@@ -36,7 +36,7 @@
       "blocks": [
         { "id": "family.parentA1", "type": "person", "role": "parentA1", "label": { "es-MX": "Mamá" } },
         { "id": "family.parentA2", "type": "person", "role": "parentA2", "label": { "es-MX": "Papá" } },
-        { "id": "family.godparents", "type": "group", "role": "godparentA", "label": { "es-MX": "Padrinos" }, "min": 0, "max": 6, "reorderable": true, "itemLabel": { "es-MX": "Padrino o madrina" },
+        { "id": "family.godparents", "type": "group", "role": "familyGroup", "label": { "es-MX": "Padrinos" }, "min": 0, "max": 6, "reorderable": true, "itemLabel": { "es-MX": "Padrino o madrina" },
           "itemBlocks": [
             { "id": "person", "type": "person", "role": "personName", "label": { "es-MX": "Nombre" }, "required": true },
             { "id": "label", "type": "text", "role": "personLabel", "label": { "es-MX": "De qué" }, "constraints": { "minLength": 0, "maxLength": 40, "multiline": false } }
@@ -48,7 +48,7 @@
       "variants": ["cards"], "defaultVariant": "cards", "required": true, "defaultVisible": true,
       "blocks": [
         { "id": "event.title", "type": "text", "role": "sectionTitle", "label": { "es-MX": "Título" }, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
-        { "id": "event.cards", "type": "group", "role": "eventTitle", "label": { "es-MX": "Momentos" }, "min": 1, "max": 6, "reorderable": true, "itemLabel": { "es-MX": "Momento" },
+        { "id": "event.cards", "type": "group", "role": "eventCards", "label": { "es-MX": "Momentos" }, "min": 1, "max": 6, "reorderable": true, "itemLabel": { "es-MX": "Momento" },
           "itemBlocks": [
             { "id": "title", "type": "text", "role": "eventTitle", "label": { "es-MX": "Nombre (Misa, Recepción…)" }, "required": true, "constraints": { "minLength": 1, "maxLength": 60, "multiline": false } },
             { "id": "when", "type": "dateTimeRange", "role": "eventWhen", "label": { "es-MX": "Cuándo" }, "required": true, "formatId": "long-h12" },
@@ -61,7 +61,7 @@
       "variants": ["grid-6"], "defaultVariant": "grid-6", "required": false, "defaultVisible": true,
       "blocks": [
         { "id": "gallery.title", "type": "text", "role": "sectionTitle", "label": { "es-MX": "Título" }, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
-        { "id": "gallery.photos", "type": "group", "role": "galleryPhoto", "label": { "es-MX": "Fotos" }, "min": 0, "max": 12, "reorderable": true, "itemLabel": { "es-MX": "Foto" },
+        { "id": "gallery.photos", "type": "group", "role": "galleryPhotos", "label": { "es-MX": "Fotos" }, "min": 0, "max": 12, "reorderable": true, "itemLabel": { "es-MX": "Foto" },
           "itemBlocks": [ { "id": "image", "type": "image", "role": "galleryPhoto", "label": { "es-MX": "Foto" }, "required": true, "constraints": { "aspect": "free", "maxBytes": 8388608 } } ] }
       ]
     },
@@ -70,7 +70,7 @@
       "variants": ["cards"], "defaultVariant": "cards", "required": false, "defaultVisible": true,
       "blocks": [
         { "id": "gifts.title", "type": "text", "role": "sectionTitle", "label": { "es-MX": "Título" }, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
-        { "id": "gifts.options", "type": "group", "role": "giftOptionTitle", "label": { "es-MX": "Opciones" }, "min": 0, "max": 4, "reorderable": true, "itemLabel": { "es-MX": "Opción" },
+        { "id": "gifts.options", "type": "group", "role": "giftOptions", "label": { "es-MX": "Opciones" }, "min": 0, "max": 4, "reorderable": true, "itemLabel": { "es-MX": "Opción" },
           "itemBlocks": [
             { "id": "kind", "type": "choice", "role": "giftOptionKind", "label": { "es-MX": "Tipo" }, "required": true, "options": [ { "id": "bank", "label": { "es-MX": "Depósito o transferencia" } }, { "id": "store", "label": { "es-MX": "Mesa en tienda" } } ] },
             { "id": "title", "type": "text", "role": "giftOptionTitle", "label": { "es-MX": "Título" }, "required": true, "constraints": { "minLength": 1, "maxLength": 60, "multiline": false } },
@@ -83,7 +83,7 @@
       "variants": ["two-columns"], "defaultVariant": "two-columns", "required": false, "defaultVisible": true,
       "blocks": [
         { "id": "dressCode.title", "type": "text", "role": "sectionTitle", "label": { "es-MX": "Título" }, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
-        { "id": "dressCode.rules", "type": "group", "role": "dressCodeTitle", "label": { "es-MX": "Reglas" }, "min": 1, "max": 3, "reorderable": true, "itemLabel": { "es-MX": "Regla" },
+        { "id": "dressCode.rules", "type": "group", "role": "dressCodeRules", "label": { "es-MX": "Reglas" }, "min": 1, "max": 3, "reorderable": true, "itemLabel": { "es-MX": "Regla" },
           "itemBlocks": [
             { "id": "title", "type": "text", "role": "dressCodeTitle", "label": { "es-MX": "Para quién" }, "required": true, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
             { "id": "detail", "type": "text", "role": "dressCodeDetail", "label": { "es-MX": "Descripción" }, "required": true, "constraints": { "minLength": 1, "maxLength": 200, "multiline": true } }

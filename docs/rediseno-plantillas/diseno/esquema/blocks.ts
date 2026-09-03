@@ -105,10 +105,44 @@ export const BlockRole = z.enum([
   // rsvp
   "rsvpDeadline", "rsvpNote", "rsvpBackground",
   // pie y ambiente
-  "footerNote", "footerLogo", "footerLink", "backgroundMusic",
+  "footerNote", "footerLogo", "footerLink", "backgroundMusic", "backgroundMusicEnabled",
   // genéricos
   "sectionTitle", "sectionIntro", "sectionBackground", "decorative",
+  // añadidos en la ronda 1R para cubrir el contenido real de las 9 plantillas sembradas (01 §10):
+  "witness",                 // parents.* con etiqueta libre distinta de padre/madre/padrino
+  "celebrantsMessage",       // texts.coupleMessage y phrases.pareja (antes sin destino)
+  "coverButtonLink",         // sectionCover.button.url
+  "hashtagPlatform",         // hashtags[].platform (choice: facebook | instagram | tiktok | x | otro)
+  "rsvpKidsNote",            // rsvp.note, distinto de rsvp.message (→ rsvpNote)
+  "rsvpChildrenAllowed",     // invitation.children_allowed (boolean de negocio)
+  "rsvpYoungAllowed",        // invitation.young_allowed
+  "personPhotoVisible",      // sectionFamily.items[].items[].showImage
+  "eventLocationNote",       // sectionEvent.locationText (capability singlePlace, H-12)
+  // ROLES DE GRUPO (I-25): un bloque `group` SOLO puede llevar uno de estos, y un bloque escalar NUNCA.
+  // Antes del 1R los grupos reutilizaban el rol de uno de sus itemBlocks (p. ej. event.cards: "eventTitle"),
+  // lo que hacía ambiguo el direccionamiento por rol de la IA y del mapeo al cambiar de plantilla.
+  "familyGroup", "eventCards", "galleryPhotos", "storyMilestones", "giftOptions",
+  "suggestionList", "amenityList", "dressCodeRules", "hashtagList", "personList",
 ]);
+
+/** Roles reservados a bloques `group` (I-25). */
+export const GROUP_ROLES = [
+  "familyGroup", "eventCards", "galleryPhotos", "storyMilestones", "giftOptions",
+  "suggestionList", "amenityList", "dressCodeRules", "hashtagList", "personList",
+] as const;
+
+/**
+ * Roles SINGLETON (I-26): como mucho un bloque por manifiesto puede llevarlos, porque identifican
+ * a una persona o a un dato único del evento. El resto de roles (sectionTitle, personName, …) se
+ * repiten legítimamente y NO se validan por unicidad — verificado en la ronda 1R: boda-clasica@1.0.0
+ * usa `sectionTitle` 8 veces de forma correcta (hallazgo 1R A-10).
+ */
+export const SINGLETON_ROLES = [
+  "celebrantA", "celebrantB", "honoree", "celebrantAPhoto", "celebrantBPhoto", "honoreePhoto",
+  "parentA1", "parentA2", "parentB1", "parentB2",
+  "coverTitle", "coverSubtitle", "coverDate", "coverImage",
+  "rsvpDeadline", "backgroundMusic", "hashtag",
+] as const;
 
 /** Campos de negocio que un bloque puede leer de Postgres (source = "business"). Tipo de bloque exigido → I-06. */
 export const BusinessField = z.enum([

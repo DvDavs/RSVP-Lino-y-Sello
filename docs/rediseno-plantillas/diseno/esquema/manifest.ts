@@ -1,7 +1,7 @@
 // packages/schema/src/manifest.ts — paquete de plantilla: template.json, theme.json, defaults.json, migrations/*.json
 import { z } from "zod";
-import { BlockId, BlockValue, EventKind, HexColor, Ident, Locale, LocalizedText, SectionKey, Semver, TemplateSlug } from "./common.ts";
-import { BlockSpec } from "./blocks.ts";
+import { BlockId, EventKind, HexColor, Ident, Locale, LocalizedText, SectionKey, Semver, TemplateSlug } from "./common.ts";
+import { BlockSpec, BlockValue } from "./blocks.ts";
 
 /** Tipos de sección (catálogo cerrado, 12): cubre las 13 claves de los 9 default_visual_*.json (J §3). */
 export const SectionType = z.enum([

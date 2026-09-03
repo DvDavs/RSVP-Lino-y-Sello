@@ -1,9 +1,9 @@
 // packages/schema/src/composed.ts — entrada y salida de compose(). El ComposedDocument es lo ÚNICO que
 // consumen los componentes de sección (editor y render público). Aquí sí hay URLs y tokens resueltos.
 import { z } from "zod";
-import { BlockId, HexColor, Ident, IsoDate, IsoTime, Locale, SectionKey, Semver, TemplateSlug, Ulid } from "./common.ts";
+import { BlockId, HexColor, HttpUrl, Ident, IsoDate, IsoTime, Locale, SectionKey, Semver, TemplateSlug, Ulid } from "./common.ts";
 import { SectionType } from "./manifest.ts";
-import { BlockRole as Role } from "./blocks.ts";
+import { BlockKind, BlockRole as Role, RichDoc } from "./blocks.ts";
 
 /** Proyección inmutable de Postgres (tabla invitation). La construye el backend; el frontend nunca consulta Postgres. */
 export const BusinessSnapshot = z.strictObject({
@@ -11,7 +11,7 @@ export const BusinessSnapshot = z.strictObject({
   date: IsoDate.nullable(),
   time: IsoTime.nullable(),
   hashtag: z.string().max(80).nullable(),
-  coverPhotoUrl: z.string().url().nullable(),
+  coverPhotoUrl: HttpUrl.nullable(),
   childrenAllowed: z.boolean(),
   youngAllowed: z.boolean(),
   eventKind: z.enum(["wedding", "quince", "baptism", "communion", "confirmation", "birthday", "graduation", "generic"]),
@@ -21,7 +21,7 @@ export const BusinessSnapshot = z.strictObject({
 
 /** assetId → URL pública resuelta (CDN). El backend la construye desde tpl_asset; en golden files es fija. */
 export const AssetIndex = z.record(z.string(), z.strictObject({
-  url: z.string().url(), width: z.number().int().optional(), height: z.number().int().optional(),
+  url: HttpUrl, width: z.number().int().optional(), height: z.number().int().optional(),
 }));
 
 export const Provenance = z.enum(["user", "default", "business", "fixed", "empty"]);
@@ -29,15 +29,15 @@ export const Provenance = z.enum(["user", "default", "business", "fixed", "empty
 /** Valor resuelto: mismo `kind` del catálogo + campos de render (url, texto formateado). */
 export const ResolvedValue = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("text"), value: z.string() }),
-  z.strictObject({ kind: z.literal("richText"), doc: z.any() }),
+  z.strictObject({ kind: z.literal("richText"), doc: RichDoc }),
   z.strictObject({ kind: z.literal("listText"), items: z.array(z.string()) }),
-  z.strictObject({ kind: z.literal("image"), url: z.string().url(), alt: z.string(), focal: z.strictObject({ x: z.number(), y: z.number() }) }),
-  z.strictObject({ kind: z.literal("audio"), url: z.string().url() }),
+  z.strictObject({ kind: z.literal("image"), url: HttpUrl, alt: z.string(), focal: z.strictObject({ x: z.number(), y: z.number() }) }),
+  z.strictObject({ kind: z.literal("audio"), url: HttpUrl }),
   z.strictObject({ kind: z.literal("date"), value: IsoDate, formatted: z.string() }),
   z.strictObject({ kind: z.literal("time"), value: IsoTime, formatted: z.string() }),
   z.strictObject({ kind: z.literal("dateTimeRange"), start: z.string(), end: z.string().optional(), formatted: z.string() }),
-  z.strictObject({ kind: z.literal("link"), href: z.string().url(), label: z.string().optional() }),
-  z.strictObject({ kind: z.literal("location"), name: z.string(), address: z.string().optional(), mapHref: z.string().url().optional() }),
+  z.strictObject({ kind: z.literal("link"), href: HttpUrl, label: z.string().optional() }),
+  z.strictObject({ kind: z.literal("location"), name: z.string(), address: z.string().optional(), mapHref: HttpUrl.optional() }),
   z.strictObject({ kind: z.literal("choice"), optionId: Ident, label: z.string() }),
   z.strictObject({ kind: z.literal("boolean"), value: z.boolean() }),
   z.strictObject({ kind: z.literal("person"), name: z.string(), note: z.string().optional() }),
@@ -46,7 +46,7 @@ export const ResolvedValue = z.discriminatedUnion("kind", [
 export const ComposedBlock = z.strictObject({
   id: BlockId,
   role: Role,
-  type: z.string(),
+  type: BlockKind,
   label: z.string(),
   provenance: Provenance,
   value: ResolvedValue.nullable(),

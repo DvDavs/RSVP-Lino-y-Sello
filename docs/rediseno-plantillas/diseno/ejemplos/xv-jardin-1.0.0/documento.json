@@ -1,39 +1,176 @@
 {
-  "_comentario": "Documento sobre xv-jardin@1.0.0. Ilustra R5 (family no está en structure -> se añade con sus valores por defecto del manifiesto, ya que no es required=true tampoco es forzada visible=false: toma defaultVisible=true) y R2 (family.godparents queda vacío -> ese grupo se compone con items:[] y provenance=user, no default, porque el usuario SÍ escribió una lista vacía a propósito distinta del [] de defaults.json).",
   "schemaVersion": 1,
-  "template": { "slug": "xv-jardin", "version": "1.0.0" },
-  "theme": { "paletteId": "lilac", "fontSetId": "moderna" },
+  "template": {
+    "slug": "xv-jardin",
+    "version": "1.0.0"
+  },
+  "theme": {
+    "paletteId": "lilac",
+    "fontSetId": "moderna"
+  },
   "structure": {
     "sections": [
-      { "key": "cover", "variant": "full", "visible": true },
-      { "key": "honoree", "variant": "centered", "visible": true },
-      { "key": "event", "variant": "cards", "visible": true },
-      { "key": "gallery", "variant": "grid-6", "visible": true },
-      { "key": "giftTable", "variant": "cards", "visible": false },
-      { "key": "dressCode", "variant": "two-columns", "visible": true },
-      { "key": "rsvp", "variant": "banner", "visible": true },
-      { "key": "footer", "variant": "simple", "visible": true }
+      {
+        "key": "cover",
+        "variant": "full",
+        "visible": true
+      },
+      {
+        "key": "honoree",
+        "variant": "centered",
+        "visible": true
+      },
+      {
+        "key": "event",
+        "variant": "cards",
+        "visible": true
+      },
+      {
+        "key": "gallery",
+        "variant": "grid-6",
+        "visible": true
+      },
+      {
+        "key": "giftTable",
+        "variant": "cards",
+        "visible": false
+      },
+      {
+        "key": "dressCode",
+        "variant": "two-columns",
+        "visible": true
+      },
+      {
+        "key": "rsvp",
+        "variant": "banner",
+        "visible": true
+      },
+      {
+        "key": "footer",
+        "variant": "simple",
+        "visible": true
+      }
     ]
   },
   "content": {
-    "cover.title": { "kind": "text", "value": "Mis XV años" },
-    "cover.subtitle": { "kind": "text", "value": "Valentina Reyes" },
-    "cover.image": { "kind": "image", "assetId": "as_01J8YQYX1HD63EACDQ55S8368N", "alt": "Valentina", "focal": { "x": 0.5, "y": 0.28 } },
-    "honoree.person": { "kind": "person", "name": "Valentina Reyes Montaño" },
-    "honoree.photo": { "kind": "image", "assetId": "as_01J8R6MAHKEW2GFM9QG29Z4N21", "alt": "Valentina", "focal": { "x": 0.5, "y": 0.35 } },
-    "family.godparents": { "kind": "group", "items": [] },
-    "event.cards": { "kind": "group", "items": [
-      { "itemId": "01J8GDAN5TK4BMEJ4BV0CYKXVB", "values": { "title": { "kind": "text", "value": "Misa" }, "when": { "kind": "dateTimeRange", "start": "2026-11-14T17:00" }, "place": { "kind": "location", "name": "Parroquia de San José" } } },
-      { "itemId": "01J8RQSNPS0XRDKABSWCPTJKC1", "values": { "title": { "kind": "text", "value": "Fiesta" }, "when": { "kind": "dateTimeRange", "start": "2026-11-14T19:30", "end": "2026-11-15T01:00" }, "place": { "kind": "location", "name": "Salón Jardín Botánico" } } }
-    ] },
-    "gallery.photos": { "kind": "group", "items": [
-      { "itemId": "01J8TZDWP5SW89W647ME9HYN3Q", "values": { "image": { "kind": "image", "assetId": "as_01J8ZHBMS73AXP2DB1GWN2D04T", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } } }
-    ] },
-    "dressCode.rules": { "kind": "group", "items": [
-      { "itemId": "01J822JMYWQ3E4G54R452HC10W", "values": { "title": { "kind": "text", "value": "Formal" }, "detail": { "kind": "text", "value": "Vestido largo o corto, o traje. Colores pastel de preferencia." } } }
-    ] },
-    "rsvp.note": { "kind": "text", "value": "Confirma antes del 1 de noviembre." }
+    "cover.title": {
+      "kind": "text",
+      "value": "Mis XV años"
+    },
+    "cover.subtitle": {
+      "kind": "text",
+      "value": "Valentina Reyes"
+    },
+    "cover.image": {
+      "kind": "image",
+      "assetId": "as_01J8YQYX1HD63EACDQ55S8368N",
+      "alt": "Valentina",
+      "focal": {
+        "x": 0.5,
+        "y": 0.28
+      }
+    },
+    "honoree.person": {
+      "kind": "person",
+      "name": "Valentina Reyes Montaño"
+    },
+    "honoree.photo": {
+      "kind": "image",
+      "assetId": "as_01J8R6MAHKEW2GFM9QG29Z4N21",
+      "alt": "Valentina",
+      "focal": {
+        "x": 0.5,
+        "y": 0.35
+      }
+    },
+    "family.godparents": {
+      "kind": "group",
+      "items": []
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8GDAN5TK4BMEJ4BV0CYKXVB",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Misa"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-11-14T17:00"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Parroquia de San José"
+            }
+          }
+        },
+        {
+          "itemId": "01J8RQSNPS0XRDKABSWCPTJKC1",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Fiesta"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-11-14T19:30",
+              "end": "2026-11-15T01:00"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Salón Jardín Botánico"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.photos": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8TZDWP5SW89W647ME9HYN3Q",
+          "values": {
+            "image": {
+              "kind": "image",
+              "assetId": "as_01J8ZHBMS73AXP2DB1GWN2D04T",
+              "alt": "",
+              "focal": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          }
+        }
+      ]
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J822JMYWQ3E4G54R452HC10W",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Formal"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo o corto, o traje. Colores pastel de preferencia."
+            }
+          }
+        }
+      ]
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Confirma antes del 1 de noviembre."
+    }
   },
   "attic": {},
-  "meta": { "locale": "es-MX" }
+  "meta": {
+    "locale": "es-MX"
+  }
 }

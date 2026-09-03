@@ -89,3 +89,55 @@ Todas las objeciones abiertas se corrigieron directamente en los documentos atac
 | E-07 | Baja | Sin corrección de diseño — queda como paso de verificación mecánica al ejecutar la primera prueba de golden file en fase 2 (`06 §3` ya lo cubre) | — |
 
 **Cero objeciones de severidad alta abiertas** tras esta ronda.
+
+---
+
+## Apéndice 1R-dominio (2026-09-03)
+
+La ronda adversarial anterior (E-01…E-07) fue **de lectura**: nadie ejecutó el esquema. La ronda 1R lo
+ejecutó, y con eso aparecieron casos límite que ninguna lectura encuentra. Entorno: `node 22.22.2`,
+`typescript 5.9.3`, `zod 4.5.4`, `ajv 8.20.0`, `ajv-formats 3.0.1`. Salida literal de consola en
+`memoria/bitacora/1R-dominio.md`; el detalle de cada corrección, en `01-dominio-y-esquema.md` §11.
+
+### A. Casos límite nuevos y su resultado
+
+| id | Caso límite atacado | Resultado antes | Resultado después |
+|---|---|---|---|
+| **A-01** | `ComposedDocument` con `link.href = "javascript:alert(1)"` y con `"data:text/html;base64,…"` | **ROTO**: ajv y Zod lo aceptan — `z.string().url()` emite `format:"uri"` y `ajv-formats` da por buena cualquier URI con esquema. Es el esquema con el que se valida lo que sirve el render público sin auth | **CERRADO**: `HttpUrl` (regex `^https?://…`) en las 9 posiciones; ajv y Zod rechazan ambos y siguen aceptando `https://maps.app.goo.gl/…` |
+| **A-02** | `richText` de 1500 caracteres contra un `BlockSpec` con `constraints.maxLength = 5` | **ROTO**: 0 violaciones — el límite de `richText` no se validaba en ningún sitio | **CERRADO**: I-16 extendida a `richText` sobre el texto plano (`richTextLength`) |
+| **A-03** | `attic` con claves `"__proto__"` y `"constructor"`, llegando por `JSON.parse` (el camino real: cuerpo HTTP y `jsonb`) | **ROTO** y **peor de lo esperado**: `z.record(BlockId, …)` devuelve `success:true` con el objeto **vacío** — Zod descarta `"__proto__"` **en silencio** (P1 lo prohíbe explícitamente); `"constructor"` casa con el patrón de `BlockId` y pasa entero. ajv sobre el mismo JSON Schema **sí** rechaza `"__proto__"` (`propertyNames`) ⇒ **TypeScript y Kotlin discrepan sobre el mismo documento** | **CERRADO parcialmente por esquema, completado por invariante**: la clave interna de `attic` pasa de `z.string().max(120)` a `BlockId` y la externa a slug+semver estrictos; y **I-29** (`assertNoReservedKeys`) se ejecuta sobre el JSON **crudo**, antes de `parse`, en TS y en Kotlin. La limitación de `z.record` **no se puede cerrar con esquema** y queda documentada |
+| **A-04** | `{op:"reorderSections", order:["cover","cover","cover"]}` | **ROTO**: válido para el esquema (solo comprueba `min(1).max(16)`) | **CERRADO**: **I-24** (`validateReorder`) exige permutación exacta de las claves actuales, en el reductor |
+| **A-05** | `{op:"setTheme"}` sin `paletteId` ni `fontSetId` | Válido | **Aceptado como no-op** (severidad baja): el reductor lo ignora y no puede corromper nada. Documentado, no corregido |
+| **A-06** | `{op:"setBlock", blockId:"cover.date", …}` sobre un bloque `source:"business"` | Válido para el esquema | **Aceptado**: es correcto que el esquema no lo sepa (no conoce el manifiesto). Lo frena I-21 en el reductor; ahora está escrito explícitamente en `01 §6.5` |
+| **A-07** | ¿Coinciden los roles de `01 §3.3` con los de `esquema/blocks.ts`? | **ROTO**: 7 de los 31 roles del documento **no existían** en el esquema (`witness`, `storyMilestone`, `giftOption`, `bankAccount`, `dressCodeRule`, `amenity`, `suggestion`) | **CERRADO**: `blocks.ts` es la fuente normativa; los que faltaban se añadieron o se mapearon; §3.3 reescrita |
+| **A-08** | Determinismo de `compose` frente al orden de claves de un objeto | **ROTO**: las listas del `CompositionReport` se construían iterando `Object.entries(doc.content)`, que respeta el orden de inserción — y **Postgres reordena las claves de un `jsonb`**, así que `contentHash` y los golden files cambiarían tras un round-trip por la base de datos | **CERRADO**: `compose.ts` ordena las cinco listas; el orden de bloques y de ítems lo fija siempre el manifiesto/el array, nunca las claves del objeto. R9 reescrita con las 5 fuentes de no-determinismo |
+| **A-09** | ¿Qué rol lleva un bloque `group`? | **ROTO**: los 8 grupos de `boda-clasica@1.0.0` reutilizaban el rol de uno de sus propios `itemBlocks` (`event.cards` → `eventTitle`, igual que `event.cards.title`) ⇒ direccionamiento por rol ambiguo para la IA y para el cambio de plantilla | **CERRADO**: 10 roles de grupo nuevos + **I-25** (grupo ⟺ rol de grupo, y ningún escalar puede usarlos) |
+| **A-10** | ¿Puede repetirse un rol dentro de un manifiesto? | **Ambiguo**: `boda-clasica@1.0.0` repite `sectionTitle` 8 veces (legítimo) y `rsvpNote` 2 veces (uno de ellos sobre un `boolean` de negocio, incorrecto). Una regla de "roles únicos" habría sido falsa | **CERRADO con matiz**: **I-26** solo sobre 17 **roles singleton** (persona o dato único del evento). El `rsvp.childrenAllowed` mal etiquetado pasa a `rsvpChildrenAllowed` |
+| **A-11** | Manifiesto que declara `locales:["es-MX","en-US"]` con etiquetas solo en `es-MX` | **ROTO**: 0 violaciones; `compose` caería a `es-MX` en silencio para un cliente `en-US` | **CERRADO**: **I-27** |
+| **A-12** | `defaults.json` con valor para un bloque `source:"business"` | **ROTO**: 0 violaciones; contenido muerto que R4 ignora siempre (misma clase de fallo que H-12) | **CERRADO**: **I-28** |
+| **A-13** | ¿Compila el paquete de esquema? | **ROTO**: `manifest.ts:3` importaba `BlockValue` de `common.ts` (está en `blocks.ts`) → `TS2305`; y `invariants.ts:109` → `TS2352`. El `README.md` afirmaba haberlo validado ejecutándolo | **CERRADO**: `tsc --noEmit --strict` en 0 errores |
+| **A-14** | ¿Validan los ejemplos contra su propio esquema? | **ROTO**: `defaults.json`, `documento.json` y `compuesto.json` de ambos pares fallaban — 17 ULID de demostración inválidos (`01J8DEMO…` usa `O`, fuera del alfabeto Crockford; 12 de ellos con 27 caracteres) y una clave `_comentario` en la raíz contra `additionalProperties:false` | **CERRADO**: ULIDs reescritos, comentarios movidos a `NOTAS.md`. Los 10 archivos pasan Zod **y** ajv |
+| **A-15** | ¿Es `compuesto.json` la salida real de `compose` sobre sus propias entradas? | **ROTO**: 8 divergencias (5 etiquetas acortadas a mano, 3 URLs de asset inventadas). El golden file probaba la mano, no el código | **CERRADO**: se escribió `esquema/compose.ts` y **ambos** `compuesto.json` se regeneraron con él; verificado que los reproduce byte a byte |
+| **A-16** | Idempotencia de `compose` (R9): dos llamadas con las mismas entradas | No verificable (no había implementación) | **VERDE** en los dos pares: `canonicalJson` idéntico |
+| **A-17** | ¿Dónde entra una sección del manifiesto que el documento no menciona? | **ROTO**: R1 no lo decía; anexar al final coloca `family` de `xv-jardin` **después del pie de página** | **CERRADO**: R1c, inserción anclada a la posición relativa del manifiesto |
+| **A-18** | `dateTimeRange` que cruza la medianoche (`2026-11-14T19:30` → `2026-11-15T01:00`) | Sin definición de formato | **CERRADO**: `formatRange` distingue mismo día (`"…, 7:30 pm – 8:30 pm"`) de días distintos (`"14 de noviembre de 2026, 7:30 pm – 15 de noviembre de 2026, 1:00 am"`). Ejercitado en el golden file de `xv-jardin` |
+| **A-19** | ¿Puede `compose` resolver un `assetId` con la firma publicada? | **ROTO**: no recibía nada con lo que hacerlo, y `ResolvedValue.image` exige `url`. La función era inimplementable | **CERRADO**: parámetro `assets: AssetIndex` |
+| **A-20** | ¿Emite `z.toJSONSchema` los `$defs` que `01 §8` prometía? | **ROTO**: 0 `$defs` y 0 `$ref` en los 10 archivos; el catálogo de bloques repetido en 5 de ellos (469 KB). Y al arreglarlo con `z.registry()`, Zod escribe un `$id` inválido dentro de cada definición y **ajv rechaza el bundle entero** | **CERRADO**: bundle único de 15 `$defs` y 42 `$ref` (217 KB), con borrado explícito del `$id` |
+
+### B. Ataques que no rompieron nada
+
+Colisión de `blockId` (I-13), de `sectionKey` (I-14), de `itemId` (I-03) y de `itemBlockId` dentro de un
+grupo (I-13); contenido del cliente más largo o más corto que el rango del spec (I-04); `end < start`
+(I-01); sección `required` oculta (I-17); escritura sobre un bloque de negocio (I-21); `itemBlock` con
+`source ≠ "user"` (I-22); `optionId` fuera de `spec.options` (I-02).
+
+### C. Recuento
+
+| Severidad | Nuevas en 1R | Cerradas | Abiertas |
+|---|---|---|---|
+| Alta | 11 | 11 | 0 |
+| Media | 14 | 14 | 0 |
+| Baja | 3 | 0 (aceptadas y documentadas) | 0 |
+
+**Cero objeciones de severidad alta abiertas.** La limitación de `z.record` con `"__proto__"` (A-03) queda
+como **riesgo residual documentado**, mitigado por I-29 pero no eliminable desde el esquema.

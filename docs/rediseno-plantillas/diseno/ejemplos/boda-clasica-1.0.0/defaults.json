@@ -4,13 +4,13 @@
   "content": {
     "cover.title": { "kind": "text", "value": "Camila & Antonio" },
     "cover.subtitle": { "kind": "text", "value": "¡Nos casamos!" },
-    "cover.image": { "kind": "image", "assetId": "as_01J8DEMO00000000000000COV1", "alt": "Pareja en el campo", "focal": { "x": 0.5, "y": 0.35 } },
+    "cover.image": { "kind": "image", "assetId": "as_01J8DEM000000000000000C0V1", "alt": "Pareja en el campo", "focal": { "x": 0.5, "y": 0.35 } },
     "cover.buttonLabel": { "kind": "text", "value": "Save the date" },
     "couple.heading": { "kind": "text", "value": "Save the date!" },
     "couple.groom": { "kind": "person", "name": "Antonio" },
     "couple.bride": { "kind": "person", "name": "Camila" },
-    "couple.groomPhoto": { "kind": "image", "assetId": "as_01J8DEMO00000000000000NOV1", "alt": "Novio", "focal": { "x": 0.5, "y": 0.4 } },
-    "couple.bridePhoto": { "kind": "image", "assetId": "as_01J8DEMO00000000000000NOV2", "alt": "Novia", "focal": { "x": 0.5, "y": 0.4 } },
+    "couple.groomPhoto": { "kind": "image", "assetId": "as_01J8DEM000000000000000N0V1", "alt": "Novio", "focal": { "x": 0.5, "y": 0.4 } },
+    "couple.bridePhoto": { "kind": "image", "assetId": "as_01J8DEM000000000000000N0V2", "alt": "Novia", "focal": { "x": 0.5, "y": 0.4 } },
     "couple.groomText": { "kind": "richText", "doc": { "type": "doc", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Ante Dios y ante todos nuestros amigos y familiares, deseo que el mundo se entere que te tomo como esposa, para amarte, cuidarte y respetarte por siempre." } ] } ] } },
     "couple.brideText": { "kind": "richText", "doc": { "type": "doc", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Mi amor, no encuentro las palabras adecuadas para expresar el gran amor que siento por ti." } ] } ] } },
     "family.intro": { "kind": "listText", "items": [ "Con la bendición de Dios y de nuestros padres" ] },
@@ -19,45 +19,45 @@
     "family.parentB1": { "kind": "person", "name": "Teresa López" },
     "family.parentB2": { "kind": "person", "name": "Raúl Estrada Santiago" },
     "family.godparents": { "kind": "group", "items": [
-      { "itemId": "01J8DEMO0000000000000000GP1", "values": { "person": { "kind": "person", "name": "Roberto Cruz y Carolina Aquino" }, "label": { "kind": "text", "value": "Padrinos de velación" } } }
+      { "itemId": "01J8DEM0000000000000000GP1", "values": { "person": { "kind": "person", "name": "Roberto Cruz y Carolina Aquino" }, "label": { "kind": "text", "value": "Padrinos de velación" } } }
     ] },
     "event.title": { "kind": "text", "value": "Itinerario" },
     "event.cards": { "kind": "group", "items": [
-      { "itemId": "01J8DEMO0000000000000000EV1", "values": { "title": { "kind": "text", "value": "Ceremonia religiosa" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T16:30", "end": "2026-12-12T17:30" }, "place": { "kind": "location", "name": "Templo de Santo Domingo de Guzmán", "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6" } } },
-      { "itemId": "01J8DEMO0000000000000000EV2", "values": { "title": { "kind": "text", "value": "Recepción" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T19:00" }, "place": { "kind": "location", "name": "Zorba el Griego", "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6" } } },
-      { "itemId": "01J8DEMO0000000000000000EV3", "values": { "title": { "kind": "text", "value": "Fiesta" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T19:30", "end": "2026-12-13T02:00" }, "place": { "kind": "location", "name": "Zorba el Griego" } } }
+      { "itemId": "01J8DEM0000000000000000EV1", "values": { "title": { "kind": "text", "value": "Ceremonia religiosa" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T16:30", "end": "2026-12-12T17:30" }, "place": { "kind": "location", "name": "Templo de Santo Domingo de Guzmán", "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6" } } },
+      { "itemId": "01J8DEM0000000000000000EV2", "values": { "title": { "kind": "text", "value": "Recepción" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T19:00" }, "place": { "kind": "location", "name": "Zorba el Griego", "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6" } } },
+      { "itemId": "01J8DEM0000000000000000EV3", "values": { "title": { "kind": "text", "value": "Fiesta" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T19:30", "end": "2026-12-13T02:00" }, "place": { "kind": "location", "name": "Zorba el Griego" } } }
     ] },
     "gallery.title": { "kind": "text", "value": "Galería" },
     "gallery.intro": { "kind": "text", "value": "No olvides tomar fotos" },
     "gallery.photos": { "kind": "group", "items": [
-      { "itemId": "01J8DEMO00000000000000000G1", "values": { "image": { "kind": "image", "assetId": "as_01J8DEMO000000000000000GA1", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } } },
-      { "itemId": "01J8DEMO00000000000000000G2", "values": { "image": { "kind": "image", "assetId": "as_01J8DEMO000000000000000GA2", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } } }
+      { "itemId": "01J8DEM00000000000000000G1", "values": { "image": { "kind": "image", "assetId": "as_01J8DEM0000000000000000GA1", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } } },
+      { "itemId": "01J8DEM00000000000000000G2", "values": { "image": { "kind": "image", "assetId": "as_01J8DEM0000000000000000GA2", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } } }
     ] },
     "story.title": { "kind": "text", "value": "Nuestra historia" },
     "story.milestones": { "kind": "group", "items": [
-      { "itemId": "01J8DEMO0000000000000000ST1", "values": { "title": { "kind": "text", "value": "Nos conocimos" }, "date": { "kind": "date", "value": "2019-03-01" }, "body": { "kind": "richText", "doc": { "type": "doc", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Todo empezó en una tarde de primavera." } ] } ] } }, "image": { "kind": "image", "assetId": "as_01J8DEMO000000000000000HIS1", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } } }
+      { "itemId": "01J8DEM0000000000000000ST1", "values": { "title": { "kind": "text", "value": "Nos conocimos" }, "date": { "kind": "date", "value": "2019-03-01" }, "body": { "kind": "richText", "doc": { "type": "doc", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Todo empezó en una tarde de primavera." } ] } ] } }, "image": { "kind": "image", "assetId": "as_01J8DEM000000000000000H1S1", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } } }
     ] },
     "gifts.title": { "kind": "text", "value": "Mesa de regalos" },
     "gifts.options": { "kind": "group", "items": [
-      { "itemId": "01J8DEMO0000000000000000GF1", "values": { "kind": { "kind": "choice", "optionId": "bank" }, "title": { "kind": "text", "value": "Depósito o transferencia" }, "detail": { "kind": "listText", "items": [ "Banco: SANTANDER", "Titular: KARLA ZARATE CRUZ", "Cuenta CLABE: 014610606106246881" ] } } },
-      { "itemId": "01J8DEMO0000000000000000GF2", "values": { "kind": { "kind": "choice", "optionId": "store" }, "title": { "kind": "text", "value": "Liverpool" }, "detail": { "kind": "listText", "items": [ "Número de evento 50355602" ] }, "link": { "kind": "link", "href": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602", "label": "Ver mesa" } } }
+      { "itemId": "01J8DEM0000000000000000GF1", "values": { "kind": { "kind": "choice", "optionId": "bank" }, "title": { "kind": "text", "value": "Depósito o transferencia" }, "detail": { "kind": "listText", "items": [ "Banco: SANTANDER", "Titular: KARLA ZARATE CRUZ", "Cuenta CLABE: 014610606106246881" ] } } },
+      { "itemId": "01J8DEM0000000000000000GF2", "values": { "kind": { "kind": "choice", "optionId": "store" }, "title": { "kind": "text", "value": "Liverpool" }, "detail": { "kind": "listText", "items": [ "Número de evento 50355602" ] }, "link": { "kind": "link", "href": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602", "label": "Ver mesa" } } }
     ] },
     "suggestions.title": { "kind": "text", "value": "Recomendaciones" },
     "suggestions.items": { "kind": "group", "items": [
-      { "itemId": "01J8DEMO0000000000000000SG1", "values": { "name": { "kind": "text", "value": "City Express Oaxaca" }, "detail": { "kind": "listText", "items": [ "Hotel" ] }, "link": { "kind": "link", "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca" } } }
+      { "itemId": "01J8DEM0000000000000000SG1", "values": { "name": { "kind": "text", "value": "City Express Oaxaca" }, "detail": { "kind": "listText", "items": [ "Hotel" ] }, "link": { "kind": "link", "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca" } } }
     ] },
     "amenities.title": { "kind": "text", "value": "Amenidades" },
     "amenities.items": { "kind": "group", "items": [
-      { "itemId": "01J8DEMO0000000000000000AM1", "values": { "name": { "kind": "text", "value": "Marck Luga" }, "detail": { "kind": "listText", "items": [ "Salón de belleza" ] }, "link": { "kind": "link", "href": "https://www.facebook.com/marck.luga.39" } } }
+      { "itemId": "01J8DEM0000000000000000AM1", "values": { "name": { "kind": "text", "value": "Marck Luga" }, "detail": { "kind": "listText", "items": [ "Salón de belleza" ] }, "link": { "kind": "link", "href": "https://www.facebook.com/marck.luga.39" } } }
     ] },
     "dressCode.title": { "kind": "text", "value": "Código de vestimenta" },
     "dressCode.rules": { "kind": "group", "items": [
-      { "itemId": "01J8DEMO0000000000000000DC1", "values": { "title": { "kind": "text", "value": "Damas" }, "detail": { "kind": "text", "value": "Vestido largo o corto, o traje elegante." } } },
-      { "itemId": "01J8DEMO0000000000000000DC2", "values": { "title": { "kind": "text", "value": "Caballeros" }, "detail": { "kind": "text", "value": "Traje o smoking, corbata, zapatos de vestir." } } }
+      { "itemId": "01J8DEM0000000000000000DC1", "values": { "title": { "kind": "text", "value": "Damas" }, "detail": { "kind": "text", "value": "Vestido largo o corto, o traje elegante." } } },
+      { "itemId": "01J8DEM0000000000000000DC2", "values": { "title": { "kind": "text", "value": "Caballeros" }, "detail": { "kind": "text", "value": "Traje o smoking, corbata, zapatos de vestir." } } }
     ] },
     "rsvp.title": { "kind": "text", "value": "Confirma tu asistencia" },
     "rsvp.note": { "kind": "text", "value": "Por favor confirma tu asistencia antes del evento." },
-    "rsvp.background": { "kind": "image", "assetId": "as_01J8DEMO000000000000000RSV1", "alt": "", "focal": { "x": 0.5, "y": 0.5 } },
+    "rsvp.background": { "kind": "image", "assetId": "as_01J8DEM000000000000000RSV1", "alt": "", "focal": { "x": 0.5, "y": 0.5 } },
     "footer.note": { "kind": "text", "value": "Invitaciones Digitales Agape. Todos los derechos reservados." }
   }
 }

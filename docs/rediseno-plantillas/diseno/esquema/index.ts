@@ -6,3 +6,4 @@ export * from "./document.ts";
 export * from "./operations.ts";
 export * from "./composed.ts";
 export * from "./invariants.ts";
+export * from "./compose.ts";

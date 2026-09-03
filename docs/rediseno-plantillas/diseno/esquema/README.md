@@ -1,16 +1,40 @@
 # Esquema de referencia (fase 1)
 
-Archivos `.ts` (Zod 4.5.4) que en la fase 3 se copian tal cual a `frontend/packages/schema/src/` (y `emit-json-schema.ts` a `frontend/packages/schema/scripts/`). Aún no hay proyecto: se validaron en esta fase ejecutándolos con `node --experimental-strip-types` contra los ejemplos de `../ejemplos/` (ver `memoria/bitacora/1-dominio.md`).
+Archivos `.ts` (Zod 4.5.4) que en la fase 3 se copian tal cual a `frontend/packages/schema/src/`
+(y `emit-json-schema.ts` a `frontend/packages/schema/scripts/`).
 
 | Archivo | Contenido |
 |---|---|
-| `common.ts` | primitivas: `BlockId`, `SectionKey`, `Semver`, `Ulid`, `AssetId`, `Locale`, `EventKind`, fechas ISO, `HttpUrl` |
-| `blocks.ts` | 14 tipos de bloque (valor + spec), catálogo de roles, campos de negocio |
+| `common.ts` | primitivas: `BlockId`, `SectionKey`, `Semver`, `Ulid`, `AssetId`, `TempId`, `Locale`, `EventKind`, fechas ISO, `HttpUrl` |
+| `blocks.ts` | 14 tipos de bloque (valor + spec), catálogo de roles (`BlockRole`, `GROUP_ROLES`, `SINGLETON_ROLES`), campos de negocio |
 | `manifest.ts` | `TemplateManifest` (template.json), `ThemeSpec` (theme.json), `DefaultsFile` (defaults.json), `MigrationPlan` |
-| `document.ts` | `InvitationDocument` (capas 2-4 + attic) |
+| `document.ts` | `InvitationDocument` (capas 2-4 + `attic`) |
 | `operations.ts` | 10 operaciones del reductor único, `OperationBatch` (autoguardado), `EditProposal` (IA) |
 | `composed.ts` | `BusinessSnapshot`, `AssetIndex`, `ComposedDocument`, `CompositionReport` |
-| `invariants.ts` | 21 invariantes I-01…I-21 que JSON Schema no expresa; se duplican en Kotlin con tabla de casos común |
-| `emit-json-schema.ts` | genera `json-schema/*.schema.json` (draft 2020-12) para el validador Kotlin |
+| `invariants.ts` | **29** invariantes `I-01`…`I-29` que JSON Schema no expresa; se duplican en Kotlin con tabla de casos común |
+| `compose.ts` | **implementación de referencia** de `compose()` (R1–R9), `formatDate`/`formatRange` deterministas y `canonicalJson` |
+| `emit-json-schema.ts` | genera `json-schema/templates2.schema.json` (bundle con `$defs`) + 10 punteros, draft 2020-12 |
+| `index.ts` | superficie pública de `@invitaciones/schema` |
 
-Regla: prohibido `.refine()`/`.superRefine()`/`.transform()` en cualquier esquema exportado (se descartan en silencio al emitir JSON Schema).
+## Reglas duras
+
+- **Prohibido `.refine()` / `.superRefine()` / `.transform()` / `z.custom()` / `z.any()`** en cualquier
+  esquema exportado: los tres primeros se descartan en silencio al emitir JSON Schema (ni `unrepresentable:
+  "throw"` los detecta) y `z.any()` emite `{}`, que acepta cualquier cosa. Toda regla entre campos vive en
+  `invariants.ts` y se implementa **dos veces** (aquí y en `templates2/schema/Invariants.kt`).
+- **Prohibido `z.string().url()`**: emite `format: "uri"`, que acepta `javascript:` y `data:`. Usa `HttpUrl`.
+- **`z.record` descarta la clave `"__proto__"` en silencio** (verificado con `zod@4.5.4`): por eso
+  `assertNoReservedKeys` (I-29) se ejecuta sobre el JSON **crudo**, antes de `parse`.
+
+## Cómo se verificó (ronda 1R, 2026-09-03)
+
+```
+npx tsc --noEmit --strict          # 0 errores
+npx tsx emit-json-schema.ts        # bundle + 10 punteros
+# cada ejemplo de ../ejemplos/**/*.json validado contra Zod Y contra ajv 8 (2020-12 + ajv-formats)
+# compose.ts reproduce byte a byte los dos compuesto.json y es idempotente
+```
+
+Transcripción literal en `../../memoria/bitacora/1R-dominio.md`. La nota anterior de este README ("se
+validaron ejecutándolos con `node --experimental-strip-types`") era falsa: el paquete no compilaba
+(`manifest.ts` importaba `BlockValue` del módulo equivocado).
