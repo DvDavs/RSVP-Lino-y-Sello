@@ -49,6 +49,7 @@ Pasos 1, 4 y 5 son la lección directa de `handoffs/1-aura-lecciones.md` #1 y #5
 - La IA nunca recibe ni produce un `invitationId`, `documentId` ni ningún id de otra invitación — la sesión de IA está acotada a la invitación ya autorizada por la petición HTTP que la invoque (misma verificación `HierarchyValidationService` que cualquier otra ruta de `/editor/**`).
 - La IA nunca inventa un `blockId` nuevo: solo referencia `blockId`s ya declarados en el manifiesto vigente (paso 1 los rechaza si no).
 - `itemId` de un `addItem` propuesto por la IA es un `tempId` (`esquema/common.ts`), igual que el editor humano — el servidor asigna el ULID definitivo (nunca la IA).
+- Todo `assetId` que una propuesta de IA intente escribir pasa por la MISMA verificación de propiedad que el editor humano (`03-api.md` §3.3, ADR-030, cierra S-01): pertenece a `tpl_asset` de esta invitación o de la plantilla vigente, o se rechaza esa operación individual en el paso 1 del pipeline (§3) — la IA nunca podría, ni siquiera por error de un proveedor externo, hacer que el documento referencie el asset de otro cliente.
 - Bloques con `aiEditable: false` (`01 §2.4`, `SpecBase`) se rechazan en el paso 1 aunque la operación sea sintácticamente válida — esto es lo que impide que la IA toque, por ejemplo, `cover.buttonLabel` (`source: fixed`) o cualquier campo que el autor de la plantilla marcó como fuera de su alcance.
 
 ## 5. Alcance recomendado (no vinculante para esta fase, orienta la fase de implementación)

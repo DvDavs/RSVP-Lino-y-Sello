@@ -73,3 +73,19 @@ Método: para cada caso del brief, se buscó el mecanismo concreto (regla R1-R9,
 | Alta | 2 | E-01, E-02 |
 | Media | 3 | E-03, E-04, E-05 |
 | Baja | 2 | E-06, E-07 |
+
+## Resolución (ronda 3)
+
+Todas las objeciones abiertas se corrigieron directamente en los documentos atacados, no solo en este registro:
+
+| ID | Severidad | Corrección aplicada | ADR |
+|---|---|---|---|
+| E-01 | Alta | `02-persistencia-y-catalogo.md` §4 paso 1.5: diff estructural obligatorio contra la versión previa publicada | ADR-028 |
+| E-02 | Alta | `03-api.md` §4: `restore` renormaliza contra la plantilla vigente, nunca copia el `doc` crudo | ADR-029 |
+| E-03 | Media | `01-dominio-y-esquema.md` §2.5: snippet corregido a ids cortos, consistente con los ejemplos | — (corrección editorial, sin ADR) |
+| E-04 | Media | `esquema/invariants.ts`: invariante `I-22_ITEM_BLOCK_SOURCE_NOT_USER` | ADR-034 |
+| E-05 | Media | `04-frontend-y-editor.md` §2.1 flujo C: aviso de archivado a partir de 5 entradas en `attic` | — (mitigación de UX, ADR-006 no cambia) |
+| E-06 | Baja | `esquema/invariants.ts`: invariante `I-23_LOCALE_NOT_SUPPORTED` | ADR-034 |
+| E-07 | Baja | Sin corrección de diseño — queda como paso de verificación mecánica al ejecutar la primera prueba de golden file en fase 2 (`06 §3` ya lo cubre) | — |
+
+**Cero objeciones de severidad alta abiertas** tras esta ronda.

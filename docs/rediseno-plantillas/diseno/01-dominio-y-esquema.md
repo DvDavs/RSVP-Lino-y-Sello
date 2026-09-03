@@ -117,15 +117,15 @@ Reglas duras del manifiesto (todas validadas en el registro, ninguna implícita 
   "reorderable": true,
   "itemLabel": { "es-MX": "Evento" },
   "itemBlocks": [
-    { "id": "event.cards.title",    "type": "text",     "role": "eventTitle",   "required": true, "constraints": {"maxLength": 60} },
-    { "id": "event.cards.when",     "type": "dateTimeRange", "role": "eventWhen", "required": true },
-    { "id": "event.cards.place",    "type": "location", "role": "eventPlace",   "required": true },
-    { "id": "event.cards.mapLink",  "type": "link",     "role": "eventMapLink", "required": false }
+    { "id": "title",    "type": "text",     "role": "eventTitle",   "required": true, "constraints": {"maxLength": 60} },
+    { "id": "when",     "type": "dateTimeRange", "role": "eventWhen", "required": true },
+    { "id": "place",    "type": "location", "role": "eventPlace",   "required": true },
+    { "id": "mapLink",  "type": "link",     "role": "eventMapLink", "required": false }
   ]
 }
 ```
 
-Los `itemBlocks` llevan ids **relativos al grupo**; en el documento se direccionan como `("event.cards", itemId, "event.cards.title")`. Esto resuelve H-49 (`itinerary[]` no admitía `locationButton`/`locationDatetime`: aquí el grupo declara sus propios bloques) y H-33 (listas heterogéneas: `body` es un bloque `listText` dentro del ítem, no un colapso a un elemento).
+Los `itemBlocks` llevan ids **cortos, relativos al grupo** (nunca prefijados con el id del grupo — corregido en esta revisión: un borrador previo de este snippet usaba `"event.cards.title"`, inconsistente con los ejemplos reales de `diseno/ejemplos/*/template.json`, que siempre usan la forma corta; hallazgo adversarial E-03). En el documento se direccionan como la terna `("event.cards", itemId, "title")` — el `blockId` corto solo es único **dentro de su grupo**, nunca globalmente (a diferencia de los `blockId` de nivel de sección, que sí son únicos en todo el manifiesto, `I-13`). Esto resuelve H-49 (`itinerary[]` no admitía `locationButton`/`locationDatetime`: aquí el grupo declara sus propios bloques) y H-33 (listas heterogéneas: `body` es un bloque `listText` dentro del ítem, no un colapso a un elemento).
 
 ### 2.6 `theme.json`
 

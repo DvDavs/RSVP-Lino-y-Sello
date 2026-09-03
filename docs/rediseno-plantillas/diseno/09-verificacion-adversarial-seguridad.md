@@ -71,3 +71,16 @@ Ya identificado y corregido proactivamente por 1-dominio como ADR-020 (`01 §2.2
 | Media | 3 | S-02, S-03, S-05 |
 | Baja | 2 | S-06, S-07 |
 | Ya cerrado (referencia) | 1 | S-04 |
+
+## Resolución (ronda 3)
+
+| ID | Severidad | Corrección aplicada | ADR |
+|---|---|---|---|
+| S-01 | Alta | `03-api.md` §3.3 + §5: verificación de pertenencia de `assetId` (`invitation_id`/`template_version_id`) antes de aplicar cualquier operación; `TPL_ASSET_NOT_OWNED`; heredado por `07-extension-ia.md` §4 | ADR-030 |
+| S-02 | Media | `03-api.md` §2: ruta `POST /master/templates2/versions` formalizada, rol MASTER explícito | ADR-033 |
+| S-03 | Media | `04-frontend-y-editor.md` §3: `sandbox="allow-scripts"`, sin `allow-same-origin` | ADR-031 |
+| S-05 | Media | `03-api.md` §8: límite de body elevado de 256 KiB a 768 KiB | ADR-032 |
+| S-06 | Baja | `03-api.md` §7: nota de límite de tasa en la capa de despliegue | — (recomendación operativa, sin ADR) |
+| S-07 | Baja | `04-frontend-y-editor.md` §6: restricción explícita — `RichDoc` se mapea a elementos React, nunca a HTML string | — (aclaración de implementación, sin ADR) |
+
+**Cero objeciones de severidad alta abiertas** tras esta ronda.

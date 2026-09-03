@@ -12,3 +12,13 @@
 - **Release (InvitationRelease)**: copia inmutable publicada (documento + versión de plantilla + tema resuelto + hash).
 - **Migración de documento**: función pura que lleva un documento de una versión de plantilla/esquema a otra.
 - **Kit de autor**: herramientas para crear y validar una plantilla nueva sin tocar Kotlin.
+- **Bloque (block)**: unidad editable dentro de una sección, con id estable (`blockId`) y rol explícito (p. ej. `parentA1`, `godparentA`). Catálogo cerrado de 14 tipos (`text`, `richText`, `listText`, `image`, `audio`, `date`, `time`, `dateTimeRange`, `link`, `location`, `choice`, `boolean`, `person`, `group`).
+- **Grupo (group)**: bloque de tipo `group`, lista repetible de ítems (`itemId` ULID del servidor) cada uno con sus propios `itemBlocks` (ids cortos, relativos al grupo — nunca prefijados).
+- **Rol (role)**: etiqueta semántica cerrada de un bloque (qué representa, no cómo se ve). Sustituye al emparejamiento por texto o posición que causaba H-01/H-02. El merge y la IA direccionan siempre por `blockId`/rol, nunca por índice.
+- **Procedencia (provenance)**: de dónde vino el valor resuelto de un bloque al componer — `user` (lo escribió el cliente), `default` (contenido de demostración de la plantilla), `business` (dato real de Postgres), `fixed` (contenido no editable de la plantilla) o `empty` (sin valor en ningún nivel).
+- **`attic`**: contenido huérfano tras una migración de versión o un cambio de plantilla; nunca se borra, se conserva indexado por `slug@version` de origen.
+- **Composición (`compose`)**: función pura `(paquete, documento, datos de negocio, locale) → (ComposedDocument, CompositionReport)`. Se ejecuta en cada lectura del editor y una vez al publicar; no existe "regenerar" como operación aparte.
+- **`InvitationRelease` / `tpl_release`**: copia inmutable publicada (documento compuesto + versión de plantilla + hash de contenido). El render público solo lee esto, nunca el documento de trabajo.
+- **`public_token`**: identificador opaco y estable del enlace público de una invitación (en `tpl_document`, nunca el `invitationId`).
+- **Operación (`Operation`) / lote (`OperationBatch`)**: unidad de edición del reductor único que comparten el editor humano, el autoguardado y la IA. Un lote humano se aplica todo o nada; una propuesta de IA (`EditProposal`) descarta operación por operación.
+- **Invariante (`I-xx`)**: regla entre campos que Zod no puede exportar a JSON Schema (p. ej. `end ≥ start`); se implementa dos veces (TypeScript y Kotlin) y se prueba con la misma tabla de casos. Catálogo actual: `I-01`…`I-23`.

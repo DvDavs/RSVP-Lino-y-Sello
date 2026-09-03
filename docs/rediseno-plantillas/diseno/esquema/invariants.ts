@@ -13,7 +13,8 @@ export type InvariantCode =
   | "I-10_DEFAULT_KEY_UNKNOWN" | "I-11_STRUCTURE_DUPLICATE_KEY" | "I-12_CONTENT_KEY_UNKNOWN"
   | "I-13_BLOCK_ID_DUPLICATE" | "I-14_SECTION_KEY_DUPLICATE" | "I-15_BLOCK_KIND_MISMATCH"
   | "I-16_TEXT_TOO_LONG" | "I-17_REQUIRED_SECTION_HIDDEN" | "I-18_ITEM_BLOCK_UNKNOWN"
-  | "I-19_STRUCTURE_KEY_UNKNOWN" | "I-20_THEME_ID_UNKNOWN" | "I-21_BUSINESS_BLOCK_WRITTEN";
+  | "I-19_STRUCTURE_KEY_UNKNOWN" | "I-20_THEME_ID_UNKNOWN" | "I-21_BUSINESS_BLOCK_WRITTEN"
+  | "I-22_ITEM_BLOCK_SOURCE_NOT_USER" | "I-23_LOCALE_NOT_SUPPORTED";
 
 const BUSINESS_TYPE: Record<string, string> = {
   "invitation.date": "date", "invitation.time": "time", "invitation.hashtag": "text",
@@ -41,6 +42,10 @@ export function validateManifest(m: TemplateManifest, theme: ThemeSpec, defaults
         for (const ib of b.itemBlocks) {
           if (inner.has(ib.id)) v.push({ code: "I-13_BLOCK_ID_DUPLICATE", path: `blocks.${b.id}.${ib.id}` });
           inner.add(ib.id);
+          // I-22 (cierra el hallazgo adversarial E-04): un itemBlock nunca lee de negocio ni es fijo —
+          // BusinessSnapshot no tiene ningún campo indexado por ítem, y R4 (01 §5.2) no define cómo
+          // resolverlo; solo "user" tiene sentido dentro de un grupo repetible.
+          if (ib.source !== "user") v.push({ code: "I-22_ITEM_BLOCK_SOURCE_NOT_USER", path: `blocks.${b.id}.${ib.id}` });
         }
       }
     }
@@ -58,6 +63,9 @@ export function validateManifest(m: TemplateManifest, theme: ThemeSpec, defaults
 /** Invariantes del DOCUMENTO contra su versión de plantilla (se ejecutan en cada escritura). */
 export function validateDocument(doc: InvitationDocument, m: TemplateManifest, theme: ThemeSpec): Violation[] {
   const v: Violation[] = [];
+  // I-23 (cierra el hallazgo adversarial E-06): el locale elegido debe estar entre los que la
+  // plantilla declara soportar (manifest.locales, 01 §2.2) — antes no se verificaba en absoluto.
+  if (!m.locales.includes(doc.meta.locale)) v.push({ code: "I-23_LOCALE_NOT_SUPPORTED", path: "meta.locale" });
   const specs = new Map<string, BlockSpec>();
   const sections = new Map(m.sections.map(s => [s.key, s] as const));
   for (const s of m.sections) for (const b of s.blocks) specs.set(b.id, b);
