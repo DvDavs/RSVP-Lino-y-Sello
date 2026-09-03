@@ -1,0 +1,11 @@
+{
+  "palettes": [
+    { "id": "garden", "name": { "es-MX": "Jardín" }, "tokens": { "bg": "#F6FAF3", "surface": "#FFFFFF", "ink": "#2E3B27", "accent": "#7CA35C", "accentInk": "#FFFFFF", "muted": "#8FA482" } },
+    { "id": "lilac", "name": { "es-MX": "Lila" }, "tokens": { "bg": "#F8F6FB", "surface": "#FFFFFF", "ink": "#372C43", "accent": "#9B7FC0", "accentInk": "#FFFFFF", "muted": "#A797B8" } }
+  ],
+  "fontSets": [
+    { "id": "moderna", "name": { "es-MX": "Moderna" }, "heading": { "family": "Playfair Display", "weights": [400, 700], "source": "google" }, "body": { "family": "Source Sans 3", "weights": [400, 600], "source": "google" } }
+  ],
+  "defaultPaletteId": "garden",
+  "defaultFontSetId": "moderna"
+}

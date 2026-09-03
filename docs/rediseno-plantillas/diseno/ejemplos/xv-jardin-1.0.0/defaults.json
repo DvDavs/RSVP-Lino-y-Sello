@@ -1,0 +1,31 @@
+{
+  "templateSlug": "xv-jardin",
+  "templateVersion": "1.0.0",
+  "content": {
+    "cover.title": { "kind": "text", "value": "Mis XV años" },
+    "cover.subtitle": { "kind": "text", "value": "Valentina" },
+    "cover.image": { "kind": "image", "assetId": "as_01J8YQYX1HD63EACDQ55S8368N", "alt": "Quinceañera", "focal": { "x": 0.5, "y": 0.3 } },
+    "honoree.heading": { "kind": "text", "value": "Celebra conmigo" },
+    "honoree.person": { "kind": "person", "name": "Valentina" },
+    "honoree.photo": { "kind": "image", "assetId": "as_01J8R6MAHKEW2GFM9QG29Z4N21", "alt": "Valentina", "focal": { "x": 0.5, "y": 0.35 } },
+    "honoree.message": { "kind": "richText", "doc": { "type": "doc", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Con mucha alegría te invito a celebrar este día tan especial para mí." } ] } ] } },
+    "family.parentA1": { "kind": "person", "name": "Nombre de la mamá" },
+    "family.parentA2": { "kind": "person", "name": "Nombre del papá" },
+    "family.godparents": { "kind": "group", "items": [] },
+    "event.title": { "kind": "text", "value": "Itinerario" },
+    "event.cards": { "kind": "group", "items": [
+      { "itemId": "01J8GDAN5TK4BMEJ4BV0CYKXVB", "values": { "title": { "kind": "text", "value": "Misa" }, "when": { "kind": "dateTimeRange", "start": "2026-11-14T17:00" }, "place": { "kind": "location", "name": "Parroquia" } } }
+    ] },
+    "gallery.title": { "kind": "text", "value": "Galería" },
+    "gallery.photos": { "kind": "group", "items": [] },
+    "gifts.title": { "kind": "text", "value": "Mesa de regalos" },
+    "gifts.options": { "kind": "group", "items": [] },
+    "dressCode.title": { "kind": "text", "value": "Código de vestimenta" },
+    "dressCode.rules": { "kind": "group", "items": [
+      { "itemId": "01J822JMYWQ3E4G54R452HC10W", "values": { "title": { "kind": "text", "value": "Formal" }, "detail": { "kind": "text", "value": "Vestido largo o corto, o traje." } } }
+    ] },
+    "rsvp.title": { "kind": "text", "value": "Confirma tu asistencia" },
+    "rsvp.note": { "kind": "text", "value": "Por favor confirma antes del evento." },
+    "footer.note": { "kind": "text", "value": "Invitaciones Digitales Agape. Todos los derechos reservados." }
+  }
+}

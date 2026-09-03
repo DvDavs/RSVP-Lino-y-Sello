@@ -1,0 +1,145 @@
+{
+  "_comentario": "Salida esperada de compose(pkg, documento.json, business, 'es-MX') para boda-clasica@1.0.0. BusinessSnapshot asumido: {invitationId:4821, date:'2026-12-12', time:'16:30', hashtag:'#CamilaYAntonio2026', coverPhotoUrl:null, childrenAllowed:true, youngAllowed:true, eventKind:'wedding', planTier:2, timezone:'America/Mexico_City'}. Este archivo + documento.json + template.json + defaults.json + theme.json son el primer golden file de 06-pruebas-y-calidad.md §4. Se muestran las 9 reglas: R1 (order=orden del manifiesto, story visible:false conservado), R2 (tres escalones: user/default/empty — ver rsvp.deadline y footer.music, ambos null), R3 (provenance en cada bloque), R4 (cover.date/couple.date/gallery.hashtag/rsvp.childrenAllowed = business, nunca desde content), R6 (misma fecha formateada igual en cover y couple: formatDate(2026-12-12, 'long', es-MX) = '12 de diciembre de 2026', resuelve H-27), R7 (itemId preservado en grupos), R8 (theme.olive != defaultPaletteId, sin fallback porque existe), R9 (esta salida es canónica y determinista: mismas entradas -> mismos bytes).",
+  "composedVersion": 1,
+  "template": { "slug": "boda-clasica", "version": "1.0.0" },
+  "locale": "es-MX",
+  "theme": {
+    "paletteId": "olive", "fontSetId": "serif-elegante",
+    "tokens": { "bg": "#F7F5EE", "surface": "#FFFFFF", "ink": "#2F3A2B", "accent": "#6B7B4A", "accentInk": "#FFFFFF", "muted": "#8A9178" },
+    "fonts": {
+      "heading": { "family": "Cormorant Garamond", "weights": [400, 600], "source": "google" },
+      "body": { "family": "Inter", "weights": [400, 500], "source": "google" }
+    }
+  },
+  "sections": [
+    { "key": "cover", "type": "cover", "variant": "framed", "visible": true, "title": "Portada", "blocks": [
+      { "id": "cover.title", "role": "coverTitle", "type": "text", "label": "Nombres en portada", "provenance": "user", "value": { "kind": "text", "value": "Camila & Antonio" } },
+      { "id": "cover.subtitle", "role": "coverSubtitle", "type": "text", "label": "Subtítulo", "provenance": "default", "value": { "kind": "text", "value": "¡Nos casamos!" } },
+      { "id": "cover.date", "role": "coverDate", "type": "date", "label": "Fecha del evento", "provenance": "business", "value": { "kind": "date", "value": "2026-12-12", "formatted": "12 de diciembre de 2026" } },
+      { "id": "cover.image", "role": "coverImage", "type": "image", "label": "Foto de portada", "provenance": "user", "value": { "kind": "image", "url": "https://cdn.invitaciones.evolutiondev.mx/a/01J8YQYX1HD63EACDQ55S8368N.webp", "alt": "Camila y Antonio en el campo", "focal": { "x": 0.5, "y": 0.3 } } },
+      { "id": "cover.buttonLabel", "role": "coverButtonLabel", "type": "text", "label": "Texto del botón", "provenance": "fixed", "value": { "kind": "text", "value": "Save the date" } }
+    ] },
+    { "key": "couple", "type": "celebrant", "variant": "side-by-side", "visible": true, "title": "Los novios", "blocks": [
+      { "id": "couple.heading", "role": "celebrantsHeading", "type": "text", "label": "Encabezado", "provenance": "default", "value": { "kind": "text", "value": "Save the date!" } },
+      { "id": "couple.groom", "role": "celebrantA", "type": "person", "label": "Novio", "provenance": "user", "value": { "kind": "person", "name": "Antonio Barrita Rocha" } },
+      { "id": "couple.bride", "role": "celebrantB", "type": "person", "label": "Novia", "provenance": "user", "value": { "kind": "person", "name": "Camila Estrada López" } },
+      { "id": "couple.groomPhoto", "role": "celebrantAPhoto", "type": "image", "label": "Foto del novio", "provenance": "default", "value": { "kind": "image", "url": "https://cdn.invitaciones.evolutiondev.mx/a/DEMONOV1.webp", "alt": "Novio", "focal": { "x": 0.5, "y": 0.4 } } },
+      { "id": "couple.bridePhoto", "role": "celebrantBPhoto", "type": "image", "label": "Foto de la novia", "provenance": "default", "value": { "kind": "image", "url": "https://cdn.invitaciones.evolutiondev.mx/a/DEMONOV2.webp", "alt": "Novia", "focal": { "x": 0.5, "y": 0.4 } } },
+      { "id": "couple.groomText", "role": "celebrantAText", "type": "richText", "label": "Palabras del novio", "provenance": "user", "value": { "kind": "richText", "doc": { "type": "doc", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Hoy elijo pasar el resto de mi vida a tu lado." } ] } ] } } },
+      { "id": "couple.brideText", "role": "celebrantBText", "type": "richText", "label": "Palabras de la novia", "provenance": "default", "value": { "kind": "richText", "doc": { "type": "doc", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Mi amor, no encuentro las palabras adecuadas para expresar el gran amor que siento por ti." } ] } ] } } },
+      { "id": "couple.date", "role": "celebrantsDate", "type": "date", "label": "Fecha", "provenance": "business", "value": { "kind": "date", "value": "2026-12-12", "formatted": "12 de diciembre de 2026" } }
+    ] },
+    { "key": "family", "type": "family", "variant": "cards", "visible": true, "title": "Nuestros padres y padrinos", "blocks": [
+      { "id": "family.intro", "role": "familyIntro", "type": "listText", "label": "Frases de introducción", "provenance": "default", "value": { "kind": "listText", "items": ["Con la bendición de Dios y de nuestros padres"] } },
+      { "id": "family.parentA1", "role": "parentA1", "type": "person", "label": "Madre del novio", "provenance": "user", "value": { "kind": "person", "name": "María Rocha Luis" } },
+      { "id": "family.parentA2", "role": "parentA2", "type": "person", "label": "Padre del novio", "provenance": "user", "value": { "kind": "person", "name": "Martín Barrita" } },
+      { "id": "family.parentB1", "role": "parentB1", "type": "person", "label": "Madre de la novia", "provenance": "user", "value": { "kind": "person", "name": "Teresa López" } },
+      { "id": "family.parentB2", "role": "parentB2", "type": "person", "label": "Padre de la novia", "provenance": "user", "value": { "kind": "person", "name": "Raúl Estrada Santiago" } },
+      { "id": "family.godparents", "role": "godparentA", "type": "group", "label": "Padrinos", "provenance": "user", "items": [
+        { "itemId": "01J8BH3BJCF42DMY0PXDDDK8KE", "blocks": [
+          { "id": "person", "role": "personName", "type": "person", "label": "Nombre", "provenance": "user", "value": { "kind": "person", "name": "Roberto Cruz y Carolina Aquino" } },
+          { "id": "label", "role": "personLabel", "type": "text", "label": "De qué", "provenance": "user", "value": { "kind": "text", "value": "Padrinos de velación" } },
+          { "id": "photo", "role": "personPhoto", "type": "image", "label": "Foto", "provenance": "empty", "value": null }
+        ] }
+      ] }
+    ] },
+    { "key": "event", "type": "event", "variant": "timeline", "visible": true, "title": "Itinerario", "blocks": [
+      { "id": "event.title", "role": "sectionTitle", "type": "text", "label": "Título de la sección", "provenance": "default", "value": { "kind": "text", "value": "Itinerario" } },
+      { "id": "event.cards", "role": "eventTitle", "type": "group", "label": "Momentos del día", "provenance": "user", "items": [
+        { "itemId": "01J8GDAN5TK4BMEJ4BV0CYKXVB", "blocks": [
+          { "id": "title", "role": "eventTitle", "type": "text", "label": "Nombre", "provenance": "user", "value": { "kind": "text", "value": "Ceremonia religiosa" } },
+          { "id": "when", "role": "eventWhen", "type": "dateTimeRange", "label": "Cuándo", "provenance": "user", "value": { "kind": "dateTimeRange", "start": "2026-12-12T16:30", "end": "2026-12-12T17:30", "formatted": "12 de diciembre de 2026, 4:30 pm – 5:30 pm" } },
+          { "id": "place", "role": "eventPlace", "type": "location", "label": "Dónde", "provenance": "user", "value": { "kind": "location", "name": "Templo de Santo Domingo de Guzmán", "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6" } },
+          { "id": "note", "role": "eventNote", "type": "text", "label": "Nota", "provenance": "empty", "value": null }
+        ] },
+        { "itemId": "01J8PXD520HJGWN52GEKP2DYYS", "blocks": [
+          { "id": "title", "role": "eventTitle", "type": "text", "label": "Nombre", "provenance": "user", "value": { "kind": "text", "value": "Recepción" } },
+          { "id": "when", "role": "eventWhen", "type": "dateTimeRange", "label": "Cuándo", "provenance": "user", "value": { "kind": "dateTimeRange", "start": "2026-12-12T19:00", "formatted": "12 de diciembre de 2026, 7:00 pm" } },
+          { "id": "place", "role": "eventPlace", "type": "location", "label": "Dónde", "provenance": "user", "value": { "kind": "location", "name": "Zorba el Griego" } },
+          { "id": "note", "role": "eventNote", "type": "text", "label": "Nota", "provenance": "empty", "value": null }
+        ] }
+      ] }
+    ] },
+    { "key": "gallery", "type": "gallery", "variant": "grid-6", "visible": true, "title": "Galería", "blocks": [
+      { "id": "gallery.title", "role": "sectionTitle", "type": "text", "label": "Título", "provenance": "default", "value": { "kind": "text", "value": "Galería" } },
+      { "id": "gallery.intro", "role": "galleryIntro", "type": "text", "label": "Frase", "provenance": "default", "value": { "kind": "text", "value": "No olvides tomar fotos" } },
+      { "id": "gallery.photos", "role": "galleryPhoto", "type": "group", "label": "Fotos", "provenance": "user", "items": [
+        { "itemId": "01J8TZDWP5SW89W647ME9HYN3Q", "blocks": [
+          { "id": "image", "role": "galleryPhoto", "type": "image", "label": "Foto", "provenance": "user", "value": { "kind": "image", "url": "https://cdn.invitaciones.evolutiondev.mx/a/01J8ZHBMS73AXP2DB1GWN2D04T.webp", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } }
+        ] }
+      ] },
+      { "id": "gallery.hashtag", "role": "hashtag", "type": "text", "label": "Hashtag", "provenance": "business", "value": { "kind": "text", "value": "#CamilaYAntonio2026" } }
+    ] },
+    { "key": "story", "type": "story", "variant": "line", "visible": false, "title": "Nuestra historia", "blocks": [
+      { "id": "story.title", "role": "sectionTitle", "type": "text", "label": "Título", "provenance": "default", "value": { "kind": "text", "value": "Nuestra historia" } },
+      { "id": "story.milestones", "role": "storyTitle", "type": "group", "label": "Momentos", "provenance": "default", "items": [
+        { "itemId": "01J8DEMO0000000000000000ST1", "blocks": [
+          { "id": "title", "role": "storyTitle", "type": "text", "label": "Título", "provenance": "default", "value": { "kind": "text", "value": "Nos conocimos" } },
+          { "id": "date", "role": "storyDate", "type": "date", "label": "Fecha", "provenance": "default", "value": { "kind": "date", "value": "2019-03-01", "formatted": "marzo de 2019" } },
+          { "id": "body", "role": "storyBody", "type": "richText", "label": "Relato", "provenance": "default", "value": { "kind": "richText", "doc": { "type": "doc", "content": [ { "type": "paragraph", "content": [ { "type": "text", "text": "Todo empezó en una tarde de primavera." } ] } ] } } },
+          { "id": "image", "role": "storyImage", "type": "image", "label": "Foto", "provenance": "default", "value": { "kind": "image", "url": "https://cdn.invitaciones.evolutiondev.mx/a/DEMOHIS1.webp", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } }
+        ] }
+      ] }
+    ] },
+    { "key": "giftTable", "type": "giftTable", "variant": "cards", "visible": true, "title": "Mesa de regalos", "blocks": [
+      { "id": "gifts.title", "role": "sectionTitle", "type": "text", "label": "Título", "provenance": "default", "value": { "kind": "text", "value": "Mesa de regalos" } },
+      { "id": "gifts.options", "role": "giftOptionTitle", "type": "group", "label": "Opciones de regalo", "provenance": "user", "items": [
+        { "itemId": "01J80TKEDJ2TRPS2MWXJBMGKQ5", "blocks": [
+          { "id": "kind", "role": "giftOptionKind", "type": "choice", "label": "Tipo", "provenance": "user", "value": { "kind": "choice", "optionId": "bank", "label": "Depósito o transferencia" } },
+          { "id": "title", "role": "giftOptionTitle", "type": "text", "label": "Título", "provenance": "user", "value": { "kind": "text", "value": "Depósito o transferencia" } },
+          { "id": "detail", "role": "giftOptionDetail", "type": "listText", "label": "Detalles", "provenance": "user", "value": { "kind": "listText", "items": ["Banco: SANTANDER", "Titular: KARLA ZARATE CRUZ", "Cuenta CLABE: 014610606106246881"] } },
+          { "id": "link", "role": "giftOptionLink", "type": "link", "label": "Enlace", "provenance": "empty", "value": null },
+          { "id": "image", "role": "giftOptionImage", "type": "image", "label": "Imagen", "provenance": "empty", "value": null }
+        ] }
+      ] }
+    ] },
+    { "key": "suggestions", "type": "suggestions", "variant": "cards", "visible": false, "title": "Recomendaciones", "blocks": [
+      { "id": "suggestions.title", "role": "sectionTitle", "type": "text", "label": "Título", "provenance": "default", "value": { "kind": "text", "value": "Recomendaciones" } },
+      { "id": "suggestions.items", "role": "suggestionName", "type": "group", "label": "Recomendaciones", "provenance": "default", "items": [
+        { "itemId": "01J8DEMO0000000000000000SG1", "blocks": [
+          { "id": "name", "role": "suggestionName", "type": "text", "label": "Nombre", "provenance": "default", "value": { "kind": "text", "value": "City Express Oaxaca" } },
+          { "id": "detail", "role": "suggestionDetail", "type": "listText", "label": "Detalles", "provenance": "default", "value": { "kind": "listText", "items": ["Hotel"] } },
+          { "id": "link", "role": "suggestionLink", "type": "link", "label": "Enlace", "provenance": "default", "value": { "kind": "link", "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca" } },
+          { "id": "image", "role": "suggestionImage", "type": "image", "label": "Imagen", "provenance": "empty", "value": null }
+        ] }
+      ] }
+    ] },
+    { "key": "amenities", "type": "amenities", "variant": "cards", "visible": false, "title": "Amenidades", "blocks": [
+      { "id": "amenities.title", "role": "sectionTitle", "type": "text", "label": "Título", "provenance": "default", "value": { "kind": "text", "value": "Amenidades" } },
+      { "id": "amenities.items", "role": "amenityName", "type": "group", "label": "Amenidades", "provenance": "default", "items": [
+        { "itemId": "01J8DEMO0000000000000000AM1", "blocks": [
+          { "id": "name", "role": "amenityName", "type": "text", "label": "Nombre", "provenance": "default", "value": { "kind": "text", "value": "Marck Luga" } },
+          { "id": "detail", "role": "amenityDetail", "type": "listText", "label": "Detalles", "provenance": "default", "value": { "kind": "listText", "items": ["Salón de belleza"] } },
+          { "id": "link", "role": "amenityLink", "type": "link", "label": "Enlace", "provenance": "default", "value": { "kind": "link", "href": "https://www.facebook.com/marck.luga.39" } },
+          { "id": "image", "role": "amenityImage", "type": "image", "label": "Imagen", "provenance": "empty", "value": null }
+        ] }
+      ] }
+    ] },
+    { "key": "dressCode", "type": "dressCode", "variant": "two-columns", "visible": true, "title": "Código de vestimenta", "blocks": [
+      { "id": "dressCode.title", "role": "sectionTitle", "type": "text", "label": "Título", "provenance": "default", "value": { "kind": "text", "value": "Código de vestimenta" } },
+      { "id": "dressCode.rules", "role": "dressCodeTitle", "type": "group", "label": "Reglas", "provenance": "user", "items": [
+        { "itemId": "01J822JMYWQ3E4G54R452HC10W", "blocks": [
+          { "id": "title", "role": "dressCodeTitle", "type": "text", "label": "Para quién", "provenance": "user", "value": { "kind": "text", "value": "Damas" } },
+          { "id": "detail", "role": "dressCodeDetail", "type": "text", "label": "Descripción", "provenance": "user", "value": { "kind": "text", "value": "Vestido largo o corto, o traje elegante." } },
+          { "id": "image", "role": "dressCodeImage", "type": "image", "label": "Imagen", "provenance": "empty", "value": null }
+        ] },
+        { "itemId": "01J85EAPE1BZX5ZE0Y5VA3VTNX", "blocks": [
+          { "id": "title", "role": "dressCodeTitle", "type": "text", "label": "Para quién", "provenance": "user", "value": { "kind": "text", "value": "Caballeros" } },
+          { "id": "detail", "role": "dressCodeDetail", "type": "text", "label": "Descripción", "provenance": "user", "value": { "kind": "text", "value": "Traje o smoking, corbata, zapatos de vestir." } },
+          { "id": "image", "role": "dressCodeImage", "type": "image", "label": "Imagen", "provenance": "empty", "value": null }
+        ] }
+      ] }
+    ] },
+    { "key": "rsvp", "type": "rsvp", "variant": "banner", "visible": true, "title": "Confirmación", "blocks": [
+      { "id": "rsvp.title", "role": "sectionTitle", "type": "text", "label": "Título", "provenance": "default", "value": { "kind": "text", "value": "Confirma tu asistencia" } },
+      { "id": "rsvp.deadline", "role": "rsvpDeadline", "type": "date", "label": "Fecha límite para confirmar", "provenance": "empty", "value": null },
+      { "id": "rsvp.note", "role": "rsvpNote", "type": "text", "label": "Nota", "provenance": "user", "value": { "kind": "text", "value": "Por confirmar antes del 1 de diciembre, por favor." } },
+      { "id": "rsvp.childrenAllowed", "role": "rsvpNote", "type": "boolean", "label": "Se admiten niños", "provenance": "business", "value": { "kind": "boolean", "value": true } },
+      { "id": "rsvp.background", "role": "rsvpBackground", "type": "image", "label": "Fondo", "provenance": "fixed", "value": { "kind": "image", "url": "https://cdn.invitaciones.evolutiondev.mx/a/RSVP1.webp", "alt": "", "focal": { "x": 0.5, "y": 0.5 } } }
+    ] },
+    { "key": "footer", "type": "footer", "variant": "simple", "visible": true, "title": "Pie", "blocks": [
+      { "id": "footer.music", "role": "backgroundMusic", "type": "audio", "label": "Música de fondo", "provenance": "empty", "value": null },
+      { "id": "footer.note", "role": "footerNote", "type": "text", "label": "Nota legal", "provenance": "fixed", "value": { "kind": "text", "value": "Invitaciones Digitales Agape. Todos los derechos reservados." } }
+    ] }
+  ]
+}

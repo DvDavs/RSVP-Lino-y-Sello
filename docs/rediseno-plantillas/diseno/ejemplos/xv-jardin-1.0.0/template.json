@@ -1,0 +1,114 @@
+{
+  "manifestVersion": 1,
+  "slug": "xv-jardin",
+  "version": "1.0.0",
+  "name": { "es-MX": "XV Jardín" },
+  "description": { "es-MX": "Plantilla de XV años, un solo celebrante (honoree). Deliberadamente con menos secciones que boda-clasica (sin story/suggestions/amenities) para ejercitar R1 con manifiestos de distinto tamaño." },
+  "eventKinds": ["quince"],
+  "minPlanTier": 1,
+  "locales": ["es-MX"],
+  "capabilities": ["hashtags"],
+  "previewImage": "assets/preview.webp",
+  "sections": [
+    {
+      "key": "cover", "type": "cover", "title": { "es-MX": "Portada" },
+      "variants": ["full"], "defaultVariant": "full", "required": true, "defaultVisible": true,
+      "blocks": [
+        { "id": "cover.title", "type": "text", "role": "coverTitle", "label": { "es-MX": "Nombre en portada" }, "required": true, "constraints": { "minLength": 1, "maxLength": 60, "multiline": false } },
+        { "id": "cover.subtitle", "type": "text", "role": "coverSubtitle", "label": { "es-MX": "Subtítulo" }, "constraints": { "minLength": 0, "maxLength": 80, "multiline": false } },
+        { "id": "cover.date", "type": "date", "role": "coverDate", "label": { "es-MX": "Fecha del evento" }, "source": "business", "businessField": "invitation.date", "editable": false, "aiEditable": false, "formatId": "long" },
+        { "id": "cover.image", "type": "image", "role": "coverImage", "label": { "es-MX": "Foto de portada" }, "required": true, "constraints": { "aspect": "portrait", "maxBytes": 8388608 } }
+      ]
+    },
+    {
+      "key": "honoree", "type": "celebrant", "title": { "es-MX": "La quinceañera" },
+      "variants": ["centered"], "defaultVariant": "centered", "required": true, "defaultVisible": true,
+      "blocks": [
+        { "id": "honoree.heading", "type": "text", "role": "celebrantsHeading", "label": { "es-MX": "Encabezado" }, "constraints": { "minLength": 0, "maxLength": 60, "multiline": false } },
+        { "id": "honoree.person", "type": "person", "role": "honoree", "label": { "es-MX": "Quinceañera" }, "required": true },
+        { "id": "honoree.photo", "type": "image", "role": "honoreePhoto", "label": { "es-MX": "Foto" }, "constraints": { "aspect": "portrait", "maxBytes": 8388608 } },
+        { "id": "honoree.message", "type": "richText", "role": "honoreeMessage", "label": { "es-MX": "Mensaje" }, "constraints": { "maxLength": 600 } }
+      ]
+    },
+    {
+      "key": "family", "type": "family", "title": { "es-MX": "Mis papás y padrinos" },
+      "variants": ["cards"], "defaultVariant": "cards", "required": false, "defaultVisible": true,
+      "blocks": [
+        { "id": "family.parentA1", "type": "person", "role": "parentA1", "label": { "es-MX": "Mamá" } },
+        { "id": "family.parentA2", "type": "person", "role": "parentA2", "label": { "es-MX": "Papá" } },
+        { "id": "family.godparents", "type": "group", "role": "godparentA", "label": { "es-MX": "Padrinos" }, "min": 0, "max": 6, "reorderable": true, "itemLabel": { "es-MX": "Padrino o madrina" },
+          "itemBlocks": [
+            { "id": "person", "type": "person", "role": "personName", "label": { "es-MX": "Nombre" }, "required": true },
+            { "id": "label", "type": "text", "role": "personLabel", "label": { "es-MX": "De qué" }, "constraints": { "minLength": 0, "maxLength": 40, "multiline": false } }
+          ] }
+      ]
+    },
+    {
+      "key": "event", "type": "event", "title": { "es-MX": "Itinerario" },
+      "variants": ["cards"], "defaultVariant": "cards", "required": true, "defaultVisible": true,
+      "blocks": [
+        { "id": "event.title", "type": "text", "role": "sectionTitle", "label": { "es-MX": "Título" }, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
+        { "id": "event.cards", "type": "group", "role": "eventTitle", "label": { "es-MX": "Momentos" }, "min": 1, "max": 6, "reorderable": true, "itemLabel": { "es-MX": "Momento" },
+          "itemBlocks": [
+            { "id": "title", "type": "text", "role": "eventTitle", "label": { "es-MX": "Nombre (Misa, Recepción…)" }, "required": true, "constraints": { "minLength": 1, "maxLength": 60, "multiline": false } },
+            { "id": "when", "type": "dateTimeRange", "role": "eventWhen", "label": { "es-MX": "Cuándo" }, "required": true, "formatId": "long-h12" },
+            { "id": "place", "type": "location", "role": "eventPlace", "label": { "es-MX": "Dónde" }, "required": true }
+          ] }
+      ]
+    },
+    {
+      "key": "gallery", "type": "gallery", "title": { "es-MX": "Galería" },
+      "variants": ["grid-6"], "defaultVariant": "grid-6", "required": false, "defaultVisible": true,
+      "blocks": [
+        { "id": "gallery.title", "type": "text", "role": "sectionTitle", "label": { "es-MX": "Título" }, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
+        { "id": "gallery.photos", "type": "group", "role": "galleryPhoto", "label": { "es-MX": "Fotos" }, "min": 0, "max": 12, "reorderable": true, "itemLabel": { "es-MX": "Foto" },
+          "itemBlocks": [ { "id": "image", "type": "image", "role": "galleryPhoto", "label": { "es-MX": "Foto" }, "required": true, "constraints": { "aspect": "free", "maxBytes": 8388608 } } ] }
+      ]
+    },
+    {
+      "key": "giftTable", "type": "giftTable", "title": { "es-MX": "Mesa de regalos" },
+      "variants": ["cards"], "defaultVariant": "cards", "required": false, "defaultVisible": true,
+      "blocks": [
+        { "id": "gifts.title", "type": "text", "role": "sectionTitle", "label": { "es-MX": "Título" }, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
+        { "id": "gifts.options", "type": "group", "role": "giftOptionTitle", "label": { "es-MX": "Opciones" }, "min": 0, "max": 4, "reorderable": true, "itemLabel": { "es-MX": "Opción" },
+          "itemBlocks": [
+            { "id": "kind", "type": "choice", "role": "giftOptionKind", "label": { "es-MX": "Tipo" }, "required": true, "options": [ { "id": "bank", "label": { "es-MX": "Depósito o transferencia" } }, { "id": "store", "label": { "es-MX": "Mesa en tienda" } } ] },
+            { "id": "title", "type": "text", "role": "giftOptionTitle", "label": { "es-MX": "Título" }, "required": true, "constraints": { "minLength": 1, "maxLength": 60, "multiline": false } },
+            { "id": "detail", "type": "listText", "role": "giftOptionDetail", "label": { "es-MX": "Detalles" }, "constraints": { "minItems": 0, "maxItems": 6, "maxItemLength": 120 } }
+          ] }
+      ]
+    },
+    {
+      "key": "dressCode", "type": "dressCode", "title": { "es-MX": "Código de vestimenta" },
+      "variants": ["two-columns"], "defaultVariant": "two-columns", "required": false, "defaultVisible": true,
+      "blocks": [
+        { "id": "dressCode.title", "type": "text", "role": "sectionTitle", "label": { "es-MX": "Título" }, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
+        { "id": "dressCode.rules", "type": "group", "role": "dressCodeTitle", "label": { "es-MX": "Reglas" }, "min": 1, "max": 3, "reorderable": true, "itemLabel": { "es-MX": "Regla" },
+          "itemBlocks": [
+            { "id": "title", "type": "text", "role": "dressCodeTitle", "label": { "es-MX": "Para quién" }, "required": true, "constraints": { "minLength": 1, "maxLength": 40, "multiline": false } },
+            { "id": "detail", "type": "text", "role": "dressCodeDetail", "label": { "es-MX": "Descripción" }, "required": true, "constraints": { "minLength": 1, "maxLength": 200, "multiline": true } }
+          ] }
+      ]
+    },
+    {
+      "key": "rsvp", "type": "rsvp", "title": { "es-MX": "Confirmación" },
+      "variants": ["banner"], "defaultVariant": "banner", "required": true, "defaultVisible": true,
+      "blocks": [
+        { "id": "rsvp.title", "type": "text", "role": "sectionTitle", "label": { "es-MX": "Título" }, "constraints": { "minLength": 1, "maxLength": 60, "multiline": false } },
+        { "id": "rsvp.note", "type": "text", "role": "rsvpNote", "label": { "es-MX": "Nota" }, "constraints": { "minLength": 0, "maxLength": 200, "multiline": true } }
+      ]
+    },
+    {
+      "key": "footer", "type": "footer", "title": { "es-MX": "Pie" },
+      "variants": ["simple"], "defaultVariant": "simple", "required": true, "defaultVisible": true,
+      "blocks": [
+        { "id": "footer.music", "type": "audio", "role": "backgroundMusic", "label": { "es-MX": "Música de fondo" }, "constraints": { "maxBytes": 8388608 } },
+        { "id": "footer.note", "type": "text", "role": "footerNote", "label": { "es-MX": "Nota legal" }, "source": "fixed", "editable": false, "aiEditable": false, "constraints": { "minLength": 0, "maxLength": 120, "multiline": false } }
+      ]
+    }
+  ],
+  "assets": [
+    { "path": "assets/preview.webp", "sha256": "bb00000000000000000000000000000000000000000000000000000000000001", "contentType": "image/webp", "bytes": 110000 }
+  ],
+  "migrationsFrom": []
+}
