@@ -22,3 +22,8 @@ Monorepo TypeScript (pnpm) · Next.js App Router + React + Tailwind · Zod como 
 
 ## 6. Pruebas y umbrales
 (pendiente: fase 1)
+
+## 7. Entorno de ejecución de esta sesión (verificado por el orquestador)
+- Java 21, Node 22.22, pnpm 10.33, npm 10.9. Chromium preinstalado para Playwright (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`; no ejecutar `playwright install`).
+- **Docker no disponible** (daemon apagado): Testcontainers no funciona. PostgreSQL 16 está instalado localmente (`/usr/lib/postgresql/16/bin/initdb`, `pg_ctl`); las pruebas de integración deben poder arrancar un clúster local o usar H2 en modo Postgres solo cuando no dependan de JSONB.
+- Sin acceso a `gh`; GitHub solo vía herramientas MCP del orquestador raíz.
