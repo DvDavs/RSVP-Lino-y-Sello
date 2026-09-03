@@ -6,7 +6,7 @@ Estados: pendiente · en curso · entregada · aceptada · rechazada (motivo)
 | Tarea | Agente | Modelo | Estado |
 |---|---|---|---|
 | Rama y memoria | orquestador | — | aceptada |
-| Inventario del repo y resúmenes por rol | 0-inventario | Sonnet | en curso |
+| Inventario del repo y resúmenes por rol | 0-inventario | Sonnet | aceptada |
 
 ## Fase 1 — Diseño
 | Tarea | Agente | Modelo | Estado |

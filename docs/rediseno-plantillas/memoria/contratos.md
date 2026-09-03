@@ -27,3 +27,7 @@ Monorepo TypeScript (pnpm) · Next.js App Router + React + Tailwind · Zod como 
 - Java 21, Node 22.22, pnpm 10.33, npm 10.9. Chromium preinstalado para Playwright (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`; no ejecutar `playwright install`).
 - **Docker no disponible** (daemon apagado): Testcontainers no funciona. PostgreSQL 16 está instalado localmente (`/usr/lib/postgresql/16/bin/initdb`, `pg_ctl`); las pruebas de integración deben poder arrancar un clúster local o usar H2 en modo Postgres solo cuando no dependan de JSONB.
 - Sin acceso a `gh`; GitHub solo vía herramientas MCP del orquestador raíz.
+- **Build Kotlin:** `build.gradle.kts` exige toolchain Java 17 y no hay JDK 17 instalado; `./gradlew test` no compila hoy (ver `handoffs/0-inventario.md`). La fase 2 debe resolverlo con el cambio mínimo de build: preferentemente añadir `org.gradle.toolchains.foojay-resolver-convention` en `settings.gradle.kts` para autodescargar JDK 17; si la red lo impide, subir el toolchain a 21 (Spring Boot 3.4 lo soporta) y registrarlo como ADR.
+- **Sin CI:** no existe `.github/workflows`; la fase 2 crea el workflow.
+- No existe `src/test`: cero pruebas en el proyecto (H-19).
+- Versiones npm verificadas el 2026-09-03 en la tabla final de `handoffs/0-inventario.md` (TypeScript 7.x y Zod 4.x: validar compatibilidad del pipeline Zod → JSON Schema en fase 1).

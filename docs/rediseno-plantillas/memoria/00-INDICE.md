@@ -25,5 +25,5 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
 | `../guias/` | Guías de uso (fase 6) |
 
 ## Estado actual
-- **Fase actual:** 0 — Preparación.
+- **Fase actual:** 1 — Diseño (fase 0 cerrada: inventario en `handoffs/0-inventario.md` y resúmenes por rol `handoffs/0-resumen-auditoria-<rol>.md`).
 - Fases: 0 Preparación · 1 Diseño · 2 Backend · 3 Frontend · 4 Plantillas y kit · 5 Migración · 6 Calidad y entrega.
