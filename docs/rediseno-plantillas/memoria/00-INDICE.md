@@ -25,7 +25,7 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
 | `../guias/` | Guías de uso (fase 6) |
 
 ## Estado actual
-- **Fase actual:** 1 — Diseño, ronda 1R (revisión independiente Opus de los 7 documentos antes de aceptar las ADR definitivamente). Nota de orquestación: en este entorno los sub-agentes no pueden lanzar sub-agentes; el orquestador raíz lanza todos los agentes directamente.
+- **Fase actual:** 1 — Diseño, DETENIDA por el dueño el 2026-09-03 durante la ronda 1R. Los 7 documentos de diseño y 34 ADR existen pero fueron producidos por un solo agente Sonnet sin revisión independiente de un modelo mayor: la ronda 1R (cuatro revisores por bloque: dominio, backend, frontend, calidad) no llegó a escribir nada por sobrecarga reiterada del servidor (errores 529). Para retomar: relanzar los cuatro briefs 1R (están en la bitácora del orquestador raíz de esa sesión y resumidos en `tablero.md`), dirimir contradicciones, aceptar ADR y consolidar `contratos.md` antes de abrir la fase 2. Nota: en este entorno los sub-agentes no pueden lanzar sub-agentes; el orquestador raíz lanza todo directamente.
 - Fases: 0 Preparación (cerrada) · 1 Diseño (cerrada) · 2 Backend (siguiente) · 3 Frontend · 4 Plantillas y kit · 5 Migración · 6 Calidad y entrega.
 
 ## Fase 1 cerrada — qué leer para empezar la fase 2
