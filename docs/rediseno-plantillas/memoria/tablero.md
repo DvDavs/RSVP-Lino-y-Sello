@@ -30,11 +30,11 @@ Estados: pendiente · en curso · entregada · aceptada · rechazada (motivo)
 **Ronda 1R — revisión independiente y profundización (lanzada por el orquestador raíz; los sub-agentes NO pueden lanzar sub-agentes en este entorno, así que la red es de un solo nivel).**
 | Tarea | Agente | Modelo | Estado |
 |---|---|---|---|
-| Dominio y esquema: verificación ejecutable Zod/JSON Schema, cobertura de las 8 plantillas, firmas, algoritmo de merge | 1R-dominio | Opus | en curso |
-| Persistencia + API + seguridad: DDL final, contratos completos por ruta, fallo parcial, Flyway real | 1R-backend | Opus | en curso |
-| Frontend + editor: monorepo exacto, protocolo postMessage, store, undo, autoguardado, wireframes, a11y, rendimiento | 1R-frontend | Opus | en curso |
-| Migración + pruebas/CI + IA: mapeo campo a campo, herramienta, ci.yml, umbrales medibles, AiEditProposal | 1R-calidad | Opus | en curso |
-| Dirimidor de contradicciones y consolidación de contratos | orquestador raíz + dirimidor si hace falta | Opus | pendiente |
+| Dominio y esquema: verificación ejecutable Zod/JSON Schema, cobertura de las 8 plantillas, firmas, algoritmo de merge | 1R-dominio | Opus→Fable | no ejecutada (errores 529 reiterados; sesión detenida por el dueño) |
+| Persistencia + API + seguridad: DDL final, contratos completos por ruta, fallo parcial, Flyway real | 1R-backend | Opus→Fable | no ejecutada (errores 529 reiterados; sesión detenida por el dueño) |
+| Frontend + editor: monorepo exacto, protocolo postMessage, store, undo, autoguardado, wireframes, a11y, rendimiento | 1R-frontend | Opus→Fable | no ejecutada (errores 529 reiterados; sesión detenida por el dueño) |
+| Migración + pruebas/CI + IA: mapeo campo a campo, herramienta, ci.yml, umbrales medibles, AiEditProposal | 1R-calidad | Opus→Fable | no ejecutada (errores 529 reiterados; sesión detenida por el dueño) |
+| Dirimidor de contradicciones y consolidación de contratos | orquestador raíz + dirimidor si hace falta | Opus | pendiente (sesión detenida) |
 
 ## Fase 2 — Backend
 (pendiente — siguiente fase)
