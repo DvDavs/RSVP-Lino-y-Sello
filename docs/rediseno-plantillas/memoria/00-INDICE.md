@@ -25,14 +25,19 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
 | `../guias/` | Guías de uso (fase 6) |
 
 ## Estado actual
-- **Fase actual:** 1 — Diseño, DETENIDA por el dueño el 2026-09-03 durante la ronda 1R. Los 7 documentos de diseño y 34 ADR existen, pero fueron producidos por un solo agente Sonnet sin revisión independiente de un modelo mayor. La ronda 1R (cuatro revisores por bloque: dominio, backend, frontend, calidad) no llegó a escribir nada por sobrecarga reiterada del servidor (errores 529). Para retomar: relanzar los cuatro briefs 1R (resumidos en `tablero.md`), dirimir contradicciones, aceptar ADR y consolidar `contratos.md` antes de abrir la fase 2. Nota: en este entorno los sub-agentes no pueden lanzar sub-agentes; el orquestador raíz lanza todo directamente.
-- Fases: 0 Preparación (cerrada) · 1 Diseño (cerrada) · 2 Backend (siguiente) · 3 Frontend · 4 Plantillas y kit · 5 Migración · 6 Calidad y entrega.
+- **Fase 1 — Diseño: CERRADA el 2026-09-03.** Los 7 documentos de diseño existían desde una sesión anterior, pero los había escrito un solo agente Sonnet en secuencia, sin revisión independiente. La **ronda 1R** los revisó adversarialmente y los profundizó hasta grado de implementación: cuatro revisores Opus en paralelo sobre bloques disjuntos, un dirimidor Opus para las 16 contradicciones entre bloques, y una verificación mecánica. 44 objeciones altas encontradas y corregidas, 0 abiertas. 88 ADR aceptadas (34 originales, 15 de ellas con enmienda, más 54 de la ronda). El esquema Zod se verificó **ejecutándolo**, no leyéndolo.
+- **Fase actual: 2 — Backend del módulo nuevo (pendiente de arrancar).**
+- Fases: 0 Preparación (cerrada) · 1 Diseño (cerrada) · **2 Backend (siguiente)** · 3 Frontend · 4 Plantillas y kit · 5 Migración · 6 Calidad y entrega.
+- Nota de entorno: en este entorno los sub-agentes **no** pueden lanzar sub-agentes. El orquestador de cada fase lanza todos los agentes directamente (red de un solo nivel).
 
-## Fase 1 cerrada — qué leer para empezar la fase 2
-1. `memoria/contratos.md` (esquema, API, persistencia, pruebas, nombre del paquete Kotlin, estructura de `frontend/`).
-2. `diseno/01-dominio-y-esquema.md` + `diseno/esquema/*.ts` + `diseno/ejemplos/{boda-clasica-1.0.0,xv-jardin-1.0.0}/*.json` — el contrato de datos completo.
-3. `diseno/02-persistencia-y-catalogo.md` — DDL exacto (migraciones `V29`-`V36`).
-4. `diseno/03-api.md` — rutas, contratos, errores.
-5. `diseno/08-verificacion-adversarial-esquema.md` y `09-verificacion-adversarial-seguridad.md` — objeciones y su resolución (0 altas abiertas); las correcciones ya están incorporadas en 01-03, estos dos documentos son el rastro de por qué existen.
-6. `memoria/preguntas-abiertas.md` — supuestos tomados que un sub-agente de fase 2 no debe volver a decidir por su cuenta sin consultarlos primero.
-7. `diseno/04-frontend-y-editor.md`, `05-migracion.md`, `06-pruebas-y-calidad.md`, `07-extension-ia.md` — para fase 3, 4/5, y referencia transversal de calidad, respectivamente (no bloquean el arranque de fase 2 backend).
+## Fase 1 cerrada — qué leer para empezar la fase 2, en este orden
+1. **`memoria/contratos.md`** — es el contrato vigente y manda sobre cualquier documento de `diseno/` que lo contradiga. Trae esquema, API, persistencia, pruebas, frontend, migración y contrato de IA, con el estado real del entorno de build.
+2. `diseno/01-dominio-y-esquema.md` + `diseno/esquema/*.ts` + `diseno/ejemplos/**` — el contrato de datos completo, con firmas en TypeScript y Kotlin, pseudocódigo del merge y los hashes. Verificado ejecutándolo.
+3. `diseno/02-persistencia-y-catalogo.md` — DDL final copiable (migraciones `V29`-`V37`) y el árbol de clases Kotlin nombradas una por una.
+4. `diseno/03-api.md` — las 19 rutas con contrato completo, la matriz rol × ruta y los códigos `TPL_*`.
+5. `memoria/preguntas-abiertas.md` — 63 supuestos agrupados por área que la fase 2 **no debe volver a decidir por su cuenta**.
+6. `memoria/handoffs/1R-dirimidor.md` — qué se decidió en cada contradicción y por qué; evita reabrir debates ya cerrados.
+7. `diseno/08-*.md` y `09-*.md` — el rastro adversarial: por qué el diseño es como es. No hacen falta para empezar, sí para no deshacer una corrección sin saberlo.
+8. `diseno/04`, `05`, `06`, `07` — para las fases 3, 5, transversal de calidad y futura de IA. No bloquean el arranque del backend, salvo `06` (umbrales y CI, que la fase 2 debe implementar) y dos tareas que `04` deja para el backend: el webhook de revalidación y el CORS de las tipografías.
+
+**Lo primero que debe hacer la fase 2**, antes de escribir código de negocio: arreglar el build (el toolchain Java 17 no compila hoy; ver `handoffs/0-build-jdk.md`), crear el `ci.yml` de `06 §9`, y comprobar lo único que quedó sin verificar por falta de JDK — que `com.networknt:json-schema-validator` acepte el bundle con `$defs` y que el espejo Kotlin de las invariantes case con el de TypeScript.
