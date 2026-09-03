@@ -27,14 +27,17 @@ Estados: pendiente · en curso · entregada · aceptada · rechazada (motivo)
 | Verificación mecánica de rutas y H-xx citados en `diseno/*.md` | orquestador (rol Haiku sustituido por el mismo motivo de arriba) | Sonnet | entregada — 0 rutas rotas, 0 H-xx inventados |
 
 
-**Ronda 1R — revisión independiente y profundización (lanzada por el orquestador raíz; los sub-agentes NO pueden lanzar sub-agentes en este entorno, así que la red es de un solo nivel).**
+**Ronda 1R — revisión independiente y profundización.** Ejecutada el 2026-09-03 por un orquestador raíz Opus 5 en un entorno que **sí** expone la herramienta `Agent`. Red de un solo nivel: los sub-agentes no pueden lanzar sub-agentes, así que el orquestador raíz lanzó los cuatro revisores directamente y en paralelo. Escalera ante error 529 (sobrecarga): esperar 60 s y reanudar el mismo agente conservando su contexto; a la segunda muerte, 5 min; solo tras tres muertes relanzar con `sonnet` añadiendo "sé especialmente riguroso y marca lo que no puedas verificar".
+
 | Tarea | Agente | Modelo | Estado |
 |---|---|---|---|
-| Dominio y esquema: verificación ejecutable Zod/JSON Schema, cobertura de las 8 plantillas, firmas, algoritmo de merge | 1R-dominio | Opus→Fable | no ejecutada (errores 529 reiterados; sesión detenida por el dueño) |
-| Persistencia + API + seguridad: DDL final, contratos completos por ruta, fallo parcial, Flyway real | 1R-backend | Opus→Fable | no ejecutada (errores 529 reiterados; sesión detenida por el dueño) |
-| Frontend + editor: monorepo exacto, protocolo postMessage, store, undo, autoguardado, wireframes, a11y, rendimiento | 1R-frontend | Opus→Fable | no ejecutada (errores 529 reiterados; sesión detenida por el dueño) |
-| Migración + pruebas/CI + IA: mapeo campo a campo, herramienta, ci.yml, umbrales medibles, AiEditProposal | 1R-calidad | Opus→Fable | no ejecutada (errores 529 reiterados; sesión detenida por el dueño) |
-| Dirimidor de contradicciones y consolidación de contratos | orquestador raíz + dirimidor si hace falta | Opus | pendiente (sesión detenida) |
+| Dominio y esquema: verificación ejecutable Zod/JSON Schema, cobertura de las 8 plantillas, firmas, algoritmo de merge | 1R-dominio | Opus | en curso |
+| Persistencia + API + seguridad: DDL final, contratos completos por ruta, fallo parcial, Flyway real | 1R-backend | Opus | en curso |
+| Frontend + editor: monorepo exacto, protocolo postMessage, store, undo, autoguardado, wireframes, a11y, rendimiento | 1R-frontend | Opus | en curso |
+| Migración + pruebas/CI + IA: mapeo campo a campo, herramienta, ci.yml, umbrales medibles, AiEditProposal | 1R-calidad | Opus | en curso |
+| Verificación mecánica de rutas, `H-xx` y validación de ejemplos | verif-1R | Haiku | pendiente |
+| Dirimidor de contradicciones | dirimidor-1R | Opus | pendiente (solo si los handoffs se contradicen) |
+| Cierre: aceptación de ADR, consolidación de `contratos.md`, glosario, tablero, índice | orquestador raíz | Opus | pendiente |
 
 ## Fase 2 — Backend
 (pendiente — siguiente fase)
