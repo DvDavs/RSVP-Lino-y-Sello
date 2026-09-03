@@ -14,17 +14,27 @@ Estados: pendiente · en curso · entregada · aceptada · rechazada (motivo)
 
 | Tarea | Agente | Modelo | Estado |
 |---|---|---|---|
-| Dominio y esquema de plantilla (revisión y firma de un borrador previo interrumpido) | 1-dominio | Sonnet (orquestador; sin sub-agente disponible) | aceptada |
-| Persistencia y catálogo | 1-persistencia | Sonnet (orquestador) | aceptada |
-| API editor y render público | 1-api | Sonnet (orquestador) | aceptada |
-| Arquitectura frontend y editor | 1-frontend | Sonnet (orquestador) | aceptada |
-| Migración | 1-migracion | Sonnet (orquestador) | aceptada |
-| Pruebas y calidad | 1-pruebas | Sonnet (orquestador) | aceptada |
-| Punto de extensión IA | 1-ia | Sonnet (orquestador) | aceptada |
-| Verificación adversarial esquema/composición (2 altas, 3 medias, 2 bajas encontradas) | 1-adv-esquema | Sonnet (orquestador) | aceptada |
-| Verificación adversarial persistencia/API/seguridad (1 alta, 3 medias, 2 bajas encontradas) | 1-adv-seguridad | Sonnet (orquestador) | aceptada |
-| Corrección de las 3 objeciones altas + 6 medias (ronda 3) | orquestador | Sonnet | aceptada |
-| Verificación mecánica de rutas y H-xx citados en `diseno/*.md` | orquestador (rol Haiku sustituido por el mismo motivo de arriba) | Sonnet | aceptada — 0 rutas rotas, 0 H-xx inventados |
+| Dominio y esquema de plantilla (revisión y firma de un borrador previo interrumpido) | 1-dominio | Sonnet (orquestador; sin sub-agente disponible) | entregada — pendiente de revisión independiente (ronda 1R) |
+| Persistencia y catálogo | 1-persistencia | Sonnet (orquestador) | entregada — pendiente de revisión independiente (ronda 1R) |
+| API editor y render público | 1-api | Sonnet (orquestador) | entregada — pendiente de revisión independiente (ronda 1R) |
+| Arquitectura frontend y editor | 1-frontend | Sonnet (orquestador) | entregada — pendiente de revisión independiente (ronda 1R) |
+| Migración | 1-migracion | Sonnet (orquestador) | entregada — pendiente de revisión independiente (ronda 1R) |
+| Pruebas y calidad | 1-pruebas | Sonnet (orquestador) | entregada — pendiente de revisión independiente (ronda 1R) |
+| Punto de extensión IA | 1-ia | Sonnet (orquestador) | entregada — pendiente de revisión independiente (ronda 1R) |
+| Verificación adversarial esquema/composición (2 altas, 3 medias, 2 bajas encontradas) | 1-adv-esquema | Sonnet (orquestador) | entregada — pendiente de revisión independiente (ronda 1R) |
+| Verificación adversarial persistencia/API/seguridad (1 alta, 3 medias, 2 bajas encontradas) | 1-adv-seguridad | Sonnet (orquestador) | entregada — pendiente de revisión independiente (ronda 1R) |
+| Corrección de las 3 objeciones altas + 6 medias (ronda 3) | orquestador | Sonnet | entregada — pendiente de revisión independiente (ronda 1R) |
+| Verificación mecánica de rutas y H-xx citados en `diseno/*.md` | orquestador (rol Haiku sustituido por el mismo motivo de arriba) | Sonnet | entregada — 0 rutas rotas, 0 H-xx inventados |
+
+
+**Ronda 1R — revisión independiente y profundización (lanzada por el orquestador raíz; los sub-agentes NO pueden lanzar sub-agentes en este entorno, así que la red es de un solo nivel).**
+| Tarea | Agente | Modelo | Estado |
+|---|---|---|---|
+| Dominio y esquema: verificación ejecutable Zod/JSON Schema, cobertura de las 8 plantillas, firmas, algoritmo de merge | 1R-dominio | Opus | en curso |
+| Persistencia + API + seguridad: DDL final, contratos completos por ruta, fallo parcial, Flyway real | 1R-backend | Opus | en curso |
+| Frontend + editor: monorepo exacto, protocolo postMessage, store, undo, autoguardado, wireframes, a11y, rendimiento | 1R-frontend | Opus | en curso |
+| Migración + pruebas/CI + IA: mapeo campo a campo, herramienta, ci.yml, umbrales medibles, AiEditProposal | 1R-calidad | Opus | en curso |
+| Dirimidor de contradicciones y consolidación de contratos | orquestador raíz + dirimidor si hace falta | Opus | pendiente |
 
 ## Fase 2 — Backend
 (pendiente — siguiente fase)
