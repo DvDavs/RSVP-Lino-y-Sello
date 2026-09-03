@@ -19,7 +19,14 @@ export const BusinessSnapshot = z.strictObject({
   timezone: z.string().default("America/Mexico_City"),
 });
 
-/** assetId → URL pública resuelta (CDN). El backend la construye desde tpl_asset; en golden files es fija. */
+/**
+ * assetId → URL pública resuelta (CDN). El backend la construye desde `tpl_asset` ANTES de llamar a `compose`
+ * y se la pasa como 4.º parámetro (ADR-1R-D-01). **Es una ENTRADA de `compose`, nunca parte del
+ * `ComposedDocument`**: dentro del documento compuesto las URLs ya viajan resueltas en cada `ResolvedValue`
+ * y ningún `assetId` sale al render público. Por eso no aparece en `ComposedDocument` y por eso tampoco se
+ * emite a JSON Schema (`emit-json-schema.ts` `RAICES`): no cruza HTTP, se construye del lado del servidor.
+ * La URL debe ser estable (CDN sin token): una URL firmada cambiaría `contentHash` en cada petición (`01 §5.5`).
+ */
 export const AssetIndex = z.record(z.string(), z.strictObject({
   url: HttpUrl, width: z.number().int().optional(), height: z.number().int().optional(),
 }));

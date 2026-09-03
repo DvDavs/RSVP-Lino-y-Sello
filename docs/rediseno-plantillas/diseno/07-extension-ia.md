@@ -16,9 +16,9 @@ Ninguna llamada a un proveedor de IA, ningún endpoint HTTP vivo, ninguna UI. Es
 
 ## 2. El catálogo de operaciones es **el mismo**, verificado
 
-`esquema/operations.ts` define un solo `Operation` (10 miembros) y tres envolturas: `OperationBatch` (humano, ≤50), `EditProposal` (IA, ≤10) y —añadida aquí— `AiEditProposal` (§4). Verificado **[V]** que el `EditProposal` reproducido en la versión previa de este documento coincide **exactamente** con `operations.ts:32-36`; no hay divergencia que dirimir en el catálogo.
+`esquema/operations.ts` define un solo `Operation` (**11** miembros desde la decisión X-05, que añadió `clearItemBlock`) y tres envolturas: `OperationBatch` (humano, ≤50), `EditProposal` (IA, ≤10) y —añadida aquí— `AiEditProposal` (§4). Verificado **[V]** que el `EditProposal` reproducido en la versión previa de este documento coincide **exactamente** con `operations.ts` `EditProposal`; no hay divergencia que dirimir en el catálogo.
 
-Las 10 operaciones, y qué necesita validar cada una **antes** de aplicarse (esto es lo que faltaba):
+Las 11 operaciones, y qué necesita validar cada una **antes** de aplicarse (esto es lo que faltaba):
 
 | Operación | Campos | Qué hay que validar contra el manifiesto/documento | ¿Lo cubre `validateValueAgainstSpec`? |
 |---|---|---|---|
@@ -28,12 +28,13 @@ Las 10 operaciones, y qué necesita validar cada una **antes** de aplicarse (est
 | `removeItem` | `groupId`, `itemId` | `itemId` existe **en el documento actual**; `items.length-1 ≥ spec.min` | **no** |
 | `moveItem` | `groupId`, `itemId`, `toIndex` | `itemId` existe; `spec.reorderable`; `toIndex < items.length` | **no** |
 | `setItemBlock` | `groupId`, `itemId`, `blockId`, `value` | todo lo de `addItem` + `itemId` existe | parcial |
+| `clearItemBlock` | `groupId`, `itemId`, `blockId` | `groupId` es un grupo declarado, `itemId` existe, `blockId` es un `itemBlock` declarado del grupo | **no** (no lleva valor) |
 | `setSectionVisible` | `sectionKey`, `visible` | `sectionKey` ∈ manifiesto; `!(section.required && !visible)` → I-17 | **no** |
 | `setSectionVariant` | `sectionKey`, `variant` | `variant` ∈ `section.variants` → I-08 | **no** |
 | `reorderSections` | `order` | `order` es una **permutación exacta** de las claves de `structure` actuales (**I-24**, `validateReorder`) | **no** (`validateReorder`, sí) |
 | `setTheme` | `paletteId?`, `fontSetId?` | ids ∈ `theme.palettes`/`theme.fontSets` → I-20; al menos uno presente | **no** |
 
-**Objeción A-02, corregida.** La versión previa decía que el paso 1 valida "con el mismo `validateValueAgainstSpec` de `invariants.ts`". Ese validador solo compara **valor contra spec** (`invariants.ts` `validateValueAgainstSpec`) y ni siquiera cubre los 14 tipos (`06 §4.1`): **7 de las 10 operaciones no llevan valor** y quedarían sin validar. Lo que hace falta es una función distinta, que **no existe todavía** y que este documento nombra y especifica:
+**Objeción A-02, corregida.** La versión previa decía que el paso 1 valida "con el mismo `validateValueAgainstSpec` de `invariants.ts`". Ese validador solo compara **valor contra spec** (`invariants.ts` `validateValueAgainstSpec`) y ni siquiera cubre los 14 tipos (`06 §4.1`): **8 de las 11 operaciones no llevan valor** y quedarían sin validar. Lo que hace falta es una función distinta, que **no existe todavía** y que este documento nombra y especifica:
 
 ```typescript
 // packages/schema/src/operations-validate.ts  (fase 2 la implementa; fase 1 solo la especifica)
@@ -99,7 +100,7 @@ El delimitador se genera con 128 bits de aleatoriedad por petición, así que no
 
 ## 4. `AiEditProposal`: el esquema completo (ADR-1R-C-14)
 
-`EditProposal` (`operations.ts:32-36`) es la **salida cruda del modelo** y se queda como está. Lo que viaja por HTTP y lo que se persiste es una envoltura que el servidor rellena y que ata la propuesta a un estado concreto del documento. La versión previa no la tenía, y sin ella la propuesta es aplicable sobre un documento que ya cambió (objeción A-04).
+`EditProposal` (`operations.ts` `EditProposal`) es la **salida cruda del modelo** y se queda como está. Lo que viaja por HTTP y lo que se persiste es una envoltura que el servidor rellena y que ata la propuesta a un estado concreto del documento. La versión previa no la tenía, y sin ella la propuesta es aplicable sobre un documento que ya cambió (objeción A-04).
 
 ```typescript
 // packages/schema/src/ai.ts — contrato de IA. Sin .refine()/.superRefine()/.transform() (ADR-005).
@@ -194,13 +195,13 @@ Igual que I-01…I-23, **no son expresables en Zod** (ADR-005 prohíbe `.refine(
 
 | id | Regla | Por qué existe | Acción si se viola |
 |---|---|---|---|
-| **A-INV-01** | Toda operación de `operations[]` afecta **únicamente** a `sectionKey`: `setBlock`/`clearBlock`/`addItem`/`removeItem`/`moveItem`/`setItemBlock` sobre bloques de esa sección; `setSectionVisible`/`setSectionVariant` sobre esa `sectionKey`; **`reorderSections` y `setTheme` prohibidas en una propuesta de IA** (la exactitud de `reorderSections` para el editor humano la cubre ya **I-24**, añadida en esta ronda; A-INV-01 va más lejos y la prohíbe del todo a la IA) | **Objeción A-01:** `EditProposal` declara `sectionKey` pero **nada la ata a las operaciones** — un `reorderSections` reordena el documento entero y un `setTheme` cambia toda la presentación, con `sectionKey:"cover"` declarado. Es P1 en su forma clásica: una regla escrita en prosa que ningún esquema aplica | descartar esa operación (`OUT_OF_SECTION_SCOPE`) |
+| **A-INV-01** | Toda operación de `operations[]` afecta **únicamente** a `sectionKey`: `setBlock`/`clearBlock`/`addItem`/`removeItem`/`moveItem`/`setItemBlock`/`clearItemBlock` sobre bloques de esa sección; `setSectionVisible`/`setSectionVariant` sobre esa `sectionKey`; **`reorderSections` y `setTheme` prohibidas en una propuesta de IA** (la exactitud de `reorderSections` para el editor humano la cubre ya **I-24**, añadida en esta ronda; A-INV-01 va más lejos y la prohíbe del todo a la IA) | **Objeción A-01:** `EditProposal` declara `sectionKey` pero **nada la ata a las operaciones** — un `reorderSections` reordena el documento entero y un `setTheme` cambia toda la presentación, con `sectionKey:"cover"` declarado. Es P1 en su forma clásica: una regla escrita en prosa que ningún esquema aplica | descartar esa operación (`OUT_OF_SECTION_SCOPE`) |
 | **A-INV-02** | `spec.aiEditable === true` para todo bloque tocado | ADR-027 | descartar (`NOT_AI_EDITABLE`) |
 | **A-INV-03** | `spec.source === "user"` para todo bloque tocado | I-21 ya lo prohíbe en el documento; aquí se descarta antes, con un mensaje entendible | descartar (`NOT_USER_SOURCE`) |
 | **A-INV-04** | Todo `blockId`, `groupId`, `sectionKey`, `variant`, `paletteId`, `fontSetId` **existe en el manifiesto/tema de la versión vigente**; todo `itemId` existe en el documento actual | El modelo no puede inventar ids (`handoffs/0-resumen-auditoria-ia.md`, H-13) | descartar (`OP_*_UNKNOWN`) |
 | **A-INV-05** | Los `tempId` del lote son únicos entre sí y no colisionan con ningún `itemId` existente | evita que dos `addItem` se pisen en el `idMap` | descartar el segundo (`DUPLICATE_TEMP_ID`) |
 | **A-INV-06** | Todo `assetId` referenciado pertenece a esta invitación o a la versión de plantilla vigente | ADR-030, cierra S-01 | descartar (`ASSET_NOT_OWNED`) |
-| **A-INV-07** | `operations.length ≤ 10` **y** el documento resultante del dry-run no viola ninguna I-01…I-29 | límite de ADR-027 + el documento debe quedar válido | truncar / descartar (`DRY_RUN_INVARIANT`) |
+| **A-INV-07** | `operations.length ≤ 10` **y** el documento resultante del dry-run no viola ninguna I-01…I-30 | límite de ADR-027 + el documento debe quedar válido | truncar / descartar (`DRY_RUN_INVARIANT`) |
 | **A-INV-08** | `proposalId` solo se puede aplicar una vez, sobre el mismo `baseRevision`, y antes de `expiresAt` | evita reaplicar una propuesta calculada sobre un documento que ya cambió | `409 TPL_AI_PROPOSAL_STALE` / `410 TPL_AI_PROPOSAL_EXPIRED` |
 
 **A-INV-01 es la corrección de fondo de esta ronda.** Sin ella, "una sección por propuesta" (patrón Canva, `handoffs/0-resumen-auditoria-ia.md` punto 6) es decorativo. La prohibición de `reorderSections`/`setTheme` en propuestas de IA es además coherente con §8: maquetar es el uso de mayor riesgo y menor valor.
@@ -222,7 +223,7 @@ Igual que I-01…I-23, **no son expresables en Zod** (ADR-005 prohíbe `.refine(
 
 2. DRY-RUN    Se aplican las VÁLIDAS sobre una copia del documento con el MISMO reductor
               (03 §3.3), sin persistir; se ejecuta validateDocument() sobre el resultado
-              (I-01…I-29) y compose() para la vista previa. Si el documento resultante viola
+              (I-01…I-30) y compose() para la vista previa. Si el documento resultante viola
               una invariante, se identifica la operación responsable por bisección
               (aplicar 1..n y quedarse con la primera que rompe) y esa operación pasa a REPARAR.
 
@@ -266,15 +267,15 @@ Nota deliberada: el paso 6 vuelve a validar. Es barato y cierra la ventana entre
 
 Reglas de la superficie, todas heredadas de `03 §1` sin excepción:
 - `invitationId` viene **siempre de la ruta**; ningún body acepta un id de invitación, documento, snapshot o release. La sesión de IA queda acotada a la invitación ya autorizada (mata H-13 por construcción, igual que el resto de la API).
-- Los códigos `TPL_AI_*` se añaden a la tabla de `03 §5` con handler explícito; ningún 500 genérico (ADR-016). **Esto exige una edición de `03-api.md` que este documento no hace**: contradicción a dirimir CD-7.
+- Los códigos `TPL_AI_*` llevan handler explícito, ningún 500 genérico (ADR-016). **Decisión X-14 (cierra CD-7): no entran en la tabla de `03 §5` en la fase 1.** Esa tabla es el contrato de las rutas que existen; añadir 11 códigos de tres rutas que ADR-027 deja explícitamente sin implementar metería contrato falso en el documento de la API. Lo que sí hace `03 §5` es **reservar el prefijo `TPL_AI_*`** y apuntar aquí, para que nadie lo reutilice; los 11 códigos se vuelcan a `03 §5` en la misma fase que implemente las rutas.
 - Límite de body 768 KiB (ADR-032). Una propuesta cabe holgadamente.
-- Persistencia de la propuesta: tabla `tpl_ai_proposal` (fase futura, **no** en `V29`-`V36`), con `invitation_id`, `proposal_id`, `base_revision`, `payload JSONB`, `status`, `expires_at`, `created_by`. Se purga a los 7 días.
+- Persistencia de la propuesta: tabla `tpl_ai_proposal`, migración **`V39`**, fase futura — **no** entra en el rango `V29`-`V37` del módulo (`02 §2`) ni en la `V38` de `tpl_migration_run` (`05 §7.2`). Numeración fijada en X-14 para que no haya dos migraciones con el mismo número, con `invitation_id`, `proposal_id`, `base_revision`, `payload JSONB`, `status`, `expires_at`, `created_by`. Se purga a los 7 días.
 
 ## 7. Límites, coste y tiempos (ADR-1R-C-15)
 
 | Límite | Valor | Motivo |
 |---|---|---|
-| Operaciones por propuesta | **≤ 10** | ADR-027 / `operations.ts:35`. Es un límite del **esquema**, no una instrucción al modelo: si devuelve 11, la salida no valida y la petición falla (D4) |
+| Operaciones por propuesta | **≤ 10** | ADR-027 / `operations.ts` `EditProposal.operations`. Es un límite del **esquema**, no una instrucción al modelo: si devuelve 11, la salida no valida y la petición falla (D4) |
 | Secciones por propuesta | **1** | A-INV-01 |
 | Reintentos de reparación | **1 por operación**, **≤ 3 por propuesta** | `handoffs/1-aura-lecciones.md` #1 ("reintento acotado"). El tope por propuesta evita que 10 operaciones inválidas disparen 10 llamadas |
 | Tokens de entrada | **≤ 8 000** | Una sección recortada (D7) cabe de sobra; si no cabe, se trunca por bloques enteros, empezando por los más largos, y se registra `truncated: true` |
@@ -311,7 +312,7 @@ Ninguna de estas piezas implementa IA. Todas son **necesarias para el editor hum
 |---|---|---|
 | `OperationValidator.validate(ops, manifest, theme, doc, opts): List<OpViolation>` | `templates2.schema` | Paso 1 del pipeline. Es la contraparte Kotlin de `validateOperations` (§2). **`opts` con `scopeSectionKey` y `aiOnly` desde el primer día**, aunque el editor humano los pase nulos |
 | `OperationReducer.apply(doc, ops, opts): ReducerResult(doc, idMap, violations)` | `templates2.domain` | Pasos 2 y 6. `opts.dryRun: Boolean` **desde el primer día**: sin él, el dry-run exige una segunda implementación |
-| `Composer.compose(pkg, doc, business, locale): CompositionResult` | `templates2.composition` | Vista previa del diff |
+| `Composer.compose(pkg, doc, business, assets, locale): CompositionResult` | `templates2.composition` | Vista previa del diff |
 | `Invariants.validateDocument(doc, manifest, theme): List<Violation>` | `templates2.schema` | Paso 2 |
 | `AssetOwnershipChecker.check(assetIds, invitationId, templateVersionId): Set<AssetId>` | `templates2.persistence` | A-INV-06 / ADR-030. **Debe aceptar una lista**, no un id suelto: la IA valida hasta 10 operaciones de golpe |
 | `DocumentWriteService.applyBatch(invitationId, batch, clientBatchId): WriteResult` | `templates2.api` | Paso 6, sin ruta paralela |
@@ -327,7 +328,7 @@ Ninguna de estas piezas implementa IA. Todas son **necesarias para el editor hum
 | `packages/sections/src/canvas/DiffOverlay.tsx` | `packages/sections` | Resaltado del diff previsualizado sobre el lienzo. Contrato de props `AiDiffEntry[]` |
 | Renderizador de `rationale` como **texto plano** | `apps/web` | D5 |
 
-**Fase 1 (este documento) deja además reservados:** los códigos de error `TPL_AI_*` (§6) para la tabla de `03 §5`, la tabla `tpl_ai_proposal` (fuera de `V29`-`V36`), y los ficheros de casos `golden/ai/A-INV-01…08-*.json` (`06 §4`).
+**Fase 1 (este documento) deja además reservados:** el prefijo de códigos de error `TPL_AI_*` (§6; `03 §5` lo reserva sin enumerarlos, X-14), la tabla `tpl_ai_proposal` (migración `V39`, fuera del rango `V29`-`V37`), y los ficheros de casos `golden/ai/A-INV-01…08-*.json` (`06 §4`).
 
 ## 10. Lo que no pude determinar
 
@@ -343,10 +344,10 @@ Ronda 1R, 2026-09-03. Revisor: `1R-calidad`. Método: contraste del documento co
 
 | id | Sev. | Objeción | Evidencia | Corrección aplicada | Estado |
 |---|---|---|---|---|---|
-| **A-01** | **Alta** | `EditProposal.sectionKey` declara "una sección por propuesta" pero **nada lo aplica**: una propuesta con `sectionKey:"cover"` puede llevar `reorderSections` sobre todo el documento o `setTheme` sobre toda la presentación. No es expresable en Zod (ADR-005 prohíbe `.refine()`), así que era una regla escrita en prosa que ningún esquema comprueba — el patrón exacto de P1/H-12 | `esquema/operations.ts:32-36`; ADR-005 | §4.2 A-INV-01: alcance por sección aplicado en `validateOperations`, con `reorderSections`/`setTheme` **prohibidas** en propuestas de IA; caso de prueba en `golden/ai/`. Complementada por I-24, añadida en paralelo por `1R-dominio` | corregido |
-| **A-02** | **Alta** | El paso 1 decía validar "con el mismo `validateValueAgainstSpec`". Ese validador solo compara valor contra spec y **7 de las 10 operaciones no llevan valor**: `clearBlock`, `removeItem`, `moveItem`, `setSectionVisible`, `setSectionVariant`, `reorderSections`, `setTheme` quedarían sin validar | `esquema/invariants.ts` `validateValueAgainstSpec`; `esquema/operations.ts` `Operation` | §2: tabla operación×validación y especificación de `validateOperations`/`OperationValidator` con 18 códigos `OP_*`, compartida con el editor humano | corregido |
+| **A-01** | **Alta** | `EditProposal.sectionKey` declara "una sección por propuesta" pero **nada lo aplica**: una propuesta con `sectionKey:"cover"` puede llevar `reorderSections` sobre todo el documento o `setTheme` sobre toda la presentación. No es expresable en Zod (ADR-005 prohíbe `.refine()`), así que era una regla escrita en prosa que ningún esquema comprueba — el patrón exacto de P1/H-12 | `esquema/operations.ts` `EditProposal`; ADR-005 | §4.2 A-INV-01: alcance por sección aplicado en `validateOperations`, con `reorderSections`/`setTheme` **prohibidas** en propuestas de IA; caso de prueba en `golden/ai/`. Complementada por I-24, añadida en paralelo por `1R-dominio` | corregido |
+| **A-02** | **Alta** | El paso 1 decía validar "con el mismo `validateValueAgainstSpec`". Ese validador solo compara valor contra spec y **8 de las 11 operaciones no llevan valor**: `clearBlock`, `clearItemBlock`, `removeItem`, `moveItem`, `setSectionVisible`, `setSectionVariant`, `reorderSections`, `setTheme` quedarían sin validar | `esquema/invariants.ts` `validateValueAgainstSpec`; `esquema/operations.ts` `Operation` | §2: tabla operación×validación y especificación de `validateOperations`/`OperationValidator` con 18 códigos `OP_*`, compartida con el editor humano | corregido |
 | **A-03** | **Alta** | Ninguna mención de inyección de prompt, siendo que el contenido del cliente entra en el prompt por diseño | brief 1R; `handoffs/0-resumen-auditoria-ia.md` | §3: 6 superficies de entrada, 5 objetivos de ataque y 9 defensas D1-D9, ninguna de ellas dependiente de que el modelo obedezca (ADR-1R-C-13) | corregido |
-| **A-04** | **Alta** | La propuesta no estaba atada a un estado del documento: sin `proposalId`, sin `baseRevision`, sin caducidad. Aplicar una propuesta calculada sobre un documento que ya cambió es el fallo obvio, y `03 §3.3` sí exige `baseRevision` para el editor humano | `esquema/operations.ts:25-29` vs `:32-36`; `03 §3.3` | §4: `AiEditProposal` con `proposalId`/`baseRevision`/`expiresAt`/`status`; A-INV-08; paso 6 re-valida | corregido |
+| **A-04** | **Alta** | La propuesta no estaba atada a un estado del documento: sin `proposalId`, sin `baseRevision`, sin caducidad. Aplicar una propuesta calculada sobre un documento que ya cambió es el fallo obvio, y `03 §3.3` sí exige `baseRevision` para el editor humano | `esquema/operations.ts` `OperationBatch` vs `:32-36`; `03 §3.3` | §4: `AiEditProposal` con `proposalId`/`baseRevision`/`expiresAt`/`status`; A-INV-08; paso 6 re-valida | corregido |
 | **A-05** | Media | El ejemplo de `aiEditable:false` (`cover.buttonLabel`, `source:fixed`) era redundante: I-21 ya rechaza toda escritura sobre bloques no-`user`, venga de donde venga | `esquema/invariants.ts` `validateDocument` (rama `source !== "user"`) | §8: ejemplo corregido a `couple.groom` (`source:"user"`), que es el caso en que `aiEditable` aporta algo | corregido |
 | **A-06** | Media | No había esquema `AiEditProposal` escrito (entregable exigido), ni contrato de endpoint, ni códigos de error | brief 1R | §4 (esquema completo, sin `.refine()`), §6 (2+1 rutas, 11 códigos `TPL_AI_*`, tabla `tpl_ai_proposal`) — ADR-1R-C-14 | corregido |
 | **A-07** | Media | Ningún límite de coste, tokens, timeout, frecuencia ni caducidad. La IA es la única parte del sistema con coste marginal por uso | brief 1R; `handoffs/1-aura-lecciones.md` #1 | §7: 11 límites con valor y motivo, incluido el tope de reparaciones **por propuesta** además de por operación (ADR-1R-C-15) | corregido |
@@ -355,4 +356,4 @@ Ronda 1R, 2026-09-03. Revisor: `1R-calidad`. Método: contraste del documento co
 | **A-10** | Baja | El pipeline no decía qué pasa si **todas** las operaciones se descartan | `handoffs/1-aura-lecciones.md` #5 | §5 paso 4: `status:"empty"` con informe, nunca un error | corregido |
 | **A-11** | Baja | El dry-run no decía cómo se atribuye una violación de documento a una operación concreta | — | §5 paso 2: bisección incremental | corregido |
 
-**Contradicciones a dirimir:** **CD-6 resuelto** durante la ronda — `1R-dominio` añadió **I-24 `REORDER_NOT_A_PERMUTATION`** (`validateReorder`), que fija la semántica también para el editor humano; A-INV-01 sigue siendo más estricta para la IA (prohíbe la operación entera) y las dos son compatibles. Queda **CD-7** (los códigos `TPL_AI_*` deben entrar en la tabla de `03 §5` y `tpl_ai_proposal` en una migración futura; este documento no edita `03` ni `02`). Ver `handoffs/1R-calidad.md`.
+**Contradicciones a dirimir:** **CD-6 resuelto** durante la ronda — `1R-dominio` añadió **I-24 `REORDER_NOT_A_PERMUTATION`** (`validateReorder`), que fija la semántica también para el editor humano; A-INV-01 sigue siendo más estricta para la IA (prohíbe la operación entera) y las dos son compatibles. **CD-7 dirimido** (X-14 / ADR-1R-X-06): los 11 códigos `TPL_AI_*` **no** entran en `03 §5` en la fase 1 —`03 §5` reserva el prefijo y apunta aquí—, `tpl_ai_proposal` es la migración **`V39`** y `tpl_migration_run` la **`V38`**, fuera del rango `V29`-`V37` del módulo. Ver `handoffs/1R-dirimidor.md`.

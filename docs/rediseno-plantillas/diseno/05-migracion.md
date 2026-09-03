@@ -65,7 +65,9 @@ Esas 5 tarjetas contienen `title.content`, `date.content`, `time.content`, `loca
 - **Construcción del paquete de plantilla (§3)** → lee **F1, el JSON crudo del repositorio**, con `JSON.parse`, sin pasar por ningún modelo tipado del módulo antiguo. Cualquier lectura que use `EditorModels.kt`/`DefaultContentConfig.kt` está prohibida: reproduce H-12 por construcción. El `EditorModels.kt` se consulta **solo** como documentación de qué significa cada campo, nunca como parser.
 - **Golden `before` de una invitación (§5)** → lee **F3, el documento ya guardado en `invitation_configs`**, sin re-ejecutar el generador (ADR-022, motivo H-09: `MongoDataInitializer.kt:83-90` pisa lo visual en cada arranque, así que re-generar hoy puede no reproducir lo que esa invitación mostró **[V]**).
 
-Corolario incómodo y aceptado: **`itemsSinglePlace` y las otras 3 rutas nunca llegaron a ninguna invitación**, así que su ausencia en el `after` no es una regresión — pero sí deben existir en el **paquete** (capacidad `singlePlace`, `esquema/manifest.ts:53`) para que la funcionalidad quede reparada en el módulo nuevo. Se migran como **defaults de la plantilla**, no como contenido de ninguna invitación.
+Corolario incómodo y aceptado: **`itemsSinglePlace` y las otras 3 rutas nunca llegaron a ninguna invitación**, así que su ausencia en el `after` no es una regresión — pero sí deben existir en el **paquete** (capacidad `singlePlace`, `esquema/manifest.ts` `Capability`) para que la funcionalidad quede reparada en el módulo nuevo. Se migran como **defaults de la plantilla**, no como contenido de ninguna invitación.
+
+**Decisión X-16 (cierra CD-2): la capacidad `singlePlace` se mantiene, con esta semántica escrita.** Una `Capability` es propiedad **del paquete de plantilla**, no dato de una invitación: no viaja en `InvitationDocument`, el cliente no la edita y la migración **nunca** la deriva de una invitación concreta. Que ninguna invitación tenga datos de origen para ella no es un argumento para retirarla — es el motivo de conservarla: es exactamente la funcionalidad que H-12 dejó muerta (`itemsSinglePlace` nunca llegó a F2 ni a F3) y que el módulo nuevo repara. Retirarla del enum normalizaría la pérdida. Reglas operativas de la migración: se lee **solo de F1**; su `defaults.json` sale del JSON del repositorio; `RegressionReport` **nunca** la cuenta como `missingUserText` ni como `missingDemoText`, porque no estaba en ningún `before`; y la variante que la usa entra `visible` según lo que diga F1, nunca inferida de F2/F3.
 
 ## 3. Construcción de los 9 paquetes de plantilla
 
@@ -162,7 +164,7 @@ Lectura **[V]**: ~95 % de las hojas son presentación (`md`/`sm`/`xs`, colores, 
 | `/config/sectionFamily/items/*/items/*/image/content` | `family.godparents[*].photo` (`personPhoto`) | sin pérdida | |
 | `/config/sectionEvent/title/content` | `event.title` (`sectionTitle`) | sin pérdida | |
 | `/config/sectionEvent/locationText/content` / `/url` | `event.cards[*].place.name` / `.mapHref` (`location`) | sin pérdida | |
-| `/config/sectionEvent/singleplace` | `manifest.capabilities += "singlePlace"` | pérdida de presentación aceptable | Deja de ser un booleano del documento: es una capacidad de la plantilla (`manifest.ts:53`) |
+| `/config/sectionEvent/singleplace` | `manifest.capabilities += "singlePlace"` | pérdida de presentación aceptable | Deja de ser un booleano del documento: es una capacidad de la plantilla (`manifest.ts` `Capability`) |
 | `/config/sectionEvent/itemsSinglePlace/*/**` | `defaults.json` de la variante `singlePlace` | sin pérdida | **Solo alcanzable leyendo F1** (§2, H-12). Desde F2/F3 es `null` |
 | `/config/sectionEvent/items/*/title/content` | `event.cards[*].title` (`eventTitle`) | sin pérdida | |
 | `/config/sectionEvent/items/*/date/timeStart/content`, `/timeEnd/content` | `event.cards[*].when` (`dateTimeRange`, `eventWhen`) → `start`/`end` | sin pérdida | Dos campos de texto libre (`"4:30 PM"`) → un rango tipado; **exige parseo con locale es-MX y validación I-01** |
@@ -367,7 +369,7 @@ La versión previa comparaba el `before` contra los `ResolvedValue` de `after` c
 
 ```
 visibleBefore = extractVisibleText(beforeLegacyDoc)      // §6.2
-visibleAfter  = extractVisibleText(compose(pkg, doc, business, locale).composed)
+visibleAfter  = extractVisibleText(compose(pkg, doc, business, assets, locale).composed)   // firma vigente: 01 §5.1, ADR-1R-D-01
 missing = visibleBefore \ visibleAfter                    // desapareció algo que se veía
 extra   = visibleAfter  \ visibleBefore                   // apareció algo que no se veía
 ```
@@ -382,7 +384,7 @@ y cada elemento de `missing` se clasifica con la procedencia del bloque de orige
 
 **Extracción del `before` (legado)** — se recorre el documento con el `FieldMap` de esa plantilla y se toma el valor de toda hoja cuya regla tenga `loss ∈ {no-loss, content-loss-blocking}` y cuyo valor sea un `string` no vacío, **si y solo si** la sección que la contiene tiene `visibility: true` en el `before`. Las hojas `presentation-loss-ok` y `discarded-with-reason` **no** entran (por definición no son texto visible del cliente). Las URLs de imagen se recogen aparte, en `visibleImagesBefore`.
 
-**Extracción del `after`** — se recorre `ComposedDocument.sections` con `visible === true` y, por cada `ComposedBlock`/`ComposedItem`, se toma según el `kind` de `ResolvedValue` (`esquema/composed.ts:30-44`):
+**Extracción del `after`** — se recorre `ComposedDocument.sections` con `visible === true` y, por cada `ComposedBlock`/`ComposedItem`, se toma según el `kind` de `ResolvedValue` (`esquema/composed.ts` `ResolvedValue`):
 
 | `kind` | Texto que aporta | Imagen que aporta |
 |---|---|---|
@@ -449,7 +451,9 @@ ON CONFLICT (invitation_id) DO UPDATE
    SET template_version_id = EXCLUDED.template_version_id,
        doc                 = EXCLUDED.doc,
        revision            = tpl_document.revision + 1,
-       updated_at          = now();          -- public_token NO se toca: es estable de por vida (02 §2.4)
+       updated_at          = now()           -- public_token NO se toca: es estable de por vida (02 §2.4)
+ WHERE tpl_document.updated_by IS NULL       -- X-07: NUNCA pisa una edición del cliente
+RETURNING id, revision;
 -- 2. Snapshot del resultado, en la MISMA transacción (02 §2.5) — el estado previo ya tiene el suyo.
 INSERT INTO tpl_document_snapshot (document_id, revision, doc, client_batch_id)
 SELECT id, revision, doc, 'migration:' || :runId FROM tpl_document WHERE invitation_id = :invitationId;
@@ -461,6 +465,18 @@ COMMIT;
 ```
 
 Precondiciones, todas comprobadas dentro de la misma transacción: `RegressionReport.passed = true`, `reviewQueue` de esa invitación vacía, y `blocking` vacío.
+
+**Quién puede crear esta fila y quién gana (decisión X-07, cierra CD-3).** Solo hay dos creadores: `POST …/document:choose-template` (`03 §3.2`) y esta transacción. `GET …/document` **no** crea nada — responde `404 TPL_DOCUMENT_NOT_STARTED` (`03 §3.3`, `02 §2.4`) —, de modo que ADR-013 queda enmendada y desaparece el tercer camino que hacía ambiguo el orden (H-39). Los dos creadores son disjuntos por construcción: `/editor/**` responde `409 TPL_NOT_MIGRATED` mientras `uses_templates2 = false` (`02 §6`, ADR-1R-B-10), así que una invitación legada no puede entrar por `:choose-template` antes de su corte.
+
+Si aun así la fila ya existe, manda **quien haya escrito el último cambio del cliente**: el `DO UPDATE` lleva `WHERE tpl_document.updated_by IS NULL`, columna que solo escriben las rutas de edición (`02 §2.4`). Casos:
+
+| Estado de la fila al re-migrar | Efecto |
+|---|---|
+| No existe | `INSERT`, `revision = 0` |
+| Existe y `updated_by IS NULL` (la escribió una corrida anterior de la migración) | `DO UPDATE`, `revision + 1`: re-migrar es idempotente (ADR-1R-C-06) |
+| Existe y `updated_by IS NOT NULL` (el cliente ya editó, p. ej. tras un rollback de §7.5) | El `DO UPDATE` **no afecta a ninguna fila**; el `RETURNING` viene vacío, la transacción se aborta y la invitación va a la cola de revisión manual con `blocking: ["documento ya editado por el cliente"]`. **Nunca se sobrescribe trabajo del cliente**: hacerlo sería H-04/H-05 en el módulo nuevo |
+
+La corrida detecta el tercer caso por el `RETURNING` vacío, no por una consulta previa: comprobar y luego escribir sería una carrera.
 
 `public_token` **no se regenera** en el `DO UPDATE`: si alguien ya compartió el enlace, re-migrar no debe romperlo (`02 §2.4`).
 
@@ -480,7 +496,9 @@ El **enrutamiento** por `uses_templates2` (qué módulo atiende cada petición) 
 Tabla de auditoría nueva, propuesta aquí (una sola tabla, fuera del ciclo de vida del producto):
 
 ```sql
--- V37 (fase 5, NO fase 2): auditoría de la migración legado→templates2.
+-- V38 (fase 5, NO fase 2): auditoría de la migración legado→templates2.
+-- Numeración fijada en X-14: V29-V37 son del módulo (02 §2; V37 = tpl_asset_gc, ADR-1R-B-03).
+-- Dos migraciones no pueden llevar el mismo número: esta es la V38.
 CREATE TABLE tpl_migration_run (
     id                  BIGSERIAL PRIMARY KEY,
     run_id              VARCHAR(40) NOT NULL,             -- ULID de la corrida completa
@@ -533,7 +551,9 @@ Qué pasa después, explícitamente:
 - El módulo antiguo vuelve a atender esa invitación leyendo su `invitation_configs`, que **nunca se modificó** — el cliente ve exactamente lo que veía antes del corte.
 - La fila `tpl_document` **no se borra**. Se queda con su `revision` y su `public_token`. Motivo: borrarla perdería el trabajo de extracción y, peor, liberaría el `public_token`; si más tarde se re-migra, `ON CONFLICT DO UPDATE` (§7.1) reutiliza la misma fila y el mismo token, y el enlace público que el cliente ya compartió sigue sirviendo.
 - **Lo que el cliente editó en el editor nuevo entre el corte y el rollback se pierde de cara al render**, porque el módulo antiguo no lo conoce. Queda en `tpl_document`/`tpl_document_snapshot`, recuperable re-migrando, pero **no** se retro-propaga a `invitation_configs`. Escribir el documento nuevo de vuelta al formato legado exigiría un compositor inverso completo; se descarta por coste y por riesgo (P10 pide convivencia, no bidireccionalidad). **Consecuencia operativa: el rollback es seguro inmediatamente después del corte y cada vez más costoso cuanto más tiempo pase.** Recomendación: ventana de rollback "barato" de **7 días** tras el corte de cada invitación; pasada esa ventana, un rollback exige aviso al cliente. Registrado en `preguntas-abiertas.md`.
-- Un `release` publicado desde `templates2` (`tpl_release`, `is_active`) queda huérfano: el enlace público debe volver a servirse por el camino antiguo. **El enrutador de fase 2 debe consultar `uses_templates2` también en la ruta pública**, no solo en las autenticadas. Punto a verificar en fase 2 (§13, objeción M-08).
+- Un `release` publicado desde `templates2` (`tpl_release`, `is_active`) queda huérfano. **Decisión X-09 (cierra CD-1): la ruta pública consulta `uses_templates2`**, igual que las autenticadas — no es un asunto del enrutador de fase 2, es contrato de la ruta y está escrito en `03 §3.15`. Con la bandera en `false`, `GET /public/i/{publicToken}/render` responde `404 TPL_RELEASE_NOT_FOUND` (el mismo código opaco que un token inexistente, para no dar un oráculo) y el enlace legado vuelve a servir por el camino antiguo. La comprobación es gratis: la fila de `invitation` ya se lee en la misma consulta para `is_enabled`/`customer`.
+- **Lo que esto cuesta**: un cliente que ya repartió el enlace **nuevo** (`/i/{publicToken}`) entre sus invitados verá esos enlaces caer en `404` tras el rollback — el módulo antiguo no conoce `public_token` y este módulo no conoce la forma del enlace legado, así que no hay redirección posible sin inventar un mapeo que nadie ha pedido. Sumado a la pérdida de las ediciones posteriores al corte, refuerza la regla de arriba: **el rollback es barato solo mientras el enlace nuevo no se haya repartido**. Registrado en `preguntas-abiertas.md` por si el dueño prefiere pagar la redirección.
+- **No es instantáneo**: el CDN puede servir la respuesta anterior hasta `max-age` 300 s y hasta 1 h en `stale-while-revalidate` (`03 §7`).
 
 ## 8. Migración de versión de plantilla (nuevo→nuevo)
 
@@ -598,7 +618,7 @@ Ronda 1R, 2026-09-03. Revisor: `1R-calidad` (independiente del autor original). 
 | **M-02** | **Alta** | El documento no decía si el extractor lee el JSON crudo o el modelo Kotlin. Leerlo por el modelo pierde 4 rutas de campo, entre ellas 5 tarjetas de contenido visible | H-12; `H-hipotesis.md` §5 (control causal); `EditorModels.kt:234-235`; medición propia: 3 y 2 tarjetas `itemsSinglePlace` | §2 nuevo: tres fuentes F1/F2/F3 y regla dura (ADR-1R-C-01) | corregido |
 | **M-03** | **Alta** | §3.2 comparaba contra "el `default_content_<slug>.json` de la plantilla resuelta por `templateId`". Esa resolución no existe: ningún content declara `templateId`, el fallback es `(eventTypeId, planId)` sin orden, y hay colisiones reales | `jq .templateId` → 9× NULL; `DefaultConfigGeneratorService.kt:70,72`; `DefaultContentConfigRepository.kt:31-35`; H-21 | §5.4 nuevo: baseline = unión de candidatos por `(eventTypeId, planId)` + marca de ambigüedad (ADR-1R-C-05) | corregido |
 | **M-04** | **Alta** | El umbral "≥ 12 caracteres" clasifica como dato real del cliente los nombres propios de demo. `"Georgina"` (8 chars, la niña ficticia del bautizo) se publicaría sin revisión: es H-03 reintroducido | Medición propia: 24 strings <12 chars en `default_content_bautizo.json`, entre ellos `Georgina`, `Mis Padres`, `Marck Luga`, `Madre`, `Madrina` | §5.3: umbral eliminado; toda coincidencia con el baseline va a cola; baseline desde Mongo, no del repo (ADR-1R-C-04) | corregido |
-| **M-05** | **Alta** | `compareRendered` solo miraba `provenance ∈ {user,business}` del `after`, así que un texto de demo que el cliente veía (H-03 + H-24) podía desaparecer con `passed = true` | `esquema/composed.ts:27,51`; H-24 (`mergeConfiguration` fuerza `visibility=true`) | §6 reescrito: conjunto completo de texto visible, clasificado en `missingUserText` (bloquea) / `missingDemoText` (informa) / `missingImages` (siempre bloquea) | corregido |
+| **M-05** | **Alta** | `compareRendered` solo miraba `provenance ∈ {user,business}` del `after`, así que un texto de demo que el cliente veía (H-03 + H-24) podía desaparecer con `passed = true` | `esquema/composed.ts` `ComposedBlock.provenance`; H-24 (`mergeConfiguration` fuerza `visibility=true`) | §6 reescrito: conjunto completo de texto visible, clasificado en `missingUserText` (bloquea) / `missingDemoText` (informa) / `missingImages` (siempre bloquea) | corregido |
 | **M-06** | **Alta** | No existía tabla de mapeo campo a campo con clasificación de pérdida (entregable exigido), ni algoritmo de extracción de texto visible, ni normalización, ni umbral | brief 1R, bloque 1 | §4 (tabla + generación mecánica + salida real del prototipo) y §6.2/§6.3 nuevos | corregido |
 | **M-07** | Media | §2 decía "los 6 slugs restantes (4, 6, 7, 8, 9, 10 y 13 → 7 paquetes)": inconsistencia aritmética, y la lista era incorrecta tras M-01 | texto original `05-migracion.md:22` | §1 punto 1: son **8** paquetes por construir además de `boda-clasica` | corregido |
 | **M-08** | Media | La transacción de corte era un `INSERT` plano; falla en el segundo intento por `UNIQUE (invitation_id)` y tras un rollback. No había procedimiento de rollback ni política de retención | `02 §2.4` DDL `uq_tpl_document_invitation` | §7.1 `ON CONFLICT DO UPDATE` idempotente que preserva `public_token`; §7.2 retención; §7.5 rollback paso a paso con sus límites (ADR-1R-C-06) | corregido |
@@ -608,4 +628,4 @@ Ronda 1R, 2026-09-03. Revisor: `1R-calidad` (independiente del autor original). 
 | **M-12** | Media | H-28 y H-03 no estaban incorporados como riesgos con contramedida trazable | brief 1R | §11: tabla de riesgos con H-xx → contramedida | corregido |
 | **M-13** | Baja | El plan de retiro proponía borrar los `payload-template-*.json` citando H-59 ("sin ninguna referencia"), que es falso para dos de ellos | `apply_template_11_12_local.sh:18-19` | §9 paso 5: verificar fichero a fichero, no asumir el hallazgo | corregido |
 
-**Contradicciones a dirimir (no resueltas aquí, ver `handoffs/1R-calidad.md`):** CD-1 (ruta pública y `uses_templates2`), CD-2 (`capabilities.singlePlace` sin datos de origen en F2/F3), CD-3 (`tpl_document` creado perezosamente en `02 §2.4` vs. creado por la migración en §7.1).
+**Contradicciones dirimidas tras cerrar este documento** (`handoffs/1R-dirimidor.md`): **CD-1 → X-09/ADR-1R-X-04** — la ruta pública **sí** consulta `uses_templates2` y responde `404 TPL_RELEASE_NOT_FOUND` con la bandera en `false` (§7.5, `03 §3.15`). **CD-2 → X-16** — la capacidad `singlePlace` **se mantiene**: es propiedad de la plantilla, no dato de invitación, y precisamente porque H-12 la dejó sin datos de origen (nunca llegó a F2/F3) es la funcionalidad que el módulo nuevo repara; se puebla solo desde F1 como default de plantilla (§2, tabla de mapeo de §7). **CD-3 → X-07/ADR-1R-X-03** — `:choose-template` es el único creador por API, la migración el único fuera de ella, y su `DO UPDATE` lleva `WHERE tpl_document.updated_by IS NULL` (§7.1).

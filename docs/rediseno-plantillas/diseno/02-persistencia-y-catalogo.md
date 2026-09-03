@@ -37,7 +37,7 @@ Configuración Flyway verificada en `src/main/resources/application.yml:39-45`: 
 | `V36__add_uses_templates2_to_invitation.sql` | `invitation.uses_templates2` |
 | `V37__create_tpl_asset_gc.sql` | `tpl_asset_gc` + trigger `trg_tpl_asset_gc` |
 
-**Convención de tipos** (fijada aquí para que fase 2 no la reinvente): claves primarias `BIGSERIAL` (coherente con `invitation.id bigint` / `customer.id bigint`, verificado en `V1__initial_schema.sql:265-282` y `:60-83`); marcas de tiempo `TIMESTAMPTZ` (el resto del esquema usa `timestamp(6) with time zone`, compatible); hashes `CHAR(64)` en hexadecimal minúsculas; ningún `TEXT[]` ni tipo exótico (ver §8.3).
+**Convención de tipos** (fijada aquí para que fase 2 no la reinvente): claves primarias `BIGSERIAL` (coherente con `invitation.id bigint` / `customer.id bigint`, verificado en `V1__initial_schema.sql:265-282` y `:60-83`); marcas de tiempo `TIMESTAMPTZ` (el resto del esquema usa `timestamp(6) with time zone`, compatible); digestos de archivo (`tpl_asset.sha256`, `AssetEntry.sha256`) `CHAR(64)` en hexadecimal minúsculas; los hashes de dominio que llevan prefijo de algoritmo (`package_hash`, `content_hash`, `requested_hash`) `VARCHAR(71)`, con el valor exacto que define `01 §2.1`/`§5.5` (`"sha256:" + 64 hex`), nunca recortado (X-01/X-02); ningún `TEXT[]` ni tipo exótico (ver §8.3).
 
 ### V29 — `tpl_template`
 
@@ -51,7 +51,7 @@ CREATE TABLE tpl_template (
     CONSTRAINT ck_tpl_template_slug_format CHECK (slug ~ '^[a-z0-9]([a-z0-9-]{1,38}[a-z0-9])$')
 );
 ```
-Fila creada la primera vez que se registra cualquier versión de un `slug`. No se borra nunca desde la API (borrar un catálogo entero es una operación MASTER manual fuera de alcance de este módulo). El `CHECK` replica el patrón `TemplateSlug` de `esquema/common.ts:16` en la base, para que ni un script suelto pueda meter un slug fuera de contrato (P1).
+Fila creada la primera vez que se registra cualquier versión de un `slug`. No se borra nunca desde la API (borrar un catálogo entero es una operación MASTER manual fuera de alcance de este módulo). El `CHECK` replica el patrón `TemplateSlug` de `esquema/common.ts` `TemplateSlug` en la base, para que ni un script suelto pueda meter un slug fuera de contrato (P1).
 
 ### V30 — `tpl_template_version`
 
@@ -68,7 +68,7 @@ CREATE TABLE tpl_template_version (
     theme            JSONB       NOT NULL,
     defaults         JSONB       NOT NULL,
     migration_plans  JSONB       NOT NULL DEFAULT '{}'::jsonb,
-    package_hash     CHAR(64)    NOT NULL,
+    package_hash     VARCHAR(71) NOT NULL,
     status           VARCHAR(20) NOT NULL DEFAULT 'published',
     min_plan_tier    SMALLINT    NOT NULL DEFAULT 1,
     event_kinds      JSONB       NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE tpl_template_version (
     CONSTRAINT ck_tpl_template_version_status CHECK (status IN ('published','deprecated')),
     CONSTRAINT ck_tpl_template_version_semver CHECK (version ~ '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'),
     CONSTRAINT ck_tpl_template_version_tier   CHECK (min_plan_tier BETWEEN 1 AND 3),
-    CONSTRAINT ck_tpl_template_version_hash   CHECK (package_hash ~ '^[0-9a-f]{64}$'),
+    CONSTRAINT ck_tpl_template_version_hash   CHECK (package_hash ~ '^sha256:[0-9a-f]{64}$'),
     CONSTRAINT ck_tpl_template_version_kinds  CHECK (jsonb_typeof(event_kinds) = 'array' AND jsonb_array_length(event_kinds) BETWEEN 1 AND 8),
     CONSTRAINT ck_tpl_template_version_manifest CHECK (jsonb_typeof(manifest) = 'object'),
     CONSTRAINT ck_tpl_template_version_theme    CHECK (jsonb_typeof(theme) = 'object'),
@@ -98,8 +98,8 @@ CREATE INDEX ix_tpl_template_version_catalog
 Cambios de la ronda 1R respecto al borrador y su motivo:
 
 - **`event_kinds` pasa de `TEXT[]` a `JSONB`** (ADR-1R-B-09). `application.yml:32` fija `spring.jpa.hibernate.ddl-auto: validate`: Hibernate valida **al arrancar** cada entidad contra el esquema real, y un desajuste **no rompe solo `templates2`, rompe el arranque de toda la aplicación**. El mapeo de arrays SQL de Hibernate 6 sobre PostgreSQL es la parte del mapeo con más aristas (`@JdbcTypeCode(SqlTypes.ARRAY)` + tipo de componente + dialecto); `jsonb` es el mismo mecanismo que ya usamos para `manifest`, con un solo camino de mapeo para todo el módulo. La consulta de catálogo pasa de `event_kinds && ARRAY['wedding']` a `event_kinds @> '["wedding"]'::jsonb`, igual de indexada con GIN.
-- **`version_major/minor/patch` pasan de `SMALLINT` a `INTEGER`.** `Semver` (`esquema/common.ts:19`) no acota el número; `SMALLINT` (máx. 32767) es un límite artificial que produciría un fallo de inserción en vez de un error de contrato.
-- **`migration_plans JSONB`**: mapa `{"<from>": MigrationPlan}` con los planes que trae el paquete (`migrations/<from>-to-<version>.json`, `esquema/manifest.ts:95-100`). Sin esta columna, `:choose-template` no puede aplicar `MigrationPlan` (`03 §3.1`) sin leer del sistema de archivos en tiempo de ejecución — que es precisamente el acoplamiento que ADR-004/ADR-008 eliminan. Es un cambio de contrato (ADR-1R-B-02).
+- **`version_major/minor/patch` pasan de `SMALLINT` a `INTEGER`.** `Semver` (`esquema/common.ts` `Semver`) no acota el número; `SMALLINT` (máx. 32767) es un límite artificial que produciría un fallo de inserción en vez de un error de contrato.
+- **`migration_plans JSONB`**: mapa `{"<from>": MigrationPlan}` con los planes que trae el paquete (`migrations/<from>-to-<version>.json`, `esquema/manifest.ts` `MigrationPlan`). Sin esta columna, `:choose-template` no puede aplicar `MigrationPlan` (`03 §3.1`) sin leer del sistema de archivos en tiempo de ejecución — que es precisamente el acoplamiento que ADR-004/ADR-008 eliminan. Es un cambio de contrato (ADR-1R-B-02).
 - **`published_by`** para auditoría del alta (quién registró la versión), `ON DELETE SET NULL` por el motivo de §5.3.
 - **`ON DELETE RESTRICT` hacia `tpl_template`**: una plantilla con versiones no se borra por accidente.
 
@@ -150,8 +150,8 @@ Cambios de la ronda 1R:
 - **`ON DELETE CASCADE` hacia `invitation`** (ADR-1R-B-04, objeción **B-01**, severidad ALTA). Verificado en código real: `InvitationRepository.kt:42-43` declara `@Query(value = "DELETE FROM invitation WHERE id = :id", nativeQuery = true) fun hardDeleteById(...)` y se invoca desde `InvitationAdminService.kt:382` y `AdminUsersService.kt:426`. Es decir, **el borrado físico de una invitación existe hoy y se ejecuta desde la administración**. Con el DDL del borrador (sin cláusula `ON DELETE`, es decir `NO ACTION`), la primera invitación con documento `templates2` que un administrador intentara borrar habría fallado con violación de clave foránea, rompiendo una función existente del producto. `V9__add_cascade_delete_to_invitation_relations.sql` demuestra que la convención del proyecto para cualquier tabla hija de `invitation` es exactamente `ON DELETE CASCADE`; `templates2` la sigue.
 - **`ux_tpl_asset_invitation_sha` / `ux_tpl_asset_version_sha`**: índices únicos parciales por `sha256` dentro del dueño. Son la clave de idempotencia real de la subida de assets (§10.1): subir dos veces el mismo archivo devuelve el mismo `assetId` en vez de duplicar el objeto en S3 y la fila.
 - **`bucket`** explícito: `S3Buckets.kt:155-157` declara dos buckets (`EDITOR`, `ASSETS`); guardar solo la clave dejaría la fila ambigua si mañana el módulo usa el otro. `uq_tpl_asset_key` sobre `(bucket, s3_key)` impide que dos filas reclamen el mismo objeto.
-- **`bytes BIGINT`** (era `INTEGER`) y `CHECK` contra el mismo tope que `AssetEntry.bytes` de `esquema/manifest.ts:49` (15 728 640).
-- **`width`/`height`** nulos: `AssetIndex` de `esquema/composed.ts:23-25` los declara opcionales; sin columna no habría de dónde sacarlos.
+- **`bytes BIGINT`** (era `INTEGER`) y `CHECK` contra el mismo tope que `AssetEntry.bytes` de `esquema/manifest.ts` `AssetEntry` (15 728 640).
+- **`width`/`height`** nulos: `AssetIndex` de `esquema/composed.ts` `AssetIndex` los declara opcionales; sin columna no habría de dónde sacarlos.
 - **`created_by`**: quién subió el asset, para la traza de borrado GDPR de §5.3.
 
 ### V32 — `tpl_document`
@@ -181,13 +181,18 @@ CREATE INDEX ix_tpl_document_template_version ON tpl_document (template_version_
 
 `public_token` es `"pub_" + ULID` = 4 + 26 = **30 caracteres**, de ahí `VARCHAR(30)` (el borrador decía 29, que es la longitud de `assetId`, `"as_" + ULID`; corregido y ahora blindado con `CHECK`). Entropía: ULID lleva 48 bits de tiempo + **80 bits aleatorios**; la parte imprevisible es de 80 bits, no de 130 — la afirmación de "≈130 bits de entropía" de `03 §7` (heredada de `09 §S-06`) es incorrecta y se corrige en `03 §7`. 80 bits siguen siendo suficientes contra enumeración por fuerza bruta, pero el número correcto importa para la decisión de límite de tasa.
 
-Una fila por invitación (creada perezosamente en el primer acceso autenticado vía `INSERT … ON CONFLICT (invitation_id) DO NOTHING` seguido de un `SELECT`, mata la carrera de `ReentrantLock` por JVM de H-44: la exclusión la da el índice único, no un lock en memoria). En ese mismo `INSERT` se genera `public_token` (servidor, ULID) — **estable de por vida de la invitación** salvo rotación explícita (`03 §3.10`), independiente de cuántas veces se publique o se cambie de plantilla.
+Una fila por invitación. **Solo dos caminos la crean** (decisión X-07, enmienda ADR-013):
+
+1. `POST …/document:choose-template` (`03 §3.2`), el único camino de la API. `GET …/document` **no** la crea: responde `404 TPL_DOCUMENT_NOT_STARTED` (`03 §3.3`). Crear en el `GET` obligaría al servidor a elegir una plantilla por defecto — presentación decidida en el backend, contra **P3** — y reintroduciría la ambigüedad de orden de H-39 que ADR-013 existe para matar.
+2. La transacción de corte de la migración (`05 §7.1`), fuera de la API.
+
+El `INSERT` de `:choose-template` es `INSERT … ON CONFLICT (invitation_id) DO NOTHING` seguido de un `SELECT` (mata la carrera de `ReentrantLock` por JVM de H-44: la exclusión la da el índice único, no un lock en memoria); el de la migración es un `DO UPDATE` **condicionado** que nunca pisa una edición del cliente (`05 §7.1`). En el `INSERT` se genera `public_token` (servidor, ULID) — **estable de por vida de la invitación** salvo rotación explícita (`03 §3.10`), independiente de cuántas veces se publique o se cambie de plantilla.
 
 `revision` es el contador de control optimista de ADR-014; cada `OperationBatch` aplicado hace
 `UPDATE tpl_document SET doc = ?, doc_bytes = ?, revision = revision + 1, updated_at = now(), updated_by = ? WHERE id = ? AND revision = ?`
 — 0 filas afectadas ⇒ `409 TPL_REVISION_CONFLICT` (`03 §5`).
 
-**`doc_bytes` y su `CHECK` de 1 MiB** son una corrección de la ronda 1R (objeción **B-05**, severidad ALTA). Motivo verificado: `validateValueAgainstSpec` (`esquema/invariants.ts:93-134`) **no tiene rama para `richText`**, así que `RichTextSpec.constraints.maxLength` (`esquema/blocks.ts:148`, tope 8000) **nunca se comprueba**; y el esquema puro de `RichDoc` (`esquema/blocks.ts:17-18`) permite 40 párrafos × 50 spans × 2000 caracteres ≈ 4·10⁶ caracteres en **un solo valor**. Sin un tope de documento, un cliente autenticado puede hacer crecer su `doc` sin cota, lote legítimo tras lote legítimo (cada uno por debajo del límite de body de 768 KiB), hasta degradar toda la tabla por TOAST. El tope se comprueba en la aplicación **antes** del `UPDATE` (`TPL_DOCUMENT_TOO_LARGE`, `03 §5`) y el `CHECK` sobre `doc_bytes` es la red de seguridad de la base. No se usa `CHECK (octet_length(doc::text) <= …)` porque la conversión `jsonb→text` por E/S no es aceptada como expresión inmutable en todas las versiones de PostgreSQL y rompería la migración: se guarda el tamaño calculado por la aplicación en una columna, que sí es comprobable.
+**`doc_bytes` y su `CHECK` de 1 MiB** son una corrección de la ronda 1R (objeción **B-05**, severidad ALTA). Motivo verificado en su momento: `validateValueAgainstSpec` (`esquema/invariants.ts`) no tenía rama para `richText`, así que `RichTextSpec.constraints.maxLength` (`esquema/blocks.ts` `RichTextSpec`, tope 8000) nunca se comprobaba. **`1R-dominio` cerró esa causa raíz durante la misma ronda** (`case "richText"` con `richTextLength`, I-16); el tope de documento **se mantiene igual** como defensa en profundidad, porque el esquema puro de `RichDoc` (`esquema/blocks.ts` `RichParagraph`/`RichDoc`) permite 40 párrafos × 50 spans × 2000 caracteres ≈ 4·10⁶ caracteres en **un solo valor**. Sin un tope de documento, un cliente autenticado puede hacer crecer su `doc` sin cota, lote legítimo tras lote legítimo (cada uno por debajo del límite de body de 768 KiB), hasta degradar toda la tabla por TOAST. El tope se comprueba en la aplicación **antes** del `UPDATE` (`TPL_DOCUMENT_TOO_LARGE`, `03 §5`) y el `CHECK` sobre `doc_bytes` es la red de seguridad de la base. No se usa `CHECK (octet_length(doc::text) <= …)` porque la conversión `jsonb→text` por E/S no es aceptada como expresión inmutable en todas las versiones de PostgreSQL y rompería la migración: se guarda el tamaño calculado por la aplicación en una columna, que sí es comprobable.
 
 ### V33 — `tpl_document_snapshot`
 
@@ -230,12 +235,12 @@ CREATE TABLE tpl_release (
     composed               JSONB       NOT NULL,
     report                 JSONB       NOT NULL,
     business_snapshot      JSONB       NOT NULL,
-    content_hash           CHAR(64)    NOT NULL,
+    content_hash           VARCHAR(71) NOT NULL,
     is_active              BOOLEAN     NOT NULL DEFAULT true,
     published_by           BIGINT      NULL REFERENCES customer(id) ON DELETE SET NULL,
     published_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
     unpublished_at         TIMESTAMPTZ NULL,
-    CONSTRAINT ck_tpl_release_hash     CHECK (content_hash ~ '^[0-9a-f]{64}$'),
+    CONSTRAINT ck_tpl_release_hash     CHECK (content_hash ~ '^sha256:[0-9a-f]{64}$'),
     CONSTRAINT ck_tpl_release_revision CHECK (document_revision >= 0),
     CONSTRAINT ck_tpl_release_composed CHECK (jsonb_typeof(composed) = 'object'),
     CONSTRAINT ck_tpl_release_unpublished CHECK (is_active = false OR unpublished_at IS NULL)
@@ -258,13 +263,14 @@ CREATE TABLE tpl_template_registration (
     id                    BIGSERIAL   PRIMARY KEY,
     template_slug         VARCHAR(40) NOT NULL,
     version               VARCHAR(20) NOT NULL,
-    requested_hash        CHAR(64)    NOT NULL,
+    requested_hash        VARCHAR(71) NOT NULL,
     result                VARCHAR(20) NOT NULL,
     error_code            VARCHAR(60) NULL,
     detail                JSONB       NULL,
     template_version_id   BIGINT      NULL REFERENCES tpl_template_version(id) ON DELETE SET NULL,
     requested_by          BIGINT      NULL REFERENCES customer(id) ON DELETE SET NULL,
     created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT ck_tpl_template_registration_hash   CHECK (requested_hash ~ '^sha256:[0-9a-f]{64}$'),
     CONSTRAINT ck_tpl_template_registration_result CHECK (result IN ('created','noop_same_hash','rejected')),
     CONSTRAINT ck_tpl_template_registration_error  CHECK (
         (result = 'rejected' AND error_code IS NOT NULL) OR (result <> 'rejected' AND error_code IS NULL))
@@ -272,7 +278,7 @@ CREATE TABLE tpl_template_registration (
 CREATE INDEX ix_tpl_template_registration_slug ON tpl_template_registration (template_slug, created_at DESC);
 ```
 
-Auditoría append-only de **cada intento** de registrar una plantilla, éxito o fallo — mata H-16/H-17 en su forma silenciosa: "la app arrancó sin plantillas" o "se creó sin visual" deja de ser posible sin una fila que lo explique. `detail` guarda la lista de violaciones (`Violation[]` de `esquema/invariants.ts:8`) o los elementos del diff estructural rechazado, para que el autor de la plantilla sepa exactamente qué corregir sin releer logs.
+Auditoría append-only de **cada intento** de registrar una plantilla, éxito o fallo — mata H-16/H-17 en su forma silenciosa: "la app arrancó sin plantillas" o "se creó sin visual" deja de ser posible sin una fila que lo explique. `detail` guarda la lista de violaciones (`Violation[]` de `esquema/invariants.ts` `Violation`) o los elementos del diff estructural rechazado, para que el autor de la plantilla sepa exactamente qué corregir sin releer logs.
 
 **Punto crítico de implementación (objeción B-04, severidad MEDIA):** una fila de auditoría de un intento **rechazado** solo sobrevive si se escribe **fuera** de la transacción que se revierte. Con `@Transactional` por defecto, `INSERT tpl_template_registration(result='rejected') ` + lanzar la excepción = la fila desaparece con el rollback, y la auditoría no audita nada. Fase 2 debe escribir esa fila con `@Transactional(propagation = Propagation.REQUIRES_NEW)` en `TemplateRegistrationAuditor` (§7), commit propio, antes de propagar la excepción al controlador. Está enumerado como caso de prueba en §11 (`registrationRejected_auditRowSurvivesRollback`).
 
@@ -336,14 +342,14 @@ fun register(pkg: TemplatePackageInput, requesterId: Long): RegistrationResult
 Orden exacto de efectos (todo lo numerado 3-7 está dentro de **una** transacción; 1, 2 y 8 no):
 
 1. **Fuera de transacción.** Se leen las partes del multipart en memoria (`template.json`, `theme.json`, `defaults.json`, `migrations/*.json`, `assets/*`), con el límite de tamaño de `03 §8`. Se valida cada archivo JSON contra su **JSON Schema emitido** (§9): `template-manifest`, `theme`, `defaults`, `migration-plan`. Cualquier fallo → auditoría `rejected` (§2 V35, transacción propia) + `422 TPL_MANIFEST_INVALID` con la lista de errores del validador. **Nada más se ejecuta.**
-2. **Fuera de transacción.** Se ejecutan las invariantes de paquete `validateManifest(m, theme, defaults)` (`esquema/invariants.ts:25-61` ⇄ `Invariants.kt`). Violaciones → auditoría `rejected` + `422 TPL_MANIFEST_INVALID` con `Violation[]` en `detail`. Se verifica además que **cada `AssetEntry.sha256`/`bytes`/`contentType` del manifiesto coincida con el archivo realmente subido**; si no, `422 TPL_PACKAGE_ASSET_MISMATCH` (código nuevo, ronda 1R — sin esta comprobación el `packageHash` de ADR-008 puede calcularse sobre un manifiesto que no describe los bytes que se van a subir).
+2. **Fuera de transacción.** Se ejecutan las invariantes de paquete `validateManifest(m, theme, defaults)` (`esquema/invariants.ts` `validateManifest` ⇄ `Invariants.kt`). Violaciones → auditoría `rejected` + `422 TPL_MANIFEST_INVALID` con `Violation[]` en `detail`. Se verifica además que **cada `AssetEntry.sha256`/`bytes`/`contentType` del manifiesto coincida con el archivo realmente subido**; si no, `422 TPL_PACKAGE_ASSET_MISMATCH` (código nuevo, ronda 1R — sin esta comprobación el `packageHash` de ADR-008 puede calcularse sobre un manifiesto que no describe los bytes que se van a subir).
 3. **Transacción abierta.** `SELECT id FROM tpl_template WHERE slug = ? FOR UPDATE` tras `INSERT INTO tpl_template (slug) VALUES (?) ON CONFLICT (slug) DO NOTHING`. El `FOR UPDATE` sobre la fila del slug serializa dos registros concurrentes del mismo slug (evita que dos MASTER registren `1.1.0` y `1.2.0` a la vez y ambos calculen el diff contra `1.0.0`).
 4. **Idempotencia.** `SELECT id, version FROM tpl_template_version WHERE template_id = ? AND package_hash = ?`:
    - Existe → auditoría `noop_same_hash` (misma transacción, aquí sí, porque no hay rollback) y `200` con la versión existente. **Fin.** Idempotencia real, no solo de código de estado.
    - No existe, pero `(template_id, version)` sí existe con otro hash → auditoría `rejected('TPL_VERSION_HASH_MISMATCH')` (transacción propia, la principal se revierte) y `409`. Mata H-09: una versión publicada nunca se pisa.
 5. **Diff estructural (ADR-028).** Si el slug ya tiene alguna versión `published`, se carga la de mayor `(major, minor, patch)` y se calcula `structuralDiff(anterior, nueva)`: `blockId`s presentes antes y ausentes ahora, `sectionKey`s removidos, `type` de un `blockId` que cambió, `min`/`max` de un grupo que se redujo, `Ident` de paleta/fontSet eliminado.
    - Diff no vacío y bump **no** mayor → auditoría `rejected('TPL_MANIFEST_BREAKING_CHANGE_NOT_MAJOR')` + `422` con la lista.
-   - Diff no vacío y bump mayor → se exige un `MigrationPlan` en `migration_plans` cuyas `ops` cubran **cada** elemento del diff (`removeBlock`/`renameBlock`/`changeBlockType`/`removeSection`/`renameSection`/`shrinkGroup`/`renamePalette`/`renameFontSet`, `esquema/manifest.ts:81-94`); si falta cobertura de algún elemento → mismo código, mismo `422`.
+   - Diff no vacío y bump mayor → se exige un `MigrationPlan` en `migration_plans` cuyas `ops` cubran **cada** elemento del diff (`removeBlock`/`renameBlock`/`changeBlockType`/`removeSection`/`renameSection`/`shrinkGroup`/`renamePalette`/`renameFontSet`, `esquema/manifest.ts` `MigrationOp`); si falta cobertura de algún elemento → mismo código, mismo `422`.
    - Diff vacío → sigue sin exigir plan.
 6. **Assets del paquete.** Para cada `AssetEntry`: `s3_key = "templates2/template/<slug>/<version>/<sha256>.<ext>"` (determinista, §10.1); `SELECT` en `tpl_asset` por `(template_version_id IS NULL AND sha256 = ?)` **no** aplica todavía porque la versión aún no existe, así que se acumulan en memoria y se insertan en el paso 7. **La subida a S3 ocurre ANTES de abrir la transacción**, en el paso 2b (ver §10.2): S3 no es transaccional y el orden correcto es "primero el objeto, después la fila", nunca al revés.
 7. `INSERT INTO tpl_template_version (...) RETURNING id` + `INSERT INTO tpl_asset (...)` por cada asset + `INSERT tpl_template_registration(result='created', template_version_id=…)`. **Commit.**
@@ -409,28 +415,28 @@ Raíz: `src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/` (ADR-0
 
 | Clase | Qué hace |
 |---|---|
-| `TemplateSlug.kt` | `@JvmInline value class` con el patrón de `esquema/common.ts:16`; rechaza en el constructor. |
-| `SemverVersion.kt` | `data class(major,minor,patch)` comparable; `parse`/`toString`; sin prerelease (contrato de `common.ts:19`). |
-| `BlockId.kt` | value class con `BLOCK_ID_PATTERN` (`common.ts:8`). |
-| `SectionKey.kt` | value class con `SECTION_KEY_PATTERN` (`common.ts:12`). |
+| `TemplateSlug.kt` | `@JvmInline value class` con el patrón de `esquema/common.ts` `TemplateSlug`; rechaza en el constructor. |
+| `SemverVersion.kt` | `data class(major,minor,patch)` comparable; `parse`/`toString`; sin prerelease (contrato de `common.ts` `Semver`). |
+| `BlockId.kt` | value class con `BLOCK_ID_PATTERN` (`common.ts` `BlockId`). |
+| `SectionKey.kt` | value class con `SECTION_KEY_PATTERN` (`common.ts` `SectionKey`). |
 | `AssetId.kt` | value class `as_<ULID>`; `AssetId.of(ulid)`. |
 | `PublicToken.kt` | value class `pub_<ULID>`. |
 | `ItemId.kt` | value class ULID de ítem de grupo. |
 | `Revision.kt` | value class `Long` no negativo. |
-| `InvitationDocument.kt` | espejo Kotlin de `esquema/document.ts:16-26` (`schemaVersion`, `template`, `theme`, `structure`, `content`, `attic`, `meta`). |
+| `InvitationDocument.kt` | espejo Kotlin de `esquema/document.ts` `InvitationDocument` (`schemaVersion`, `template`, `theme`, `structure`, `content`, `attic`, `meta`). |
 | `BlockValue.kt` | jerarquía `sealed` de los 14 tipos de valor de `esquema/blocks.ts`. |
-| `BlockSpec.kt` | jerarquía `sealed` de las 14 especificaciones + `SpecBase` (`blocks.ts:133-196`). |
-| `TemplateManifest.kt` | espejo de `esquema/manifest.ts:56-71`. |
-| `ThemeSpec.kt` | espejo de `manifest.ts:38-43`. |
-| `DefaultsFile.kt` | espejo de `manifest.ts:74-78`. |
-| `MigrationPlan.kt` | espejo de `manifest.ts:81-100` (`MigrationOp` sealed). |
+| `BlockSpec.kt` | jerarquía `sealed` de las 14 especificaciones + `SpecBase` (`blocks.ts` `SpecBase`/`BlockSpec`). |
+| `TemplateManifest.kt` | espejo de `esquema/manifest.ts` `TemplateManifest`. |
+| `ThemeSpec.kt` | espejo de `manifest.ts` `ThemeSpec`. |
+| `DefaultsFile.kt` | espejo de `manifest.ts` `DefaultsFile`. |
+| `MigrationPlan.kt` | espejo de `manifest.ts` `MigrationPlan`/`MigrationOp` (`MigrationOp` sealed). |
 | `TemplatePackage.kt` | agregado inmutable `manifest + theme + defaults + planes` que consume `compose`. |
-| `BusinessSnapshot.kt` | espejo de `esquema/composed.ts:9-20`. |
-| `ComposedDocument.kt` | espejo de `composed.ts:79-85`. |
-| `CompositionReport.kt` | espejo de `composed.ts:87-94` (`missingRequired`, `stillDefault`, `orphanContent`, `orphanSections`, `invalidValues`, `themeFallback`). |
-| `Operation.kt` | `sealed interface` con las 10 operaciones de `esquema/operations.ts:10-22`. |
+| `BusinessSnapshot.kt` | espejo de `esquema/composed.ts` `BusinessSnapshot`. |
+| `ComposedDocument.kt` | espejo de `composed.ts` `ComposedDocument`. |
+| `CompositionReport.kt` | espejo de `composed.ts` `CompositionReport` (`missingRequired`, `stillDefault`, `orphanContent`, `orphanSections`, `invalidValues`, `themeFallback`). |
+| `Operation.kt` | `sealed interface` con las **11** operaciones de `esquema/operations.ts` `Operation` (incluida `clearItemBlock`, añadida en X-05). |
 | `OperationBatch.kt` | `data class(baseRevision, clientBatchId, operations)`. |
-| `EditProposal.kt` | espejo de `operations.ts:32-36` (lo consume fase de IA, aquí solo el tipo). |
+| `EditProposal.kt` | espejo de `operations.ts` `EditProposal` (lo consume fase de IA, aquí solo el tipo). |
 | `StructuralDiff.kt` | resultado de `structuralDiff` (§4 paso 5): elementos eliminados/renombrados/estrechados. |
 | `RegistrationResult.kt` | `sealed`: `Created`, `NoopSameHash`, `Rejected(code, detail)`. |
 | `Templates2Exception.kt` | `sealed class` raíz de todas las excepciones del módulo, con `code: TplErrorCode` y `status: HttpStatus`. |
@@ -441,13 +447,13 @@ Raíz: `src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/` (ADR-0
 | Clase | Qué hace |
 |---|---|
 | `Templates2Json.kt` | `object` con **el único** `ObjectMapper` del módulo (§8.1), `canonical(node): String` (claves ordenadas, sin espacios) y `sha256Canonical(node): String`. |
-| `JsonSchemaRegistry.kt` | `@Component` que carga los 10 `*.schema.json` del classpath una sola vez (`JsonSchemaFactory` draft 2020-12) y los cachea por nombre. |
+| `JsonSchemaRegistry.kt` | `@Component` que carga **`templates2.schema.json`** (el bundle con `$defs`, ADR-1R-D-08) más los 10 archivos-puntero del classpath una sola vez y los cachea por nombre. Registra el bundle en un `SchemaLoader`/`JsonSchemaFactory` (draft 2020-12) por su `$id` absoluto para que el `$ref` de cada puntero (`…/templates2.schema.json#/$defs/<Id>`) resuelva **sin** salir a la red — `com.networknt:json-schema-validator` intentaría descargar el `$id` si no se le preinstala el esquema. |
 | `JsonSchemaValidatorService.kt` | valida un `JsonNode` contra un esquema por nombre; traduce `ValidationMessage` a `Violation`. |
 | `Invariants.kt` | puerto Kotlin de `esquema/invariants.ts`: `validateManifest`, `validateDocument`, `validateValueAgainstSpec`. |
-| `InvariantCode.kt` | `enum` con `I-01`…`I-23` exactamente como `invariants.ts:9-17`. |
+| `InvariantCode.kt` | `enum` con `I-01`…`I-30` exactamente como `invariants.ts` `InvariantCode` (23 → 29 por ADR-1R-D-05, +`I-30_TEXT_MULTILINE_NOT_ALLOWED` por X-06; `I-31` está **reservado** para ADR-1R-F-06 y no se declara hasta que se acepte). |
 | `Violation.kt` | `data class(code, path, detail?)`. |
 | `CanonicalJson.kt` | serialización canónica determinista (ordenación lexicográfica recursiva de claves de objeto; los arrays conservan orden). |
-| `PackageHasher.kt` | `packageHash = sha256(canonical(manifest) ‖ sha256 de cada asset ordenado por ruta)` (ADR-008). |
+| `PackageHasher.kt` | `packageHash` **exactamente** como lo define `01 §2.1` (`buildPackageHash`): una línea `"<ruta>\t<sha256hex del contenido>"` por **cada** archivo del paquete (manifiesto, `theme.json`, `defaults.json`, cada plan de migración y cada asset), ordenadas por ruta byte a byte sobre UTF-8, unidas con `\n` sin `\n` final; los `.json` se hashean sobre `canonicalJson(JSON.parse(archivo))`, los assets sobre sus bytes literales. Devuelve `"sha256:" + 64 hex`. La fórmula anterior (`canonical(manifest) ‖ sha256 de assets`) queda derogada: colisionaba cuando solo cambiaban `defaults.json`/`theme.json` y el registro idempotente por `package_hash` (ADR-008) descartaba el segundo paquete en silencio (ADR-1R-D-03, X-01). |
 
 ### 7.3 `templates2.composition` — funciones puras
 
@@ -462,7 +468,7 @@ Raíz: `src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/` (ADR-0
 | `AssetUrlResolver.kt` | `AssetId → URL pública`, puro: recibe el mapa `assetId → (bucket, key)` ya cargado; construye la URL con la plantilla de `§10.4`. |
 | `OperationReducer.kt` | **el reductor único**: `(doc, ops, manifest) → (doc', idMap, violations)`; lo comparten editor, autoguardado e IA (ADR-014). |
 | `DocumentNormalizer.kt` | normalización contra el manifiesto vigente (mueve a `attic`); lo usan `:choose-template` y `restore` (ADR-029). |
-| `ContentHasher.kt` | `contentHash = sha256(canonical(composed))` (R9). |
+| `ContentHasher.kt` | `contentHash = "sha256:" + hex(SHA-256(utf8(canonicalJson({composed, report}))))` — sobre la salida completa de `compose`, **con el informe dentro**, tal como fija `01 §5.5` (ADR-1R-D-02, X-02). Sin el `report` un cambio en `stillDefault` no invalidaría el `ETag` del render público (`03 §7`). |
 
 ### 7.4 `templates2.persistence` — entidades, repositorios y almacenes
 
@@ -472,14 +478,14 @@ Raíz: `src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/` (ADR-0
 | `TplTemplateRepository.kt` | `JpaRepository`; `findBySlug`, `insertIgnoreConflict` (`@Query` nativo con `ON CONFLICT DO NOTHING`), `lockBySlug` (`FOR UPDATE`). |
 | `TplTemplateVersionRepository.kt` | `findByTemplateIdAndVersion`, `findByTemplateIdAndPackageHash`, `findLatestPublished`, `searchCatalog(eventKind, planTier)` (`@>` sobre `event_kinds`). |
 | `TplAssetRepository.kt` | `findByPublicId`, `existsOwned(publicId, invitationId, templateVersionId)`, `findByInvitationIdAndSha256`, `countByInvitationId`. |
-| `TplDocumentRepository.kt` | `findByInvitationId`, `insertIfAbsent` (nativo, `ON CONFLICT (invitation_id) DO NOTHING`), `lockByInvitationId` (`FOR UPDATE`), `applyRevision(id, doc, bytes, expectedRevision, userId)` (nativo, devuelve filas afectadas), `findByPublicToken`, `rotatePublicToken`. |
+| `TplDocumentRepository.kt` | `findByInvitationId`, `insertIfAbsent` (nativo, `ON CONFLICT (invitation_id) DO NOTHING`; lo llama **solo** `:choose-template`), `lockByInvitationId` (`FOR UPDATE`), `applyRevision(id, doc, bytes, expectedRevision, userId)` (nativo, devuelve filas afectadas), `findByPublicToken`, `rotatePublicToken`. |
 | `TplDocumentSnapshotRepository.kt` | `insertSnapshot`, `findByDocumentIdAndRevision`, `findByDocumentIdAndClientBatchId`, `pageHistory`. |
 | `TplReleaseRepository.kt` | `findActiveByInvitationId`, `findActiveByPublicToken` (join con `tpl_document`), `deactivateActive`, `insertRelease`, `pageHistory`. |
 | `TplTemplateRegistrationRepository.kt` | `insertAudit` (append-only). |
 | `TplAssetGcRepository.kt` | `pollPending(limit)`, `markDeleted`, `markFailed`. |
 | `Templates2FlagRepository.kt` | **único** acceso a `invitation.uses_templates2` (`@Query` nativo de lectura y de `UPDATE`); nunca vía `InvitationEntity`. |
 | `BusinessSnapshotReader.kt` | construye `BusinessSnapshot` leyendo `invitation` + plan con una consulta de proyección de solo lectura (no carga el grafo de `InvitationEntity`). |
-| `DocumentStore.kt` | operaciones transaccionales sobre el documento: crear perezosamente, aplicar lote, restaurar, cambiar plantilla. |
+| `DocumentStore.kt` | operaciones transaccionales sobre el documento: crear (**solo** desde `:choose-template`, X-07), aplicar lote, restaurar, cambiar plantilla. |
 | `ReleaseStore.kt` | publicar / despublicar / historial, con el bloqueo de §11.2. |
 | `AssetStore.kt` | alta y baja de assets, cuota, idempotencia por `sha256`. |
 | `Templates2S3KeyService.kt` | construye las claves deterministas de §10.1. **No** reutiliza `S3KeyService.generateInvitationAssetKey` (§14, objeción B-09). |
@@ -603,14 +609,14 @@ sourceSets.main { resources.srcDir("frontend/packages/schema/json-schema") }
 dependencies { implementation("com.networknt:json-schema-validator:1.5.4") }
 ```
 
-En tiempo de ejecución, `JsonSchemaRegistry` carga `classpath:/<nombre>.schema.json` para los 10 nombres de `emit-json-schema.ts:15-19`: `template-manifest`, `theme`, `defaults`, `migration-plan`, `invitation-document`, `operation-batch`, `edit-proposal`, `composed-document`, `business-snapshot`, `composition-report`.
+En tiempo de ejecución, `JsonSchemaRegistry` carga **once** archivos: el bundle `classpath:/templates2.schema.json` y los 10 punteros `classpath:/<nombre>.schema.json` (`emit-json-schema.ts`, constantes `COMPARTIDOS`/`RAICES`): `template-manifest`, `theme`, `defaults`, `migration-plan`, `invitation-document`, `operation-batch`, `edit-proposal`, `composed-document`, `business-snapshot`, `composition-report`. Cada puntero es un archivo de tres claves (`$schema`, `$id`, `$ref`) que apunta a `…/templates2.schema.json#/$defs/<Id>`; las 15 definiciones compartidas viven **solo** en el bundle (decisión X-11: `02` estaba desalineado con ADR-1R-D-08, que ya rige en `01 §8` y `04`). El bundle debe precargarse en la factoría **antes** de resolver cualquier puntero.
 
 ### 9.3 Mecanismo que rompe el build si el backend y el frontend divergen
 
 Tres cierres independientes, todos en `check`:
 
 1. **Tarea Gradle `verifyJsonSchemaEmitted`** (tipo `Exec` + comparación): ejecuta `pnpm --filter @invitaciones/schema schema:emit "$buildDir/schema-check"` y falla si `diff -r frontend/packages/schema/json-schema "$buildDir/schema-check"` no está vacío. Es decir: **si alguien editó a mano un `.schema.json`, o cambió un `.ts` sin regenerar, el build de Kotlin falla.** Se engancha con `tasks.named("check") { dependsOn("verifyJsonSchemaEmitted") }`. Si `pnpm` no está disponible (entorno sin Node), la tarea se marca `onlyIf { project.hasProperty("withNode") || System.getenv("CI") != null }` — en CI siempre corre, en local es opcional.
-2. **Prueba Kotlin `JsonSchemaPresenceTest`**: afirma que los 10 nombres esperados existen en el classpath, que cada uno declara `"$schema": "https://json-schema.org/draft/2020-12/schema"` y que su `$id` coincide con `https://invitaciones.evolutiondev.mx/schema/<nombre>.schema.json` (`emit-json-schema.ts:23`). Falla si alguien añade un esquema al TS y no lo publica, o al revés.
+2. **Prueba Kotlin `JsonSchemaPresenceTest`**: afirma que el bundle `templates2.schema.json` y los 10 punteros existen en el classpath, que cada uno declara `"$schema": "https://json-schema.org/draft/2020-12/schema"`, que su `$id` es `https://invitaciones.evolutiondev.mx/schema/<nombre>.schema.json` y que **el `$ref` de cada puntero resuelve contra el bundle** (validar un documento de ejemplo por cada nombre; si el `$ref` no resolviera, `json-schema-validator` fallaría o intentaría una descarga). Falla si alguien añade un esquema al TS y no lo publica, o al revés. Que esta biblioteca acepte el bundle con `$defs` está **inferido** de que ajv lo acepta: sin JDK en la sesión de fase 1 no se pudo ejecutar (ADR-1R-D-08).
 3. **Prueba Kotlin `InvariantParityTest`**: recorre `frontend/packages/schema/golden/invariants/*.json` (la tabla compartida de `contratos.md` §6) y exige que `Invariants.kt` produzca **el mismo conjunto de códigos** que el caso declara. Es lo que impide que la implementación Kotlin de las 23 invariantes se separe de la de TypeScript, que es el riesgo real de tenerlas duplicadas (ADR-005).
 
 ## 10. Assets y S3: orden exacto de efectos y compensación
@@ -686,9 +692,9 @@ Nivel de aislamiento: **`READ COMMITTED`** (el de PostgreSQL por defecto; no se 
 
 `SELECT … FROM tpl_template WHERE slug = ? FOR UPDATE` (§4 paso 3) serializa por slug; el `UNIQUE (template_id, version)` y el `UNIQUE (template_id, package_hash)` son la red final. Dos registros idénticos simultáneos: uno crea, el otro obtiene violación de unicidad, la captura y responde `200 noop_same_hash` tras releer la fila.
 
-### 11.5 Creación perezosa del documento
+### 11.5 Creación del documento (nunca en un `GET`)
 
-`INSERT … ON CONFLICT (invitation_id) DO NOTHING` + `SELECT`. Nunca un `ReentrantLock` en memoria (H-44: el lock actual es por JVM y no sobrevive a escalar horizontalmente).
+`:choose-template` hace `INSERT … ON CONFLICT (invitation_id) DO NOTHING` + `SELECT`. Nunca un `ReentrantLock` en memoria (H-44: el lock actual es por JVM y no sobrevive a escalar horizontalmente). Ninguna ruta de lectura crea la fila (X-07): `GET …/document` sobre una invitación sin documento es `404 TPL_DOCUMENT_NOT_STARTED`. El otro creador posible es la migración (`05 §7.1`), que corre fuera de la API sobre invitaciones con `uses_templates2 = false`; los dos caminos son disjuntos por construcción (§6) y, si se cruzaran, el `DO UPDATE` condicionado de la migración se abstiene en vez de sobrescribir.
 
 ## 12. Evidencia de código real leída para esta revisión
 
@@ -730,7 +736,7 @@ Objeciones encontradas atacando este documento y su corrección **ya aplicada ar
 | B-02 | **Alta** | Borrar una invitación dejaba los objetos de S3 huérfanos **y sin rastro de su clave**, impidiendo el derecho al olvido | la cascada de B-01 borra `tpl_asset` sin pasar por código de `templates2` | `tpl_asset_gc` + trigger `trg_tpl_asset_gc` (V37, migración nueva) + `AssetGcJob` (§10.3) | cerrada |
 | B-03 | **Alta** | La idempotencia de `OperationBatch` por `clientBatchId` era nominal: tras un timeout de red el cliente reenvía con la **misma** `baseRevision` y el lote se aplica dos veces | `03 §3.3` del borrador (razonamiento "el segundo intento falla su chequeo de `baseRevision`") | índice `ux_tpl_document_snapshot_batch` (§2 V33) + respuesta `200` con la revisión ya producida (§10.5, `03 §3.3`) | cerrada |
 | B-04 | Media | La auditoría de un registro **rechazado** se perdía con el rollback de la propia transacción que la escribía | `02 §4` del borrador (pasos 1/2/4 insertan y luego lanzan) | `TemplateRegistrationAuditor` con `Propagation.REQUIRES_NEW` (§2 V35, §7.4) | cerrada |
-| B-05 | **Alta** | `tpl_document.doc` podía crecer sin cota: `validateValueAgainstSpec` no valida `richText` y el esquema permite ~4·10⁶ caracteres por valor | `esquema/invariants.ts:93-134` (sin rama `richText`); `esquema/blocks.ts:17-18` (40×50×2000) | columna `doc_bytes` + `CHECK ≤ 1 MiB` + `TPL_DOCUMENT_TOO_LARGE` (§2 V32, `03 §5`); contradicción con el esquema registrada para dirimir | cerrada (con contradicción abierta) |
+| B-05 | **Alta** | `tpl_document.doc` podía crecer sin cota: `validateValueAgainstSpec` no validaba `richText` y el esquema permite ~4·10⁶ caracteres por valor | `esquema/invariants.ts` `validateValueAgainstSpec`; `esquema/blocks.ts` `RichParagraph`/`RichDoc` (40×50×2000) | columna `doc_bytes` + `CHECK ≤ 1 MiB` + `TPL_DOCUMENT_TOO_LARGE` (§2 V32, `03 §5`). La causa raíz la cerró `1R-dominio` en paralelo (`case "richText"`, I-16); el tope se mantiene como defensa en profundidad | cerrada |
 | B-06 | Media | La consulta de purga de snapshots del borrador no es válida: `NOT IN (SELECT … ORDER BY … LIMIT 200)` sin correlación real | §5 del borrador | consulta reescrita con `max(revision) - 200` y borrado por lotes (§5.1) | cerrada |
 | B-07 | **Alta** | Deshabilitar una invitación (soft delete) no la retiraba del render público: regresión frente al módulo antiguo | `InvitationEntity.kt:15`; `PublicGuestInfoController.kt:65-75` | comprobación obligatoria de disponibilidad en el render público (§5.2, `03 §3.8`/§7) con `TPL_INVITATION_UNAVAILABLE` | cerrada |
 | B-08 | Media | Añadir `uses_templates2 NOT NULL` a `invitation` sin `DEFAULT` habría roto los `INSERT` de Hibernate del módulo antiguo | `application.yml:32` (`validate`), `InvitationEntity.kt:17-173` (no mapea la columna) | `DEFAULT false` obligatorio + acceso exclusivo por `Templates2FlagRepository` con SQL nativo (§2 V36, §7.4) | cerrada |
@@ -739,9 +745,9 @@ Objeciones encontradas atacando este documento y su corrección **ya aplicada ar
 | B-11 | Media | Publicar sin bloquear la fila podía grabar un `document_revision` que no corresponde al `composed` congelado | §11.2 | `SELECT … FOR UPDATE` al abrir la transacción de publicación (§11.2) | cerrada |
 | B-12 | Media | `event_kinds TEXT[]` arriesgaba el arranque de **toda** la aplicación por `ddl-auto: validate` | `application.yml:32`; ausencia total de mapeos de array/JSON en el repositorio | `event_kinds JSONB` + GIN `jsonb_path_ops` (§2 V30, §8.3) | cerrada |
 | B-13 | Baja | `public_token VARCHAR(29)` era incorrecto (30) y no había `CHECK` de formato | aritmética `"pub_" + ULID(26)` | `VARCHAR(30)` + `CHECK` de patrón (§2 V32) | cerrada |
-| B-14 | Baja | Sin `migration_plans` persistidos, `:choose-template` no podía aplicar un `MigrationPlan` sin leer del disco en runtime | `esquema/manifest.ts:95-100`; `03 §3.1` | columna `migration_plans JSONB` (§2 V30) | cerrada |
-| B-15 | Baja | `bytes INTEGER` y ausencia de `bucket`, `width`, `height`, `created_by` en `tpl_asset` | `esquema/composed.ts:23-25`, `S3Buckets.kt:154-157` | columnas añadidas (§2 V31) | cerrada |
+| B-14 | Baja | Sin `migration_plans` persistidos, `:choose-template` no podía aplicar un `MigrationPlan` sin leer del disco en runtime | `esquema/manifest.ts` `MigrationPlan`; `03 §3.1` | columna `migration_plans JSONB` (§2 V30) | cerrada |
+| B-15 | Baja | `bytes INTEGER` y ausencia de `bucket`, `width`, `height`, `created_by` en `tpl_asset` | `esquema/composed.ts` `AssetIndex`, `S3Buckets.kt:154-157` | columnas añadidas (§2 V31) | cerrada |
 
-**Nota de convergencia (verificada al cerrar esta ronda).** Las contradicciones C-01 (`richText` sin validación de longitud), C-03 (`StructureEntry.order`), C-04 (clave de `attic`) y C-05 (`CompositionReport.fallbacks`) que detecté contra `01-dominio-y-esquema.md`/`esquema/*.ts` **fueron resueltas en paralelo por `1R-dominio` durante esta misma ronda**: `esquema/invariants.ts` ya valida la longitud de `richText` contra `spec.constraints.maxLength` (`richTextLength`, caso `"richText"`), `document.ts` usa `AtticKey` (`<slug>@<semver>`) y `composed.ts`/`01 §5` usan `stillDefault`/`invalidValues`. No quedan pendientes de dirimir por este bloque salvo **C-02** (`GET .../document` perezoso según ADR-013 vs. creación exclusiva por `:choose-template`, `03 §3.3`), que es una decisión de contrato de API, no de esquema. Detalle en `handoffs/1R-backend.md` §C.
+**Nota de convergencia (verificada al cerrar esta ronda).** Las contradicciones C-01 (`richText` sin validación de longitud), C-03 (`StructureEntry.order`), C-04 (clave de `attic`) y C-05 (`CompositionReport.fallbacks`) que detecté contra `01-dominio-y-esquema.md`/`esquema/*.ts` **fueron resueltas en paralelo por `1R-dominio` durante esta misma ronda**: `esquema/invariants.ts` ya valida la longitud de `richText` contra `spec.constraints.maxLength` (`richTextLength`, caso `"richText"`), `document.ts` usa `AtticKey` (`<slug>@<semver>`) y `composed.ts`/`01 §5` usan `stillDefault`/`invalidValues`. **C-02 quedó dirimida** (X-07 / ADR-1R-X-03): la creación es exclusiva de `:choose-template`, `GET .../document` responde `404 TPL_DOCUMENT_NOT_STARTED` y la migración es el único otro creador, con un `DO UPDATE` condicionado que nunca pisa una edición del cliente (§2.4, §11.5, `05 §7.1`). Enmienda la cláusula de creación perezosa de ADR-013.
 
 El tope de 1 MiB por documento (objeción B-05) **se mantiene** aunque C-01 esté cerrada: es defensa en profundidad frente a la acumulación de muchos valores válidos, no solo frente a un valor gigante.

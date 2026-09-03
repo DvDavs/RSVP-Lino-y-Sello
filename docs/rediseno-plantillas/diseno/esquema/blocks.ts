@@ -174,7 +174,16 @@ export const TextSpec = z.strictObject({ ...SpecBase, type: z.literal("text"),
   constraints: z.strictObject({
     minLength: z.number().int().min(0).max(2000).default(0),
     maxLength: z.number().int().min(1).max(2000).default(200),
-    pattern: z.string().max(200).optional(),
+    /**
+     * `multiline: false` NO es una pista de interfaz: es una restricción del valor. La comprueba
+     * `validateValueAgainstSpec` (I-30) — la API y la IA escriben sin pasar por el formulario del editor,
+     * exactamente el mismo motivo por el que I-16 se extendió a `richText` (ADR-1R-D-05).
+     * `pattern` (regex por plantilla) se RETIRÓ en X-06: el mismo patrón lo interpretarían `RegExp` de
+     * JavaScript y `java.util.regex` de Kotlin, que difieren (clases Unicode, lookbehind, grupos con nombre),
+     * de modo que TS y Kotlin podrían aceptar y rechazar el MISMO documento — justo lo que P1 prohíbe y la
+     * misma clase de fallo que I-29. Además es superficie de ReDoS evaluada en cada escritura. Para validar
+     * forma están los 13 tipos escalares (`date`, `time`, `link`, `location`, `choice`, `person`…).
+     */
     multiline: z.boolean().default(false),
   }).default({ minLength: 0, maxLength: 200, multiline: false }),
 });
@@ -188,6 +197,12 @@ export const ListTextSpec = z.strictObject({ ...SpecBase, type: z.literal("listT
     maxItemLength: z.number().int().min(1).max(200).default(200),
   }).default({ minItems: 0, maxItems: 12, maxItemLength: 200 }),
 });
+/**
+ * X-06 — `aspect` y `maxBytes` NO se comprueban en `validateValueAgainstSpec`: es imposible, `ImageValue`
+ * solo lleva `assetId` (ni bytes ni dimensiones). Se comprueban en el paso de asset del reductor
+ * (`01 §6.5`, `ReducerContext.assetMeta`), que ya carga la fila de `tpl_asset` para verificar pertenencia
+ * (ADR-030) y donde `bytes`/`width`/`height` sí existen (`02 §2` V31). Error: `TPL_ASSET_SPEC_MISMATCH`.
+ */
 export const ImageSpec = z.strictObject({ ...SpecBase, type: z.literal("image"),
   constraints: z.strictObject({
     aspect: z.enum(["free", "square", "portrait", "landscape", "wide"]).default("free"),

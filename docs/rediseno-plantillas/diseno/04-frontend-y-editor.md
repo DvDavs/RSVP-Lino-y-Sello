@@ -270,7 +270,7 @@ El editor **no** es WYSIWYG por edición directa del DOM (anti-patrón confirmad
 - **Lienzo** (centro/derecha): el `ComposedDocument` renderizado exactamente como lo verá el invitado, dentro de un `<iframe>` aislado (§8). Permite **seleccionar** (clic en un bloque), **navegar** (scroll) y ver el resultado en vivo. No permite editar texto sobre el lienzo.
 - **Panel lateral** (izquierda): lista de secciones (mostrar/ocultar, reordenar, cambiar variante) y, con un bloque seleccionado, un formulario `react-hook-form` + resolver Zod del `BlockSpec` correspondiente, con campos curados.
 
-**Por qué no hay edición en línea sobre el lienzo (corrección de la justificación original).** El borrador anterior lo atribuía al aislamiento del iframe. **Es falso**: un `contenteditable` dentro del iframe funcionaría igual, porque el JS que lo maneja se ejecuta *dentro* del propio iframe y solo enviaría el texto al padre por `postMessage` [I]. El motivo real es P7 y P1: la validación por `BlockSpec` (longitudes, patrón, `multiline`, opciones de `choice`, marcas cerradas de `richText`) es visible y explicable en un formulario, y silenciosa o imposible en un `contenteditable`; además `richText` solo admite `bold`/`italic`/`href` (`esquema/blocks.ts`, `RichSpan.marks`) y un `contenteditable` invita a pegar HTML arbitrario que habría que sanear en el borde. **Divergencia registrada:** `investigacion-editor-y-tecnologias.md` §3.1 fila 2 promete "clic directo sobre el texto → se edita ahí mismo"; este diseño lo sustituye por "clic sobre el texto → el panel abre ese campo con el foco puesto", que conserva la sensación de inmediatez sin abrir la superficie. Ver §22 y `handoffs/1R-frontend.md` ("contradicciones a dirimir", C-4).
+**Por qué no hay edición en línea sobre el lienzo (corrección de la justificación original).** El borrador anterior lo atribuía al aislamiento del iframe. **Es falso**: un `contenteditable` dentro del iframe funcionaría igual, porque el JS que lo maneja se ejecuta *dentro* del propio iframe y solo enviaría el texto al padre por `postMessage` [I]. El motivo real es P7 y P1: la validación por `BlockSpec` (longitudes, `multiline` — I-30 —, opciones de `choice`, marcas cerradas de `richText`) es visible y explicable en un formulario, y silenciosa o imposible en un `contenteditable`; además `richText` solo admite `bold`/`italic`/`href` (`esquema/blocks.ts`, `RichSpan.marks`) y un `contenteditable` invita a pegar HTML arbitrario que habría que sanear en el borde. **Divergencia registrada:** `investigacion-editor-y-tecnologias.md` §3.1 fila 2 promete "clic directo sobre el texto → se edita ahí mismo"; este diseño lo sustituye por "clic sobre el texto → el panel abre ese campo con el foco puesto", que conserva la sensación de inmediatez sin abrir la superficie. Ver §22 y `handoffs/1R-frontend.md` ("contradicciones a dirimir", C-4).
 
 ---
 
@@ -534,7 +534,7 @@ Tras publicar:
 
 | # | Acción del cliente | Llamada | Estado de carga | Estados de error y qué ve el cliente |
 |---|---|---|---|---|
-| 1 | Entra a `/editor` | `GET /public/templates2/catalog` (catálogo; ruta del backend, `03 §2` no la lista → §22 hueco H-F-01) | Rejilla de 8 tarjetas *skeleton* | Red caída → "No pudimos cargar las plantillas" + [Reintentar]. 401 → redirección a login |
+| 1 | Entra a `/editor` | `GET /editor/templates2/catalog` (`03 §2` ruta 1, `§3.1`; **autenticada**, decisión X-10) | Rejilla de 8 tarjetas *skeleton* | Red caída → "No pudimos cargar las plantillas" + [Reintentar]. 401 → redirección a login |
 | 2 | Pulsa "Elegir" | `POST …/document:choose-template` | Botón en estado `aria-busy`, resto de tarjetas inertes | `403 TPL_PLAN_TIER_INSUFFICIENT` → diálogo "Esta plantilla es del plan Premium"; `404 TPL_TEMPLATE_VERSION_NOT_FOUND` → "Esta plantilla ya no está disponible", se recarga el catálogo; `409 TPL_MIGRATION_PLAN_MISSING` → "No podemos cambiar a esta versión ahora mismo" + reporte al soporte |
 | 3 | Llega a `/editor/{id}` | `GET …/document` | Chrome con esqueleto del panel + lienzo en blanco con "Preparando tu invitación…" | `404 TPL_DOCUMENT_NOT_STARTED` → vuelve a `/editor`; `403 TPL_FORBIDDEN` → página "No tienes acceso a esta invitación" |
 | 4 | El lienzo carga | `RENDER` por el puente (§9) | Lienzo con `aria-busy="true"` hasta el primer `RENDER` pintado | `READY` no llega en 5 s → recarga automática una vez; segundo fallo → "No pudimos mostrar la vista previa" + [Reintentar] + enlace a `/preview/{id}` como salida (§8.8) |
@@ -685,6 +685,8 @@ Si el lienzo no arranca tras dos intentos, el editor **sigue siendo usable**: el
 ---
 
 ## 9. Protocolo `postMessage` v1 (contrato completo, definido con Zod)
+
+> **Relación con ADR-018 (decisión X-15).** ADR-018 queda **enmendada, no reemplazada**. Se mantiene íntegra su decisión de arquitectura — lienzo en `<iframe>` propio, comunicación exclusivamente por `postMessage` tipado, los tipos viven en `packages/schema`, el iframe nunca recibe credenciales ni toca `tpl_document` — que es lo que ADR-031 y `contratos.md` §2 citan. Lo único que ADR-1R-F-03 sustituye es la **lista ilustrativa** de cuatro mensajes de ADR-018 (`SELECT_BLOCK`, `SCROLL_TO_SECTION`, `PREVIEW_UPDATE`, `VIEWPORT_CHANGE`), que nunca fue un catálogo cerrado: el catálogo normativo es el de §9.3-§9.4, versionado con `CANVAS_PROTOCOL_VERSION`. Reemplazar ADR-018 entera dejaría huérfanas las referencias de ADR-031 y de `contratos.md` §2 sin ganar nada.
 
 ### 9.1 Sobre y versionado
 
@@ -853,7 +855,7 @@ interface EditorState {
 
 El manifiesto (`TemplateManifest`) se guarda **fuera** del store, en un contexto de solo lectura (`TemplateContext`): es inmutable durante toda la sesión y meterlo en el store haría que Immer lo recorriera en cada actualización sin ninguna ganancia.
 
-### 10.3 Acciones = las diez operaciones de `esquema/operations.ts`, una por una
+### 10.3 Acciones = las once operaciones de `esquema/operations.ts`, una por una
 
 Todas siguen el mismo esqueleto: **(1)** validar contra el `BlockSpec`/manifiesto con el mismo `invariants.ts` que usará el servidor; **(2)** parche optimista sobre `composed`; **(3)** empujar la entrada de undo; **(4)** encolar la operación; **(5)** programar el autoguardado.
 
@@ -864,7 +866,8 @@ Todas siguen el mismo esqueleto: **(1)** validar contra el `BlockSpec`/manifiest
 | `addItem(groupId, values, index?)` | `{op:"addItem", groupId, tempId, values, index?}` | inserta un `ComposedItem` con `itemId = tempId` | `removeItem(groupId, tempId)`, reescrito a ULID al llegar `idMap` (§12.3) | `tempId` = `"tmp:" + crypto.randomUUID().replace(/-/g,"")` (cumple `TempId` de `common.ts`) |
 | `removeItem(groupId, itemId)` | `{op:"removeItem", groupId, itemId}` | quita el ítem | `addItem(groupId, valoresGuardados, índiceGuardado)` con **`tempId` nuevo** | **Limitación declarada:** deshacer un borrado restaura los valores pero **no el `itemId`**, porque el ULID lo asigna el servidor (ADR-015). Consecuencia visible: ninguna (el `itemId` no se muestra); consecuencia interna: una propuesta de IA o una entrada de `attic` que citara el id viejo deja de resolver. Objeción O-09, media, aceptada como limitación |
 | `moveItem(groupId, itemId, toIndex)` | `{op:"moveItem", …}` | reordena | `moveItem` al índice anterior | Coalesce por `moveItem:{groupId}:{itemId}` durante 1 s (arrastre continuo) |
-| `setItemBlock(groupId, itemId, blockId, value)` | `{op:"setItemBlock", …}` | igual que `setBlock`, dentro del ítem | mismo criterio que `setBlock` (valor previo o `clearBlock` conceptual — **el catálogo no tiene `clearItemBlock`**, así que si no había valor previo la inversa es `setItemBlock` con el valor de `defaults` del `itemBlock`, y si tampoco existe, se marca la entrada como **no deshacible** y el botón `↶` lo dice) | Hueco real del catálogo de operaciones: ver `handoffs/1R-frontend.md` C-1 |
+| `setItemBlock(groupId, itemId, blockId, value)` | `{op:"setItemBlock", …}` | igual que `setBlock`, dentro del ítem | si había valor previo en ese `itemBlock`: `setItemBlock` con ese valor; **si no lo había**: `clearItemBlock` | **Hueco cerrado (decisión X-05)**: el catálogo tiene ya `clearItemBlock`. La solución anterior era además inimplementable — no existen defaults por `itemBlock` (`compose.ts`, rama `group`: el escalón `default` es del grupo entero) — y la alternativa de rellenar con contenido de demostración es la objeción O-08 otra vez. **Ninguna entrada de undo queda "no deshacible"** |
+| `clearItemBlock(groupId, itemId, blockId)` | `{op:"clearItemBlock", groupId, itemId, blockId}` | borra la clave de `values` del ítem: el bloque pasa a `value:null`, `provenance:"empty"` | `setItemBlock` con el valor previo | Simétrica de `clearBlock` para el interior de un grupo (X-05) |
 | `setSectionVisible(sectionKey, visible)` | `{op:"setSectionVisible", …}` | conmuta `visible` | valor anterior | Bloqueado en cliente si `SectionSpec.required` |
 | `setSectionVariant(sectionKey, variant)` | `{op:"setSectionVariant", …}` | cambia `variant` | variante anterior | Solo variantes ∈ `supportedVariants` del registro (§5.2) |
 | `reorderSections(order)` | `{op:"reorderSections", order}` | reordena `composed.sections` | orden anterior completo | Una sola entrada de undo por arrastre, no por paso intermedio |
@@ -1354,13 +1357,13 @@ Tres puntos de comprobación, ninguno opcional:
 
 | Momento | Quién | Qué comprueba | Qué pasa si falla |
 |---|---|---|---|
-| **Registro de la plantilla** (`POST /master/templates2/versions`) | validador Kotlin, como invariante nueva del catálogo | por cada `Palette`: `ink/bg ≥ 4.5`, `ink/surface ≥ 4.5`, `accentInk/accent ≥ 4.5`, `muted/bg ≥ 3.0` (texto secundario grande), `accent/bg ≥ 3.0` (componentes de interfaz, 1.4.11) | rechazo del registro con `422 TPL_MANIFEST_INVALID` |
+| **Registro de la plantilla** (`POST /master/templates2/versions`) | validador Kotlin, como invariante nueva del catálogo (`I-31`, reservada) | por cada `Palette`: `ink/bg ≥ 4.5`, `ink/surface ≥ 4.5`, `accentInk/accent ≥ 4.5`, `muted/bg ≥ 3.0` (texto secundario grande), `accent/bg ≥ 3.0` (componentes de interfaz, 1.4.11) | rechazo del registro con `422 TPL_MANIFEST_INVALID` |
 | **CI del frontend** | `packages/sections/test/contrast.test.ts` sobre **todos** los `theme.json` de `golden/` | las mismas cinco parejas | falla el job `frontend` |
 | **e2e** | `@axe-core/playwright@4.13.0` sobre el render público de las dos plantillas de ejemplo y sobre el editor | contraste real ya pintado + el resto de reglas | cero violaciones críticas o serias (ADR-024) |
 
 El cálculo es el de WCAG 2.x: linealizar cada canal sRGB (`c ≤ 0.03928 ? c/12.92 : ((c+0.055)/1.055)^2.4`), luminancia `0.2126R + 0.7152G + 0.0722B`, ratio `(L1+0.05)/(L2+0.05)`. Vive en `packages/sections/src/theme/contrast.ts` (≈ 20 líneas, sin dependencias) y la implementación Kotlin espejo comparte tabla de casos, igual que las invariantes (ADR-005).
 
-**Bloqueo de alcance:** la invariante de registro exigiría añadir `I-24_PALETTE_CONTRAST_BELOW_AA` a `esquema/invariants.ts`, archivo **prohibido** para este rol. Se propone en ADR-1R-F-06 y se registra como contradicción a dirimir con el bloque 01. Mientras no se acepte, la única compuerta mecánica es la de CI del frontend, que ya cubre las plantillas del repositorio pero no una plantilla registrada en producción.
+**Numeración y estado (decisión X-03).** El código `I-24` ya estaba **ocupado** por `I-24_REORDER_NOT_A_PERMUTATION`, implementada y probada en `esquema/invariants.ts` (`validateReorder`) durante esta misma ronda. La invariante de contraste se renumera a **`I-31_PALETTE_CONTRAST_BELOW_AA`** — no a `I-30`, que X-06 asigna a `I-30_TEXT_MULTILINE_NOT_ALLOWED`, ya implementada, para que el rango de códigos implementados quede contiguo (`I-01`…`I-30`) y la prueba de exhaustividad de `06 §4.2` no tenga huecos. `I-31` queda **reservado**: entra en `esquema/invariants.ts` y en `golden/invariants/` cuando el orquestador acepte ADR-1R-F-06, no antes. Mientras tanto la única compuerta mecánica es la de CI del frontend, que cubre las plantillas del repositorio pero no una registrada en producción.
 
 ### 17.2 Foco y teclado
 
@@ -1546,7 +1549,7 @@ Decisión: **`typescript@5.9.3`** (última 5.x, publicada 2025-09-30 [V]), exact
 
 | # | Asunto | Supuesto conservador tomado |
 |---|---|---|
-| H-F-01 | `03-api.md` §2 **no lista ninguna ruta de catálogo de plantillas para el cliente**, pero el flujo A la necesita (paso 1) | Se asume `GET /public/templates2/catalog?eventKind&planTier` devolviendo `{slug, version, name, previewImageUrl, minPlanTier}`. **Cambio de contrato pendiente**: bloque 03 |
+| H-F-01 | ~~`03-api.md` §2 no lista ninguna ruta de catálogo de plantillas para el cliente~~ | **CERRADO (X-10)**: la ruta existe y es `GET /editor/templates2/catalog` (`03 §2` ruta 1, `§3.1`), **autenticada**, con `eventKind`/`planTier`/`limit`/`cursor` y respuesta `{slug, version, name, eventKinds, minPlanTier, previewUrl, capabilities, status}`. No es pública: expondría el catálogo comercial y su `minPlanTier` a cualquiera, y el paso 1 del flujo ocurre ya dentro de `/editor`, con sesión. `minPlanTier` viaja en la respuesta para poder pintar la tarjeta bloqueada (§7.1 paso 2); quien bloquea de verdad es `:choose-template` con `403 TPL_PLAN_TIER_INSUFFICIENT` |
 | H-F-02 | Edición táctil real desde el móvil del cliente | Editor desktop-first; la vista móvil es solo visualización (supuesto heredado del borrador, se mantiene) |
 | H-F-03 | Retención del archivo original tras el recorte | Recorte destructivo; original solo en memoria de sesión (§13.3) |
 | H-F-04 | No existe ruta para **desactivar** un release (retirar una invitación publicada) | El enlace se retira desactivando `is_active`; falta el endpoint. Registrado |
@@ -1619,6 +1622,6 @@ El resto de la tabla de `0-inventario.md` §7 se **confirmó sin cambios** (next
 
 ### 23.3 ADR propuestas por esta revisión
 
-`ADR-1R-F-01` TypeScript 5.9.3 · `ADR-1R-F-02` compuerta de aislamiento del lienzo y contingencia de origen dedicado · `ADR-1R-F-03` protocolo `postMessage` v1 con `MessageChannel` · `ADR-1R-F-04` semántica de la pila de undo (inversa de `setBlock` sobre un `default` es `clearBlock`) · `ADR-1R-F-05` política de conflicto `baseRevision` sin rebase automático + bloqueo entre pestañas · `ADR-1R-F-06` validación de contraste en tres puntos e invariante `I-24` (depende del bloque 01) · `ADR-1R-F-07` tipografías autoalojadas y lista blanca de familias · `ADR-1R-F-08` `section-variants.json` emitido y validado en el registro de plantillas · `ADR-1R-F-09` invalidación de ISR al publicar por webhook con secreto.
+`ADR-1R-F-01` TypeScript 5.9.3 · `ADR-1R-F-02` compuerta de aislamiento del lienzo y contingencia de origen dedicado · `ADR-1R-F-03` protocolo `postMessage` v1 con `MessageChannel` · `ADR-1R-F-04` semántica de la pila de undo (inversa de `setBlock` sobre un `default` es `clearBlock`) · `ADR-1R-F-05` política de conflicto `baseRevision` sin rebase automático + bloqueo entre pestañas · `ADR-1R-F-06` validación de contraste en tres puntos e invariante `I-31` (renumerada en X-03; reservada hasta que la ADR se acepte) · `ADR-1R-F-07` tipografías autoalojadas y lista blanca de familias · `ADR-1R-F-08` `section-variants.json` emitido y validado en el registro de plantillas · `ADR-1R-F-09` invalidación de ISR al publicar por webhook con secreto.
 
 Texto completo al final de `memoria/decisiones.md`, estado **propuesta**.

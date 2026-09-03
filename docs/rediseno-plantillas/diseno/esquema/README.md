@@ -9,9 +9,9 @@ Archivos `.ts` (Zod 4.5.4) que en la fase 3 se copian tal cual a `frontend/packa
 | `blocks.ts` | 14 tipos de bloque (valor + spec), catálogo de roles (`BlockRole`, `GROUP_ROLES`, `SINGLETON_ROLES`), campos de negocio |
 | `manifest.ts` | `TemplateManifest` (template.json), `ThemeSpec` (theme.json), `DefaultsFile` (defaults.json), `MigrationPlan` |
 | `document.ts` | `InvitationDocument` (capas 2-4 + `attic`) |
-| `operations.ts` | 10 operaciones del reductor único, `OperationBatch` (autoguardado), `EditProposal` (IA) |
-| `composed.ts` | `BusinessSnapshot`, `AssetIndex`, `ComposedDocument`, `CompositionReport` |
-| `invariants.ts` | **29** invariantes `I-01`…`I-29` que JSON Schema no expresa; se duplican en Kotlin con tabla de casos común |
+| `operations.ts` | **11** operaciones del reductor único (`clearItemBlock` añadida en la dirimición X-05), `OperationBatch` (autoguardado), `EditProposal` (IA) |
+| `composed.ts` | `BusinessSnapshot`, `AssetIndex` (**entrada** de `compose`, nunca parte del `ComposedDocument`), `ComposedDocument`, `CompositionReport` |
+| `invariants.ts` | **30** invariantes `I-01`…`I-30` que JSON Schema no expresa (`I-30_TEXT_MULTILINE_NOT_ALLOWED` viene de X-06; `I-31_PALETTE_CONTRAST_BELOW_AA` está **reservada**, no declarada, hasta que se acepte ADR-1R-F-06); se duplican en Kotlin con tabla de casos común |
 | `compose.ts` | **implementación de referencia** de `compose()` (R1–R9), `formatDate`/`formatRange` deterministas y `canonicalJson` |
 | `emit-json-schema.ts` | genera `json-schema/templates2.schema.json` (bundle con `$defs`) + 10 punteros, draft 2020-12 |
 | `index.ts` | superficie pública de `@invitaciones/schema` |
@@ -26,7 +26,7 @@ Archivos `.ts` (Zod 4.5.4) que en la fase 3 se copian tal cual a `frontend/packa
 - **`z.record` descarta la clave `"__proto__"` en silencio** (verificado con `zod@4.5.4`): por eso
   `assertNoReservedKeys` (I-29) se ejecuta sobre el JSON **crudo**, antes de `parse`.
 
-## Cómo se verificó (ronda 1R, 2026-09-03)
+## Cómo se verificó (ronda 1R + dirimición, 2026-09-03)
 
 ```
 npx tsc --noEmit --strict          # 0 errores
@@ -35,6 +35,10 @@ npx tsx emit-json-schema.ts        # bundle + 10 punteros
 # compose.ts reproduce byte a byte los dos compuesto.json y es idempotente
 ```
 
-Transcripción literal en `../../memoria/bitacora/1R-dominio.md`. La nota anterior de este README ("se
+Tras la dirimición (X-05, X-06, X-16, `AssetIndex`) se volvió a ejecutar la batería completa: `tsc --noEmit
+--strict` en 0 errores, bundle + 10 punteros reemitidos, 10/10 ejemplos válidos contra Zod y ajv, `compose`
+reproduciendo ambos golden files byte a byte, y los 20 ataques cerrados.
+
+Transcripción literal en `../../memoria/bitacora/1R-dominio.md` y en `../../memoria/bitacora/1R-dirimidor.md`. La nota anterior de este README ("se
 validaron ejecutándolos con `node --experimental-strip-types`") era falsa: el paquete no compilaba
 (`manifest.ts` importaba `BlockValue` del módulo equivocado).

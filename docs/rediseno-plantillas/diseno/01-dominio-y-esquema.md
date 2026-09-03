@@ -74,7 +74,7 @@ lineas = [ f"{ruta}\t{sha256hex(bytes_del_archivo)}"  para cada archivo del paqu
 - `LF` es `"\n"`. No hay `\n` final.
 
 El resultado es determinista entre sistemas operativos y entre Kotlin y Node, y es el mismo valor que
-`02 §2.2` almacena como `tpl_template_version.package_hash` (`text`, único por `(template_id, package_hash)`).
+`02 §2.2` almacena como `tpl_template_version.package_hash` (`VARCHAR(71)` con `CHECK (package_hash ~ '^sha256:[0-9a-f]{64}$')`, único por `(template_id, package_hash)`; decisión X-01 — el prefijo de algoritmo se guarda, no se recorta).
 
 ### 2.2 Manifiesto (`template.json`)
 
@@ -592,7 +592,7 @@ Notas que un implementador necesita y el texto anterior no daba:
 |---|---|---|
 | Bloque de nivel de sección | `blockId` (único en TODO el manifiesto, I-13) | `content`, `setBlock`, `clearBlock`, `attic` |
 | Ítem de un grupo | terna `(groupId, itemId)` — `itemId` es un ULID **del servidor** | `removeItem`, `moveItem` |
-| Bloque dentro de un ítem | terna `(groupId, itemId, itemBlockId)` — `itemBlockId` es corto y único **solo dentro del grupo** | `setItemBlock` |
+| Bloque dentro de un ítem | terna `(groupId, itemId, itemBlockId)` — `itemBlockId` es corto y único **solo dentro del grupo** | `setItemBlock`, `clearItemBlock` |
 
 Un `itemBlockId` y un `blockId` de sección pueden coincidir (`title` existe como ambos en
 `boda-clasica@1.0.0`): son espacios de nombres distintos y la operación dice en cuál está. Prefijar los
@@ -625,6 +625,11 @@ contentHash = "sha256:" + hex( SHA-256( utf8( canonicalJson({
   idéntico (p. ej. uno con una clave huérfana que R1 descarta) deben dar el mismo `ETag`.
 - El `report` entra en el hash porque `stillDefault` cambia lo que el editor muestra y lo que `preflight`
   bloquea; si no entrara, un cambio en las advertencias no invalidaría la caché.
+- **Se almacena con el prefijo** (decisión X-02): `tpl_release.content_hash` es `VARCHAR(71)` con
+  `CHECK (content_hash ~ '^sha256:[0-9a-f]{64}$')`, y el `ETag` del render público lleva el valor completo
+  (`ETag: "sha256:3f…"`). Recortar el prefijo en la base y reponerlo en la capa HTTP daría dos
+  representaciones del mismo hash, que es la enfermedad que P1 ataca; el prefijo es además lo que permite
+  cambiar de algoritmo algún día sin ambigüedad.
 - **No entra ninguna URL con firma temporal.** `AssetIndex.url` debe ser estable (URL de CDN sin token); si
   la fase 2 necesita URLs firmadas, se firman **después** de calcular el hash, en la capa HTTP. Si no, el
   `ETag` cambiaría en cada petición y la caché del render público dejaría de servir para nada.
@@ -664,7 +669,7 @@ export type MigrationError =
   | { code: "MIG_TARGET_BLOCK_UNKNOWN";  op: string; blockId: string }
   | { code: "MIG_TARGET_BLOCK_EXISTS";   op: string; blockId: string }
   | { code: "MIG_CONVERTER_UNSUPPORTED"; from: string; to: string }
-  | { code: "MIG_RESULT_INVALID";        violations: Violation[] };   // el doc migrado no pasa I-01…I-29
+  | { code: "MIG_RESULT_INVALID";        violations: Violation[] };   // el doc migrado no pasa I-01…I-30
 ```
 
 ```kotlin
@@ -720,7 +725,7 @@ Semántica de los cuatro convertidores (única definición; el resto no existe):
 ### 6.3 Reglas duras de la migración
 
 - Una migración es **pura** (mismo documento + mismo plan → mismo resultado), se ejecuta con `dryRun`
-  obligatorio antes de aplicarse (`03 §5`) y **termina validando el documento resultante** contra I-01…I-29:
+  obligatorio antes de aplicarse (`03 §5`) y **termina validando el documento resultante** contra I-01…I-30:
   si no pasa, devuelve `MIG_RESULT_INVALID` y **no** se escribe nada. Una migración no puede dejar el
   documento en un estado que la escritura normal rechazaría.
 - **Nada se borra jamás**: todo lo que pierde destino va al `attic`, indexado por `"<slug>@<version>"` de
@@ -768,7 +773,7 @@ Algoritmo (determinista, sin heurísticas de texto):
 4. **Los grupos nunca se transportan.** Un `eventCards` de otra plantilla tiene otros `itemBlocks`; copiar
    ítems produciría ítems medio vacíos que el cliente no sabe de dónde salen. Van al `attic` completos.
 5. Todo lo que no se transportó va a `attic["<slugOrigen>@<versionOrigen>"]`, **incluidos los grupos**.
-6. El documento resultante se valida contra I-01…I-29 antes de escribirse.
+6. El documento resultante se valida contra I-01…I-30 antes de escribirse.
 
 Consecuencia aceptada y que el editor **debe** decir en voz alta antes de confirmar: cambiar de plantilla
 conserva los nombres, las fotos de portada y de los celebrantes, y la fecha límite de confirmación; **pierde
@@ -785,7 +790,15 @@ export function applyOperation(
 export type ReducerContext = {
   pkg:     TemplatePackage;
   newUlid: () => string;                 // inyectada: compose es pura, el reductor NO (genera ULIDs)
-  ownsAsset: (assetId: string) => boolean; // pertenencia del asset a esta invitación (ADR-030)
+  /**
+   * Metadatos del asset, o `null` si no existe o no pertenece a esta invitación ni a la plantilla vigente.
+   * Sustituye al `ownsAsset(assetId): boolean` anterior (decisión X-06): el reductor ya cargaba la fila de
+   * `tpl_asset` para comprobar pertenencia (ADR-030) y necesita además `bytes`/`width`/`height` para hacer
+   * cumplir `image.maxBytes`, `image.aspect` y `audio.maxBytes`, que NO son comprobables contra el valor
+   * (`ImageValue`/`AudioValue` solo llevan `assetId`). Una función en vez de dos: misma consulta, misma
+   * transacción de lectura, cero superficie nueva de E/S.
+   */
+  assetMeta: (assetId: string) => { bytes: number; width?: number; height?: number; contentType: string } | null;
 };
 export type OperationResult =
   | { ok: true;  doc: InvitationDocument; idMap?: Record<string, string> }   // tempId → ULID
@@ -802,9 +815,10 @@ export type OperationError =
   | { code: "TPL_VARIANT_UNKNOWN";        sectionKey: string; variant: string }
   | { code: "TPL_THEME_ID_UNKNOWN";       field: "paletteId" | "fontSetId"; id: string }
   | { code: "TPL_ASSET_NOT_OWNED";        assetId: string }
+  | { code: "TPL_ASSET_SPEC_MISMATCH";   assetId: string; constraint: "maxBytes" | "aspect" }
   | { code: "TPL_INVARIANT_VIOLATION";    violations: Violation[] };
 
-/** Las 29 invariantes en una sola llamada. Devuelve la lista vacía si todo está bien; nunca lanza. */
+/** Las 30 invariantes en una sola llamada. Devuelve la lista vacía si todo está bien; nunca lanza. */
 export function validateInvariants(
   doc: InvitationDocument, pkg: TemplatePackage, raw?: unknown,
 ): Violation[];
@@ -846,7 +860,16 @@ Reglas del reductor que el esquema **no** puede expresar y que un implementador 
 - `reorderSections.order` debe ser una **permutación exacta** de las claves actuales de `doc.structure`
   (I-24). El esquema solo comprueba longitud: acepta `["cover","cover","cover"]`.
 - `setSectionVisible(key, false)` sobre `required: true` → `TPL_SECTION_REQUIRED` (I-17).
-- Toda `ScalarValue` con `assetId` pasa por `ctx.ownsAsset` antes de escribirse (ADR-030).
+- Toda `ScalarValue` con `assetId` pasa por `ctx.assetMeta` antes de escribirse: `null` → `TPL_ASSET_NOT_OWNED`
+  (ADR-030). Con los metadatos en la mano se comprueban además las tres restricciones de asset que el esquema
+  declara y que ningún validador de valor puede ver (**X-06**), fallando con `TPL_ASSET_SPEC_MISMATCH`:
+  - `image.maxBytes` / `audio.maxBytes`: `meta.bytes > spec.constraints.maxBytes`.
+  - `image.aspect` sobre `r = meta.width / meta.height` (si faltan las dimensiones, no se comprueba y se
+    registra; nunca se rechaza por falta de dato): `square` ⇒ `|r − 1| ≤ 0.02`; `portrait` ⇒ `r < 1`;
+    `landscape` ⇒ `r > 1`; `wide` ⇒ `r ≥ 1.6`; `free` ⇒ sin comprobación. Las tolerancias exactas son un
+    supuesto conservador registrado en `preguntas-abiertas.md`.
+  El recorte del editor es destructivo (sube un asset nuevo, `04 §13`), así que comprobar en el momento de
+  atar el asset al bloque es el único punto donde el dato existe y todavía se puede rechazar.
 - Un lote humano es **todo o nada**; una `EditProposal` de IA descarta operación por operación
   (`07 §4`, lección 5 de `handoffs/1-aura-lecciones.md`).
 

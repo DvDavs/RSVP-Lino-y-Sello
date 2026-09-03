@@ -41,6 +41,8 @@ Todas las rutas autenticadas de invitación exigen `HierarchyValidationService.v
 
 Rutas 12, 14, 8, 9, 1, 18 y 19 **son nuevas de la ronda 1R**; el borrador no tenía forma de despublicar, de revocar un enlace filtrado, de listar o borrar assets, de listar el catálogo ni de deprecar una versión — huecos que fase 2 habría tenido que inventar (objeción **A-01**).
 
+**Forma canónica de la ruta pública (X-08):** `/public/i/{publicToken}/render`, tal como la fijan esta tabla, `contratos.md` §4, `02 §7` (`PublicRenderController.kt`) y `04 §15`. La forma `/public/invitations/{token}/render` que aparece en el texto de ADR-013 es la del borrador y queda **enmendada**: no existe en ningún documento de diseño ni en ningún ejemplo.
+
 `publicToken` es `tpl_document.public_token` (`02 §2` V32), nunca `invitationId`. El editor obtiene `publicUrl` (`{app.frontend.url}/i/{publicToken}`, propiedad ya existente en `application.yml:71-73`) en la respuesta de las rutas 3, 11 y 14.
 
 **Encaje con `SecurityConfig` real** (`core/auth/security/SecurityConfig.kt:36-48`, verificado):
@@ -55,7 +57,7 @@ Convenciones comunes: todas las respuestas son `application/json; charset=UTF-8`
 ### 3.1 `GET /editor/templates2/catalog`
 
 - **Auth**: autenticada (`@PreAuthorize` de §2). No hay invitación que autorizar; el catálogo es común.
-- **Query**: `eventKind` (opcional, uno de `esquema/common.ts:48-50`), `planTier` (opcional 1-3), `limit` (≤ 50, por defecto 20), `cursor`.
+- **Query**: `eventKind` (opcional, uno de `esquema/common.ts` `EventKind`), `planTier` (opcional 1-3), `limit` (≤ 50, por defecto 20), `cursor`.
 - **Límite**: sin cuerpo.
 
 ```jsonc
@@ -123,7 +125,7 @@ Convenciones comunes: todas las respuestas son `application/json; charset=UTF-8`
   "publicToken": "pub_01J8…",
   "publicUrl": "https://app.example.com/i/pub_01J8…",
   "activeRelease": { "releaseId": 7, "publishedAt": "2026-09-01T18:00:00Z",
-                     "contentHash": "3f…", "stale": true, "staleReason": ["business.date"] }
+                     "contentHash": "sha256:3f…", "stale": true, "staleReason": ["business.date"] }
 }
 ```
 `composed` se calcula en cada `GET` (`compose()`, ADR-007) — nunca se lee de una tabla; el `BusinessSnapshot` se toma de `invitation` en la misma transacción de lectura. `stale` se calcula comparando `tpl_release.business_snapshot` congelado con el actual (`02 §2` V34), sin recomponer el release.
@@ -133,8 +135,8 @@ Convenciones comunes: todas las respuestas son `application/json; charset=UTF-8`
 ### 3.4 `POST /editor/invitations/{invitationId}/document/operations`
 
 - **Auth**: `validateInvitationAccess`.
-- **Límites**: cuerpo ≤ **768 KiB** (ADR-032, §8); `operations` entre 1 y 50 (`esquema/operations.ts:28`); documento resultante ≤ 1 MiB (`02 §2` V32).
-- **Cuerpo**: `OperationBatch` **exactamente** como `esquema/operations.ts:25-29` — `{baseRevision, clientBatchId, operations[]}`, `z.strictObject` (ninguna clave extra).
+- **Límites**: cuerpo ≤ **768 KiB** (ADR-032, §8); `operations` entre 1 y 50 (`esquema/operations.ts` `OperationBatch.operations`); documento resultante ≤ 1 MiB (`02 §2` V32).
+- **Cuerpo**: `OperationBatch` **exactamente** como `esquema/operations.ts` `OperationBatch` — `{baseRevision, clientBatchId, operations[]}`, `z.strictObject` (ninguna clave extra).
 
 ```jsonc
 // request
@@ -168,14 +170,14 @@ Convenciones comunes: todas las respuestas son `application/json; charset=UTF-8`
 **Semántica (fijada, no descrita en prosa):**
 
 1. **Todo o nada.** Se valida el lote completo antes de aplicar nada. Basta una operación inválida para rechazar el lote con `422 TPL_OPERATION_INVALID` y `details.operations = [{index, code, path}]`. (El pipeline de IA de `07` descarta operación por operación; esta ruta no.)
-2. **Resolución de `tempId` dentro del lote.** `addItem` declara `tempId`; las operaciones posteriores del **mismo** lote pueden referirse a ese ítem por su `tempId` (`AnyItemId`, `esquema/operations.ts:8,15-17`). El servidor mantiene un mapa `tempId → ULID` durante la aplicación y lo devuelve en `idMap`. Un `tempId` no declarado por ningún `addItem` previo del lote → `422 TPL_TEMP_ID_UNRESOLVED`. Un `tempId` repetido en dos `addItem` del mismo lote → `422 TPL_TEMP_ID_DUPLICATE`. **Esto no estaba especificado** y el esquema lo permite (objeción **A-04**).
+2. **Resolución de `tempId` dentro del lote.** `addItem` declara `tempId`; las operaciones posteriores del **mismo** lote pueden referirse a ese ítem por su `tempId` (`AnyItemId`, `esquema/operations.ts` `AnyItemId` / `setItemBlock`). El servidor mantiene un mapa `tempId → ULID` durante la aplicación y lo devuelve en `idMap`. Un `tempId` no declarado por ningún `addItem` previo del lote → `422 TPL_TEMP_ID_UNRESOLVED`. Un `tempId` repetido en dos `addItem` del mismo lote → `422 TPL_TEMP_ID_DUPLICATE`. **Esto no estaba especificado** y el esquema lo permite (objeción **A-04**).
 3. **Propiedad de `assetId` (ADR-030).** Toda operación que porte un `ImageValue`/`AudioValue` se valida por pertenencia: `SELECT 1 FROM tpl_asset WHERE public_id = ? AND (invitation_id = :invitationId OR template_version_id = :templateVersionId)`. Sin fila → `422 TPL_ASSET_NOT_OWNED`, lote completo rechazado. La consulta se hace **en bloque** (un `IN` con todos los `assetId` del lote), no una por operación.
-4. **Bloques no escribibles.** Una operación sobre un `blockId` con `source != "user"` → `422 TPL_BUSINESS_BLOCK_WRITE` (invariante `I-21`, `esquema/invariants.ts:86`). Una operación sobre un `blockId` no declarado → `422 TPL_BLOCK_UNKNOWN`.
+4. **Bloques no escribibles.** Una operación sobre un `blockId` con `source != "user"` → `422 TPL_BLOCK_NOT_EDITABLE`, con `details.source` = `"business"` o `"fixed"` (invariante `I-21`, `esquema/invariants.ts` `validateDocument`, rama `spec.source !== "user"`). Una operación sobre un `blockId` no declarado → `422 TPL_BLOCK_UNKNOWN`.
 5. **Revisión optimista.** `baseRevision ≠ tpl_document.revision` → `409 TPL_REVISION_CONFLICT` con `{currentRevision, document, composed, report}` para que el cliente rebase sus operaciones pendientes. No hay merge automático.
 6. **Idempotencia real (corrección 1R, objeción A-05).** El par `(document_id, clientBatchId)` es único (`02 §2` V33, `ux_tpl_document_snapshot_batch`). Si llega un lote cuyo `clientBatchId` ya produjo una revisión de este documento, **no se vuelve a aplicar**: se responde `200` con `applied: false`, la `revision` que ese lote produjo y el `idMap` guardado. Esto cubre el caso real que el borrador no cubría: timeout de red ⇒ el cliente reintenta con la **misma** `baseRevision`, que sigue siendo la vieja, y el chequeo de revisión **no** lo habría detenido. Ventana: la retención de snapshots (200 revisiones o 30 días, ADR-011); pasada esa ventana el lote se trata como nuevo y el chequeo de `baseRevision` lo detiene.
 7. **Transacción.** Una sola: `SELECT … FOR UPDATE` del documento no es necesario (el `UPDATE … WHERE revision = ?` es suficiente), pero sí lo es que el `INSERT` del snapshot y el `UPDATE` del documento vayan juntos.
 
-- **Errores**: `409 TPL_REVISION_CONFLICT` · `422 TPL_OPERATION_INVALID` · `422 TPL_BLOCK_UNKNOWN` · `422 TPL_ASSET_NOT_OWNED` · `422 TPL_BUSINESS_BLOCK_WRITE` · `422 TPL_TEMP_ID_UNRESOLVED` · `422 TPL_TEMP_ID_DUPLICATE` · `422 TPL_DOCUMENT_TOO_LARGE` · `413 TPL_BODY_TOO_LARGE` · `400 TPL_MALFORMED_JSON` · `403 TPL_FORBIDDEN` · `404 TPL_DOCUMENT_NOT_STARTED`.
+- **Errores**: `409 TPL_REVISION_CONFLICT` · `422 TPL_OPERATION_INVALID` · `422 TPL_BLOCK_UNKNOWN` · `422 TPL_ASSET_NOT_OWNED` · `422 TPL_ASSET_SPEC_MISMATCH` · `422 TPL_BLOCK_NOT_EDITABLE` · `422 TPL_TEMP_ID_UNRESOLVED` · `422 TPL_TEMP_ID_DUPLICATE` · `422 TPL_DOCUMENT_TOO_LARGE` · `413 TPL_BODY_TOO_LARGE` · `400 TPL_MALFORMED_JSON` · `403 TPL_FORBIDDEN` · `404 TPL_DOCUMENT_NOT_STARTED`.
 
 ### 3.5 `GET /editor/invitations/{invitationId}/document/history`
 
@@ -266,7 +268,7 @@ Validación: tipo declarado ∈ `{image/webp, image/png, image/jpeg, audio/mpeg,
   "warnings": [ { "code": "TPL_SECTION_EMPTY", "sectionKeys": ["story"] } ],
   "report": { "missingRequired": [], "stillDefault": ["couple.brideText"], "orphanContent": [],
               "orphanSections": [], "invalidValues": [], "themeFallback": null },
-  "contentHash": "3f…", "sameAsActiveRelease": false }
+  "contentHash": "sha256:3f…", "sameAsActiveRelease": false }
 ```
 - **Errores**: `403 TPL_FORBIDDEN` · `404 TPL_DOCUMENT_NOT_STARTED`. **Idempotencia**: lectura pura, sin efectos.
 
@@ -279,12 +281,12 @@ Validación: tipo declarado ∈ `{image/webp, image/png, image/jpeg, audio/mpeg,
   3. Comprobación de disponibilidad: `invitation.is_enabled`, `customer.is_enabled`, `!customer.is_banned` (mismas tres que `PublicGuestInfoController.kt:65-75`) → `403 TPL_INVITATION_UNAVAILABLE`.
   4. Se lee `BusinessSnapshot` y se compone (`compose`, puro).
   5. Preflight: `report.missingRequired` no vacío → `422 TPL_PUBLISH_BLOCKED_MISSING_REQUIRED`; algún `blockId` `required` en `report.stillDefault` → `422 TPL_PUBLISH_BLOCKED_DEFAULT_CONTENT`; `report.invalidValues` no vacío → `422 TPL_PUBLISH_BLOCKED_INVALID_VALUES`.
-  6. `contentHash = sha256(canonical(composed))`. Si coincide con el `content_hash` del release **activo**, se responde `200` con ese release, **sin insertar fila** (evita historial ruidoso).
+  6. `contentHash = "sha256:" + hex(SHA-256(utf8(canonicalJson({composed, report}))))` (`01 §5.5`, ADR-1R-D-02; el informe entra en el hash). Si coincide con el `content_hash` del release **activo**, se responde `200` con ese release, **sin insertar fila** (evita historial ruidoso).
   7. `UPDATE tpl_release SET is_active = false, unpublished_at = now() WHERE invitation_id = ? AND is_active` + `INSERT INTO tpl_release (…) VALUES (…, is_active = true)`. El índice único parcial garantiza como máximo un activo.
   8. **Commit.** No se toca S3 en ningún paso: publicar es inmune a que S3 esté caído (`02 §10.5`).
 ```jsonc
 // 201
-{ "releaseId": 8, "contentHash": "3f…", "documentRevision": 43,
+{ "releaseId": 8, "contentHash": "sha256:3f…", "documentRevision": 43,
   "publishedAt": "2026-09-03T12:05:00Z",
   "publicToken": "pub_01J8…", "publicUrl": "https://app.example.com/i/pub_01J8…",
   "reusedActiveRelease": false }
@@ -304,7 +306,7 @@ Validación: tipo declarado ∈ `{image/webp, image/png, image/jpeg, audio/mpeg,
 - **Auth**: `validateInvitationAccess`. **Query**: `limit` (≤ 50), `cursor`.
 ```jsonc
 // 200
-{ "items": [ { "releaseId": 8, "publishedAt": "…", "unpublishedAt": null, "contentHash": "3f…",
+{ "items": [ { "releaseId": 8, "publishedAt": "…", "unpublishedAt": null, "contentHash": "sha256:3f…",
                "documentRevision": 43, "templateVersion": {"slug":"boda-clasica","version":"1.0.0"},
                "isActive": true, "publishedBy": 12 } ], "nextCursor": null }
 ```
@@ -314,33 +316,35 @@ Nunca devuelve `composed` (cuerpo enorme); para verlo está el render público. 
 
 - **Auth**: **ninguna** (`/public/**` es `permitAll`, `SecurityConfig.kt:38`).
 - **Cabeceras de petición**: `If-None-Match` (opcional).
-- **Consulta**: una sola, por índice único: `tpl_document.public_token` → `invitation_id` → `tpl_release WHERE is_active`, con los tres campos de disponibilidad de `invitation`/`customer`.
+- **Consulta**: una sola, por índice único: `tpl_document.public_token` → `invitation_id` → `tpl_release WHERE is_active`, con los tres campos de disponibilidad de `invitation`/`customer` **y con `invitation.uses_templates2`**.
+- **La bandera de corte también manda aquí (decisión X-09).** Si `invitation.uses_templates2 = false`, esta ruta responde `404 TPL_RELEASE_NOT_FOUND` aunque exista un `tpl_release` activo. Motivo: tras un rollback (`05 §7.5`) el contenido autoritativo de esa invitación vuelve a ser `invitation_configs`, servido por el módulo antiguo; seguir sirviendo el release desde aquí dejaría **dos verdades vivas** para la misma invitación, que es H-04/H-05 exactamente. La comprobación **no cuesta una consulta más**: la fila de `invitation` ya se lee en la misma consulta para `is_enabled`. La bandera se lee, nunca se escribe. No se redirige al enlace legado: este módulo no conoce su forma; el enlace legado sigue funcionando por su propio camino.
+- **Consecuencia de caché de un rollback**: igual que despublicar o rotar el token, el CDN puede seguir sirviendo la respuesta anterior hasta `max-age` 300 s (y hasta 1 h en `stale-while-revalidate`), §7. Un rollback no es instantáneo de cara al invitado.
 ```jsonc
 // 200
 { "composed": { "composedVersion": 1, "template": {…}, "locale": "es-MX", "theme": {…}, "sections": […] },
-  "publishedAt": "2026-09-03T12:05:00Z", "contentHash": "3f…" }
+  "publishedAt": "2026-09-03T12:05:00Z", "contentHash": "sha256:3f…" }
 ```
-- **Cabeceras de respuesta**: `ETag: "3f…"` (fuerte, el `contentHash` entre comillas) · `Cache-Control: public, max-age=300, stale-while-revalidate=3600` · `Vary: Accept-Encoding` · `X-Content-Type-Options: nosniff`.
+- **Cabeceras de respuesta**: `ETag: "sha256:3f…"` (fuerte, el `contentHash` completo entre comillas) · `Cache-Control: public, max-age=300, stale-while-revalidate=3600` · `Vary: Accept-Encoding` · `X-Content-Type-Options: nosniff`.
 - **`304`**: `If-None-Match` que coincide → `304` sin cuerpo. La consulta de resolución sigue ejecutándose (es un índice único, coste despreciable) porque hay que comprobar que el release siga activo y la invitación disponible.
 - **Errores**: `404 TPL_RELEASE_NOT_FOUND` — **la misma respuesta** para "token inexistente", "documento sin release activo" y "release despublicado", para no dar un oráculo de enumeración de tokens · `403 TPL_INVITATION_UNAVAILABLE` cuando la invitación está deshabilitada o su dueño deshabilitado/baneado (misma política que `PublicGuestInfoController.kt:65-75`, pero **un solo código** para los tres casos: el invitado no tiene por qué saber cuál).
 - **Idempotencia**: lectura pura; **jamás** escribe (ni contadores ni "visto por última vez": eso convertiría la ruta cacheable en una escritura y traería de vuelta H-04).
 
 ### 3.16 `GET /public/i/{publicToken}/exists`
 
-- **Auth**: ninguna. `200 {"published": true|false}`. `Cache-Control: no-store` (es la sonda que el editor consulta tras publicar; cachearla la haría inútil). Devuelve `false` —no `404`— también para un token inexistente, para no ser un oráculo. **Límite de tasa**: es la ruta más barata de sondear; §7 se aplica igual.
+- **Auth**: ninguna. `200 {"published": true|false}`. Aplica la misma regla de bandera que §3.15 (X-09): con `uses_templates2 = false` responde `{"published": false}`, nunca `true`. `Cache-Control: no-store` (es la sonda que el editor consulta tras publicar; cachearla la haría inútil). Devuelve `false` —no `404`— también para un token inexistente, para no ser un oráculo. **Límite de tasa**: es la ruta más barata de sondear; §7 se aplica igual.
 
 ### 3.17 `POST /master/templates2/versions`
 
 - **Auth**: rol `MASTER`, garantizado por `SecurityConfig.kt:44` (`/master/**` → `hasRole("MASTER")`); además `@PreAuthorize("hasRole('MASTER')")` en el controlador como defensa en profundidad. **No** usa `HierarchyValidationService` (no hay invitación que autorizar), tal como fija ADR-033.
 - **Transporte**: `multipart/form-data` — aquí sí, porque el paquete son varios archivos; partes: `template` (JSON), `theme` (JSON), `defaults` (JSON), `migrations` (0..n JSON), `assets` (0..200 binarios, nombre de parte = ruta relativa `assets/<archivo>`).
-- **Límites**: `template`+`theme`+`defaults`+`migrations` ≤ 2 MiB en total; cada asset ≤ 15 MiB (`esquema/manifest.ts:49`); ≤ 200 assets (`manifest.ts:68`). **Requiere elevar `spring.servlet.multipart.max-file-size`/`max-request-size`**; como es una ruta exclusiva de MASTER y no de clientes, y sin ella el kit de autor no puede subir un paquete, se acepta el cambio global y se declara explícitamente en `05`/fase 2 (única modificación de `application.yml` que este módulo pide: `max-file-size: 15MB`, `max-request-size: 64MB`).
+- **Límites**: `template`+`theme`+`defaults`+`migrations` ≤ 2 MiB en total; cada asset ≤ 15 MiB (`esquema/manifest.ts` `AssetEntry`); ≤ 200 assets (`manifest.ts` `TemplateManifest.assets`). **Requiere elevar `spring.servlet.multipart.max-file-size`/`max-request-size`**; como es una ruta exclusiva de MASTER y no de clientes, y sin ella el kit de autor no puede subir un paquete, se acepta el cambio global y se declara explícitamente en `05`/fase 2 (única modificación de `application.yml` que este módulo pide: `max-file-size: 15MB`, `max-request-size: 64MB`).
 - **Algoritmo**: `02 §4`, paso a paso.
 ```jsonc
 // 201
 { "result": "created", "templateVersionId": 14, "slug": "boda-clasica", "version": "1.1.0",
-  "packageHash": "a7…", "assetsRegistered": 6, "structuralDiff": { "removedBlocks": [], "…": [] } }
+  "packageHash": "sha256:a7…", "assetsRegistered": 6, "structuralDiff": { "removedBlocks": [], "…": [] } }
 // 200
-{ "result": "noop_same_hash", "templateVersionId": 14, "packageHash": "a7…" }
+{ "result": "noop_same_hash", "templateVersionId": 14, "packageHash": "sha256:a7…" }
 ```
 - **Errores**: `422 TPL_MANIFEST_INVALID` (con `details.violations = Violation[]`) · `422 TPL_PACKAGE_ASSET_MISMATCH` · `422 TPL_MANIFEST_BREAKING_CHANGE_NOT_MAJOR` (con `details.diff`) · `409 TPL_VERSION_HASH_MISMATCH` · `413 TPL_ASSET_TOO_LARGE` · `415 TPL_ASSET_TYPE_UNSUPPORTED` · `502 TPL_ASSET_STORAGE_UNAVAILABLE`.
 - **Idempotencia**: **real, por `packageHash`** (ADR-008). Reenviar el mismo paquete → `200 noop_same_hash`, sin fila nueva y sin reiniciar nada (P4). Reenviar el mismo `slug@version` con contenido distinto → `409`, nunca sobrescritura (mata H-09).
@@ -351,7 +355,7 @@ Nunca devuelve `composed` (cuerpo enorme); para verlo está el render público. 
 - **Auth**: `MASTER`. **Query**: `slug`, `status`, `limit`, `cursor`.
 ```jsonc
 { "items": [ { "templateVersionId": 14, "slug": "boda-clasica", "version": "1.1.0",
-               "status": "published", "packageHash": "a7…", "publishedAt": "…", "documentsUsing": 37 } ],
+               "status": "published", "packageHash": "sha256:a7…", "publishedAt": "…", "documentsUsing": 37 } ],
   "recentRegistrations": [ { "slug": "xv-jardin", "version": "1.0.1", "result": "rejected",
                              "errorCode": "TPL_MANIFEST_BREAKING_CHANGE_NOT_MAJOR", "createdAt": "…" } ],
   "nextCursor": null }
@@ -385,10 +389,11 @@ Todos los códigos del módulo, su HTTP y su origen. La fuente única en código
 | `TPL_REVISION_CONFLICT` | 409 | `baseRevision` desactualizada (operations, restore, choose-template, release) |
 | `TPL_OPERATION_INVALID` | 422 | Alguna `Operation` del lote no valida contra el manifiesto (detalle por índice) |
 | `TPL_BLOCK_UNKNOWN` | 422 | Una operación referencia un `blockId` no declarado en la versión vigente |
-| `TPL_BUSINESS_BLOCK_WRITE` | 422 | Se intenta escribir un bloque con `source != "user"` (invariante I-21) |
+| `TPL_BLOCK_NOT_EDITABLE` | 422 | Se intenta escribir un bloque con `source != "user"` (invariante I-21). `details.source` distingue `"business"` (el valor lo pone Postgres, R4) de `"fixed"` (el valor lo pone la plantilla y no es editable). Definición normativa: `01 §6.5` `OperationError` |
 | `TPL_TEMP_ID_UNRESOLVED` | 422 | Una operación usa un `tempId` que ningún `addItem` previo del lote declaró |
 | `TPL_TEMP_ID_DUPLICATE` | 422 | Dos `addItem` del mismo lote declaran el mismo `tempId` |
 | `TPL_ASSET_NOT_OWNED` | 422 | Un `assetId` referenciado no pertenece a esta invitación ni a la plantilla vigente (ADR-030) |
+| `TPL_ASSET_SPEC_MISMATCH` | 422 | El asset no cumple las restricciones que el `BlockSpec` declara para ese bloque: `image.maxBytes`/`audio.maxBytes` o `image.aspect`. Se comprueba en el reductor con los metadatos de `tpl_asset` (`bytes`, `width`, `height`), no contra el valor — `ImageValue`/`AudioValue` solo llevan `assetId` (decisión X-06, `01 §6.5`). `details.constraint` ∈ `{maxBytes, aspect}` |
 | `TPL_ASSET_NOT_FOUND` | 404 | `DELETE /assets/{id}` con un `assetId` inexistente **o ajeno** (misma respuesta a propósito) |
 | `TPL_ASSET_IN_USE` | 409 | Se intenta borrar un asset referenciado por el documento o por algún release |
 | `TPL_ASSET_TOO_LARGE` | 413 | Asset por encima de 15 MiB |
@@ -411,6 +416,8 @@ Todos los códigos del módulo, su HTTP y su origen. La fuente única en código
 | `TPL_VERSION_LAST_PUBLISHED` | 409 | Deprecar la única versión publicada de un slug con documentos que la usan |
 | `TPL_INTERNAL` | 500 | Cualquier excepción no prevista, **con código y sin traza** (§10.3) |
 
+**Prefijo `TPL_AI_*` — reservado, no listado (decisión X-14).** Los 11 códigos del contrato de IA (`07 §6`) **no** entran en esta tabla en la fase 1: las tres rutas `…/document/ai:*` están diseñadas y explícitamente **sin implementar** (ADR-027), y una tabla de errores que enumera códigos de rutas inexistentes es contrato falso. Se reserva el prefijo para que nadie lo reutilice y se vuelca la lista completa aquí en la misma fase que implemente las rutas; la tabla `tpl_ai_proposal` es la migración `V39` (fuera del rango `V29`-`V37` del módulo y de la `V38` de `tpl_migration_run`).
+
 Regla dura (ADR-016): **ninguna ruta de `templates2` devuelve un 500 sin `code`**. `TPL_INTERNAL` es el único 500 posible y lo emite el handler propio, no el mecanismo genérico de Spring.
 
 ## 6. Preflight de publicación (mata H-03 en la vía de publicación)
@@ -419,7 +426,7 @@ Regla dura (ADR-016): **ninguna ruta de `templates2` devuelve un 500 sin `code`*
 
 ## 7. Render público: caché, ETag y coherencia con `contentHash`
 
-- **`ETag`** = `"<content_hash>"` (comillas incluidas, ETag **fuerte**; el `contentHash` es `sha256(canonical(composed))`, R9 de `01 §5.2`). Es determinista: dos publicaciones del mismo contenido producen el mismo ETag, y publicar contenido distinto lo cambia siempre. **No hace falta purga activa de CDN**: el cambio de `ETag` basta como invalidación, con la ventana de `max-age` descrita abajo.
+- **`ETag`** = `"<content_hash>"` (comillas incluidas, ETag **fuerte**; el valor completo con su prefijo, p. ej. `ETag: "sha256:3f…"`; el `contentHash` lo define `01 §5.5` sobre `{composed, report}`, ADR-1R-D-02). Es determinista: dos publicaciones del mismo contenido producen el mismo ETag, y publicar contenido distinto lo cambia siempre. **No hace falta purga activa de CDN**: el cambio de `ETag` basta como invalidación, con la ventana de `max-age` descrita abajo.
 - **`Cache-Control: public, max-age=300, stale-while-revalidate=3600`.** Consecuencia asumida y ahora explícita: tras publicar, despublicar (§3.13) o rotar el token (§3.10), el CDN puede servir la respuesta anterior **hasta 300 s** (y hasta 1 h en modo `stale-while-revalidate`). Para una revocación inmediata hace falta purgar el CDN, que es una operación de la capa de despliegue, fuera de este módulo. El borrador afirmaba invalidación "automática" sin matizar esta ventana (objeción **A-08**).
 - **`304`**: `If-None-Match` idéntico ⇒ `304` sin cuerpo, pero **después** de resolver el token y comprobar disponibilidad: un release despublicado o una invitación deshabilitada deben dejar de servirse aunque el cliente traiga el ETag correcto.
 - **`assetId` → URL** se resuelve al **componer** (`02 §10.4`), con la plantilla `{templates2.assets.public-base-url}/{s3_key}` y sin llamar a S3. Nunca una URL firmada de corta duración en el render público (rompería el `max-age`).
@@ -432,13 +439,13 @@ Regla dura (ADR-016): **ninguna ruta de `templates2` devuelve un 500 sin `code`*
 |---|---|---|
 | Cuerpo de `POST .../document/operations` | **768 KiB** (ADR-032) | `Templates2BodyLimitFilter` (§10.4) |
 | Cuerpo de las demás rutas JSON del editor | 8 KiB | mismo filtro |
-| Operaciones por lote | 1..50 | esquema (`operations.ts:28`) + validación Kotlin |
+| Operaciones por lote | 1..50 | esquema (`operations.ts` `OperationBatch.operations`) + validación Kotlin |
 | Documento serializado | 1 MiB | `DocumentStore` + `CHECK` sobre `doc_bytes` (`02 §2` V32) |
 | Asset por archivo | 15 MiB | `EditorAssetService` por `Content-Length` y lectura contada |
 | Assets por invitación | 200 (cuota blanda) | `AssetStore` |
 | Paquete de plantilla | 200 assets, 15 MiB cada uno, 2 MiB de JSON | `TemplateRegistrar` |
-| Secciones por documento | 16 | esquema (`document.ts:14`) |
-| Ítems por grupo | 24 | esquema (`blocks.ts:66`) |
+| Secciones por documento | 16 | esquema (`document.ts` `Structure`) |
+| Ítems por grupo | 24 | esquema (`blocks.ts` `GroupValue`) |
 
 **Cómo se aplica el límite de cuerpo (corrección 1R, objeción A-10).** El borrador decía "límite de Spring MVC a configurar". **Spring MVC no tiene tal ajuste para cuerpos JSON**: `server.tomcat.max-http-form-post-size` solo afecta a `application/x-www-form-urlencoded`, y `spring.servlet.multipart.*` solo a multipart. Para un `application/json` no hay límite de plataforma. Por tanto se implementa `Templates2BodyLimitFilter` (`OncePerRequestFilter` registrado solo para `/editor/**` y `/master/templates2/**`): rechaza con `413 TPL_BODY_TOO_LARGE` si `Content-Length` excede el límite de la ruta y, cuando no hay `Content-Length` (`Transfer-Encoding: chunked`), envuelve el `InputStream` en uno contado que aborta al superarlo. Sin este filtro, H-45 ("acepta cualquier JSON") seguiría vivo en el módulo nuevo.
 
@@ -450,7 +457,7 @@ Regla dura (ADR-016): **ninguna ruta de `templates2` devuelve un 500 sin `code`*
 | `OperationBatch` | `(document_id, clientBatchId)` | retención de snapshots (200 rev. / 30 d) | `200 {applied:false, revision:<la que produjo>}` |
 | Subida de asset | `(invitation_id, sha256)` | permanente | `200 {reused:true, assetId:<el existente>}` |
 | Publicación | `content_hash` del release activo | mientras siga activo | `200` con el release existente, sin fila nueva |
-| Creación perezosa del documento | `UNIQUE (invitation_id)` + `ON CONFLICT DO NOTHING` | permanente | `200`, documento existente |
+| Creación del documento (`:choose-template`; **nunca** un `GET`, X-07) | `UNIQUE (invitation_id)` + `ON CONFLICT DO NOTHING` | permanente | `200`, documento existente |
 | Despublicar | estado | — | `204` también si ya estaba despublicado |
 | Deprecar versión | estado | — | `200` también si ya estaba deprecada |
 | `restore`, `rotate` | **no idempotentes por diseño** | — | protegidas por `baseRevision` / por ser explícitas |
@@ -501,8 +508,8 @@ Notas: el `401` de la fila "Anónimo" lo produce `AuthEntryPointJwt` a través d
 | Restaurar la revisión de otro documento | `{"revision": 37}` esperando que sea global | las snapshots se resuelven **siempre** por `document_id` derivado del `invitationId` autorizado ⇒ `404 TPL_SNAPSHOT_NOT_FOUND` |
 | Referenciar un release ajeno | `releaseId` en el cuerpo | ninguna ruta acepta `releaseId` de entrada; el activo se resuelve por `invitation_id` |
 | Adivinar un enlace público | `publicToken` al azar | 80 bits aleatorios + misma respuesta `404` para token inexistente y sin release (§3.15) |
-| Escribir un bloque de negocio | `setBlock` sobre `blockId` con `source: "business"` | invariante I-21 ⇒ `422 TPL_BUSINESS_BLOCK_WRITE` |
-| Escribir `attic` directamente | `attic` en un cuerpo | `attic` no es escribible por ninguna operación del catálogo cerrado (`operations.ts:10-22`) |
+| Escribir un bloque no editable | `setBlock` sobre `blockId` con `source: "business"` o `"fixed"` | invariante I-21 ⇒ `422 TPL_BLOCK_NOT_EDITABLE` (`details.source`) |
+| Escribir `attic` directamente | `attic` en un cuerpo | `attic` no es escribible por ninguna operación del catálogo cerrado (`operations.ts` `Operation`) |
 | Colisión de `clientBatchId` entre invitaciones | mismo `clientBatchId` en dos invitaciones | la unicidad es `(document_id, client_batch_id)`, no global (`02 §2` V33) |
 | Elevar el `itemId` | `itemId` ULID inventado en `removeItem` | el reductor solo acepta ítems presentes en el grupo ⇒ `422 TPL_OPERATION_INVALID` |
 
@@ -593,7 +600,8 @@ Nombre del test · arreglo · acción · aserción. Los de persistencia pura viv
 19. `unknownBodyField_isRejected` · cuerpo con `"invitationId": 999` extra · `400 TPL_MALFORMED_JSON` (P1: no se descarta en silencio).
 20. `deprecatedVersion_cannotStartNewDocument` · versión `deprecated` · `:choose-template` · `404 TPL_TEMPLATE_VERSION_NOT_FOUND`.
 21. `snapshotOfAnotherDocument_isNotVisible` · revisión que existe en otro documento · `restore` · `404 TPL_SNAPSHOT_NOT_FOUND`.
-22. `businessBlockWrite_isRejected` · `setBlock` sobre bloque `source: "business"` · `422 TPL_BUSINESS_BLOCK_WRITE`.
+22. `businessBlockWrite_isRejected` · `setBlock` sobre bloque `source: "business"` · `422 TPL_BLOCK_NOT_EDITABLE` con `details.source == "business"`.
+22b. `fixedBlockWrite_isRejected` · `setBlock` sobre bloque `source: "fixed"` · `422 TPL_BLOCK_NOT_EDITABLE` con `details.source == "fixed"` (el caso que el nombre anterior `TPL_BUSINESS_BLOCK_WRITE` no cubría).
 
 **Límites**
 23. `bodyOver768KiB_isRejectedBeforeParsing` · cuerpo de 800 KiB · `413 TPL_BODY_TOO_LARGE`, sin traza de deserialización en el log.
@@ -627,7 +635,7 @@ Nombre del test · arreglo · acción · aserción. Los de persistencia pura viv
 
 - Si el bucket `ASSETS` es de lectura pública (`02 §10.4`). El render público lo asume; la propiedad `templates2.assets.public-base-url` permite corregirlo sin migrar nada.
 - Si existe una cuota real de almacenamiento por cliente/plan (supuesto: 200 assets/invitación).
-- Si `minPlanTier` debe bloquear `:choose-template` (supuesto: sí, `403 TPL_PLAN_TIER_INSUFFICIENT`, con `planTier` tomado de `BusinessSnapshot`, `esquema/composed.ts:18`).
+- Si `minPlanTier` debe bloquear `:choose-template` (supuesto: sí, `403 TPL_PLAN_TIER_INSUFFICIENT`, con `planTier` tomado de `BusinessSnapshot`, `esquema/composed.ts` `BusinessSnapshot.planTier`).
 - El dominio real del enlace público: se usa `app.frontend.url` (`application.yml:71-73`), que hoy vale `http://localhost` por defecto.
 - Si algún cliente actual depende del cuerpo de error existente (`ErrorMessage`) de forma que un cuerpo con `code` extra le moleste — el módulo nuevo no tiene consumidores todavía, así que el riesgo es nulo hoy.
 
@@ -638,7 +646,7 @@ Nombre del test · arreglo · acción · aserción. Los de persistencia pura viv
 | A-01 | **Alta** | No existía forma de **despublicar** ni de **revocar** un enlace filtrado; tampoco de listar/borrar assets ni de deprecar una versión | tabla de rutas del borrador (`03 §2`) | rutas 8, 9, 12, 14, 18, 19 añadidas con contrato completo (§3.8-3.10, §3.13, §3.18-3.19) | cerrada |
 | A-02 | Media | `/editor/**` no está en `SecurityConfig`: cae en `anyRequest().authenticated()`, sin regla de rol explícita | `SecurityConfig.kt:36-48` | `@PreAuthorize("hasAnyRole('USER','ADMIN','MASTER')")` a nivel de clase, posible por `@EnableMethodSecurity` (`SecurityConfig.kt:17`), sin tocar el núcleo (§2) | cerrada |
 | A-03 | Media | `:choose-template` no llevaba `baseRevision`: cambiar de plantilla desde una pestaña vieja pisaba trabajo ajeno | `03 §3.1` del borrador | `baseRevision` obligatorio cuando el documento ya existe (§3.2) | cerrada |
-| A-04 | Media | La resolución de `tempId` **dentro** del mismo lote no estaba especificada, y el esquema la permite | `esquema/operations.ts:8,15-17` | mapa `tempId → ULID` durante la aplicación + `TPL_TEMP_ID_UNRESOLVED`/`TPL_TEMP_ID_DUPLICATE` (§3.4 punto 2) | cerrada |
+| A-04 | Media | La resolución de `tempId` **dentro** del mismo lote no estaba especificada, y el esquema la permite | `esquema/operations.ts` `AnyItemId` / `setItemBlock` | mapa `tempId → ULID` durante la aplicación + `TPL_TEMP_ID_UNRESOLVED`/`TPL_TEMP_ID_DUPLICATE` (§3.4 punto 2) | cerrada |
 | A-05 | **Alta** | La idempotencia del `OperationBatch` era nominal: tras un timeout el cliente reenvía con la misma `baseRevision` y el lote se aplica dos veces | razonamiento del borrador en `03 §3.3` | unicidad `(document_id, clientBatchId)` + respuesta `200 {applied:false}` (§3.4 punto 6, `02 §2` V33) | cerrada |
 | A-06 | Media | 15 MiB por multipart es imposible con la configuración real (por defecto 1 MB) y elevarla relajaría una protección del módulo antiguo | ausencia de `spring.servlet.multipart` en `src/main/resources`; `FileValidationService.kt:11` | subida de assets por **cuerpo binario crudo**, sin cambio global (§3.7). La única multipart que queda es la ruta MASTER, con cambio declarado | cerrada |
 | A-07 | **Alta** | Un `public_token` filtrado no se podía revocar: era "estable de por vida" sin ninguna vía de rotación | `02 §2` V32 del borrador | `POST .../public-token:rotate` (§3.10) + `unpublish` (§3.13) | cerrada |
@@ -652,4 +660,4 @@ Nombre del test · arreglo · acción · aserción. Los de persistencia pura viv
 | A-15 | Media | 401/403 de la cadena de seguridad no pueden llevar `TPL_*` y el contrato daba a entender lo contrario | `SecurityConfig.kt:34-35`; `JwtTokenFilter.kt:44,49,54` | límite explícito documentado (§9.1 nota, §10.4) para que fase 2 no escriba pruebas imposibles | cerrada |
 | A-16 | Baja | No existía código para "S3 no responde": habría acabado en un 500 genérico | ADR-016 | `TPL_ASSET_STORAGE_UNAVAILABLE` (502) y handler de `SdkException` (§5, §10.3) | cerrada |
 
-**Contradicciones.** De las cinco que detecté contra `01-dominio-y-esquema.md`/`esquema/*.ts`, cuatro (C-01 `richText` sin validación de longitud, C-03 `StructureEntry.order`, C-04 clave de `attic`, C-05 `CompositionReport.fallbacks`) **las resolvió `1R-dominio` en paralelo durante esta misma ronda** — verificado al cerrar: `invariants.ts` valida ya la longitud de `richText`, `document.ts` usa `AtticKey` (`<slug>@<semver>`) y `composed.ts` mantiene `stillDefault`/`invalidValues`. Los contratos de este documento ya seguían el esquema TS, así que no requieren cambio. Queda **una** para dirimir: **C-02**, `GET .../document` perezoso según ADR-013 frente a creación exclusiva por `:choose-template` (§3.3). Ambas posturas en `handoffs/1R-backend.md` §C.
+**Contradicciones.** De las cinco que detecté contra `01-dominio-y-esquema.md`/`esquema/*.ts`, cuatro (C-01 `richText` sin validación de longitud, C-03 `StructureEntry.order`, C-04 clave de `attic`, C-05 `CompositionReport.fallbacks`) **las resolvió `1R-dominio` en paralelo durante esta misma ronda** — verificado al cerrar: `invariants.ts` valida ya la longitud de `richText`, `document.ts` usa `AtticKey` (`<slug>@<semver>`) y `composed.ts` mantiene `stillDefault`/`invalidValues`. Los contratos de este documento ya seguían el esquema TS, así que no requieren cambio. **C-02 quedó dirimida a favor de este documento** (X-07 / ADR-1R-X-03): la creación es exclusiva de `:choose-template` y `GET .../document` responde `404 TPL_DOCUMENT_NOT_STARTED` (§3.3). Crear en el `GET` obligaría al servidor a elegir plantilla por defecto (contra P3) y reintroduciría H-39. ADR-013 queda enmendada en esa cláusula.

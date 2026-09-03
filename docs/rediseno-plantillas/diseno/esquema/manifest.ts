@@ -50,6 +50,15 @@ export const AssetEntry = z.strictObject({
 });
 
 /** Capacidades declaradas (sustituyen a templateId mágicos, H-11/H-12). */
+/**
+ * Capacidades DECLARADAS por la plantilla (nunca un `templateId` mágico, H-11). Son propiedad del paquete,
+ * no dato de ninguna invitación: no viajan en `InvitationDocument` y el cliente no las edita.
+ * `singlePlace` (X-16): se mantiene. `itemsSinglePlace` del módulo antiguo nunca llegó a las fases F2/F3 del
+ * generador (H-12), así que NINGUNA invitación existente tiene datos de origen para ella; solo puede poblarse
+ * desde F1 (el JSON del repositorio) como *default de plantilla* (`05 §2`, `§7 tabla de mapeo`). Que no haya
+ * datos de origen es exactamente el motivo de conservarla: es la funcionalidad que H-12 dejó muerta y que el
+ * módulo nuevo repara. Retirarla del enum sería normalizar la pérdida.
+ */
 export const Capability = z.enum(["singlePlace", "story", "hashtags", "music", "countdown"]);
 
 /** template.json */

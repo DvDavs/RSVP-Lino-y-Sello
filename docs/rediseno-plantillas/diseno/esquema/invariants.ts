@@ -19,7 +19,12 @@ export type InvariantCode =
   // añadidas en la ronda 1R (ver 01 §11, tabla de objeciones)
   | "I-24_REORDER_NOT_A_PERMUTATION" | "I-25_GROUP_ROLE_MISMATCH" | "I-26_SINGLETON_ROLE_DUPLICATE"
   | "I-27_LOCALIZED_TEXT_MISSING_LOCALE" | "I-28_DEFAULT_FOR_BUSINESS_BLOCK"
-  | "I-29_RESERVED_OBJECT_KEY";
+  | "I-29_RESERVED_OBJECT_KEY"
+  // añadida en la ronda de dirimición (X-06): constraint declarada en blocks.ts que nadie validaba
+  | "I-30_TEXT_MULTILINE_NOT_ALLOWED";
+// `I-31_PALETTE_CONTRAST_BELOW_AA` queda RESERVADO para ADR-1R-F-06 (`04 §17.1`, decisión X-03).
+// No se declara aquí hasta que esa ADR se acepte: un código en `InvariantCode` sin implementación ni
+// fichero de casos rompería la prueba de exhaustividad de `06 §4.2`.
 
 /**
  * I-29 — claves reservadas del objeto de JavaScript en cualquier mapa por id (`content`, `defaults.content`,
@@ -180,6 +185,10 @@ export function validateValueAgainstSpec(spec: BlockSpec, value: { kind: string 
     case "text": {
       const s = value.value as string;
       if (s.length > spec.constraints.maxLength || s.length < spec.constraints.minLength) v.push({ code: "I-16_TEXT_TOO_LONG", path });
+      // I-30 (X-06): `multiline: false` prohíbe saltos de línea en el valor. Antes era una constraint
+      // declarada que no comprobaba nadie: el editor pintaba un <input>, pero la API y la IA escriben
+      // sin pasar por él y un "\n" rompe la maquetación de la sección.
+      if (!spec.constraints.multiline && /[\r\n]/.test(s)) v.push({ code: "I-30_TEXT_MULTILINE_NOT_ALLOWED", path });
       break;
     }
     case "richText": {

@@ -170,7 +170,7 @@ export default defineConfig({
 | `packages/sections` | Vitest v8 | líneas 70 / funciones 75 / ramas 60 | idem |
 | `apps/web` (lógica, no e2e) | Vitest v8 | líneas 60 / funciones 65 / ramas 50 | idem |
 | Esquemas exportados de `packages/schema` | §5.3 (prueba mecánica, no porcentaje) | **100 %** con ≥1 caso positivo y ≥1 negativo | `vitest run schema-coverage.contract.test.ts` |
-| Invariantes I-01…I-29 | §4 (tabla compartida) | **100 %** con ≥1 caso que viola y ≥1 que no | `./gradlew test` + `vitest run` |
+| Invariantes I-01…I-30 | §4 (tabla compartida) | **100 %** con ≥1 caso que viola y ≥1 que no | `./gradlew test` + `vitest run` |
 | Tipos de bloque (14) | §5.2 | **100 %** con la matriz completa | idem |
 | e2e | §8 | los 6 escenarios en verde | `playwright test` |
 | a11y | `@axe-core/playwright` | 0 violaciones `critical`/`serious` en el render público de los 2 ejemplos | `playwright test e2e/a11y.spec.ts` |
@@ -237,7 +237,7 @@ object Golden {
 
 Golden de **migración de versión**: por cada `MigrationPlan` registrado, un par `antes.json`/`despues-esperado.json`; la prueba corre `migrate()` y compara canónicamente.
 
-## 4. Las 29 invariantes, una por una (ADR-005, ADR-034, ronda 1R)
+## 4. Las 30 invariantes, una por una (ADR-005, ADR-034, ronda 1R)
 
 > **Sincronización de la ronda 1R (releído al cerrar este documento).** La versión previa decía "un archivo por invariante `I-01`…`I-21`". Cuando empecé la revisión el catálogo tenía **23** (`contratos.md` §3, ADR-034). Al cerrar, el agente `1R-dominio` había ampliado `esquema/invariants.ts` a **29** (`I-24`…`I-29`) **[V]**, y de paso había cerrado dos de mis objeciones: `richText.maxLength` ya se valida (`invariants.ts` `case "richText"`) y `z.any()` ya no aparece en `composed.ts`. La tabla de abajo cubre las **29**; los umbrales, el formato y los runners no cambian. Que el número haya pasado de 21 → 23 → 29 en una sola fase es precisamente la razón por la que la prueba de inventario de §3 y la de exhaustividad de §4.2 existen: el catálogo va a seguir creciendo y ninguna ampliación puede entrar sin su fichero de casos en los dos lados.
 
@@ -274,6 +274,11 @@ Enumeradas con el caso mínimo que cada fichero debe contener. Cada fichero llev
 | **I-27** `LOCALIZED_TEXT_MISSING_LOCALE` | `validateManifest` | `label` sin `en-US` cuando `manifest.locales` lo declara | todos los locales presentes | `locales:["es-MX"]` y `label` solo con `es-MX` (no viola) |
 | **I-28** `DEFAULT_FOR_BUSINESS_BLOCK` | `validateManifest` | `defaults.content[x]` sobre un bloque `source:"business"` — contenido muerto, R4 lo ignora siempre | default sobre un bloque `source:"user"` | default sobre `source:"fixed"` (fijar el comportamiento: hoy **no** viola: la comprobación de `validateManifest` solo mira `source === "business"`) |
 | **I-29** `RESERVED_OBJECT_KEY` | `assertNoReservedKeys(raw)` sobre el **JSON crudo, antes de `parse()`** | `content` con la clave `__proto__` — verificado por `1R-dominio` que Zod la descarta **en silencio** y ajv la rechaza, es decir, TS y Kotlin discreparían | claves normales | `"constructor"` y `"prototype"`, que sí casan con el patrón de `BlockId`; y la misma clave dentro de `attic` y de `GroupItem.values` |
+| **I-30** `TEXT_MULTILINE_NOT_ALLOWED` | `validateValueAgainstSpec`, rama `text` | `{kind:"text", value:"Ana\nMaría"}` contra un spec con `multiline: false` | el mismo valor sin salto de línea | el mismo valor con `multiline: true` (no viola); `"\r"` solo (viola: se comprueban `\r` y `\n`) |
+
+**`I-31_PALETTE_CONTRAST_BELOW_AA` está reservado, no implementado** (X-03): entra en este catálogo, en `esquema/invariants.ts` y en `golden/invariants/` cuando el orquestador acepte ADR-1R-F-06. Hasta entonces no debe declararse en `InvariantCode`: la prueba de exhaustividad de §4.2 fallaría por un fichero de casos que no puede existir todavía.
+
+**Constraints de `blocks.ts` que ya no quedan sin validador (objeción Q-05, decisión X-06):** `text.multiline` → I-30 (arriba); `text.pattern` → **retirada del esquema** (dos motores de regex, `RegExp` de JS y `java.util.regex`, no garantizan la misma respuesta sobre el mismo documento: P1 lo prohíbe, y además es superficie de ReDoS); `image.maxBytes`, `audio.maxBytes` e `image.aspect` → no son comprobables contra el valor (`ImageValue`/`AudioValue` solo llevan `assetId`) y se comprueban en el reductor con los metadatos de `tpl_asset`, con `TPL_ASSET_SPEC_MISMATCH` (`01 §6.5`, `03 §5`). Sus casos van a `golden/blocks/` como casos del reductor, no de `validateValueAgainstSpec`.
 
 Forma del fichero (`golden/invariants/I-01-range-end-before-start.json`):
 ```json
@@ -295,21 +300,21 @@ El campo `fn` (`validateManifest` | `validateDocument` | `validateValueAgainstSp
 
 Una sola prueba parametrizada en TS y otra en Kotlin recorren el mismo fichero. CI corre ambas sobre el mismo commit, así que una divergencia entre `invariants.ts` e `Invariants.kt` no puede mergearse.
 
-### 4.1 Huecos que quedan en el catálogo (objeción Q-05, contradicción a dirimir CD-4)
+### 4.1 Constraints declaradas y quién las verifica (objeción Q-05, cerrada por la decisión X-06)
 
-`validateValueAgainstSpec` (`esquema/invariants.ts`) tiene `case` para `text`, `richText`, `listText`, `dateTimeRange`, `choice` y `group`. **Las restricciones declaradas en los demás specs siguen sin verificarse** **[V]** — con `richText.maxLength` ya cerrado por `1R-dominio` durante esta misma ronda:
+`validateValueAgainstSpec` (`esquema/invariants.ts`) tiene `case` para `text`, `richText`, `listText`, `dateTimeRange`, `choice` y `group`. Al abrir la ronda había **6 restricciones declaradas que no verificaba nadie**; `1R-dominio` cerró `richText.maxLength` en paralelo y la dirimición X-06 (ADR-1R-X-02) cerró las cinco restantes, cada una donde le corresponde:
 
 | Restricción declarada | Dónde | Invariante que la verifica |
 |---|---|---|
 | `RichTextSpec.constraints.maxLength` | `blocks.ts` `RichTextSpec` | **cerrada en la ronda 1R** (`case "richText"` + `richTextLength()`) |
-| `TextSpec.constraints.pattern` | `blocks.ts` `TextSpec` | **ninguna** |
-| `TextSpec.constraints.multiline` | `blocks.ts` `TextSpec` | **ninguna** |
-| `ImageSpec.constraints.aspect` | `blocks.ts` `ImageSpec` | **ninguna** |
-| `ImageSpec.constraints.maxBytes` | `blocks.ts` `ImageSpec` | **ninguna** aquí (`03 §3.4` la mira en la subida, con otro límite) |
-| `AudioSpec.constraints.maxBytes` | `blocks.ts` `AudioSpec` | **ninguna** |
+| ~~`TextSpec.constraints.pattern`~~ | — | **retirada del esquema** (X-06): `RegExp` de JS y `java.util.regex` de Kotlin no garantizan la misma respuesta sobre el mismo documento (P1), y es superficie de ReDoS |
+| `TextSpec.constraints.multiline` | `blocks.ts` `TextSpec` | **`I-30_TEXT_MULTILINE_NOT_ALLOWED`** en `validateValueAgainstSpec` (X-06) |
+| `ImageSpec.constraints.aspect` | `blocks.ts` `ImageSpec` | **reductor**, con `assetMeta.width/height` → `TPL_ASSET_SPEC_MISMATCH` (`01 §6.5`). No es comprobable contra el valor: `ImageValue` solo lleva `assetId` |
+| `ImageSpec.constraints.maxBytes` | `blocks.ts` `ImageSpec` | **reductor**, con `assetMeta.bytes` → `TPL_ASSET_SPEC_MISMATCH`. El límite global de subida de `03 §3.4` es otro y más laxo: este es el del bloque |
+| `AudioSpec.constraints.maxBytes` | `blocks.ts` `AudioSpec` | **reductor**, igual que el anterior |
 | `ChoiceSpec.options[].label` no vacía | `blocks.ts` `ChoiceSpec` | cubierta por Zod |
 
-Quedan **5 huecos**. Es el mismo patrón que ADR-005 quiso eliminar: una regla escrita en el esquema que ningún validador aplica. **No se resuelve aquí** (el bloque 01 es de otro autor y este documento no lo edita): se registra como contradicción a dirimir CD-4 y, mientras tanto, `06` fija una prueba que lo hace visible en vez de silencioso — `invariant-gaps.contract.test.ts` enumera cada `constraints.*` declarado en `blocks.ts` y falla si no hay un fichero `golden/invariants/I-xx-*.json` que lo ejercite. Hoy fallaría con 5 huecos; es la señal correcta, y bajó de 6 a 5 durante esta ronda sin que nadie tuviera que acordarse de mirarlo: exactamente para eso está la prueba.
+**Quedan 0 huecos**, pero la prueba se queda: `invariant-gaps.contract.test.ts` enumera cada `constraints.*` declarado en `blocks.ts` y falla si no hay ni un fichero `golden/invariants/I-xx-*.json` ni un fichero `golden/operations/<op>.cases.json` que lo ejercite — las tres restricciones de asset se prueban como casos del **reductor** (`assetMeta` inyectado con `bytes`/`width`/`height`), no de `validateValueAgainstSpec`. La cuenta fue 6 → 5 → 0 en una sola fase sin que nadie tuviera que acordarse de mirarlo: exactamente para eso está la prueba, y por eso sigue en verde en lugar de borrarse.
 
 ### 4.2 Exhaustividad del catálogo
 
@@ -329,20 +334,20 @@ Un fichero `golden/blocks/<kind>.cases.json` por tipo. Cada uno contiene, **como
 
 | # | `kind` | `P` mínimo | `N-limit` específico | Trampa que la prueba debe fijar |
 |---|---|---|---|---|
-| 1 | `text` | `{kind:"text",value:"Ana"}` | `value` de 2001 chars (`blocks.ts:8`) | `value:""` con `minLength:0` **es válido**; con `minLength:1` viola I-16 |
-| 2 | `richText` | `doc` con 1 párrafo y 1 span | 41 párrafos (`RichDoc.max(40)`) | `marks:["bold","italic","bold"]` (>2, `blocks.ts:14`); `href` con `javascript:` debe fallar el patrón `HttpUrl` |
+| 1 | `text` | `{kind:"text",value:"Ana"}` | `value` de 2001 chars (`blocks.ts` `TextValue`) | `value:""` con `minLength:0` **es válido**; con `minLength:1` viola I-16 |
+| 2 | `richText` | `doc` con 1 párrafo y 1 span | 41 párrafos (`RichDoc.max(40)`) | `marks:["bold","italic","bold"]` (>2, `blocks.ts` `RichSpan`); `href` con `javascript:` debe fallar el patrón `HttpUrl` |
 | 3 | `listText` | `{items:["a"]}` | 13 ítems (`max(12)`) | `items:[]` con `minItems:0` válido; ítem de 201 chars → I-16 |
 | 4 | `image` | `{assetId:"as_<ULID>",alt:"",focal:{x:0,y:0}}` | `focal.x = 1.1` | `assetId` sin prefijo `as_`; **`alt:""` es válido** (imagen decorativa) y a11y debe tolerarlo |
-| 5 | `audio` | `{assetId:"as_<ULID>"}` | — | `assetId` con ULID en minúsculas (Crockford exige mayúsculas, `common.ts:22`) |
-| 6 | `date` | `{value:"2026-12-31"}` | `"2026-13-01"` | `"2026-02-30"` **pasa el regex** (`common.ts:53` no valida días por mes) — fijar que es un hueco conocido y decidir si se cierra |
+| 5 | `audio` | `{assetId:"as_<ULID>"}` | — | `assetId` con ULID en minúsculas (Crockford exige mayúsculas, `common.ts` `Ulid`) |
+| 6 | `date` | `{value:"2026-12-31"}` | `"2026-13-01"` | `"2026-02-30"` **pasa el regex** (`common.ts` `IsoDate` no valida días por mes) — fijar que es un hueco conocido y decidir si se cierra |
 | 7 | `time` | `{value:"23:59"}` | `"24:00"` | `"9:30"` (sin cero a la izquierda) debe fallar |
 | 8 | `dateTimeRange` | `{start:"2026-12-31T16:00"}` | `end` anterior → I-01 | comparación de strings ISO es correcta **solo** sin zona; fijar que `start` con `Z` falla el regex |
-| 9 | `link` | `{href:"https://a.mx"}` | `label` de 81 chars | `href:"javascript:alert(1)"` rechazado por `HttpUrl` (`common.ts:60`) |
+| 9 | `link` | `{href:"https://a.mx"}` | `label` de 81 chars | `href:"javascript:alert(1)"` rechazado por `HttpUrl` (`common.ts` `HttpUrl`) |
 | 10 | `location` | `{name:"Templo"}` | `name:""` (min 1) | `mapHref` no-http rechazado |
 | 11 | `choice` | `{optionId:"cash"}` | `optionId:"CASH"` (mayúsculas: `Ident` es kebab minúscula) | `optionId` válido en forma pero ausente de `spec.options` → I-02 |
 | 12 | `boolean` | `{value:true}` | `value:"true"` | — |
 | 13 | `person` | `{name:"Ana"}` | `name:""` | `note` de 201 chars |
-| 14 | `group` | `{items:[{itemId:ULID,values:{}}]}` | 25 ítems (`max(24)`) | `values` con clave no declarada → I-18; `itemId` duplicado → I-03; **grupo anidado dentro de `values` debe fallar** (`ScalarValue` no incluye `GroupValue`, `blocks.ts:56`) |
+| 14 | `group` | `{items:[{itemId:ULID,values:{}}]}` | 25 ítems (`max(24)`) | `values` con clave no declarada → I-18; `itemId` duplicado → I-03; **grupo anidado dentro de `values` debe fallar** (`ScalarValue` no incluye `GroupValue`, `blocks.ts` `ScalarValue`) |
 
 Prueba de exhaustividad (`block-kinds.contract.test.ts`): enumera `BlockKind.options` (14) y falla si falta un fichero de casos o si algún fichero no contiene los 6 tipos de caso. Así el catálogo no puede crecer sin pruebas.
 
@@ -360,9 +365,9 @@ const EXPORTED = Object.entries(schema).filter(([, v]) => v instanceof z.ZodType
 ```
 El punto 3 es el que detecta un `.refine()` colado: Zod diría inválido y el JSON Schema válido. Complementa al lint de §7, no lo reemplaza.
 
-### 5.4 Las 10 operaciones
+### 5.4 Las 11 operaciones
 
-Un fichero `golden/operations/<op>.cases.json` por cada miembro del `discriminatedUnion` de `esquema/operations.ts:10-22` (`setBlock`, `clearBlock`, `addItem`, `removeItem`, `moveItem`, `setItemBlock`, `setSectionVisible`, `setSectionVariant`, `reorderSections`, `setTheme`). Cada uno con: forma válida; forma inválida por Zod; operación **válida en forma pero inválida contra el manifiesto** (`blockId` inexistente, `sectionKey` inexistente, `variant` no declarada, `paletteId` no declarada, `itemId` inexistente); y el resultado esperado del reductor sobre un documento base fijo. Los mismos ficheros los consume el pipeline de IA (`07 §3`).
+Un fichero `golden/operations/<op>.cases.json` por cada miembro del `discriminatedUnion` de `esquema/operations.ts` `Operation` (`setBlock`, `clearBlock`, `addItem`, `removeItem`, `moveItem`, `setItemBlock`, **`clearItemBlock`** (X-05), `setSectionVisible`, `setSectionVariant`, `reorderSections`, `setTheme`). Cada uno con: forma válida; forma inválida por Zod; operación **válida en forma pero inválida contra el manifiesto** (`blockId` inexistente, `sectionKey` inexistente, `variant` no declarada, `paletteId` no declarada, `itemId` inexistente); y el resultado esperado del reductor sobre un documento base fijo. Los mismos ficheros los consume el pipeline de IA (`07 §3`).
 
 ## 6. Postgres efímero en pruebas (ADR-025 + ADR-1R-C-10)
 
@@ -425,7 +430,7 @@ waiting for server to shut down.... done · server stopped
 ```
 `fsync=off`/`synchronous_commit=off` son seguros y deseables aquí: el clúster se borra al terminar. `--locale=C` hace determinista el `ORDER BY` sobre texto entre máquinas.
 
-**Ciclo de vida en JUnit5:** un `@BeforeAll` a nivel de **suite**, no de clase, vía `@TestInstance(PER_CLASS)` sobre una clase base con un `static` guardado en `ExtensionContext.Store` de raíz, o —preferido por simplicidad— un `TestExecutionListener` registrado en `META-INF/services/org.junit.platform.launcher.TestExecutionListener` que arranca en `testPlanExecutionStarted` y para en `testPlanExecutionFinished`. Un solo arranque por corrida de Gradle. Flyway aplica `V29`-`V36` (más las de fase 2) contra ese clúster antes del primer test; entre clases de prueba se hace `TRUNCATE ... RESTART IDENTITY CASCADE` de las tablas `tpl_*`, nunca se recrea el esquema.
+**Ciclo de vida en JUnit5:** un `@BeforeAll` a nivel de **suite**, no de clase, vía `@TestInstance(PER_CLASS)` sobre una clase base con un `static` guardado en `ExtensionContext.Store` de raíz, o —preferido por simplicidad— un `TestExecutionListener` registrado en `META-INF/services/org.junit.platform.launcher.TestExecutionListener` que arranca en `testPlanExecutionStarted` y para en `testPlanExecutionFinished`. Un solo arranque por corrida de Gradle. Flyway aplica `V29`-`V37` (`02 §2`; más las de fase 2) contra ese clúster antes del primer test; entre clases de prueba se hace `TRUNCATE ... RESTART IDENTITY CASCADE` de las tablas `tpl_*`, nunca se recrea el esquema.
 
 **H2 queda descartado**, sin excepción: no soporta `@>` ni `->>` sobre JSONB, que es exactamente lo que hay que probar (`02 §2.2`, filtro de catálogo por `event_kinds`), ni los índices `GIN`, ni `INSERT … ON CONFLICT … DO UPDATE` con la semántica de `02 §2.4`/`05 §7.1`.
 
@@ -718,10 +723,10 @@ Los tres jobs son obligatorios para mergear (ADR-026). `backend` y `frontend` co
 
 Por severidad de consecuencia silenciosa, siguiendo `handoffs/0-resumen-auditoria-pruebas.md`:
 
-1. Tabla de invariantes I-01…I-29 en ambos lados (§4) — sin ella, ADR-005 es una promesa.
+1. Tabla de invariantes I-01…I-30 en ambos lados (§4) — sin ella, ADR-005 es una promesa.
 2. Golden de composición de los 2 ejemplos (§3) — fija R1-R9 antes de tocar el motor.
 3. Matriz de los 14 tipos de bloque (§5.2).
-4. Casos de las 10 operaciones + reductor (§5.4).
+4. Casos de las 11 operaciones + reductor (§5.4).
 5. Contrato de API por código `TPL_*` (`03 §5`), con Postgres real.
 6. Golden de migración de versión.
 7. E2E-01…E2E-06.
@@ -744,8 +749,8 @@ Ronda 1R, 2026-09-03. Revisor: `1R-calidad`. Método: relectura adversarial cont
 | **Q-02** | **Alta** | Los umbrales de ADR-024 no eran verificables: `jacocoTestCoverageVerification` sin ninguna configuración, y `08 §2` mencionaba Kover como alternativa. **Kover 0.9.1 no admite umbrales por paquete** | `javap KoverVerifyRule` (sin `filters`); error de compilación del script; ejecución de JaCoCo con dos reglas y dos umbrales, `EXIT=1` | §2.1: JaCoCo 0.8.12 elegido con evidencia, configuración Gradle completa, comando que falla la build (ADR-1R-C-08) | corregido |
 | **Q-03** | **Alta** | El script de `initdb`/`pg_ctl` de §6 **no funciona en este entorno**: `initdb: error: cannot be run as root` | ejecución propia | §6.2: script corregido con delegación en el usuario `postgres`, ejecutado con éxito (salida literal incluida) — ADR-1R-C-10 | corregido |
 | **Q-04** | **Alta** | §4 hablaba de "las 21 invariantes I-01…I-21"; al empezar la revisión el catálogo tenía **23** (ADR-034) y al cerrarla **29** (`1R-dominio` añadió I-24…I-29 en paralelo), y ninguna estaba enumerada con sus casos | `esquema/invariants.ts` `InvariantCode`; `contratos.md` §3 | §4: las **29** enumeradas con caso que viola, caso que no y caso extra; formato de fichero fijado; §4.2 prueba de exhaustividad para que la próxima ampliación no vuelva a pasar desapercibida | corregido |
-| **Q-05** | **Alta** | 6 restricciones declaradas en `blocks.ts` no las verificaba ninguna invariante: es el defecto que ADR-005 quiso eliminar, en otro sitio. `1R-dominio` cerró `richText.maxLength` durante la ronda; **quedan 5** (`text.pattern`, `text.multiline`, `image.aspect`, `image.maxBytes`, `audio.maxBytes`) | `esquema/invariants.ts` (switch de 6 casos) vs `blocks.ts` | §4.1: tabla del hueco + prueba `invariant-gaps.contract.test.ts` que lo hace fallar en vez de silenciarlo. **No se corrige el esquema aquí** (otro bloque): contradicción a dirimir CD-4, ya reducida | registrado |
-| **Q-06** | **Alta** | No había casos de contrato por tipo de bloque (14) ni por operación (10); "100 % de esquemas exportados" no era mecánicamente comprobable | brief 1R; `blocks.ts:74-77`, `operations.ts:10-22` | §5.2 (matriz de 6 casos × 14 tipos, con la trampa concreta de cada uno), §5.3 (regla mecánica de 3 puntos), §5.4 (10 operaciones) | corregido |
+| **Q-05** | **Alta** | 6 restricciones declaradas en `blocks.ts` no las verificaba ninguna invariante: es el defecto que ADR-005 quiso eliminar, en otro sitio | `esquema/invariants.ts` (switch de 6 casos) vs `blocks.ts` | §4.1: tabla + prueba `invariant-gaps.contract.test.ts` que lo hace fallar en vez de silenciarlo. `1R-dominio` cerró `richText.maxLength` durante la ronda y la dirimición **X-06 (ADR-1R-X-02) cerró las 5 restantes**: `pattern` retirada, `multiline` → I-30, y las tres de asset al reductor con `TPL_ASSET_SPEC_MISMATCH` | cerrado |
+| **Q-06** | **Alta** | No había casos de contrato por tipo de bloque (14) ni por operación (10); "100 % de esquemas exportados" no era mecánicamente comprobable | brief 1R; `blocks.ts` `BlockKind`, `operations.ts` `Operation` | §5.2 (matriz de 6 casos × 14 tipos, con la trampa concreta de cada uno), §5.3 (regla mecánica de 3 puntos), §5.4 (11 operaciones) | corregido |
 | **Q-07** | Media | Golden files en **dos** rutas con "symlink o copia" — el mecanismo por el que dos representaciones divergen (H-35) | texto original `06:25`,`06:44` | §3: ruta única `frontend/packages/schema/golden/**`, leída por Gradle con `sourceSets.test.resources.srcDir(...)` y por TS con `import.meta.url`; prueba de inventario contra la deriva (ADR-1R-C-09) | corregido |
 | **Q-08** | Media | Umbral TS solo de líneas. Verificado que con el provider `v8` una función de una sola sentencia nunca llamada puede reportar `Lines 100 %` y solo `Functions 50 %` | ejecución propia de `vitest@3.2.7` | §2.2: umbral obligatorio de `functions` además de `lines`, `branches` y `statements` | corregido |
 | **Q-09** | Media | No había escenarios e2e nombrados ni política anti-flake | brief 1R | §8.1 (6 escenarios con fichero y criterio) y §8.2 (8 reglas, con cuarentena prohibida sin issue y fecha límite) — ADR-1R-C-11 | corregido |
@@ -753,4 +758,4 @@ Ronda 1R, 2026-09-03. Revisor: `1R-calidad`. Método: relectura adversarial cont
 | **Q-11** | Baja | El lint de ADR-005 no cubría `.catch()` ni `z.any()`, y `z.any()` aparecía en `composed.ts` | `esquema/composed.ts:32` (estado al empezar la ronda) | §7: dos reglas nuevas. `1R-dominio` retiró el `z.any()` durante esta misma ronda, así que **CD-5 queda resuelto** y la regla de lint puede aplicarse sin excepciones | corregido |
 | **Q-12** | Baja | El job `backend` medía cobertura sobre todo el proyecto, donde el módulo antiguo sin pruebas hace inalcanzable el 80 % | H-19 | §2.1: `classDirectories` filtrado a `templates2/**` | corregido |
 
-**Contradicciones a dirimir:** **CD-4** (`validateValueAgainstSpec` no cubre 5 constraints de `blocks.ts`: `text.pattern`, `text.multiline`, `image.aspect`, `image.maxBytes`, `audio.maxBytes`). **CD-5 resuelto** durante la ronda por `1R-dominio` (retirado el `z.any()` de `composed.ts`). Ver `handoffs/1R-calidad.md`.
+**Contradicciones: ninguna abierta.** **CD-5** lo resolvió `1R-dominio` durante la ronda (retirado el `z.any()` de `composed.ts`). **CD-4** lo dirimió X-06 / ADR-1R-X-02: `text.pattern` retirada del esquema, `text.multiline` → `I-30`, y `image.aspect`/`image.maxBytes`/`audio.maxBytes` al reductor con `TPL_ASSET_SPEC_MISMATCH` (§4.1). Ver `handoffs/1R-dirimidor.md`.
