@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  postgres-db:
+    image: postgres:13
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution123
+      POSTGRES_DB: invitaciones
+    ports:
+      - "5501:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - spring-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d invitaciones"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-db:
+    image: mongo:6
+    container_name: mongo-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: evolution
+      MONGO_INITDB_ROOT_PASSWORD: evolution123
+      MONGO_INITDB_DATABASE: invitaciones
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - spring-network
+
+  spring-app:
+    build:
+      context: .
+      args:
+        - GRADLE_USER_HOME=/cache
+    container_name: spring-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/invitaciones
+      SPRING_DATASOURCE_USERNAME: evolution
+      SPRING_DATASOURCE_PASSWORD: evolution123
+      SPRING_DATA_MONGODB_URI: mongodb://evolution:evolution123@mongo-db:27017/invitaciones?authSource=admin
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      MAILERSEND_API_TOKEN: ${MAILERSEND_API_TOKEN}
+      MAILERSEND_FROM_EMAIL: ${MAILERSEND_FROM_EMAIL}
+      MAILERSEND_FROM_NAME: ${MAILERSEND_FROM_NAME}
+      WHATSAPP_PHONE_NUMBER_ID: 1257270407463833
+      WHATSAPP_ACCESS_TOKEN: EAALnnvKeQRwBRGrNQ02tZBZBlv83z0Xrk5vhKhhmOuEJX5m04ntH6PJOlnEPy7PY4xATNXZA0RAeZCRPiiZAj5cnGsorjH7FQbCPr7mCN1ZC8SmZCRur3RmuIlCj5gNOBHsM9g68bGLOqd4gwNBb7bOiNZAsZCIHDXe51ZBeEZAFMUxZCVxfQMyp7JiJryro4urvMuTZA8AZDZD
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      mongo-db:
+        condition: service_started
+    ports:
+      - "6003:6003"
+    volumes:
+      - gradle-cache:/cache
+    networks:
+      - spring-network
+
+volumes:
+  postgres_data:
+  gradle-cache:
+  mongo_data:
+
+networks:
+  spring-network:

@@ -1,0 +1,137 @@
+{
+  "eventTypeId": 1,
+  "planId": 1,
+  "images": {
+    "people": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/NOVIO.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/NOVIA.jpg"
+    ],
+    "coverPhoto": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/PORTADA-PREMIUM.jpg",
+    "gallery": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G1.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G2.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G3.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G4.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G5.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G6.jpg"
+    ],
+    "parents": {
+      "mother": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/madre_novio.jpg",
+      "father": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg"
+    },
+    "godparents": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg"
+    ],
+    "story": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium/noviazgo.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium/propuesta-matrimonio.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium/pedida-mano.jpg"
+    ],
+    "recommendations": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/hotel.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/sitio_taxi.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/renta_autos.jpeg"
+    ],
+    "amenities": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/salon_belleza.jpg"
+    ]
+  },
+  "phrases": {
+    "hombre": [
+      "Ante Dios y ante todos nuestros amigos y familiares, deseo que el mundo se entere que te tomo como esposa, para amarte, cuidarte y respetarte por siempre, jurarte fidelidad y compromiso; además de un amor puro y eterno. ¡Juntos por siempre, vida mía!"
+    ],
+    "mujer": [
+      "Mi amor, no encuentro las palabras adecuadas para expresar el gran amor que siento por ti... ¡Te Amo!"
+    ]
+  },
+  "itinerary": [
+    {
+      "eventName": "Ceremonia Religiosa",
+      "eventLocation": "Templo de Santo Domingo de Guzmán",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "startTime": "4:30 PM",
+      "endTime": "5:30 PM"
+    },
+    {
+      "eventName": "Recepción",
+      "eventLocation": "Zorba el Griego",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "startTime": "7:00 PM",
+      "endTime": "7:30 PM"
+    },
+    {
+      "eventName": "Fiesta",
+      "eventLocation": "Zorba el Griego",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "startTime": "7:30 PM",
+      "endTime": "2:00 AM"
+    }
+  ],
+  "giftRegistry": [
+    {
+      "type": "cash",
+      "name": "Depósito o transferencia",
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/banamex.jpg",
+      "icon": "fas fa-copy",
+      "message": [
+        "Banco: SANTANDER",
+        "Titular: KARLA ZARATE CRUZ",
+        "Cuenta CLABE: 014610606106246881",
+        "Número de tarjeta: 60610624688"
+      ]
+    },
+    {
+      "type": "digital",
+      "name": "Liverpool",
+      "message": ["Mesa Liverpool - Número de evento 50355602"],
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/liverpool.jpg"
+    }
+  ],
+  "music": {
+    "type": "custom",
+    "enabled": true,
+    "url": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/song.mp3"
+  },
+  "hashtags": ["#antonioYcamila"],
+  "dressCode": {
+    "women": {
+      "title": "Damas",
+      "description": "Vestido largo/corto o traje elegante.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_mujer.jpg"
+    },
+    "men": {
+      "title": "Caballeros",
+      "description": "Traje o smoking, corbata, zapatos de vestir.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_hombre.jpg"
+    }
+  },
+  "parents": {
+    "bride": {
+      "label": "(Padres de la Novia)",
+      "names": "Raul Estrada Santiago y Teresa Lopez",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/madre_novio.jpg"
+    },
+    "groom": {
+      "label": "(Padres del Novio)",
+      "names": "Martín Barrita y María Rocha Luis",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg"
+    }
+  },
+  "story": [
+    {
+      "title": "Inicio de nuestro noviazgo",
+      "date": "JUNIO 7, 2012",
+      "description": "Ese día me encontraba muy nervioso, pues ya llevábamos de amigos casi un año y era momento de que diéramos el primer paso en nuestra relación, así que me decidí a preguntarle si quería ser mi novia, gracias a dios ella aceptó e iniciamos esta hermosa aventura."
+    },
+    {
+      "title": "Propuesta de matrimonio",
+      "date": "DICIEMBRE 14, 2019",
+      "description": "Fue un dia maravilloso para los dos, no me lo esperaba, después de 8 años de novios, por fin Santiago decidió proponerme matrimonio y formalizar esta relación tan hermosa, él se lució y me sorprendió con la entrega del anillo de compromiso."
+    },
+    {
+      "title": "Pedida de mano",
+      "date": "DICIEMBRE 21, 2019",
+      "description": "Decidimos continuar con las tradiciones y ese día vino Santiago con toda su familia a mi casa a pedirle mi mano formalmente a mis padres para que ellos otorgaran su consentimiento de nuestro compromiso, una vez aceptado el mismo Santiago me sorprendió con un espectáculo de juegos pirotécnicos para celebrar la unión oficial de nuestra futura boda."
+    }
+  ]
+}

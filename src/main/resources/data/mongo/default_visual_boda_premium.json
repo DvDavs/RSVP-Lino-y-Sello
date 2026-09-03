@@ -1,0 +1,4813 @@
+{
+  "templateId": 5,
+  "config": {
+    "settings": {
+      "primaryColor": [241, 78, 149, 0.6],
+      "secondaryColor": [255, 255, 255, 1],
+      "music": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/song.mp3",
+      "child_friendly": false,
+      "young_friendly": false,
+      "name": "invitacion1"
+    },
+    "sectionCover": {
+      "visibility": true,
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "Antonio & Camila",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 100,
+          "lineHeight": 100,
+          "margin": [0, 0, 0, 0],
+          "color": [255, 255, 255, 1],
+          "background": [255, 255, 255, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 100,
+          "lineHeight": 150,
+          "margin": [0, 0, 0, 0],
+          "color": [255, 255, 255, 1],
+          "background": [255, 255, 255, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 90,
+          "margin": [0, 0, 0, 0],
+          "color": [255, 255, 255, 1],
+          "background": [255, 255, 255, 0]
+        }
+      },
+      "date": {
+        "day": "2025-10-25",
+        "hours": "16:30:00",
+        "md": {
+          "fontSize": 25,
+          "width": 90,
+          "height": 90,
+          "color": [255, 255, 255, 1],
+          "background": [241, 78, 149, 0.6],
+          "alignHorizontal": "center"
+        },
+        "sm": {
+          "fontSize": 25,
+          "width": 80,
+          "height": 80,
+          "color": [255, 255, 255, 1],
+          "background": [241, 78, 149, 0.6],
+          "alignHorizontal": "center"
+        },
+        "xs": {
+          "fontSize": 22,
+          "width": 72,
+          "height": 72,
+          "color": [255, 255, 255, 1],
+          "background": [241, 78, 149, 0.6],
+          "alignHorizontal": "center"
+        }
+      },
+      "button": {
+        "content": "Save the date",
+        "url": "#",
+        "md": {
+          "fontSize": 14,
+          "width": 147,
+          "height": 51,
+          "color": [241, 78, 149, 0.6],
+          "background": [255, 255, 255, 1],
+          "alignHorizontal": "center"
+        },
+        "sm": {
+          "fontSize": 14,
+          "width": 147,
+          "height": 51,
+          "color": [241, 78, 149, 0.6],
+          "background": [255, 255, 255, 1],
+          "alignHorizontal": "center"
+        },
+        "xs": {
+          "fontSize": 14,
+          "width": 147,
+          "height": 51,
+          "color": [241, 78, 149, 0.6],
+          "background": [255, 255, 255, 1],
+          "alignHorizontal": "center"
+        }
+      },
+      "coverImage": {
+        "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/PORTADA-PREMIUM.jpg",
+        "md": {
+          "width": 100,
+          "height": 100,
+          "alignHorizontal": "center",
+          "alignVertical": "top",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "sm": {
+          "width": 100,
+          "height": 100,
+          "alignHorizontal": "center",
+          "alignVertical": "top",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "xs": {
+          "width": 100,
+          "height": 100,
+          "alignHorizontal": "center",
+          "alignVertical": "top",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        }
+      }
+    },
+    "sectionCouple": {
+      "backgroundColor": {
+        "content": [0, 0, 0, 0.04]
+      },
+      "visibility": true,
+      "heading": {
+        "fontFamily": "Sacramento",
+        "content": "Save the date!",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "subheading": {
+        "fontFamily": "Work Sans",
+        "content": "¡Nos casamos!",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 22,
+          "lineHeight": 22,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 22,
+          "lineHeight": 22,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 22,
+          "lineHeight": 22,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "datetime": {
+        "fontFamily": "Work Sans",
+        "content": "17 de Julio de 2025, 4:30 PM",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 24,
+          "lineHeight": 24,
+          "margin": [0, 0, 0, 0],
+          "color": [0, 0, 0, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 24,
+          "lineHeight": 24,
+          "margin": [0, 0, 0, 0],
+          "color": [0, 0, 0, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 24,
+          "lineHeight": 30,
+          "margin": [0, 0, 0, 0],
+          "color": [0, 0, 0, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "icon": {
+        "content": "fas fa-heart",
+        "md": {
+          "alignHorizontal": "center",
+          "iconSize": 20,
+          "color": [241, 78, 149, 1],
+          "background": [255, 255, 255, 100]
+        },
+        "sm": {
+          "alignHorizontal": "center",
+          "iconSize": 20,
+          "color": [241, 78, 149, 1],
+          "background": [255, 255, 255, 100]
+        },
+        "xs": {
+          "alignHorizontal": "center",
+          "iconSize": 20,
+          "color": [241, 78, 149, 1],
+          "background": [255, 255, 255, 100]
+        }
+      },
+      "groomName": {
+        "fontFamily": "Sacramento",
+        "content": "Antonio Barrita",
+        "md": {
+          "fontAlign": "right",
+          "fontStyle": [],
+          "fontSize": 35,
+          "lineHeight": 35,
+          "margin": [0, 0, 20, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "right",
+          "fontStyle": [],
+          "fontSize": 35,
+          "lineHeight": 35,
+          "margin": [0, 0, 20, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 35,
+          "lineHeight": 35,
+          "margin": [0, 0, 20, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "brideName": {
+        "fontFamily": "Sacramento",
+        "content": "Camila Estrada",
+        "md": {
+          "fontAlign": "left",
+          "fontStyle": [],
+          "fontSize": 35,
+          "lineHeight": 35,
+          "margin": [0, 0, 20, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "left",
+          "fontStyle": [],
+          "fontSize": 35,
+          "lineHeight": 35,
+          "margin": [0, 0, 20, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 35,
+          "lineHeight": 35,
+          "margin": [0, 0, 20, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "groomPhoto": {
+        "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/NOVIO.jpg",
+        "md": {
+          "width": 150,
+          "height": 150,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "sm": {
+          "width": 150,
+          "height": 150,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "xs": {
+          "width": 120,
+          "height": 120,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        }
+      },
+      "bridePhoto": {
+        "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/NOVIA.jpg",
+        "md": {
+          "width": 150,
+          "height": 150,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "sm": {
+          "width": 150,
+          "height": 150,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "xs": {
+          "width": 120,
+          "height": 120,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        }
+      },
+      "groomText": {
+        "fontFamily": "Work Sans",
+        "content": "Ante Dios y ante todos nuestros amigos y familiares, deseo que el mundo se entere que te tomo como esposa, para amarte, cuidarte y respetarte por siempre, jurarte fidelidad y compromiso; además de un amor puro y eterno. ¡Juntos por siempre, vida mía!",
+        "md": {
+          "fontAlign": "right",
+          "fontStyle": [],
+          "fontSize": 16,
+          "lineHeight": 30,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "right",
+          "fontStyle": [],
+          "fontSize": 16,
+          "lineHeight": 30,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 16,
+          "lineHeight": 30,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "brideText": {
+        "fontFamily": "Work Sans",
+        "content": "Mi amor, no encuentro las palabras adecuadas para expresar el gran amor que siento por ti... ¡Te Amo!",
+        "md": {
+          "fontAlign": "left",
+          "fontStyle": [],
+          "fontSize": 16,
+          "lineHeight": 30,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "left",
+          "fontStyle": [],
+          "fontSize": 16,
+          "lineHeight": 30,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 16,
+          "lineHeight": 30,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        }
+      }
+    },
+    "sectionEvent": {
+      "visibility": true,
+      "background": {
+        "content": "https://www.invitaciones-digitales.com.mx/wedding/images/img_bg_1.jpg",
+        "md": {
+          "width": 100,
+          "height": 100,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "sm": {
+          "width": 100,
+          "height": 100,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "xs": {
+          "width": 100,
+          "height": 100,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        }
+      },
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "¡Nuestro itinerario, acompáñanos!",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [255, 255, 255, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [255, 255, 255, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [255, 255, 255, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "singleplace": false,
+      "locationText": {
+        "icon": "fas fa-map-marker",
+        "fontFamily": "Work Sans",
+        "content": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 16,
+          "lineHeight": 32,
+          "margin": [0, 0, 0, 0],
+          "color": [255, 255, 255, 0.8],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 16,
+          "lineHeight": 32,
+          "margin": [0, 0, 0, 0],
+          "color": [255, 255, 255, 0.8],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 16,
+          "lineHeight": 32,
+          "margin": [0, 0, 0, 0],
+          "color": [255, 255, 255, 0.8],
+          "background": [0, 0, 0, 0]
+        },
+        "url": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+      },
+      "items": [
+        {
+          "id": "event-1",
+          "title": {
+            "icon": "fa-solid fa-church",
+            "fontFamily": "Work Sans",
+            "content": "Ceremonia Religiosa",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "date": {
+            "icon": {
+              "content": "fas fa-clock",
+              "md": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "timeStart": {
+              "fontFamily": "Work Sans",
+              "content": "4:30 PM",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "timeEnd": {
+              "fontFamily": "Work Sans",
+              "content": "5:30 PM",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            }
+          },
+          "time": {
+            "icon": {
+              "content": "calendar",
+              "md": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "dateDay": {
+              "fontFamily": "Work Sans",
+              "content": "Sábado 17",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "dateMonthYear": {
+              "fontFamily": "Work Sans",
+              "content": "Julio, 2025",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            }
+          },
+          "locationText": {
+            "icon": "fas fa-map-marker",
+            "fontFamily": "Work Sans",
+            "content": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+            "url": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            }
+          }
+        },
+        {
+          "id": "event-2",
+          "title": {
+            "icon": "fas fa-cocktail",
+            "fontFamily": "Work Sans",
+            "content": "Recepción",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "date": {
+            "icon": {
+              "content": "fas fa-clock",
+              "md": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "timeStart": {
+              "fontFamily": "Work Sans",
+              "content": "7:00 PM",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "timeEnd": {
+              "fontFamily": "Work Sans",
+              "content": "7:30 PM",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            }
+          },
+          "time": {
+            "icon": {
+              "content": "calendar",
+              "md": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "dateDay": {
+              "fontFamily": "Work Sans",
+              "content": "Sábado 17",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "dateMonthYear": {
+              "fontFamily": "Work Sans",
+              "content": "Julio, 2025",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            }
+          },
+          "locationText": {
+            "icon": "fas fa-map-marker",
+            "fontFamily": "Work Sans",
+            "content": "Salón Jardín Las Rosas. (Dale clic para ver la ubicación)",
+            "url": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            }
+          }
+        },
+        {
+          "id": "event-3",
+          "title": {
+            "icon": "fas fa-music",
+            "fontFamily": "Work Sans",
+            "content": "Fiesta",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "date": {
+            "icon": {
+              "content": "fas fa-clock",
+              "md": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "timeStart": {
+              "fontFamily": "Work Sans",
+              "content": "7:30 PM",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "timeEnd": {
+              "fontFamily": "Work Sans",
+              "content": "2:00 AM",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            }
+          },
+          "time": {
+            "icon": {
+              "content": "calendar",
+              "md": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "alignHorizontal": "center",
+                "iconSize": 20,
+                "color": [255, 255, 255, 1],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "dateDay": {
+              "fontFamily": "Work Sans",
+              "content": "Sábado 17",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            },
+            "dateMonthYear": {
+              "fontFamily": "Work Sans",
+              "content": "Julio, 2025",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 32,
+                "margin": [0, 0, 0, 0],
+                "color": [255, 255, 255, 0.8],
+                "background": [0, 0, 0, 0]
+              }
+            }
+          },
+          "locationText": {
+            "icon": "fas fa-map-marker",
+            "fontFamily": "Work Sans",
+            "content": "Salón Jardín Las Rosas. (Dale clic para ver la ubicación)",
+            "url": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            }
+          }
+        }
+      ],
+      "itemsSinglePlace": [
+        {
+          "id": "event-1",
+          "title": {
+            "icon": "fa-solid fa-church",
+            "fontFamily": "Work Sans",
+            "content": "Ceremonia Religiosa",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "time": {
+            "icon": "fas fa-clock",
+            "fontFamily": "Work Sans",
+            "content": "4:30 PM - 5:30 PM",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "date": {
+            "icon": "fas fa-calendar",
+            "fontFamily": "Work Sans",
+            "content": "Sábado 17 Julio, 2025",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "locationText": {
+            "icon": "fas fa-map-marker",
+            "fontFamily": "Work Sans",
+            "content": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "url": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+          }
+        },
+        {
+          "id": "event-2",
+          "title": {
+            "icon": "fas fa-cocktail",
+            "fontFamily": "Work Sans",
+            "content": "Recepción",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "time": {
+            "icon": "fas fa-clock",
+            "fontFamily": "Work Sans",
+            "content": "7:00 PM - 7:30 PM",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "date": {
+            "icon": "fas fa-calendar",
+            "fontFamily": "Work Sans",
+            "content": "Sábado 17 Julio, 2025",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "locationText": {
+            "icon": "fas fa-map-marker",
+            "fontFamily": "Work Sans",
+            "content": "Salón Jardín Las Rosas. (Dale clic para ver la ubicación)",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "url": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+          }
+        },
+        {
+          "id": "event-3",
+          "title": {
+            "icon": "fas fa-music",
+            "fontFamily": "Work Sans",
+            "content": "Fiesta",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 20,
+              "lineHeight": 20,
+              "margin": [0, 0, 20, 0],
+              "color": [255, 255, 255, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "time": {
+            "icon": "fas fa-clock",
+            "fontFamily": "Work Sans",
+            "content": "7:30 PM - 2:00 AM",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "date": {
+            "icon": "fas fa-calendar",
+            "fontFamily": "Work Sans",
+            "content": "Sábado 17 Julio, 2025",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "locationText": {
+            "icon": "fas fa-map-marker",
+            "fontFamily": "Work Sans",
+            "content": "Salón Jardín Las Rosas. (Dale clic para ver la ubicación)",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 0, 0],
+              "color": [255, 255, 255, 0.8],
+              "background": [0, 0, 0, 0]
+            },
+            "url": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+          }
+        }
+      ]
+    },
+    "sectionGallery": {
+      "visibility": true,
+      "backgroundColor": {
+        "content": [0, 0, 0, 0.04]
+      },
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "Galería de fotos",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "intro": {
+        "fontFamily": "Work Sans",
+        "content": "No olvides tomar fotos",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 22,
+          "lineHeight": 32,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 22,
+          "lineHeight": 32,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 22,
+          "lineHeight": 32,
+          "margin": [0, 0, 20, 0],
+          "color": [130, 130, 130, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "hashtags": [
+        {
+          "url": "https://www.facebook.com/hashtag/antonioYcamila",
+          "icon": "fab fa-facebook",
+          "fontFamily": "Work Sans",
+          "content": "#antonioYcamila",
+          "md": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 22,
+            "lineHeight": 30,
+            "margin": [0, 0, 0, 0],
+            "color": [241, 78, 149, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "sm": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 22,
+            "lineHeight": 30,
+            "margin": [0, 0, 0, 0],
+            "color": [241, 78, 149, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "xs": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 22,
+            "lineHeight": 30,
+            "margin": [0, 0, 0, 0],
+            "color": [241, 78, 149, 1],
+            "background": [0, 0, 0, 0]
+          }
+        },
+        {
+          "url": "https://www.instagram.com/explore/tags/antonioYcamila",
+          "icon": "fab fa-instagram",
+          "fontFamily": "Work Sans",
+          "content": "#antonioYcamila",
+          "md": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 22,
+            "lineHeight": 30,
+            "margin": [0, 0, 0, 0],
+            "color": [241, 78, 149, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "sm": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 22,
+            "lineHeight": 30,
+            "margin": [0, 0, 0, 0],
+            "color": [241, 78, 149, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "xs": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 22,
+            "lineHeight": 30,
+            "margin": [0, 0, 0, 0],
+            "color": [241, 78, 149, 1],
+            "background": [0, 0, 0, 0]
+          }
+        }
+      ],
+      "items": [
+        {
+          "id": "g1",
+          "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G1.jpg",
+          "md": {
+            "width": 32,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "sm": {
+            "width": 49,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "xs": {
+            "width": 100,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          }
+        },
+        {
+          "id": "g2",
+          "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G2.jpg",
+          "md": {
+            "width": 32,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "sm": {
+            "width": 49,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "xs": {
+            "width": 100,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          }
+        },
+        {
+          "id": "g3",
+          "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G3.jpg",
+          "md": {
+            "width": 32,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "sm": {
+            "width": 49,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "xs": {
+            "width": 100,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          }
+        },
+        {
+          "id": "g4",
+          "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G4.jpg",
+          "md": {
+            "width": 32,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "sm": {
+            "width": 49,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "xs": {
+            "width": 100,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          }
+        },
+        {
+          "id": "g5",
+          "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G5.jpg",
+          "md": {
+            "width": 32,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "sm": {
+            "width": 49,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "xs": {
+            "width": 100,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          }
+        },
+        {
+          "id": "g6",
+          "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G6.jpg",
+          "md": {
+            "width": 32,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "sm": {
+            "width": 49,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          },
+          "xs": {
+            "width": 100,
+            "height": 350,
+            "alignHorizontal": "center",
+            "alignVertical": "center",
+            "imageBackRepeat": "no-repeat",
+            "imageBackSize": "cover"
+          }
+        }
+      ]
+    },
+    "sectionGifttable": {
+      "visibility": true,
+      "backgroundColor": {
+        "content": [0, 0, 0, 0.04]
+      },
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "Mesa de Regalos",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "items": [
+        {
+          "id": "s1",
+          "type": "digital",
+          "image": {
+            "id": null,
+            "content": "",
+            "md": {
+              "width": 428.0,
+              "height": 219.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "contain"
+            },
+            "sm": {
+              "width": 570.0,
+              "height": 250.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "contain"
+            },
+            "xs": {
+              "width": 330.0,
+              "height": 220.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "id": null,
+            "icon": null,
+            "fontFamily": "Work Sans",
+            "content": "Mesa de Palacio de hierro",
+            "url": null,
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18.0,
+              "lineHeight": 20.0,
+              "margin": [20.0, 0.0, 20.0, 0.0],
+              "color": [93.0, 93.0, 93.0, 1.0],
+              "background": [0.0, 0.0, 0.0, 0.0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18.0,
+              "lineHeight": 20.0,
+              "margin": [20.0, 0.0, 20.0, 0.0],
+              "color": [93.0, 93.0, 93.0, 1.0],
+              "background": [0.0, 0.0, 0.0, 0.0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18.0,
+              "lineHeight": 20.0,
+              "margin": [20.0, 0.0, 20.0, 0.0],
+              "color": [93.0, 93.0, 93.0, 1.0],
+              "background": [0.0, 0.0, 0.0, 0.0]
+            }
+          },
+          "body": [
+            {
+              "id": "msj1",
+              "icon": null,
+              "fontFamily": "Work Sans",
+              "content": "mesa de palacio",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 28.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 28.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 28.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            },
+            {
+              "id": "msj2",
+              "icon": "fa-solid fa-link",
+              "fontFamily": "Work Sans",
+              "content": "compra aqui",
+              "url": "#",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 28.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 28.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 28.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            }
+          ],
+          "linkHref": null
+        },
+        {
+          "id": "s2",
+          "type": "bank",
+          "image": {
+            "id": null,
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/liverpool.jpg",
+            "md": {
+              "width": 428.0,
+              "height": 219.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "contain"
+            },
+            "sm": {
+              "width": 570.0,
+              "height": 250.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "contain"
+            },
+            "xs": {
+              "width": 330.0,
+              "height": 220.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "id": null,
+            "icon": null,
+            "fontFamily": "Work Sans",
+            "content": "Depósito o Transferencia",
+            "url": null,
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18.0,
+              "lineHeight": 20.0,
+              "margin": [20.0, 0.0, 20.0, 0.0],
+              "color": [93.0, 93.0, 93.0, 1.0],
+              "background": [0.0, 0.0, 0.0, 0.0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18.0,
+              "lineHeight": 20.0,
+              "margin": [20.0, 0.0, 20.0, 0.0],
+              "color": [93.0, 93.0, 93.0, 1.0],
+              "background": [0.0, 0.0, 0.0, 0.0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18.0,
+              "lineHeight": 20.0,
+              "margin": [20.0, 0.0, 20.0, 0.0],
+              "color": [93.0, 93.0, 93.0, 1.0],
+              "background": [0.0, 0.0, 0.0, 0.0]
+            }
+          },
+          "body": [
+            {
+              "id": "msj1",
+              "icon": null,
+              "fontFamily": "Work Sans",
+              "content": "mensaje de banco",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            },
+            {
+              "id": "msj2",
+              "icon": null,
+              "fontFamily": "Work Sans",
+              "content": "Banco:",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            },
+            {
+              "id": "msj3",
+              "icon": null,
+              "fontFamily": "Work Sans",
+              "content": "banamex",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            },
+            {
+              "id": "msj4",
+              "icon": null,
+              "fontFamily": "Work Sans",
+              "content": "Titular:",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            },
+            {
+              "id": "msj5",
+              "icon": "fas fa-copy",
+              "fontFamily": "Work Sans",
+              "content": "omar",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            },
+            {
+              "id": "msj6",
+              "icon": null,
+              "fontFamily": "Work Sans",
+              "content": "Cuenta CLABE:",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            },
+            {
+              "id": "msj7",
+              "icon": "fas fa-copy",
+              "fontFamily": "Work Sans",
+              "content": "12345678",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            },
+            {
+              "id": "msj8",
+              "icon": null,
+              "fontFamily": "Work Sans",
+              "content": "Número de tarjeta:",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            },
+            {
+              "id": "msj9",
+              "icon": "fas fa-copy",
+              "fontFamily": "Work Sans",
+              "content": "12345678",
+              "url": "",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [0.0, 0.0, 0.0, 0.0]
+              }
+            }
+          ],
+          "linkHref": null
+        },
+        {
+          "id": "s3",
+          "type": "fisico",
+          "image": {
+            "id": null,
+            "content": "",
+            "md": {
+              "width": 428.0,
+              "height": 219.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": null,
+              "imageBackSize": null
+            },
+            "sm": {
+              "width": 570.0,
+              "height": 250.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": null,
+              "imageBackSize": null
+            },
+            "xs": {
+              "width": 330.0,
+              "height": 220.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": null,
+              "imageBackSize": null
+            }
+          },
+          "title": {
+            "id": null,
+            "icon": null,
+            "fontFamily": "Work Sans",
+            "content": "lluvia de sobres",
+            "url": null,
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16.0,
+              "lineHeight": 18,
+              "margin": [0.0, 0.0, 0.0, 0.0],
+              "color": [130.0, 130.0, 130.0, 1.0],
+              "background": [255.0, 255.0, 255.0, 0.0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16.0,
+              "lineHeight": 18.0,
+              "margin": [0.0, 0.0, 0.0, 0.0],
+              "color": [130.0, 130.0, 130.0, 1.0],
+              "background": [255.0, 255.0, 255.0, 0.0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16.0,
+              "lineHeight": 18.0,
+              "margin": [0.0, 0.0, 0.0, 0.0],
+              "color": [130.0, 130.0, 130.0, 1.0],
+              "background": [255.0, 255.0, 255.0, 0.0]
+            }
+          },
+          "body": [
+            {
+              "id": "msj1",
+              "icon": "fa-solid fa-gift",
+              "fontFamily": "Work Sans",
+              "content": "mensaje lluvia de sobres",
+              "url": "",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [255.0, 255.0, 255.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [255.0, 255.0, 255.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [255.0, 255.0, 255.0, 0.0]
+              }
+            }
+          ],
+          "linkHref": null
+        },
+        {
+          "id": "s4",
+          "type": "digital",
+          "image": {
+            "id": null,
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/liverpool.jpg",
+            "md": {
+              "width": 428.0,
+              "height": 219.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": null,
+              "imageBackSize": null
+            },
+            "sm": {
+              "width": 570.0,
+              "height": 250.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": null,
+              "imageBackSize": null
+            },
+            "xs": {
+              "width": 330.0,
+              "height": 220.0,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackPosition": null,
+              "imageBackRepeat": null,
+              "imageBackSize": null
+            }
+          },
+          "title": {
+            "id": null,
+            "icon": null,
+            "fontFamily": "Work Sans",
+            "content": "Mesa de liverpool",
+            "url": null,
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16.0,
+              "lineHeight": 18.0,
+              "margin": [0.0, 0.0, 0.0, 0.0],
+              "color": [130.0, 130.0, 130.0, 1.0],
+              "background": [255.0, 255.0, 255.0, 0.0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16.0,
+              "lineHeight": 18.0,
+              "margin": [0.0, 0.0, 0.0, 0.0],
+              "color": [130.0, 130.0, 130.0, 1.0],
+              "background": [255.0, 255.0, 255.0, 0.0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16.0,
+              "lineHeight": 18.0,
+              "margin": [0.0, 0.0, 0.0, 0.0],
+              "color": [130.0, 130.0, 130.0, 1.0],
+              "background": [255.0, 255.0, 255.0, 0.0]
+            }
+          },
+          "body": [
+            {
+              "id": "msj1",
+              "icon": null,
+              "fontFamily": "Work Sans",
+              "content": "visita liverpool",
+              "url": "",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [255.0, 255.0, 255.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [255.0, 255.0, 255.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [255.0, 255.0, 255.0, 0.0]
+              }
+            },
+            {
+              "id": "msj2",
+              "icon": "fa-solid fa-link",
+              "fontFamily": "Work Sans",
+              "content": "compra aqui",
+              "url": "#",
+              "md": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [255.0, 255.0, 255.0, 0.0]
+              },
+              "sm": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [255.0, 255.0, 255.0, 0.0]
+              },
+              "xs": {
+                "fontAlign": "center",
+                "fontStyle": [],
+                "fontSize": 16.0,
+                "lineHeight": 18.0,
+                "margin": [0.0, 0.0, 0.0, 0.0],
+                "color": [130.0, 130.0, 130.0, 1.0],
+                "background": [255.0, 255.0, 255.0, 0.0]
+              }
+            }
+          ],
+          "linkHref": null
+        }
+      ]
+    },
+    "sectionSuggestions": {
+      "visibility": true,
+      "backgroundColor": {
+        "content": [0, 0, 0, 0.04]
+      },
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "Nuestras recomendaciones",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "items": [
+        {
+          "id": "s1",
+          "image": {
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/hotel.jpg",
+            "md": {
+              "width": 428,
+              "height": 219,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "sm": {
+              "width": 570,
+              "height": 460,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "xs": {
+              "width": 330,
+              "height": 220,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "fontFamily": "Work Sans",
+            "content": "Hotel",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "body": [
+            {
+              "icon": "fas fa-external-link-alt",
+              "fontFamily": "Work Sans",
+              "content": "City Express Oaxaca",
+              "url": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "id": "msg-1"
+            }
+          ]
+        },
+        {
+          "id": "s2",
+          "image": {
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/sitio_taxi.jpg",
+            "md": {
+              "width": 428,
+              "height": 219,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "sm": {
+              "width": 570,
+              "height": 460,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "xs": {
+              "width": 330,
+              "height": 220,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "fontFamily": "Work Sans",
+            "content": "Sitio de Taxis",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "body": [
+            {
+              "icon": "fas fa-external-link-alt",
+              "fontFamily": "Work Sans",
+              "content": "Sitio Antequera",
+              "url": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "id": "msg-1"
+            }
+          ]
+        },
+        {
+          "id": "s3",
+          "image": {
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/renta_autos.jpeg",
+            "md": {
+              "width": 428,
+              "height": 219,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "sm": {
+              "width": 570,
+              "height": 460,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "xs": {
+              "width": 330,
+              "height": 220,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "fontFamily": "Work Sans",
+            "content": "Renta de Autos",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "body": [
+            {
+              "icon": "fas fa-external-link-alt",
+              "fontFamily": "Work Sans",
+              "content": "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax.",
+              "url": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "id": "msg-1"
+            }
+          ]
+        }
+      ]
+    },
+    "sectionAmenities": {
+      "visibility": true,
+      "backgroundColor": {
+        "content": [0, 0, 0, 0.04]
+      },
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "Amenidades",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "items": [
+        {
+          "id": "s1",
+          "image": {
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/salon_belleza.jpg",
+            "md": {
+              "width": 428,
+              "height": 219,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "sm": {
+              "width": 570,
+              "height": 460,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "xs": {
+              "width": 330,
+              "height": 220,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "fontFamily": "Work Sans",
+            "content": "Salón de belleza",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "body": [
+            {
+              "icon": "fas fa-external-link-alt",
+              "fontFamily": "Work Sans",
+              "content": "Marck Luga",
+              "url": "https://www.facebook.com/marck.luga.39",
+              "md": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "sm": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "xs": {
+                "fontAlign": "left",
+                "fontStyle": [],
+                "fontSize": 16,
+                "lineHeight": 18,
+                "margin": [0, 0, 0, 0],
+                "color": [130, 130, 130, 1],
+                "background": [0, 0, 0, 0]
+              },
+              "id": "msg-1"
+            }
+          ]
+        }
+      ]
+    },
+    "sectionStarted": {
+      "visibility": true,
+      "limit_confirm": {
+        "fontFamily": "Work Sans",
+        "content": "Fecha límite para confirmar tu asistencia 26 de Julio, 2023. De lo contrario entenderemos que no asistirás",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 18,
+          "lineHeight": 22,
+          "margin": [0, 0, 20, 0],
+          "color": [106, 104, 104, 1],
+          "background": [255, 255, 255, 1]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 18,
+          "lineHeight": 34,
+          "margin": [0, 0, 20, 0],
+          "color": [106, 104, 104, 1],
+          "background": [255, 255, 255, 1]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 18,
+          "lineHeight": 34,
+          "margin": [0, 0, 20, 0],
+          "color": [106, 104, 104, 1],
+          "background": [255, 255, 255, 1]
+        }
+      },
+      "background": {
+        "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/img_bg_4.jpg",
+        "md": {
+          "width": 100,
+          "height": 100,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "sm": {
+          "width": 100,
+          "height": 100,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        },
+        "xs": {
+          "width": 100,
+          "height": 100,
+          "alignHorizontal": "center",
+          "alignVertical": "center",
+          "imageBackRepeat": "no-repeat",
+          "imageBackSize": "cover"
+        }
+      },
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "Confirma tu asistencia",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [255, 255, 255, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [255, 255, 255, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [255, 255, 255, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "note": {
+        "icon": "fas fa-exclamation-triangle",
+        "fontFamily": "Work Sans",
+        "content": "Boda sin niños, agradecemos su comprensión.",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 22,
+          "lineHeight": 22,
+          "margin": [0, 0, 30, 0],
+          "color": [255, 255, 255, 0.5],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 22,
+          "lineHeight": 34,
+          "margin": [0, 0, 30, 0],
+          "color": [255, 255, 255, 0.5],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 22,
+          "lineHeight": 34,
+          "margin": [0, 0, 30, 0],
+          "color": [255, 255, 255, 0.5],
+          "background": [0, 0, 0, 0]
+        }
+      }
+    },
+    "sectionFamily": {
+      "visibility": true,
+      "backgroundColor": {
+        "content": [255, 255, 255, 1]
+      },
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "¡Te esperamos!",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "intro": [
+        {
+          "id": "intro-0",
+          "icon": null,
+          "fontFamily": "Work Sans",
+          "content": "Hay días en la vida que son especiales por sí solos. Compartirlos con las personas que quieres lo convierte en inolvidables.",
+          "md": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 22,
+            "lineHeight": 32,
+            "margin": [0, 0, 20, 0],
+            "color": [130, 130, 130, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "sm": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 22,
+            "lineHeight": 32,
+            "margin": [0, 0, 20, 0],
+            "color": [130, 130, 130, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "xs": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 22,
+            "lineHeight": 32,
+            "margin": [0, 0, 20, 0],
+            "color": [130, 130, 130, 1],
+            "background": [0, 0, 0, 0]
+          }
+        },
+        {
+          "id": "intro-1",
+          "icon": null,
+          "fontFamily": "Work Sans",
+          "content": "A nuestros Padres",
+          "md": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 16,
+            "lineHeight": 32,
+            "margin": [0, 0, 20, 0],
+            "color": [130, 130, 130, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "sm": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 16,
+            "lineHeight": 32,
+            "margin": [0, 0, 20, 0],
+            "color": [130, 130, 130, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "xs": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 16,
+            "lineHeight": 32,
+            "margin": [0, 0, 20, 0],
+            "color": [130, 130, 130, 1],
+            "background": [0, 0, 0, 0]
+          }
+        },
+        {
+          "id": "intro-2",
+          "icon": null,
+          "fontFamily": "Work Sans",
+          "content": "Gracias por sus consejos y amor incondicional que nos han permitido llegar a este momento de nuestras vidas y poder honrarlos de esta manera.",
+          "md": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 17.5,
+            "lineHeight": 32,
+            "margin": [0, 0, 20, 0],
+            "color": [130, 130, 130, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "sm": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 17.5,
+            "lineHeight": 32,
+            "margin": [0, 0, 20, 0],
+            "color": [130, 130, 130, 1],
+            "background": [0, 0, 0, 0]
+          },
+          "xs": {
+            "fontAlign": "center",
+            "fontStyle": [],
+            "fontSize": 17.5,
+            "lineHeight": 32,
+            "margin": [0, 0, 20, 0],
+            "color": [130, 130, 130, 1],
+            "background": [0, 0, 0, 0]
+          }
+        }
+      ],
+      "items": [
+        {
+          "id": "f0",
+          "title": {
+            "id": null,
+            "icon": null,
+            "fontFamily": "Work Sans",
+            "content": "(Padres de la Novia)",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "items": [
+            {
+              "id": "f0",
+              "image": {
+                "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg",
+                "md": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "sm": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "xs": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                }
+              },
+              "label": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "Raul Estrada Santiago",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "text": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "showImage": true
+            },
+            {
+              "id": "f1",
+              "image": {
+                "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/madre_novio.jpg",
+                "md": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "sm": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "xs": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                }
+              },
+              "label": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "Teresa Lopez",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "text": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "showImage": true
+            }
+          ]
+        },
+        {
+          "id": "f1",
+          "title": {
+            "id": null,
+            "icon": null,
+            "fontFamily": "Work Sans",
+            "content": "(Padres del novio)",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "items": [
+            {
+              "id": "f0",
+              "image": {
+                "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg",
+                "md": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "sm": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "xs": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                }
+              },
+              "label": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "Raul Estrada Santiago",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "text": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "showImage": true
+            },
+            {
+              "id": "f1",
+              "image": {
+                "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/madre_novio.jpg",
+                "md": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "sm": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "xs": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                }
+              },
+              "label": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "Teresa Lopez",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "text": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "showImage": true
+            }
+          ]
+        },
+        {
+          "id": "f2",
+          "title": {
+            "id": null,
+            "icon": null,
+            "fontFamily": "Work Sans",
+            "content": "(Padrinos de Velación)",
+            "md": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "center",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 32,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "items": [
+            {
+              "id": "f0",
+              "image": {
+                "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg",
+                "md": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "sm": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "xs": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                }
+              },
+              "label": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "Raul Estrada Santiago",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "text": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "showImage": true
+            },
+            {
+              "id": "f1",
+              "image": {
+                "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/madre_novio.jpg",
+                "md": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "sm": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                },
+                "xs": {
+                  "width": 180,
+                  "height": 180,
+                  "alignHorizontal": "center",
+                  "alignVertical": "center",
+                  "imageBackRepeat": "no-repeat",
+                  "imageBackSize": "cover"
+                }
+              },
+              "label": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "Teresa Lopez",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 20, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "text": {
+                "id": null,
+                "icon": null,
+                "fontFamily": "Work Sans",
+                "content": "",
+                "md": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "sm": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                },
+                "xs": {
+                  "fontAlign": "center",
+                  "fontStyle": [],
+                  "fontSize": 17.5,
+                  "lineHeight": 32,
+                  "margin": [0, 0, 0, 0],
+                  "color": [130, 130, 130, 1],
+                  "background": [0, 0, 0, 0]
+                }
+              },
+              "showImage": true
+            }
+          ]
+        }
+      ]
+    },
+    "sectionStory": {
+      "visibility": true,
+      "backgroundColor": {
+        "content": [255, 255, 255, 1]
+      },
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "Nuestra historia",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "items": [
+        {
+          "id": "t1",
+          "image": {
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium/noviazgo.jpg",
+            "md": {
+              "width": 160,
+              "height": 160,
+              "alignHorizontal": "center",
+              "alignVertical": "top",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "sm": {
+              "width": 160,
+              "height": 160,
+              "alignHorizontal": "center",
+              "alignVertical": "top",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "xs": {
+              "width": 60,
+              "height": 60,
+              "alignHorizontal": "center",
+              "alignVertical": "top",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "fontFamily": "Work Sans",
+            "content": "Inicio de nuestro noviazgo",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 24,
+              "lineHeight": 24,
+              "margin": [0, 0, 20, 0],
+              "color": [0, 0, 0, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 24,
+              "lineHeight": 24,
+              "margin": [0, 0, 20, 0],
+              "color": [0, 0, 0, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 24,
+              "lineHeight": 24,
+              "margin": [0, 0, 20, 0],
+              "color": [0, 0, 0, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "date": {
+            "fontFamily": "Work Sans",
+            "content": "JUNIO 7, 2012",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 13,
+              "lineHeight": 22,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 13,
+              "lineHeight": 22,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 13,
+              "lineHeight": 22,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "body": {
+            "fontFamily": "Work Sans",
+            "content": "Ese día me encontraba muy nervioso, pues ya llevábamos de amigos casi un año y era momento de que diéramos el primer paso en nuestra relación, así que me decidí a preguntarle si quería ser mi novia, gracias a dios ella aceptó e iniciamos esta hermosa aventura.",
+            "md": {
+              "fontAlign": "justify",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 29,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "justify",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 29,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "justify",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 29,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          }
+        },
+        {
+          "id": "t2",
+          "image": {
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium/propuesta-matrimonio.jpg",
+            "md": {
+              "width": 160,
+              "height": 160,
+              "alignHorizontal": "center",
+              "alignVertical": "top",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "sm": {
+              "width": 160,
+              "height": 160,
+              "alignHorizontal": "center",
+              "alignVertical": "top",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "xs": {
+              "width": 60,
+              "height": 60,
+              "alignHorizontal": "center",
+              "alignVertical": "top",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "fontFamily": "Work Sans",
+            "content": "Propuesta de matrimonio",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 24,
+              "lineHeight": 24,
+              "margin": [0, 0, 20, 0],
+              "color": [0, 0, 0, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 24,
+              "lineHeight": 24,
+              "margin": [0, 0, 20, 0],
+              "color": [0, 0, 0, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 24,
+              "lineHeight": 24,
+              "margin": [0, 0, 20, 0],
+              "color": [0, 0, 0, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "date": {
+            "fontFamily": "Work Sans",
+            "content": "DICIEMBRE 14, 2019",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 13,
+              "lineHeight": 22,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 13,
+              "lineHeight": 22,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 13,
+              "lineHeight": 22,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "body": {
+            "fontFamily": "Work Sans",
+            "content": "Fue un dia maravilloso para los dos, no me lo esperaba, después de 8 años de novios, por fin Santiago decidió proponerme matrimonio y formalizar esta relación tan hermosa, él se lució y me sorprendió con la entrega del anillo de compromiso.",
+            "md": {
+              "fontAlign": "justify",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 29,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "justify",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 29,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "justify",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 29,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          }
+        },
+        {
+          "id": "t3",
+          "image": {
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium/pedida-mano.jpg",
+            "md": {
+              "width": 160,
+              "height": 160,
+              "alignHorizontal": "center",
+              "alignVertical": "top",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "sm": {
+              "width": 160,
+              "height": 160,
+              "alignHorizontal": "center",
+              "alignVertical": "top",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "xs": {
+              "width": 60,
+              "height": 60,
+              "alignHorizontal": "center",
+              "alignVertical": "top",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "fontFamily": "Work Sans",
+            "content": "Pedida de mano",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 24,
+              "lineHeight": 24,
+              "margin": [0, 0, 20, 0],
+              "color": [0, 0, 0, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 24,
+              "lineHeight": 24,
+              "margin": [0, 0, 20, 0],
+              "color": [0, 0, 0, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 24,
+              "lineHeight": 24,
+              "margin": [0, 0, 20, 0],
+              "color": [0, 0, 0, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "date": {
+            "fontFamily": "Work Sans",
+            "content": "DICIEMBRE 21, 2019",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 13,
+              "lineHeight": 22,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 13,
+              "lineHeight": 22,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 13,
+              "lineHeight": 22,
+              "margin": [0, 0, 20, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "body": {
+            "fontFamily": "Work Sans",
+            "content": "Decidimos continuar con las tradiciones y ese día vino Santiago con toda su familia a mi casa a pedirle mi mano formalmente a mis padres para que ellos otorgaran su consentimiento de nuestro compromiso, una vez aceptado el mismo Santiago me sorprendió con un espectáculo de juegos pirotécnicos para celebrar la unión oficial de nuestra futura boda.",
+            "md": {
+              "fontAlign": "justify",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 29,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "justify",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 29,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "justify",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 29,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          }
+        }
+      ]
+    },
+    "sectionDresscode": {
+      "visibility": true,
+      "backgroundColor": {
+        "content": [0, 0, 0, 0.04]
+      },
+      "title": {
+        "fontFamily": "Sacramento",
+        "content": "Código de Vestir",
+        "md": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 60,
+          "lineHeight": 60,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "sm": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        },
+        "xs": {
+          "fontAlign": "center",
+          "fontStyle": [],
+          "fontSize": 45,
+          "lineHeight": 45,
+          "margin": [0, 0, 10, 0],
+          "color": [241, 78, 149, 1],
+          "background": [0, 0, 0, 0]
+        }
+      },
+      "items": [
+        {
+          "id": "d1",
+          "image": {
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_mujer.jpg",
+            "md": {
+              "width": 428,
+              "height": 285,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "sm": {
+              "width": 570,
+              "height": 580,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "xs": {
+              "width": 100,
+              "height": 200,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "fontFamily": "Work Sans",
+            "content": "Damas",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "bullet": {
+            "icon": "fas fa-thumbs-up",
+            "fontFamily": "Work Sans",
+            "content": "Vestido largo/corto o traje elegante.",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 18,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 18,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 18,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          }
+        },
+        {
+          "id": "d2",
+          "image": {
+            "content": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_hombre.jpg",
+            "md": {
+              "width": 428,
+              "height": 285,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "sm": {
+              "width": 570,
+              "height": 580,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            },
+            "xs": {
+              "width": 100,
+              "height": 200,
+              "alignHorizontal": "center",
+              "alignVertical": "center",
+              "imageBackRepeat": "no-repeat",
+              "imageBackSize": "cover"
+            }
+          },
+          "title": {
+            "fontFamily": "Work Sans",
+            "content": "Caballeros",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 18,
+              "lineHeight": 20,
+              "margin": [20, 0, 20, 0],
+              "color": [93, 93, 93, 1],
+              "background": [0, 0, 0, 0]
+            }
+          },
+          "bullet": {
+            "icon": "fas fa-thumbs-up",
+            "fontFamily": "Work Sans",
+            "content": "Traje o smoking, corbata, zapatos de vestir.",
+            "md": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 18,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "sm": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 18,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            },
+            "xs": {
+              "fontAlign": "left",
+              "fontStyle": [],
+              "fontSize": 16,
+              "lineHeight": 18,
+              "margin": [0, 0, 0, 0],
+              "color": [130, 130, 130, 1],
+              "background": [0, 0, 0, 0]
+            }
+          }
+        }
+      ]
+    },
+    "sectionFooter": {
+      "logoUrl": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/logo_agape.png",
+      "linkHref": "https://www.facebook.com/Invitacionesdigitaleseinteligentes",
+      "smallText": {
+        "fontFamily": "Work Sans",
+        "content": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+      }
+    }
+  }
+}

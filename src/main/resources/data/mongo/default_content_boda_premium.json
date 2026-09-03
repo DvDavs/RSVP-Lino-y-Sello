@@ -1,0 +1,112 @@
+{
+  "eventTypeId": 1,
+  "planId": 2,
+  "images": {
+    "people": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/NOVIO.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/NOVIA.jpg"
+    ],
+    "coverPhoto": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/PORTADA-PREMIUM.jpg",
+    "gallery": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G1.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/G2.jpg"
+    ],
+    "parents": {
+      "mother": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/madre_novio.jpg",
+      "father": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg"
+    },
+    "godparents": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg"
+    ],
+    "story": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium/noviazgo.jpg"
+    ],
+    "recommendations": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/hotel.jpg"
+    ],
+    "amenities": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/salon_belleza.jpg"
+    ]
+  },
+  "phrases": {
+    "hombre": [
+      "Ante Dios y ante todos nuestros amigos y familiares, deseo que el mundo se entere que te tomo como esposa, para amarte, cuidarte y respetarte por siempre."
+    ],
+    "mujer": [
+      "Mi amor, no encuentro las palabras adecuadas para expresar el gran amor que siento por ti."
+    ]
+  },
+  "itinerary": [
+    {
+      "eventName": "Ceremonia Religiosa",
+      "eventLocation": "Templo de Santo Domingo de Guzmán",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "startTime": "4:30 PM",
+      "endTime": "5:30 PM"
+    },
+    {
+      "eventName": "Recepción",
+      "eventLocation": "Zorba el Griego",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "startTime": "7:00 PM",
+      "endTime": "7:30 PM"
+    },
+    {
+      "eventName": "Fiesta",
+      "eventLocation": "Zorba el Griego",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "startTime": "7:30 PM",
+      "endTime": "2:00 AM"
+    }
+  ],
+  "giftRegistry": [
+    {
+      "type": "cash",
+      "name": "Depósito o transferencia",
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/banamex.jpg",
+      "icon": "fas fa-copy",
+      "message": [
+        "Banco: SANTANDER",
+        "Titular: KARLA ZARATE CRUZ",
+        "Cuenta CLABE: 014610606106246881",
+        "Número de tarjeta: 60610624688"
+      ]
+    },
+    {
+      "type": "digital",
+      "name": "Liverpool",
+      "message": ["Su presencia es nuestro mejor regalo."],
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/liverpool.jpg"
+    }
+  ],
+  "music": {
+    "type": "custom",
+    "enabled": true,
+    "url": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/song.mp3"
+  },
+  "hashtags": ["#antonioYcamila"],
+  "dressCode": {
+    "women": {
+      "title": "Damas",
+      "description": "Vestido largo/corto o traje elegante.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_mujer.jpg"
+    },
+    "men": {
+      "title": "Caballeros",
+      "description": "Traje o smoking, corbata, zapatos de vestir.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_hombre.jpg"
+    }
+  },
+  "parents": {
+    "bride": {
+      "label": "(Padres de la Novia)",
+      "names": "Raul Estrada Santiago y Teresa Lopez",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/madre_novio.jpg"
+    },
+    "groom": {
+      "label": "(Padres del Novio)",
+      "names": "Martín Barrita y María Rocha Luis",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg"
+    }
+  }
+}

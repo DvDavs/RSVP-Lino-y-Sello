@@ -1,0 +1,195 @@
+{
+  "_comment": "Mapea a data class DefaultContentConfig",
+  "eventTypeId": 7,
+  "planId": 2,
+  "date": "2025-12-31T16:30:00",
+  "celebrantName": "Nombre del Festejado o Pareja",
+
+  "texts": {
+    "coverSubtitle": "Nuestra Boda / Mis XV",
+    "coverButton": "Save the date",
+    "coupleHeading": "¡Nos Casamos!",
+    "itineraryTitle": "Itinerario",
+    "galleryTitle": "Galería",
+    "galleryIntro": "Comparte tus momentos",
+    "recommendationsTitle": "Recomendaciones",
+    "amenitiesTitle": "Amenidades",
+    "giftTableTitle": "Mesa de Regalos",
+    "rsvpTitle": "Confirmación",
+    "dressCodeTitle": "Código de Vestimenta",
+    "familyIntro": "Con la bendición de..."
+  },
+
+  "images": {
+    "people": [
+      "https://url-foto-principal-1.jpg",
+      "https://url-foto-principal-2.jpg"
+    ],
+    "coverPhoto": "https://url-portada.jpg",
+    "gallery": ["https://url-galeria-1.jpg", "https://url-galeria-2.jpg"],
+    "backgrounds": {
+      "topBg": "https://url-bg-top.jpg",
+      "bottomBg": "https://url-bg-bottom.jpg",
+      "rsvpBg": "https://url-bg-rsvp.jpg"
+    },
+    "story": ["https://url-historia-1.jpg"],
+    "parents": {
+      "mother": "https://url-foto-mama-default.jpg",
+      "father": "https://url-foto-papa-default.jpg"
+    },
+    "godparents": ["https://url-foto-padrinos-default.jpg"]
+  },
+
+  "phrases": {
+    "intro": ["Frase de introducción general"],
+    "celebrated": ["Frase del festejado (XV/Bautizo)"],
+    "pareja": ["Frase conjunta de novios"],
+    "hombre": ["Votos o frase del novio"],
+    "mujer": ["Votos o frase de la novia"]
+  },
+
+  "parents": {
+    "_comment": "Estructura para DefaultParents.kt. El servicio decide cuál usar según el eventTypeId.",
+
+    "bride": {
+      "label": "Padres de la Novia",
+      "names": "Nombre Madre y Nombre Padre",
+      "image": "https://url-foto-padres-novia.jpg"
+    },
+    "groom": {
+      "label": "Padres del Novio",
+      "names": "Nombre Madre y Nombre Padre",
+      "image": "https://url-foto-padres-novio.jpg"
+    },
+    "parents": {
+      "label": "Mis Padres",
+      "names": "Nombre Madre y Nombre Padre",
+      "image": "https://url-foto-padres.jpg"
+    },
+    "godparents": {
+      "label": "Mis Padrinos",
+      "names": "Nombre Madrina y Nombre Padrino",
+      "image": "https://url-foto-padrinos.jpg"
+    }
+  },
+
+  "itinerary": [
+    {
+      "eventName": "Ceremonia",
+      "eventLocation": "Catedral Metropolitana",
+      "startTime": "4:00 PM",
+      "endTime": "5:00 PM",
+      "eventMapsUrl": "https://maps.google.com/...",
+      "icon": "fas fa-church",
+      "date": "Viernes 20 de Octubre"
+    },
+    {
+      "eventName": "Recepción",
+      "eventLocation": "Salón de Eventos",
+      "startTime": "6:00 PM",
+      "endTime": "2:00 AM",
+      "eventMapsUrl": "https://maps.google.com/...",
+      "icon": "fas fa-glass-cheers",
+      "date": "Viernes 20 de Octubre"
+    }
+  ],
+
+  "giftRegistry": [
+    {
+      "type": "bank",
+      "name": "Banco Santander",
+      "photo": "https://url-logo-banco.jpg",
+      "icon": "fas fa-copy",
+      "message": [
+        "Banco: Santander",
+        "Cuenta: 1234567890",
+        "CLABE: 012345678901234567",
+        "Titular: Juan Perez"
+      ]
+    },
+    {
+      "type": "store",
+      "name": "Liverpool",
+      "photo": "https://url-logo-tienda.jpg",
+      "url": "https://mesaderegalos.liverpool.com...",
+      "icon": "fas fa-external-link-alt",
+      "message": ["Número de evento: 12345"]
+    }
+  ],
+
+  "music": {
+    "type": "custom",
+    "enabled": true,
+    "url": "https://url-cancion.mp3"
+  },
+
+  "hashtags": [
+    {
+      "content": "#NuestraBoda",
+      "url": "https://instagram.com/..."
+    }
+  ],
+
+  "dressCode": {
+    "women": {
+      "title": "Mujeres",
+      "description": "Vestido Largo",
+      "image": "https://url-img-dresscode-mujer.jpg",
+      "icon": "dress"
+    },
+    "men": {
+      "title": "Hombres",
+      "description": "Traje Formal",
+      "image": "https://url-img-dresscode-hombre.jpg",
+      "icon": "suit"
+    }
+  },
+
+  "story": [
+    {
+      "title": "Nos conocimos",
+      "date": "2020",
+      "description": "Fue amor a primera vista...",
+      "image": "https://url-historia-1.jpg"
+    }
+  ],
+
+  "recommendations": [
+    {
+      "type": "Hotel",
+      "name": "City Express Oaxaca",
+      "url": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/hotel.jpg"
+    },
+    {
+      "type": "Sitio de Taxis",
+      "name": "Sitio Antequera",
+      "url": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/sitio_taxi.jpg"
+    },
+    {
+      "type": "Renta de Autos",
+      "name": "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax.",
+      "url": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/renta_autos.jpeg"
+    }
+  ],
+  "amenities": [
+    {
+      "type": "Salón de belleza",
+      "name": "Marck Luga",
+      "url": "https://www.facebook.com/marck.luga.39",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/salon_belleza.jpg"
+    }
+  ],
+
+  "rsvp": {
+    "message": "Fecha límite: 15 de Octubre",
+    "note": "Evento solo adultos"
+  },
+
+  "footer": {
+    "logoUrl": "https://url-logo.png",
+    "text": "Todos los derechos reservados"
+  }
+}

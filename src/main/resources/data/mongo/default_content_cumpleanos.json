@@ -1,0 +1,209 @@
+{
+  "_comment": "Generado desde dataCumplePremium.ts",
+  "eventTypeId": 6,
+  "planId": 2,
+  "date": "2025-12-31T16:30:00",
+  "celebrantName": "Pedro Estrada",
+  "texts": {
+    "coverSubtitle": "Mi Cumpleaños",
+    "coverButton": "Save the date",
+    "coupleHeading": "Reserva la fecha",
+    "itineraryTitle": "Itinerario",
+    "galleryTitle": "Galería",
+    "galleryIntro": "No olvides tomar fotos",
+    "recommendationsTitle": "Recomendaciones",
+    "amenitiesTitle": "Amenidades",
+    "giftTableTitle": "Mesa de Regalos",
+    "rsvpTitle": "Confirma tu asistencia",
+    "dressCodeTitle": "Dress Code",
+    "familyIntro": "Le damos gracias a dios por convertirnos en tus padres y le pedimos que guarde tu corazón puro y renueve un espíritu recto dentro de ti. Este será tu segundo año de muchos que celebraremos contigo y nuestros seres queridos. Te amamos demasiado. ¡Siempre serás nuestro bebé!"
+  },
+  "images": {
+    "people": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/cumple/foto.jpg"
+    ],
+    "coverPhoto": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/cumple/portada.jpg",
+    "gallery": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/cumple/g1.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/cumple/g2.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/cumple/g3.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/cumple/foto.jpg"
+    ],
+    "backgrounds": {
+      "topBg": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/cumple/bg-top.jpg",
+      "bottomBg": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/cumple/bg-bottom.jpg",
+      "rsvpBg": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/img_bg_4.jpg"
+    },
+    "story": [],
+    "parents": {
+      "mother": "https://www.invitaciones-digitales.com.mx/xv/images/mother.jpg",
+      "father": "https://www.invitaciones-digitales.com.mx/xv/images/father.jpg"
+    },
+    "godparents": [
+      "https://www.invitaciones-digitales.com.mx/xv/images/godmother.jpg",
+      "https://www.invitaciones-digitales.com.mx/xv/images/godfather.jpg"
+    ]
+  },
+  "phrases": {
+    "intro": [
+      "Le damos gracias a dios por convertirnos en tus padres y le pedimos que guarde tu corazón puro y renueve un espíritu recto dentro de ti. Este será tu segundo año de muchos que celebraremos contigo y nuestros seres queridos. Te amamos demasiado. ¡Siempre serás nuestro bebé!"
+    ],
+    "celebrated": [
+      "¡Precaución! Fiesta en construcción. ¡Te espero en este día tan especial para mí, no me falles!"
+    ]
+  },
+  "family": {
+    "parents": {
+      "title": "Mis Padres",
+      "members": [
+        {
+          "label": "Madre",
+          "name": "Maria Gomez",
+          "photo": "https://www.invitaciones-digitales.com.mx/xv/images/mother.jpg"
+        },
+        {
+          "label": "Padre",
+          "name": "Raul Estrada",
+          "photo": "https://www.invitaciones-digitales.com.mx/xv/images/father.jpg"
+        }
+      ]
+    },
+    "godparents": {
+      "title": "Mis Padrinos",
+      "members": [
+        {
+          "label": "Madrina",
+          "name": "Carolina Aquino",
+          "photo": "https://www.invitaciones-digitales.com.mx/xv/images/godmother.jpg"
+        },
+        {
+          "label": "Padrino",
+          "name": "Roberto Cruz",
+          "photo": "https://www.invitaciones-digitales.com.mx/xv/images/godfather.jpg"
+        }
+      ]
+    }
+  },
+  "itinerary": [
+    {
+      "eventName": "Fiesta",
+      "eventLocation": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+      "startTime": "4:30 PM",
+      "endTime": "5:30 PM",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "icon": "fas fa-music",
+      "date": "Miércoles 31, Diciembre, 2025"
+    },
+    {
+      "eventName": "Comida",
+      "eventLocation": "Por definir. (Dale clic para ver la ubicación)",
+      "startTime": "5:30 PM",
+      "endTime": "6:30 PM",
+      "eventMapsUrl": "#",
+      "icon": "fas fa-utensil-spoon",
+      "date": "Miércoles 31, Diciembre, 2025"
+    },
+    {
+      "eventName": "SHOW DE PAYASITO WOODY",
+      "eventLocation": "Por definir. (Dale clic para ver la ubicación)",
+      "startTime": "7:30 PM",
+      "endTime": "8:30 PM",
+      "eventMapsUrl": "#",
+      "icon": "fas fa-star",
+      "date": "Miércoles 31, Diciembre, 2025"
+    },
+    {
+      "eventName": "CUENTOS ESTELARES DE COSI",
+      "eventLocation": "Por definir. (Dale clic para ver la ubicación)",
+      "startTime": "9:30 PM",
+      "endTime": "10:30 PM",
+      "eventMapsUrl": "#",
+      "icon": "fas fa-book",
+      "date": "Miércoles 31, Diciembre, 2025"
+    }
+  ],
+  "giftRegistry": [
+    {
+      "type": "bank",
+      "name": "Depósito o transferencia",
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/banamex.jpg",
+      "icon": "fas fa-copy",
+      "message": [
+        "Banco: SANTANDER",
+        "Titular: KARLA ZARATE CRUZ",
+        "Cuenta CLABE: 014610606106246881",
+        "Número de tarjeta: 60610624688"
+      ]
+    },
+    {
+      "type": "store",
+      "name": "Mesa Liverpool",
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/liverpool.jpg",
+      "url": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602",
+      "icon": "fas fa-external-link-alt",
+      "message": ["Número de evento 50355602"]
+    }
+  ],
+  "music": {
+    "type": "custom",
+    "enabled": true,
+    "url": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/song.mp3"
+  },
+  "hashtags": [
+    {
+      "content": "#confirmación",
+      "url": "#"
+    }
+  ],
+  "dressCode": {
+    "women": {
+      "title": "Damas",
+      "description": "Vestido largo/corto o traje elegante.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_mujer.jpg",
+      "icon": "fas fa-thumbs-up"
+    },
+    "men": {
+      "title": "Caballeros",
+      "description": "Traje o smoking, corbata, zapatos de vestir.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_hombre.jpg",
+      "icon": "fas fa-thumbs-up"
+    }
+  },
+  "recommendations": [
+    {
+      "type": "Hotel",
+      "name": "City Express Oaxaca",
+      "url": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/hotel.jpg"
+    },
+    {
+      "type": "Sitio de Taxis",
+      "name": "Sitio Antequera",
+      "url": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/sitio_taxi.jpg"
+    },
+    {
+      "type": "Renta de Autos",
+      "name": "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax.",
+      "url": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/renta_autos.jpeg"
+    }
+  ],
+  "amenities": [
+    {
+      "type": "Salón de belleza",
+      "name": "Marck Luga",
+      "url": "https://www.facebook.com/marck.luga.39",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/salon_belleza.jpg"
+    }
+  ],
+  "rsvp": {
+    "message": "Fecha límite para confirmar tu asistencia 26 de Julio, 2025. De lo contrario entenderemos que no asistirás",
+    "note": "Boda sin niños, agradecemos su comprensión."
+  },
+  "footer": {
+    "logoUrl": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/logo_agape.png",
+    "text": "Invitaciones Digitales Agape 2021. All Rights Reserved.",
+    "link": "https://www.facebook.com/Invitacionesdigitaleseinteligentes"
+  }
+}

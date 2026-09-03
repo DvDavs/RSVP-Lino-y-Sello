@@ -1,0 +1,43 @@
+# Docker Compose solo para bases de datos
+# Para desarrollo local con Gradle
+#
+# Variables de entorno requeridas para la aplicación Spring Boot:
+# - FRONTEND_URL: URL del frontend (por defecto: http://localhost)
+# - MAILERSEND_API_TOKEN: Token de API de MailerSend
+# - MAILERSEND_FROM_EMAIL: Email del remitente
+# - MAILERSEND_FROM_NAME: Nombre del remitente
+#
+# Estas variables deben configurarse en el sistema o en application.properties/application.yml
+services:
+  postgres-db:
+    image: postgres:13
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution123
+      POSTGRES_DB: invitaciones
+    ports:
+      - "5501:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evolution -d invitaciones"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-db:
+    image: mongo:6
+    container_name: mongo-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: evolution
+      MONGO_INITDB_ROOT_PASSWORD: evolution123
+      MONGO_INITDB_DATABASE: invitaciones
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  postgres_data:
+  mongo_data:

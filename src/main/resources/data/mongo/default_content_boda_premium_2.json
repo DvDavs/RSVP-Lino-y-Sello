@@ -1,0 +1,123 @@
+{
+  "eventTypeId": 1,
+  "planId": 2,
+  "images": {
+    "people": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/novios.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/novios.jpg"
+    ],
+    "coverPhoto": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/portada.jpg",
+    "gallery": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/G1.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/G2.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/G3.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/G1.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/G2.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/G3.jpg"
+    ],
+    "parents": {
+      "mother": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/madre_novio.jpg",
+      "father": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg"
+    },
+    "godparents": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg"
+    ],
+    "story": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/evento1.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/evento2.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/evento1.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/evento2.jpg"
+    ],
+    "recommendations": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/suggestions-4.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/suggestions-1.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/suggestions-2.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/suggestions-3.jpg"
+    ],
+    "amenities": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/iconos/playera.svg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/iconos/microfono.svg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/iconos/camara.svg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/iconos/pintura.svg"
+    ]
+  },
+  "phrases": {
+    "hombre": [
+      "Ante Dios y ante todos nuestros amigos y familiares, deseo que el mundo se entere que te tomo como esposa, para amarte, cuidarte y respetarte por siempre."
+    ],
+    "mujer": [
+      "Mi amor, no encuentro las palabras adecuadas para expresar el gran amor que siento por ti."
+    ]
+  },
+  "itinerary": [
+    {
+      "eventName": "CEREMONIA RELIGIOSA",
+      "eventLocation": "TEMPLO SANTO DOMINGO DE GUZMÁN",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "startTime": "4:30 PM",
+      "endTime": "5:30 PM"
+    },
+    {
+      "eventName": "BRINDIS DE RECEPCIÓN",
+      "eventLocation": "TEMPLO SANTO DOMINGO DE GUZMÁN",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "startTime": "7:00 PM",
+      "endTime": "7:30 PM"
+    }
+  ],
+  "giftRegistry": [
+    {
+      "type": "envelope",
+      "name": "LLUVIAS DE SOBRES",
+      "message": ["para quienes deseen sumar un gesto de amor."],
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/iconos/sobre.svg"
+    },
+    {
+      "type": "transfer",
+      "name": "DEPÓSITO O TRANSFERENCIA",
+      "message": [
+        "Banco: SANTANDER",
+        "Titular: KARLA ZARATE CRUZ",
+        "Cuenta CLABE: 014610606106246881",
+        "Número de tarjeta: 60610624688"
+      ],
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/iconos/tarjeta.svg"
+    },
+    {
+      "type": "digital",
+      "name": "MESA LIVERPOOL",
+      "message": ["Número de evento 50355602"],
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/iconos/regalo.svg"
+    }
+  ],
+  "music": {
+    "type": "custom",
+    "enabled": true,
+    "url": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/song.mp3"
+  },
+  "hashtags": ["#Sarah&Alan"],
+  "dressCode": {
+    "women": {
+      "title": "ELLAS",
+      "description": "Vestido largo Bolso pequeño Accesorios brillantes Tacones.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/dresscode2.jpg"
+    },
+    "men": {
+      "title": "ELLOS",
+      "description": "Traje formal Camisa manga larga Corbata o corbatín Zapatos.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/dresscode1.jpg"
+    }
+  },
+  "parents": {
+    "bride": {
+      "label": "MADRE DEL NOVIO",
+      "names": "María Rocha Luis",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/madre_novio.jpg"
+    },
+    "groom": {
+      "label": "PADRE DEL NOVIO",
+      "names": "Martín Barrita",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/boda/template2/img/padre_novio.jpg"
+    }
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "eventTypeId": 5,
+  "planId": 2,
+  "date": "2025-12-31T16:30:00",
+  "celebrantName": "Pedro Estrada",
+  "texts": {
+    "coverSubtitle": "Mi confirmación",
+    "coverButton": "Save the date",
+    "coupleHeading": "Reserva la fecha",
+    "coupleMessage": "Hoy que mi alma se viste con sus mejores galas; bendíceme y bendice a los que amo.",
+    "familyIntro": "Una luz para toda la vida me dará Dios en la confirmación. Los invito a acompañarme y alegrarme en este día.",
+    "itineraryTitle": "Itinerario",
+    "galleryTitle": "Galería",
+    "galleryIntro": "No olvides tomar fotos",
+    "recommendationsTitle": "Recomendaciones",
+    "amenitiesTitle": "Amenidades",
+    "giftTableTitle": "Mesa de Regalos",
+    "rsvpTitle": "Confirma tu asistencia",
+    "dressCodeTitle": "Dress Code"
+  },
+  "images": {
+    "people": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/confirmacion/foto.jpg"
+    ],
+    "coverPhoto": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/confirmacion/portada.jpg",
+    "backgrounds": {
+      "topBg": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/confirmacion/bg-top.jpg",
+      "bottomBg": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/confirmacion/bg-bottom2.jpg",
+      "rsvpBg": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/img_bg_4.jpg"
+    },
+    "gallery": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/confirmacion/g1.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/confirmacion/g2.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/confirmacion/g3.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/demos/confirmacion/g4.jpg"
+    ],
+    "parents": {
+      "mother": "https://www.invitaciones-digitales.com.mx/xv/images/mother.jpg",
+      "father": "https://www.invitaciones-digitales.com.mx/xv/images/father.jpg"
+    },
+    "godparents": [
+      "https://www.invitaciones-digitales.com.mx/xv/images/godmother.jpg",
+      "https://www.invitaciones-digitales.com.mx/xv/images/godfather.jpg"
+    ],
+    "recommendations": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/hotel.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/sitio_taxi.jpg",
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/renta_autos.jpeg"
+    ],
+    "amenities": [
+      "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/salon_belleza.jpg"
+    ]
+  },
+  "phrases": {
+    "intro": [
+      "Una luz para toda la vida me dará Dios en la confirmación. Los invito a acompañarme y alegrarme en este día."
+    ],
+    "celebrated": [
+      "Hoy que mi alma se viste con sus mejores galas; bendíceme y bendice a los que amo."
+    ]
+  },
+  "parents": {
+    "parents": {
+      "label": "Mis Padres",
+      "names": "Maria Gomez y Raul Estrada",
+      "image": "https://www.invitaciones-digitales.com.mx/xv/images/mother.jpg"
+    },
+    "godparents": {
+      "label": "Mis Padrinos",
+      "names": "Carolina Aquino y Roberto Cruz",
+      "image": "https://www.invitaciones-digitales.com.mx/xv/images/godmother.jpg"
+    }
+  },
+  "itinerary": [
+    {
+      "eventName": "Ceremonia",
+      "eventLocation": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+      "eventMapsUrl": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6",
+      "startTime": "4:30 PM",
+      "endTime": "5:30 PM",
+      "icon": "fas fa-church",
+      "date": "Miércoles 31, Diciembre, 2025"
+    },
+    {
+      "eventName": "Fiesta",
+      "eventLocation": "Por definir. (Dale clic para ver la ubicación)",
+      "eventMapsUrl": "#",
+      "startTime": "7:00 PM",
+      "endTime": "7:30 PM",
+      "icon": "fas fa-cocktail",
+      "date": "Miércoles 31, Diciembre, 2025"
+    }
+  ],
+  "giftRegistry": [
+    {
+      "type": "cash",
+      "name": "Depósito o transferencia",
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/banamex.jpg",
+      "icon": "fas fa-copy",
+      "message": [
+        "Banco: SANTANDER",
+        "Titular: KARLA ZARATE CRUZ",
+        "Cuenta CLABE: 014610606106246881",
+        "Número de tarjeta: 60610624688"
+      ]
+    },
+    {
+      "type": "store",
+      "name": "Mesa Liverpool",
+      "photo": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/liverpool.jpg",
+      "url": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602",
+      "icon": "fas fa-external-link-alt",
+      "message": ["Número de evento 50355602"]
+    }
+  ],
+  "recommendations": [
+    {
+      "type": "Hotel",
+      "name": "City Express Oaxaca",
+      "url": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/hotel.jpg"
+    },
+    {
+      "type": "Sitio de Taxis",
+      "name": "Sitio Antequera",
+      "url": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/sitio_taxi.jpg"
+    },
+    {
+      "type": "Renta de Autos",
+      "name": "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax.",
+      "url": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/renta_autos.jpeg"
+    }
+  ],
+  "amenities": [
+    {
+      "type": "Salón de belleza",
+      "name": "Marck Luga",
+      "url": "https://www.facebook.com/marck.luga.39",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/salon_belleza.jpg"
+    }
+  ],
+  "music": {
+    "type": "custom",
+    "enabled": true,
+    "url": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/premium-new/song.mp3"
+  },
+  "hashtags": [
+    {
+      "content": "#confirmación",
+      "url": "#"
+    }
+  ],
+  "dressCode": {
+    "women": {
+      "title": "Damas",
+      "description": "Vestido largo/corto o traje elegante.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_mujer.jpg",
+      "icon": "fas fa-thumbs-up"
+    },
+    "men": {
+      "title": "Caballeros",
+      "description": "Traje o smoking, corbata, zapatos de vestir.",
+      "image": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/dress_code_hombre.jpg",
+      "icon": "fas fa-thumbs-up"
+    }
+  },
+  "rsvp": {
+    "message": "Fecha límite para confirmar tu asistencia 26 de Julio, 2023. De lo contrario entenderemos que no asistirás",
+    "note": "Boda sin niños, agradecemos su comprensión."
+  },
+  "footer": {
+    "logoUrl": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/logo_agape.png",
+    "linkHref": "https://www.facebook.com/Invitacionesdigitaleseinteligentes",
+    "text": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+  }
+}
