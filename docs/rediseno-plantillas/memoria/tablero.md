@@ -58,9 +58,11 @@ Estados: pendiente · en curso · entregada · aceptada · rechazada (motivo)
 | Revisión adversarial de 2-1 (obligatoria: Sonnet tocando persistencia) | 2-1-REV | **Opus** | 0 | **aceptada** — 15 objeciones, sabotaje de `ddl-auto`, +21 pruebas (557) |
 | Composición R1–R9, reductor único, migración y `switchTemplate` | 2-2 | **Opus** | 0 | **aceptada** — 716 pruebas Kotlin, 453 TS; cierra O-01/O-06/O-10/O-12 |
 | Catálogo y registro de plantillas en un paso | 2-3 | **Opus** | 0 | **aceptada** — 862 pruebas; registra las 2 plantillas de ejemplo |
-| Documento, operaciones, snapshots y publicación | 2-4 | **Opus** | — | en curso |
-| API completa e integración | 2-5 | — | — | pendiente |
-| Revisión adversarial global y cierre | 2-cierre | — | — | pendiente |
+| Documento, operaciones, snapshots y publicación | 2-4 | **Opus** | 0 | **aceptada** — 943 pruebas; `public_token` con imprevisibilidad medida |
+| API completa e integración | 2-5 | **Opus** | 0 | **aceptada** — 1 100 pruebas; 19/19 rutas, 35 códigos `TPL_*` alcanzables |
+| Revisión adversarial global de cierre | 2-ADV | **Opus** | 0 | **aceptada** — 17 objeciones; encontró un defecto VIVO que ninguna prueba veía |
+| Consolidación de cierre (6 objeciones abiertas) | 2-6 | **Opus** | 0 | **aceptada** — 1 184 pruebas; webhook de revalidación incluido |
+| Cierre: 50 ADR aceptadas, `contratos.md`, memoria, seguridad del bucket | orquestador | **Opus** | — | **cerrada** — 1 186 pruebas, 0 fallos |
 
 **Ningún agente murió por sobrecarga (error 529)**, así que la escalera de reintento (esperar 60 s y reanudar el mismo agente con `SendMessage`; a la tercera muerte relanzar con el siguiente modelo) **no llegó a usarse**. Sí se usó `SendMessage` una vez, para inyectar en vuelo al bloque 2-0b las dos objeciones ALTAS que la revisión de 2-0a acababa de encontrar.
 ## Fase 3 — Frontend
@@ -71,3 +73,6 @@ Estados: pendiente · en curso · entregada · aceptada · rechazada (motivo)
 (pendiente)
 ## Fase 6 — Calidad y entrega
 (pendiente)
+
+
+**Resultado de la fase 2:** 1 186 pruebas Kotlin y 458 TypeScript, 0 fallos, 0 omitidas. Cobertura BUNDLE 94,62 % líneas / 81,22 % ramas. 50 ADR aceptadas, ninguna rechazada. **Ningún sub-agente hubo que repetirlo**: los seis entregaron a la primera y las tres revisiones se cerraron sin reintento.

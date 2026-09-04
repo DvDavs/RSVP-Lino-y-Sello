@@ -168,3 +168,45 @@ Formato: `- [Fase N · agente] Pregunta. **Supuesto tomado:** …`
 - [Fase 2 · 2-6] **Una fila de `tpl_asset` con un `bucket` distinto del configurado ahora produce `500`**, en vez de una URL rota en silencio (ADR-2-6-04). Hoy no puede ocurrir —los dos escritores usan la misma constante—, pero ocurriría si alguien moviera objetos de bucket o cambiara `templates2.assets.bucket` con filas ya escritas: el editor y el catálogo de esa invitación dejarían de responder. **Supuesto tomado:** fallar en voz alta, porque una imagen rota dentro de un `composed` ya congelado en `tpl_release` no la detecta nadie (P1). ¿Se prefiere degradar (servir la URL del bucket de la fila y avisar) si algún día hay más de un bucket de verdad? Eso exigiría además una `public-base-url` por bucket.
 - [Fase 2 · 2-6] **Apagar `templates2.retention.enabled` ya no apaga el planificador entero** (ADR-2-6-02): quien dependiera de ese efecto colateral debe usar `templates2.scheduling.enabled=false`. **Supuesto tomado:** el cambio es correcto porque el efecto colateral era el defecto (dejaba de drenar `tpl_asset_gc`, que es el derecho al olvido), y las tres propiedades siguen teniendo `true` por defecto, así que ningún despliegue actual cambia de comportamiento salvo en eso. ¿Hay algún entorno que hoy ponga `templates2.retention.enabled=false` esperando apagar **todas** las tareas periódicas?
 - [Fase 2 · 2-6] **`image.aspect` sigue sin comprobarse cuando la cabecera de la imagen no se puede leer**, tanto en assets de plantilla como de invitación: `ImageDimensions` devuelve `null` y el reductor no rechaza por falta de dato (`01 §6.5`). **Supuesto tomado:** es el comportamiento correcto y ya vigente; ADR-2-6-03 cierra el hueco real —las dimensiones a `NULL` **siempre** para los assets de plantilla—, no este residual. ¿Debería el registro **rechazar** un asset de imagen cuya cabecera no se entiende (hoy solo se comprueba el número mágico, que es más laxo), o el residual es aceptable?
+
+
+---
+
+# Índice de las preguntas de la fase 2, agrupadas (53 en total)
+
+Las secciones de arriba las escribió cada sub-agente. Este índice las agrupa por a quién le toca
+decidir, para que el dueño no tenga que leerlas todas para encontrar las suyas.
+
+## A. Las que bloquean algo hoy (decidir antes de la fase 3)
+1. **`invitation_guest.graduates_name` no la crea ninguna migración** y `ddl-auto` es `validate`:
+   ningún entorno nuevo arranca la aplicación completa, así que las 19 rutas nunca han respondido
+   sobre un Tomcat real. Es **preexistente y ajeno** al módulo. Falta asignarle número de migración
+   (no `V38`/`V39`) y dueño. Supuesto tomado: no tocarlo (ADR-2-ORQ-02).
+2. **Bucket de S3 de pruebas**: `templates2.assets.bucket` es ahora obligatoria y sin defecto
+   (ADR-2-ORQ-03), a petición del dueño. Falta decidir **qué bucket** se usa en desarrollo y en CI.
+3. **`TPL_NOT_MIGRATED` y `uses_templates2`**: `invitation_configs` vive en Mongo y ADR-009 lo prohíbe
+   en el módulo nuevo, así que la sonda responde "no lo sé" por defecto y **una invitación nueva no
+   puede empezar hasta que alguien active la bandera**. ¿Se acepta, o el corte debe ser automático?
+   (ADR-2-4-02.)
+
+## B. Contenido y plantillas (fase 4, pero condicionan al kit de autor)
+4. Los ejemplos de `diseno/ejemplos/` traen **digestos de relleno** y no son registrables tal cual.
+5. ¿Se añaden `TPL_PACKAGE_UNEXPECTED_FILE` y `TPL_MIGRATION_PLAN_ORPHAN` al catálogo cerrado?
+6. `audio/aac` está en el `CHECK` de `V31` pero no en el catálogo de tipos aceptados.
+7. El catálogo enseña plantillas fuera del plan del cliente cuando no se puede resolver el `planTier`.
+
+## C. Contrato con el frontend (fase 3)
+8. El **cuerpo** del `POST /api/revalidate` lo fijó el backend, no el contrato de diseño.
+9. `AssetIndex`: la URL de producción sale de `tpl_asset.s3_key`, **no** del `assetId`; la convención
+   `<ULID>.webp` de los golden es de fixture y no debe llegar al frontend.
+10. Rutas y cabeceras del render público (`ETag`, `304`, `Cache-Control`) — ver `handoffs/2-5.md`.
+
+## D. Deuda técnica reconocida, sin bloquear
+11. `Templates2Exception.Internal` devuelve su mensaje al cliente en el `500`, con nombres de tabla e
+    ids internos; el handler final sí es opaco. Los dos caminos al mismo `500` no se comportan igual.
+12. `testRuntimeOnly("com.h2database:h2")` sigue en el classpath de pruebas pese a que `contratos §6`
+    da H2 por descartado. Ninguna prueba de `templates2` lo usa; es la trampa que lo haría posible.
+13. Barrido semanal de huérfanos de S3: `S3Service` no expone listado.
+14. CORS de tipografías (`contratos §8`): infraestructura, fase 3/4.
+15. **Credenciales AWS y secreto JWT en texto plano en `application.yml`** (H-48, preexistente). Si
+    son reales, conviene rotarlas; está fuera del alcance de este módulo.
