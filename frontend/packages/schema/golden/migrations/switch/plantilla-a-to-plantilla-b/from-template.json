@@ -1,0 +1,167 @@
+{
+  "manifestVersion": 1,
+  "slug": "plantilla-a",
+  "version": "1.0.0",
+  "name": {
+    "es-MX": "Plantilla de prueba"
+  },
+  "eventKinds": [
+    "generic"
+  ],
+  "minPlanTier": 1,
+  "locales": [
+    "es-MX"
+  ],
+  "capabilities": [],
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "title": {
+        "es-MX": "cover"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "a.coverTitle",
+          "role": "coverTitle",
+          "label": {
+            "es-MX": "a.coverTitle"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        },
+        {
+          "id": "a.coverImage",
+          "role": "coverImage",
+          "label": {
+            "es-MX": "a.coverImage"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "image",
+          "constraints": {
+            "aspect": "free",
+            "maxBytes": 8388608
+          }
+        },
+        {
+          "id": "a.coverDate",
+          "role": "coverDate",
+          "label": {
+            "es-MX": "a.coverDate"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "date",
+          "formatId": "long"
+        },
+        {
+          "id": "a.sectionTitle",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "a.sectionTitle"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "family",
+      "type": "family",
+      "title": {
+        "es-MX": "family"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "a.parentA1",
+          "role": "parentA1",
+          "label": {
+            "es-MX": "a.parentA1"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        },
+        {
+          "id": "a.cards",
+          "role": "eventCards",
+          "label": {
+            "es-MX": "a.cards"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "group",
+          "min": 0,
+          "max": 12,
+          "reorderable": true,
+          "itemLabel": {
+            "es-MX": "a.cards item"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "eventTitle",
+              "label": {
+                "es-MX": "title"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "assets": [],
+  "migrationsFrom": []
+}

@@ -1,0 +1,659 @@
+{
+  "_comentario": "Los cinco MigrationError de 01 §6.1, sobre un par de paquetes mínimo emitido aquí como dato.",
+  "from": {
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "a.uno",
+              "role": "coverTitle",
+              "label": {
+                "es-MX": "a.uno"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "a.rico",
+              "role": "storyBody",
+              "label": {
+                "es-MX": "a.rico"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "richText",
+              "constraints": {
+                "maxLength": 8000
+              }
+            },
+            {
+              "id": "a.lista",
+              "role": "giftOptions",
+              "label": {
+                "es-MX": "a.lista"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "group",
+              "min": 0,
+              "max": 4,
+              "reorderable": true,
+              "itemLabel": {
+                "es-MX": "a.lista item"
+              },
+              "itemBlocks": [
+                {
+                  "id": "title",
+                  "role": "giftOptionTitle",
+                  "label": {
+                    "es-MX": "title"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "text",
+                  "constraints": {
+                    "minLength": 0,
+                    "maxLength": 200,
+                    "multiline": false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    }
+  },
+  "to": {
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "2.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "a.uno",
+              "role": "coverTitle",
+              "label": {
+                "es-MX": "a.uno"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "a.dos",
+              "role": "coverSubtitle",
+              "label": {
+                "es-MX": "a.dos"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "a.rico",
+              "role": "storyBody",
+              "label": {
+                "es-MX": "a.rico"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "a.lista",
+              "role": "giftOptions",
+              "label": {
+                "es-MX": "a.lista"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "group",
+              "min": 0,
+              "max": 1,
+              "reorderable": true,
+              "itemLabel": {
+                "es-MX": "a.lista item"
+              },
+              "itemBlocks": [
+                {
+                  "id": "title",
+                  "role": "giftOptionTitle",
+                  "label": {
+                    "es-MX": "title"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "text",
+                  "constraints": {
+                    "minLength": 0,
+                    "maxLength": 200,
+                    "multiline": false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "2.0.0",
+      "content": {}
+    }
+  },
+  "casos": [
+    {
+      "name": "MIG_PLAN_VERSION_MISMATCH: el plan no va de 1.0.0 a 2.0.0",
+      "plan": {
+        "templateSlug": "fixture-tpl",
+        "from": "1.0.0",
+        "to": "1.5.0",
+        "ops": []
+      },
+      "antes": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "a.uno": {
+            "kind": "text",
+            "value": "uno"
+          },
+          "a.rico": {
+            "kind": "richText",
+            "doc": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "texto"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      },
+      "expectError": {
+        "code": "MIG_PLAN_VERSION_MISMATCH",
+        "expected": "fixture-tpl:1.0.0->2.0.0",
+        "got": "fixture-tpl:1.0.0->1.5.0"
+      }
+    },
+    {
+      "name": "MIG_TARGET_BLOCK_UNKNOWN: renameBlock a un id que el destino no declara",
+      "plan": {
+        "templateSlug": "fixture-tpl",
+        "from": "1.0.0",
+        "to": "2.0.0",
+        "ops": [
+          {
+            "op": "renameBlock",
+            "from": "a.uno",
+            "to": "a.fantasma"
+          }
+        ]
+      },
+      "antes": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "a.uno": {
+            "kind": "text",
+            "value": "uno"
+          },
+          "a.rico": {
+            "kind": "richText",
+            "doc": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "texto"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      },
+      "expectError": {
+        "code": "MIG_TARGET_BLOCK_UNKNOWN",
+        "op": "renameBlock",
+        "blockId": "a.fantasma"
+      }
+    },
+    {
+      "name": "MIG_TARGET_BLOCK_EXISTS: renameBlock sobre un id que ya tiene contenido",
+      "plan": {
+        "templateSlug": "fixture-tpl",
+        "from": "1.0.0",
+        "to": "2.0.0",
+        "ops": [
+          {
+            "op": "renameBlock",
+            "from": "a.rico",
+            "to": "a.uno"
+          }
+        ]
+      },
+      "antes": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "a.uno": {
+            "kind": "text",
+            "value": "uno"
+          },
+          "a.rico": {
+            "kind": "richText",
+            "doc": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "texto"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      },
+      "expectError": {
+        "code": "MIG_TARGET_BLOCK_EXISTS",
+        "op": "renameBlock",
+        "blockId": "a.uno"
+      }
+    },
+    {
+      "name": "MIG_CONVERTER_UNSUPPORTED: textToRichText sobre un valor que no es text",
+      "plan": {
+        "templateSlug": "fixture-tpl",
+        "from": "1.0.0",
+        "to": "2.0.0",
+        "ops": [
+          {
+            "op": "changeBlockType",
+            "id": "a.rico",
+            "converterId": "textToRichText"
+          }
+        ]
+      },
+      "antes": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "a.uno": {
+            "kind": "text",
+            "value": "uno"
+          },
+          "a.rico": {
+            "kind": "richText",
+            "doc": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "texto"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      },
+      "expectError": {
+        "code": "MIG_CONVERTER_UNSUPPORTED",
+        "from": "richText",
+        "to": "textToRichText"
+      }
+    },
+    {
+      "name": "MIG_RESULT_INVALID: la cardinalidad del grupo baja y el plan no trae shrinkGroup (I-04)",
+      "plan": {
+        "templateSlug": "fixture-tpl",
+        "from": "1.0.0",
+        "to": "2.0.0",
+        "ops": []
+      },
+      "antes": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "a.lista": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8ANA1AAAAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "A"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8DAS2AAAAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "B"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      },
+      "expectError": {
+        "code": "MIG_RESULT_INVALID",
+        "violations": [
+          {
+            "code": "I-04_GROUP_SIZE_OUT_OF_BOUNDS",
+            "path": "content.a.lista"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "manifestVersion": 1,
+  "slug": "plantilla-b",
+  "version": "3.1.0",
+  "name": {
+    "es-MX": "Plantilla de prueba"
+  },
+  "eventKinds": [
+    "generic"
+  ],
+  "minPlanTier": 1,
+  "locales": [
+    "es-MX"
+  ],
+  "capabilities": [],
+  "sections": [
+    {
+      "key": "portada",
+      "type": "cover",
+      "title": {
+        "es-MX": "portada"
+      },
+      "variants": [
+        "clasica",
+        "moderna"
+      ],
+      "defaultVariant": "moderna",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "b.titulo",
+          "role": "coverTitle",
+          "label": {
+            "es-MX": "b.titulo"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        },
+        {
+          "id": "b.imagen",
+          "role": "coverImage",
+          "label": {
+            "es-MX": "b.imagen"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        },
+        {
+          "id": "b.fecha",
+          "role": "coverDate",
+          "label": {
+            "es-MX": "b.fecha"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "date",
+          "formatId": "long"
+        },
+        {
+          "id": "b.otroTitulo",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "b.otroTitulo"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "familia",
+      "type": "family",
+      "title": {
+        "es-MX": "familia"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "b.parentA1",
+          "role": "parentA1",
+          "label": {
+            "es-MX": "b.parentA1"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "pie",
+      "type": "footer",
+      "title": {
+        "es-MX": "pie"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": false,
+      "defaultVisible": false,
+      "blocks": [
+        {
+          "id": "b.nota",
+          "role": "footerNote",
+          "label": {
+            "es-MX": "b.nota"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    }
+  ],
+  "assets": [],
+  "migrationsFrom": []
+}

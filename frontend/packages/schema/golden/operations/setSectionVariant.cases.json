@@ -8,9 +8,68 @@
       "variant": "alt"
     },
     "expectZodValid": true,
-    "expectManifestError": null,
-    "reducerResult": null,
-    "reducerResultPending": true
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "alt",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
   },
   {
     "name": "forma inválida: falta variant",
@@ -20,9 +79,8 @@
       "sectionKey": "cover"
     },
     "expectZodValid": false,
-    "expectManifestError": null,
-    "reducerResult": null,
-    "reducerResultPending": true
+    "expectOpViolations": [],
+    "reducerResult": null
   },
   {
     "name": "variant no declarada",
@@ -33,8 +91,16 @@
       "variant": "no-existe"
     },
     "expectZodValid": true,
-    "expectManifestError": "TPL_VARIANT_UNKNOWN",
-    "reducerResult": null,
-    "reducerResultPending": true
+    "expectOpViolations": [
+      "OP_VARIANT_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_VARIANT_UNKNOWN",
+        "sectionKey": "cover",
+        "variant": "no-existe"
+      }
+    }
   }
 ]

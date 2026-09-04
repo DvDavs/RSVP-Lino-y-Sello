@@ -18,6 +18,13 @@ const writeJson = (p: string, v: unknown) => writeFileSync(p, JSON.stringify(v, 
 /**
  * URL de CDN determinista a partir del assetId: la misma regla usada para producir los
  * `compuesto.json` de referencia de la ronda 1R (verificado por igualdad byte a byte más abajo).
+ *
+ * **CONVENCIÓN DE FIXTURE, NO REGLA DE PRODUCCIÓN** (objeción O-06 de `bitacora/2-0a-REV.md`). En
+ * producción `AssetUrlResolver` construye `"{templates2.assets.public-base-url}/{s3_key}"` a partir de
+ * la columna `s3_key` de `tpl_asset` (`02 §10.4`): deriva de un dato almacenado, no del `assetId`.
+ * Por eso el `AssetIndex` resultante se emite como DATO (`assets.json`) en cada carpeta de golden: así
+ * el lado Kotlin reproduce `compuesto.json` sin conocer —ni poder copiar— esta convención (remedio
+ * real que la revisión dejó pendiente; ADR-2-2-02).
  */
 const cdnUrl = (id: string): string => `https://cdn.invitaciones.evolutiondev.mx/a/${id.slice(3)}.webp`;
 
@@ -37,7 +44,7 @@ function collectAssetIds(...roots: unknown[]): Set<string> {
 
 function buildAssetIndex(ids: Set<string>): AssetIndex {
   const idx: AssetIndex = {};
-  for (const id of ids) idx[id] = { url: cdnUrl(id) };
+  for (const id of [...ids].sort()) idx[id] = { url: cdnUrl(id) };   // ordenado: el golden es dato estable
   return idx;
 }
 
@@ -104,6 +111,7 @@ export function genGoldenTemplates(): { dir: string; matched: boolean }[] {
     writeJson(outDir + "defaults.json", defaults);
     writeJson(outDir + "documento.json", doc);
     writeJson(outDir + "business.json", business);
+    writeJson(outDir + "assets.json", assets);   // O-06: el AssetIndex es DATO del golden, no un .ts
     writeJson(outDir + "compuesto.json", result.composed);
     writeJson(outDir + "reporte.json", result.report);
 

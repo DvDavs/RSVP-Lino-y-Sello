@@ -1,0 +1,510 @@
+{
+  "name": "r7-grupos-usuario-default-y-vacio",
+  "descripcion": "R7: el orden de los ítems es el del array de doc.content; el orden de los bloques DENTRO del ítem lo fija el spec, no el JSON; un itemBlock sin valor es 'empty' aunque el grupo sea 'user'; el escalón de default opera a nivel de GRUPO COMPLETO, nunca por ítem (mezclarlo resucitaría H-02); grupo required vacío → missingRequired; grupo required que sigue en default → stillDefault",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "event",
+        "type": "event",
+        "title": {
+          "es-MX": "event"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "g.usuario",
+            "role": "eventCards",
+            "label": {
+              "es-MX": "g.usuario"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "group",
+            "min": 0,
+            "max": 12,
+            "reorderable": true,
+            "itemLabel": {
+              "es-MX": "g.usuario item"
+            },
+            "itemBlocks": [
+              {
+                "id": "title",
+                "role": "eventTitle",
+                "label": {
+                  "es-MX": "title"
+                },
+                "required": false,
+                "editable": true,
+                "source": "user",
+                "aiEditable": true,
+                "type": "text",
+                "constraints": {
+                  "minLength": 0,
+                  "maxLength": 200,
+                  "multiline": false
+                }
+              },
+              {
+                "id": "image",
+                "role": "decorative",
+                "label": {
+                  "es-MX": "image"
+                },
+                "required": false,
+                "editable": true,
+                "source": "user",
+                "aiEditable": true,
+                "type": "image",
+                "constraints": {
+                  "aspect": "free",
+                  "maxBytes": 8388608
+                }
+              },
+              {
+                "id": "nota",
+                "role": "eventNote",
+                "label": {
+                  "es-MX": "nota"
+                },
+                "required": false,
+                "editable": true,
+                "source": "user",
+                "aiEditable": true,
+                "type": "text",
+                "constraints": {
+                  "minLength": 0,
+                  "maxLength": 200,
+                  "multiline": false
+                }
+              }
+            ]
+          },
+          {
+            "id": "g.default",
+            "role": "giftOptions",
+            "label": {
+              "es-MX": "g.default"
+            },
+            "required": true,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "group",
+            "min": 0,
+            "max": 12,
+            "reorderable": true,
+            "itemLabel": {
+              "es-MX": "g.default item"
+            },
+            "itemBlocks": [
+              {
+                "id": "title",
+                "role": "giftOptionTitle",
+                "label": {
+                  "es-MX": "title"
+                },
+                "required": false,
+                "editable": true,
+                "source": "user",
+                "aiEditable": true,
+                "type": "text",
+                "constraints": {
+                  "minLength": 0,
+                  "maxLength": 200,
+                  "multiline": false
+                }
+              }
+            ]
+          },
+          {
+            "id": "g.vacio",
+            "role": "galleryPhotos",
+            "label": {
+              "es-MX": "g.vacio"
+            },
+            "required": true,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "group",
+            "min": 0,
+            "max": 12,
+            "reorderable": true,
+            "itemLabel": {
+              "es-MX": "g.vacio item"
+            },
+            "itemBlocks": [
+              {
+                "id": "photo",
+                "role": "galleryPhoto",
+                "label": {
+                  "es-MX": "photo"
+                },
+                "required": false,
+                "editable": true,
+                "source": "user",
+                "aiEditable": true,
+                "type": "image",
+                "constraints": {
+                  "aspect": "free",
+                  "maxBytes": 8388608
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {
+      "g.default": {
+        "kind": "group",
+        "items": [
+          {
+            "itemId": "01J8DEMA1AAAAAAAAAAAAAAAAA",
+            "values": {
+              "title": {
+                "kind": "text",
+                "value": "Regalo de demostración"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "event",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {
+      "g.usuario": {
+        "kind": "group",
+        "items": [
+          {
+            "itemId": "01J8ATEM2AAAAAAAAAAAAAAAAA",
+            "values": {
+              "nota": {
+                "kind": "text",
+                "value": "segunda tarjeta"
+              },
+              "title": {
+                "kind": "text",
+                "value": "Recepción"
+              }
+            }
+          },
+          {
+            "itemId": "01J8ATEM1AAAAAAAAAAAAAAAAA",
+            "values": {
+              "title": {
+                "kind": "text",
+                "value": "Ceremonia"
+              },
+              "image": {
+                "kind": "image",
+                "assetId": "as_01J8PHATA2AAAAAAAAAAAAAAAA",
+                "alt": "iglesia",
+                "focal": {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": "2027-03-08",
+    "time": "19:05",
+    "hashtag": "#AnaYLuis",
+    "coverPhotoUrl": "https://cdn.invitaciones.evolutiondev.mx/legacy/portada.jpg",
+    "childrenAllowed": false,
+    "youngAllowed": true,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {
+    "as_01J8PHATA1AAAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/uno.webp",
+      "width": 1200,
+      "height": 800
+    },
+    "as_01J8PHATA2AAAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/dos.webp"
+    },
+    "as_01J8SANADA1AAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/tres.mp3"
+    }
+  },
+  "locale": "es-MX",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-MX",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "event",
+        "type": "event",
+        "variant": "default",
+        "visible": true,
+        "title": "event",
+        "blocks": [
+          {
+            "id": "g.usuario",
+            "role": "eventCards",
+            "type": "group",
+            "label": "g.usuario",
+            "provenance": "user",
+            "items": [
+              {
+                "itemId": "01J8ATEM2AAAAAAAAAAAAAAAAA",
+                "blocks": [
+                  {
+                    "id": "title",
+                    "role": "eventTitle",
+                    "type": "text",
+                    "label": "title",
+                    "provenance": "user",
+                    "value": {
+                      "kind": "text",
+                      "value": "Recepción"
+                    }
+                  },
+                  {
+                    "id": "image",
+                    "role": "decorative",
+                    "type": "image",
+                    "label": "image",
+                    "provenance": "empty",
+                    "value": null
+                  },
+                  {
+                    "id": "nota",
+                    "role": "eventNote",
+                    "type": "text",
+                    "label": "nota",
+                    "provenance": "user",
+                    "value": {
+                      "kind": "text",
+                      "value": "segunda tarjeta"
+                    }
+                  }
+                ]
+              },
+              {
+                "itemId": "01J8ATEM1AAAAAAAAAAAAAAAAA",
+                "blocks": [
+                  {
+                    "id": "title",
+                    "role": "eventTitle",
+                    "type": "text",
+                    "label": "title",
+                    "provenance": "user",
+                    "value": {
+                      "kind": "text",
+                      "value": "Ceremonia"
+                    }
+                  },
+                  {
+                    "id": "image",
+                    "role": "decorative",
+                    "type": "image",
+                    "label": "image",
+                    "provenance": "user",
+                    "value": {
+                      "kind": "image",
+                      "url": "https://cdn.invitaciones.evolutiondev.mx/a/dos.webp",
+                      "alt": "iglesia",
+                      "focal": {
+                        "x": 0.5,
+                        "y": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "id": "nota",
+                    "role": "eventNote",
+                    "type": "text",
+                    "label": "nota",
+                    "provenance": "empty",
+                    "value": null
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "g.default",
+            "role": "giftOptions",
+            "type": "group",
+            "label": "g.default",
+            "provenance": "default",
+            "items": [
+              {
+                "itemId": "01J8DEMA1AAAAAAAAAAAAAAAAA",
+                "blocks": [
+                  {
+                    "id": "title",
+                    "role": "giftOptionTitle",
+                    "type": "text",
+                    "label": "title",
+                    "provenance": "default",
+                    "value": {
+                      "kind": "text",
+                      "value": "Regalo de demostración"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "g.vacio",
+            "role": "galleryPhotos",
+            "type": "group",
+            "label": "g.vacio",
+            "provenance": "empty",
+            "items": []
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [
+      "g.vacio"
+    ],
+    "stillDefault": [
+      "g.default"
+    ],
+    "orphanContent": [],
+    "orphanSections": [],
+    "invalidValues": [],
+    "themeFallback": null
+  }
+}

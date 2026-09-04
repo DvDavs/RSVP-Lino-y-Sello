@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "template": {
+    "slug": "fixture-tpl",
+    "version": "1.0.0"
+  },
+  "theme": {
+    "paletteId": "olive",
+    "fontSetId": "clasica"
+  },
+  "structure": {
+    "sections": [
+      {
+        "key": "cover",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "story",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "gifts",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "menu",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "extra",
+        "variant": "default",
+        "visible": true
+      }
+    ]
+  },
+  "content": {
+    "cover.title": {
+      "kind": "text",
+      "value": "Ana & Luis"
+    },
+    "cover.old": {
+      "kind": "text",
+      "value": "Nos casamos"
+    },
+    "cover.legacy": {
+      "kind": "text",
+      "value": "Confirma tu asistencia"
+    },
+    "cover.dropped": {
+      "kind": "text",
+      "value": "adorno viejo"
+    },
+    "cover.olvidado": {
+      "kind": "text",
+      "value": "nadie lo migró"
+    },
+    "story.body": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Nos conocimos un verano en la costa y no nos separamos"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "story.tags": {
+      "kind": "listText",
+      "items": [
+        "viaje",
+        "playa"
+      ]
+    },
+    "conv.aRico": {
+      "kind": "text",
+      "value": "Un párrafo suelto"
+    },
+    "conv.aLista": {
+      "kind": "text",
+      "value": "Una sola entrada"
+    },
+    "conv.vacioRico": {
+      "kind": "text",
+      "value": ""
+    },
+    "conv.vacioLista": {
+      "kind": "text",
+      "value": ""
+    },
+    "gifts.list": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8GAFT1AAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Sobre"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "En la recepción"
+            }
+          }
+        },
+        {
+          "itemId": "01J8GAFT2AAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Mesa"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Tienda X"
+            }
+          }
+        },
+        {
+          "itemId": "01J8GAFT3AAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Viaje"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Fondo común"
+            }
+          }
+        },
+        {
+          "itemId": "01J8GAFT4AAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Otro"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Sorpresa"
+            }
+          }
+        }
+      ]
+    },
+    "menu.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8MENA1AAAAAAAAAAAAAAAAA",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Cena de tres tiempos"
+            }
+          }
+        },
+        {
+          "itemId": "01J8MENA2AAAAAAAAAAAAAAAAA",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Barra libre"
+            }
+          }
+        }
+      ]
+    },
+    "extra.note": {
+      "kind": "text",
+      "value": "Hotel recomendado"
+    }
+  },
+  "attic": {},
+  "meta": {
+    "locale": "es-MX"
+  }
+}

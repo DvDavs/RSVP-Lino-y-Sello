@@ -1,0 +1,306 @@
+{
+  "_comentario": "Fixture base de golden/operations/ (O-01). Es DATO: Kotlin lo lee tal cual para reproducir `reducerResult` y `expectOpViolations` sin conocer scripts/fixtures.ts. `newUlid` devuelve SIEMPRE `ulidSeed`: el reductor es determinista si se le inyecta una fuente determinista.",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "title": {
+          "es-MX": "cover"
+        },
+        "variants": [
+          "default",
+          "alt"
+        ],
+        "defaultVariant": "default",
+        "required": true,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "cover.title",
+            "role": "coverTitle",
+            "label": {
+              "es-MX": "cover.title"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 80,
+              "multiline": false
+            }
+          },
+          {
+            "id": "cover.image",
+            "role": "coverImage",
+            "label": {
+              "es-MX": "cover.image"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "image",
+            "constraints": {
+              "aspect": "square",
+              "maxBytes": 100000
+            }
+          },
+          {
+            "id": "cover.fixed",
+            "role": "coverSubtitle",
+            "label": {
+              "es-MX": "cover.fixed"
+            },
+            "required": false,
+            "editable": true,
+            "source": "fixed",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          },
+          {
+            "id": "cover.music",
+            "role": "backgroundMusic",
+            "label": {
+              "es-MX": "cover.music"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "audio",
+            "constraints": {
+              "maxBytes": 100000
+            }
+          }
+        ]
+      },
+      {
+        "key": "event",
+        "type": "event",
+        "title": {
+          "es-MX": "event"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "event.cards",
+            "role": "eventCards",
+            "label": {
+              "es-MX": "event.cards"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "group",
+            "min": 1,
+            "max": 3,
+            "reorderable": true,
+            "itemLabel": {
+              "es-MX": "event.cards item"
+            },
+            "itemBlocks": [
+              {
+                "id": "title",
+                "role": "sectionTitle",
+                "label": {
+                  "es-MX": "title"
+                },
+                "required": false,
+                "editable": true,
+                "source": "user",
+                "aiEditable": true,
+                "type": "text",
+                "constraints": {
+                  "minLength": 0,
+                  "maxLength": 200,
+                  "multiline": false
+                }
+              },
+              {
+                "id": "image",
+                "role": "decorative",
+                "label": {
+                  "es-MX": "image"
+                },
+                "required": false,
+                "editable": true,
+                "source": "user",
+                "aiEditable": true,
+                "type": "image",
+                "constraints": {
+                  "aspect": "free",
+                  "maxBytes": 8388608
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {
+      "cover.fixed": {
+        "kind": "text",
+        "value": "Fijo de la plantilla"
+      }
+    }
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "cover",
+          "variant": "default",
+          "visible": true
+        },
+        {
+          "key": "event",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {
+      "cover.title": {
+        "kind": "text",
+        "value": "Ana & Luis"
+      },
+      "event.cards": {
+        "kind": "group",
+        "items": [
+          {
+            "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+            "values": {
+              "title": {
+                "kind": "text",
+                "value": "Ceremonia"
+              }
+            }
+          },
+          {
+            "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+            "values": {
+              "title": {
+                "kind": "text",
+                "value": "Recepción"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "assetMeta": {
+    "as_01J8ASSETAKAAAAAAAAAAAAAAA": {
+      "bytes": 50000,
+      "width": 1000,
+      "height": 1000,
+      "contentType": "image/webp"
+    },
+    "as_01J8ASSETBGAAAAAAAAAAAAAAA": {
+      "bytes": 900000,
+      "width": 1000,
+      "height": 1000,
+      "contentType": "image/webp"
+    },
+    "as_01J8ASSETWDAAAAAAAAAAAAAAA": {
+      "bytes": 50000,
+      "width": 1600,
+      "height": 400,
+      "contentType": "image/webp"
+    }
+  },
+  "ulidSeed": "01J8NEWATEMAAAAAAAAAAAAAAA",
+  "knownItemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+  "otherItemId": "01J8KNAWN2AAAAAAAAAAAAAAAA"
+}

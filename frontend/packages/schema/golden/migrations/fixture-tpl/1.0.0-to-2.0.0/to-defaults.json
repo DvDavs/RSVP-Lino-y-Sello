@@ -1,0 +1,10 @@
+{
+  "templateSlug": "fixture-tpl",
+  "templateVersion": "2.0.0",
+  "content": {
+    "cover.added": {
+      "kind": "text",
+      "value": "Nuevo por defecto"
+    }
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "applied": [
+    {
+      "op": "renameBlock",
+      "target": "cover.old"
+    },
+    {
+      "op": "removeBlock",
+      "target": "cover.dropped"
+    },
+    {
+      "op": "addBlock",
+      "target": "cover.added"
+    },
+    {
+      "op": "renameSection",
+      "target": "story"
+    },
+    {
+      "op": "renamePalette",
+      "target": "olive"
+    },
+    {
+      "op": "renameFontSet",
+      "target": "clasica"
+    },
+    {
+      "op": "changeBlockType",
+      "target": "story.body"
+    },
+    {
+      "op": "changeBlockType",
+      "target": "story.tags"
+    },
+    {
+      "op": "changeBlockType",
+      "target": "conv.aRico"
+    },
+    {
+      "op": "changeBlockType",
+      "target": "conv.aLista"
+    },
+    {
+      "op": "changeBlockType",
+      "target": "conv.vacioRico"
+    },
+    {
+      "op": "changeBlockType",
+      "target": "conv.vacioLista"
+    },
+    {
+      "op": "moveIntoGroup",
+      "target": "cover.legacy"
+    },
+    {
+      "op": "flattenGroup",
+      "target": "menu.items"
+    },
+    {
+      "op": "shrinkGroup",
+      "target": "gifts.list"
+    },
+    {
+      "op": "removeSection",
+      "target": "extra"
+    }
+  ],
+  "moved": [
+    {
+      "from": "cover.old",
+      "to": "cover.new"
+    },
+    {
+      "from": "cover.legacy",
+      "to": "event.cards.title"
+    },
+    {
+      "from": "menu.items.name",
+      "to": "menu.note"
+    }
+  ],
+  "toAttic": [
+    {
+      "blockId": "cover.dropped",
+      "reason": "removeBlock"
+    },
+    {
+      "blockId": "menu.items",
+      "reason": "removeBlock"
+    },
+    {
+      "blockId": "gifts.list",
+      "reason": "shrinkGroup"
+    },
+    {
+      "blockId": "extra.note",
+      "reason": "removeSection"
+    },
+    {
+      "blockId": "cover.olvidado",
+      "reason": "removeBlock"
+    }
+  ],
+  "converted": [
+    {
+      "blockId": "story.body",
+      "converterId": "richTextToText"
+    },
+    {
+      "blockId": "story.tags",
+      "converterId": "listTextToText"
+    },
+    {
+      "blockId": "conv.aRico",
+      "converterId": "textToRichText"
+    },
+    {
+      "blockId": "conv.aLista",
+      "converterId": "textToListText"
+    },
+    {
+      "blockId": "conv.vacioRico",
+      "converterId": "textToRichText"
+    },
+    {
+      "blockId": "conv.vacioLista",
+      "converterId": "textToListText"
+    }
+  ],
+  "lossless": false
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "template": {
+    "slug": "plantilla-a",
+    "version": "1.0.0"
+  },
+  "theme": {
+    "paletteId": "olive",
+    "fontSetId": "clasica"
+  },
+  "structure": {
+    "sections": [
+      {
+        "key": "cover",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "family",
+        "variant": "default",
+        "visible": true
+      }
+    ]
+  },
+  "content": {
+    "a.coverTitle": {
+      "kind": "text",
+      "value": "Ana & Luis"
+    },
+    "a.coverImage": {
+      "kind": "image",
+      "assetId": "as_01J8RETRATAAAAAAAAAAAAAAAA",
+      "alt": "portada",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "a.coverDate": {
+      "kind": "date",
+      "value": "2027-04-10"
+    },
+    "a.sectionTitle": {
+      "kind": "text",
+      "value": "Nuestra historia"
+    },
+    "a.parentA1": {
+      "kind": "text",
+      "value": "Sra. Ruiz"
+    },
+    "a.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8CARD1AAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Ceremonia"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "attic": {},
+  "meta": {
+    "locale": "es-MX"
+  }
+}

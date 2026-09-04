@@ -1,0 +1,256 @@
+{
+  "name": "r1c-required-con-defaultVisible-false",
+  "descripcion": "HUECO CONOCIDO (registrado en preguntas-abiertas.md, 2-2): R1 fuerza visible:true sobre una sección `required` que ESTÁ en doc.structure (I-17), pero R1c inserta las ausentes con `spec.defaultVisible` tal cual (01 §5.3). Un manifiesto con required:true y defaultVisible:false produce una sección obligatoria invisible en cuanto el documento no la menciona, y ninguna invariante lo detecta porque I-17 solo mira doc.structure. Se congela el comportamiento actual para que Kotlin y TypeScript no diverjan mientras el dueño no decida",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "title": {
+          "es-MX": "cover"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": true,
+        "defaultVisible": false,
+        "blocks": [
+          {
+            "id": "cover.title",
+            "role": "coverTitle",
+            "label": {
+              "es-MX": "cover.title"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          }
+        ]
+      },
+      {
+        "key": "event",
+        "type": "event",
+        "title": {
+          "es-MX": "event"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "event.title",
+            "role": "eventTitle",
+            "label": {
+              "es-MX": "event.title"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {}
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "event",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {},
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": "2027-03-08",
+    "time": "19:05",
+    "hashtag": "#AnaYLuis",
+    "coverPhotoUrl": "https://cdn.invitaciones.evolutiondev.mx/legacy/portada.jpg",
+    "childrenAllowed": false,
+    "youngAllowed": true,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {},
+  "locale": "es-MX",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-MX",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "variant": "default",
+        "visible": false,
+        "title": "cover",
+        "blocks": [
+          {
+            "id": "cover.title",
+            "role": "coverTitle",
+            "type": "text",
+            "label": "cover.title",
+            "provenance": "empty",
+            "value": null
+          }
+        ]
+      },
+      {
+        "key": "event",
+        "type": "event",
+        "variant": "default",
+        "visible": true,
+        "title": "event",
+        "blocks": [
+          {
+            "id": "event.title",
+            "role": "eventTitle",
+            "type": "text",
+            "label": "event.title",
+            "provenance": "empty",
+            "value": null
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [],
+    "stillDefault": [],
+    "orphanContent": [],
+    "orphanSections": [],
+    "invalidValues": [],
+    "themeFallback": null
+  }
+}

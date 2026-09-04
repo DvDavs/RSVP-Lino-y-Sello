@@ -1,0 +1,548 @@
+{
+  "name": "o12-invalid-values",
+  "descripcion": "O-12: valores presentes pero inválidos contra su spec (I-16, I-30, I-04, I-01, I-02) se registran en report.invalidValues, ordenados por blockId y luego por código. `composed` NO cambia: el valor se sigue resolviendo igual; lo único que cambia es que el informe lo dice, que es lo que `TPL_PUBLISH_BLOCKED_INVALID_VALUES` (03 §5) necesita para bloquear la publicación",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "title": {
+          "es-MX": "cover"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "v.corto",
+            "role": "coverTitle",
+            "label": {
+              "es-MX": "v.corto"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 5,
+              "multiline": false
+            }
+          },
+          {
+            "id": "v.unaLinea",
+            "role": "coverSubtitle",
+            "label": {
+              "es-MX": "v.unaLinea"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          },
+          {
+            "id": "v.lista",
+            "role": "dressCodeDetail",
+            "label": {
+              "es-MX": "v.lista"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "listText",
+            "constraints": {
+              "minItems": 0,
+              "maxItems": 2,
+              "maxItemLength": 200
+            }
+          },
+          {
+            "id": "v.rango",
+            "role": "eventWhen",
+            "label": {
+              "es-MX": "v.rango"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "dateTimeRange",
+            "formatId": "long-h12"
+          },
+          {
+            "id": "v.choice",
+            "role": "hashtagPlatform",
+            "label": {
+              "es-MX": "v.choice"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "choice",
+            "options": [
+              {
+                "id": "instagram",
+                "label": {
+                  "es-MX": "instagram"
+                }
+              }
+            ]
+          },
+          {
+            "id": "v.grupo",
+            "role": "eventCards",
+            "label": {
+              "es-MX": "v.grupo"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "group",
+            "min": 2,
+            "max": 4,
+            "reorderable": true,
+            "itemLabel": {
+              "es-MX": "v.grupo item"
+            },
+            "itemBlocks": [
+              {
+                "id": "title",
+                "role": "eventTitle",
+                "label": {
+                  "es-MX": "title"
+                },
+                "required": false,
+                "editable": true,
+                "source": "user",
+                "aiEditable": true,
+                "type": "text",
+                "constraints": {
+                  "minLength": 0,
+                  "maxLength": 200,
+                  "multiline": false
+                }
+              }
+            ]
+          },
+          {
+            "id": "v.dosCodigos",
+            "role": "coverButtonLabel",
+            "label": {
+              "es-MX": "v.dosCodigos"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 5,
+              "multiline": false
+            }
+          },
+          {
+            "id": "v.escalarEnGrupo",
+            "role": "galleryPhotos",
+            "label": {
+              "es-MX": "v.escalarEnGrupo"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "group",
+            "min": 0,
+            "max": 12,
+            "reorderable": true,
+            "itemLabel": {
+              "es-MX": "v.escalarEnGrupo item"
+            },
+            "itemBlocks": [
+              {
+                "id": "title",
+                "role": "galleryIntro",
+                "label": {
+                  "es-MX": "title"
+                },
+                "required": false,
+                "editable": true,
+                "source": "user",
+                "aiEditable": true,
+                "type": "text",
+                "constraints": {
+                  "minLength": 0,
+                  "maxLength": 200,
+                  "multiline": false
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {}
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "cover",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {
+      "v.corto": {
+        "kind": "text",
+        "value": "texto demasiado largo"
+      },
+      "v.unaLinea": {
+        "kind": "text",
+        "value": "dos\nlíneas"
+      },
+      "v.lista": {
+        "kind": "listText",
+        "items": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      "v.rango": {
+        "kind": "dateTimeRange",
+        "start": "2027-05-02T10:00",
+        "end": "2027-05-01T10:00"
+      },
+      "v.choice": {
+        "kind": "choice",
+        "optionId": "no-declarada"
+      },
+      "v.grupo": {
+        "kind": "group",
+        "items": [
+          {
+            "itemId": "01J8SAAA1AAAAAAAAAAAAAAAAA",
+            "values": {
+              "title": {
+                "kind": "text",
+                "value": "único"
+              }
+            }
+          }
+        ]
+      },
+      "v.dosCodigos": {
+        "kind": "text",
+        "value": "demasiado largo\ny con salto"
+      },
+      "v.escalarEnGrupo": {
+        "kind": "text",
+        "value": "no soy un grupo"
+      }
+    },
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": "2027-03-08",
+    "time": "19:05",
+    "hashtag": "#AnaYLuis",
+    "coverPhotoUrl": "https://cdn.invitaciones.evolutiondev.mx/legacy/portada.jpg",
+    "childrenAllowed": false,
+    "youngAllowed": true,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {},
+  "locale": "es-MX",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-MX",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "variant": "default",
+        "visible": true,
+        "title": "cover",
+        "blocks": [
+          {
+            "id": "v.corto",
+            "role": "coverTitle",
+            "type": "text",
+            "label": "v.corto",
+            "provenance": "user",
+            "value": {
+              "kind": "text",
+              "value": "texto demasiado largo"
+            }
+          },
+          {
+            "id": "v.unaLinea",
+            "role": "coverSubtitle",
+            "type": "text",
+            "label": "v.unaLinea",
+            "provenance": "user",
+            "value": {
+              "kind": "text",
+              "value": "dos\nlíneas"
+            }
+          },
+          {
+            "id": "v.lista",
+            "role": "dressCodeDetail",
+            "type": "listText",
+            "label": "v.lista",
+            "provenance": "user",
+            "value": {
+              "kind": "listText",
+              "items": [
+                "a",
+                "b",
+                "c"
+              ]
+            }
+          },
+          {
+            "id": "v.rango",
+            "role": "eventWhen",
+            "type": "dateTimeRange",
+            "label": "v.rango",
+            "provenance": "user",
+            "value": {
+              "kind": "dateTimeRange",
+              "start": "2027-05-02T10:00",
+              "end": "2027-05-01T10:00",
+              "formatted": "2 de mayo de 2027, 10:00 am – 1 de mayo de 2027, 10:00 am"
+            }
+          },
+          {
+            "id": "v.choice",
+            "role": "hashtagPlatform",
+            "type": "choice",
+            "label": "v.choice",
+            "provenance": "user",
+            "value": {
+              "kind": "choice",
+              "optionId": "no-declarada",
+              "label": "no-declarada"
+            }
+          },
+          {
+            "id": "v.grupo",
+            "role": "eventCards",
+            "type": "group",
+            "label": "v.grupo",
+            "provenance": "user",
+            "items": [
+              {
+                "itemId": "01J8SAAA1AAAAAAAAAAAAAAAAA",
+                "blocks": [
+                  {
+                    "id": "title",
+                    "role": "eventTitle",
+                    "type": "text",
+                    "label": "title",
+                    "provenance": "user",
+                    "value": {
+                      "kind": "text",
+                      "value": "único"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "v.dosCodigos",
+            "role": "coverButtonLabel",
+            "type": "text",
+            "label": "v.dosCodigos",
+            "provenance": "user",
+            "value": {
+              "kind": "text",
+              "value": "demasiado largo\ny con salto"
+            }
+          },
+          {
+            "id": "v.escalarEnGrupo",
+            "role": "galleryPhotos",
+            "type": "group",
+            "label": "v.escalarEnGrupo",
+            "provenance": "empty",
+            "items": []
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [],
+    "stillDefault": [],
+    "orphanContent": [],
+    "orphanSections": [],
+    "invalidValues": [
+      {
+        "blockId": "v.choice",
+        "code": "I-02_CHOICE_UNKNOWN_OPTION"
+      },
+      {
+        "blockId": "v.corto",
+        "code": "I-16_TEXT_TOO_LONG"
+      },
+      {
+        "blockId": "v.dosCodigos",
+        "code": "I-16_TEXT_TOO_LONG"
+      },
+      {
+        "blockId": "v.dosCodigos",
+        "code": "I-30_TEXT_MULTILINE_NOT_ALLOWED"
+      },
+      {
+        "blockId": "v.escalarEnGrupo",
+        "code": "I-15_BLOCK_KIND_MISMATCH"
+      },
+      {
+        "blockId": "v.grupo",
+        "code": "I-04_GROUP_SIZE_OUT_OF_BOUNDS"
+      },
+      {
+        "blockId": "v.lista",
+        "code": "I-04_GROUP_SIZE_OUT_OF_BOUNDS"
+      },
+      {
+        "blockId": "v.rango",
+        "code": "I-01_RANGE_END_BEFORE_START"
+      },
+      {
+        "blockId": "v.unaLinea",
+        "code": "I-30_TEXT_MULTILINE_NOT_ALLOWED"
+      }
+    ],
+    "themeFallback": null
+  }
+}

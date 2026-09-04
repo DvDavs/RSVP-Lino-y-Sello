@@ -1,0 +1,42 @@
+{
+  "palettes": [
+    {
+      "id": "olive",
+      "name": {
+        "es-MX": "Olivo"
+      },
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      }
+    }
+  ],
+  "fontSets": [
+    {
+      "id": "clasica",
+      "name": {
+        "es-MX": "Clásica"
+      },
+      "heading": {
+        "family": "Playfair Display",
+        "weights": [
+          400
+        ],
+        "source": "bundled"
+      },
+      "body": {
+        "family": "Lora",
+        "weights": [
+          400
+        ],
+        "source": "bundled"
+      }
+    }
+  ],
+  "defaultPaletteId": "olive",
+  "defaultFontSetId": "clasica"
+}

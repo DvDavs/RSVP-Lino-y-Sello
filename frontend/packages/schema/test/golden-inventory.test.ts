@@ -6,7 +6,10 @@ import { listDirs, goldenDir } from "./golden.ts";
 import { readdirSync } from "node:fs";
 
 const EXPECTED_TEMPLATE_DIRS = ["boda-clasica-1.0.0", "xv-jardin-1.0.0"];
-const EXPECTED_FILES = ["template.json", "theme.json", "defaults.json", "documento.json", "business.json", "compuesto.json", "reporte.json"].sort();
+// OCHO ficheros desde 2-2: `assets.json` emite el `AssetIndex` como DATO (objeción O-06). Antes la
+// regla `assetId → url` vivía solo en un `.ts` del generador, así que Kotlin no podía reproducir
+// `compuesto.json` sin copiar una convención de fixture que NO es la regla de producción (02 §10.4).
+const EXPECTED_FILES = ["template.json", "theme.json", "defaults.json", "documento.json", "business.json", "assets.json", "compuesto.json", "reporte.json"].sort();
 
 describe("golden/templates — inventario", () => {
   it("exactamente las 2 plantillas de ejemplo (contratos.md §3)", () => {
@@ -14,9 +17,20 @@ describe("golden/templates — inventario", () => {
   });
 
   for (const dir of EXPECTED_TEMPLATE_DIRS) {
-    it(`${dir}: los 7 ficheros`, () => {
+    it(`${dir}: los 8 ficheros`, () => {
       const files = readdirSync(goldenDir("templates") + "/" + dir).sort();
       expect(files).toEqual(EXPECTED_FILES);
     });
   }
+});
+
+describe("golden/ — las seis subcarpetas más fixtures", () => {
+  it("existen todas y ninguna está vacía", () => {
+    for (const sub of ["templates", "compose", "invariants", "blocks", "operations", "migrations", "fixtures"])
+      expect(readdirSync(goldenDir(sub)).length).toBeGreaterThan(0);
+  });
+
+  it("el fixture base del reductor está emitido como dato (O-01)", () => {
+    expect(readdirSync(goldenDir("fixtures"))).toContain("operations-base.json");
+  });
 });
