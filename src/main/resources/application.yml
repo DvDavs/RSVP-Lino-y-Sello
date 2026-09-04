@@ -46,6 +46,13 @@ spring:
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://evolution:evolution123@localhost:27017/invitaciones?authSource=admin}
+  servlet:
+    multipart:
+      # templates2 (contratos.md 4, 03 3.17): POST /master/templates2/versions es la UNICA ruta
+      # multipart del modulo y sube el paquete de una plantilla (hasta 200 assets de 15 MiB).
+      # Es la unica modificacion de este fichero que pide el modulo nuevo.
+      max-file-size: 15MB
+      max-request-size: 64MB
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
