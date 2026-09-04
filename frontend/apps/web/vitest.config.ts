@@ -24,7 +24,16 @@ export default defineConfig({
       // páginas de ruta ((chrome)/(canvas)/(public)/**) son esqueleto de fetch+estado; su prueba de
       // integración real (con Testing Library sobre flujos completos) es de los bloques 3-4/3-5, que
       // sustituyen el contenido de esas páginas. Registrado en `memoria/bitacora/3-1.md`.
-      include: ["lib/**/*.{ts,tsx}", "app/api/**/*.{ts,tsx}", "components/ui/**/*.{ts,tsx}", "components/public/**/*.{ts,tsx}"],
+      // Bloque 3-3: `app/(public)/_componentes/composed-lectura.ts` es lógica pura (qué sale de la
+      // invitación hacia los metadatos y qué NO) y entra en cobertura; las PÁGINAS de esa carpeta
+      // siguen fuera, como el resto de rutas.
+      include: [
+        "lib/**/*.{ts,tsx}",
+        "app/api/**/*.{ts,tsx}",
+        "app/(public)/_componentes/composed-lectura.ts",
+        "components/ui/**/*.{ts,tsx}",
+        "components/public/**/*.{ts,tsx}",
+      ],
       exclude: ["**/*.test.{ts,tsx}", "**/*.d.ts"],
       thresholds: { lines: 60, functions: 65, branches: 50, statements: 60 },
     },
