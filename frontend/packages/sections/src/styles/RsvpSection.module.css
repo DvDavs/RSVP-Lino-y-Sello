@@ -1,0 +1,207 @@
+/**
+ * packages/sections/src/styles/RsvpSection.module.css — 01 §3.1 tabla, tipo `rsvp`, variantes
+ * `banner`/`form-inline`. El formulario de RSVP NO se implementa aquí (04 §15.6/§8.7): esta hoja
+ * solo viste el contenedor, la llamada a la acción y el estado inerte de `mode:"canvas"`.
+ */
+
+.section {
+  position: relative;
+  overflow: clip;
+  color: var(--inv-color-accent-ink);
+  background: var(--inv-color-accent);
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.backdrop :global(img) {
+  height: 100%;
+  --inv-image-aspect-default: var(--inv-image-aspect-wide);
+}
+
+/* Velo de contraste sobre la imagen de fondo, para que el texto claro siga siendo legible
+ * encima de cualquier fotografía (1.4.3 Contrast (Minimum), medido sobre el texto, no la imagen). */
+.veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--inv-color-ink) 55%, transparent),
+    color-mix(in srgb, var(--inv-color-ink) 72%, transparent)
+  );
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  max-width: var(--inv-content-max);
+  margin-inline: auto;
+  padding-block: var(--inv-space-8);
+  padding-inline: var(--inv-space-5);
+  display: grid;
+  gap: var(--inv-space-5);
+  justify-items: center;
+  text-align: center;
+}
+
+.section[data-variant="form-inline"] .inner {
+  justify-items: start;
+  text-align: left;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--inv-space-7);
+}
+
+.section[data-variant="form-inline"] .content {
+  display: grid;
+  gap: var(--inv-space-3);
+}
+
+.ornament {
+  display: inline-block;
+  width: 2.5rem;
+  height: 0.0625rem;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-3xl);
+  line-height: var(--inv-leading-tight);
+  letter-spacing: var(--inv-tracking-tight);
+  color: inherit;
+}
+
+.intro {
+  margin: 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-lg);
+  line-height: var(--inv-leading-relaxed);
+  color: inherit;
+  opacity: 0.92;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--inv-space-3);
+}
+
+.section[data-variant="form-inline"] .meta {
+  justify-content: flex-start;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--inv-touch-target-min);
+  padding-inline: var(--inv-space-4);
+  border-radius: var(--inv-radius-sm);
+  border: var(--inv-border-width) solid color-mix(in srgb, var(--inv-color-accent-ink) 45%, transparent);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: inherit;
+}
+
+.note {
+  margin: 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+  line-height: var(--inv-leading-relaxed);
+  color: inherit;
+  opacity: 0.9;
+}
+
+/* ------------------------------------------------------------------------------------------
+ * Llamada a la acción — la superficie con la que el invitado ACTÚA. La más clara y apetecible
+ * de pulsar de toda la invitación (brief §1). Un `<a>` real en público, un `<span>` inerte en
+ * canvas (04 §8.1/§8.7: el lienzo no tiene `allow-forms`, así que el formulario real jamás se
+ * monta ahí — el estado inerte lo hace explícito en vez de dejar un control muerto sin explicar).
+ * ---------------------------------------------------------------------------------------- */
+.ctaRow {
+  display: grid;
+  gap: var(--inv-space-2);
+  justify-items: center;
+}
+
+.section[data-variant="form-inline"] .ctaRow {
+  justify-items: stretch;
+  text-align: center;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--inv-touch-target-min) * 2);
+  padding-inline: var(--inv-space-7);
+  border-radius: var(--inv-radius-md);
+  background: var(--inv-color-surface);
+  color: var(--inv-color-accent);
+  font-family: var(--inv-font-body);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-lg);
+  letter-spacing: var(--inv-tracking-normal);
+  text-decoration: none;
+  box-shadow: var(--inv-shadow-md);
+  transition-property: transform, box-shadow;
+  transition-duration: var(--inv-motion-normal);
+  transition-timing-function: var(--inv-motion-ease);
+}
+
+.cta:hover {
+  box-shadow: var(--inv-shadow-lg);
+  transform: translateY(-0.125rem) scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+  .cta:hover {
+    transform: none;
+  }
+}
+
+.ctaInert {
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--inv-color-surface) 55%, var(--inv-color-accent));
+  color: var(--inv-color-accent-ink);
+  box-shadow: none;
+}
+
+.ctaInert:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.ctaCaption {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  color: inherit;
+  opacity: 0.85;
+}
+
+.mountSlot {
+  /* La isla real de RSVP (04 §15.6) se monta aquí, fuera de packages/sections — este `<div>` es
+   * solo el gancho DOM estable (`id`/`data-rsvp-mount`, ver handoffs/3-2c.md). Sin contenido
+   * propio: si algo se porta dentro, ocupa su propio espacio; vacío no tiene huella visual. */
+  min-height: 0;
+}
+
+@media (min-width: 48rem) {
+  .section[data-variant="form-inline"] .inner {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+}

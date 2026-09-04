@@ -87,6 +87,23 @@
   /* Medida (measure): ancho de línea legible para texto largo (richText, listas). ~60-65 ch. */
   --inv-measure: 34rem;
 
+  /* Ancho máximo de columna de contenido de una SECCIÓN (AÑADIDO por 3-2c: ningún token de 3-2a
+   * acota el ancho del contenedor de una sección — `--inv-measure` es para texto largo en línea,
+   * no para la columna completa de tarjetas/grupos). Sin él, en escritorio ancho (1440px+) las
+   * tarjetas de giftTable/suggestions/amenities/family se estirarían de borde a borde, que es
+   * exactamente la lectura visual de "formulario", no de invitación editorial. */
+  --inv-content-max: 68rem;
+
+  /* Ancho mínimo de columna para grillas de tarjetas con `repeat(auto-fit, minmax(…))`
+   * (AÑADIDO por 3-2c: giftTable/suggestions/amenities/family "cards"). Un solo valor para que
+   * las cuatro secciones de tarjetas compartan el mismo punto de quiebre editorial. */
+  --inv-grid-card-min: 16rem;
+
+  /* Grosor de línea fina para separadores de la variante "list" (AÑADIDO por 3-2c). Se tiñe con
+   * `color-mix(in srgb, var(--inv-color-ink) N%, transparent)`, igual criterio que las sombras de
+   * arriba — nunca un `rgba(0,0,0,…)` fijo. */
+  --inv-border-width: 1px;
+
   /* Sombra: tintada con la tinta de la paleta activa (color-mix), nunca negro puro — se adapta
    * a cada paleta sin que ninguna hoja de sección escriba un rgba(0,0,0,…) a mano. */
   --inv-shadow-sm: 0 1px 2px color-mix(in srgb, var(--inv-color-ink) 14%, transparent);
@@ -118,4 +135,14 @@
   --inv-image-aspect-default: 4 / 3;
   --inv-focal-x: 50%;
   --inv-focal-y: 50%;
+
+  /* Relaciones de aspecto adicionales (AÑADIDAS por 3-2c), con la MISMA técnica que ya usa
+   * `ImageBlock` (`--inv-image-aspect-default` en cascada): una sección envuelve su `<ImageBlock>`
+   * en un contenedor que REDEFINE `--inv-image-aspect-default` para ese subárbol (las custom
+   * properties heredan), sin tocar `ImageBlock.tsx` ni su `.module.css`. Los valores corresponden
+   * a los `constraints.aspect` reales del manifiesto (`01 §3.2` fila 4: "aspect/maxBytes los
+   * valida la subida"; `template.json` declara "square" en `giftOptionImage`/`personPhoto`/etc. y
+   * "wide" en `rsvpBackground`) — no son números inventados, son los dos aspectos que faltaban. */
+  --inv-image-aspect-square: 1 / 1;
+  --inv-image-aspect-wide: 21 / 9;
 }

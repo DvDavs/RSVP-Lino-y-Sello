@@ -25,6 +25,13 @@ import type { ComposedSection } from "./schema-types.ts";
 import type { BlockRef, RenderMode } from "./types.ts";
 import { SECTION_REGISTRY_DATA, labelsFor } from "./registry-data.ts";
 import { createPlaceholderSection } from "./placeholder/SectionPlaceholder.tsx";
+// Componentes reales del bloque 3-2c (mitad B del catálogo, docs/rediseno-plantillas/memoria/handoffs/3-2c.md).
+import { GiftTableSection } from "./sections/GiftTableSection.tsx";
+import { SuggestionsSection } from "./sections/SuggestionsSection.tsx";
+import { AmenitiesSection } from "./sections/AmenitiesSection.tsx";
+import { RsvpSection } from "./sections/RsvpSection.tsx";
+import { FamilySection } from "./sections/FamilySection.tsx";
+import { FooterSection } from "./sections/FooterSection.tsx";
 
 export type { RenderMode, BlockRef } from "./types.ts";
 
@@ -69,12 +76,14 @@ export const sectionRegistry: Readonly<Record<SectionType, SectionEntry>> = {
   celebrant: buildEntry("celebrant"),
   event: buildEntry("event"),
   gallery: buildEntry("gallery"),
-  giftTable: buildEntry("giftTable"),
-  suggestions: buildEntry("suggestions"),
-  amenities: buildEntry("amenities"),
-  rsvp: buildEntry("rsvp"),
-  family: buildEntry("family"),
+  // Mitad B del catálogo (bloque 3-2c): componente real, mismos supportedVariants/defaultVariant/
+  // roles/variantLabels ya verificados de `registry-data.ts` — SOLO cambia `component`.
+  giftTable: { ...buildEntry("giftTable"), component: GiftTableSection },
+  suggestions: { ...buildEntry("suggestions"), component: SuggestionsSection },
+  amenities: { ...buildEntry("amenities"), component: AmenitiesSection },
+  rsvp: { ...buildEntry("rsvp"), component: RsvpSection },
+  family: { ...buildEntry("family"), component: FamilySection },
   story: buildEntry("story"),
   dressCode: buildEntry("dressCode"),
-  footer: buildEntry("footer"),
+  footer: { ...buildEntry("footer"), component: FooterSection },
 };
