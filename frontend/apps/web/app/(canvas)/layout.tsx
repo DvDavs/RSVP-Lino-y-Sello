@@ -32,7 +32,11 @@ export const dynamic = "force-dynamic"; // el nonce de la CSP (proxy.ts) es por 
 export default async function LienzoLayout({ children }: { children: ReactNode }) {
   const nonce = (await headers()).get("x-nonce") ?? "";
   return (
-    <html lang="es-MX" data-font-family={tipografiaLienzo.style.fontFamily}>
+    // `data-nonce`: el `<style nonce>` que emite `ThemeProvider` de `@invitaciones/sections` lo
+    // monta un componente de CLIENTE, que no puede llamar a `headers()`. Se publica aquí para que la
+    // página lo lea del DOM. No es una fuga: Next ya pone el mismo nonce en los once `<script
+    // nonce>` del documento, legibles igual, y dentro del lienzo no hay ningún secreto (C4/P8).
+    <html lang="es-MX" data-nonce={nonce} data-font-family={tipografiaLienzo.style.fontFamily}>
       <head>
         {/*
           La CSP del lienzo NO admite `style=` en línea (`style-src` sin `'unsafe-inline'`, medido en

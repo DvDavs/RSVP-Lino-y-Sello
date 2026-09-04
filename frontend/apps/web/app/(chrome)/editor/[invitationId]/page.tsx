@@ -57,6 +57,20 @@ export default function PaginaEditorInvitacion() {
     };
   }, [invitationId]);
 
+  // ── Enganche de pruebas de punta a punta ──────────────────────────────────────────────────
+  // `e2e/` conduce el editor por las MISMAS 11 acciones que usará el panel de 3-5, porque los
+  // formularios del panel son de ese bloque y todavía no existen. Va detrás de una variable de
+  // entorno pública que solo pone `playwright.config.ts`: en un despliegue real no está definida y
+  // este `useEffect` no expone nada. El store NO contiene el token de sesión (vive solo en
+  // `lib/api-client.ts`, P8), así que el enganche no filtra ningún secreto.
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_E2E_HOOKS !== "1") return;
+    (window as unknown as { __editorStore?: typeof useEditorStore }).__editorStore = useEditorStore;
+    return () => {
+      delete (window as unknown as { __editorStore?: typeof useEditorStore }).__editorStore;
+    };
+  }, []);
+
   // ── Cierre de pestaña y reenganche a la red (04 §12.7, §12.5) ─────────────────────────────
   useEffect(() => {
     function alOcultarse(): void {
@@ -220,13 +234,22 @@ export default function PaginaEditorInvitacion() {
                   type="button"
                   data-testid={`section-row-${fila.key}`}
                   aria-current={selection?.sectionKey === fila.key ? "true" : undefined}
-                  onClick={() => useEditorStore.getState().select({ sectionKey: fila.key, blockId: fila.key })}
-                  className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-ui-control px-3 text-left text-ui-aux transition-colors ${
-                    selection?.sectionKey === fila.key ? "bg-ui-accent-soft text-ui-accent-soft-ink" : "text-ui-ink hover:bg-ui-bg-alt"
+                  onClick={() => {
+                    // Al pulsar una fila el lienzo se desplaza a esa sección (04 §9.3
+                    // `SCROLL_TO_SECTION`) y la selección pasa a la sección.
+                    useEditorStore.getState().select({ sectionKey: fila.key, blockId: fila.key });
+                    useEditorStore.getState().scrollToSection(fila.key);
+                  }}
+                  className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-ui-control border-l-3 px-3 text-left text-ui-aux transition-colors ${
+                    selection?.sectionKey === fila.key
+                      ? "border-ui-accent bg-ui-accent-soft font-semibold text-ui-accent-soft-ink"
+                      : "border-transparent text-ui-ink hover:bg-ui-bg-alt"
                   }`}
                 >
                   <span className="truncate">{fila.title}</span>
-                  <span className="shrink-0 text-ui-ink-muted">{fila.visible ? "Visible" : "Oculta"}</span>
+                  <span className={`shrink-0 ${fila.visible ? "text-ui-ink-muted" : "text-ui-warning"}`}>
+                    {fila.visible ? "Visible" : "Oculta"}
+                  </span>
                 </button>
               </li>
             ))}

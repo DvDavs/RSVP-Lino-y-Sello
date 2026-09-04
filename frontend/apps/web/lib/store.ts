@@ -14,6 +14,7 @@
 // Lo que este store NO hace, a propósito y documentado: no monta formularios, no elige paletas, no
 // reordena con arrastre y no sube imágenes — eso es del bloque 3-5, que se engancha llamando a
 // estas mismas 11 acciones. Los puntos de extensión están marcados con «EXTENSIÓN 3-5».
+import { useMemo } from "react";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { useShallow } from "zustand/react/shallow";
@@ -187,6 +188,8 @@ export interface EditorActions {
 
   // — interfaz (no producen operación) —
   select: (ref: BlockRef | null) => void;
+  /** Desplaza el lienzo a una sección (`SCROLL_TO_SECTION`). No produce operación. */
+  scrollToSection: (sectionKey: string) => void;
   openPanel: (p: PanelKey) => void;
   setViewport: (v: Viewport) => void;
   previewTheme: (paletteId: string | null, fontSetId: string | null) => void;
@@ -331,6 +334,20 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
         return timers;
       }
 
+      /**
+       * El indicador dice LA VERDAD (04 §12.8): si no queda nada pendiente, el estado vuelve a
+       * `idle`. Hace falta porque deshacer puede CANCELAR en el borrador lo último que se escribió
+       * (§11.3, caso 1) y entonces no hay respuesta del servidor que devuelva el estado — sin esto
+       * el editor se quedaba diciendo "Sin guardar" con la cola vacía.
+       */
+      function reconciliarEstadoDeGuardado(): void {
+        set((s) => {
+          if (s.saveState === "conflict" || s.saveState === "error" || s.saveState === "offline") return;
+          const pendiente = s.draft.length > 0 || s.queue.length > 0 || s.inFlight !== null;
+          if (!pendiente && s.saveState === "dirty") s.saveState = "idle";
+        });
+      }
+
       /** 04 §12.2 `flushDraft`: trocea a ≤ 50 y bombea. */
       function flushDraft(): void {
         asegurarTimers().cancel();
@@ -342,6 +359,7 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
             s.queue.push(...lotes);
           });
         }
+        reconciliarEstadoDeGuardado();
         void pump();
       }
 
@@ -947,6 +965,10 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           sink?.select(ref);
         },
 
+        scrollToSection(sectionKey): void {
+          sink?.scrollToSection(sectionKey);
+        },
+
         openPanel(p): void {
           set((s) => { s.panel = p; });
         },
@@ -1009,6 +1031,7 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           if (cancelado) {
             persistir();
             recalcularPendientes();
+            reconciliarEstadoDeGuardado();
           } else {
             // Caso 2: ya estaban encoladas o enviadas ⇒ la inversa viaja como operaciones NUEVAS.
             enqueue([...entry.revert], entry.revert.some(isImmediateOperation));
@@ -1140,11 +1163,21 @@ function motivoNoAplicable(base: ComposedDocument | null, op: Operation): string
 
 export const useEditorStore = createEditorStore();
 
-/** Filas de la lista de secciones. EXTENSIÓN 3-5: `SectionList`/`SectionRow` consumen esto. */
+/**
+ * Filas de la lista de secciones. EXTENSIÓN 3-5: `SectionList`/`SectionRow` consumen esto.
+ *
+ * ⚠ El `map` va en un `useMemo`, NO dentro del selector con `useShallow`. `useShallow` compara los
+ * elementos del array con `Object.is`, así que un array de objetos RECIÉN CREADOS nunca es igual al
+ * anterior: el selector devuelve una instantánea distinta en cada render y `useSyncExternalStore`
+ * entra en bucle («Maximum update depth exceeded», React #185 — medido en el navegador, no
+ * supuesto). Se selecciona la referencia ESTABLE que mantiene Immer (`composed.sections`) y se
+ * deriva encima.
+ */
 export function useSectionRows() {
-  return useEditorStore(
-    useShallow((s) =>
-      (s.composed?.sections ?? []).map((sec, i) => ({
+  const sections = useEditorStore((s) => s.composed?.sections);
+  return useMemo(
+    () =>
+      (sections ?? []).map((sec, i) => ({
         key: sec.key,
         title: sec.title,
         visible: sec.visible,
@@ -1152,7 +1185,7 @@ export function useSectionRows() {
         type: sec.type,
         order: i,
       })),
-    ),
+    [sections],
   );
 }
 
@@ -1217,8 +1250,10 @@ export function useUndoRedoLabels() {
 
 /** Ítems de un grupo. EXTENSIÓN 3-5: `GroupField`/`PhotoManager` consumen esto. */
 export function useGroupItems(groupId: string) {
-  return useEditorStore(
-    useShallow((s) => (s.composed ? (findGroup(s.composed as ComposedDocument, groupId)?.group.items ?? []) : [])),
+  const composed = useEditorStore((s) => s.composed);
+  return useMemo(
+    () => (composed ? (findGroup(composed as ComposedDocument, groupId)?.group.items ?? []) : []),
+    [composed, groupId],
   );
 }
 
