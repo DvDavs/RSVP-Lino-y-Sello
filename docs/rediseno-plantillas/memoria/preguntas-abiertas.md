@@ -264,3 +264,58 @@ decidir, para que el dueño no tenga que leerlas todas para encontrar las suyas.
    `npm install` (su `package-lock.json` se versiona). Consume `packages/schema` por
    `file:../../packages/schema`, lo que produce **dos copias de `zod`** — el motivo por el que existe
    `configureZodForCanvas()`. En `apps/web`, dentro del workspace, habrá una sola.
+
+## Fase 3 · 3-1 — andamiaje de `apps/web` (7)
+
+1. **Presupuesto de JS de `/i/[publicToken]` (04 §16.1, 150 KB gz): el suelo real de `next@16.3.4` +
+   Turbopack, sin código de aplicación, mide 165,9 KB gz** — verificado, `check-budget.mjs` rompe de
+   verdad (`exit 1`), sin ningún componente cliente propio en esa ruta. Se probó un `browserslist`
+   moderno para reducir el *chunk* de *polyfills*: sin efecto medible. **Supuesto tomado:** no se
+   relaja la constante (ADR-3-1-01, propuesta); el hallazgo queda para que el dueño decida entre subir
+   el presupuesto, investigar una configuración de *build* que lo baje, o esperar a medir con
+   contenido real en la fase 4. ¿Qué prefiere el dueño?
+2. **`04 §16.2` dice "lee `.next/app-build-manifest.json`"; ese fichero no existe en `next@16.3.4`**
+   (probado con Turbopack, el bundler por defecto, y con `next build --webpack`, los dos). El
+   manifiesto real y estable por ruta es `.next/server/app/<ruta>/page/build-manifest.json` →
+   `{rootMainFiles, polyfillFiles}`. **Supuesto tomado:** `scripts/check-budget.mjs` se escribió
+   contra esa forma real, documentado en el propio script. ¿Se corrige `04 §16.2` para que el próximo
+   bloque no pierda tiempo con el nombre de fichero equivocado?
+3. **`script-src`/`eval` de Zod SÍ se dispara dentro de `apps/web` en `/editor/[id]/canvas`, a pesar de
+   `canvas-runtime.ts`, `configureZodForCanvas()` llamada a nivel de módulo, y un intento de configurar
+   una supuesta segunda copia de `zod` directamente** — verificado con Playwright
+   (`e2e/lienzo-csp.spec.ts`). Descartado con evidencia que sea una segunda instalación física de
+   `zod` (`find node_modules/.pnpm -maxdepth 1 -iname "zod@4.5.4*"` da una sola entrada). Sospecha sin
+   confirmar: Turbopack separa el código de Zod en su propio grupo de *chunks* para esa ruta, con una
+   instancia de módulo propia (el *chunk* violador no contiene el marcador `CANVAS_ZOD_JITLESS` que
+   exporta `canvas-runtime.ts`). **Supuesto tomado:** no se afloja la CSP; el hallazgo queda en
+   cuarentena documentada (`// QUARANTINE`, `06 §8.2.6`) en la propia prueba, que verifica lo que sí
+   se controla (cabeceras, cero violaciones de estilo) y avisa con `console.warn` en cada corrida sin
+   ponerse en rojo. ¿Quién depura el *bundle* sin minificar para confirmar la causa exacta?
+4. **`noUncheckedIndexedAccess: true` (04 §2 lo pide para `tsconfig.base.json`) rompe el typecheck de
+   `packages/schema`** — verificado: `tsc` desde `apps/web` (que consume `.ts` fuente de
+   `@invitaciones/schema`, no `.d.ts` compilados) hereda el *flag* y produce errores nuevos en
+   `compose.ts`/`invariants.ts` que no existen al correr el typecheck de `schema` de forma aislada.
+   **Supuesto tomado:** no se aplica en ningún `tsconfig.json` del monorepo (ni base ni `apps/web`),
+   porque `packages/schema` es de solo lectura para este bloque y no se puede corregir ahí. ¿Se acepta
+   la ausencia del *flag*, o se resuelve compilando `packages/schema` a `.d.ts` (cambiaría cómo lo
+   consumen TODOS los paquetes) para que cada consumidor pueda tener sus propias `compilerOptions`
+   estrictas sin filtrarse a los demás?
+5. **`POST /auth/token` responde `{"accessToken", "refreshToken", "role", "isSurveyAnswered"}`, no
+   `{"token"}`** — verificado contra el backend real; ningún documento de `03-api.md`/memoria lo decía
+   (esa ruta es de `modules/auth`, fuera de `templates2`). **Supuesto tomado:** `lib/api-types.ts`
+   (`AuthTokenResponse`) se ajustó a la forma real. Ningún cambio de contrato pedido: solo se registra
+   para que nadie vuelva a perder tiempo adivinando el nombre del campo.
+6. **`packages/schema` sigue con `"lint": "echo 'lint: pendiente'"` (placeholder de la fase 2) y es de
+   solo lectura para este bloque** — las reglas de ADR-005 SÍ están declaradas en el
+   `eslint.config.mjs` raíz (alcanzables con `pnpm exec eslint packages/schema/src`), pero
+   `pnpm -r run lint`/`turbo run lint` no las ejecuta contra `schema` porque su propio script no
+   invoca `eslint`. **Supuesto tomado:** no se tocó `packages/schema/package.json` (fuera de mi
+   alcance). ¿Quién tiene permiso para completar ese script — el mismo agente que complete
+   `packages/sections`, o requiere volver a abrir `packages/schema` a un bloque futuro?
+7. **`/editor/[invitationId]` y `/preview/[invitationId]` son Client Components, no RSC como marca
+   `04 §6`** — el token de sesión vive en `sessionStorage` (P8, `lib/api-client.ts`) y un Server
+   Component no puede leerlo; no existe hoy ningún mecanismo de sesión legible en el servidor (cookie
+   httpOnly, por ejemplo). **Supuesto tomado:** ambas rutas cargan sus datos en el cliente, mismo
+   patrón que ya usa toda la parte autenticada. ¿Se introduce una cookie de sesión en un bloque
+   futuro para que estas rutas puedan volver a ser RSC (mejor rendimiento, menos JS), o se acepta el
+   patrón cliente como definitivo?
