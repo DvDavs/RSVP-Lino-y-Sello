@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean
 import jakarta.persistence.EntityManager
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2AssetBucket
 
 /**
  * S3 falso, con memoria y con interruptor de avería.
@@ -94,7 +95,7 @@ class Templates2ApiTestConfig {
         almacen: S3Falso,
         claves: Templates2S3KeyService,
         ulids: UlidGenerator,
-    ) = EditorAssetService(editor, store, almacen, claves, ulids, BUCKET)
+    ) = EditorAssetService(editor, store, almacen, claves, ulids, BUCKET_BEAN)
 
     @Bean
     fun publicRenderService(
@@ -112,5 +113,8 @@ class Templates2ApiTestConfig {
 
     companion object {
         const val BUCKET = "bucket-de-pruebas"
+
+        /** El bucket ya no es un `String` suelto: lo resuelve [Templates2AssetBucket] (ADR-2-ORQ-03). */
+        val BUCKET_BEAN = Templates2AssetBucket(BUCKET, false)
     }
 }

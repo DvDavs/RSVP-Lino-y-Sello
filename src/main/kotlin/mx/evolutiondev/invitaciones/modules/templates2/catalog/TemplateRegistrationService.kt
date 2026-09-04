@@ -9,6 +9,7 @@ import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2S3K
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.UlidGenerator
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2AssetBucket
 
 /**
  * El **único** camino de alta de una plantilla (`02 §4`, ADR-033): lo comparten
@@ -40,11 +41,11 @@ class TemplateRegistrationService(
     private val ulid: UlidGenerator,
     private val registrar: TemplateRegistrar,
     private val auditor: TemplateRegistrationAuditor,
-    @Value("\${templates2.assets.bucket:}") bucketConfigurado: String,
+    bucketDelModulo: Templates2AssetBucket,
 ) {
 
-    /** `S3Buckets.ASSETS` salvo que se configure otro (`02 §10.4`); no exige tocar `application.yml`. */
-    val bucket: String = bucketConfigurado.ifBlank { S3Buckets.ASSETS }
+    /** Resuelto por [Templates2AssetBucket]: obligatorio y sin defecto de producción (`02 §10.4`). */
+    val bucket: String = bucketDelModulo.nombre
 
     fun register(raw: RawTemplatePackage, requesterId: Long? = null): TemplateRegistrationOutcome {
         // --- Paso 1: parseo + JSON Schema + invariantes + assets declarados + package_hash ---

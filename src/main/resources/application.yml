@@ -97,6 +97,15 @@ whatsapp:
 # Es la SEGUNDA modificacion de este fichero que pide el modulo nuevo, tras spring.servlet.multipart
 # (contratos.md 4 decia "unica"); la enmienda queda registrada como ADR-2-6-01.
 templates2:
+  assets:
+    # OBLIGATORIA y SIN VALOR POR DEFECTO a proposito (ADR-2-ORQ-03).
+    # El unico defecto natural seria 'invitacionesdigitalesassets', que es el bucket de PRODUCCION,
+    # y un bucket de produccion no puede ser el valor que se aplica cuando nadie ha pensado en ello.
+    # Sin esta propiedad la aplicacion NO arranca y explica que poner. Para desarrollo y pruebas,
+    # define un bucket propio:  TEMPLATES2_ASSETS_BUCKET=mi-bucket-de-pruebas
+    bucket: ${TEMPLATES2_ASSETS_BUCKET:}
+    # Escribir en el bucket de produccion exige declararlo explicitamente.
+    allow-production-bucket: ${TEMPLATES2_ALLOW_PRODUCTION_BUCKET:false}
   revalidate:
     url: ${TEMPLATES2_REVALIDATE_URL:}
     token: ${TEMPLATES2_REVALIDATE_TOKEN:}

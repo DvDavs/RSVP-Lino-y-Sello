@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.Base64
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2AssetBucket
 
 /** Una plantilla publicada tal como la ve el cliente (`03 §3.1`). */
 data class CatalogEntry(
@@ -77,13 +78,13 @@ class TemplateCatalogService(
     private val registrations: TplTemplateRegistrationQueryRepository,
     private val assets: TplAssetRepository,
     @Value("\${templates2.assets.public-base-url:}") baseUrlConfigurada: String,
-    @Value("\${templates2.assets.bucket:}") bucketConfigurado: String,
+    bucketDelModulo: Templates2AssetBucket,
     @Value("\${aws.region:us-east-2}") region: String,
 ) {
 
     private val log = LoggerFactory.getLogger(TemplateCatalogService::class.java)
 
-    private val bucket: String = bucketConfigurado.ifBlank { S3Buckets.ASSETS }
+    private val bucket: String = bucketDelModulo.nombre
 
     /** `02 §10.4`: por patrón, sin llamar a S3, para que el catálogo no dependa de su disponibilidad. */
     val publicBaseUrl: String = baseUrlConfigurada.ifBlank { "https://$bucket.s3.$region.amazonaws.com" }

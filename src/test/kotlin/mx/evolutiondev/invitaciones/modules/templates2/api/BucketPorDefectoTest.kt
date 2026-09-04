@@ -1,45 +1,82 @@
 package mx.evolutiondev.invitaciones.modules.templates2.api
 
 import mx.evolutiondev.invitaciones.core.s3.S3Buckets
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2AssetBucket
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2AssetBucketNoConfigurado
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
 
 /**
- * **Objeción ADV-01 de `bitacora/2-adv.md`, cerrada aquí.**
+ * **Objeción ADV-01 de `bitacora/2-adv.md` y ADR-2-ORQ-03, cerradas aquí.**
  *
- * `templates2.assets.bucket` **no está en `application.yml`** y no puede estarlo: `contratos.md §4`
- * fija que la única modificación de ese fichero que pide el módulo es `spring.servlet.multipart`. Es
- * decir: el valor que se usa en producción es **siempre** el defecto del código. Los cuatro puntos
- * que lo resuelven vivían en bloques distintos y no coincidían — `catalog` (2-3) usaba
- * `S3Buckets.ASSETS` y `api` (2-4 y 2-5) un literal propio, `"invitaciones-assets"` —, así que el
- * editor subía a un bucket y la URL compuesta y publicada apuntaba a otro.
+ * Historia en dos actos, porque la segunda mitad importa más que la primera:
  *
- * Ninguna prueba lo detectaba porque **todas** inyectan el bucket explícitamente
- * (`bucket-de-pruebas`): el defecto solo existe con la configuración real. `02 §10.1` paso 8 nombra
- * literalmente `S3Service.uploadPublicFile(S3Buckets.ASSETS, …)`, así que el valor correcto no es
- * opinable.
+ * 1. Cuatro puntos del módulo resolvían el bucket de S3 por su cuenta y **no coincidían** (`catalog`
+ *    usaba `S3Buckets.ASSETS`; `api`, el literal `"invitaciones-assets"`), así que el editor subía a
+ *    un bucket y la URL compuesta y publicada apuntaba a otro. Ninguna de las 1 100 pruebas lo veía,
+ *    porque **todas** inyectan el bucket explícitamente: el defecto sólo existe con la configuración
+ *    real.
+ * 2. Unificarlo no bastaba: el valor unificado era `S3Buckets.ASSETS`, **el bucket de producción**.
+ *    Arrancar sin configurar nada bastaba para subir objetos de cliente ahí. Un bucket de producción
+ *    no puede ser el valor que se aplica precisamente cuando nadie ha pensado en el asunto.
  *
- * La prueba mira el **código fuente** además de la constante porque el defecto se reintroduce
+ * Hoy el bucket lo resuelve **[Templates2AssetBucket] y nadie más**: propiedad obligatoria, sin
+ * defecto, con rechazo explícito del bucket de producción salvo declaración expresa.
+ *
+ * La prueba mira el **código fuente** además del comportamiento porque el defecto se reintroduce
  * escribiendo un literal nuevo en cualquiera de los cuatro sitios, y eso no rompe ninguna prueba
  * funcional.
  */
 class BucketPorDefectoTest {
 
-    /** Los nombres admisibles: la constante del núcleo o la del módulo, que es la misma. */
-    private val admisibles = setOf("S3Buckets.ASSETS", "BUCKET_POR_DEFECTO", "EditorAssetService.BUCKET_POR_DEFECTO")
+    // --- comportamiento de la resolución -------------------------------------------------
 
     @Test
-    fun `el bucket por defecto del editor es el que fija 02 10-1 paso 8`() {
-        assertEquals(S3Buckets.ASSETS, EditorAssetService.BUCKET_POR_DEFECTO)
+    fun `sin bucket configurado la aplicacion no arranca, en vez de caer en el de produccion`() {
+        val e = assertThrows(Templates2AssetBucketNoConfigurado::class.java) {
+            Templates2AssetBucket(configurado = "", permitirProduccion = false)
+        }
+        assertTrue(
+            e.message!!.contains("templates2.assets.bucket"),
+            "el mensaje debe decir qué propiedad falta; decía: ${e.message}",
+        )
+        assertTrue(
+            e.message!!.contains(S3Buckets.ASSETS),
+            "el mensaje debe explicar por qué no hay defecto (sería el de producción)",
+        )
     }
+
+    @Test
+    fun `apuntar al bucket de produccion exige declararlo explicitamente`() {
+        assertThrows(Templates2AssetBucketNoConfigurado::class.java) {
+            Templates2AssetBucket(configurado = S3Buckets.ASSETS, permitirProduccion = false)
+        }
+        // Con la declaración expresa sí se permite: el objetivo es que nadie lo haga sin querer.
+        assertEquals(
+            S3Buckets.ASSETS,
+            Templates2AssetBucket(configurado = S3Buckets.ASSETS, permitirProduccion = true).nombre,
+        )
+    }
+
+    @Test
+    fun `un bucket de pruebas se acepta tal cual`() {
+        assertEquals(
+            "mi-bucket-de-pruebas",
+            Templates2AssetBucket(configurado = "  mi-bucket-de-pruebas  ", permitirProduccion = false).nombre,
+        )
+    }
+
+    // --- compuertas sobre el código fuente -----------------------------------------------
 
     @Test
     fun `ningun fuente de templates2 escribe un nombre de bucket a mano`() {
         val hallazgos = ficheros().flatMap { fichero ->
             fichero.readLines().withIndex()
                 .filter { (_, linea) -> LITERAL_ABANDONADO.containsMatchIn(linea) }
+                .filterNot { (_, linea) -> linea.trimStart().startsWith("*") || linea.trimStart().startsWith("//") }
                 .map { (i, linea) -> "${fichero.name}:${i + 1}: ${linea.trim()}" }
         }
         assertEquals(
@@ -49,24 +86,24 @@ class BucketPorDefectoTest {
     }
 
     @Test
-    fun `los cuatro defectos de bucket del modulo resuelven al mismo valor`() {
-        val encontrados = mutableListOf<Pair<String, String>>()
-        for (fichero in ficheros()) {
-            for ((i, linea) in fichero.readLines().withIndex()) {
-                val m = DEFECTO_DE_BUCKET.find(linea) ?: continue
-                encontrados.add("${fichero.name}:${i + 1}" to m.groupValues[1].trim())
-            }
+    fun `nadie vuelve a inventarse un bucket por defecto con ifBlank`() {
+        val hallazgos = ficheros().flatMap { fichero ->
+            fichero.readLines().withIndex()
+                .filter { (_, linea) -> DEFECTO_DE_BUCKET.containsMatchIn(linea) }
+                .map { (i, linea) -> "${fichero.name}:${i + 1}: ${linea.trim()}" }
         }
-        assertTrue(
-            encontrados.size >= 4,
-            "esperaba los cuatro puntos que resuelven el bucket y encontré ${encontrados.size}: $encontrados",
+        assertEquals(
+            emptyList<String>(), hallazgos,
+            "el bucket lo resuelve Templates2AssetBucket y nadie más; un ifBlank aquí reintroduce un " +
+                "defecto silencioso, que fue exactamente el defecto ADV-01",
         )
-        val fuera = encontrados.filterNot { it.second in admisibles }
-        assertEquals(emptyList<Pair<String, String>>(), fuera, "estos defectos no son S3Buckets.ASSETS")
     }
 
     private fun ficheros(): List<File> = raizDeTemplates2()
-        .walkTopDown().filter { it.isFile && it.extension == "kt" }.toList()
+        .walkTopDown().filter { it.isFile && it.extension == "kt" }
+        // El único fichero que puede nombrar el bucket de producción es el que lo rechaza.
+        .filterNot { it.name == "Templates2AssetBucket.kt" }
+        .toList()
 
     private fun raizDeTemplates2(): File {
         val ejemplos = File(
@@ -81,8 +118,8 @@ class BucketPorDefectoTest {
     }
 
     companion object {
-        /** `…ifBlank { <expresión> }` sobre el parámetro del bucket, sea cual sea el nombre de la variable. */
-        private val DEFECTO_DE_BUCKET = Regex("""bucketConfigurado\s*\.ifBlank\s*\{\s*([^}]+?)\s*\}""")
+        /** `…ifBlank { <expresión> }` sobre un parámetro de bucket, sea cual sea el nombre. */
+        private val DEFECTO_DE_BUCKET = Regex("""bucket\w*\s*\.ifBlank\s*\{""", RegexOption.IGNORE_CASE)
 
         /** El literal que introdujeron 2-4 y 2-5; y cualquier otro nombre de bucket suelto. */
         private val LITERAL_ABANDONADO = Regex(""""invitaciones-assets"|"invitacionesdigitales(assets|editor)"""")

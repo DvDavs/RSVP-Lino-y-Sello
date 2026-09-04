@@ -1,6 +1,5 @@
 package mx.evolutiondev.invitaciones.modules.templates2.api
 
-import mx.evolutiondev.invitaciones.core.s3.S3Buckets
 import mx.evolutiondev.invitaciones.modules.templates2.catalog.ImageDimensions
 import mx.evolutiondev.invitaciones.modules.templates2.catalog.MagicBytes
 import mx.evolutiondev.invitaciones.modules.templates2.domain.AssetContentType
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.InputStream
 import java.time.Duration
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2AssetBucket
 
 /**
  * Assets del cliente: rutas 7-9 de `03 §2` (`03 §3.7`-`§3.9`, `02 §10.1`).
@@ -52,12 +52,12 @@ class EditorAssetService(
     private val almacen: InvitationAssetStorage,
     private val claves: Templates2S3KeyService,
     private val ulids: UlidGenerator,
-    @Value("\${templates2.assets.bucket:}") bucketConfigurado: String,
+    bucketDelModulo: Templates2AssetBucket,
 ) {
 
     /** Mismo valor por defecto que `EditorDocumentService`, para que la URL compuesta y la firmada
      *  apunten al mismo objeto. */
-    val bucket: String = bucketConfigurado.ifBlank { BUCKET_POR_DEFECTO }
+    val bucket: String = bucketDelModulo.nombre
 
     // =============================================================================================
     // 03 §3.7 — POST …/assets   (cuerpo binario crudo, ADR-1R-B-12)
@@ -304,15 +304,6 @@ class EditorAssetService(
 
         const val LIMITE_POR_DEFECTO = 50
         const val LIMITE_MAXIMO = 100
-        /**
-         * `02 §10.1` paso 8 fija literalmente `S3Service.uploadPublicFile(S3Buckets.ASSETS, …)`, y es
-         * el mismo bucket que ya usan `catalog.TemplateRegistrationService` y
-         * `catalog.TemplateCatalogService` (los dos con `S3Buckets.ASSETS`). Un literal propio aquí
-         * hacía que, **sin** `templates2.assets.bucket` configurada —que es el estado real:
-         * `contratos.md §4` prohíbe tocar `application.yml` salvo `spring.servlet.multipart`—, el
-         * editor subiera a un bucket y el catálogo compusiera la URL desde otro.
-         */
-        const val BUCKET_POR_DEFECTO = S3Buckets.ASSETS
 
         private const val TROZO = 64 * 1024
 

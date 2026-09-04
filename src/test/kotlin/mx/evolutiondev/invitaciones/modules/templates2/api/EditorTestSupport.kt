@@ -48,6 +48,7 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2AssetBucket
 
 /**
  * Cliente de revalidación falso (ADR-2-6-01): registra cada llamada y permite forzar el fallo o un
@@ -151,7 +152,7 @@ class EditorTestConfig {
         ulids: UlidGenerator,
     ) = EditorDocumentService(
         hierarchy, store, versiones, negocio, assets, releases, flags, sonda, esquemas, ulids,
-        BASE_URL, "bucket-de-pruebas", "us-east-2", FRONTEND,
+        BASE_URL, Templates2AssetBucket("bucket-de-pruebas", false), "us-east-2", FRONTEND,
     )
 
     @Bean

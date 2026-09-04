@@ -271,7 +271,7 @@ class TemplateRegistrarIntegrationTest : RegistroTestSupport() {
         ulid,
         registrador,
         auditor,
-        RegistroTestConfig.BUCKET,
+        RegistroTestConfig.BUCKET_BEAN,
     )
 
     /**

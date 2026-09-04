@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2AssetBucket
 
 /**
  * Almacén de assets falso: sustituye a S3, que no participa de la transacción (`02 §10`). Permite
@@ -95,7 +96,7 @@ class RegistroTestConfig {
         ulid: UlidGenerator,
         registrar: TemplateRegistrar,
         auditor: TemplateRegistrationAuditor,
-    ) = TemplateRegistrationService(parser, almacen, keys, ulid, registrar, auditor, BUCKET)
+    ) = TemplateRegistrationService(parser, almacen, keys, ulid, registrar, auditor, BUCKET_BEAN)
 
     @Bean
     fun templateCatalogService(
@@ -104,10 +105,13 @@ class RegistroTestConfig {
         consultas: TplTemplateVersionQueryRepository,
         registrations: TplTemplateRegistrationQueryRepository,
         assets: TplAssetRepository,
-    ) = TemplateCatalogService(templates, versions, consultas, registrations, assets, BASE_URL, BUCKET, "us-east-2")
+    ) = TemplateCatalogService(templates, versions, consultas, registrations, assets, BASE_URL, BUCKET_BEAN, "us-east-2")
 
     companion object {
         const val BUCKET = "bucket-de-pruebas"
+
+        /** El bucket ya no es un `String` suelto: lo resuelve [Templates2AssetBucket] (ADR-2-ORQ-03). */
+        val BUCKET_BEAN = Templates2AssetBucket(BUCKET, false)
         const val BASE_URL = "https://cdn.pruebas.local"
     }
 }

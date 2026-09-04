@@ -52,6 +52,7 @@ import mx.evolutiondev.invitaciones.modules.templates2.schema.JsonSchemaValidato
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2AssetBucket
 
 /**
  * Ciclo de vida del documento de trabajo (`02 §7.5`): `:choose-template`, `GET /document`,
@@ -78,15 +79,15 @@ class EditorDocumentService(
     private val schemas: JsonSchemaValidatorService,
     private val ulids: UlidGenerator,
     @Value("\${templates2.assets.public-base-url:}") baseUrlConfigurada: String,
-    @Value("\${templates2.assets.bucket:}") bucketConfigurado: String,
+    bucketDelModulo: Templates2AssetBucket,
     @Value("\${aws.region:us-east-2}") region: String,
     @Value("\${app.frontend.url:http://localhost}") private val frontendUrl: String,
     private val composer: Composer = DefaultComposer,
 ) {
 
-    /** Mismo defecto que [EditorAssetService.BUCKET_POR_DEFECTO] y que `catalog` (`02 §10.1` paso 8):
+    /** Resuelto por [Templates2AssetBucket], único punto del módulo que decide el bucket:
      *  si difieren, la URL compuesta apunta a un bucket distinto de donde se subió el asset. */
-    private val bucket: String = bucketConfigurado.ifBlank { EditorAssetService.BUCKET_POR_DEFECTO }
+    private val bucket: String = bucketDelModulo.nombre
 
     /** `02 §10.4`: por patrón, sin llamar a S3 — `compose` no puede depender de su disponibilidad. */
     val publicBaseUrl: String = baseUrlConfigurada.ifBlank { "https://$bucket.s3.$region.amazonaws.com" }
