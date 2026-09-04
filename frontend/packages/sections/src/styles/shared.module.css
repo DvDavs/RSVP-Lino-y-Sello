@@ -1,0 +1,49 @@
+/**
+ * packages/sections/src/styles/shared.module.css — utilidades compartidas por bloques y por el
+ * marcador de posición de sección. Solo `var(--inv-*)` (04 §19.2): nada de color/tamaño literal.
+ */
+
+/* Oculta visualmente sin ocultar de lectores de pantalla (04 §17: alt describible, anuncios ARIA). */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Foco visible propio, nunca `outline: none` sin sustituto (04 §17.2). */
+.focusRing:focus-visible {
+  outline: var(--inv-focus-ring-width) solid var(--inv-color-accent);
+  outline-offset: var(--inv-focus-ring-offset);
+}
+
+/* Objetivo táctil mínimo AA (2.5.8) para cualquier elemento interactivo de un bloque. */
+.touchTarget {
+  min-height: var(--inv-touch-target-min);
+  min-width: var(--inv-touch-target-min);
+}
+
+/* Transición estándar; se anula completa con `prefers-reduced-motion` (04 §17.5) — una sola regla
+ * para que ningún bloque tenga que repetir su propio `@media` de movimiento reducido. */
+.transition {
+  transition-duration: var(--inv-motion-normal);
+  transition-timing-function: var(--inv-motion-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transition {
+    transition: none;
+    animation: none;
+    scroll-behavior: auto;
+  }
+}
+
+/* Medida de línea legible para texto largo (richText, listas). */
+.measure {
+  max-width: var(--inv-measure);
+}
