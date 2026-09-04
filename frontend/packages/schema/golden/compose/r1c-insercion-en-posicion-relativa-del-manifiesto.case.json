@@ -1,0 +1,360 @@
+{
+  "name": "r1c-insercion-en-posicion-relativa-del-manifiesto",
+  "descripcion": "R1c (ADR-1R-D-06): las secciones ausentes de doc.structure se insertan en su POSICIÓN RELATIVA del manifiesto, NUNCA al final. Manifiesto [cover,family,event,footer], documento [cover,event] → cover, family, event, footer. Anexar al final habría dejado `family` DESPUÉS del pie de página, que es el bug exacto que la ronda 1R detectó en xv-jardin",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "title": {
+          "es-MX": "cover"
+        },
+        "variants": [
+          "default",
+          "alt"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "cover.title",
+            "role": "coverTitle",
+            "label": {
+              "es-MX": "cover.title"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          }
+        ]
+      },
+      {
+        "key": "family",
+        "type": "family",
+        "title": {
+          "es-MX": "family"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "family.intro",
+            "role": "familyIntro",
+            "label": {
+              "es-MX": "family.intro"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          }
+        ]
+      },
+      {
+        "key": "event",
+        "type": "event",
+        "title": {
+          "es-MX": "event"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "event.title",
+            "role": "eventTitle",
+            "label": {
+              "es-MX": "event.title"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          }
+        ]
+      },
+      {
+        "key": "footer",
+        "type": "footer",
+        "title": {
+          "es-MX": "footer"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": true,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "footer.note",
+            "role": "footerNote",
+            "label": {
+              "es-MX": "footer.note"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {}
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "cover",
+          "variant": "default",
+          "visible": true
+        },
+        {
+          "key": "event",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {},
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": "2027-03-08",
+    "time": "19:05",
+    "hashtag": "#AnaYLuis",
+    "coverPhotoUrl": "https://cdn.invitaciones.evolutiondev.mx/legacy/portada.jpg",
+    "childrenAllowed": false,
+    "youngAllowed": true,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {},
+  "locale": "es-MX",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-MX",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "variant": "default",
+        "visible": true,
+        "title": "cover",
+        "blocks": [
+          {
+            "id": "cover.title",
+            "role": "coverTitle",
+            "type": "text",
+            "label": "cover.title",
+            "provenance": "empty",
+            "value": null
+          }
+        ]
+      },
+      {
+        "key": "family",
+        "type": "family",
+        "variant": "default",
+        "visible": true,
+        "title": "family",
+        "blocks": [
+          {
+            "id": "family.intro",
+            "role": "familyIntro",
+            "type": "text",
+            "label": "family.intro",
+            "provenance": "empty",
+            "value": null
+          }
+        ]
+      },
+      {
+        "key": "event",
+        "type": "event",
+        "variant": "default",
+        "visible": true,
+        "title": "event",
+        "blocks": [
+          {
+            "id": "event.title",
+            "role": "eventTitle",
+            "type": "text",
+            "label": "event.title",
+            "provenance": "empty",
+            "value": null
+          }
+        ]
+      },
+      {
+        "key": "footer",
+        "type": "footer",
+        "variant": "default",
+        "visible": true,
+        "title": "footer",
+        "blocks": [
+          {
+            "id": "footer.note",
+            "role": "footerNote",
+            "type": "text",
+            "label": "footer.note",
+            "provenance": "empty",
+            "value": null
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [],
+    "stillDefault": [],
+    "orphanContent": [],
+    "orphanSections": [],
+    "invalidValues": [],
+    "themeFallback": null
+  }
+}

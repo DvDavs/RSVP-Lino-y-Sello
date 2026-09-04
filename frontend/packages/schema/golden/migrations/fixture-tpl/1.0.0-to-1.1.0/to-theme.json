@@ -1,0 +1,76 @@
+{
+  "palettes": [
+    {
+      "id": "olive",
+      "name": {
+        "es-MX": "Olivo"
+      },
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      }
+    },
+    {
+      "id": "verde",
+      "name": {
+        "es-MX": "Verde"
+      },
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F2F6F0",
+        "ink": "#1E2A1E",
+        "accent": "#3E6B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#8A968A"
+      }
+    }
+  ],
+  "fontSets": [
+    {
+      "id": "clasica",
+      "name": {
+        "es-MX": "Clásica"
+      },
+      "heading": {
+        "family": "Playfair Display",
+        "weights": [
+          400
+        ],
+        "source": "bundled"
+      },
+      "body": {
+        "family": "Lora",
+        "weights": [
+          400
+        ],
+        "source": "bundled"
+      }
+    },
+    {
+      "id": "serif",
+      "name": {
+        "es-MX": "Serif"
+      },
+      "heading": {
+        "family": "Lora",
+        "weights": [
+          400
+        ],
+        "source": "bundled"
+      },
+      "body": {
+        "family": "Lora",
+        "weights": [
+          400
+        ],
+        "source": "bundled"
+      }
+    }
+  ],
+  "defaultPaletteId": "olive",
+  "defaultFontSetId": "clasica"
+}

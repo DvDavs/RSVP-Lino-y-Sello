@@ -6,6 +6,7 @@ import type { InvitationDocument } from "./document.ts";
 import type { BlockSpec, GroupSpec, BlockValue, ScalarValue } from "./blocks.ts";
 import type { BusinessSnapshot, AssetIndex, CompositionResult, CompositionReport } from "./composed.ts";
 import type { Locale } from "./common.ts";
+import { validateValueAgainstSpec } from "./invariants.ts";
 
 export type TemplatePackage = { manifest: TemplateManifest; theme: ThemeSpec; defaults: DefaultsFile };
 
@@ -15,18 +16,34 @@ const MESES: Record<Locale, string[]> = {
   "es-ES": ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
   "en-US": ["January","February","March","April","May","June","July","August","September","October","November","December"],
 };
+/**
+ * Los tres formateadores devuelven el valor CRUDO cuando la entrada no tiene la forma que ese formato
+ * espera. Es una combinación alcanzable con datos válidos —`formatId` es un `Ident` libre, así que un
+ * `DateSpec` puede declarar `formatId: "h12"`— y sin la guarda las dos implementaciones divergían:
+ * JavaScript producía `"NaN:undefined pm"` (`Number("2027-01-31")` es `NaN`) y Kotlin lanzaría
+ * `NumberFormatException`. P1 exige que las dos den lo mismo sobre el mismo documento.
+ */
 function fLong(d: string, loc: Locale): string {
-  const [y, m, day] = d.split("-").map(Number);
-  return loc === "en-US" ? `${MESES[loc][m - 1]} ${day}, ${y}` : `${day} de ${MESES[loc][m - 1]} de ${y}`;
+  const p = d.split("-");
+  if (p.length !== 3) return d;
+  const [y, m, day] = p.map(Number);
+  if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(day) || m! < 1 || m! > 12) return d;
+  return loc === "en-US" ? `${MESES[loc][m! - 1]} ${day}, ${y}` : `${day} de ${MESES[loc][m! - 1]} de ${y}`;
 }
 function fMonthYear(d: string, loc: Locale): string {
-  const [y, m] = d.split("-").map(Number);
-  return loc === "en-US" ? `${MESES[loc][m - 1]} ${y}` : `${MESES[loc][m - 1]} de ${y}`;
+  const p = d.split("-");
+  if (p.length !== 3) return d;
+  const [y, m] = p.map(Number);
+  if (!Number.isInteger(y) || !Number.isInteger(m) || m! < 1 || m! > 12) return d;
+  return loc === "en-US" ? `${MESES[loc][m! - 1]} ${y}` : `${MESES[loc][m! - 1]} de ${y}`;
 }
 function fH12(t: string): string {
-  const [H, M] = t.split(":").map(Number);
-  const h = H % 12 === 0 ? 12 : H % 12;
-  return `${h}:${String(M).padStart(2, "0")} ${H < 12 ? "am" : "pm"}`;
+  const p = t.split(":");
+  if (p.length !== 2) return t;
+  const [H, M] = p.map(Number);
+  if (!Number.isInteger(H) || !Number.isInteger(M)) return t;
+  const h = H! % 12 === 0 ? 12 : H! % 12;
+  return `${h}:${String(M).padStart(2, "0")} ${H! < 12 ? "am" : "pm"}`;
 }
 export function formatDate(value: string, formatId: string, loc: Locale): string {
   switch (formatId) {
@@ -38,11 +55,15 @@ export function formatDate(value: string, formatId: string, loc: Locale): string
   }
 }
 export function formatRange(start: string, end: string | undefined, formatId: string, loc: Locale): string {
-  const [ds, ts] = start.split("T");
-  const head = `${fLong(ds, loc)}, ${fH12(ts)}`;
+  const ps = start.split("T");
+  if (ps.length !== 2) return start;                       // misma guarda que fLong/fH12
+  const [ds, ts] = ps;
+  const head = `${fLong(ds!, loc)}, ${fH12(ts!)}`;
   if (!end) return head;
-  const [de, te] = end.split("T");
-  return de === ds ? `${head} – ${fH12(te)}` : `${head} – ${fLong(de, loc)}, ${fH12(te)}`;
+  const pe = end.split("T");
+  if (pe.length !== 2) return head;
+  const [de, te] = pe;
+  return de === ds ? `${head} – ${fH12(te!)}` : `${head} – ${fLong(de!, loc)}, ${fH12(te!)}`;
 }
 
 const L = (m: Record<string, string | undefined>, loc: Locale): string => m[loc] ?? m["es-MX"]!;
@@ -68,6 +89,9 @@ function resolveScalar(spec: BlockSpec, v: ScalarValue, assets: AssetIndex, loc:
     case "choice": { const opt = (spec as any).options?.find((o: any) => o.id === v.optionId); return { kind: "choice", optionId: v.optionId, label: opt ? L(opt.label, loc) : v.optionId }; }
     case "boolean": return { kind: "boolean", value: v.value };
     case "person": { const o: any = { kind: "person", name: v.name }; if (v.note !== undefined) o.note = v.note; return o; }
+    // Un valor que no es ninguno de los 13 escalares (p. ej. un `group` guardado bajo un spec escalar)
+    // NO se resuelve: se registra en `report.invalidValues` y el bloque queda `provenance: "empty"`.
+    default: return null;
   }
 }
 
@@ -134,6 +158,18 @@ export function compose(pkg: TemplatePackage, doc: InvitationDocument, business:
     blocks: spec.blocks.map(b => componerBloque(b, spec)),
   }));
 
+  /**
+   * O-12 (`bitacora/2-0a-REV.md`), cerrada aquí: `invalidValues` estaba declarado en `composed.ts` y
+   * `compose()` **no lo poblaba jamás**, así que un valor presente pero inválido para su spec se
+   * renderizaba sin dejar rastro — P1 prohíbe exactamente eso, y `03 §5` ya reserva
+   * `TPL_PUBLISH_BLOCKED_INVALID_VALUES` para bloquear la publicación por este motivo.
+   * El valor **se sigue resolviendo igual** (`composed` no cambia): lo único que cambia es que el
+   * informe lo dice. Se ejecuta la MISMA `validateValueAgainstSpec` que el reductor y las invariantes.
+   */
+  function registrarInvalidos(b: BlockSpec, value: unknown, path: string): void {
+    for (const x of validateValueAgainstSpec(b, value as never, path)) rep.invalidValues.push({ blockId: b.id, code: x.code });
+  }
+
   function componerBloque(b: BlockSpec, sec: SectionSpec): any {
     const label = L(b.label, locale);
     if (b.type === "group") {
@@ -142,6 +178,9 @@ export function compose(pkg: TemplatePackage, doc: InvitationDocument, business:
       const def = pkg.defaults.content[b.id] as BlockValue | undefined;
       const fuente = del?.kind === "group" ? del : def?.kind === "group" ? def : undefined;
       const prov = del?.kind === "group" ? "user" : def?.kind === "group" ? "default" : "empty";
+      // Un valor NO group bajo un spec `group` también es inválido y hoy desaparecía sin traza.
+      if (fuente !== undefined) registrarInvalidos(b, fuente, `content.${b.id}`);
+      else if (del !== undefined) registrarInvalidos(b, del, `content.${b.id}`);
       const items = (fuente?.items ?? []).map(it => ({
         itemId: it.itemId,
         blocks: g.itemBlocks.map(ib => {                                 // R9: orden = orden del spec, no del JSON
@@ -166,6 +205,7 @@ export function compose(pkg: TemplatePackage, doc: InvitationDocument, business:
     const def = pkg.defaults.content[b.id] as ScalarValue | undefined;
     const src = del ?? def;
     let prov: string = del !== undefined ? "user" : def !== undefined ? (b.source === "fixed" ? "fixed" : "default") : "empty";
+    if (src !== undefined) registrarInvalidos(b, src, `content.${b.id}`);
     const value = src === undefined ? null : resolveScalar(b, src, assets, locale);
     if (value === null) prov = "empty";
     if (b.required && value === null) rep.missingRequired.push(b.id);
@@ -173,7 +213,9 @@ export function compose(pkg: TemplatePackage, doc: InvitationDocument, business:
     return { id: b.id, role: b.role, type: b.type, label, provenance: prov, value };
   }
 
+  // R9 punto 1: las CINCO listas se ordenan explícitamente antes de devolverlas (ataque 1R A-08).
   rep.missingRequired.sort(); rep.stillDefault.sort(); rep.orphanSections.sort();
+  rep.invalidValues.sort((a, b) => (a.blockId < b.blockId ? -1 : a.blockId > b.blockId ? 1 : a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
   return {
     composed: { composedVersion: 1, template: { slug: m.slug, version: m.version }, locale,
       theme: { paletteId, fontSetId, tokens: pal.tokens, fonts: { heading: fs.heading, body: fs.body } },

@@ -232,3 +232,19 @@ export function validateValueAgainstSpec(spec: BlockSpec, value: { kind: string 
   }
   return v;
 }
+
+/**
+ * Las 30 invariantes en una sola llamada (`01 §6.5`). Devuelve la lista vacía si todo está bien;
+ * **nunca lanza**. Espejo exacto de `Invariants.validateInvariants` de Kotlin: `raw` (el JSON crudo,
+ * tal cual llegaría por HTTP) solo se recorre si se aporta, porque I-29 corre **antes** de `parse`
+ * (contratos.md §3). Sin ella, `migrate()` (`01 §6.3`) no podía cumplir su regla dura de terminar
+ * validando el documento resultante.
+ */
+export function validateInvariants(
+  doc: InvitationDocument, pkg: { manifest: TemplateManifest; theme: ThemeSpec }, raw?: unknown,
+): Violation[] {
+  const v: Violation[] = [];
+  if (raw !== undefined) v.push(...assertNoReservedKeys(raw));
+  v.push(...validateDocument(doc, pkg.manifest, pkg.theme));
+  return v;
+}

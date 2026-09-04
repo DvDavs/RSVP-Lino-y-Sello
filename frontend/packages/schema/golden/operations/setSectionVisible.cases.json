@@ -4,13 +4,72 @@
     "tag": "valid-shape",
     "operation": {
       "op": "setSectionVisible",
-      "sectionKey": "cover",
+      "sectionKey": "event",
       "visible": false
     },
     "expectZodValid": true,
-    "expectManifestError": null,
-    "reducerResult": null,
-    "reducerResultPending": true
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": false
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
   },
   {
     "name": "forma inválida: visible no booleano",
@@ -21,9 +80,8 @@
       "visible": "no"
     },
     "expectZodValid": false,
-    "expectManifestError": null,
-    "reducerResult": null,
-    "reducerResultPending": true
+    "expectOpViolations": [],
+    "reducerResult": null
   },
   {
     "name": "sectionKey inexistente",
@@ -34,8 +92,35 @@
       "visible": true
     },
     "expectZodValid": true,
-    "expectManifestError": "TPL_SECTION_UNKNOWN",
-    "reducerResult": null,
-    "reducerResultPending": true
+    "expectOpViolations": [
+      "OP_SECTION_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_SECTION_UNKNOWN",
+        "sectionKey": "noExiste"
+      }
+    }
+  },
+  {
+    "name": "ocultar una sección required (I-17)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setSectionVisible",
+      "sectionKey": "cover",
+      "visible": false
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_SECTION_REQUIRED_CANNOT_HIDE"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_SECTION_REQUIRED",
+        "sectionKey": "cover"
+      }
+    }
   }
 ]

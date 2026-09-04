@@ -1,0 +1,42 @@
+{
+  "palettes": [
+    {
+      "id": "verde",
+      "name": {
+        "es-MX": "Verde"
+      },
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F2F6F0",
+        "ink": "#1E2A1E",
+        "accent": "#3E6B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#8A968A"
+      }
+    }
+  ],
+  "fontSets": [
+    {
+      "id": "serif",
+      "name": {
+        "es-MX": "Serif"
+      },
+      "heading": {
+        "family": "Playfair Display",
+        "weights": [
+          400
+        ],
+        "source": "bundled"
+      },
+      "body": {
+        "family": "Lora",
+        "weights": [
+          400
+        ],
+        "source": "bundled"
+      }
+    }
+  ],
+  "defaultPaletteId": "verde",
+  "defaultFontSetId": "serif"
+}

@@ -16,8 +16,8 @@ Formato de fichero: JSON (no JSONC), UTF-8 sin BOM, indentado 2, generado con
 
 ## `golden/templates/<slug>-<version>/`
 
-**Siete** ficheros por carpeta, uno por ejemplo completo de `docs/rediseno-plantillas/diseno/ejemplos/`
-(seis de `06 §3` más `business.json`, ADR-2-0a-02):
+**Ocho** ficheros por carpeta, uno por ejemplo completo de `docs/rediseno-plantillas/diseno/ejemplos/`
+(seis de `06 §3`, más `business.json` de ADR-2-0a-02 y `assets.json` de ADR-2-2-02):
 
 | Fichero | Contenido |
 |---|---|
@@ -26,6 +26,7 @@ Formato de fichero: JSON (no JSONC), UTF-8 sin BOM, indentado 2, generado con
 | `defaults.json` | `DefaultsFile` copiado |
 | `documento.json` | `InvitationDocument` copiado |
 | `business.json` | `BusinessSnapshot` **fijo** usado para componer este caso (ver nota de negocio abajo) |
+| `assets.json` | el `AssetIndex` **exacto** con el que se compuso, como DATO (ADR-2-2-02, cierra O-06). Kotlin lo lee tal cual: así reproduce `compuesto.json` sin copiar la convención `assetId → url` del generador, que **no** es la regla de producción |
 | `compuesto.json` | `result.composed` — la salida REAL de `compose(pkg, documento, business, assets, locale)` |
 | `reporte.json` | `result.report` — el `CompositionReport` de esa misma llamada |
 
@@ -39,9 +40,10 @@ plantilla**, con los valores literales de `NOTAS.md` de cada ejemplo (o, cuando 
 valores conservadores sin efecto observable en el resto). Registrado en
 `memoria/preguntas-abiertas.md` (2-0a).
 
-**`AssetIndex`** no se guarda como fichero: se reconstruye en el generador con la regla determinista
+**`AssetIndex`**: el generador lo construye con la regla determinista
 `url = "https://cdn.invitaciones.evolutiondev.mx/a/" + assetId.slice(3) + ".webp"` sobre cada
-`assetId` hallado en `documento.json`/`defaults.json`. El generador verifica en cada ejecución que
+`assetId` hallado en `documento.json`/`defaults.json`, **y desde 2-2 lo emite como `assets.json`**
+(ADR-2-2-02). El generador verifica en cada ejecución que
 `compuesto.json` coincide **byte a byte** con el `compuesto.json` de `diseno/ejemplos/` (el golden de
 referencia de la ronda 1R) — si no coincidiera, sería la prueba de que esa regla o el `BusinessSnapshot`
 están mal, no que el golden hay que aceptarlo tal cual. Desde la revisión 2-0a-REV el generador
@@ -52,11 +54,11 @@ salida errónea).
 > `assetId → url` es una **convención de fixture de prueba**, NO la regla de producción. En
 > producción `AssetUrlResolver` construye `"{templates2.assets.public-base-url}/{s3_key}"` a partir
 > de la columna `s3_key` de `tpl_asset` (`02 §10.4`): deriva de un dato almacenado, no del `assetId`.
-> Reproducir `compuesto.json` desde Kotlin exige construir el `AssetIndex` con la convención de
-> fixture **solo dentro de la prueba**; llevarla a `AssetUrlResolver` rompería cualquier asset cuya
-> clave S3 no sea `<ULID>.webp`. Remedio pendiente: emitir el `AssetIndex` como dato
-> (`golden/templates/<dir>/assets.json`) para que el golden deje de depender de una convención que
-> vive solo en un `.ts`.
+> Llevarla a `AssetUrlResolver` rompería cualquier asset cuya clave S3 no sea `<ULID>.webp`, que son
+> todas las reales (`templates2/invitation/{id}/{sha256}.{ext}`, `02 §10.1`).
+> **REMEDIO APLICADO en 2-2 (ADR-2-2-02):** el `AssetIndex` se emite como `assets.json` en cada
+> carpeta. `ComposerGoldenTest.kt` lo lee como dato y `AssetUrlResolver` implementa **solo** la regla
+> de producción (`"{public-base-url}/{s3_key}"`), verificada en `AssetUrlResolverTest.kt`.
 
 ## `golden/invariants/I-xx-<nombre>.json`
 
@@ -108,30 +110,59 @@ obligatorios (`06 §5.2`); varios traen además casos `"extra"` (las "trampas" d
 
 ## `golden/operations/<op>.cases.json`
 
-11 ficheros — las 11 operaciones de `esquema/operations.ts` `Operation`, `clearItemBlock` incluida
+11 ficheros — las 11 operaciones de `src/operations.ts` `Operation`, `clearItemBlock` incluida
 (ADR-1R-X-01). Cada caso: `name`, `tag` (`"valid-shape"|"invalid-shape"|"invalid-manifest"`),
 `operation` (el objeto crudo), `expectZodValid` (¿`Operation.safeParse` tiene éxito?),
-`expectManifestError` (código `TPL_*` o el código de invariante esperado cuando la operación es
-válida en forma pero inválida contra un manifiesto/tema fijo del propio generador — comprobación
-**referencial** directa, no el reductor) y **`reducerResult: null` con `reducerResultPending: true`**.
+`expectOpViolations` (los códigos `OP_*` que devuelve `validateOperations` de verdad) y
+**`reducerResult`**: la salida REAL de `applyOperation(documento, op, ctx)` — `{ok:true, doc, idMap?}`
+o `{ok:false, error}` —, `null` solo cuando la forma no es válida y la operación ni siquiera llega al
+reductor.
 
-**Limitación declarada de esta fase (2-0a):** `operations-reducer.ts` (`applyOperation`, `01 §6.5`)
-no es uno de los 10 archivos de esquema que esta fase movió — es lógica de negocio del reductor,
-fuera de alcance de 2-0a. Por eso `reducerResult` queda `null`/pendiente: cuando exista el reductor
-(2-0b o posterior), regenerar estos ficheros haciendo que `ocase()` en
-`scripts/gen-golden-operations.ts` llame también a `applyOperation` sobre un documento base fijo y
-rellene `reducerResult` de verdad (nunca a mano).
+**Cerrado en 2-2 (objeción O-01 / ADR-2-0a-03).** El campo `expectManifestError` de 2-0a **ya no
+existe**: se calculaba contra un `manifestFixture(...)` que vivía solo en el script generador, así que
+no lo verificaba nadie en ninguno de los dos lados y obligaba al lector Kotlin a reimplementar
+`scripts/fixtures.ts`. En su lugar, el fixture base se emite como DATO en
+`golden/fixtures/operations-base.json` (manifiesto, tema, defaults, documento, `assetMeta`, `ulidSeed`)
+y los dos campos nuevos los produce código exportado del paquete.
+
+## `golden/fixtures/`
+
+Fuera del recuento contractual de `contratos.md §6` (que fija 11 ficheros en `golden/operations/`):
+
+| Fichero | Contenido |
+|---|---|
+| `operations-base.json` | manifiesto + tema + defaults + documento + `assetMeta` + `ulidSeed` con los que se calculan `reducerResult` y `expectOpViolations`. `newUlid` devuelve **siempre** `ulidSeed`: el reductor es determinista si se le inyecta una fuente determinista |
+| `operations-batches.json` | casos de `applyBatch` (`01 §6.5`): `tempId` resuelto dentro del lote, sin resolver, duplicado, y el todo-o-nada. `ulidsDelLote` es la secuencia exacta que el runner debe inyectar |
+
+## `golden/compose/<id>.case.json`
+
+Una rama de R1-R9 por fichero (objeción **O-10**: la cobertura de `compose.ts` escondía reglas sin
+probar, y la revisión pidió convertirlas en **casos golden, no en pruebas TS sueltas**, porque una
+prueba TS no cruza a Kotlin y por tanto no es cobertura de paridad). Cada caso trae TODAS sus entradas
+en línea (`manifest`, `theme`, `defaults`, `documento`, `business`, `assets`, `locale`) y la salida real
+(`compuesto`, `reporte`), más una `descripcion` que dice qué rama fija. Cubre el fallback de tema de
+R8, `orphanSections`, la clave duplicada, la variante desconocida, las dos formas de R1c, el asset
+ausente del `AssetIndex`, los seis `businessField` con datos y con nulos, los cinco `formatId`, la
+medianoche de `h12`, `es-MX`/`es-ES`/`en-US`, los 13 kinds escalares y el `invalidValues` de O-12.
 
 ## `golden/migrations/`
 
-**0 pares** `<slug>/<from>-to-<to>/{antes,despues-esperado}.json`: ninguno de los dos ejemplos
-disponibles (`boda-clasica-1.0.0`, `xv-jardin-1.0.0`) declara `migrationsFrom` (ambos `[]`,
-verificado por el propio generador en cada ejecución) y `migrate()` (`01 §6.1`, `migrate.ts`) no es
-uno de los 10 archivos movidos en esta fase — fabricar un plan y una plantilla origen ficticios para
-producir un par violaría ADR-1R-D-09. En su lugar: `op-shapes.cases.json` (22 casos: forma válida e
-inválida de cada una de las 11 `MigrationOp` cerradas de `01 §6.2`, autoverificados contra
-`MigrationOp.safeParse` real). Cuando exista una plantilla registrada con un plan de migración real
-(fase 5, `05-migracion.md`) o se implemente `migrate.ts`,añadir aquí los pares reales.
+- `op-shapes.cases.json` — 22 casos: forma válida e inválida de cada una de las 11 `MigrationOp`
+  cerradas de `01 §6.2`, autoverificados contra `MigrationOp.safeParse` real.
+- `errors.cases.json` — los cinco `MigrationError` de `01 §6.1`, con el par de paquetes mínimo con el
+  que se producen emitido como dato (`from`, `to`).
+- `index.json` — índice de los casos con estructura de directorio (`migrate` y `switch`). Kotlin no
+  puede enumerar subdirectorios del classpath con un glob simple, así que el índice es dato.
+- `<slug>/<from>-to-<to>/` — par antes/después REAL: `plan.json`, `antes.json`,
+  `despues-esperado.json`, `reporte-esperado.json` y **los dos paquetes completos**
+  (`from-template.json`, `from-theme.json`, `from-defaults.json` y sus `to-*`), de modo que Kotlin
+  ejecuta `migrate()` sin conocer el generador.
+- `switch/<origen>-to-<destino>/` — igual, sin `plan.json`, para `switchTemplate` (`01 §6.4`).
+
+**Cerrado en 2-2.** Los dos ejemplos siguen sin declarar `migrationsFrom` (el generador lo verifica en
+cada ejecución y lanza si deja de ser cierto), pero ADR-1R-D-09 prohíbe **escribir** golden a mano, no
+**sintetizarlos con código**: el par `fixture-tpl 1.0.0→2.0.0` se construye con `scripts/fixtures.ts`,
+ejercita las **once** operaciones de migración y se verifica ejecutando `migrate()` de verdad.
 
 ## Regenerar
 

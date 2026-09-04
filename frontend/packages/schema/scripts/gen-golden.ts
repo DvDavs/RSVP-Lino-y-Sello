@@ -6,6 +6,9 @@ console.log("== golden/templates ==");
 for (const { dir, matched } of genGoldenTemplates())
   console.log(`  ${dir}: ${matched ? "OK (coincide con diseno/ejemplos)" : "AVISO: no coincide con diseno/ejemplos"}`);
 
+console.log("== golden/compose ==");
+await import("./gen-golden-compose.ts");
+
 console.log("== golden/invariants ==");
 await import("./gen-golden-invariants.ts");
 

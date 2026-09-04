@@ -1,0 +1,48 @@
+{
+  "templateSlug": "fixture-tpl",
+  "from": "1.0.0",
+  "to": "1.1.0",
+  "ops": [
+    {
+      "op": "addBlock",
+      "id": "cover.added"
+    },
+    {
+      "op": "renameBlock",
+      "from": "cover.old",
+      "to": "cover.new"
+    },
+    {
+      "op": "changeBlockType",
+      "id": "story.body",
+      "converterId": "richTextToText"
+    },
+    {
+      "op": "moveIntoGroup",
+      "blockId": "cover.legacy",
+      "groupId": "event.cards",
+      "itemBlockId": "title"
+    },
+    {
+      "op": "flattenGroup",
+      "groupId": "menu.items",
+      "itemBlockId": "name",
+      "toBlockId": "menu.note"
+    },
+    {
+      "op": "shrinkGroup",
+      "groupId": "gifts.list",
+      "max": 2
+    },
+    {
+      "op": "renamePalette",
+      "from": "rosa",
+      "to": "verde"
+    },
+    {
+      "op": "renameFontSet",
+      "from": "moderna",
+      "to": "serif"
+    }
+  ]
+}

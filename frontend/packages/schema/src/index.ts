@@ -7,3 +7,6 @@ export * from "./operations.ts";
 export * from "./composed.ts";
 export * from "./invariants.ts";
 export * from "./compose.ts";
+export * from "./operations-reducer.ts";
+export * from "./operations-validate.ts";
+export * from "./migrate.ts";
