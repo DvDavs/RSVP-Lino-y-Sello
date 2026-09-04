@@ -42,7 +42,27 @@ Estados: pendiente · en curso · entregada · aceptada · rechazada (motivo)
 **Objeciones altas: 44 encontradas, 44 corregidas en sitio, 0 abiertas.** Las cuatro tablas de objeciones viven en la sección "Revisión independiente (1R-xxx)" de cada documento.
 
 ## Fase 2 — Backend
-(pendiente — **siguiente fase**; arranca leyendo `contratos.md`, `01`+`esquema/`, `02` y `03`)
+
+**EN CURSO desde 2026-09-04.** Rama `claude/fase-2-backend-orchestration-ksyuzi`, creada desde `claude/agent-network-invitation-41nx5y` (`88238b2`). Orquestador raíz Opus 5 en un entorno que **sí** expone la herramienta `Agent`; red de **un solo nivel** (los sub-agentes no pueden lanzar sub-agentes, así que el orquestador lanzó todos). Los bloques que implementan en paralelo corrieron en **worktrees git aislados**, integrados por el orquestador con `git merge --no-ff` y suite completa tras cada merge.
+
+**Desviación de reparto respecto al prompt de la fase, con motivo:** el prompt pedía los bloques 2-1, 2-2 y 2-3 **en paralelo**. Se ejecutaron **2-1 ∥ 2-2** y luego **2-3**, porque 2-3 escribe en `templates2.persistence` y `templates2.api` —los mismos paquetes que 2-1— y en un worktree aislado no compilaría sin los repositorios de 2-1. Gana la regla dura "nunca dos agentes sobre el mismo paquete Kotlin a la vez". Registrado en `preguntas-abiertas.md`.
+
+**Ampliación de alcance del bloque 0b, con motivo:** además de las dos verificaciones pendientes, 2-0b entregó `templates2.domain` y `templates2.schema` completos. Sin ese cimiento común, los tres bloques paralelos habrían inventado cada uno sus propios tipos de dominio en worktrees aislados y no se habrían podido integrar.
+
+| Tarea | Agente | Modelo real | Reintentos | Estado |
+|---|---|---|---|---|
+| Cimientos: build 21, monorepo `frontend/packages/schema`, emisión del bundle, golden files, `pg-ephemeral.sh`, `ci.yml` | 2-0a | **Sonnet** | 0 | **aceptada** con reservas — 375 pruebas TS, cobertura 100/100/88,04 |
+| Revisión adversarial de 2-0a (obligatoria: Sonnet tocando esquema) | 2-0a-REV | **Opus** | 0 | **aceptada** — 20 objeciones, 2 ALTAS, 5 defectos corregidos en sitio |
+| Verificación Kotlin pendiente de la fase 1 + cimiento compartido (`domain`, `schema`) | 2-0b | **Opus** | 0 | **aceptada** — networknt OK, paridad 102/102, 482 pruebas |
+| Persistencia: Flyway `V29`–`V37`, 8 entidades, 9 repositorios | 2-1 | **Sonnet** | 0 | **aceptada** con reservas — 536 pruebas |
+| Revisión adversarial de 2-1 (obligatoria: Sonnet tocando persistencia) | 2-1-REV | **Opus** | 0 | **aceptada** — 15 objeciones, sabotaje de `ddl-auto`, +21 pruebas (557) |
+| Composición R1–R9, reductor único, migración y `switchTemplate` | 2-2 | **Opus** | 0 | **aceptada** — 716 pruebas Kotlin, 453 TS; cierra O-01/O-06/O-10/O-12 |
+| Catálogo y registro de plantillas en un paso | 2-3 | **Opus** | 0 | **aceptada** — 862 pruebas; registra las 2 plantillas de ejemplo |
+| Documento, operaciones, snapshots y publicación | 2-4 | **Opus** | — | en curso |
+| API completa e integración | 2-5 | — | — | pendiente |
+| Revisión adversarial global y cierre | 2-cierre | — | — | pendiente |
+
+**Ningún agente murió por sobrecarga (error 529)**, así que la escalera de reintento (esperar 60 s y reanudar el mismo agente con `SendMessage`; a la tercera muerte relanzar con el siguiente modelo) **no llegó a usarse**. Sí se usó `SendMessage` una vez, para inyectar en vuelo al bloque 2-0b las dos objeciones ALTAS que la revisión de 2-0a acababa de encontrar.
 ## Fase 3 — Frontend
 (pendiente)
 ## Fase 4 — Plantillas y kit
