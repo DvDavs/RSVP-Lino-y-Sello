@@ -61,6 +61,10 @@ class AssetGcJob(
     private val almacen: InvitationAssetStorage,
     @Value("\${templates2.assets.gc.batch-size:500}") private val lote: Int = LOTE_POR_DEFECTO,
     @Value("\${templates2.assets.gc.max-attempts:10}") private val maxIntentos: Int = MAX_INTENTOS,
+    /** ADR-2-6-02, objeción ADV-08: interruptor **propio**. Antes esta tarea se apagaba con
+     *  `templates2.retention.enabled`, cuyo nombre solo habla de la purga de snapshots, y apagar la
+     *  retención dejaba de drenar `tpl_asset_gc` —el derecho al olvido— sin decirlo. */
+    @Value("\${templates2.assets.gc.enabled:true}") private val habilitada: Boolean = true,
 ) {
 
     private val log = LoggerFactory.getLogger(AssetGcJob::class.java)
@@ -68,6 +72,14 @@ class AssetGcJob(
     /** Cada hora al minuto 15 (`02 §10.3`). Devuelve cuántos objetos se borraron de verdad. */
     @Scheduled(cron = "\${templates2.assets.gc.cron:0 15 * * * *}")
     fun recolectar(): Int {
+        if (!habilitada) {
+            log.warn(
+                "templates2: el drenaje de tpl_asset_gc está DESACTIVADO " +
+                    "(templates2.assets.gc.enabled=false); los objetos de S3 de invitaciones y clientes " +
+                    "borrados NO se están retirando (02 §5.3, derecho al olvido)",
+            )
+            return 0
+        }
         var borrados = 0
         for (fila in cola.pendientes(lote)) {
             if (fila.attempts >= maxIntentos) {
