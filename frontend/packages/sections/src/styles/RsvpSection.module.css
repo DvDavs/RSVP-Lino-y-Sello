@@ -89,6 +89,13 @@
   opacity: 0.92;
 }
 
+/* El bloque delegado (`sectionIntro`) fija su PROPIO `color: var(--inv-color-ink)` en su raíz —
+ * gana sobre el `color:inherit` de `.intro`, y aquí el fondo es el velo oscuro, no `--inv-color-bg`
+ * (mismo hallazgo que el chip de fecha, ver abajo). Se sobrescribe en el HIJO DIRECTO. */
+.intro > :global(*) {
+  color: inherit;
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;
@@ -100,15 +107,29 @@
   justify-content: flex-start;
 }
 
+/* `inline-block`, NUNCA `flex`: un chip mezcla texto suelto con un elemento (p. ej. "Confirma
+ * antes del " + `<time>`) — dentro de un contenedor `flex`, ese texto y el elemento se
+ * "blockifican" como ítems de flex SEPARADOS (CSS Display §2.7) y dejan de fluir en línea,
+ * produciendo un solape visual real (medido [V] en el banco de capturas: `<time>` pasaba a
+ * `display:block` dentro del `<span class="chip">`). `line-height` centra verticalmente un chip
+ * de una sola línea sin flexbox. */
 .chip {
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
   min-height: var(--inv-touch-target-min);
+  line-height: var(--inv-touch-target-min);
   padding-inline: var(--inv-space-4);
   border-radius: var(--inv-radius-sm);
   border: var(--inv-border-width) solid color-mix(in srgb, var(--inv-color-accent-ink) 45%, transparent);
   font-family: var(--inv-font-body);
   font-size: var(--inv-text-sm);
+  color: inherit;
+}
+
+/* `DateBlock` fija su propio `color: var(--inv-color-ink)` (blocks.module.css `.time`), pensado
+ * para texto sobre `--inv-color-bg` — aquí el chip vive sobre el velo oscuro de la portada de
+ * RSVP, así que se sobrescribe a `inherit` (selector con una especificidad más que `.time` sola,
+ * gana sin `!important`) para no perder contraste (04 §17.1). */
+.chip :global(time) {
   color: inherit;
 }
 
@@ -120,6 +141,12 @@
   line-height: var(--inv-leading-relaxed);
   color: inherit;
   opacity: 0.9;
+}
+
+/* `rsvpNote`/`rsvpKidsNote` delegan en un bloque con su PROPIO color — mismo hallazgo que
+ * `.intro` arriba. */
+.note > :global(*) {
+  color: inherit;
 }
 
 /* ------------------------------------------------------------------------------------------

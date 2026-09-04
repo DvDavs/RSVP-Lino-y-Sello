@@ -67,6 +67,16 @@
   color: var(--inv-color-muted);
 }
 
+/* `sectionIntro` delega en TextBlock/RichTextBlock/ListTextBlock, y los tres fijan su PROPIO
+ * `color: var(--inv-color-ink)` en su elemento raíz (blocks.module.css/RichTextBlock.module.css)
+ * — ese `color` explícito gana sobre el `color` heredado de `.intro` (medido [V] en el banco de
+ * capturas: el texto salía en tinta, no en el tono apagado que pide el diseño). Se sobrescribe en
+ * el HIJO DIRECTO (el único que produce el bloque delegado), nunca más abajo, para no aplanar el
+ * color de un `<a>` de acento dentro de un richText. */
+.intro > :global(*) {
+  color: inherit;
+}
+
 /* ------------------------------------------------------------------------------------------
  * Variante "cards": grilla de tarjetas. `.groupWrap > ul` es el `<ul>` REAL de `GroupBlock`.
  * ---------------------------------------------------------------------------------------- */
@@ -74,6 +84,11 @@
   margin: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--inv-grid-card-min), 1fr));
+  /* `start`, no `stretch` (el valor por defecto de grid): una tarjeta sin imagen (rol
+   * `giftOptionImage` en `provenance:"empty"`, R2/R5) no debe estirarse a la altura de sus
+   * vecinas con foto — deja un vacío en blanco enorme, medido en el banco de capturas. Cada
+   * tarjeta mide lo que su propio contenido pide, como en cualquier grilla editorial de tarjetas. */
+  align-items: start;
   gap: var(--inv-space-6);
 }
 

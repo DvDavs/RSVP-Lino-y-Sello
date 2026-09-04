@@ -67,6 +67,13 @@
   color: var(--inv-color-muted);
 }
 
+/* `sectionIntro` delega en un bloque que fija su PROPIO `color: var(--inv-color-ink)` en su
+ * elemento raíz — gana sobre el `color` heredado de `.intro` (mismo hallazgo que
+ * GiftTableSection.module.css). Se sobrescribe en el HIJO DIRECTO, nunca más abajo. */
+.intro > :global(*) {
+  color: inherit;
+}
+
 .blessing {
   margin: 0;
   max-width: var(--inv-measure);

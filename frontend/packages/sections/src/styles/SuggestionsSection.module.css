@@ -65,6 +65,14 @@
   color: var(--inv-color-muted);
 }
 
+/* `sectionIntro` delega en TextBlock/RichTextBlock/ListTextBlock, y los tres fijan su PROPIO
+ * `color: var(--inv-color-ink)` en su elemento raíz — gana sobre el `color` heredado de `.intro`
+ * (mismo hallazgo que GiftTableSection.module.css, medido en el banco de capturas). Se
+ * sobrescribe en el HIJO DIRECTO, nunca más abajo (no aplana el acento de un enlace interno). */
+.intro > :global(*) {
+  color: inherit;
+}
+
 /* ------------------------------------------------------------------------------------------
  * Variante "cards".
  * ---------------------------------------------------------------------------------------- */
@@ -72,6 +80,9 @@
   margin: 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--inv-grid-card-min), 1fr));
+  /* `start`, no `stretch`: una tarjeta sin imagen no debe estirarse a la altura de sus vecinas
+   * con foto (mismo criterio que GiftTableSection.module.css, medido en el banco de capturas). */
+  align-items: start;
   gap: var(--inv-space-6);
 }
 

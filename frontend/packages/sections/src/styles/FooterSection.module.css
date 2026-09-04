@@ -53,6 +53,14 @@
   color: var(--inv-color-muted);
 }
 
+/* El bloque delegado (`sectionIntro`) fija su PROPIO `color: var(--inv-color-ink)` en su raíz —
+ * gana sobre el `color` heredado de `.intro`/`.note` (medido [V] en el banco de capturas: la nota
+ * legal salía en tinta llena en vez del tono discreto que pide el brief §1). Se sobrescribe en el
+ * HIJO DIRECTO. */
+.intro > :global(*) {
+  color: inherit;
+}
+
 .audio {
   width: 100%;
   max-width: 22rem;
