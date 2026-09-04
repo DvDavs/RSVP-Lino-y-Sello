@@ -1,0 +1,240 @@
+/**
+ * packages/sections/src/styles/GallerySection.module.css — 3-2b.
+ *
+ * `galleryPhotos` se delega en `<GroupBlock>` (un `<li>` por foto, un único `<span>` itemBlock
+ * envolviendo el `<span class="frame">` de `ImageBlock`, `blocks/ImageBlock.module.css:1`). El
+ * radio/sombra de tarjeta se aplican al `<li>` (con `overflow: hidden`) en vez de intentar
+ * alcanzar el `<span>` interno por clase — evita depender de nombres de clase hasheados fuera de
+ * mi alcance. La proporción de imagen se controla RE-DECLARANDO `--inv-image-aspect-default` en
+ * el `<li>`: `ImageBlock` la lee por herencia de CSS, sin que yo tenga que tocar `blocks/**`
+ * (mismo patrón documentado en `theme/tokens.css` §5, "una sección real la sobrescribe... igual
+ * token"). Así las cuatro variantes quedan con proporción ESTABLE (sin salto de layout al cargar,
+ * tarea 1 del brief) incluso `masonry`, que en vez de alto intrínseco real (`ResolvedValue.image`
+ * no trae `width/height`, ADR-2-3-07) alterna tres proporciones fijas por posición.
+ */
+
+.section {
+  background: var(--inv-color-bg);
+  padding: var(--inv-space-8) var(--inv-space-5);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--inv-space-6);
+  animation: gallery-rise var(--inv-motion-normal) var(--inv-motion-ease) both;
+}
+
+@keyframes gallery-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--inv-space-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    animation: none;
+  }
+}
+
+.heading {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  padding-bottom: var(--inv-space-3);
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-3xl);
+  color: var(--inv-color-ink);
+}
+
+.heading::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--inv-space-6);
+  height: var(--inv-border-width-axis);
+  background: var(--inv-color-accent);
+}
+
+/* TextBlock (`src/blocks/blocks.module.css` `.text`) fija su propio `color: var(--inv-color-ink)`
+ * en el `<span>` que pinta — sin este `> *` el `color` de `.intro`/`.hashtag` no llega al texto
+ * real (una declaración explícita en el propio nodo gana siempre sobre la heredada; medido con
+ * una captura real, bitácora 3-2b). */
+.intro > *,
+.hashtag > * {
+  color: inherit;
+}
+
+.intro {
+  margin: var(--inv-space-2) auto 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+  color: var(--inv-color-muted);
+}
+
+.groupWrap {
+  --inv-image-aspect-default: 1 / 1;
+}
+
+.groupWrap ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.groupWrap li {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--inv-radius-md);
+  background: var(--inv-color-surface);
+}
+
+.groupWrap img {
+  transition-property: transform;
+  transition-duration: var(--inv-motion-normal);
+  transition-timing-function: var(--inv-motion-ease);
+}
+
+.groupWrap li:hover img,
+.groupWrap li:focus-within img {
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .groupWrap img {
+    transition: none;
+  }
+
+  .groupWrap li:hover img,
+  .groupWrap li:focus-within img {
+    transform: none;
+  }
+}
+
+.social {
+  margin-top: var(--inv-space-6);
+  display: grid;
+  justify-items: center;
+  gap: var(--inv-space-2);
+}
+
+.hashtag {
+  margin: 0;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-medium);
+  font-size: var(--inv-text-lg);
+  color: var(--inv-color-accent);
+}
+
+.hashtagListWrap ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--inv-space-3);
+}
+
+/* ---------------------------------------------------------------------- variante: grid-6 ---- */
+
+.section[data-variant="grid-6"] .groupWrap ul {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--inv-space-3);
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="grid-6"] .groupWrap ul {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------------------- variante: grid-9 ---- */
+
+.section[data-variant="grid-9"] .groupWrap ul {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--inv-space-2);
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="grid-9"] .groupWrap ul {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.section[data-variant="grid-9"] .groupWrap li {
+  border-radius: var(--inv-radius-sm);
+}
+
+/* -------------------------------------------------------------------- variante: carousel ---- */
+
+.section[data-variant="carousel"] .groupWrap {
+  --inv-image-aspect-default: 3 / 4;
+}
+
+.section[data-variant="carousel"] .groupWrap:focus-visible {
+  outline: var(--inv-focus-ring-width) solid var(--inv-color-accent);
+  outline-offset: var(--inv-focus-ring-offset);
+  border-radius: var(--inv-radius-md);
+}
+
+.section[data-variant="carousel"] .groupWrap ul {
+  display: flex;
+  gap: var(--inv-space-4);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-block-end: var(--inv-space-2);
+  scroll-padding-inline: var(--inv-space-5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section[data-variant="carousel"] .groupWrap ul {
+    scroll-behavior: auto;
+  }
+}
+
+.section[data-variant="carousel"] .groupWrap li {
+  flex: 0 0 auto;
+  width: min(70%, calc(var(--inv-measure) * 0.62));
+  scroll-snap-align: center;
+}
+
+/* --------------------------------------------------------------------- variante: masonry ---- */
+
+.section[data-variant="masonry"] .groupWrap ul {
+  column-count: 2;
+  column-gap: var(--inv-space-3);
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="masonry"] .groupWrap ul {
+    column-count: 3;
+  }
+}
+
+.section[data-variant="masonry"] .groupWrap li {
+  break-inside: avoid;
+  margin-bottom: var(--inv-space-3);
+}
+
+.section[data-variant="masonry"] .groupWrap li:nth-child(3n + 1) {
+  --inv-image-aspect-default: 3 / 4;
+}
+
+.section[data-variant="masonry"] .groupWrap li:nth-child(3n + 2) {
+  --inv-image-aspect-default: 1 / 1;
+}
+
+.section[data-variant="masonry"] .groupWrap li:nth-child(3n) {
+  --inv-image-aspect-default: 4 / 5;
+}

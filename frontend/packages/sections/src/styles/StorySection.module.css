@@ -1,0 +1,218 @@
+/**
+ * packages/sections/src/styles/StorySection.module.css — 3-2b.
+ *
+ * `storyMilestones` (`<GroupBlock>`, orden fijo de `itemBlocks`: título, fecha, relato, foto —
+ * `template.json` de `boda-clasica`, único ejemplo real). Se reordena visualmente con `order`
+ * (grid) en `line`, y con posiciones de columna EXPLÍCITAS (`grid-column`) en `alternating` para
+ * el zig-zag foto/texto — nunca tocando el DOM que produce `GroupBlock` (fuera de mi alcance).
+ */
+
+.section {
+  background: var(--inv-color-bg);
+  padding: var(--inv-space-8) var(--inv-space-5);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--inv-space-7);
+  animation: story-rise var(--inv-motion-normal) var(--inv-motion-ease) both;
+}
+
+@keyframes story-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--inv-space-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    animation: none;
+  }
+}
+
+.heading {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  padding-bottom: var(--inv-space-3);
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-3xl);
+  color: var(--inv-color-ink);
+}
+
+.heading::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--inv-space-6);
+  height: var(--inv-border-width-axis);
+  background: var(--inv-color-accent);
+}
+
+/* Los bloques (TextBlock/DateBlock/RichTextBlock) fijan su propio color en el nodo que pintan —
+ * sin este `> *` ni `.intro` ni los `nth-of-type` de abajo llegan a teñir el texto real (una
+ * declaración explícita en el propio nodo gana siempre sobre la heredada; medido con una captura
+ * real, bitácora 3-2b). */
+.intro > * {
+  color: inherit;
+}
+
+.groupWrap li > span > * {
+  color: inherit;
+}
+
+.intro {
+  margin: var(--inv-space-2) auto 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  color: var(--inv-color-muted);
+}
+
+.groupWrap {
+  --inv-image-aspect-default: 4 / 3;
+}
+
+.groupWrap ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--inv-space-7);
+  max-width: var(--inv-measure);
+  margin-inline: auto;
+}
+
+.groupWrap li {
+  display: grid;
+  gap: var(--inv-space-2);
+}
+
+.groupWrap li > span {
+  display: block;
+}
+
+/* itemBlock 1: título. */
+.groupWrap li > span:nth-of-type(1) {
+  order: 2;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-xl);
+  color: var(--inv-color-ink);
+}
+
+/* itemBlock 2: fecha (month-year). */
+.groupWrap li > span:nth-of-type(2) {
+  order: 1;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-accent);
+}
+
+/* itemBlock 3: relato (richText). */
+.groupWrap li > span:nth-of-type(3) {
+  order: 4;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+  line-height: var(--inv-leading-relaxed);
+  color: var(--inv-color-muted);
+}
+
+/* itemBlock 4: foto. */
+.groupWrap li > span:nth-of-type(4) {
+  order: 3;
+}
+
+.groupWrap li > span:nth-of-type(4) img {
+  border-radius: var(--inv-radius-md);
+}
+
+/* ---------------------------------------------------------------------- variante: line ---- */
+
+.section[data-variant="line"] .groupWrap li {
+  position: relative;
+  padding-inline-start: var(--inv-space-6);
+}
+
+.section[data-variant="line"] .groupWrap li::before {
+  content: "";
+  position: absolute;
+  top: var(--inv-space-1);
+  left: calc(var(--inv-space-6) / 2 - var(--inv-space-2) / 2);
+  width: var(--inv-space-2);
+  height: var(--inv-space-2);
+  transform: rotate(45deg);
+  background: var(--inv-color-accent);
+  box-shadow: 0 0 0 var(--inv-border-width-hairline) var(--inv-color-bg);
+  z-index: 1;
+}
+
+.section[data-variant="line"] .groupWrap li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: var(--inv-space-1);
+  left: calc(var(--inv-space-6) / 2 - var(--inv-border-width-hairline) / 2);
+  width: var(--inv-border-width-hairline);
+  height: calc(100% + var(--inv-space-7));
+  background: color-mix(in srgb, var(--inv-color-accent) 30%, transparent);
+}
+
+/* ------------------------------------------------------------------ variante: alternating ---- */
+
+@media (min-width: 640px) {
+  .section[data-variant="alternating"] .groupWrap ul {
+    max-width: none;
+  }
+
+  .section[data-variant="alternating"] .groupWrap li {
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--inv-space-6);
+    align-items: center;
+    max-width: var(--inv-measure);
+    margin-inline: auto;
+  }
+
+  .section[data-variant="alternating"] .groupWrap li > span:nth-of-type(4) {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+
+  .section[data-variant="alternating"] .groupWrap li > span:nth-of-type(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .section[data-variant="alternating"] .groupWrap li > span:nth-of-type(1) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .section[data-variant="alternating"] .groupWrap li > span:nth-of-type(3) {
+    grid-column: 2;
+    grid-row: 3;
+  }
+
+  .section[data-variant="alternating"] .groupWrap li:nth-of-type(even) > span:nth-of-type(4) {
+    grid-column: 2;
+  }
+
+  .section[data-variant="alternating"] .groupWrap li:nth-of-type(even) > span:nth-of-type(2),
+  .section[data-variant="alternating"] .groupWrap li:nth-of-type(even) > span:nth-of-type(1),
+  .section[data-variant="alternating"] .groupWrap li:nth-of-type(even) > span:nth-of-type(3) {
+    grid-column: 1;
+  }
+}
+
+.section[data-variant="alternating"] .groupWrap {
+  --inv-image-aspect-default: 4 / 5;
+}
