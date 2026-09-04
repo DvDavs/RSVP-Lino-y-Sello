@@ -9,7 +9,7 @@
         "bg": "#FDF7F5",
         "surface": "#FFFFFF",
         "ink": "#3A2E2B",
-        "accent": "#C98B8B",
+        "accent": "#B35B5B",
         "accentInk": "#FFFFFF",
         "muted": "#9A8A86"
       }
@@ -25,7 +25,7 @@
         "ink": "#2F3A2B",
         "accent": "#6B7B4A",
         "accentInk": "#FFFFFF",
-        "muted": "#8A9178"
+        "muted": "#888F76"
       }
     },
     {

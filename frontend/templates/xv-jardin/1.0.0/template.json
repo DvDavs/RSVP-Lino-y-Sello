@@ -18,7 +18,7 @@
   "capabilities": [
     "hashtags"
   ],
-  "previewImage": "assets/preview.png",
+  "previewImage": "assets/preview.webp",
   "sections": [
     {
       "key": "cover",
@@ -603,10 +603,22 @@
   ],
   "assets": [
     {
-      "path": "assets/preview.png",
-      "sha256": "b129749cfa8b7648e0b0424be3a0128666ba8ec16c73f83d0cdc7404212bc6d0",
-      "contentType": "image/png",
-      "bytes": 518479
+      "path": "assets/divider.webp",
+      "sha256": "6079e415349dba6fa192cc15d8b06fd36966a346fea4ed90e814c2964c0358c4",
+      "contentType": "image/webp",
+      "bytes": 25714
+    },
+    {
+      "path": "assets/preview.webp",
+      "sha256": "91672579ac235a56110ec0a9b93887b6c813f3ca31b4aed244042259740947c9",
+      "contentType": "image/webp",
+      "bytes": 60648
+    },
+    {
+      "path": "assets/rsvp-bg.webp",
+      "sha256": "02a1a186fd4132c33222ca7d89c7aae68f0cf4e0ee8b50c8c8bcaeb331e6780d",
+      "contentType": "image/webp",
+      "bytes": 36354
     }
   ],
   "migrationsFrom": []
