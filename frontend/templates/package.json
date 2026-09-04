@@ -1,0 +1,19 @@
+{
+  "name": "@invitaciones/templates-art",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Generador determinista de la imaginería de los paquetes de plantilla (SVG autoral -> @resvg/resvg-js -> sharp -> WebP). AISLADO A PROPÓSITO del workspace pnpm de frontend/: pnpm-workspace.yaml solo declara packages/* y apps/*, así que este package.json no entra en el monorepo y no toca frontend/package.json ni pnpm-lock.yaml, que pertenecen a otro sub-agente (ADR-3-2d-01).",
+  "scripts": {
+    "art": "node scripts/build-art.mjs",
+    "packages": "node scripts/build-packages.mjs",
+    "check": "node scripts/build-art.mjs --check && node scripts/build-packages.mjs --check",
+    "all": "node scripts/build-art.mjs && node scripts/build-packages.mjs"
+  },
+  "dependencies": {
+    "@expo-google-fonts/cormorant-garamond": "0.4.1",
+    "@expo-google-fonts/playfair-display": "0.4.2",
+    "@resvg/resvg-js": "2.6.2",
+    "sharp": "0.35.4"
+  }
+}
