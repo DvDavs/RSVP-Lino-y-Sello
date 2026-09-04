@@ -1,0 +1,241 @@
+/**
+ * packages/sections/src/styles/GiftTableSection.module.css — 01 §3.1 tabla, tipo `giftTable`,
+ * variantes `cards`/`list`. Solo `var(--inv-*)` (04 §19.2). El grupo `giftOptions` se pinta con
+ * `<GroupBlock>` sin reimplementar `<ul>/<li>` (3-2a §2): esta hoja SOLO estiliza los elementos
+ * REALES que `GroupBlock`/los bloques de tipo ya producen, por combinador descendiente desde
+ * `.groupWrap` — nunca tocando `GroupBlock.module.css` ni sus nombres de clase (que además están
+ * codificados/hasheados y no son accesibles desde este módulo).
+ */
+
+.section {
+  position: relative;
+  padding-block: var(--inv-space-8);
+  padding-inline: var(--inv-space-5);
+  background: var(--inv-color-bg);
+  color: var(--inv-color-ink);
+  overflow: clip;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.12;
+}
+
+.backdrop :global(img) {
+  height: 100%;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--inv-content-max);
+  margin-inline: auto;
+  display: grid;
+  gap: var(--inv-space-6);
+}
+
+.header {
+  display: grid;
+  gap: var(--inv-space-3);
+  max-width: var(--inv-measure);
+}
+
+.ornament {
+  display: inline-block;
+  width: 2.5rem;
+  height: 0.0625rem;
+  background: var(--inv-color-accent);
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-3xl);
+  line-height: var(--inv-leading-tight);
+  letter-spacing: var(--inv-tracking-tight);
+  color: var(--inv-color-ink);
+}
+
+.intro {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-lg);
+  line-height: var(--inv-leading-relaxed);
+  color: var(--inv-color-muted);
+}
+
+/* `sectionIntro` delega en TextBlock/RichTextBlock/ListTextBlock, y los tres fijan su PROPIO
+ * `color: var(--inv-color-ink)` en su elemento raíz (blocks.module.css/RichTextBlock.module.css)
+ * — ese `color` explícito gana sobre el `color` heredado de `.intro` (medido [V] en el banco de
+ * capturas: el texto salía en tinta, no en el tono apagado que pide el diseño). Se sobrescribe en
+ * el HIJO DIRECTO (el único que produce el bloque delegado), nunca más abajo, para no aplanar el
+ * color de un `<a>` de acento dentro de un richText. */
+.intro > :global(*) {
+  color: inherit;
+}
+
+/* ------------------------------------------------------------------------------------------
+ * Variante "cards": grilla de tarjetas. `.groupWrap > ul` es el `<ul>` REAL de `GroupBlock`.
+ * ---------------------------------------------------------------------------------------- */
+.groupWrap.cards > ul {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--inv-grid-card-min), 1fr));
+  /* `start`, no `stretch` (el valor por defecto de grid): una tarjeta sin imagen (rol
+   * `giftOptionImage` en `provenance:"empty"`, R2/R5) no debe estirarse a la altura de sus
+   * vecinas con foto — deja un vacío en blanco enorme, medido en el banco de capturas. Cada
+   * tarjeta mide lo que su propio contenido pide, como en cualquier grilla editorial de tarjetas. */
+  align-items: start;
+  gap: var(--inv-space-6);
+}
+
+.groupWrap.cards > ul > li {
+  display: flex;
+  flex-direction: column;
+  background: var(--inv-color-surface);
+  border-radius: var(--inv-radius-lg);
+  box-shadow: var(--inv-shadow-sm);
+  overflow: hidden;
+  transition-property: transform, box-shadow;
+  transition-duration: var(--inv-motion-normal);
+  transition-timing-function: var(--inv-motion-ease);
+}
+
+.groupWrap.cards > ul > li:hover,
+.groupWrap.cards > ul > li:focus-within {
+  box-shadow: var(--inv-shadow-md);
+  transform: translateY(-0.25rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .groupWrap.cards > ul > li {
+    transition: none;
+  }
+  .groupWrap.cards > ul > li:hover,
+  .groupWrap.cards > ul > li:focus-within {
+    transform: none;
+  }
+}
+
+/* El itemBlock que contiene la imagen (ImageBlock) bebe hasta el borde de la tarjeta; el resto
+ * del contenido lleva relleno propio. `:has()` distingue por estructura real, no por orden. */
+.groupWrap.cards > ul > li > span:has(img) {
+  display: block;
+  /* Recorte cuadrado para la miniatura de la tarjeta (01 §3.2: `giftOptionImage` declara
+   * `constraints.aspect: "square"`) — se logra REDEFINIENDO el token que `ImageBlock` ya lee,
+   * nunca tocando su .module.css (ver tokens.css, comentario "Relaciones de aspecto adicionales"). */
+  --inv-image-aspect-default: var(--inv-image-aspect-square);
+}
+
+.groupWrap.cards > ul > li > span:not(:has(img)) {
+  padding-inline: var(--inv-space-5);
+}
+
+.groupWrap.cards > ul > li > span:first-child:not(:has(img)) {
+  padding-block-start: var(--inv-space-5);
+}
+
+.groupWrap.cards > ul > li > span:last-child {
+  padding-block-end: var(--inv-space-5);
+}
+
+/* Insignia del tipo de regalo (giftOptionKind, ChoiceBlock — primer itemBlock del catálogo real,
+ * `01 §3.2` fila 11 + template.json verificado [V]: kind, title, detail, link, image, en ese
+ * orden). Se distingue por posición porque `GroupBlock` no expone un gancho por rol —
+ * documentado en `preguntas-abiertas.md`. */
+.groupWrap.cards > ul > li > span:first-child:not(:has(img)) :global(span) {
+  display: inline-block;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-accent);
+}
+
+/* Título de la opción (giftOptionTitle, segundo itemBlock). */
+.groupWrap.cards > ul > li > span:nth-child(2):not(:has(img)) :global(span) {
+  display: block;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-xl);
+  line-height: var(--inv-leading-snug);
+  color: var(--inv-color-ink);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* Ritmo vertical entre los itemBlocks de texto (todos menos el primero y la imagen). */
+.groupWrap.cards > ul > li > span:not(:first-child):not(:has(img)) {
+  margin-top: var(--inv-space-2);
+}
+
+.groupWrap.cards > ul > li a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--inv-touch-target-min);
+  font-family: var(--inv-font-body);
+  font-weight: var(--inv-weight-medium);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-accent);
+  text-underline-offset: 0.2em;
+}
+
+/* ------------------------------------------------------------------------------------------
+ * Variante "list": filas horizontales separadas por línea fina, sin tarjeta ni sombra.
+ * ---------------------------------------------------------------------------------------- */
+.groupWrap.list > ul {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+
+.groupWrap.list > ul > li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--inv-space-4);
+  padding-block: var(--inv-space-4);
+  border-bottom: var(--inv-border-width) solid
+    color-mix(in srgb, var(--inv-color-ink) 12%, transparent);
+}
+
+.groupWrap.list > ul > li:last-child {
+  border-bottom: none;
+}
+
+.groupWrap.list > ul > li > span:has(img) {
+  grid-row: 1 / -1;
+  width: 4.5rem;
+  --inv-image-aspect-default: var(--inv-image-aspect-square);
+}
+
+.groupWrap.list > ul > li > span:not(:has(img)) {
+  grid-column: 2;
+}
+
+.groupWrap.list > ul > li > span:first-child:not(:has(img)) :global(span) {
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-accent);
+}
+
+.groupWrap.list > ul > li > span:nth-child(2):not(:has(img)) :global(span) {
+  display: block;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-lg);
+  color: var(--inv-color-ink);
+}
+
+.groupWrap.list > ul > li a {
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-accent);
+}

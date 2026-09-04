@@ -31,6 +31,13 @@ import { EventSection } from "./sections/EventSection.tsx";
 import { GallerySection } from "./sections/GallerySection.tsx";
 import { StorySection } from "./sections/StorySection.tsx";
 import { DressCodeSection } from "./sections/DressCodeSection.tsx";
+// Componentes reales del bloque 3-2c (mitad B del catálogo, docs/rediseno-plantillas/memoria/handoffs/3-2c.md).
+import { GiftTableSection } from "./sections/GiftTableSection.tsx";
+import { SuggestionsSection } from "./sections/SuggestionsSection.tsx";
+import { AmenitiesSection } from "./sections/AmenitiesSection.tsx";
+import { RsvpSection } from "./sections/RsvpSection.tsx";
+import { FamilySection } from "./sections/FamilySection.tsx";
+import { FooterSection } from "./sections/FooterSection.tsx";
 
 export type { RenderMode, BlockRef } from "./types.ts";
 
@@ -71,19 +78,16 @@ function buildEntry(sectionType: SectionType): SectionEntry {
 }
 
 export const sectionRegistry: Readonly<Record<SectionType, SectionEntry>> = {
-  // Bloque 3-2b (este agente): 6 componentes reales — solo se sustituye `component`.
   cover: { ...buildEntry("cover"), component: CoverSection },
   celebrant: { ...buildEntry("celebrant"), component: CelebrantSection },
   event: { ...buildEntry("event"), component: EventSection },
   gallery: { ...buildEntry("gallery"), component: GallerySection },
   story: { ...buildEntry("story"), component: StorySection },
   dressCode: { ...buildEntry("dressCode"), component: DressCodeSection },
-  // Bloque 3-2c (otro agente, en paralelo): siguen en marcador de posición hasta que sustituya
-  // `component` de sus 6 entradas — NO TOCAR estas líneas (brief 3-2b, "ARCHIVOS QUE TE TOCAN").
-  giftTable: buildEntry("giftTable"),
-  suggestions: buildEntry("suggestions"),
-  amenities: buildEntry("amenities"),
-  rsvp: buildEntry("rsvp"),
-  family: buildEntry("family"),
-  footer: buildEntry("footer"),
+  giftTable: { ...buildEntry("giftTable"), component: GiftTableSection },
+  suggestions: { ...buildEntry("suggestions"), component: SuggestionsSection },
+  amenities: { ...buildEntry("amenities"), component: AmenitiesSection },
+  rsvp: { ...buildEntry("rsvp"), component: RsvpSection },
+  family: { ...buildEntry("family"), component: FamilySection },
+  footer: { ...buildEntry("footer"), component: FooterSection },
 };
