@@ -56,6 +56,9 @@ importers:
       '@invitaciones/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@invitaciones/sections':
+        specifier: workspace:*
+        version: link:../../packages/sections
       '@radix-ui/react-dialog':
         specifier: 1.1.23
         version: 1.1.23(@types/react-dom@19.2.7(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
