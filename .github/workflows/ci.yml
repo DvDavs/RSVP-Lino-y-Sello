@@ -24,6 +24,12 @@
 #      no un error de este YAML.
 #   6. `NODE_VERSION`/`PNPM_VERSION` fijados a las versiones verificadas en este entorno
 #      (contratos.md §7: Node 22.22.2, pnpm 10.33.0), no a los valores de ejemplo de `06 §9`.
+#   7. El job `backend` corre `check` (objeción ADV-16 del cierre de la fase 2, bloque 2-6). La orden
+#      de `contratos.md §6` es `test jacocoTestReport jacocoTestCoverageVerification`, y con ella
+#      `verifyJsonSchemaEmitted` —enganchada a `check` en build.gradle.kts:265-268 y exigida por
+#      `contratos.md §5`— no se ejecutaba en CI. `check` es superconjunto de `test`, así que el
+#      efecto de la orden contractual se conserva íntegro. Como `verifyJsonSchemaEmitted` reemite el
+#      esquema con `pnpm`, este job instala ahora Node/pnpm y las dependencias de `frontend/`.
 #
 # CI no se ha ejecutado (ni puede ejecutarse) desde esta sesión: no hay `gh`/push a GitHub. La
 # validación hecha aquí es sintáctica (yaml.safe_load) y de lectura, no una corrida real — ver
@@ -84,8 +90,32 @@ jobs:
 
       - run: chmod +x gradlew
 
-      - name: Pruebas + cobertura (06 §2.1 — requiere JaCoCo configurado por 2-0b, ver nota 5 de cabecera)
-        run: ./gradlew --no-daemon test jacocoTestReport jacocoTestCoverageVerification
+      # `check` en vez de `test` (objeción ADV-16 de la revisión adversarial global). `check` es un
+      # superconjunto estricto de la orden literal de `contratos.md §6`
+      # (`test jacocoTestReport jacocoTestCoverageVerification`): build.gradle.kts engancha a `check`
+      # tanto `jacocoTestCoverageVerification` como **`verifyJsonSchemaEmitted`**, la compuerta de
+      # deriva del JSON Schema del lado Kotlin (contratos.md §5). Con `test` a secas esa compuerta no
+      # se ejecutaba NUNCA en CI. Se dejan las dos tareas de JaCoCo explícitas para que la orden siga
+      # conteniendo, palabra por palabra, la de `contratos.md §6`.
+      # `verifyJsonSchemaEmitted` necesita `pnpm` en el PATH y `pnpm install` hecho en frontend/: si
+      # falta, falla con instrucciones y NO se salta en silencio (build.gradle.kts:225).
+      - name: Node + pnpm (los necesita verifyJsonSchemaEmitted, contratos.md §5)
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Dependencias del frontend (solo para reemitir el esquema)
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: check + cobertura (06 §2.1 y §5 — incluye verifyJsonSchemaEmitted, ver nota 7 de cabecera)
+        run: ./gradlew --no-daemon check jacocoTestReport jacocoTestCoverageVerification
         env:
           TPL_TEST_JDBC_URL: jdbc:postgresql://127.0.0.1:55432/templates2_test
           TPL_TEST_DB_USER: postgres
