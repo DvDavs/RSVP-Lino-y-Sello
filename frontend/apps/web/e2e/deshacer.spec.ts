@@ -4,7 +4,7 @@
 // Contra el backend REAL: si el undo mandara la operación equivocada (o no la mandara), la recarga
 // lo delataría, porque el documento se relee del servidor.
 import { expect, test } from "@playwright/test";
-import { invitacionSembrada, jwtDemo, revisionActual, sesionDemo } from "./preparar.ts";
+import { aplicarOperaciones, invitacionSembrada, jwtDemo, revisionActual, sesionDemo } from "./preparar.ts";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
@@ -90,15 +90,11 @@ test("E-02 · escribir, deshacer, rehacer y recargar: el estado coincide con lo 
   await expect(page.getByTestId("undo")).toBeDisabled();
 
   // ── 5. Se restaura el valor original para no ensuciar la invitación de demostración ───────
-  await page.evaluate(
-    ([id, v]) => {
-      const s = (window as unknown as { __editorStore: Handle }).__editorStore.getState();
-      s.setBlock(id as string, { kind: "text", value: v as string });
-      s.flushNow();
-    },
-    [blockId, original] as const,
-  );
-  await expect(page.locator("[data-save-state]")).toHaveAttribute("data-save-state", "idle", { timeout: 20_000 });
+  // Por HTTP con la revisión vigente: la limpieza no debe poder tumbar una prueba ya demostrada.
+  const limpieza = await aplicarOperaciones(invitationId, token, [
+    { op: "setBlock", blockId, value: { kind: "text", value: original } },
+  ]);
+  expect(limpieza.status).toBe(200);
 });
 
 test("E-02b · deshacer antes de que salga el lote no genera tráfico (04 §11.3, caso 1)", async ({ page }) => {

@@ -7,7 +7,7 @@
 // la prueba de que esa prevención no tapa el caso que sí importa.
 import { existsSync, mkdirSync } from "node:fs";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
-import { API_BASE, invitacionSembrada, jwtDemo, revisionActual, sesionDemo } from "./preparar.ts";
+import { API_BASE, aplicarOperaciones, invitacionSembrada, jwtDemo, revisionActual, sesionDemo } from "./preparar.ts";
 
 const EVIDENCIA = new URL("../../../../docs/rediseno-plantillas/evidencia/fase-3/editor/", import.meta.url).pathname;
 if (!existsSync(EVIDENCIA)) mkdirSync(EVIDENCIA, { recursive: true });
@@ -116,8 +116,10 @@ test("E-06 · dos navegadores editan lo mismo: el segundo ve el diálogo y nada 
     expect(trasResolver).toBe(`${original} · desde A`);
 
     // ── Limpieza: se devuelve el valor original a la invitación de demostración ────────────
-    await escribirYGuardar(paginaA, blockId, original);
-    await expect(paginaA.locator("[data-save-state]")).toHaveAttribute("data-save-state", "idle", { timeout: 20_000 });
+    const limpieza = await aplicarOperaciones(invitationId, token, [
+      { op: "setBlock", blockId, value: { kind: "text", value: original } },
+    ]);
+    expect(limpieza.status).toBe(200);
   } finally {
     await contextoA.close();
     await contextoB.close();

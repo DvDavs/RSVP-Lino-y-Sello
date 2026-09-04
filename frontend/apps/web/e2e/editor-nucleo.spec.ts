@@ -9,6 +9,7 @@ import { existsSync, mkdirSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import {
   API_BASE,
+  aplicarOperaciones,
   borrarInvitacion,
   invitacionSembrada,
   invitacionSinDocumento,
@@ -172,11 +173,11 @@ test.describe("núcleo del editor", () => {
     const despues = await revisionActual(invitationId, token);
     expect(despues).toBeGreaterThan(antes);
 
-    // Se deja como estaba para no romper la invitación de demostración del dueño.
-    await page.evaluate((k) => {
-      const s = (window as unknown as { __editorStore: { getState: () => { setSectionVisible: (k: string, v: boolean) => void } } }).__editorStore;
-      s.getState().setSectionVisible(k as string, true);
-    }, clave);
-    await expect(indicador).toHaveAttribute("data-save-state", "idle", { timeout: 20_000 });
+    // Se deja como estaba para no romper la invitación de demostración del dueño. La limpieza va por
+    // HTTP con la revisión vigente, no por la interfaz: ver `aplicarOperaciones` en `preparar.ts`.
+    const limpieza = await aplicarOperaciones(invitationId, token, [
+      { op: "setSectionVisible", sectionKey: clave, visible: true },
+    ]);
+    expect(limpieza.status).toBe(200);
   });
 });

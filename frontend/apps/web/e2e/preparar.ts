@@ -114,3 +114,27 @@ export async function revisionActual(invitationId: number, token: string): Promi
   const cuerpo = (await r.json()) as { revision: number };
   return cuerpo.revision;
 }
+
+/**
+ * Aplica un lote por la RUTA REAL, leyendo antes la revisión vigente. Se usa para la LIMPIEZA de las
+ * pruebas (devolver la invitación de demostración a su estado), nunca para lo que se está midiendo.
+ *
+ * Va por HTTP y no por la interfaz a propósito: la limpieza se ejecuta cuando la revisión del
+ * servidor puede haber avanzado por otra prueba o por el `keepalive` de una pestaña que se cerró, y
+ * un `409` en el paso de limpieza haría fallar una prueba que ya había demostrado lo suyo. El
+ * editor sabe resolver ese `409` — eso lo mide `conflicto.spec.ts`, que es su sitio.
+ */
+export async function aplicarOperaciones(
+  invitationId: number,
+  token: string,
+  operations: unknown[],
+): Promise<{ status: number; revision: number | null }> {
+  const baseRevision = await revisionActual(invitationId, token);
+  const r = await fetch(`${API_BASE}/editor/invitations/${invitationId}/document/operations`, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+    body: JSON.stringify({ baseRevision, clientBatchId: `limpieza${Date.now().toString(36)}`, operations }),
+  });
+  const cuerpo = (await r.json()) as { revision?: number };
+  return { status: r.status, revision: cuerpo.revision ?? null };
+}
