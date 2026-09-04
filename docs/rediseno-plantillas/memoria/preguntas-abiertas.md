@@ -274,3 +274,57 @@ decidir, para que el dueño no tenga que leerlas todas para encontrar las suyas.
 - [Fase 3 · 3-2a] **`ComposedSection.blocks: Array<ComposedBlock | ComposedGroup>` no es una unión discriminada limpia para TypeScript**: `ComposedBlock.type` es el `BlockKind` COMPLETO (incluye el literal `"group"` como uno de sus 14 valores posibles, aunque el dominio nunca lo produzca ahí — 01 §2.5, los grupos no anidan), así que `block.type === "group"` no excluye de forma fiable el miembro `ComposedBlock` al hacer *narrowing*. **Supuesto tomado:** se distingue por la presencia de `items` (`isComposedGroup`, en `schema-types.ts`), que sí narrowea de forma exclusiva; documentado en el propio código. ¿Vale la pena que `composed.ts` use `z.discriminatedUnion` con una forma que sí distinga limpiamente (p. ej. dando a `ComposedBlock` un `type` que EXCLUYA `"group"` en su propio tipo), o se acepta el patrón `isComposedGroup` como la forma estándar de trabajar con esa unión?
 - [Fase 3 · 3-2a] **`jest-axe@11.0.0` no publica tipos TypeScript propios** (verificado [V]: no hay ningún `.d.ts` en el paquete instalado) y `@types/jest-axe` no está en el `package.json` exacto de `04 §2.1`. **Supuesto tomado:** declaración ambiental mínima propia en `test/jest-axe.d.ts` (solo lo que este paquete usa) + augmentación de `Assertion` de Vitest en `test/vitest-matchers.d.ts` (separado porque un `.d.ts` con `import` propio deja de aplicar su `declare module` de forma global — verificado [V]). ¿Se acepta `@types/jest-axe` como dependencia si en algún momento se publica, o se mantiene la declaración local (más control, menos superficie)?
 - [Fase 3 · 3-2a] **No existe `eslint.config.mjs` en este árbol de trabajo** (raíz del monorepo, propiedad de 3-1 según `contratos.md` §1), así que las prohibiciones duras de `04 §19.3` (`dangerouslySetInnerHTML`, `style={{`, utilidades de Tailwind, imports de `next/*`/`zustand`/etc.) no tienen ninguna compuerta mecánica de CI todavía. **Supuesto tomado:** se añadió `test/lint-guards.test.ts` dentro de `packages/sections` como compuerta real (falla `pnpm test` si se viola una regla), citando exactamente qué archivo del árbol de sección lo comete. ¿Cuándo 3-1 (u otro bloque) publique `eslint.config.mjs`, se retira esta prueba o se deja como red de seguridad adicional (recomendado: dejarla, es barata y no depende de que el lint corra)?
+## Fase 3 · 3-1 — andamiaje de `apps/web` (7)
+
+1. **Presupuesto de JS de `/i/[publicToken]` (04 §16.1, 150 KB gz): el suelo real de `next@16.3.4` +
+   Turbopack, sin código de aplicación, mide 165,9 KB gz** — verificado, `check-budget.mjs` rompe de
+   verdad (`exit 1`), sin ningún componente cliente propio en esa ruta. Se probó un `browserslist`
+   moderno para reducir el *chunk* de *polyfills*: sin efecto medible. **Supuesto tomado:** no se
+   relaja la constante (ADR-3-1-01, propuesta); el hallazgo queda para que el dueño decida entre subir
+   el presupuesto, investigar una configuración de *build* que lo baje, o esperar a medir con
+   contenido real en la fase 4. ¿Qué prefiere el dueño?
+2. **`04 §16.2` dice "lee `.next/app-build-manifest.json`"; ese fichero no existe en `next@16.3.4`**
+   (probado con Turbopack, el bundler por defecto, y con `next build --webpack`, los dos). El
+   manifiesto real y estable por ruta es `.next/server/app/<ruta>/page/build-manifest.json` →
+   `{rootMainFiles, polyfillFiles}`. **Supuesto tomado:** `scripts/check-budget.mjs` se escribió
+   contra esa forma real, documentado en el propio script. ¿Se corrige `04 §16.2` para que el próximo
+   bloque no pierda tiempo con el nombre de fichero equivocado?
+3. **`script-src`/`eval` de Zod SÍ se dispara dentro de `apps/web` en `/editor/[id]/canvas`, a pesar de
+   `canvas-runtime.ts`, `configureZodForCanvas()` llamada a nivel de módulo, y un intento de configurar
+   una supuesta segunda copia de `zod` directamente** — verificado con Playwright
+   (`e2e/lienzo-csp.spec.ts`). Descartado con evidencia que sea una segunda instalación física de
+   `zod` (`find node_modules/.pnpm -maxdepth 1 -iname "zod@4.5.4*"` da una sola entrada). Sospecha sin
+   confirmar: Turbopack separa el código de Zod en su propio grupo de *chunks* para esa ruta, con una
+   instancia de módulo propia (el *chunk* violador no contiene el marcador `CANVAS_ZOD_JITLESS` que
+   exporta `canvas-runtime.ts`). **Supuesto tomado:** no se afloja la CSP; el hallazgo queda en
+   cuarentena documentada (`// QUARANTINE`, `06 §8.2.6`) en la propia prueba, que verifica lo que sí
+   se controla (cabeceras, cero violaciones de estilo) y avisa con `console.warn` en cada corrida sin
+   ponerse en rojo. ¿Quién depura el *bundle* sin minificar para confirmar la causa exacta?
+4. **`noUncheckedIndexedAccess: true` (04 §2 lo pide para `tsconfig.base.json`) rompe el typecheck de
+   `packages/schema`** — verificado: `tsc` desde `apps/web` (que consume `.ts` fuente de
+   `@invitaciones/schema`, no `.d.ts` compilados) hereda el *flag* y produce errores nuevos en
+   `compose.ts`/`invariants.ts` que no existen al correr el typecheck de `schema` de forma aislada.
+   **Supuesto tomado:** no se aplica en ningún `tsconfig.json` del monorepo (ni base ni `apps/web`),
+   porque `packages/schema` es de solo lectura para este bloque y no se puede corregir ahí. ¿Se acepta
+   la ausencia del *flag*, o se resuelve compilando `packages/schema` a `.d.ts` (cambiaría cómo lo
+   consumen TODOS los paquetes) para que cada consumidor pueda tener sus propias `compilerOptions`
+   estrictas sin filtrarse a los demás?
+5. **`POST /auth/token` responde `{"accessToken", "refreshToken", "role", "isSurveyAnswered"}`, no
+   `{"token"}`** — verificado contra el backend real; ningún documento de `03-api.md`/memoria lo decía
+   (esa ruta es de `modules/auth`, fuera de `templates2`). **Supuesto tomado:** `lib/api-types.ts`
+   (`AuthTokenResponse`) se ajustó a la forma real. Ningún cambio de contrato pedido: solo se registra
+   para que nadie vuelva a perder tiempo adivinando el nombre del campo.
+6. **`packages/schema` sigue con `"lint": "echo 'lint: pendiente'"` (placeholder de la fase 2) y es de
+   solo lectura para este bloque** — las reglas de ADR-005 SÍ están declaradas en el
+   `eslint.config.mjs` raíz (alcanzables con `pnpm exec eslint packages/schema/src`), pero
+   `pnpm -r run lint`/`turbo run lint` no las ejecuta contra `schema` porque su propio script no
+   invoca `eslint`. **Supuesto tomado:** no se tocó `packages/schema/package.json` (fuera de mi
+   alcance). ¿Quién tiene permiso para completar ese script — el mismo agente que complete
+   `packages/sections`, o requiere volver a abrir `packages/schema` a un bloque futuro?
+7. **`/editor/[invitationId]` y `/preview/[invitationId]` son Client Components, no RSC como marca
+   `04 §6`** — el token de sesión vive en `sessionStorage` (P8, `lib/api-client.ts`) y un Server
+   Component no puede leerlo; no existe hoy ningún mecanismo de sesión legible en el servidor (cookie
+   httpOnly, por ejemplo). **Supuesto tomado:** ambas rutas cargan sus datos en el cliente, mismo
+   patrón que ya usa toda la parte autenticada. ¿Se introduce una cookie de sesión en un bloque
+   futuro para que estas rutas puedan volver a ser RSC (mejor rendimiento, menos JS), o se acepta el
+   patrón cliente como definitivo?

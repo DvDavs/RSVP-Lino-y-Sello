@@ -70,6 +70,12 @@ frontend/**/coverage/
 frontend/.turbo/
 frontend/**/.turbo/
 frontend/**/*.tsbuildinfo
+# apps/web (fase 3, bloque 3-1): build de Next.js y artefactos de Playwright/Lighthouse.
+frontend/apps/web/.next/
+frontend/apps/web/next-env.d.ts
+frontend/apps/web/playwright-report/
+frontend/apps/web/test-results/
+frontend/apps/web/.lighthouseci/
 # frontend/packages/schema/json-schema/ y frontend/packages/schema/golden/ SÍ se versionan:
 # son artefactos contractuales (ADR-1R-D-08/D-09), no build output descartable.
 ### worktrees de sub-agentes (efímeros, no versionar) ###

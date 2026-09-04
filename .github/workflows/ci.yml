@@ -191,8 +191,20 @@ jobs:
           retention-days: 7
 
   e2e:
-    name: e2e (Playwright/Chromium) — NO OPERATIVO hasta la fase 3 (ver nota 4 de cabecera)
-    if: false   # apps/web no existe todavía (contratos.md §1, ADR-017: es de la fase 3).
+    name: e2e (Playwright/Chromium)
+    # `apps/web` existe desde el bloque 3-1 (contratos.md §1, ADR-017): el `if: false` de la fase 2
+    # queda retirado aquí. Ajustes MÍNIMOS respecto a la versión de la fase 2 (memoria/bitacora/3-1.md):
+    #   - Puerto del backend: 6003 (application.yml:2), no 8080 — no hay actuator expuesto
+    #     (`/actuator/health` da 401, `anyRequest().authenticated()`); la sonda pasa a
+    #     `GET /public/i/sonda/exists`, la misma que usa `scripts/dev-backend.sh` (permitAll, siempre
+    #     responde 2xx sin importar el token).
+    #   - Rol `evolution`: `V1__initial_schema.sql` hace `ALTER TABLE … OWNER TO evolution` y el
+    #     servicio `postgres:16` de GitHub Actions no lo crea solo (a diferencia del clúster efímero
+    #     local de `scripts/pg-ephemeral.sh`, que sí lo hace) — paso nuevo antes de `bootRun`.
+    #   - `TEMPLATES2_ASSETS_BUCKET`/`TEMPLATES2_ASSETS_MODE=local`: obligatoria y sin defecto
+    #     (ADR-2-ORQ-03); no hay S3 real disponible en CI, mismo criterio que ADR-3-0a-02.
+    #   - `SPRING_DATA_MONGODB_URI` con `serverSelectionTimeoutMS` corto: sin Mongo en el runner,
+    #     `MongoDataInitializer` alargaría el arranque ~8 minutos (`handoffs/3-0a.md` §1).
     needs: [backend, frontend]
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -250,18 +262,39 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
 
+      - name: Rol "evolution" (V1__initial_schema.sql hace ALTER TABLE … OWNER TO evolution)
+        working-directory: .
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -p 55432 -U postgres -d postgres -v ON_ERROR_STOP=1 -c \
+            "DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'evolution') THEN CREATE ROLE evolution LOGIN SUPERUSER PASSWORD 'evolution123'; END IF; END \$\$;"
+
       - name: Backend en segundo plano (perfil test)
         working-directory: .
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon bootRun --args='--spring.profiles.active=test' &
+          mkdir -p build/dev
+          ./gradlew --no-daemon bootRun --args='--spring.profiles.active=test' > build/dev/backend-e2e.log 2>&1 &
+          echo "esperando a que $BASE responda…"
           for i in $(seq 1 60); do
-            curl -sf http://127.0.0.1:8080/actuator/health && break || sleep 5;
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 3 "$BASE/public/i/sonda/exists" || true)"
+            if [ -n "$code" ] && [ "$code" != "000" ]; then echo "backend arriba (HTTP $code)"; break; fi
+            sleep 5
           done
         env:
-          TPL_TEST_JDBC_URL: jdbc:postgresql://127.0.0.1:55432/templates2_e2e
-          TPL_TEST_DB_USER: postgres
-          TPL_TEST_DB_PASSWORD: postgres
+          BASE: http://127.0.0.1:6003
+          SPRING_DATASOURCE_URL: jdbc:postgresql://127.0.0.1:55432/templates2_e2e
+          SPRING_DATASOURCE_USERNAME: evolution
+          SPRING_DATASOURCE_PASSWORD: evolution123
+          # Sin Mongo en el runner: se recorta el tiempo de selección de servidor, igual que hace
+          # `scripts/dev-backend.sh` (handoffs/3-0a.md §1), para que MongoDataInitializer no alargue
+          # el arranque ~8 minutos.
+          SPRING_DATA_MONGODB_URI: "mongodb://localhost:27017/invitaciones?serverSelectionTimeoutMS=250&connectTimeoutMS=250"
+          # Obligatoria y sin defecto (ADR-2-ORQ-03); sin S3 real en CI, modo local (ADR-3-0a-02).
+          TEMPLATES2_ASSETS_BUCKET: templates2-ci-e2e
+          TEMPLATES2_ASSETS_MODE: local
+          TEMPLATES2_ASSETS_LOCAL_DIR: ${{ github.workspace }}/build/templates2-assets
+          TEMPLATES2_ASSETS_LOCAL_BASE_URL: http://127.0.0.1:6003/public/templates2-assets
+          TEMPLATES2_ASSETS_PUBLIC_BASE_URL: http://127.0.0.1:6003/public/templates2-assets
 
       # El servidor web del frontend lo arranca Playwright (`webServer` de playwright.config.ts),
       # NO un `&` suelto en este paso: un proceso lanzado con `&` en un step muere al terminarlo.
@@ -275,4 +308,11 @@ jobs:
           path: |
             frontend/apps/web/playwright-report/**
             frontend/apps/web/test-results/**
+          retention-days: 7
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-e2e-log
+          path: build/dev/backend-e2e.log
           retention-days: 7
