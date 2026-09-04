@@ -1,0 +1,47 @@
+# TAREA 5 — pnpm --filter @invitaciones/schema test  (2026-09-04, tras el bloque 3-0a)
+
+      Coverage enabled with v8
+
+ ✓ test/migrations.contract.test.ts (38 tests) 20ms
+ ✓ test/operations.contract.test.ts (66 tests) 40ms
+ ✓ test/invariant-gaps.contract.test.ts (8 tests) 38ms
+ ✓ test/compose.templates.test.ts (6 tests) 34ms
+ ✓ test/schema-coverage.contract.test.ts (30 tests) 524ms
+ ✓ test/block-kinds.contract.test.ts (118 tests) 42ms
+ ✓ test/compose.golden.test.ts (36 tests) 22ms
+ ✓ test/operation-batches.contract.test.ts (6 tests) 13ms
+ ✓ test/invariants.contract.test.ts (102 tests) 25ms
+ ✓ test/golden-inventory.test.ts (5 tests) 5ms
+ ✓ test/invariant-catalog.contract.test.ts (32 tests) 37ms
+ ✓ test/compose.branches.test.ts (5 tests) 14ms
+ ✓ test/invariants.branches.test.ts (6 tests) 7ms
+
+ Test Files  13 passed (13)
+      Tests  458 passed (458)
+   Start at  15:50:59
+   Duration  4.64s (transform 840ms, setup 0ms, collect 4.32s, tests 821ms, environment 5ms, prepare 2.31s)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   99.92 |     87.6 |     100 |   99.92 |                   
+ blocks.ts         |     100 |      100 |     100 |     100 |                   
+ common.ts         |     100 |      100 |     100 |     100 |                   
+ compose.ts        |     100 |    92.61 |     100 |     100 | ...00-101,106,218 
+ composed.ts       |     100 |      100 |     100 |     100 |                   
+ document.ts       |     100 |      100 |     100 |     100 |                   
+ invariants.ts     |     100 |    99.11 |     100 |     100 | 252               
+ manifest.ts       |     100 |      100 |     100 |     100 |                   
+ migrate.ts        |   99.56 |     81.6 |     100 |   99.56 | 86                
+ ...ons-reducer.ts |     100 |    86.16 |     100 |     100 | ...59,283-287,302 
+ ...ns-validate.ts |     100 |    75.45 |     100 |     100 | ...60,166,170-171 
+ operations.ts     |     100 |      100 |     100 |     100 |                   
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 99.92% ( 1349/1350 )
+Branches     : 87.6% ( 622/710 )
+Functions    : 100% ( 55/55 )
+Lines        : 99.92% ( 1349/1350 )
+================================================================================

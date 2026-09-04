@@ -1,0 +1,12 @@
+# TAREA 2 — la guarda de producción del adaptador local (ADR-3-0a-02).
+# Comando (con templates2.assets.mode=local):
+#   ./gradlew bootRun --args="--spring.profiles.active=prod --server.port=0 --templates2.scheduling.enabled=false"
+
+Caused by: mx.evolutiondev.invitaciones.modules.templates2.persistence.ModoLocalEnProduccion:
+  'templates2.assets.mode=local' está PROHIBIDO con el perfil prod activo: los assets se
+  guardarían en el disco de la instancia y se perderían en el siguiente despliegue, dejando
+  imágenes rotas en invitaciones ya publicadas. Quita la propiedad (el valor por defecto es
+  's3') o cambia de perfil.
+
+# La aplicación NO arranca: el bean falla al construirse. Perfiles rechazados:
+#   prod, production, prd, produccion, producción  (LocalAssetStorage.PERFILES_DE_PRODUCCION)

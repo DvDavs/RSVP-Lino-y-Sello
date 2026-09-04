@@ -106,6 +106,22 @@ templates2:
     bucket: ${TEMPLATES2_ASSETS_BUCKET:}
     # Escribir en el bucket de produccion exige declararlo explicitamente.
     allow-production-bucket: ${TEMPLATES2_ALLOW_PRODUCTION_BUCKET:false}
+    # --- TERCERA modificacion de este fichero que pide el modulo nuevo (bloque 3-0a, ADR-3-0a-02) ---
+    # Adaptador de assets. 's3' es el comportamiento de siempre y el valor por defecto: sin tocar
+    # nada, este bloque NO cambia como se comporta la aplicacion. Con 'local' (solo DESARROLLO) los
+    # bytes se escriben en disco y se sirven desde el propio backend, porque en el entorno de la
+    # fase 3 no hay ningun bucket de S3 utilizable y sin esto las rutas que suben bytes no se pueden
+    # ejercitar contra un Tomcat real. Con un perfil de produccion activo, 'local' NO ARRANCA.
+    mode: ${TEMPLATES2_ASSETS_MODE:s3}
+    local:
+      # Directorio raiz del modo local; reproduce la clave de S3 tal cual.
+      dir: ${TEMPLATES2_ASSETS_LOCAL_DIR:build/templates2-assets}
+      # Base publica desde la que el propio backend sirve esos bytes (ruta de solo lectura).
+      base-url: ${TEMPLATES2_ASSETS_LOCAL_BASE_URL:http://localhost:6003/public/templates2-assets}
+    # Base publica con la que `AssetUrlResolver` construye la URL de un asset (`02 §10.4`).
+    # VACIA = el comportamiento de siempre: https://{bucket}.s3.{aws.region}.amazonaws.com.
+    # En modo local hay que apuntarla a `local.base-url` (lo hace scripts/dev-backend.sh).
+    public-base-url: ${TEMPLATES2_ASSETS_PUBLIC_BASE_URL:}
   revalidate:
     url: ${TEMPLATES2_REVALIDATE_URL:}
     token: ${TEMPLATES2_REVALIDATE_TOKEN:}
