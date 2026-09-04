@@ -1,0 +1,41 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setSectionVisible",
+      "sectionKey": "cover",
+      "visible": false
+    },
+    "expectZodValid": true,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "forma inválida: visible no booleano",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "setSectionVisible",
+      "sectionKey": "cover",
+      "visible": "no"
+    },
+    "expectZodValid": false,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "sectionKey inexistente",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setSectionVisible",
+      "sectionKey": "noExiste",
+      "visible": true
+    },
+    "expectZodValid": true,
+    "expectManifestError": "TPL_SECTION_UNKNOWN",
+    "reducerResult": null,
+    "reducerResultPending": true
+  }
+]

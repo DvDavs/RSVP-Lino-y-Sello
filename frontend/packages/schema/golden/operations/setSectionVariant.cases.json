@@ -1,0 +1,40 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setSectionVariant",
+      "sectionKey": "cover",
+      "variant": "alt"
+    },
+    "expectZodValid": true,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "forma inválida: falta variant",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "setSectionVariant",
+      "sectionKey": "cover"
+    },
+    "expectZodValid": false,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "variant no declarada",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setSectionVariant",
+      "sectionKey": "cover",
+      "variant": "no-existe"
+    },
+    "expectZodValid": true,
+    "expectManifestError": "TPL_VARIANT_UNKNOWN",
+    "reducerResult": null,
+    "reducerResultPending": true
+  }
+]

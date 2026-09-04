@@ -1,0 +1,84 @@
+[
+  {
+    "name": "content con la clave __proto__",
+    "fn": "assertNoReservedKeys",
+    "raw": {
+      "content": {
+        "__proto__": {
+          "kind": "text",
+          "value": "x"
+        }
+      }
+    },
+    "expect": [
+      "I-29_RESERVED_OBJECT_KEY"
+    ]
+  },
+  {
+    "name": "claves normales",
+    "fn": "assertNoReservedKeys",
+    "raw": {
+      "content": {
+        "cover.title": {
+          "kind": "text",
+          "value": "x"
+        }
+      }
+    },
+    "expect": []
+  },
+  {
+    "name": "\"constructor\" y \"prototype\" también violan",
+    "fn": "assertNoReservedKeys",
+    "raw": {
+      "content": {
+        "constructor": {
+          "kind": "text",
+          "value": "x"
+        },
+        "prototype": {
+          "kind": "text",
+          "value": "y"
+        }
+      }
+    },
+    "expect": [
+      "I-29_RESERVED_OBJECT_KEY",
+      "I-29_RESERVED_OBJECT_KEY"
+    ]
+  },
+  {
+    "name": "__proto__ dentro de attic y de GroupItem.values",
+    "fn": "assertNoReservedKeys",
+    "raw": {
+      "attic": {
+        "boda@1.0.0": {
+          "__proto__": {
+            "kind": "text",
+            "value": "x"
+          }
+        }
+      },
+      "content": {
+        "group": {
+          "kind": "group",
+          "items": [
+            {
+              "itemId": "01J8AAAAAAAAAAAAAAAAAAAAAA",
+              "values": {
+                "__proto__": {
+                  "kind": "text",
+                  "value": "x"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "expect": [
+      "I-29_RESERVED_OBJECT_KEY",
+      "I-29_RESERVED_OBJECT_KEY"
+    ]
+  }
+]

@@ -1,0 +1,177 @@
+[
+  {
+    "name": "values con clave que no es itemBlock del grupo",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.cards",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "event.cards"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 12,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "event.cards item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8A1AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "noExiste": {
+              "kind": "text",
+              "value": "x"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.event.cards",
+    "expect": [
+      "I-18_ITEM_BLOCK_UNKNOWN"
+    ]
+  },
+  {
+    "name": "clave válida",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.cards",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "event.cards"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 12,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "event.cards item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8A1AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "x"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.event.cards",
+    "expect": []
+  },
+  {
+    "name": "clave que es blockId de nivel superior pero no del grupo (viola)",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.cards",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "event.cards"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 12,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "event.cards item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8A1AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "cover.title": {
+              "kind": "text",
+              "value": "x"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.event.cards",
+    "expect": [
+      "I-18_ITEM_BLOCK_UNKNOWN"
+    ]
+  }
+]

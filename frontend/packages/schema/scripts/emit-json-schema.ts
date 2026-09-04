@@ -12,11 +12,11 @@
 // repetido en 5 de ellos; el mismo contenido emitido desde un `z.registry()` = 80.7 KB con 42 `$ref`.
 import { z } from "zod";
 import { writeFileSync, mkdirSync } from "node:fs";
-import { TemplateManifest, ThemeSpec, DefaultsFile, MigrationPlan } from "./manifest.ts";
-import { InvitationDocument } from "./document.ts";
-import { OperationBatch, EditProposal } from "./operations.ts";
-import { ComposedDocument, BusinessSnapshot, CompositionReport } from "./composed.ts";
-import { BlockValue, BlockSpec, ScalarValue, ScalarSpec, BlockRole } from "./blocks.ts";
+import { TemplateManifest, ThemeSpec, DefaultsFile, MigrationPlan } from "../src/manifest.ts";
+import { InvitationDocument } from "../src/document.ts";
+import { OperationBatch, EditProposal } from "../src/operations.ts";
+import { ComposedDocument, BusinessSnapshot, CompositionReport } from "../src/composed.ts";
+import { BlockValue, BlockSpec, ScalarValue, ScalarSpec, BlockRole } from "../src/blocks.ts";
 
 const BASE = "https://invitaciones.evolutiondev.mx/schema/templates2.schema.json";
 

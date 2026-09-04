@@ -1,0 +1,38 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setTheme",
+      "paletteId": "olive"
+    },
+    "expectZodValid": true,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "forma inválida: paletteId no es Ident",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "setTheme",
+      "paletteId": "OLIVE!"
+    },
+    "expectZodValid": false,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "paletteId inexistente",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setTheme",
+      "paletteId": "no-existe"
+    },
+    "expectZodValid": true,
+    "expectManifestError": "TPL_THEME_ID_UNKNOWN",
+    "reducerResult": null,
+    "reducerResultPending": true
+  }
+]

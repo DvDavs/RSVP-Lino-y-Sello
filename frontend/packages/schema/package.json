@@ -1,0 +1,29 @@
+{
+  "name": "@invitaciones/schema",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fuente única del esquema de plantillas e invitaciones (Zod 4) + emisor de JSON Schema para Kotlin.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "schema:emit": "tsx scripts/emit-json-schema.ts json-schema",
+    "gen:golden": "tsx scripts/gen-golden.ts",
+    "test": "vitest run --coverage",
+    "typecheck": "tsc --noEmit --strict",
+    "lint": "echo 'lint: pendiente (fase 3, ADR-005 06 §7)' "
+  },
+  "dependencies": {
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "tsx": "4.23.13",
+    "vitest": "3.2.4",
+    "@vitest/coverage-v8": "3.2.4",
+    "@types/node": "22.20.1",
+    "ajv": "8.20.0"
+  }
+}

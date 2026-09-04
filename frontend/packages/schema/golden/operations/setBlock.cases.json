@@ -1,0 +1,46 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.title",
+      "value": {
+        "kind": "text",
+        "value": "Ana & Luis"
+      }
+    },
+    "expectZodValid": true,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "forma inválida: falta value",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.title"
+    },
+    "expectZodValid": false,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "blockId inexistente en el manifiesto",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "no.existe",
+      "value": {
+        "kind": "text",
+        "value": "x"
+      }
+    },
+    "expectZodValid": true,
+    "expectManifestError": "TPL_BLOCK_UNKNOWN",
+    "reducerResult": null,
+    "reducerResultPending": true
+  }
+]

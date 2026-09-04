@@ -1,0 +1,170 @@
+[
+  {
+    "name": "grupo con items.length > max",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.cards",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "event.cards"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 2,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "event.cards item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8G0AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G1AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G2AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.event.cards",
+    "expect": [
+      "I-04_GROUP_SIZE_OUT_OF_BOUNDS"
+    ]
+  },
+  {
+    "name": "grupo dentro de rango",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.cards",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "event.cards"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 2,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "event.cards item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8G0AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.event.cards",
+    "expect": []
+  },
+  {
+    "name": "listText con items.length > maxItems (mismo código)",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "gallery.tags",
+      "role": "decorative",
+      "label": {
+        "es-MX": "gallery.tags"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 3,
+        "maxItemLength": 50
+      }
+    },
+    "input": {
+      "kind": "listText",
+      "items": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ]
+    },
+    "path": "content.gallery.tags",
+    "expect": [
+      "I-04_GROUP_SIZE_OUT_OF_BOUNDS"
+    ]
+  }
+]

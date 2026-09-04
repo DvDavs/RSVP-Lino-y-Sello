@@ -1,0 +1,163 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.person",
+      "role": "personName",
+      "label": {
+        "es-MX": "test.person"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "person"
+    },
+    "value": {
+      "kind": "person",
+      "name": "Ana"
+    },
+    "path": "content.test.person",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: note al límite (200 chars)",
+    "tag": "PM",
+    "spec": {
+      "id": "test.person",
+      "role": "personName",
+      "label": {
+        "es-MX": "test.person"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "person"
+    },
+    "value": {
+      "kind": "person",
+      "name": "Ana",
+      "note": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "path": "content.test.person",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra PersonSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.person",
+      "role": "personName",
+      "label": {
+        "es-MX": "test.person"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "person"
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.person",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta name",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.person",
+      "role": "personName",
+      "label": {
+        "es-MX": "test.person"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "person"
+    },
+    "value": {
+      "kind": "person"
+    },
+    "path": "content.test.person",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: name:\"\" (min 1)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.person",
+      "role": "personName",
+      "label": {
+        "es-MX": "test.person"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "person"
+    },
+    "value": {
+      "kind": "person",
+      "name": ""
+    },
+    "path": "content.test.person",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.person",
+      "role": "personName",
+      "label": {
+        "es-MX": "test.person"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "person"
+    },
+    "value": null,
+    "path": "content.test.person",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: note de 201 chars",
+    "tag": "extra",
+    "spec": {
+      "id": "test.person",
+      "role": "personName",
+      "label": {
+        "es-MX": "test.person"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "person"
+    },
+    "value": {
+      "kind": "person",
+      "name": "Ana",
+      "note": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "path": "content.test.person",
+    "expectZodValid": false,
+    "expectViolations": []
+  }
+]

@@ -1,0 +1,400 @@
+[
+  {
+    "name": "dos ítems con el mismo ULID",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.cards",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "event.cards"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "event.cards item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8DAPAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "A"
+            }
+          }
+        },
+        {
+          "itemId": "01J8DAPAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "B"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.event.cards",
+    "expect": [
+      "I-03_ITEM_ID_DUPLICATE"
+    ]
+  },
+  {
+    "name": "ítems distintos",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.cards",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "event.cards"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "event.cards item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8AAAAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "A"
+            }
+          }
+        },
+        {
+          "itemId": "01J8BAAAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "B"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.event.cards",
+    "expect": []
+  },
+  {
+    "name": "24 ítems (máximo) todos distintos",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.cards",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "event.cards"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "event.cards item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8A0AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T0"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A1AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T1"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A2AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T2"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A3AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T3"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A4AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T4"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A5AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T5"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A6AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T6"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A7AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T7"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A8AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T8"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A9AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T9"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A10AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T10"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A11AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T11"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A12AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T12"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A13AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T13"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A14AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T14"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A15AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T15"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A16AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T16"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A17AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T17"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A18AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T18"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A19AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T19"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A20AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T20"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A21AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T21"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A22AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T22"
+            }
+          }
+        },
+        {
+          "itemId": "01J8A23AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T23"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.event.cards",
+    "expect": []
+  }
+]

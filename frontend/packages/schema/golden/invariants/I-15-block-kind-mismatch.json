@@ -1,0 +1,86 @@
+[
+  {
+    "name": "TextValue sobre ImageSpec",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "cover.image",
+      "role": "coverImage",
+      "label": {
+        "es-MX": "cover.image"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "image",
+      "constraints": {
+        "aspect": "free",
+        "maxBytes": 8388608
+      }
+    },
+    "input": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.cover.image",
+    "expect": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "tipos coincidentes",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "cover.title",
+      "role": "coverTitle",
+      "label": {
+        "es-MX": "cover.title"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "input": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.cover.title",
+    "expect": []
+  },
+  {
+    "name": "BooleanValue sobre TextSpec (matriz §5.2, un representante)",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "cover.title",
+      "role": "coverTitle",
+      "label": {
+        "es-MX": "cover.title"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "input": {
+      "kind": "boolean",
+      "value": true
+    },
+    "path": "content.cover.title",
+    "expect": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  }
+]

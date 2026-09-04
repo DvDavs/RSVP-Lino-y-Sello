@@ -1,0 +1,44 @@
+[
+  {
+    "name": "forma válida: permutación exacta",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "reorderSections",
+      "order": [
+        "event",
+        "cover"
+      ]
+    },
+    "expectZodValid": true,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "forma inválida: array vacío (min 1)",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "reorderSections",
+      "order": []
+    },
+    "expectZodValid": false,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "no es una permutación (I-24)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "reorderSections",
+      "order": [
+        "cover",
+        "cover"
+      ]
+    },
+    "expectZodValid": true,
+    "expectManifestError": "I-24_REORDER_NOT_A_PERMUTATION",
+    "reducerResult": null,
+    "reducerResultPending": true
+  }
+]

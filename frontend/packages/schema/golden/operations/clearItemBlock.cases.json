@@ -1,0 +1,48 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "clearItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+      "blockId": "title"
+    },
+    "expectZodValid": true,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "forma inválida: campo extra",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "clearItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+      "blockId": "title",
+      "value": {
+        "kind": "text",
+        "value": "x"
+      }
+    },
+    "expectZodValid": false,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "itemId inexistente",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "clearItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8NAEXASTAAAAAAAAAAAAAAA",
+      "blockId": "title"
+    },
+    "expectZodValid": true,
+    "expectManifestError": "TPL_ITEM_UNKNOWN",
+    "reducerResult": null,
+    "reducerResultPending": true
+  }
+]

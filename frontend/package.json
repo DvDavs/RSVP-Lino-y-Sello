@@ -1,0 +1,21 @@
+{
+  "name": "invitaciones-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Monorepo del frontend nuevo del módulo de plantillas e invitaciones (fase 2: solo packages/schema).",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "-- fase 2: solo packages/schema existe; apps/web, packages/sections y packages/migration-legacy son de fase 3": "",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}

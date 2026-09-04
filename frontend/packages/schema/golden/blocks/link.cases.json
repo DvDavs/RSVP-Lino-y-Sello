@@ -1,0 +1,163 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.link",
+      "role": "coverButtonLink",
+      "label": {
+        "es-MX": "test.link"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "link"
+    },
+    "value": {
+      "kind": "link",
+      "href": "https://a.mx"
+    },
+    "path": "content.test.link",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: label de 80 chars (máximo)",
+    "tag": "PM",
+    "spec": {
+      "id": "test.link",
+      "role": "coverButtonLink",
+      "label": {
+        "es-MX": "test.link"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "link"
+    },
+    "value": {
+      "kind": "link",
+      "href": "https://a.mx",
+      "label": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "path": "content.test.link",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra LinkSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.link",
+      "role": "coverButtonLink",
+      "label": {
+        "es-MX": "test.link"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "link"
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.link",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta href",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.link",
+      "role": "coverButtonLink",
+      "label": {
+        "es-MX": "test.link"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "link"
+    },
+    "value": {
+      "kind": "link"
+    },
+    "path": "content.test.link",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: label de 81 chars",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.link",
+      "role": "coverButtonLink",
+      "label": {
+        "es-MX": "test.link"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "link"
+    },
+    "value": {
+      "kind": "link",
+      "href": "https://a.mx",
+      "label": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "path": "content.test.link",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.link",
+      "role": "coverButtonLink",
+      "label": {
+        "es-MX": "test.link"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "link"
+    },
+    "value": null,
+    "path": "content.test.link",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: href javascript: rechazado por HttpUrl",
+    "tag": "extra",
+    "spec": {
+      "id": "test.link",
+      "role": "coverButtonLink",
+      "label": {
+        "es-MX": "test.link"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "link"
+    },
+    "value": {
+      "kind": "link",
+      "href": "javascript:alert(1)"
+    },
+    "path": "content.test.link",
+    "expectZodValid": false,
+    "expectViolations": []
+  }
+]

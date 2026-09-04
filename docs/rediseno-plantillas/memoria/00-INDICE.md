@@ -26,7 +26,8 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
 
 ## Estado actual
 - **Fase 1 — Diseño: CERRADA el 2026-09-03.** Los 7 documentos de diseño existían desde una sesión anterior, pero los había escrito un solo agente Sonnet en secuencia, sin revisión independiente. La **ronda 1R** los revisó adversarialmente y los profundizó hasta grado de implementación: cuatro revisores Opus en paralelo sobre bloques disjuntos, un dirimidor Opus para las 16 contradicciones entre bloques, y una verificación mecánica. 44 objeciones altas encontradas y corregidas, 0 abiertas. 88 ADR aceptadas (34 originales, 15 de ellas con enmienda, más 54 de la ronda). El esquema Zod se verificó **ejecutándolo**, no leyéndolo.
-- **Fase actual: 2 — Backend del módulo nuevo (pendiente de arrancar).**
+- **Fase actual: 2 — Backend del módulo nuevo (en curso desde 2026-09-04).**
+- **Rama de la fase 2: `claude/fase-2-backend-orchestration-ksyuzi`**, creada desde `claude/agent-network-invitation-41nx5y` en `88238b2` (fase 1 cerrada en `4681b2c` + el prompt de la fase 2). El entorno de esta sesión obliga a trabajar sobre una rama propia por fase; `contratos.md §1` y `brief-comun.md` siguen nombrando la rama de la fase 1, que es la base, no la de trabajo actual.
 - Fases: 0 Preparación (cerrada) · 1 Diseño (cerrada) · **2 Backend (siguiente)** · 3 Frontend · 4 Plantillas y kit · 5 Migración · 6 Calidad y entrega.
 - Nota de entorno: en este entorno los sub-agentes **no** pueden lanzar sub-agentes. El orquestador de cada fase lanza todos los agentes directamente (red de un solo nivel).
 

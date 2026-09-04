@@ -1,0 +1,168 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.date",
+      "role": "eventDate",
+      "label": {
+        "es-MX": "test.date"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "date",
+      "formatId": "long"
+    },
+    "value": {
+      "kind": "date",
+      "value": "2026-12-31"
+    },
+    "path": "content.test.date",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: DateValue no tiene más campos",
+    "tag": "PM",
+    "spec": {
+      "id": "test.date",
+      "role": "eventDate",
+      "label": {
+        "es-MX": "test.date"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "date",
+      "formatId": "long"
+    },
+    "value": {
+      "kind": "date",
+      "value": "2026-01-01"
+    },
+    "path": "content.test.date",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra DateSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.date",
+      "role": "eventDate",
+      "label": {
+        "es-MX": "test.date"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "date",
+      "formatId": "long"
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.date",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta value",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.date",
+      "role": "eventDate",
+      "label": {
+        "es-MX": "test.date"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "date",
+      "formatId": "long"
+    },
+    "value": {
+      "kind": "date"
+    },
+    "path": "content.test.date",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: mes 13 no existe",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.date",
+      "role": "eventDate",
+      "label": {
+        "es-MX": "test.date"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "date",
+      "formatId": "long"
+    },
+    "value": {
+      "kind": "date",
+      "value": "2026-13-01"
+    },
+    "path": "content.test.date",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.date",
+      "role": "eventDate",
+      "label": {
+        "es-MX": "test.date"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "date",
+      "formatId": "long"
+    },
+    "value": null,
+    "path": "content.test.date",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra (hueco conocido, ver preguntas-abiertas.md): \"2026-02-30\" PASA el regex — IsoDate no valida días por mes",
+    "tag": "extra",
+    "spec": {
+      "id": "test.date",
+      "role": "eventDate",
+      "label": {
+        "es-MX": "test.date"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "date",
+      "formatId": "long"
+    },
+    "value": {
+      "kind": "date",
+      "value": "2026-02-30"
+    },
+    "path": "content.test.date",
+    "expectZodValid": true,
+    "expectViolations": []
+  }
+]

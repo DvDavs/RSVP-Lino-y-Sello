@@ -1,0 +1,41 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "removeItem",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA"
+    },
+    "expectZodValid": true,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "forma inválida: itemId no es ULID ni tempId",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "removeItem",
+      "groupId": "event.cards",
+      "itemId": "bad"
+    },
+    "expectZodValid": false,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "itemId inexistente",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "removeItem",
+      "groupId": "event.cards",
+      "itemId": "01J8NAEXASTAAAAAAAAAAAAAAA"
+    },
+    "expectZodValid": true,
+    "expectManifestError": "TPL_ITEM_UNKNOWN",
+    "reducerResult": null,
+    "reducerResultPending": true
+  }
+]

@@ -1,0 +1,246 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.image",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.image"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "image",
+      "constraints": {
+        "aspect": "free",
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "image",
+      "assetId": "as_01J8AMG1AAAAAAAAAAAAAAAAAA",
+      "alt": "",
+      "focal": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "path": "content.test.image",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: alt de 200 chars, focal en el límite",
+    "tag": "PM",
+    "spec": {
+      "id": "test.image",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.image"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "image",
+      "constraints": {
+        "aspect": "free",
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "image",
+      "assetId": "as_01J8AMG1AAAAAAAAAAAAAAAAAA",
+      "alt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "focal": {
+        "x": 1,
+        "y": 1
+      }
+    },
+    "path": "content.test.image",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra ImageSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.image",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.image"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "image",
+      "constraints": {
+        "aspect": "free",
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.image",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta assetId",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.image",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.image"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "image",
+      "constraints": {
+        "aspect": "free",
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "image",
+      "alt": "",
+      "focal": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "path": "content.test.image",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: focal.x = 1.1 excede Focal.max(1)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.image",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.image"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "image",
+      "constraints": {
+        "aspect": "free",
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "image",
+      "assetId": "as_01J8AMG1AAAAAAAAAAAAAAAAAA",
+      "alt": "",
+      "focal": {
+        "x": 1.1,
+        "y": 0
+      }
+    },
+    "path": "content.test.image",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.image",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.image"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "image",
+      "constraints": {
+        "aspect": "free",
+        "maxBytes": 8388608
+      }
+    },
+    "value": null,
+    "path": "content.test.image",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: assetId sin prefijo as_",
+    "tag": "extra",
+    "spec": {
+      "id": "test.image",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.image"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "image",
+      "constraints": {
+        "aspect": "free",
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "image",
+      "assetId": "01J8AMG1AAAAAAAAAAAAAAAAAA",
+      "alt": "",
+      "focal": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    "path": "content.test.image",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: alt:\"\" es válido (imagen decorativa, a11y debe tolerarlo)",
+    "tag": "extra",
+    "spec": {
+      "id": "test.image",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.image"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "image",
+      "constraints": {
+        "aspect": "free",
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "image",
+      "assetId": "as_01J8AMG1AAAAAAAAAAAAAAAAAA",
+      "alt": "",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "path": "content.test.image",
+    "expectZodValid": true,
+    "expectViolations": []
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "clearBlock",
+      "blockId": "cover.title"
+    },
+    "expectZodValid": true,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "forma inválida: campo extra",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "clearBlock",
+      "blockId": "cover.title",
+      "value": {
+        "kind": "text",
+        "value": "x"
+      }
+    },
+    "expectZodValid": false,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "blockId inexistente",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "clearBlock",
+      "blockId": "no.existe"
+    },
+    "expectZodValid": true,
+    "expectManifestError": "TPL_BLOCK_UNKNOWN",
+    "reducerResult": null,
+    "reducerResultPending": true
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+      "blockId": "title",
+      "value": {
+        "kind": "text",
+        "value": "x"
+      }
+    },
+    "expectZodValid": true,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "forma inválida: falta value",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "setItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+      "blockId": "title"
+    },
+    "expectZodValid": false,
+    "expectManifestError": null,
+    "reducerResult": null,
+    "reducerResultPending": true
+  },
+  {
+    "name": "blockId no es itemBlock del grupo",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+      "blockId": "no.existe",
+      "value": {
+        "kind": "text",
+        "value": "x"
+      }
+    },
+    "expectZodValid": true,
+    "expectManifestError": "TPL_BLOCK_UNKNOWN",
+    "reducerResult": null,
+    "reducerResultPending": true
+  }
+]
