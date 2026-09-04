@@ -1,5 +1,6 @@
 package mx.evolutiondev.invitaciones.modules.templates2.api
 
+import mx.evolutiondev.invitaciones.modules.templates2.catalog.ImageDimensions
 import mx.evolutiondev.invitaciones.modules.templates2.domain.AssetContentType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -64,6 +65,19 @@ class ImageDimensionsTest {
             "un contenedor WebP desconocido no se adivina",
         )
         assertNull(ImageDimensions.de(AssetContentType.IMAGE_PNG, png(0, 0)), "0x0 no es una imagen")
+        // ADV-09: sin la guarda de firma + IHDR, cualquier archivo de >= 24 B declarado PNG devolvía
+        // los bytes de las posiciones 16 y 20 como si fueran dimensiones. Inventar es peor que null.
+        assertNull(
+            ImageDimensions.de(AssetContentType.IMAGE_PNG, ByteArray(64) { (it * 31 and 0x7F).toByte() }),
+            "sin la firma PNG no hay dimensiones que leer",
+        )
+        assertNull(
+            ImageDimensions.de(
+                AssetContentType.IMAGE_PNG,
+                byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A) + ByteArray(40),
+            ),
+            "con la firma pero sin IHDR en el primer chunk, tampoco",
+        )
         assertNull(
             ImageDimensions.de(AssetContentType.IMAGE_JPEG, byteArrayOf(0xFF.toByte(), 0xD8.toByte()) + ByteArray(20)),
             "sin ningún SOF no hay dimensiones",

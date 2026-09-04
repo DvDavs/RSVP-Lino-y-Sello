@@ -52,6 +52,14 @@ class TemplateRegistrar(
 ) {
 
     /** Un asset del paquete **ya subido a S3** (`02 §10.2`), pendiente de su fila en `tpl_asset`. */
+    /**
+     * `width`/`height` los lee `catalog.ImageDimensions` de la cabecera del archivo (objeción ADV-09,
+     * bloque 2-6). Son `null` para lo que no es imagen o cuya cabecera no se entiende, y **no son
+     * adorno**: el reductor hace cumplir `image.aspect` con `tpl_asset.width`/`height` y, si faltan,
+     * no comprueba nada (`OperationReducer.comprobarAsset`). Con ellos a `NULL` —como estaban hasta
+     * 2-6, ADR-2-3-07— un `setBlock` con el `assetId` de un asset **de plantilla** pasaba `aspect`
+     * siempre, y `contratos.md §3` prohíbe una restricción del esquema sin validador.
+     */
     data class AssetSubido(
         val publicId: String,
         val sha256: String,
@@ -59,6 +67,8 @@ class TemplateRegistrar(
         val bytes: Long,
         val bucket: String,
         val s3Key: String,
+        val width: Int? = null,
+        val height: Int? = null,
     )
 
     @Transactional
@@ -141,6 +151,8 @@ class TemplateRegistrar(
                     sha256 = a.sha256,
                     contentType = a.contentType,
                     bytes = a.bytes,
+                    width = a.width,
+                    height = a.height,
                     createdBy = requesterId,
                 ),
             )

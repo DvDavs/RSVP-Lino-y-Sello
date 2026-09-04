@@ -26,11 +26,11 @@ import java.util.zip.ZipOutputStream
 object PaqueteFixture {
 
     /** Paquete registrable a partir de un ejemplo de `diseno/ejemplos/`. */
-    fun ejemplo(plantilla: String): RawTemplatePackage {
+    fun ejemplo(plantilla: String, bytesPorRuta: Map<String, ByteArray> = emptyMap()): RawTemplatePackage {
         val manifest = Golden.Ejemplos.leer(plantilla, "template").deepCopy<ObjectNode>()
         val theme = Golden.Ejemplos.leer(plantilla, "theme")
         val defaults = Golden.Ejemplos.leer(plantilla, "defaults")
-        return conAssetsReales(manifest, theme, defaults, emptyMap())
+        return conAssetsReales(manifest, theme, defaults, emptyMap(), bytesPorRuta)
     }
 
     /**
@@ -42,6 +42,14 @@ object PaqueteFixture {
         theme: JsonNode,
         defaults: JsonNode,
         migraciones: Map<String, JsonNode>,
+        /**
+         * Bytes **de verdad** para rutas concretas del paquete, en vez de los deterministas de
+         * [archivo]. Lo usa la prueba de `image.aspect` de assets de plantilla (objeción ADV-09):
+         * necesita una cabecera de imagen legible, y la de [archivo] es solo el número mágico. El
+         * `bytes` declarado en el manifiesto se corrige al tamaño real, para que siga cuadrando con
+         * la comprobación de `02 §4` paso 2.
+         */
+        bytesPorRuta: Map<String, ByteArray> = emptyMap(),
     ): RawTemplatePackage {
         val files = LinkedHashMap<String, ByteArray>()
         val assets = manifest.get("assets") as? ArrayNode
@@ -50,7 +58,8 @@ object PaqueteFixture {
             val path = obj.get("path").asText()
             val bytes = obj.get("bytes").asInt()
             val contentType = obj.get("contentType").asText()
-            val datos = archivo(path, bytes, contentType)
+            val datos = bytesPorRuta[path] ?: archivo(path, bytes, contentType)
+            obj.put("bytes", datos.size)
             obj.put("sha256", hex(sha256(datos)))
             files[path] = datos
         }

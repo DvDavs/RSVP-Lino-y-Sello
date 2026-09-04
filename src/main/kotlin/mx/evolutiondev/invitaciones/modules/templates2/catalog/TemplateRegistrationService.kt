@@ -95,6 +95,10 @@ class TemplateRegistrationService(
             if (porSha.containsKey(a.sha256)) continue
             val key = keys.templateAssetKey(pkg.slug, pkg.version, a.sha256, a.contentType)
             storage.upload(bucket, key, a.bytes, a.contentType.wire)
+            // Objeción ADV-09: alto y ancho leídos de la cabecera, igual que en la subida de assets de
+            // invitación (`02 §10.1` paso 10). Sin ellos, `image.aspect` se quedaba sin validador para
+            // todo documento que referenciara un asset de plantilla (`contratos.md §3`).
+            val dimensiones = ImageDimensions.de(a.contentType, a.bytes)
             porSha[a.sha256] = TemplateRegistrar.AssetSubido(
                 publicId = "as_" + ulid.next(),
                 sha256 = a.sha256,
@@ -102,6 +106,8 @@ class TemplateRegistrationService(
                 bytes = a.size.toLong(),
                 bucket = bucket,
                 s3Key = key,
+                width = dimensiones?.first,
+                height = dimensiones?.second,
             )
         }
         return porSha.values.toList()
