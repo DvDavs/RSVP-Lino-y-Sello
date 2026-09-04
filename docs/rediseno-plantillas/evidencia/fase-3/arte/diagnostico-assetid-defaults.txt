@@ -1,0 +1,29 @@
+invitación de diagnóstico id=4 (recién creada, SIN tocar nada más)
+
+== 1. POST …/document:choose-template boda-clasica@1.0.0
+   HTTP 201
+{"revision":0,"publicToken":"pub_C96PTKNJ45CV6XF00RGFTZYC75","created":true}
+
+== 2. defaults.json del paquete declara un assetId para cover.image
+{"kind":"image","assetId":"as_01J8DEM000000000000000C0V1","alt":"Pareja en el campo","focal":{"x":0.5,"y":0.35}}
+
+== 3. AssetEntry del manifiesto NO tiene campo de id (packages/schema/src/manifest.ts:45-50)
+[{"path":"assets/divider.webp","sha256":"3960f97e40e54783bb851ca34e4afc78c8d8ff540a486aa6451a96db87e1f1ec","contentType":"image/webp","bytes":31002},{"path":"assets/preview.webp","sha256":"5edcd64d402752bb66f89236a9f4683376ca457d6fed50d4d5114ac189b28ce5","contentType":"image/webp","bytes":70120},{"path":"assets/rsvp-bg.webp","sha256":"2f62262e765cef18fe523a57a4a46b2633e029c668d981d8fbf5644eefd9777e","contentType":"image/webp","bytes":43340}]
+
+== 4. los publicId REALES de esa versión, acuñados por TemplateRegistrationService.kt:104
+   as_01M1PR84JAFCBD7B3CKSRNQRTQ  image/webp
+   as_01M1PR84JBGVAEGDCZTQ279N86  image/webp
+   as_01M1PR84JBGVAEGDCZTQ279N87  image/webp
+
+== 5. GET …/document → sección cover del composed
+[{"id":"cover.title","provenance":"default","kind":"text"},{"id":"cover.subtitle","provenance":"default","kind":"text"},{"id":"cover.date","provenance":"business","kind":"date"},{"id":"cover.image","provenance":"empty","kind":null},{"id":"cover.buttonLabel","provenance":"fixed","kind":"text"}]
+
+== 6. CompositionReport
+{"missingRequired":["cover.image"],"stillDefault":["couple.bride","couple.groom","cover.title"],"orphanContent":[],"orphanSections":[],"invalidValues":[],"themeFallback":null}
+
+== 7. GET …/release/preflight
+{"canPublish":false,"blockers":[{"code":"TPL_PUBLISH_BLOCKED_MISSING_REQUIRED","blockIds":["cover.image"]},{"code":"TPL_PUBLISH_BLOCKED_DEFAULT_CONTENT","blockIds":["couple.bride","couple.groom","cover.title"]}]}
+
+== 8. rsvp.background es source=fixed ⇒ NI SIQUIERA el cliente puede darle valor
+   HTTP 422
+{"code":"TPL_BLOCK_NOT_EDITABLE","message":"la operación 0 del lote no es aplicable: TPL_BLOCK_NOT_EDITABLE","details":{"operations":[{"index":0,"code":"TPL_BLOCK_NOT_EDITABLE","path":"rsvp.background","source":"fixed"}]}}
