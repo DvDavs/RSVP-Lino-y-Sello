@@ -200,6 +200,12 @@ tasks.jacocoTestCoverageVerification {
 // TypeScript a un directorio temporal y falla si difieren de lo versionado en
 // frontend/packages/schema/json-schema. Impide que alguien edite un esquema a mano o cambie un
 // fichero de src sin regenerar. NUNCA pasa en silencio: si falta pnpm, falla con instrucciones.
+val execOps: org.gradle.process.ExecOperations = objects.newInstance(ExecHolder::class.java).execOperations
+
+abstract class ExecHolder {
+    @get:javax.inject.Inject abstract val execOperations: org.gradle.process.ExecOperations
+}
+
 val verifyJsonSchemaEmitted by tasks.registering {
     group = "verification"
     description = "Reemite el JSON Schema desde @invitaciones/schema y falla si hay deriva con lo versionado."
@@ -226,7 +232,7 @@ val verifyJsonSchemaEmitted by tasks.registering {
         checkDir.deleteRecursively()
         checkDir.mkdirs()
         val salida = ByteArrayOutputStream()
-        val exit = project.exec {
+        val exit = execOps.exec {
             workingDir = frontendDir
             commandLine(pnpm, "--filter", "@invitaciones/schema", "exec",
                 "tsx", "scripts/emit-json-schema.ts", checkDir.absolutePath)
