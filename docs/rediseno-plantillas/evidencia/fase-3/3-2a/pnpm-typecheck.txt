@@ -1,0 +1,5 @@
+
+> @invitaciones/sections@0.0.0 typecheck /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-ae1d78e9b42856826/frontend/packages/sections
+> tsc --noEmit
+
+exit=0

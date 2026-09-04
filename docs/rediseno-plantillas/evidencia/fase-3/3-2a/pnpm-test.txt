@@ -1,0 +1,53 @@
+
+> @invitaciones/sections@0.0.0 test /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-ae1d78e9b42856826/frontend/packages/sections
+> vitest run --coverage
+
+
+ RUN  v5.0.0 /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-ae1d78e9b42856826/frontend/packages/sections
+      Coverage enabled with v8
+
+
+ Test Files  18 passed (18)
+      Tests  186 passed (186)
+   Start at  17:26:19
+   Duration  9.79s (environment 57%, setup 17%, import 9%, transform 8%, tests 4%, worker 4%)
+
+Environment  jsdom was created 18 times · 14.07s total, 57% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   93.46 |     89.3 |    98.5 |   98.67 |                   
+ src               |   95.83 |    94.11 |     100 |   95.65 |                   
+  registry-data.ts |    90.9 |       50 |     100 |    90.9 | 113               
+ src/blocks        |   89.62 |    91.05 |     100 |     100 |                   
+  AudioBlock.tsx   |      60 |    66.66 |     100 |     100 | 10-11             
+  BooleanBlock.tsx |   66.66 |    83.33 |     100 |     100 | 14                
+  ChoiceBlock.tsx  |   66.66 |       75 |     100 |     100 | 9                 
+  ...angeBlock.tsx |   66.66 |       75 |     100 |     100 | 10                
+  GroupBlock.tsx   |   88.88 |    83.33 |     100 |     100 | 20                
+  ImageBlock.tsx   |   94.44 |    94.73 |     100 |     100 | 22                
+  ...tionBlock.tsx |      75 |    91.66 |     100 |     100 | 9                 
+  PersonBlock.tsx  |      75 |     87.5 |     100 |     100 | 8                 
+  ...TextBlock.tsx |   94.44 |    93.75 |     100 |     100 | 45                
+  TimeBlock.tsx    |   66.66 |       75 |     100 |     100 | 8                 
+ src/canvas        |   98.07 |    84.84 |   92.85 |   97.91 |                   
+  ...asContext.tsx |     100 |      100 |   83.33 |     100 |                   
+  ...onOverlay.tsx |   97.67 |    79.16 |     100 |   97.43 | 21                
+ src/placeholder   |      90 |     87.5 |     100 |   94.73 |                   
+  ...aceholder.tsx |      90 |     87.5 |     100 |   94.73 | 70                
+ src/theme         |   96.55 |    83.33 |     100 |     100 |                   
+  ...eProvider.tsx |   95.83 |    83.33 |     100 |     100 | 69                
+  fonts.ts         |    92.3 |       75 |     100 |     100 | 53,65             
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 93.46% ( 243/260 )
+Branches     : 89.3% ( 192/215 )
+Functions    : 98.5% ( 66/67 )
+Lines        : 98.67% ( 224/227 )
+================================================================================
+exit=0

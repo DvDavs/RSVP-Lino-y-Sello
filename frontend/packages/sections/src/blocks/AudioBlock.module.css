@@ -1,0 +1,5 @@
+.audio {
+  width: 100%;
+  max-width: var(--inv-measure);
+  border-radius: var(--inv-radius-sm);
+}

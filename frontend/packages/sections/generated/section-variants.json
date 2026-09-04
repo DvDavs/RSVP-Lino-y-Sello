@@ -1,0 +1,54 @@
+{
+  "amenities": [
+    "cards",
+    "list"
+  ],
+  "celebrant": [
+    "side-by-side",
+    "stacked",
+    "centered"
+  ],
+  "cover": [
+    "full",
+    "framed",
+    "split"
+  ],
+  "dressCode": [
+    "two-columns",
+    "cards"
+  ],
+  "event": [
+    "timeline",
+    "cards",
+    "single-place"
+  ],
+  "family": [
+    "cards",
+    "list"
+  ],
+  "footer": [
+    "simple"
+  ],
+  "gallery": [
+    "grid-6",
+    "grid-9",
+    "carousel",
+    "masonry"
+  ],
+  "giftTable": [
+    "cards",
+    "list"
+  ],
+  "rsvp": [
+    "banner",
+    "form-inline"
+  ],
+  "story": [
+    "line",
+    "alternating"
+  ],
+  "suggestions": [
+    "cards",
+    "list"
+  ]
+}

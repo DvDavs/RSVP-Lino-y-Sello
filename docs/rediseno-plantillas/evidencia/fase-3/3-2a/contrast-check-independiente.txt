@@ -1,0 +1,18 @@
+=== blush ===
+  ink/bg: 12.33 >= 4.5  OK
+  ink/surface: 13.08 >= 4.5  OK
+  accentInk/accent: 2.78 >= 4.5  FAIL
+  muted/bg: 3.12 >= 3.0  OK
+  accent/bg: 2.62 >= 3.0  FAIL
+=== olive ===
+  ink/bg: 10.93 >= 4.5  OK
+  ink/surface: 11.93 >= 4.5  OK
+  accentInk/accent: 4.61 >= 4.5  OK
+  muted/bg: 3.01 >= 3.0  OK
+  accent/bg: 4.22 >= 3.0  OK
+=== navy ===
+  ink/bg: 13.20 >= 4.5  OK
+  ink/surface: 14.29 >= 4.5  OK
+  accentInk/accent: 8.78 >= 4.5  OK
+  muted/bg: 3.31 >= 3.0  OK
+  accent/bg: 8.11 >= 3.0  OK

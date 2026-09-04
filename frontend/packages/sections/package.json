@@ -1,0 +1,41 @@
+{
+  "name": "@invitaciones/sections",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cimiento visual del render de invitaciones: tema/tokens --inv-*, los 14 componentes de bloque y el sectionRegistry. Sin tailwindcss (04 §19): las secciones no pueden usar utilidades del chrome ni por accidente.",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "emit:variants": "node --experimental-strip-types scripts/emit-section-variants.ts"
+  },
+  "dependencies": {
+    "@invitaciones/schema": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "vitest": "5.0.0",
+    "@vitest/coverage-v8": "5.0.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "vite": "8.2.2",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
+    "jsdom": "30.0.1",
+    "jest-axe": "11.0.0",
+    "typescript": "5.9.3",
+    "@types/node": "22.20.1"
+  }
+}

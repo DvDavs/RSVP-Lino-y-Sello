@@ -1,0 +1,16 @@
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--inv-space-5);
+}
+
+.item {
+  display: grid;
+  gap: var(--inv-space-2);
+}
+
+.itemBlock {
+  display: block;
+}
