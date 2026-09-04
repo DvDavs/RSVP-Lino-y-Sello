@@ -1,0 +1,9 @@
+corrida 1: LCP 2323 ms | FCP 1071 ms | CLS 0.000 | TBT 160 ms | SI 1764 ms | perf 0.96 | a11y 0.96
+corrida 2: LCP 2314 ms | FCP 1060 ms | CLS 0.000 | TBT 132 ms | SI 1716 ms | perf 0.97 | a11y 0.96
+corrida 3: LCP 2269 ms | FCP 1062 ms | CLS 0.000 | TBT 131 ms | SI 1721 ms | perf 0.97 | a11y 0.96
+corrida 4: LCP 1215 ms | FCP 1065 ms | CLS 0.000 | TBT 141 ms | SI 1784 ms | perf 0.99 | a11y 0.96
+corrida 5: LCP NO_LCP | FCP 1070 ms | CLS 0.000 | TBT - | SI 1070 ms | perf null | a11y 0.96
+
+LCP validos ordenados: 1215, 2269, 2314, 2323  ->  MEDIANA 2314 ms   (umbral 2500 ms, 04 §16.1)  CUMPLE
+CLS mediana 0.000  (umbral 0,1)  CUMPLE
+categories:accessibility 0.96 en las 5 corridas -> NO CUMPLE el minScore 1 de 04 §16.2 (color-contrast, ver bitacora 3-3 §5)
