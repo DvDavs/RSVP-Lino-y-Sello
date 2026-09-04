@@ -17,6 +17,7 @@ import mx.evolutiondev.invitaciones.modules.templates2.persistence.TemplateVersi
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.TplDocumentEntity
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.TplReleaseEntity
 import mx.evolutiondev.invitaciones.modules.templates2.schema.DomainJson
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -45,6 +46,15 @@ class ReleaseService(
     private val releases: ReleaseStore,
     private val availability: InvitationAvailabilityReader,
     private val versions: TemplateVersionLoader,
+    /**
+     * ADR-1R-F-09 / **ADR-2-6-01**: los tres sucesos que dejan obsoleto lo que el borde tiene cacheado
+     * —publicar, despublicar y rotar el enlace— se anuncian como [PublicRenderInvalidated]. El evento
+     * se publica **dentro** de la transacción y lo consume [RevalidationNotifier] **después** del
+     * commit (`@TransactionalEventListener(AFTER_COMMIT)`): si la transacción se revierte, no se
+     * invalida nada, porque no ha cambiado nada. Publicar el evento no puede fallar (es una llamada en
+     * memoria) y su consumidor no propaga nunca.
+     */
+    private val eventos: ApplicationEventPublisher,
 ) {
 
     // =============================================================================================
@@ -176,6 +186,11 @@ class ReleaseService(
         val hash = ContentHasher.contentHash(resultado)
         val activo = releases.active(invitationId)
         if (activo != null && activo.contentHash == hash) {
+            // Se anuncia también el reúso. El contenido no ha cambiado, así que el borde ya sirve lo
+            // correcto y la llamada es redundante; se hace igual porque la alternativa —decidir aquí
+            // que "no hace falta"— apuesta a que el borde y la base están de acuerdo, y equivocarse en
+            // esa apuesta deja un enlace sirviendo contenido viejo sin que nadie lo note (P1).
+            invalidar(invitationId, fila.publicToken, PublicRenderInvalidated.Motivo.PUBLICADO)
             return respuesta(activo, fila, reusado = true)
         }
 
@@ -192,7 +207,18 @@ class ReleaseService(
             publishedBy = requesterId,
             publishedAt = Instant.now(),
         )
+        invalidar(invitationId, fila.publicToken, PublicRenderInvalidated.Motivo.PUBLICADO)
         return respuesta(nuevo, fila, reusado = false)
+    }
+
+    /**
+     * Anuncia que lo cacheado bajo `publicToken` dejó de ser válido (`contratos.md §8`, ADR-1R-F-09).
+     * Solo publica el evento: quién lo escucha, cuándo y con qué garantías es cosa de
+     * [RevalidationNotifier], y ese reparto es lo que permite que un fallo del webhook **no** pueda
+     * tumbar una publicación ya commiteada.
+     */
+    private fun invalidar(invitationId: Long, publicToken: String, motivo: PublicRenderInvalidated.Motivo) {
+        eventos.publishEvent(PublicRenderInvalidated(invitationId, publicToken, motivo))
     }
 
     // =============================================================================================
@@ -206,8 +232,13 @@ class ReleaseService(
     @Transactional
     fun unpublish(requesterId: Long, invitationId: Long) {
         editor.autorizar(requesterId, invitationId)
-        editor.exigirDocumento(invitationId)
+        val fila = editor.exigirDocumento(invitationId)
         releases.unpublish(invitationId)
+        // Sí aplica (ADR-2-6-01): despublicar es justamente el caso en que dejar el borde intacto
+        // mantendría vivo durante 300 s un enlace que el cliente acaba de retirar. `unpublish` es
+        // idempotente, así que se anuncia aunque no hubiera release activo: revalidar de más es
+        // barato; revalidar de menos deja publicado lo que el cliente creyó haber retirado.
+        invalidar(invitationId, fila.publicToken, PublicRenderInvalidated.Motivo.DESPUBLICADO)
     }
 
     @Transactional(readOnly = true)
@@ -244,7 +275,12 @@ class ReleaseService(
     fun rotatePublicToken(requesterId: Long, invitationId: Long): PublicTokenResponse {
         editor.autorizar(requesterId, invitationId)
         val fila = editor.exigirDocumento(invitationId)
+        val anterior = fila.publicToken
         val nuevo = editor.rotar(fila.id)
+        // Sí aplica, y se invalida el token **anterior**, no el nuevo (ADR-2-6-01): rotar existe para
+        // revocar un enlace filtrado (ADR-1R-B-05), y lo que el borde tiene cacheado está bajo el
+        // token viejo. El nuevo no se ha servido nunca, así que no hay nada suyo que invalidar.
+        invalidar(invitationId, anterior, PublicRenderInvalidated.Motivo.TOKEN_ROTADO)
         return PublicTokenResponse(nuevo.value, editor.publicUrl(nuevo.value), Instant.now())
     }
 

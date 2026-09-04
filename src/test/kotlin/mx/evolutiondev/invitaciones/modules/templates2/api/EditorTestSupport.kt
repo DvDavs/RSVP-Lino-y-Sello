@@ -41,12 +41,40 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
+
+/**
+ * Cliente de revalidación falso (ADR-2-6-01): registra cada llamada y permite forzar el fallo o un
+ * código de estado ajeno, que son los dos casos que **no pueden** tumbar la publicación.
+ */
+class ClienteRevalidacionFalso : RevalidationClient {
+
+    data class Llamada(val url: String, val token: String, val cuerpo: String)
+
+    val llamadas = java.util.Collections.synchronizedList(mutableListOf<Llamada>())
+
+    @Volatile var falla: Boolean = false
+
+    @Volatile var estado: Int = 200
+
+    override fun post(url: String, token: String, cuerpo: String, timeout: java.time.Duration): Int {
+        llamadas.add(Llamada(url, token, cuerpo))
+        if (falla) throw IllegalStateException("frontend caído (simulado)")
+        return estado
+    }
+
+    fun limpiar() {
+        llamadas.clear()
+        falla = false
+        estado = 200
+    }
+}
 
 /** Sonda de `invitation_configs` controlable por prueba (ADR-2-4-02). `null` = "no lo sé". */
 class SondaFalsa : LegacyConfigProbe {
@@ -132,7 +160,25 @@ class EditorTestConfig {
         releases: ReleaseStore,
         disponibilidad: InvitationAvailabilityReader,
         versiones: TemplateVersionLoader,
-    ) = ReleaseService(editor, releases, disponibilidad, versiones)
+        eventos: ApplicationEventPublisher,
+    ) = ReleaseService(editor, releases, disponibilidad, versiones, eventos)
+
+    /**
+     * Cliente de revalidación **falso**, con memoria (ADR-2-6-01, objeción ADV-02). Igual que
+     * `SondaFalsa` y `S3Falso`: **un solo bean para las dos vistas**, para que la prueba lo manipule
+     * como [ClienteRevalidacionFalso] y el notificador lo reciba como `RevalidationClient`.
+     */
+    @Bean
+    fun clienteRevalidacionFalso() = ClienteRevalidacionFalso()
+
+    /**
+     * El notificador real, con URL y token de prueba: lo que se sustituye es la red, no la lógica.
+     * Sin este bean el `@TransactionalEventListener` no existiría en el contexto del slice y las
+     * pruebas de "se llama tras publicar" no probarían nada.
+     */
+    @Bean
+    fun revalidationNotifier(cliente: ClienteRevalidacionFalso) =
+        RevalidationNotifier(cliente, REVALIDATE_URL, REVALIDATE_TOKEN, 1000L)
 
     @Bean
     fun snapshotRetention(consultas: TplDocumentSnapshotQueryRepository) = SnapshotRetention(consultas)
@@ -143,6 +189,8 @@ class EditorTestConfig {
     companion object {
         const val BASE_URL = "https://cdn.pruebas.local"
         const val FRONTEND = "https://app.pruebas.local"
+        const val REVALIDATE_URL = "https://app.pruebas.local/api/revalidate"
+        const val REVALIDATE_TOKEN = "token-de-pruebas"
     }
 }
 

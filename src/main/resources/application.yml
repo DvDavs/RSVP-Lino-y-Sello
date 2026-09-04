@@ -86,6 +86,21 @@ whatsapp:
   api-url: https://graph.facebook.com/v19.0
   phone-number-id: 1257270407463833
   access-token: EAALnnvKeQRwBRGrNQ02tZBZBlv83z0Xrk5vhKhhmOuEJX5m04ntH6PJOlnEPy7PY4xATNXZA0RAeZCRPiiZAj5cnGsorjH7FQbCPr7mCN1ZC8SmZCRur3RmuIlCj5gNOBHsM9g68bGLOqd4gwNBb7bOiNZAsZCIHDXe51ZBeEZAFMUxZCVxfQMyp7JiJryro4urvMuTZA8AZDZD
+# templates2 (contratos.md 8, ADR-1R-F-09; anadido por el bloque 2-6, ADR-2-6-01). Invalidacion de la
+# cache del render publico tras publicar, despublicar o rotar el enlace: el backend hace
+# POST {url} con la cabecera x-revalidate-token y el handler de Next.js ejecuta
+# revalidateTag("invitation:{publicToken}").
+# VACIAS = FUNCION DESACTIVADA: sin url y sin token no se llama a nadie y el borde se corrige solo con
+# el max-age de 300 s. No se pone un host por defecto a proposito (app.frontend.url vale
+# http://localhost por defecto y mandar un token a un host adivinado es peor que no llamar).
+# El token sale de la variable de entorno; NUNCA se escribe aqui ni en un log.
+# Es la SEGUNDA modificacion de este fichero que pide el modulo nuevo, tras spring.servlet.multipart
+# (contratos.md 4 decia "unica"); la enmienda queda registrada como ADR-2-6-01.
+templates2:
+  revalidate:
+    url: ${TEMPLATES2_REVALIDATE_URL:}
+    token: ${TEMPLATES2_REVALIDATE_TOKEN:}
+    timeout-ms: ${TEMPLATES2_REVALIDATE_TIMEOUT_MS:3000}
 logging:
   level:
     root: info
