@@ -37,6 +37,9 @@ export default defineConfig({
         "components/ui/**/*.{ts,tsx}",
         "components/public/**/*.{ts,tsx}",
         "components/editor/**/*.{ts,tsx}",
+        // Bloque 3-3: `composed-lectura.ts` es lógica pura (qué sale de la invitación hacia los
+        // metadatos y qué NO) y entra en cobertura; las PÁGINAS de esa carpeta siguen fuera.
+        "app/(public)/_componentes/composed-lectura.ts",
       ],
       exclude: ["**/*.test.{ts,tsx}", "**/*.d.ts"],
       thresholds: { lines: 60, functions: 65, branches: 50, statements: 60 },

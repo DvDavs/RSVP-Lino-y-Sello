@@ -1,0 +1,199 @@
+
+> web@0.0.0 e2e /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-af8b2aa0f9c52418e/frontend/apps/web
+> playwright test
+
+[WebServer] Warning: Custom Cache-Control headers detected for the following routes:
+[WebServer]   - /_next/static/media/:path*
+[WebServer] 
+[WebServer] Setting a custom Cache-Control header can break Next.js development behavior.
+
+Running 14 tests using 2 workers
+
+  ✘   2 [chromium] › e2e/a11y-publico.spec.ts:33:1 › invitación publicada: 0 violaciones axe críticas o serias (2.4s)
+  ✘   1 [chromium] › e2e/a11y-publico.spec.ts:53:1 › invitación publicada en móvil (390x844): 0 violaciones axe críticas o serias (2.4s)
+  ✓   3 [chromium] › e2e/a11y.spec.ts:8:1 › página de invitación no disponible: 0 violaciones axe críticas o serias (1.2s)
+  ✓   4 [chromium] › e2e/a11y.spec.ts:16:1 › catálogo del editor (sin sesión): 0 violaciones axe críticas o serias (1.3s)
+  ✘   6 [chromium] › e2e/presupuesto.spec.ts:32:1 › el JS de primera carga de /i/[publicToken] cabe en el presupuesto de 150 KB gz (125ms)
+lienzo-csp: script-src/eval sigue abierto (QUARANTINE, ver preguntas-abiertas.md): [{"directive":"script-src","blockedURI":"eval","sourceFile":"http://127.0.0.1:3000/_next/static/chunks/3mad-h9oyntbu.js","lineNumber":1}]
+  ✓   5 [chromium] › e2e/lienzo-csp.spec.ts:8:1 › la ruta del lienzo lleva la CSP sin 'self', y sin violaciones de estilo en línea (444ms)
+  ✓   7 [chromium] › e2e/presupuesto.spec.ts:45:1 › la compuerta mide el JS PROPIO de cada ruta, no solo el runtime común (114ms)
+  ✓   8 [chromium] › e2e/publico-no-disponible.spec.ts:8:1 › publicToken inexistente muestra el estado de no disponible, sin trampas de foco (431ms)
+  ✓   9 [chromium] › e2e/presupuesto.spec.ts:37:1 › la compuerta de presupuesto rompe de verdad cuando se excede (118ms)
+  ✓  10 [chromium] › e2e/render-publico.spec.ts:65:1 › la invitación publicada se abre y muestra el texto y las imágenes sembradas (641ms)
+  ✓  11 [chromium] › e2e/render-publico.spec.ts:123:1 › noindex: la invitación nunca se indexa (etiqueta y cabecera) (438ms)
+  ✓  12 [chromium] › e2e/render-publico.spec.ts:139:1 › un publicToken inexistente cae en el estado de no disponible, sin filtrar nada (393ms)
+  ✓  13 [chromium] › e2e/render-publico.spec.ts:157:1 › una sección oculta desaparece de la invitación publicada tras revalidar (1.0s)
+  ✓  14 [chromium] › e2e/render-publico.spec.ts:196:1 › el HTML se sirve desde caché ISR y no desde un render por visita (32ms)
+
+
+  1) [chromium] › e2e/a11y-publico.spec.ts:33:1 › invitación publicada: 0 violaciones axe críticas o serias 
+
+    Error: [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodos": [
+          ".CelebrantSection-module__dqfH1G__kicker > .blocks-module__XLN7qa__text.shared-module__uDtsFa__transition.shared-module__uDtsFa__focusRing",
+          ".CelebrantSection-module__dqfH1G__dateRow > time[datetime=\"2027-04-18\"]",
+          "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(1) > span",
+          "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(2) > span"
+        ]
+      }
+    ]
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 13
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "help": "Elements must meet minimum color contrast ratio thresholds",
+    +     "id": "color-contrast",
+    +     "impact": "serious",
+    +     "nodos": Array [
+    +       ".CelebrantSection-module__dqfH1G__kicker > .blocks-module__XLN7qa__text.shared-module__uDtsFa__transition.shared-module__uDtsFa__focusRing",
+    +       ".CelebrantSection-module__dqfH1G__dateRow > time[datetime=\"2027-04-18\"]",
+    +       "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(1) > span",
+    +       "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(2) > span",
+    +     ],
+    +   },
+    + ]
+
+      48 |
+      49 |   const graves = await violacionesGraves(page);
+    > 50 |   expect(graves, JSON.stringify(graves, null, 2)).toEqual([]);
+         |                                                   ^
+      51 | });
+      52 |
+      53 | test("invitación publicada en móvil (390x844): 0 violaciones axe críticas o serias", async ({ page }) => {
+        at /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-af8b2aa0f9c52418e/frontend/apps/web/e2e/a11y-publico.spec.ts:50:51
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/a11y-publico-invitación-pu-ad301-iones-axe-críticas-o-serias-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/a11y-publico-invitación-pu-ad301-iones-axe-críticas-o-serias-chromium/video-1.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/a11y-publico-invitación-pu-ad301-iones-axe-críticas-o-serias-chromium/error-context.md
+
+  2) [chromium] › e2e/a11y-publico.spec.ts:53:1 › invitación publicada en móvil (390x844): 0 violaciones axe críticas o serias 
+
+    Error: [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodos": [
+          ".CelebrantSection-module__dqfH1G__kicker > .blocks-module__XLN7qa__text.shared-module__uDtsFa__transition.shared-module__uDtsFa__focusRing",
+          ".CelebrantSection-module__dqfH1G__dateRow > time[datetime=\"2027-04-18\"]",
+          "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(1) > span",
+          "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(2) > span"
+        ]
+      }
+    ]
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 13
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "help": "Elements must meet minimum color contrast ratio thresholds",
+    +     "id": "color-contrast",
+    +     "impact": "serious",
+    +     "nodos": Array [
+    +       ".CelebrantSection-module__dqfH1G__kicker > .blocks-module__XLN7qa__text.shared-module__uDtsFa__transition.shared-module__uDtsFa__focusRing",
+    +       ".CelebrantSection-module__dqfH1G__dateRow > time[datetime=\"2027-04-18\"]",
+    +       "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(1) > span",
+    +       "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(2) > span",
+    +     ],
+    +   },
+    + ]
+
+      59 |   await expect(page.locator("h1")).toHaveCount(1);
+      60 |   const graves = await violacionesGraves(page);
+    > 61 |   expect(graves, JSON.stringify(graves, null, 2)).toEqual([]);
+         |                                                   ^
+      62 | });
+      63 |
+        at /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-af8b2aa0f9c52418e/frontend/apps/web/e2e/a11y-publico.spec.ts:61:51
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/a11y-publico-invitación-pu-eb4ca-iones-axe-críticas-o-serias-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/a11y-publico-invitación-pu-eb4ca-iones-axe-críticas-o-serias-chromium/video-1.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/a11y-publico-invitación-pu-eb4ca-iones-axe-críticas-o-serias-chromium/error-context.md
+
+  3) [chromium] › e2e/presupuesto.spec.ts:32:1 › el JS de primera carga de /i/[publicToken] cabe en el presupuesto de 150 KB gz 
+
+    Error: salida literal de check-budget:
+
+    /i/[publicToken]: 230.3 KB gz de primera carga (límite 150.0 KB)
+      runtime común de Next   127.7 KB   (5 chunks)
+            69.8 KB  static/chunks/34qr-jx8gdlro.js
+            43.0 KB  static/chunks/05xzqua93yvwd.js
+             7.2 KB  static/chunks/2zv99ov_-7c1a.js
+             4.3 KB  static/chunks/turbopack-3i_t3ykmbr0z3.js
+             3.5 KB  static/chunks/25qsihvdu4q2b.js
+      JS propio de la ruta    102.6 KB   (5 chunks)
+            87.2 KB  static/chunks/3mad-h9oyntbu.js
+             9.8 KB  static/chunks/1yiht2hd3f_hy.js
+             3.6 KB  static/chunks/2rv_n8nb5psvv.js
+             1.2 KB  static/chunks/3-0axdll0td7g.js
+             0.8 KB  static/chunks/3hjf6lbw9fhmm.js
+      polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+      EXCEDIDO por 80.3 KB
+
+    /editor/[invitationId]: 234.5 KB gz de primera carga (límite 600.0 KB)
+      runtime común de Next   127.7 KB   (5 chunks)
+            69.8 KB  static/chunks/34qr-jx8gdlro.js
+            43.0 KB  static/chunks/05xzqua93yvwd.js
+             7.2 KB  static/chunks/2zv99ov_-7c1a.js
+             4.3 KB  static/chunks/turbopack-3i_t3ykmbr0z3.js
+             3.5 KB  static/chunks/25qsihvdu4q2b.js
+      JS propio de la ruta    106.8 KB   (7 chunks)
+            87.2 KB  static/chunks/3mad-h9oyntbu.js
+             9.1 KB  static/chunks/3boe600tk0neo.js
+             3.6 KB  static/chunks/2rv_n8nb5psvv.js
+             3.3 KB  static/chunks/44a2zoa8uvc4q.js
+             1.3 KB  static/chunks/36lwd64dgw1vn.js
+             1.1 KB  static/chunks/3rix9pmk03_yy.js
+             1.1 KB  static/chunks/2fa424n-74m-7.js
+      polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+
+    check-budget: presupuesto de JS excedido (04 §16.2). Orden de actuación: 1) ¿se coló el chrome en la ruta pública? 2) diferir la isla de RSVP; 3) reducir pesos tipográficos; 4) subconjunto de fuentes más estrecho; 5) si nada basta, ADR para subir el presupuesto.
+
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      32 | test("el JS de primera carga de /i/[publicToken] cabe en el presupuesto de 150 KB gz", () => {
+      33 |   const { codigo, salida } = correrCompuerta();
+    > 34 |   expect(codigo, `salida literal de check-budget:\n${salida}`).toBe(0);
+         |                                                                ^
+      35 | });
+      36 |
+      37 | test("la compuerta de presupuesto rompe de verdad cuando se excede", () => {
+        at /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-af8b2aa0f9c52418e/frontend/apps/web/e2e/presupuesto.spec.ts:34:64
+
+    Error Context: test-results/presupuesto-el-JS-de-prime-4cd5b-el-presupuesto-de-150-KB-gz-chromium/error-context.md
+
+  3 failed
+    [chromium] › e2e/a11y-publico.spec.ts:33:1 › invitación publicada: 0 violaciones axe críticas o serias 
+    [chromium] › e2e/a11y-publico.spec.ts:53:1 › invitación publicada en móvil (390x844): 0 violaciones axe críticas o serias 
+    [chromium] › e2e/presupuesto.spec.ts:32:1 › el JS de primera carga de /i/[publicToken] cabe en el presupuesto de 150 KB gz 
+  11 passed (16.8s)
+ ELIFECYCLE  Command failed with exit code 1.

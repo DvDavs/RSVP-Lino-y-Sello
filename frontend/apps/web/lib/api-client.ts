@@ -480,9 +480,15 @@ export async function getPublicRender(
     auth: false,
     ifNoneMatch: opciones.ifNoneMatch,
     next: opciones.next,
-    // Con `next.revalidate` el fetch usa el Data Cache de Next; sin él, sigue el `Cache-Control`
-    // del backend. `cache` explícito solo hace falta cuando no se pasa `next`.
-    ...(opciones.next ? {} : { cache: "no-store" as RequestCache }),
+    // CORRECCIÓN del bloque 3-3 (medida, `bitacora/3-3.md` §4). Dejar `cache` sin fijar NO era
+    // neutro: `peticion()` lo rellena con `cache: "no-store"` por defecto (línea 213), y en Next 16
+    // `no-store` GANA sobre `next.revalidate`. Efecto real: el fetch no entraba en el Data Cache,
+    // la petición marcaba el render como dinámico y `/i/[publicToken]` respondía
+    // `500 DYNAMIC_SERVER_USAGE` en cuanto la ruta se generaba de forma estática — el `revalidate:
+    // 300` y el `revalidateTag` de `04 §15.1/§15.2` no llegaban a ejercerse nunca.
+    // Con `next` presente se pide explícitamente el Data Cache; sin él se conserva el `no-store`
+    // (ese camino lo usa quien quiera la respuesta fresca con el `Cache-Control` del backend).
+    cache: opciones.next ? ("force-cache" as RequestCache) : ("no-store" as RequestCache),
   });
   if (r.status === 304) return { status: "not-modified", etag: r.etag };
   return { status: "ok", data: r.data as import("./api-types.ts").PublicRenderResponse, etag: r.etag };

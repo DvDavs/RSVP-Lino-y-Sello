@@ -13,6 +13,13 @@ import type { NextConfig } from "next";
  * La CSP del lienzo NO va aquí: necesita un `nonce` por petición y vive en `proxy.ts`.
  */
 const nextConfig: NextConfig = {
+  // `forbidden()` de `next/navigation` (bloque 3-3): el render público necesita distinguir el
+  // `403 TPL_INVITATION_UNAVAILABLE` —la invitación existe, el anfitrión no está disponible— del
+  // `404 TPL_RELEASE_NOT_FOUND`, y devolver el estado HTTP correcto en cada caso. Sin esta bandera,
+  // `forbidden()` lanza en tiempo de ejecución y la convención `forbidden.tsx` se ignora.
+  // Es aditiva: habilita `forbidden()`/`unauthorized()` y sus dos archivos de convención, y no
+  // cambia el comportamiento de ninguna ruta que no los use. ADR-3-3-01.
+  experimental: { authInterrupts: true },
   async headers() {
     return [
       {
@@ -42,4 +49,18 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+/**
+ * `04 §16.2`: "Complemento de diagnóstico (no compuerta): `ANALYZE=1 pnpm --filter web build` con
+ * `@next/bundle-analyzer` para ver QUÉ creció". El paquete ya estaba instalado desde 3-1 pero no
+ * enganchado, así que la orden documentada no hacía nada. Sin `ANALYZE=1` el envoltorio es la
+ * identidad: no cambia ni un byte del build normal ni del de CI.
+ */
+const conAnalizador =
+  process.env.ANALYZE === "1"
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      (require("@next/bundle-analyzer") as (o: { enabled: boolean }) => (c: NextConfig) => NextConfig)({
+        enabled: true,
+      })
+    : (c: NextConfig) => c;
+
+export default conAnalizador(nextConfig);

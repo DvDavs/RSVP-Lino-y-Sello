@@ -1,0 +1,45 @@
+[WebServer] Warning: Custom Cache-Control headers detected for the following routes:
+[WebServer]   - /_next/static/media/:path*
+[WebServer] 
+[WebServer] Setting a custom Cache-Control header can break Next.js development behavior.
+
+Running 2 tests using 2 workers
+
+  ✘  2 [chromium] › e2e/a11y-publico.spec.ts:44:1 › invitación publicada en móvil (390x844): 0 violaciones axe críticas o serias (2.4s)
+  ✘  1 [chromium] › e2e/a11y-publico.spec.ts:24:1 › invitación publicada: 0 violaciones axe críticas o serias (2.5s)
+
+
+  1) [chromium] › e2e/a11y-publico.spec.ts:24:1 › invitación publicada: 0 violaciones axe críticas o serias 
+
+    Error: [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodos": [
+          ".CelebrantSection-module__dqfH1G__kicker > .blocks-module__XLN7qa__text.shared-module__uDtsFa__transition.shared-module__uDtsFa__focusRing",
+          ".CelebrantSection-module__dqfH1G__dateRow > time[datetime=\"2027-04-18\"]",
+          "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(1) > span",
+          "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(2) > span"
+        ]
+      }
+    ]
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 13
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "help": "Elements must meet minimum color contrast ratio thresholds",
+    +     "id": "color-contrast",
+    +     "impact": "serious",
+    +     "nodos": Array [
+    +       ".CelebrantSection-module__dqfH1G__kicker > .blocks-module__XLN7qa__text.shared-module__uDtsFa__transition.shared-module__uDtsFa__focusRing",
+    +       ".CelebrantSection-module__dqfH1G__dateRow > time[datetime=\"2027-04-18\"]",
+    +       "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(1) > span",
+    +       "article:nth-child(1) > .CelebrantSection-module__dqfH1G__textCol > .CelebrantSection-module__dqfH1G__quote.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__doc.shared-module__uDtsFa__measure > .RichTextBlock-module__U-M6Tq__paragraph:nth-child(2) > span",
+    +     ],
+    +   },

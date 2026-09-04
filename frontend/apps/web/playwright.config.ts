@@ -56,6 +56,12 @@ export default defineConfig({
       PORT: PUERTO,
       NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:6003",
       NEXT_PUBLIC_EDITOR_ORIGIN: process.env.NEXT_PUBLIC_EDITOR_ORIGIN ?? ORIGEN,
+      // Bloque 3-3: `e2e/render-publico.spec.ts` recorre el ciclo real de `04 §15.2` (publicar →
+      // webhook → recargar) golpeando `POST /api/revalidate`. Ese handler RECHAZA TODO si no hay
+      // `REVALIDATE_SECRET` configurado (`app/api/revalidate/route.ts:40`), así que sin esta línea
+      // la prueba mediría un 401, no la revalidación.
+      REVALIDATE_SECRET: process.env.REVALIDATE_SECRET ?? "e2e-secreto-de-pruebas",
+      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000",
       NEXT_PUBLIC_CDN_ORIGIN: process.env.NEXT_PUBLIC_CDN_ORIGIN ?? "http://127.0.0.1:6003",
       // Enganche de pruebas del bloque 3-4: expone el store del editor en `window.__editorStore`
       // para conducir las 11 acciones desde Playwright mientras el panel de formularios (3-5) no
