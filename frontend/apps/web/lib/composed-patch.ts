@@ -16,8 +16,9 @@
 //     de las 19 rutas devuelve al cliente (ver `preguntas-abiertas.md`, «Fase 3 · 3-4»).
 // Para esos seis tipos NO se parchea: el bloque entra en `pendingBlocks`, el lienzo lo pinta con el
 // valor anterior y `aria-busy="true"` hasta que llega la respuesta. Nada se descarta en silencio (P1).
-import type { ComposedDocument, Operation } from "@invitaciones/schema";
-import {
+import type {
+  ComposedDocument,
+  Operation,
   ComposedBlock as ComposedBlockSchema,
   ComposedGroup as ComposedGroupSchema,
   ComposedSection as ComposedSectionSchema,
@@ -342,4 +343,36 @@ export function pendingKeysFor(composed: ComposedDocument | null, ops: readonly 
     }
   }
   return [...claves];
+}
+
+// ---------------------------------------------------------------------------------------------
+// Aplicación de un `PATCH` entrante (lado LIENZO, 04 §9.3)
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Aplica las entradas de un `PATCH` sobre una copia del documento compuesto y la devuelve. **Pura**
+ * (no muta la entrada): la ruta del lienzo la usa dentro de un `setState`, donde mutar el estado
+ * anterior sería un defecto de React.
+ *
+ * Una entrada que no case con ningún bloque se IGNORA para el pintado pero no rompe el resto del
+ * `PATCH` (P1: se procesa lo que se entiende, nunca a medias un mismo bloque). El `RENDER` completo
+ * que sigue a toda respuesta del servidor (§12.4 paso 6) reconcilia cualquier deriva.
+ */
+export function applyPatchEntries(composed: ComposedDocument, entries: readonly PatchEntry[]): ComposedDocument {
+  const copia = structuredClone(composed) as ComposedDocument;
+  for (const entrada of entries) {
+    const { ref } = entrada;
+    if (ref.itemId !== undefined && ref.itemBlockId !== undefined) {
+      const loc = findItemBlock(copia, ref.blockId, ref.itemId, ref.itemBlockId);
+      if (!loc) continue;
+      loc.block.value = entrada.value;
+      loc.block.provenance = entrada.provenance;
+      continue;
+    }
+    const loc = findBlock(copia, ref.blockId);
+    if (!loc) continue;
+    loc.block.value = entrada.value;
+    loc.block.provenance = entrada.provenance;
+  }
+  return copia;
 }

@@ -26,7 +26,7 @@ import {
   postOperations,
   restoreRevision,
 } from "./api-client.ts";
-import type { OperationBatchResponse, RevisionConflictBody } from "./api-types.ts";
+import type { OperationBatchResponse } from "./api-types.ts";
 import {
   classifySaveError,
   clearPending,
