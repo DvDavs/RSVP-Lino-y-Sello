@@ -1,0 +1,215 @@
+/**
+ * packages/sections/src/styles/CelebrantSection.module.css — 3-2b.
+ * `side-by-side` (columnas con divisor), `stacked` (fila foto/texto que alterna lado a lado en
+ * escritorio, apilada en móvil) y `centered` (una sola columna, foto circular pequeña) leen
+ * como tres maquetas distintas, no como una con más o menos ancho.
+ */
+
+.section {
+  background: var(--inv-color-bg);
+  padding: var(--inv-space-8) var(--inv-space-5);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--inv-space-2);
+  text-align: center;
+  max-width: var(--inv-measure);
+  margin: 0 auto var(--inv-space-7);
+  animation: celebrant-rise var(--inv-motion-normal) var(--inv-motion-ease) both;
+}
+
+@keyframes celebrant-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--inv-space-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    animation: none;
+  }
+}
+
+.heading {
+  position: relative;
+  margin: 0;
+  padding-bottom: var(--inv-space-3);
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-3xl);
+  color: var(--inv-color-ink);
+}
+
+.heading::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--inv-space-6);
+  height: var(--inv-border-width-axis);
+  background: var(--inv-color-accent);
+}
+
+/* Los bloques (TextBlock/DateBlock/RichTextBlock, `src/blocks/*.module.css`) fijan su propio
+ * `color: var(--inv-color-ink)` en el nodo que pintan — una declaración explícita en el propio
+ * elemento gana siempre sobre un color heredado del contenedor, así que sin este `> *` el
+ * "kicker"/fecha/cita salían todos en tinta, nunca en el atenuado que pide este diseño (medido
+ * con una captura real, ver bitácora 3-2b). */
+.kicker > *,
+.dateRow > *,
+.quote > *,
+.personName > * {
+  color: inherit;
+}
+
+.kicker {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-muted);
+}
+
+.dateRow {
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-muted);
+}
+
+.people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--inv-space-7);
+  max-width: var(--inv-measure);
+  margin: 0 auto;
+}
+
+.person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--inv-space-4);
+  text-align: center;
+}
+
+.photoWrap {
+  width: min(60%, calc(var(--inv-measure) * 0.5));
+  --inv-image-aspect-default: 1 / 1;
+}
+
+.photoWrap > span {
+  border-radius: 50%;
+  box-shadow: var(--inv-shadow-md);
+}
+
+.textCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--inv-space-2);
+  align-items: inherit;
+}
+
+.personName {
+  margin: 0;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-xl);
+  color: var(--inv-color-ink);
+}
+
+.quote {
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+  line-height: var(--inv-leading-relaxed);
+  color: var(--inv-color-muted);
+}
+
+/* --------------------------------------------------------------- variante: side-by-side ---- */
+
+@media (min-width: 640px) {
+  .section[data-variant="side-by-side"] .people {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: none;
+  }
+
+  .section[data-variant="side-by-side"] .person {
+    flex: 1 1 0;
+    max-width: var(--inv-measure);
+  }
+
+  .section[data-variant="side-by-side"] .person:not(:last-child) {
+    padding-inline-end: var(--inv-space-6);
+    border-inline-end: var(--inv-border-width-hairline) solid
+      color-mix(in srgb, var(--inv-color-ink) 15%, transparent);
+  }
+}
+
+/* ------------------------------------------------------------------- variante: stacked ---- */
+
+.section[data-variant="stacked"] .photoWrap {
+  width: 100%;
+  --inv-image-aspect-default: 16 / 10;
+}
+
+.section[data-variant="stacked"] .photoWrap > span {
+  border-radius: var(--inv-radius-lg);
+}
+
+.section[data-variant="stacked"] .person {
+  text-align: left;
+  align-items: stretch;
+}
+
+.section[data-variant="stacked"] .textCol {
+  text-align: left;
+  align-items: flex-start;
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="stacked"] .person {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .section[data-variant="stacked"] .photoWrap,
+  .section[data-variant="stacked"] .textCol {
+    flex: 1 1 50%;
+    min-width: 0;
+  }
+
+  .section[data-variant="stacked"] .person:nth-of-type(even) {
+    flex-direction: row-reverse;
+  }
+}
+
+/* ------------------------------------------------------------------ variante: centered ---- */
+
+.section[data-variant="centered"] .photoWrap {
+  width: min(45%, calc(var(--inv-measure) * 0.4));
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="centered"][data-people="2"] .people {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: none;
+  }
+
+  .section[data-variant="centered"][data-people="2"] .person {
+    flex: 0 1 calc(var(--inv-measure) * 0.6);
+  }
+}

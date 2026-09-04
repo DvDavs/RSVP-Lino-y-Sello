@@ -1,0 +1,284 @@
+/**
+ * packages/sections/src/styles/CoverSection.module.css — 3-2b.
+ *
+ * Una sola estructura de DOM (`CoverSection.tsx`) para tres variantes con lecturas visuales
+ * DELIBERADAMENTE distintas — nunca "la misma con un borde":
+ *   - `full`    — foto a sangre (grid de una sola celda, imagen y texto apilados con
+ *                 `grid-area: 1 / 1`), velo de degradado, nombres y fecha ANCLADOS ABAJO sobre
+ *                 la foto (patrón hero clásico de invitación premium).
+ *   - `framed`  — sin foto a sangre: retrato enmarcado (sombra + borde + radio grande) como
+ *                 pieza de arte independiente, con la tipografía ALREDEDOR (no encima) —
+ *                 `.content` pasa a `display: contents` y cada hijo toma su propio `order` para
+ *                 intercalar la imagen entre el eyebrow y el nombre.
+ *   - `split`   — dos columnas a partir de 640px (imagen a sangre en una, texto en la otra, sin
+ *                 radio: "borde duro"); en móvil, imagen arriba a todo lo ancho y texto debajo.
+ *
+ * Único color permitido: `var(--inv-color-*)` (6 tokens). Todo tamaño/espaciado/radio por token;
+ * los anchos "estrechos" que ningún token cubre se DERIVAN de `--inv-measure` con `calc()` en vez
+ * de un rem a mano (04 §5.4).
+ */
+
+.section {
+  background: var(--inv-color-bg);
+}
+
+.stage {
+  position: relative;
+}
+
+.imageWrap {
+  display: block;
+  width: 100%;
+}
+
+/* El `<span>` raíz de `ImageBlock` (blocks/ImageBlock.module.css `.frame`) SOLO se puede alcanzar
+ * por selector de ETIQUETA desde aquí: sus clases están scoped/hasheadas por su propio CSS
+ * Module. Un selector de un nivel más de especificidad (`.imageWrap > span`) gana sobre `.frame`
+ * sin tocar `blocks/**` (fuera de mi alcance) — mismo criterio en las tres variantes de abajo. */
+.imageWrap > span {
+  width: 100%;
+}
+
+.scrim {
+  display: none;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--inv-space-3);
+  text-align: center;
+  color: var(--inv-color-ink);
+  animation: cover-rise var(--inv-motion-normal) var(--inv-motion-ease) both;
+}
+
+@keyframes cover-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--inv-space-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content {
+    animation: none;
+  }
+}
+
+/* Los componentes de bloque (TextBlock/DateBlock, `src/blocks/*.module.css`, fuera de mi alcance)
+ * fijan SU PROPIO `color: var(--inv-color-ink)` en el nodo que renderizan — no basta con poner
+ * `color` en el contenedor y confiar en la herencia CSS, porque una declaración explícita en el
+ * propio elemento SIEMPRE gana sobre un valor heredado del padre, sea cual sea la especificidad
+ * comparada entre selectores. `> *` fuerza a ese hijo (el `<span>`/`<time>` real) a heredar el
+ * color que de verdad quiero (medido con una captura real: sin esto, el texto de la variante
+ * "full" salía en tinta oscura sobre foto en vez de blanco — ver bitácora 3-2b). */
+.eyebrow > *,
+.heroName > *,
+.dateRow > *,
+.badge > * {
+  color: inherit;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+}
+
+.heroName {
+  margin: 0;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-4xl);
+  line-height: var(--inv-leading-tight);
+  letter-spacing: var(--inv-tracking-tight);
+}
+
+.dateRow {
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: var(--inv-space-2) var(--inv-space-4);
+  border: var(--inv-border-width-hairline) solid currentColor;
+  border-radius: var(--inv-radius-sm);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  min-height: var(--inv-touch-target-min);
+}
+
+/* ---------------------------------------------------------------------- variante: full ---- */
+
+/* La primera pantalla completa (04 §2, "la que decide si la invitación parece cara"): el
+ * `min-height` va en el `.stage`, INDEPENDIENTE de la relación de aspecto de la foto — si dejara
+ * que `aspect-ratio` decidiera la altura (como en `framed`/`split`), una foto ancha dejaría un
+ * hueco en blanco bajo el contenido en pantallas altas. `100svh` con reserva `100vh` (Chromium
+ * antiguo / sin soporte de unidades "small viewport"). */
+.section[data-variant="full"] .stage {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.section[data-variant="full"] .imageWrap {
+  grid-area: 1 / 1;
+  height: 100%;
+}
+
+.section[data-variant="full"] .imageWrap > span {
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+.section[data-variant="full"] .scrim {
+  display: block;
+  grid-area: 1 / 1;
+  align-self: end;
+  width: 100%;
+  height: 85%;
+  /* Texto blanco sobre foto: el velo tiene que quedar de verdad oscuro donde vive el texto (el
+   * primer intento, 70%→transparent en 55%, dejaba la franja del "eyebrow" casi sin oscurecer —
+   * medido en captura, contraste insuficiente). Ahora el 92% de tinta cubre el tercio inferior
+   * completo (donde vive TODO el bloque de texto) antes de empezar a aclarar. */
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--inv-color-ink) 92%, transparent),
+    color-mix(in srgb, var(--inv-color-ink) 78%, transparent) 38%,
+    color-mix(in srgb, var(--inv-color-ink) 20%, transparent) 72%,
+    transparent
+  );
+}
+
+.section[data-variant="full"] .content {
+  grid-area: 1 / 1;
+  align-self: end;
+  justify-self: stretch;
+  padding: var(--inv-space-7) var(--inv-space-5) var(--inv-space-6);
+  color: var(--inv-color-surface);
+  /* Refuerzo de legibilidad independiente del velo (defensa en profundidad, mismo motivo que un
+   * velo insuficiente en una paleta con foto muy clara): sombra sutil, nunca decorativa. */
+  text-shadow: 0 var(--inv-border-width-hairline) var(--inv-space-2)
+    color-mix(in srgb, var(--inv-color-ink) 65%, transparent);
+}
+
+.section[data-variant="full"] .badge {
+  text-shadow: none;
+}
+
+.section[data-variant="full"] .dateRow {
+  color: var(--inv-color-surface);
+  opacity: 0.9;
+}
+
+/* -------------------------------------------------------------------- variante: framed ---- */
+
+.section[data-variant="framed"] .stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--inv-space-5);
+  padding: var(--inv-space-8) var(--inv-space-5);
+}
+
+.section[data-variant="framed"] .content {
+  display: contents;
+  color: var(--inv-color-ink);
+}
+
+.section[data-variant="framed"] .eyebrow {
+  order: 1;
+}
+
+.section[data-variant="framed"] .imageWrap {
+  order: 2;
+  width: min(100%, calc(var(--inv-measure) * 0.65));
+  --inv-image-aspect-default: 4 / 5;
+}
+
+.section[data-variant="framed"] .imageWrap > span {
+  border-radius: var(--inv-radius-lg);
+  box-shadow: var(--inv-shadow-lg);
+  border: var(--inv-border-width-hairline) solid var(--inv-color-accent);
+}
+
+.section[data-variant="framed"] .heroName {
+  order: 3;
+}
+
+.section[data-variant="framed"] .dateRow {
+  order: 4;
+}
+
+.section[data-variant="framed"] .badge {
+  order: 5;
+  margin-inline: auto;
+}
+
+.section[data-variant="framed"] .scrim {
+  display: none;
+}
+
+/* --------------------------------------------------------------------- variante: split ---- */
+
+.section[data-variant="split"] .stage {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.section[data-variant="split"] .imageWrap {
+  --inv-image-aspect-default: 1 / 1;
+}
+
+.section[data-variant="split"] .imageWrap > span {
+  border-radius: 0;
+}
+
+.section[data-variant="split"] .scrim {
+  display: none;
+}
+
+.section[data-variant="split"] .content {
+  padding: var(--inv-space-7) var(--inv-space-5);
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="split"] .stage {
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+  }
+
+  .section[data-variant="split"] .imageWrap {
+    height: 100%;
+  }
+
+  .section[data-variant="split"] .imageWrap > span {
+    height: 100%;
+  }
+
+  .section[data-variant="split"] .content {
+    align-items: flex-start;
+    justify-content: center;
+    text-align: left;
+    padding: var(--inv-space-8);
+  }
+}

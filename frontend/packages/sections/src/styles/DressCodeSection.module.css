@@ -1,0 +1,185 @@
+/**
+ * packages/sections/src/styles/DressCodeSection.module.css — 3-2b.
+ * `dressCodeRules` (`<GroupBlock>`, orden fijo de itemBlocks: para quién, descripción, foto
+ * opcional). `two-columns` es una rejilla editorial de 2 columnas con foto de retrato; `cards`
+ * es una fila de tarjetas compactas y centradas — dos lecturas claramente distintas.
+ */
+
+.section {
+  background: var(--inv-color-bg);
+  padding: var(--inv-space-8) var(--inv-space-5);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--inv-space-7);
+  animation: dress-rise var(--inv-motion-normal) var(--inv-motion-ease) both;
+}
+
+@keyframes dress-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--inv-space-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    animation: none;
+  }
+}
+
+.heading {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  padding-bottom: var(--inv-space-3);
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-3xl);
+  color: var(--inv-color-ink);
+}
+
+.heading::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--inv-space-6);
+  height: var(--inv-border-width-axis);
+  background: var(--inv-color-accent);
+}
+
+/* TextBlock fija su propio color en el `<span>` que pinta — sin este `> *` ni `.intro` ni los
+ * `nth-of-type` de abajo llegan a teñir el texto real (medido con una captura real, bitácora
+ * 3-2b). */
+.intro > * {
+  color: inherit;
+}
+
+.groupWrap li > span > * {
+  color: inherit;
+}
+
+.intro {
+  margin: var(--inv-space-2) auto 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  color: var(--inv-color-muted);
+}
+
+.groupWrap ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--inv-space-6);
+  max-width: var(--inv-measure);
+  margin-inline: auto;
+}
+
+.groupWrap li {
+  display: grid;
+  gap: var(--inv-space-2);
+}
+
+.groupWrap li > span {
+  display: block;
+}
+
+/* itemBlock 1: para quién. */
+.groupWrap li > span:nth-of-type(1) {
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-lg);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-ink);
+}
+
+/* itemBlock 2: descripción. */
+.groupWrap li > span:nth-of-type(2) {
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+  line-height: var(--inv-leading-relaxed);
+  color: var(--inv-color-muted);
+}
+
+/* itemBlock 3: foto (opcional). */
+.groupWrap li > span:nth-of-type(3) {
+  order: -1;
+}
+
+/* -------------------------------------------------------------- variante: two-columns ---- */
+
+.section[data-variant="two-columns"] .groupWrap {
+  --inv-image-aspect-default: 3 / 4;
+}
+
+.section[data-variant="two-columns"] .groupWrap ul {
+  max-width: none;
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="two-columns"] .groupWrap ul {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--inv-space-7);
+  }
+}
+
+.section[data-variant="two-columns"] .groupWrap li > span:nth-of-type(3) img {
+  border-radius: var(--inv-radius-md);
+}
+
+.section[data-variant="two-columns"] .groupWrap li:not(:last-child) {
+  padding-bottom: var(--inv-space-6);
+  border-bottom: var(--inv-border-width-hairline) solid color-mix(in srgb, var(--inv-color-ink) 12%, transparent);
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="two-columns"] .groupWrap li:not(:last-child) {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* ------------------------------------------------------------------- variante: cards ---- */
+
+.section[data-variant="cards"] .groupWrap {
+  --inv-image-aspect-default: 1 / 1;
+}
+
+.section[data-variant="cards"] .groupWrap ul {
+  max-width: none;
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="cards"] .groupWrap ul {
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  }
+}
+
+.section[data-variant="cards"] .groupWrap li {
+  justify-items: center;
+  text-align: center;
+  padding: var(--inv-space-6);
+  background: var(--inv-color-surface);
+  border-radius: var(--inv-radius-md);
+  box-shadow: var(--inv-shadow-sm);
+  max-width: calc(var(--inv-measure) * 0.6);
+}
+
+.section[data-variant="cards"] .groupWrap li > span:nth-of-type(3) {
+  width: min(45%, calc(var(--inv-measure) * 0.35));
+}
+
+.section[data-variant="cards"] .groupWrap li > span:nth-of-type(3) img {
+  border-radius: 50%;
+}

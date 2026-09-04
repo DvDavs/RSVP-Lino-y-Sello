@@ -1,6 +1,9 @@
 // packages/sections/test/fixtures.ts — datos de prueba VALIDADOS contra los esquemas Zod reales
 // (`.parse()`, no `as ComposedBlock` a ciegas) — si un fixture no encaja con el esquema real, la
 // prueba falla aquí, no en un `.map()` silencioso más abajo.
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   ComposedBlockSchema,
   ComposedGroupSchema,
@@ -8,6 +11,16 @@ import {
   ResolvedThemeSchema,
 } from "../src/schema-types.ts";
 import type { ComposedBlock, ComposedGroup, ComposedSection, ResolvedTheme } from "../src/schema-types.ts";
+import {
+  compose,
+  TemplateManifest,
+  ThemeSpec,
+  DefaultsFile,
+  type TemplatePackage,
+  type BusinessSnapshot,
+  type AssetIndex,
+  type ComposedDocument,
+} from "@invitaciones/schema";
 
 export function textBlock(overrides: Record<string, unknown> = {}): ComposedBlock {
   return ComposedBlockSchema.parse({
@@ -230,4 +243,75 @@ export function navyTheme(overrides: Record<string, unknown> = {}): ResolvedThem
     },
     ...overrides,
   });
+}
+
+// ---------------------------------------------------------------------------------------------
+// AÑADIDO por 3-2b: documento REAL de `boda-clasica@1.0.0`, compuesto con el `compose()` de verdad
+// (`@invitaciones/schema`) contra `frontend/templates/boda-clasica/1.0.0/{template,theme,defaults}
+// .json`. `doc.structure.sections: []` + `doc.content: {}` deliberado: R1c inserta las 12 secciones
+// del manifiesto en su posición y R2 cae a `defaults.json` para cada bloque — es decir, exactamente
+// el contenido de fábrica de la plantilla real, sin inventar nada a mano en la prueba (04 §20.1,
+// "jest-axe sobre tu sección con datos de boda-clasica"). Memoizado: `compose()` es puro (R6) y
+// cada `describe` que lo usa no necesita recomponerlo.
+// ---------------------------------------------------------------------------------------------
+const here = dirname(fileURLToPath(import.meta.url));
+const BODA_CLASICA_DIR = resolve(here, "../../../templates/boda-clasica/1.0.0");
+
+function readJson(fileName: string): unknown {
+  return JSON.parse(readFileSync(resolve(BODA_CLASICA_DIR, fileName), "utf8"));
+}
+
+/** `assetId` → URL falsa pero bien formada, solo para los assetId que `defaults.json` usa de verdad. */
+const BODA_CLASICA_ASSETS: AssetIndex = {
+  as_01J8DEM000000000000000C0V1: { url: "https://cdn.ejemplo.mx/assets/portada.webp" },
+  as_01J8DEM000000000000000N0V1: { url: "https://cdn.ejemplo.mx/assets/novio.webp" },
+  as_01J8DEM000000000000000N0V2: { url: "https://cdn.ejemplo.mx/assets/novia.webp" },
+  as_01J8DEM0000000000000000GA1: { url: "https://cdn.ejemplo.mx/assets/galeria-1.webp" },
+  as_01J8DEM0000000000000000GA2: { url: "https://cdn.ejemplo.mx/assets/galeria-2.webp" },
+  as_01J8DEM000000000000000H1S1: { url: "https://cdn.ejemplo.mx/assets/historia-1.webp" },
+  as_01J8DEM000000000000000RSV1: { url: "https://cdn.ejemplo.mx/assets/rsvp-fondo.webp" },
+};
+
+const BODA_CLASICA_BUSINESS: BusinessSnapshot = {
+  invitationId: 1,
+  date: "2026-12-12",
+  time: "16:30",
+  hashtag: "#CamilaYAntonio",
+  coverPhotoUrl: null,
+  childrenAllowed: true,
+  youngAllowed: true,
+  eventKind: "wedding",
+  planTier: 2,
+  timezone: "America/Mexico_City",
+};
+
+let bodaClasicaComposedCache: ComposedDocument | undefined;
+
+/** El `ComposedDocument` real de `boda-clasica@1.0.0` con TODO su contenido de fábrica. */
+export function realBodaClasicaDocument(): ComposedDocument {
+  if (bodaClasicaComposedCache) return bodaClasicaComposedCache;
+  const pkg: TemplatePackage = {
+    manifest: TemplateManifest.parse(readJson("template.json")),
+    theme: ThemeSpec.parse(readJson("theme.json")),
+    defaults: DefaultsFile.parse(readJson("defaults.json")),
+  };
+  const doc = {
+    schemaVersion: 1 as const,
+    template: { slug: "boda-clasica", version: "1.0.0" },
+    theme: { paletteId: "blush", fontSetId: "serif-elegante" },
+    structure: { sections: [] },
+    content: {},
+    attic: {},
+    meta: { locale: "es-MX" as const },
+  };
+  const { composed } = compose(pkg, doc, BODA_CLASICA_BUSINESS, BODA_CLASICA_ASSETS, "es-MX");
+  bodaClasicaComposedCache = composed;
+  return composed;
+}
+
+/** Una sección concreta (por `key`, p. ej. "cover"/"event"/"gallery") del documento real de arriba. */
+export function realBodaClasicaSection(key: string): ComposedSection {
+  const section = realBodaClasicaDocument().sections.find((s) => s.key === key);
+  if (!section) throw new Error(`fixtures.ts: boda-clasica@1.0.0 no tiene la sección "${key}"`);
+  return section;
 }

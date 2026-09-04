@@ -1,0 +1,214 @@
+/**
+ * packages/sections/src/styles/EventSection.module.css — 3-2b.
+ *
+ * `eventCards` se delega en `<GroupBlock>` (no reimplementable, blocks/GroupBlock.tsx): el HTML
+ * que produce es fijo — `<ul><li><span>…</span>…</li></ul>`, un `<span>` por `itemBlock` EN EL
+ * ORDEN DEL MANIFIESTO (R9.1: título, cuándo, dónde, nota — `template.json` de `boda-clasica` y
+ * `xv-jardin`, verificado [V] contra ambos). Por eso el estilo por posición (`:nth-of-type`)
+ * sobre esos `span` es la única vía disponible para diferenciar título/hora/lugar/nota sin tocar
+ * `blocks/**`: en modo público esos `<span>` no llevan ningún atributo distintivo (activation.ts
+ * solo añade `data-block-id` en `mode="canvas"`). Riesgo documentado en preguntas-abiertas.md: una
+ * plantilla futura que declare `eventCards.itemBlocks` en OTRO orden recibiría este mismo estilo
+ * posicional mal emparejado — aceptado porque las dos plantillas semilla comparten el orden.
+ *
+ * `timeline` (eje + hitos) y `cards` (rejilla) leen como dos maquetas distintas de verdad.
+ */
+
+.section {
+  background: var(--inv-color-bg);
+  padding: var(--inv-space-8) var(--inv-space-5);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--inv-space-7);
+  animation: event-rise var(--inv-motion-normal) var(--inv-motion-ease) both;
+}
+
+@keyframes event-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--inv-space-2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    animation: none;
+  }
+}
+
+.heading {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  padding-bottom: var(--inv-space-3);
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-3xl);
+  color: var(--inv-color-ink);
+}
+
+.heading::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--inv-space-6);
+  height: var(--inv-border-width-axis);
+  background: var(--inv-color-accent);
+}
+
+.groupWrap ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--inv-space-6);
+  max-width: var(--inv-measure);
+  margin-inline: auto;
+}
+
+.groupWrap li {
+  display: block;
+}
+
+.groupWrap li > span {
+  display: block;
+}
+
+/* Los bloques que `GroupBlock` monta dentro de cada `<span class="itemBlock">` fijan su propio
+ * color (TextBlock/DateTimeRangeBlock/LocationBlock, `src/blocks/*.module.css`) — el `color` de
+ * los `nth-of-type` de abajo no llegaría al texto real sin este `> *` (una declaración explícita
+ * en el propio nodo gana siempre sobre la heredada; medido con una captura real, bitácora 3-2b). */
+.groupWrap li > span > * {
+  color: inherit;
+}
+
+.note > * {
+  color: inherit;
+}
+
+/* itemBlock 1: título del momento. */
+.groupWrap li > span:nth-of-type(1) {
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-lg);
+  color: var(--inv-color-ink);
+}
+
+/* itemBlock 2: cuándo (dateTimeRange). */
+.groupWrap li > span:nth-of-type(2) {
+  margin-top: var(--inv-space-1);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-accent);
+}
+
+/* itemBlock 3: dónde (location). */
+.groupWrap li > span:nth-of-type(3) {
+  margin-top: var(--inv-space-2);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-muted);
+}
+
+/* itemBlock 4: nota (opcional). */
+.groupWrap li > span:nth-of-type(4) {
+  margin-top: var(--inv-space-1);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  font-style: italic;
+  color: var(--inv-color-muted);
+}
+
+.singlePlace {
+  display: grid;
+  gap: var(--inv-space-3);
+  max-width: var(--inv-measure);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.note {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-muted);
+}
+
+/* ------------------------------------------------------------------ variante: timeline ---- */
+
+.section[data-variant="timeline"] .groupWrap li {
+  position: relative;
+  padding-inline-start: var(--inv-space-6);
+}
+
+.section[data-variant="timeline"] .groupWrap li::before {
+  content: "";
+  position: absolute;
+  top: var(--inv-space-1);
+  left: calc(var(--inv-space-6) / 2 - var(--inv-space-2) / 2);
+  width: var(--inv-space-2);
+  height: var(--inv-space-2);
+  border-radius: 50%;
+  background: var(--inv-color-accent);
+  box-shadow: 0 0 0 var(--inv-border-width-hairline) var(--inv-color-bg);
+  z-index: 1;
+}
+
+.section[data-variant="timeline"] .groupWrap li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: var(--inv-space-1);
+  left: calc(var(--inv-space-6) / 2 - var(--inv-border-width-axis) / 2);
+  width: var(--inv-border-width-axis);
+  height: calc(100% + var(--inv-space-6));
+  background: color-mix(in srgb, var(--inv-color-accent) 35%, transparent);
+}
+
+/* --------------------------------------------------------------------- variante: cards ---- */
+
+.section[data-variant="cards"] .groupWrap ul {
+  max-width: none;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .section[data-variant="cards"] .groupWrap ul {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.section[data-variant="cards"] .groupWrap li {
+  padding: var(--inv-space-5);
+  background: var(--inv-color-surface);
+  border-radius: var(--inv-radius-md);
+  box-shadow: var(--inv-shadow-sm);
+}
+
+/* --------------------------------------------------------------- variante: single-place ---- */
+
+.section[data-variant="single-place"] .groupWrap ul {
+  max-width: var(--inv-measure);
+}
+
+.section[data-variant="single-place"] .groupWrap li {
+  padding: var(--inv-space-6);
+  background: var(--inv-color-surface);
+  border-radius: var(--inv-radius-lg);
+  box-shadow: var(--inv-shadow-md);
+  text-align: center;
+}
+
+.section[data-variant="single-place"] .groupWrap li > span:nth-of-type(1) {
+  font-size: var(--inv-text-xl);
+}

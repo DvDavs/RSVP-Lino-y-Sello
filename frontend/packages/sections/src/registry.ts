@@ -25,6 +25,12 @@ import type { ComposedSection } from "./schema-types.ts";
 import type { BlockRef, RenderMode } from "./types.ts";
 import { SECTION_REGISTRY_DATA, labelsFor } from "./registry-data.ts";
 import { createPlaceholderSection } from "./placeholder/SectionPlaceholder.tsx";
+import { CoverSection } from "./sections/CoverSection.tsx";
+import { CelebrantSection } from "./sections/CelebrantSection.tsx";
+import { EventSection } from "./sections/EventSection.tsx";
+import { GallerySection } from "./sections/GallerySection.tsx";
+import { StorySection } from "./sections/StorySection.tsx";
+import { DressCodeSection } from "./sections/DressCodeSection.tsx";
 
 export type { RenderMode, BlockRef } from "./types.ts";
 
@@ -65,16 +71,19 @@ function buildEntry(sectionType: SectionType): SectionEntry {
 }
 
 export const sectionRegistry: Readonly<Record<SectionType, SectionEntry>> = {
-  cover: buildEntry("cover"),
-  celebrant: buildEntry("celebrant"),
-  event: buildEntry("event"),
-  gallery: buildEntry("gallery"),
+  // Bloque 3-2b (este agente): 6 componentes reales — solo se sustituye `component`.
+  cover: { ...buildEntry("cover"), component: CoverSection },
+  celebrant: { ...buildEntry("celebrant"), component: CelebrantSection },
+  event: { ...buildEntry("event"), component: EventSection },
+  gallery: { ...buildEntry("gallery"), component: GallerySection },
+  story: { ...buildEntry("story"), component: StorySection },
+  dressCode: { ...buildEntry("dressCode"), component: DressCodeSection },
+  // Bloque 3-2c (otro agente, en paralelo): siguen en marcador de posición hasta que sustituya
+  // `component` de sus 6 entradas — NO TOCAR estas líneas (brief 3-2b, "ARCHIVOS QUE TE TOCAN").
   giftTable: buildEntry("giftTable"),
   suggestions: buildEntry("suggestions"),
   amenities: buildEntry("amenities"),
   rsvp: buildEntry("rsvp"),
   family: buildEntry("family"),
-  story: buildEntry("story"),
-  dressCode: buildEntry("dressCode"),
   footer: buildEntry("footer"),
 };

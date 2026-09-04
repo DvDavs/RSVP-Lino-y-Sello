@@ -118,4 +118,16 @@
   --inv-image-aspect-default: 4 / 3;
   --inv-focal-x: 50%;
   --inv-focal-y: 50%;
+
+  /* ------------------------------------------------------------------------------------------
+   * 6. Bordes y trazos (AÑADIDO por 3-2b, bloque de secciones cover/celebrant/event/gallery/
+   *    story/dressCode). Ninguna herramienta de diseño expresa un grosor de trazo por tema (no
+   *    hay campo en `ResolvedTheme` para esto, igual que radios/espaciado en la sección 3), así
+   *    que es un valor FIJO del sistema, no del documento (P3) — igual criterio que
+   *    `--inv-radius-*`. Se usa en trazos finos: eje de línea de tiempo (EventSection/
+   *    StorySection), separadores entre columnas (DressCodeSection) y el borde de tarjeta/marco
+   *    (CoverSection variante "framed"). Nunca un "1px"/"2px" a mano en un .module.css.
+   * ---------------------------------------------------------------------------------------- */
+  --inv-border-width-hairline: 1px;
+  --inv-border-width-axis: 2px;
 }
