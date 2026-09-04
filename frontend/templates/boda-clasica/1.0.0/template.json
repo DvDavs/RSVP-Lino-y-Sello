@@ -20,7 +20,7 @@
     "hashtags",
     "music"
   ],
-  "previewImage": "assets/preview.png",
+  "previewImage": "assets/preview.webp",
   "sections": [
     {
       "key": "cover",
@@ -1101,16 +1101,22 @@
   ],
   "assets": [
     {
-      "path": "assets/preview.png",
-      "sha256": "8e22083a98052e48852458432561c95a0ffb0611f77e60901a67377b6d7866c9",
-      "contentType": "image/png",
-      "bytes": 509379
+      "path": "assets/divider.webp",
+      "sha256": "3960f97e40e54783bb851ca34e4afc78c8d8ff540a486aa6451a96db87e1f1ec",
+      "contentType": "image/webp",
+      "bytes": 31002
     },
     {
-      "path": "assets/rsvp-bg.png",
-      "sha256": "34fbabcdcaf030f55fb5fe236cd71db28c650721e70bf6ea9986e8729f37e9de",
-      "contentType": "image/png",
-      "bytes": 599841
+      "path": "assets/preview.webp",
+      "sha256": "5edcd64d402752bb66f89236a9f4683376ca457d6fed50d4d5114ac189b28ce5",
+      "contentType": "image/webp",
+      "bytes": 70120
+    },
+    {
+      "path": "assets/rsvp-bg.webp",
+      "sha256": "2f62262e765cef18fe523a57a4a46b2633e029c668d981d8fbf5644eefd9777e",
+      "contentType": "image/webp",
+      "bytes": 43340
     }
   ],
   "migrationsFrom": []
