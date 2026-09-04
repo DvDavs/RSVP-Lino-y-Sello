@@ -1,0 +1,787 @@
+{
+  "name": "kinds-los-trece-escalares",
+  "descripcion": "resolveScalar sobre los 13 kinds, incluidos audio/time/boolean de usuario y las variantes con campo opcional ausente (link sin label, location sin address/mapHref, person sin note). `choice` con optionId fuera de options: la etiqueta cae al propio optionId y se registra I-02 en invalidValues",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "title": {
+          "es-MX": "cover"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "k.text",
+            "role": "coverTitle",
+            "label": {
+              "es-MX": "k.text"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          },
+          {
+            "id": "k.richText",
+            "role": "storyBody",
+            "label": {
+              "es-MX": "k.richText"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "richText",
+            "constraints": {
+              "maxLength": 8000
+            }
+          },
+          {
+            "id": "k.listText",
+            "role": "dressCodeDetail",
+            "label": {
+              "es-MX": "k.listText"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "listText",
+            "constraints": {
+              "minItems": 0,
+              "maxItems": 12,
+              "maxItemLength": 200
+            }
+          },
+          {
+            "id": "k.image",
+            "role": "coverImage",
+            "label": {
+              "es-MX": "k.image"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "image",
+            "constraints": {
+              "aspect": "free",
+              "maxBytes": 8388608
+            }
+          },
+          {
+            "id": "k.audio",
+            "role": "backgroundMusic",
+            "label": {
+              "es-MX": "k.audio"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "audio",
+            "constraints": {
+              "maxBytes": 8388608
+            }
+          },
+          {
+            "id": "k.date",
+            "role": "coverDate",
+            "label": {
+              "es-MX": "k.date"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "date",
+            "formatId": "long"
+          },
+          {
+            "id": "k.time",
+            "role": "eventTime",
+            "label": {
+              "es-MX": "k.time"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "time",
+            "formatId": "h12"
+          },
+          {
+            "id": "k.range",
+            "role": "eventWhen",
+            "label": {
+              "es-MX": "k.range"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "dateTimeRange",
+            "formatId": "long-h12"
+          },
+          {
+            "id": "k.link",
+            "role": "footerLink",
+            "label": {
+              "es-MX": "k.link"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "link"
+          },
+          {
+            "id": "k.linkSinLabel",
+            "role": "hashtagLink",
+            "label": {
+              "es-MX": "k.linkSinLabel"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "link"
+          },
+          {
+            "id": "k.location",
+            "role": "eventPlace",
+            "label": {
+              "es-MX": "k.location"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "location"
+          },
+          {
+            "id": "k.locationMinima",
+            "role": "eventLocationNote",
+            "label": {
+              "es-MX": "k.locationMinima"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "location"
+          },
+          {
+            "id": "k.choice",
+            "role": "hashtagPlatform",
+            "label": {
+              "es-MX": "k.choice"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "choice",
+            "options": [
+              {
+                "id": "instagram",
+                "label": {
+                  "es-MX": "Instagram"
+                }
+              },
+              {
+                "id": "tiktok",
+                "label": {
+                  "es-MX": "TikTok"
+                }
+              }
+            ]
+          },
+          {
+            "id": "k.choiceDesconocida",
+            "role": "giftOptionKind",
+            "label": {
+              "es-MX": "k.choiceDesconocida"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "choice",
+            "options": [
+              {
+                "id": "sobre",
+                "label": {
+                  "es-MX": "Sobre"
+                }
+              }
+            ]
+          },
+          {
+            "id": "k.boolean",
+            "role": "personPhotoVisible",
+            "label": {
+              "es-MX": "k.boolean"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "boolean"
+          },
+          {
+            "id": "k.person",
+            "role": "parentA1",
+            "label": {
+              "es-MX": "k.person"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "person"
+          },
+          {
+            "id": "k.personSinNota",
+            "role": "parentA2",
+            "label": {
+              "es-MX": "k.personSinNota"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "person"
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {}
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "cover",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {
+      "k.text": {
+        "kind": "text",
+        "value": "Ana & Luis"
+      },
+      "k.richText": {
+        "kind": "richText",
+        "doc": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Primer párrafo."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": []
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Tercer párrafo."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "k.listText": {
+        "kind": "listText",
+        "items": [
+          "Formal",
+          "Colores tierra"
+        ]
+      },
+      "k.image": {
+        "kind": "image",
+        "assetId": "as_01J8PHATA1AAAAAAAAAAAAAAAA",
+        "alt": "portada",
+        "focal": {
+          "x": 0.5,
+          "y": 0.25
+        }
+      },
+      "k.audio": {
+        "kind": "audio",
+        "assetId": "as_01J8SANADA1AAAAAAAAAAAAAAA"
+      },
+      "k.date": {
+        "kind": "date",
+        "value": "2027-09-18"
+      },
+      "k.time": {
+        "kind": "time",
+        "value": "13:45"
+      },
+      "k.range": {
+        "kind": "dateTimeRange",
+        "start": "2027-09-18T18:00",
+        "end": "2027-09-18T23:00"
+      },
+      "k.link": {
+        "kind": "link",
+        "href": "https://ejemplo.mx/mapa",
+        "label": "Cómo llegar"
+      },
+      "k.linkSinLabel": {
+        "kind": "link",
+        "href": "https://ejemplo.mx/insta"
+      },
+      "k.location": {
+        "kind": "location",
+        "name": "Hacienda El Olivo",
+        "address": "Camino Real 12",
+        "mapHref": "https://maps.example.com/olivo"
+      },
+      "k.locationMinima": {
+        "kind": "location",
+        "name": "Jardín trasero"
+      },
+      "k.choice": {
+        "kind": "choice",
+        "optionId": "tiktok"
+      },
+      "k.choiceDesconocida": {
+        "kind": "choice",
+        "optionId": "transferencia"
+      },
+      "k.boolean": {
+        "kind": "boolean",
+        "value": true
+      },
+      "k.person": {
+        "kind": "person",
+        "name": "Ana Ruiz",
+        "note": "madrina"
+      },
+      "k.personSinNota": {
+        "kind": "person",
+        "name": "Luis Paz"
+      }
+    },
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": "2027-03-08",
+    "time": "19:05",
+    "hashtag": "#AnaYLuis",
+    "coverPhotoUrl": "https://cdn.invitaciones.evolutiondev.mx/legacy/portada.jpg",
+    "childrenAllowed": false,
+    "youngAllowed": true,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {
+    "as_01J8PHATA1AAAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/uno.webp",
+      "width": 1200,
+      "height": 800
+    },
+    "as_01J8PHATA2AAAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/dos.webp"
+    },
+    "as_01J8SANADA1AAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/tres.mp3"
+    }
+  },
+  "locale": "es-MX",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-MX",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "variant": "default",
+        "visible": true,
+        "title": "cover",
+        "blocks": [
+          {
+            "id": "k.text",
+            "role": "coverTitle",
+            "type": "text",
+            "label": "k.text",
+            "provenance": "user",
+            "value": {
+              "kind": "text",
+              "value": "Ana & Luis"
+            }
+          },
+          {
+            "id": "k.richText",
+            "role": "storyBody",
+            "type": "richText",
+            "label": "k.richText",
+            "provenance": "user",
+            "value": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Primer párrafo."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": []
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Tercer párrafo."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "k.listText",
+            "role": "dressCodeDetail",
+            "type": "listText",
+            "label": "k.listText",
+            "provenance": "user",
+            "value": {
+              "kind": "listText",
+              "items": [
+                "Formal",
+                "Colores tierra"
+              ]
+            }
+          },
+          {
+            "id": "k.image",
+            "role": "coverImage",
+            "type": "image",
+            "label": "k.image",
+            "provenance": "user",
+            "value": {
+              "kind": "image",
+              "url": "https://cdn.invitaciones.evolutiondev.mx/a/uno.webp",
+              "alt": "portada",
+              "focal": {
+                "x": 0.5,
+                "y": 0.25
+              }
+            }
+          },
+          {
+            "id": "k.audio",
+            "role": "backgroundMusic",
+            "type": "audio",
+            "label": "k.audio",
+            "provenance": "user",
+            "value": {
+              "kind": "audio",
+              "url": "https://cdn.invitaciones.evolutiondev.mx/a/tres.mp3"
+            }
+          },
+          {
+            "id": "k.date",
+            "role": "coverDate",
+            "type": "date",
+            "label": "k.date",
+            "provenance": "user",
+            "value": {
+              "kind": "date",
+              "value": "2027-09-18",
+              "formatted": "18 de septiembre de 2027"
+            }
+          },
+          {
+            "id": "k.time",
+            "role": "eventTime",
+            "type": "time",
+            "label": "k.time",
+            "provenance": "user",
+            "value": {
+              "kind": "time",
+              "value": "13:45",
+              "formatted": "1:45 pm"
+            }
+          },
+          {
+            "id": "k.range",
+            "role": "eventWhen",
+            "type": "dateTimeRange",
+            "label": "k.range",
+            "provenance": "user",
+            "value": {
+              "kind": "dateTimeRange",
+              "start": "2027-09-18T18:00",
+              "end": "2027-09-18T23:00",
+              "formatted": "18 de septiembre de 2027, 6:00 pm – 11:00 pm"
+            }
+          },
+          {
+            "id": "k.link",
+            "role": "footerLink",
+            "type": "link",
+            "label": "k.link",
+            "provenance": "user",
+            "value": {
+              "kind": "link",
+              "href": "https://ejemplo.mx/mapa",
+              "label": "Cómo llegar"
+            }
+          },
+          {
+            "id": "k.linkSinLabel",
+            "role": "hashtagLink",
+            "type": "link",
+            "label": "k.linkSinLabel",
+            "provenance": "user",
+            "value": {
+              "kind": "link",
+              "href": "https://ejemplo.mx/insta"
+            }
+          },
+          {
+            "id": "k.location",
+            "role": "eventPlace",
+            "type": "location",
+            "label": "k.location",
+            "provenance": "user",
+            "value": {
+              "kind": "location",
+              "name": "Hacienda El Olivo",
+              "address": "Camino Real 12",
+              "mapHref": "https://maps.example.com/olivo"
+            }
+          },
+          {
+            "id": "k.locationMinima",
+            "role": "eventLocationNote",
+            "type": "location",
+            "label": "k.locationMinima",
+            "provenance": "user",
+            "value": {
+              "kind": "location",
+              "name": "Jardín trasero"
+            }
+          },
+          {
+            "id": "k.choice",
+            "role": "hashtagPlatform",
+            "type": "choice",
+            "label": "k.choice",
+            "provenance": "user",
+            "value": {
+              "kind": "choice",
+              "optionId": "tiktok",
+              "label": "TikTok"
+            }
+          },
+          {
+            "id": "k.choiceDesconocida",
+            "role": "giftOptionKind",
+            "type": "choice",
+            "label": "k.choiceDesconocida",
+            "provenance": "user",
+            "value": {
+              "kind": "choice",
+              "optionId": "transferencia",
+              "label": "transferencia"
+            }
+          },
+          {
+            "id": "k.boolean",
+            "role": "personPhotoVisible",
+            "type": "boolean",
+            "label": "k.boolean",
+            "provenance": "user",
+            "value": {
+              "kind": "boolean",
+              "value": true
+            }
+          },
+          {
+            "id": "k.person",
+            "role": "parentA1",
+            "type": "person",
+            "label": "k.person",
+            "provenance": "user",
+            "value": {
+              "kind": "person",
+              "name": "Ana Ruiz",
+              "note": "madrina"
+            }
+          },
+          {
+            "id": "k.personSinNota",
+            "role": "parentA2",
+            "type": "person",
+            "label": "k.personSinNota",
+            "provenance": "user",
+            "value": {
+              "kind": "person",
+              "name": "Luis Paz"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [],
+    "stillDefault": [],
+    "orphanContent": [],
+    "orphanSections": [],
+    "invalidValues": [
+      {
+        "blockId": "k.choiceDesconocida",
+        "code": "I-02_CHOICE_UNKNOWN_OPTION"
+      }
+    ],
+    "themeFallback": null
+  }
+}

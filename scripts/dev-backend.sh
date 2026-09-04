@@ -1,0 +1,254 @@
+#!/usr/bin/env bash
+# scripts/dev-backend.sh — levanta TODA la aplicación (no un contexto acotado) con un solo comando,
+# sobre el PostgreSQL efímero de `scripts/pg-ephemeral.sh`, y espera activamente a que responda.
+#
+# Bloque 3-0a de la fase 3. Antes de él la aplicación completa no arrancaba: `InvitationGuestEntity`
+# mapea `invitation_guest.graduates_name`, columna que ninguna migración creaba, con
+# `ddl-auto: validate` (ADR-2-ORQ-02). Lo desbloquea `V40__add_invitation_guest_graduates_name.sql`.
+#
+#   scripts/dev-backend.sh start     # arranca (idempotente: si ya responde, no hace nada)
+#   scripts/dev-backend.sh stop      # para el backend y el clúster efímero
+#   scripts/dev-backend.sh status    # 0 si el backend responde
+#   scripts/dev-backend.sh restart
+#   scripts/dev-backend.sh env       # imprime las variables para hacer `eval $(… env)` en otro shell
+#   scripts/dev-backend.sh register <dir>   # registra un paquete de plantilla con el backend PARADO
+#                                           # (`--templates2.register.*` de handoffs/2-3.md)
+#
+# Variables que puedes fijar antes de llamar:
+#   TPL_DEV_PORT           puerto HTTP del backend           (por defecto 6003, el de application.yml)
+#   TEMPLATES2_ASSETS_BUCKET  bucket declarado                (por defecto templates2-dev-local)
+#   TEMPLATES2_ASSETS_MODE    's3' o 'local'                  (por defecto local, ver más abajo)
+#   TPL_DEV_LOG            archivo de log                     (por defecto build/dev/backend.log)
+#   TPL_DEV_TIMEOUT        segundos de espera del arranque    (por defecto 300)
+set -euo pipefail
+
+RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$RAIZ"
+
+PUERTO="${TPL_DEV_PORT:-6003}"
+LOG="${TPL_DEV_LOG:-$RAIZ/build/dev/backend.log}"
+PIDFILE="${TPL_DEV_PIDFILE:-$RAIZ/build/dev/backend.pid}"
+TIMEOUT="${TPL_DEV_TIMEOUT:-300}"
+BASE="http://127.0.0.1:$PUERTO"
+DB="${TPL_DEV_DB:-invitaciones_dev}"
+
+# --- Bucket de assets -------------------------------------------------------------------------
+# OBLIGATORIA y sin defecto en `application.yml` (ADR-2-ORQ-03) porque el único defecto natural era
+# el bucket de PRODUCCIÓN. Aquí se declara un nombre de PRUEBAS explícito y se comprueba que nadie
+# haya exportado el de producción: escribir ahí desde un entorno de desarrollo es inaceptable.
+export TEMPLATES2_ASSETS_BUCKET="${TEMPLATES2_ASSETS_BUCKET:-templates2-dev-local}"
+BUCKET_DE_PRODUCCION="invitacionesdigitalesassets"
+if [ "$TEMPLATES2_ASSETS_BUCKET" = "$BUCKET_DE_PRODUCCION" ]; then
+  echo "dev-backend: NO. TEMPLATES2_ASSETS_BUCKET apunta al bucket de PRODUCCIÓN ($BUCKET_DE_PRODUCCION)." >&2
+  echo "             Este script es de desarrollo y nunca escribe ahí. Cambia la variable." >&2
+  exit 2
+fi
+
+# --- Modo de assets ---------------------------------------------------------------------------
+# `s3` es el valor por defecto de `application.yml`; aquí el defecto es `local` (ADR-3-0a-02) porque
+# en este entorno no hay ningún bucket de S3 utilizable: con `s3` toda subida devuelve
+# `502 TPL_ASSET_STORAGE_UNAVAILABLE` (evidencia en bitacora/3-0a.md). Fuerza `s3` si tienes bucket:
+#   TEMPLATES2_ASSETS_MODE=s3 scripts/dev-backend.sh start
+export TEMPLATES2_ASSETS_MODE="${TEMPLATES2_ASSETS_MODE:-local}"
+export TEMPLATES2_ASSETS_LOCAL_DIR="${TEMPLATES2_ASSETS_LOCAL_DIR:-$RAIZ/build/templates2-assets}"
+export TEMPLATES2_ASSETS_LOCAL_BASE_URL="${TEMPLATES2_ASSETS_LOCAL_BASE_URL:-$BASE/public/templates2-assets}"
+if [ "$TEMPLATES2_ASSETS_MODE" = "local" ]; then
+  # `AssetUrlResolver` construye "{public-base-url}/{s3_key}" (`02 §10.4`): en modo local tiene que
+  # apuntar al propio backend, o el `composed` traería URL de un bucket que no existe.
+  export TEMPLATES2_ASSETS_PUBLIC_BASE_URL="${TEMPLATES2_ASSETS_PUBLIC_BASE_URL:-$TEMPLATES2_ASSETS_LOCAL_BASE_URL}"
+fi
+
+# --- Mongo ------------------------------------------------------------------------------------
+# `templates2` no usa Mongo (ADR-009) pero `MongoDataInitializer` es un `CommandLineRunner` del
+# módulo antiguo que siembra al arrancar. No hay `mongod` en este entorno; el sembrador captura sus
+# propias excepciones (`MongoDataInitializer.kt:88,113`) así que NO tumba el arranque, pero con el
+# tiempo de selección de servidor por defecto (30 s × 16 operaciones) tardaría ~8 minutos. Se
+# recorta a 250 ms: el arranque queda en segundos y los errores siguen apareciendo en el log.
+export SPRING_DATA_MONGODB_URI="${SPRING_DATA_MONGODB_URI:-mongodb://localhost:27017/invitaciones?serverSelectionTimeoutMS=250&connectTimeoutMS=250}"
+
+# "Responde" = Tomcat contesta CUALQUIER código HTTP. No se elige una ruta concreta a propósito:
+# la sonda no debe depender de que esa ruta esté bien, sólo de que el servidor esté escuchando.
+responde() {
+  local codigo
+  codigo="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 3 "$BASE/public/i/sonda/exists" 2>/dev/null)" || return 1
+  [ -n "$codigo" ] && [ "$codigo" != "000" ]
+}
+
+arrancar_postgres() {
+  # `pg-ephemeral.sh start` EXPORTA sus variables en el shell que hace `source` — pero también
+  # define funciones llamadas `start`, `stop` y `status`, que PISARÍAN las de este script. Por eso
+  # se hace el `source` en un subshell y sólo se importan de vuelta las tres variables.
+  local vars
+  vars="$(bash -c "source '$RAIZ/scripts/pg-ephemeral.sh' start >/dev/null 2>&1
+    printf 'TPL_TEST_PGPORT=%s\nTPL_TEST_PGDATA=%s\nTPL_TEST_JDBC_URL=%s\n' \
+      \"\$TPL_TEST_PGPORT\" \"\$TPL_TEST_PGDATA\" \"\$TPL_TEST_JDBC_URL\"")"
+  eval "$(printf '%s\n' "$vars" | sed 's/^/export /')"
+  if [ -z "${TPL_TEST_PGPORT:-}" ]; then
+    echo "dev-backend: pg-ephemeral.sh no arrancó ningún clúster" >&2
+    return 1
+  fi
+  local puerto="$TPL_TEST_PGPORT"
+  local pgbin="${TPL_TEST_PGBIN:-/usr/lib/postgresql/16/bin}"
+
+  # V1__initial_schema.sql hace `ALTER TABLE … OWNER TO evolution`: sin ese rol Flyway falla con
+  # `ERROR: role "evolution" does not exist`. Es un requisito del volcado original, no del módulo.
+  "$pgbin/psql" -h 127.0.0.1 -p "$puerto" -U postgres -d postgres -v ON_ERROR_STOP=1 -q <<SQL
+DO \$\$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'evolution') THEN
+    CREATE ROLE evolution LOGIN SUPERUSER PASSWORD 'evolution123';
+  END IF;
+END \$\$;
+SQL
+  if ! "$pgbin/psql" -h 127.0.0.1 -p "$puerto" -U postgres -d postgres -Atqc \
+      "SELECT 1 FROM pg_database WHERE datname = '$DB'" | grep -q 1; then
+    "$pgbin/createdb" -h 127.0.0.1 -p "$puerto" -U postgres -O evolution "$DB"
+  fi
+
+  # Flyway lo ejecuta el propio arranque (`spring.flyway.enabled: true`, `application.yml:35`):
+  # no hace falta invocarlo aparte, y hacerlo dos veces sería peor.
+  export SPRING_DATASOURCE_URL="jdbc:postgresql://127.0.0.1:$puerto/$DB"
+  export SPRING_DATASOURCE_USERNAME="evolution"
+  export SPRING_DATASOURCE_PASSWORD="evolution123"
+  export TPL_DEV_PGPORT="$puerto"
+}
+
+start() {
+  if responde; then
+    echo "dev-backend: ya responde en $BASE (idempotente, no hago nada)"
+    imprimir_resumen
+    return 0
+  fi
+  mkdir -p "$(dirname "$LOG")"
+  arrancar_postgres
+  : > "$LOG"
+  echo "dev-backend: compilando y arrancando… (log: $LOG)" >&2
+  # `--console=plain` y sin daemon: el log queda legible y `stop` mata un árbol de procesos pequeño.
+  nohup ./gradlew bootRun --console=plain --no-daemon \
+      -Dorg.gradle.jvmargs=-Xmx1g >>"$LOG" 2>&1 &
+  echo $! > "$PIDFILE"
+  local pid; pid="$(cat "$PIDFILE")"
+
+  # Espera ACTIVA: se sondea el puerto, no se duerme un tiempo fijo. Se aborta en cuanto el proceso
+  # muere o el log dice que el arranque falló, para no esperar el tope entero ante un fallo obvio.
+  local t=0
+  while [ "$t" -lt "$TIMEOUT" ]; do
+    if responde; then
+      echo
+      echo "dev-backend: ARRIBA en $BASE (PID $pid, ${t}s)"
+      grep -aoE "Started InvitationsApplicationKt in [0-9.]+ seconds \(process running for [0-9.]+\)" "$LOG" | tail -1 || true
+      imprimir_resumen
+      return 0
+    fi
+    if ! kill -0 "$pid" 2>/dev/null; then
+      echo >&2
+      echo "dev-backend: el proceso murió durante el arranque. Últimas líneas del log:" >&2
+      tail -40 "$LOG" >&2
+      return 1
+    fi
+    if grep -qa "APPLICATION FAILED TO START\|Application run failed" "$LOG"; then
+      echo >&2
+      echo "dev-backend: el arranque FALLÓ. Últimas líneas del log:" >&2
+      tail -40 "$LOG" >&2
+      stop >/dev/null 2>&1 || true
+      return 1
+    fi
+    printf '.' >&2
+    sleep 2
+    t=$((t + 2))
+  done
+  echo >&2
+  echo "dev-backend: agotado el tope de ${TIMEOUT}s sin respuesta. Últimas líneas del log:" >&2
+  tail -40 "$LOG" >&2
+  return 1
+}
+
+imprimir_resumen() {
+  cat <<RESUMEN
+
+  URL          $BASE
+  PID          $(cat "$PIDFILE" 2>/dev/null || echo '(desconocido)')
+  Log          $LOG
+  Postgres     ${SPRING_DATASOURCE_URL:-(ya en marcha; usa 'status')}
+  Assets       modo=$TEMPLATES2_ASSETS_MODE bucket=$TEMPLATES2_ASSETS_BUCKET
+RESUMEN
+}
+
+stop() {
+  if [ -f "$PIDFILE" ]; then
+    local pid; pid="$(cat "$PIDFILE")"
+    # `bootRun` lanza la aplicación como HIJO del proceso de Gradle: hay que matar el grupo entero,
+    # o el Tomcat sigue escuchando con Gradle ya muerto.
+    if kill -0 "$pid" 2>/dev/null; then
+      pkill -TERM -P "$pid" 2>/dev/null || true
+      kill -TERM "$pid" 2>/dev/null || true
+      local t=0
+      while kill -0 "$pid" 2>/dev/null && [ "$t" -lt 30 ]; do sleep 1; t=$((t + 1)); done
+      pkill -KILL -P "$pid" 2>/dev/null || true
+      kill -KILL "$pid" 2>/dev/null || true
+    fi
+    rm -f "$PIDFILE"
+  fi
+  # Red de seguridad: cualquier JVM que siga sujetando el puerto (p. ej. tras un `kill -9` previo).
+  local restos; restos="$(pgrep -f "InvitationsApplicationKt" 2>/dev/null || true)"
+  if [ -n "$restos" ]; then kill -KILL $restos 2>/dev/null || true; fi
+  "$RAIZ/scripts/pg-ephemeral.sh" stop || true
+  echo "dev-backend: parado (idempotente)"
+}
+
+status() {
+  if responde; then
+    echo "dev-backend: EN MARCHA — $BASE (PID $(cat "$PIDFILE" 2>/dev/null || echo '?'))"
+    return 0
+  fi
+  echo "dev-backend: parado"
+  return 1
+}
+
+env_vars() {
+  # Para `eval "$(scripts/dev-backend.sh env)"` desde otro shell (lo usa scripts/smoke.sh).
+  local estado="${TPL_TEST_STATE_DIR:-/tmp/templates2-pg}/state.env"
+  if [ -f "$estado" ]; then
+    local puerto; puerto="$( . "$estado"; echo "$TPL_TEST_PGPORT" )"
+    echo "export TPL_DEV_PGPORT=$puerto"
+    echo "export TPL_DEV_JDBC_URL=jdbc:postgresql://127.0.0.1:$puerto/$DB"
+    echo "export PGPORT_DEV=$puerto"
+  fi
+  echo "export TPL_DEV_BASE=$BASE"
+  echo "export TEMPLATES2_ASSETS_BUCKET=$TEMPLATES2_ASSETS_BUCKET"
+  echo "export TEMPLATES2_ASSETS_MODE=$TEMPLATES2_ASSETS_MODE"
+}
+
+# Registro de un paquete por línea de comandos (handoffs/2-3.md). Recorre EXACTAMENTE el mismo
+# servicio que `POST /master/templates2/versions` (P4: registrar una plantilla no toca Kotlin).
+# Necesita el puerto libre, así que se ejecuta con el backend parado.
+register() {
+  local ruta="${1:-}"
+  if [ -z "$ruta" ]; then echo "uso: $0 register <dir templates/<slug>/<version>/ | .zip>" >&2; exit 2; fi
+  if responde; then
+    echo "dev-backend: hay un backend en marcha en $BASE; párale antes de registrar por línea de comandos" >&2
+    echo "             (o usa la ruta HTTP POST /master/templates2/versions con un JWT MASTER)." >&2
+    exit 2
+  fi
+  arrancar_postgres
+  mkdir -p "$(dirname "$LOG")"
+  # `server.port=0` para no chocar con nada; el `ApplicationRunner` corre igual y después se sale.
+  # `web-application-type=none` para no abrir puerto, y `templates2.scheduling.enabled=false` porque
+  # el planificador del módulo levanta un hilo NO demonio: sin apagarlo la JVM no termina nunca
+  # después de registrar (ADR-2-4-06 / ADR-2-6-02).
+  ./gradlew bootRun --console=plain --no-daemon --args="\
+--templates2.register.enabled=true \
+--templates2.register.path=$ruta \
+--spring.main.web-application-type=none \
+--templates2.scheduling.enabled=false" 2>&1 | tee -a "$LOG" \
+    | grep -aE "templates2: registro|templates2: (created|noop|CREATED)|Started Invitations" || true
+}
+
+case "${1:-start}" in
+  start) start ;;
+  stop) stop ;;
+  restart) stop; start ;;
+  status) status ;;
+  env) env_vars ;;
+  register) shift; register "$@" ;;
+  *) echo "uso: $0 start|stop|restart|status|env|register <ruta>" >&2; exit 2 ;;
+esac

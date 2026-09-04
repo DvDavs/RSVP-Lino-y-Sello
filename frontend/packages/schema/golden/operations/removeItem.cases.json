@@ -1,0 +1,119 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "removeItem",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA"
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
+  },
+  {
+    "name": "forma inválida: itemId no es ULID ni tempId",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "removeItem",
+      "groupId": "event.cards",
+      "itemId": "bad"
+    },
+    "expectZodValid": false,
+    "expectOpViolations": [],
+    "reducerResult": null
+  },
+  {
+    "name": "itemId inexistente",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "removeItem",
+      "groupId": "event.cards",
+      "itemId": "01J8NAEXASTAAAAAAAAAAAAAAA"
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_ITEM_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_ITEM_UNKNOWN",
+        "groupId": "event.cards",
+        "itemId": "01J8NAEXASTAAAAAAAAAAAAAAA"
+      }
+    }
+  },
+  {
+    "name": "tempId sin resolver: TPL_ITEM_UNKNOWN",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "removeItem",
+      "groupId": "event.cards",
+      "itemId": "tmp:abcdefgh"
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_ITEM_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_ITEM_UNKNOWN",
+        "groupId": "event.cards",
+        "itemId": "tmp:abcdefgh"
+      }
+    }
+  }
+]

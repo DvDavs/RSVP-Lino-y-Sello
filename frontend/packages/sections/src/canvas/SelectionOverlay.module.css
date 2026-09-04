@@ -1,0 +1,25 @@
+.overlay {
+  display: none; /* CSSOM (SelectionOverlay.tsx) lo pone en "block" al medir una selección real. */
+  position: absolute;
+  pointer-events: none;
+  z-index: 2147483647;
+  border: var(--inv-focus-ring-width) solid var(--inv-color-accent);
+  border-radius: var(--inv-radius-sm);
+  box-shadow: var(--inv-shadow-sm);
+}
+
+.label {
+  position: absolute;
+  top: calc(-1 * var(--inv-space-5));
+  left: 0;
+  padding: var(--inv-space-1) var(--inv-space-2);
+  border-radius: var(--inv-radius-sm);
+  background: var(--inv-color-accent);
+  color: var(--inv-color-accent-ink);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-2xs);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}

@@ -1,0 +1,450 @@
+{
+  "name": "r6-formatos-es-ES",
+  "descripcion": "R6: los cinco formatId (long, month-year, iso, h12 y uno desconocido → long), la medianoche de h12 (H % 12 === 0 → 12) y las tres formas de formatRange, en es-ES. Sin Intl: tabla de meses literal (ICU difiere entre JVM y Node)",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX",
+      "es-ES",
+      "en-US"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "event",
+        "type": "event",
+        "title": {
+          "es-MX": "event"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "f.long",
+            "role": "eventDate",
+            "label": {
+              "es-MX": "f.long"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "date",
+            "formatId": "long"
+          },
+          {
+            "id": "f.monthYear",
+            "role": "storyDate",
+            "label": {
+              "es-MX": "f.monthYear"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "date",
+            "formatId": "month-year"
+          },
+          {
+            "id": "f.iso",
+            "role": "rsvpDeadline",
+            "label": {
+              "es-MX": "f.iso"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "date",
+            "formatId": "iso"
+          },
+          {
+            "id": "f.desconocido",
+            "role": "celebrantsDate",
+            "label": {
+              "es-MX": "f.desconocido"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "date",
+            "formatId": "no-existe"
+          },
+          {
+            "id": "f.medianoche",
+            "role": "eventTime",
+            "label": {
+              "es-MX": "f.medianoche"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "time",
+            "formatId": "h12"
+          },
+          {
+            "id": "f.mediodia",
+            "role": "coverDate",
+            "label": {
+              "es-MX": "f.mediodia"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "time",
+            "formatId": "h12"
+          },
+          {
+            "id": "f.rangoMismoDia",
+            "role": "eventWhen",
+            "label": {
+              "es-MX": "f.rangoMismoDia"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "dateTimeRange",
+            "formatId": "long-h12"
+          },
+          {
+            "id": "f.rangoOtroDia",
+            "role": "storyTitle",
+            "label": {
+              "es-MX": "f.rangoOtroDia"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "dateTimeRange",
+            "formatId": "long-h12"
+          },
+          {
+            "id": "f.rangoSinFin",
+            "role": "eventNote",
+            "label": {
+              "es-MX": "f.rangoSinFin"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "dateTimeRange",
+            "formatId": "long-h12"
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {}
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "event",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {
+      "f.long": {
+        "kind": "date",
+        "value": "2027-01-31"
+      },
+      "f.monthYear": {
+        "kind": "date",
+        "value": "2027-07-04"
+      },
+      "f.iso": {
+        "kind": "date",
+        "value": "2027-12-25"
+      },
+      "f.desconocido": {
+        "kind": "date",
+        "value": "2027-02-28"
+      },
+      "f.medianoche": {
+        "kind": "time",
+        "value": "00:07"
+      },
+      "f.mediodia": {
+        "kind": "time",
+        "value": "12:00"
+      },
+      "f.rangoMismoDia": {
+        "kind": "dateTimeRange",
+        "start": "2027-05-01T16:00",
+        "end": "2027-05-01T23:30"
+      },
+      "f.rangoOtroDia": {
+        "kind": "dateTimeRange",
+        "start": "2027-05-01T22:00",
+        "end": "2027-05-02T02:15"
+      },
+      "f.rangoSinFin": {
+        "kind": "dateTimeRange",
+        "start": "2027-05-01T09:05"
+      }
+    },
+    "attic": {},
+    "meta": {
+      "locale": "es-ES"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": "2027-03-08",
+    "time": "19:05",
+    "hashtag": "#AnaYLuis",
+    "coverPhotoUrl": "https://cdn.invitaciones.evolutiondev.mx/legacy/portada.jpg",
+    "childrenAllowed": false,
+    "youngAllowed": true,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {},
+  "locale": "es-ES",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-ES",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "event",
+        "type": "event",
+        "variant": "default",
+        "visible": true,
+        "title": "event",
+        "blocks": [
+          {
+            "id": "f.long",
+            "role": "eventDate",
+            "type": "date",
+            "label": "f.long",
+            "provenance": "user",
+            "value": {
+              "kind": "date",
+              "value": "2027-01-31",
+              "formatted": "31 de enero de 2027"
+            }
+          },
+          {
+            "id": "f.monthYear",
+            "role": "storyDate",
+            "type": "date",
+            "label": "f.monthYear",
+            "provenance": "user",
+            "value": {
+              "kind": "date",
+              "value": "2027-07-04",
+              "formatted": "julio de 2027"
+            }
+          },
+          {
+            "id": "f.iso",
+            "role": "rsvpDeadline",
+            "type": "date",
+            "label": "f.iso",
+            "provenance": "user",
+            "value": {
+              "kind": "date",
+              "value": "2027-12-25",
+              "formatted": "2027-12-25"
+            }
+          },
+          {
+            "id": "f.desconocido",
+            "role": "celebrantsDate",
+            "type": "date",
+            "label": "f.desconocido",
+            "provenance": "user",
+            "value": {
+              "kind": "date",
+              "value": "2027-02-28",
+              "formatted": "28 de febrero de 2027"
+            }
+          },
+          {
+            "id": "f.medianoche",
+            "role": "eventTime",
+            "type": "time",
+            "label": "f.medianoche",
+            "provenance": "user",
+            "value": {
+              "kind": "time",
+              "value": "00:07",
+              "formatted": "12:07 am"
+            }
+          },
+          {
+            "id": "f.mediodia",
+            "role": "coverDate",
+            "type": "time",
+            "label": "f.mediodia",
+            "provenance": "user",
+            "value": {
+              "kind": "time",
+              "value": "12:00",
+              "formatted": "12:00 pm"
+            }
+          },
+          {
+            "id": "f.rangoMismoDia",
+            "role": "eventWhen",
+            "type": "dateTimeRange",
+            "label": "f.rangoMismoDia",
+            "provenance": "user",
+            "value": {
+              "kind": "dateTimeRange",
+              "start": "2027-05-01T16:00",
+              "end": "2027-05-01T23:30",
+              "formatted": "1 de mayo de 2027, 4:00 pm – 11:30 pm"
+            }
+          },
+          {
+            "id": "f.rangoOtroDia",
+            "role": "storyTitle",
+            "type": "dateTimeRange",
+            "label": "f.rangoOtroDia",
+            "provenance": "user",
+            "value": {
+              "kind": "dateTimeRange",
+              "start": "2027-05-01T22:00",
+              "end": "2027-05-02T02:15",
+              "formatted": "1 de mayo de 2027, 10:00 pm – 2 de mayo de 2027, 2:15 am"
+            }
+          },
+          {
+            "id": "f.rangoSinFin",
+            "role": "eventNote",
+            "type": "dateTimeRange",
+            "label": "f.rangoSinFin",
+            "provenance": "user",
+            "value": {
+              "kind": "dateTimeRange",
+              "start": "2027-05-01T09:05",
+              "formatted": "1 de mayo de 2027, 9:05 am"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [],
+    "stillDefault": [],
+    "orphanContent": [],
+    "orphanSections": [],
+    "invalidValues": [],
+    "themeFallback": null
+  }
+}

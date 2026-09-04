@@ -1,0 +1,26 @@
+{
+  "name": "canvas-gate-spike",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Spike DESECHABLE de la compuerta A1-A8 del lienzo aislado (fase 3, bloque 3-0b). No es apps/web.",
+  "scripts": {
+    "build": "next build",
+    "start": "next start -p 6100 -H 127.0.0.1",
+    "dev": "next dev -p 6100 -H 127.0.0.1",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@invitaciones/schema": "file:../../packages/schema",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "26.4.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "typescript": "5.9.3"
+  }
+}

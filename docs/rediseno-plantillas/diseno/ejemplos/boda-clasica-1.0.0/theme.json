@@ -1,0 +1,13 @@
+{
+  "palettes": [
+    { "id": "blush", "name": { "es-MX": "Rosa empolvado" }, "tokens": { "bg": "#FDF7F5", "surface": "#FFFFFF", "ink": "#3A2E2B", "accent": "#C98B8B", "accentInk": "#FFFFFF", "muted": "#9A8A86" } },
+    { "id": "olive", "name": { "es-MX": "Olivo y marfil" }, "tokens": { "bg": "#F7F5EE", "surface": "#FFFFFF", "ink": "#2F3A2B", "accent": "#6B7B4A", "accentInk": "#FFFFFF", "muted": "#8A9178" } },
+    { "id": "navy", "name": { "es-MX": "Azul noche" }, "tokens": { "bg": "#F4F6FA", "surface": "#FFFFFF", "ink": "#1E2A44", "accent": "#2E4A7D", "accentInk": "#FFFFFF", "muted": "#7C889E" } }
+  ],
+  "fontSets": [
+    { "id": "serif-elegante", "name": { "es-MX": "Serif elegante" }, "heading": { "family": "Cormorant Garamond", "weights": [400, 600], "source": "google" }, "body": { "family": "Inter", "weights": [400, 500], "source": "google" } },
+    { "id": "moderna", "name": { "es-MX": "Moderna" }, "heading": { "family": "Playfair Display", "weights": [400, 700], "source": "google" }, "body": { "family": "Source Sans 3", "weights": [400, 600], "source": "google" } }
+  ],
+  "defaultPaletteId": "blush",
+  "defaultFontSetId": "serif-elegante"
+}

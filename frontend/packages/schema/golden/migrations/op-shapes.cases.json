@@ -1,0 +1,194 @@
+[
+  {
+    "name": "renameBlock: forma válida",
+    "op": {
+      "op": "renameBlock",
+      "from": "a.old",
+      "to": "a.new"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "renameBlock: falta to",
+    "op": {
+      "op": "renameBlock",
+      "from": "a.old"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "removeBlock: forma válida",
+    "op": {
+      "op": "removeBlock",
+      "id": "a.old"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "removeBlock: id con forma inválida de BlockId",
+    "op": {
+      "op": "removeBlock",
+      "id": "A-old!"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "addBlock: forma válida",
+    "op": {
+      "op": "addBlock",
+      "id": "a.new"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "addBlock: campo extra",
+    "op": {
+      "op": "addBlock",
+      "id": "a.new",
+      "value": "x"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "renameSection: forma válida",
+    "op": {
+      "op": "renameSection",
+      "from": "old",
+      "to": "new"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "renameSection: from con forma inválida de SectionKey",
+    "op": {
+      "op": "renameSection",
+      "from": "old-section",
+      "to": "new"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "removeSection: forma válida",
+    "op": {
+      "op": "removeSection",
+      "key": "old"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "removeSection: falta key",
+    "op": {
+      "op": "removeSection"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "renamePalette: forma válida",
+    "op": {
+      "op": "renamePalette",
+      "from": "olive",
+      "to": "sage"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "renamePalette: from mayúsculas (Ident es kebab minúscula)",
+    "op": {
+      "op": "renamePalette",
+      "from": "Olive",
+      "to": "sage"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "renameFontSet: forma válida",
+    "op": {
+      "op": "renameFontSet",
+      "from": "clasica",
+      "to": "moderna"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "renameFontSet: falta to",
+    "op": {
+      "op": "renameFontSet",
+      "from": "clasica"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "changeBlockType: forma válida",
+    "op": {
+      "op": "changeBlockType",
+      "id": "a.text",
+      "converterId": "textToRichText"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "changeBlockType: converterId fuera del catálogo cerrado de 4",
+    "op": {
+      "op": "changeBlockType",
+      "id": "a.text",
+      "converterId": "textToDate"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "moveIntoGroup: forma válida",
+    "op": {
+      "op": "moveIntoGroup",
+      "blockId": "a.old",
+      "groupId": "g.items",
+      "itemBlockId": "title"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "moveIntoGroup: falta itemBlockId",
+    "op": {
+      "op": "moveIntoGroup",
+      "blockId": "a.old",
+      "groupId": "g.items"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "flattenGroup: forma válida",
+    "op": {
+      "op": "flattenGroup",
+      "groupId": "g.items",
+      "itemBlockId": "title",
+      "toBlockId": "a.new"
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "flattenGroup: falta toBlockId",
+    "op": {
+      "op": "flattenGroup",
+      "groupId": "g.items",
+      "itemBlockId": "title"
+    },
+    "expectZodValid": false
+  },
+  {
+    "name": "shrinkGroup: forma válida",
+    "op": {
+      "op": "shrinkGroup",
+      "groupId": "g.items",
+      "max": 4
+    },
+    "expectZodValid": true
+  },
+  {
+    "name": "shrinkGroup: max fuera de rango (1..24)",
+    "op": {
+      "op": "shrinkGroup",
+      "groupId": "g.items",
+      "max": 0
+    },
+    "expectZodValid": false
+  }
+]

@@ -1,0 +1,28 @@
+/* CSS del CHROME del editor. El lienzo NO lo carga (`04 §19.4`): su layout es otro documento raíz. */
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font: 13px/1.5 ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  background: #eef0f3; color: #14181f;
+}
+.editor { display: grid; grid-template-columns: 470px 1fr; height: 100vh; }
+.panel { background: #fff; border-right: 1px solid #d6dae1; padding: 16px 18px; overflow: auto; }
+.panel h1 { font-size: 15px; margin: 0 0 4px; }
+.panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: #6a7280; margin: 18px 0 6px; }
+.sub { margin: 0 0 14px; color: #6a7280; font-size: 11px; line-height: 1.6; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; background: #f3f4f7; padding: 1px 4px; border-radius: 3px; }
+table.resultados { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.resultados th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: #6a7280; border-bottom: 1px solid #d6dae1; padding: 4px 4px; }
+table.resultados td { border-bottom: 1px solid #eceef2; padding: 6px 4px; vertical-align: top; }
+table.resultados td.id { font-weight: 700; width: 26px; }
+table.resultados td.valor { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #3b4351; word-break: break-word; }
+table.resultados td.veredicto { font-weight: 700; width: 54px; text-align: right; }
+tr[data-veredicto="PASA"] td.veredicto { color: #12703f; }
+tr[data-veredicto="FALLA"] td.veredicto { color: #b0142b; }
+tr[data-veredicto="—"] td.veredicto { color: #9aa1ad; }
+tr[data-foco="true"] td { background: #fff6d9; box-shadow: inset 3px 0 0 #d99b00; }
+.marcador { margin: 10px 0 0; font-size: 12px; font-weight: 700; }
+ol.log { margin: 0; padding-left: 18px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; color: #3b4351; line-height: 1.65; }
+.lienzo-hueco { padding: 14px; overflow: hidden; }
+iframe#lienzo { width: 100%; height: 100%; border: 1px solid #c9ced6; border-radius: 8px; background: #fff; display: block; }

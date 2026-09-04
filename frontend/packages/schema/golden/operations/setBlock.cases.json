@@ -1,0 +1,491 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.title",
+      "value": {
+        "kind": "text",
+        "value": "Camila & Antonio"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Camila & Antonio"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
+  },
+  {
+    "name": "forma inválida: falta value",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.title"
+    },
+    "expectZodValid": false,
+    "expectOpViolations": [],
+    "reducerResult": null
+  },
+  {
+    "name": "blockId inexistente en el manifiesto",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "no.existe",
+      "value": {
+        "kind": "text",
+        "value": "x"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_BLOCK_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_BLOCK_UNKNOWN",
+        "blockId": "no.existe"
+      }
+    }
+  },
+  {
+    "name": "bloque source=fixed: no editable (I-21)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.fixed",
+      "value": {
+        "kind": "text",
+        "value": "x"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_BLOCK_NOT_USER_SOURCE"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_BLOCK_NOT_EDITABLE",
+        "blockId": "cover.fixed",
+        "source": "fixed"
+      }
+    }
+  },
+  {
+    "name": "kind del valor distinto del type del spec",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.title",
+      "value": {
+        "kind": "image",
+        "assetId": "as_01J8ASSETAKAAAAAAAAAAAAAAA",
+        "alt": "",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_VALUE_INVALID"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_BLOCK_TYPE_MISMATCH",
+        "blockId": "cover.title",
+        "expected": "text",
+        "got": "image"
+      }
+    }
+  },
+  {
+    "name": "texto más largo que maxLength (I-16)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.title",
+      "value": {
+        "kind": "text",
+        "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_VALUE_INVALID"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_INVARIANT_VIOLATION",
+        "violations": [
+          {
+            "code": "I-16_TEXT_TOO_LONG",
+            "path": "content.cover.title"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "salto de línea con multiline=false (I-30)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.title",
+      "value": {
+        "kind": "text",
+        "value": "Ana\nLuis"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_VALUE_INVALID"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_INVARIANT_VIOLATION",
+        "violations": [
+          {
+            "code": "I-30_TEXT_MULTILINE_NOT_ALLOWED",
+            "path": "content.cover.title"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "assetId que no pertenece (ADR-030)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.image",
+      "value": {
+        "kind": "image",
+        "assetId": "as_01J8ASSETNAAAAAAAAAAAAAAAA",
+        "alt": "",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_ASSET_NOT_OWNED",
+        "assetId": "as_01J8ASSETNAAAAAAAAAAAAAAAA"
+      }
+    }
+  },
+  {
+    "name": "asset que excede image.maxBytes (X-06)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.image",
+      "value": {
+        "kind": "image",
+        "assetId": "as_01J8ASSETBGAAAAAAAAAAAAAAA",
+        "alt": "",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_ASSET_SPEC_MISMATCH",
+        "assetId": "as_01J8ASSETBGAAAAAAAAAAAAAAA",
+        "constraint": "maxBytes"
+      }
+    }
+  },
+  {
+    "name": "asset que incumple image.aspect=square (X-06)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.image",
+      "value": {
+        "kind": "image",
+        "assetId": "as_01J8ASSETWDAAAAAAAAAAAAAAA",
+        "alt": "",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_ASSET_SPEC_MISMATCH",
+        "assetId": "as_01J8ASSETWDAAAAAAAAAAAAAAA",
+        "constraint": "aspect"
+      }
+    }
+  },
+  {
+    "name": "asset correcto: pasa las tres comprobaciones",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.image",
+      "value": {
+        "kind": "image",
+        "assetId": "as_01J8ASSETAKAAAAAAAAAAAAAAA",
+        "alt": "",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          },
+          "cover.image": {
+            "kind": "image",
+            "assetId": "as_01J8ASSETAKAAAAAAAAAAAAAAA",
+            "alt": "",
+            "focal": {
+              "x": 0.5,
+              "y": 0.5
+            }
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
+  },
+  {
+    "name": "asset que excede audio.maxBytes (X-06)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.music",
+      "value": {
+        "kind": "audio",
+        "assetId": "as_01J8ASSETAAAAAAAAAAAAAAAAA"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_ASSET_SPEC_MISMATCH",
+        "assetId": "as_01J8ASSETAAAAAAAAAAAAAAAAA",
+        "constraint": "maxBytes"
+      }
+    }
+  },
+  {
+    "name": "asset de audio dentro de audio.maxBytes",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.music",
+      "value": {
+        "kind": "audio",
+        "assetId": "as_01J8ASSETSNAAAAAAAAAAAAAAA"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          },
+          "cover.music": {
+            "kind": "audio",
+            "assetId": "as_01J8ASSETSNAAAAAAAAAAAAAAA"
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
+  }
+]

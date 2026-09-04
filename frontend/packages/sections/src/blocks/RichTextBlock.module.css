@@ -1,0 +1,17 @@
+.doc {
+  display: grid;
+  gap: var(--inv-space-3);
+  font-family: var(--inv-font-body);
+  color: var(--inv-color-ink);
+}
+
+.paragraph {
+  margin: 0;
+  line-height: var(--inv-leading-relaxed);
+  font-size: var(--inv-text-base);
+}
+
+.link {
+  color: var(--inv-color-accent);
+  text-underline-offset: 0.2em;
+}

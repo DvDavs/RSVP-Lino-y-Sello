@@ -1,0 +1,256 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "addItem",
+      "groupId": "event.cards",
+      "tempId": "tmp:abcdefgh",
+      "values": {
+        "title": {
+          "kind": "text",
+          "value": "Fiesta"
+        }
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8NEWATEMAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Fiesta"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      },
+      "idMap": {
+        "tmp:abcdefgh": "01J8NEWATEMAAAAAAAAAAAAAAA"
+      }
+    }
+  },
+  {
+    "name": "forma inválida: tempId demasiado corto",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "addItem",
+      "groupId": "event.cards",
+      "tempId": "tmp:x",
+      "values": {}
+    },
+    "expectZodValid": false,
+    "expectOpViolations": [],
+    "reducerResult": null
+  },
+  {
+    "name": "groupId inexistente",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "addItem",
+      "groupId": "no.existe",
+      "tempId": "tmp:abcdefgh",
+      "values": {}
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_GROUP_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_BLOCK_UNKNOWN",
+        "blockId": "no.existe"
+      }
+    }
+  },
+  {
+    "name": "clave de values que no es itemBlock del grupo",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "addItem",
+      "groupId": "event.cards",
+      "tempId": "tmp:abcdefgh",
+      "values": {
+        "noExiste": {
+          "kind": "text",
+          "value": "x"
+        }
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_BLOCK_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_BLOCK_UNKNOWN",
+        "blockId": "noExiste"
+      }
+    }
+  },
+  {
+    "name": "index más allá del final",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "addItem",
+      "groupId": "event.cards",
+      "tempId": "tmp:abcdefgh",
+      "values": {},
+      "index": 7
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_ITEM_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_OPERATION_INVALID",
+        "op": "addItem",
+        "detail": "index 7 > items 2"
+      }
+    }
+  },
+  {
+    "name": "inserción en el índice 0",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "addItem",
+      "groupId": "event.cards",
+      "tempId": "tmp:abcdefgh",
+      "values": {},
+      "index": 0
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8NEWATEMAAAAAAAAAAAAAAA",
+                "values": {}
+              },
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      },
+      "idMap": {
+        "tmp:abcdefgh": "01J8NEWATEMAAAAAAAAAAAAAAA"
+      }
+    }
+  }
+]

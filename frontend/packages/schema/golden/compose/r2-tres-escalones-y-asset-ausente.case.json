@@ -1,0 +1,407 @@
+{
+  "name": "r2-tres-escalones-y-asset-ausente",
+  "descripcion": "R2/R3/R5: user → default → empty; `fixed` solo puede venir de defaults; un assetId que NO está en el AssetIndex NO inventa URL: value null y provenance 'empty' (R5). missingRequired y stillDefault poblados; clave de content no declarada → orphanContent",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "title": {
+          "es-MX": "cover"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "cover.title",
+            "role": "coverTitle",
+            "label": {
+              "es-MX": "cover.title"
+            },
+            "required": true,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          },
+          {
+            "id": "cover.subtitle",
+            "role": "coverSubtitle",
+            "label": {
+              "es-MX": "cover.subtitle"
+            },
+            "required": true,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          },
+          {
+            "id": "cover.button",
+            "role": "coverButtonLabel",
+            "label": {
+              "es-MX": "cover.button"
+            },
+            "required": true,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          },
+          {
+            "id": "cover.legal",
+            "role": "decorative",
+            "label": {
+              "es-MX": "cover.legal"
+            },
+            "required": false,
+            "editable": true,
+            "source": "fixed",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          },
+          {
+            "id": "cover.image",
+            "role": "coverImage",
+            "label": {
+              "es-MX": "cover.image"
+            },
+            "required": true,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "image",
+            "constraints": {
+              "aspect": "free",
+              "maxBytes": 8388608
+            }
+          },
+          {
+            "id": "cover.bg",
+            "role": "coverBackground",
+            "label": {
+              "es-MX": "cover.bg"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "image",
+            "constraints": {
+              "aspect": "free",
+              "maxBytes": 8388608
+            }
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {
+      "cover.subtitle": {
+        "kind": "text",
+        "value": "Nos casamos (texto de demostración)"
+      },
+      "cover.legal": {
+        "kind": "text",
+        "value": "Aviso fijo de la plantilla"
+      }
+    }
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "cover",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {
+      "cover.title": {
+        "kind": "text",
+        "value": "Ana & Luis"
+      },
+      "cover.image": {
+        "kind": "image",
+        "assetId": "as_01J8AASENTEAAAAAAAAAAAAAAA",
+        "alt": "portada",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      },
+      "cover.bg": {
+        "kind": "image",
+        "assetId": "as_01J8PHATA1AAAAAAAAAAAAAAAA",
+        "alt": "fondo",
+        "focal": {
+          "x": 0.25,
+          "y": 0.75
+        }
+      },
+      "zz.borrado": {
+        "kind": "text",
+        "value": "huérfano"
+      },
+      "aa.borrado": {
+        "kind": "text",
+        "value": "otro huérfano"
+      }
+    },
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": "2027-03-08",
+    "time": "19:05",
+    "hashtag": "#AnaYLuis",
+    "coverPhotoUrl": "https://cdn.invitaciones.evolutiondev.mx/legacy/portada.jpg",
+    "childrenAllowed": false,
+    "youngAllowed": true,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {
+    "as_01J8PHATA1AAAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/uno.webp",
+      "width": 1200,
+      "height": 800
+    },
+    "as_01J8PHATA2AAAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/dos.webp"
+    },
+    "as_01J8SANADA1AAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/tres.mp3"
+    }
+  },
+  "locale": "es-MX",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-MX",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "cover",
+        "type": "cover",
+        "variant": "default",
+        "visible": true,
+        "title": "cover",
+        "blocks": [
+          {
+            "id": "cover.title",
+            "role": "coverTitle",
+            "type": "text",
+            "label": "cover.title",
+            "provenance": "user",
+            "value": {
+              "kind": "text",
+              "value": "Ana & Luis"
+            }
+          },
+          {
+            "id": "cover.subtitle",
+            "role": "coverSubtitle",
+            "type": "text",
+            "label": "cover.subtitle",
+            "provenance": "default",
+            "value": {
+              "kind": "text",
+              "value": "Nos casamos (texto de demostración)"
+            }
+          },
+          {
+            "id": "cover.button",
+            "role": "coverButtonLabel",
+            "type": "text",
+            "label": "cover.button",
+            "provenance": "empty",
+            "value": null
+          },
+          {
+            "id": "cover.legal",
+            "role": "decorative",
+            "type": "text",
+            "label": "cover.legal",
+            "provenance": "fixed",
+            "value": {
+              "kind": "text",
+              "value": "Aviso fijo de la plantilla"
+            }
+          },
+          {
+            "id": "cover.image",
+            "role": "coverImage",
+            "type": "image",
+            "label": "cover.image",
+            "provenance": "empty",
+            "value": null
+          },
+          {
+            "id": "cover.bg",
+            "role": "coverBackground",
+            "type": "image",
+            "label": "cover.bg",
+            "provenance": "user",
+            "value": {
+              "kind": "image",
+              "url": "https://cdn.invitaciones.evolutiondev.mx/a/uno.webp",
+              "alt": "fondo",
+              "focal": {
+                "x": 0.25,
+                "y": 0.75
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [
+      "cover.button",
+      "cover.image"
+    ],
+    "stillDefault": [
+      "cover.subtitle"
+    ],
+    "orphanContent": [
+      "aa.borrado",
+      "zz.borrado"
+    ],
+    "orphanSections": [],
+    "invalidValues": [],
+    "themeFallback": null
+  }
+}

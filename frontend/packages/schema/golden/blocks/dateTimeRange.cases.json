@@ -1,0 +1,173 @@
+[
+  {
+    "name": "P mínimo: solo start",
+    "tag": "P",
+    "spec": {
+      "id": "test.range",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "test.range"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "value": {
+      "kind": "dateTimeRange",
+      "start": "2026-12-31T16:00"
+    },
+    "path": "content.test.range",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: con end presente",
+    "tag": "PM",
+    "spec": {
+      "id": "test.range",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "test.range"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "value": {
+      "kind": "dateTimeRange",
+      "start": "2026-12-31T16:00",
+      "end": "2026-12-31T18:00"
+    },
+    "path": "content.test.range",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra DateTimeRangeSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.range",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "test.range"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.range",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta start",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.range",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "test.range"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "value": {
+      "kind": "dateTimeRange",
+      "end": "2026-12-31T18:00"
+    },
+    "path": "content.test.range",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: end anterior a start → I-01",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.range",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "test.range"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "value": {
+      "kind": "dateTimeRange",
+      "start": "2026-12-31T16:00",
+      "end": "2026-12-31T15:00"
+    },
+    "path": "content.test.range",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-01_RANGE_END_BEFORE_START"
+    ]
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.range",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "test.range"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "value": null,
+    "path": "content.test.range",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: start con zona (Z) falla el regex (IsoLocalDateTime es sin zona)",
+    "tag": "extra",
+    "spec": {
+      "id": "test.range",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "test.range"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "value": {
+      "kind": "dateTimeRange",
+      "start": "2026-12-31T16:00:00Z"
+    },
+    "path": "content.test.range",
+    "expectZodValid": false,
+    "expectViolations": []
+  }
+]

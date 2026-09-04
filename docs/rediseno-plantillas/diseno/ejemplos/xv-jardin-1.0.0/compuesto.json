@@ -1,0 +1,510 @@
+{
+  "composedVersion": 1,
+  "template": {
+    "slug": "xv-jardin",
+    "version": "1.0.0"
+  },
+  "locale": "es-MX",
+  "theme": {
+    "paletteId": "lilac",
+    "fontSetId": "moderna",
+    "tokens": {
+      "bg": "#F8F6FB",
+      "surface": "#FFFFFF",
+      "ink": "#372C43",
+      "accent": "#9B7FC0",
+      "accentInk": "#FFFFFF",
+      "muted": "#A797B8"
+    },
+    "fonts": {
+      "heading": {
+        "family": "Playfair Display",
+        "weights": [
+          400,
+          700
+        ],
+        "source": "google"
+      },
+      "body": {
+        "family": "Source Sans 3",
+        "weights": [
+          400,
+          600
+        ],
+        "source": "google"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "variant": "full",
+      "visible": true,
+      "title": "Portada",
+      "blocks": [
+        {
+          "id": "cover.title",
+          "role": "coverTitle",
+          "type": "text",
+          "label": "Nombre en portada",
+          "provenance": "user",
+          "value": {
+            "kind": "text",
+            "value": "Mis XV años"
+          }
+        },
+        {
+          "id": "cover.subtitle",
+          "role": "coverSubtitle",
+          "type": "text",
+          "label": "Subtítulo",
+          "provenance": "user",
+          "value": {
+            "kind": "text",
+            "value": "Valentina Reyes"
+          }
+        },
+        {
+          "id": "cover.date",
+          "role": "coverDate",
+          "type": "date",
+          "label": "Fecha del evento",
+          "provenance": "business",
+          "value": {
+            "kind": "date",
+            "value": "2026-11-14",
+            "formatted": "14 de noviembre de 2026"
+          }
+        },
+        {
+          "id": "cover.image",
+          "role": "coverImage",
+          "type": "image",
+          "label": "Foto de portada",
+          "provenance": "user",
+          "value": {
+            "kind": "image",
+            "url": "https://cdn.invitaciones.evolutiondev.mx/a/01J8YQYX1HD63EACDQ55S8368N.webp",
+            "alt": "Valentina",
+            "focal": {
+              "x": 0.5,
+              "y": 0.28
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "honoree",
+      "type": "celebrant",
+      "variant": "centered",
+      "visible": true,
+      "title": "La quinceañera",
+      "blocks": [
+        {
+          "id": "honoree.heading",
+          "role": "celebrantsHeading",
+          "type": "text",
+          "label": "Encabezado",
+          "provenance": "default",
+          "value": {
+            "kind": "text",
+            "value": "Celebra conmigo"
+          }
+        },
+        {
+          "id": "honoree.person",
+          "role": "honoree",
+          "type": "person",
+          "label": "Quinceañera",
+          "provenance": "user",
+          "value": {
+            "kind": "person",
+            "name": "Valentina Reyes Montaño"
+          }
+        },
+        {
+          "id": "honoree.photo",
+          "role": "honoreePhoto",
+          "type": "image",
+          "label": "Foto",
+          "provenance": "user",
+          "value": {
+            "kind": "image",
+            "url": "https://cdn.invitaciones.evolutiondev.mx/a/01J8R6MAHKEW2GFM9QG29Z4N21.webp",
+            "alt": "Valentina",
+            "focal": {
+              "x": 0.5,
+              "y": 0.35
+            }
+          }
+        },
+        {
+          "id": "honoree.message",
+          "role": "honoreeMessage",
+          "type": "richText",
+          "label": "Mensaje",
+          "provenance": "default",
+          "value": {
+            "kind": "richText",
+            "doc": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Con mucha alegría te invito a celebrar este día tan especial para mí."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "family",
+      "type": "family",
+      "variant": "cards",
+      "visible": true,
+      "title": "Mis papás y padrinos",
+      "blocks": [
+        {
+          "id": "family.parentA1",
+          "role": "parentA1",
+          "type": "person",
+          "label": "Mamá",
+          "provenance": "default",
+          "value": {
+            "kind": "person",
+            "name": "Nombre de la mamá"
+          }
+        },
+        {
+          "id": "family.parentA2",
+          "role": "parentA2",
+          "type": "person",
+          "label": "Papá",
+          "provenance": "default",
+          "value": {
+            "kind": "person",
+            "name": "Nombre del papá"
+          }
+        },
+        {
+          "id": "family.godparents",
+          "role": "familyGroup",
+          "type": "group",
+          "label": "Padrinos",
+          "provenance": "user",
+          "items": []
+        }
+      ]
+    },
+    {
+      "key": "event",
+      "type": "event",
+      "variant": "cards",
+      "visible": true,
+      "title": "Itinerario",
+      "blocks": [
+        {
+          "id": "event.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": "Título",
+          "provenance": "default",
+          "value": {
+            "kind": "text",
+            "value": "Itinerario"
+          }
+        },
+        {
+          "id": "event.cards",
+          "role": "eventCards",
+          "type": "group",
+          "label": "Momentos",
+          "provenance": "user",
+          "items": [
+            {
+              "itemId": "01J8GDAN5TK4BMEJ4BV0CYKXVB",
+              "blocks": [
+                {
+                  "id": "title",
+                  "role": "eventTitle",
+                  "type": "text",
+                  "label": "Nombre (Misa, Recepción…)",
+                  "provenance": "user",
+                  "value": {
+                    "kind": "text",
+                    "value": "Misa"
+                  }
+                },
+                {
+                  "id": "when",
+                  "role": "eventWhen",
+                  "type": "dateTimeRange",
+                  "label": "Cuándo",
+                  "provenance": "user",
+                  "value": {
+                    "kind": "dateTimeRange",
+                    "start": "2026-11-14T17:00",
+                    "formatted": "14 de noviembre de 2026, 5:00 pm"
+                  }
+                },
+                {
+                  "id": "place",
+                  "role": "eventPlace",
+                  "type": "location",
+                  "label": "Dónde",
+                  "provenance": "user",
+                  "value": {
+                    "kind": "location",
+                    "name": "Parroquia de San José"
+                  }
+                }
+              ]
+            },
+            {
+              "itemId": "01J8RQSNPS0XRDKABSWCPTJKC1",
+              "blocks": [
+                {
+                  "id": "title",
+                  "role": "eventTitle",
+                  "type": "text",
+                  "label": "Nombre (Misa, Recepción…)",
+                  "provenance": "user",
+                  "value": {
+                    "kind": "text",
+                    "value": "Fiesta"
+                  }
+                },
+                {
+                  "id": "when",
+                  "role": "eventWhen",
+                  "type": "dateTimeRange",
+                  "label": "Cuándo",
+                  "provenance": "user",
+                  "value": {
+                    "kind": "dateTimeRange",
+                    "start": "2026-11-14T19:30",
+                    "end": "2026-11-15T01:00",
+                    "formatted": "14 de noviembre de 2026, 7:30 pm – 15 de noviembre de 2026, 1:00 am"
+                  }
+                },
+                {
+                  "id": "place",
+                  "role": "eventPlace",
+                  "type": "location",
+                  "label": "Dónde",
+                  "provenance": "user",
+                  "value": {
+                    "kind": "location",
+                    "name": "Salón Jardín Botánico"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "gallery",
+      "type": "gallery",
+      "variant": "grid-6",
+      "visible": true,
+      "title": "Galería",
+      "blocks": [
+        {
+          "id": "gallery.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": "Título",
+          "provenance": "default",
+          "value": {
+            "kind": "text",
+            "value": "Galería"
+          }
+        },
+        {
+          "id": "gallery.photos",
+          "role": "galleryPhotos",
+          "type": "group",
+          "label": "Fotos",
+          "provenance": "user",
+          "items": [
+            {
+              "itemId": "01J8TZDWP5SW89W647ME9HYN3Q",
+              "blocks": [
+                {
+                  "id": "image",
+                  "role": "galleryPhoto",
+                  "type": "image",
+                  "label": "Foto",
+                  "provenance": "user",
+                  "value": {
+                    "kind": "image",
+                    "url": "https://cdn.invitaciones.evolutiondev.mx/a/01J8ZHBMS73AXP2DB1GWN2D04T.webp",
+                    "alt": "",
+                    "focal": {
+                      "x": 0.5,
+                      "y": 0.5
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "giftTable",
+      "type": "giftTable",
+      "variant": "cards",
+      "visible": false,
+      "title": "Mesa de regalos",
+      "blocks": [
+        {
+          "id": "gifts.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": "Título",
+          "provenance": "default",
+          "value": {
+            "kind": "text",
+            "value": "Mesa de regalos"
+          }
+        },
+        {
+          "id": "gifts.options",
+          "role": "giftOptions",
+          "type": "group",
+          "label": "Opciones",
+          "provenance": "default",
+          "items": []
+        }
+      ]
+    },
+    {
+      "key": "dressCode",
+      "type": "dressCode",
+      "variant": "two-columns",
+      "visible": true,
+      "title": "Código de vestimenta",
+      "blocks": [
+        {
+          "id": "dressCode.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": "Título",
+          "provenance": "default",
+          "value": {
+            "kind": "text",
+            "value": "Código de vestimenta"
+          }
+        },
+        {
+          "id": "dressCode.rules",
+          "role": "dressCodeRules",
+          "type": "group",
+          "label": "Reglas",
+          "provenance": "user",
+          "items": [
+            {
+              "itemId": "01J822JMYWQ3E4G54R452HC10W",
+              "blocks": [
+                {
+                  "id": "title",
+                  "role": "dressCodeTitle",
+                  "type": "text",
+                  "label": "Para quién",
+                  "provenance": "user",
+                  "value": {
+                    "kind": "text",
+                    "value": "Formal"
+                  }
+                },
+                {
+                  "id": "detail",
+                  "role": "dressCodeDetail",
+                  "type": "text",
+                  "label": "Descripción",
+                  "provenance": "user",
+                  "value": {
+                    "kind": "text",
+                    "value": "Vestido largo o corto, o traje. Colores pastel de preferencia."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "rsvp",
+      "type": "rsvp",
+      "variant": "banner",
+      "visible": true,
+      "title": "Confirmación",
+      "blocks": [
+        {
+          "id": "rsvp.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": "Título",
+          "provenance": "default",
+          "value": {
+            "kind": "text",
+            "value": "Confirma tu asistencia"
+          }
+        },
+        {
+          "id": "rsvp.note",
+          "role": "rsvpNote",
+          "type": "text",
+          "label": "Nota",
+          "provenance": "user",
+          "value": {
+            "kind": "text",
+            "value": "Confirma antes del 1 de noviembre."
+          }
+        }
+      ]
+    },
+    {
+      "key": "footer",
+      "type": "footer",
+      "variant": "simple",
+      "visible": true,
+      "title": "Pie",
+      "blocks": [
+        {
+          "id": "footer.music",
+          "role": "backgroundMusic",
+          "type": "audio",
+          "label": "Música de fondo",
+          "provenance": "empty",
+          "value": null
+        },
+        {
+          "id": "footer.note",
+          "role": "footerNote",
+          "type": "text",
+          "label": "Nota legal",
+          "provenance": "fixed",
+          "value": {
+            "kind": "text",
+            "value": "Invitaciones Digitales Agape. Todos los derechos reservados."
+          }
+        }
+      ]
+    }
+  ]
+}

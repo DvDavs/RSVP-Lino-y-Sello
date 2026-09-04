@@ -1,0 +1,554 @@
+[
+  {
+    "name": "mismo blockId en dos secciones",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "dup.id",
+              "role": "coverTitle",
+              "label": {
+                "es-MX": "dup.id"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "dup.id",
+              "role": "coverSubtitle",
+              "label": {
+                "es-MX": "dup.id"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": [
+      "I-13_BLOCK_ID_DUPLICATE"
+    ]
+  },
+  {
+    "name": "ids únicos",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "a.id",
+              "role": "coverTitle",
+              "label": {
+                "es-MX": "a.id"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "b.id",
+              "role": "coverSubtitle",
+              "label": {
+                "es-MX": "b.id"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  },
+  {
+    "name": "mismo id en dos itemBlocks del MISMO grupo (viola)",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "event",
+          "type": "event",
+          "title": {
+            "es-MX": "event"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "event.cards",
+              "role": "eventCards",
+              "label": {
+                "es-MX": "event.cards"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "group",
+              "min": 0,
+              "max": 12,
+              "reorderable": true,
+              "itemLabel": {
+                "es-MX": "event.cards item"
+              },
+              "itemBlocks": [
+                {
+                  "id": "title",
+                  "role": "sectionTitle",
+                  "label": {
+                    "es-MX": "title"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "text",
+                  "constraints": {
+                    "minLength": 0,
+                    "maxLength": 200,
+                    "multiline": false
+                  }
+                },
+                {
+                  "id": "title",
+                  "role": "sectionIntro",
+                  "label": {
+                    "es-MX": "title"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "text",
+                  "constraints": {
+                    "minLength": 0,
+                    "maxLength": 200,
+                    "multiline": false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": [
+      "I-13_BLOCK_ID_DUPLICATE"
+    ]
+  },
+  {
+    "name": "mismo id en itemBlocks de grupos DISTINTOS (no viola: relativos)",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "event",
+          "type": "event",
+          "title": {
+            "es-MX": "event"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "event.cardsA",
+              "role": "eventCards",
+              "label": {
+                "es-MX": "event.cardsA"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "group",
+              "min": 0,
+              "max": 12,
+              "reorderable": true,
+              "itemLabel": {
+                "es-MX": "event.cardsA item"
+              },
+              "itemBlocks": [
+                {
+                  "id": "title",
+                  "role": "sectionTitle",
+                  "label": {
+                    "es-MX": "title"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "text",
+                  "constraints": {
+                    "minLength": 0,
+                    "maxLength": 200,
+                    "multiline": false
+                  }
+                }
+              ]
+            },
+            {
+              "id": "event.cardsB",
+              "role": "galleryPhotos",
+              "label": {
+                "es-MX": "event.cardsB"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "group",
+              "min": 0,
+              "max": 12,
+              "reorderable": true,
+              "itemLabel": {
+                "es-MX": "event.cardsB item"
+              },
+              "itemBlocks": [
+                {
+                  "id": "title",
+                  "role": "sectionTitle",
+                  "label": {
+                    "es-MX": "title"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "text",
+                  "constraints": {
+                    "minLength": 0,
+                    "maxLength": 200,
+                    "multiline": false
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "_comentario": "Índice de los casos con estructura de directorio. `migrate` lleva plan.json; `switch` no. Cada directorio trae los DOS paquetes completos (from-*/to-*), el documento de partida y el resultado esperado, de modo que Kotlin puede ejecutar migrate()/switchTemplate() sin conocer el generador.",
+  "migrate": [
+    "fixture-tpl/1.0.0-to-2.0.0",
+    "fixture-tpl/1.0.0-to-1.1.0"
+  ],
+  "switch": [
+    "switch/plantilla-a-to-plantilla-b"
+  ]
+}

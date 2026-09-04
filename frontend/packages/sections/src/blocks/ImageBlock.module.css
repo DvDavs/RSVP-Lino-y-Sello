@@ -1,0 +1,18 @@
+.frame {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--inv-image-aspect-default);
+  overflow: hidden;
+  border-radius: var(--inv-radius-md);
+  background: var(--inv-color-surface);
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Reserva 50% (centro) hasta que el useEffect fije --inv-focal-x/y (CSSOM, ver ImageBlock.tsx). */
+  object-position: var(--inv-focal-x, 50%) var(--inv-focal-y, 50%);
+}

@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "template": {
+    "slug": "fixture-tpl",
+    "version": "2.0.0"
+  },
+  "theme": {
+    "paletteId": "verde",
+    "fontSetId": "serif"
+  },
+  "structure": {
+    "sections": [
+      {
+        "key": "cover",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "relato",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "gifts",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "menu",
+        "variant": "default",
+        "visible": true
+      }
+    ]
+  },
+  "content": {
+    "cover.title": {
+      "kind": "text",
+      "value": "Ana & Luis"
+    },
+    "story.body": {
+      "kind": "text",
+      "value": "Nos conocimos un verano en la"
+    },
+    "story.tags": {
+      "kind": "text",
+      "value": "viaje, playa"
+    },
+    "conv.aRico": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Un párrafo suelto"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "conv.aLista": {
+      "kind": "listText",
+      "items": [
+        "Una sola entrada"
+      ]
+    },
+    "conv.vacioRico": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": []
+          }
+        ]
+      }
+    },
+    "conv.vacioLista": {
+      "kind": "listText",
+      "items": []
+    },
+    "gifts.list": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8GAFT1AAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Sobre"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "En la recepción"
+            }
+          }
+        },
+        {
+          "itemId": "01J8GAFT2AAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Mesa"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Tienda X"
+            }
+          }
+        }
+      ]
+    },
+    "cover.new": {
+      "kind": "text",
+      "value": "Nos casamos"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01JMGRAT000000000000000000",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Confirma tu asistencia"
+            }
+          }
+        }
+      ]
+    },
+    "menu.note": {
+      "kind": "text",
+      "value": "Cena de tres tiempos"
+    }
+  },
+  "attic": {
+    "fixture-tpl@1.0.0": {
+      "cover.dropped": {
+        "kind": "text",
+        "value": "adorno viejo"
+      },
+      "menu.items": {
+        "kind": "group",
+        "items": [
+          {
+            "itemId": "01J8MENA2AAAAAAAAAAAAAAAAA",
+            "values": {
+              "name": {
+                "kind": "text",
+                "value": "Barra libre"
+              }
+            }
+          }
+        ]
+      },
+      "gifts.list": {
+        "kind": "group",
+        "items": [
+          {
+            "itemId": "01J8GAFT3AAAAAAAAAAAAAAAAA",
+            "values": {
+              "title": {
+                "kind": "text",
+                "value": "Viaje"
+              },
+              "detail": {
+                "kind": "text",
+                "value": "Fondo común"
+              }
+            }
+          },
+          {
+            "itemId": "01J8GAFT4AAAAAAAAAAAAAAAAA",
+            "values": {
+              "title": {
+                "kind": "text",
+                "value": "Otro"
+              },
+              "detail": {
+                "kind": "text",
+                "value": "Sorpresa"
+              }
+            }
+          }
+        ]
+      },
+      "extra.note": {
+        "kind": "text",
+        "value": "Hotel recomendado"
+      },
+      "cover.olvidado": {
+        "kind": "text",
+        "value": "nadie lo migró"
+      }
+    }
+  },
+  "meta": {
+    "locale": "es-MX"
+  }
+}

@@ -1,0 +1,164 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.location",
+      "role": "eventPlace",
+      "label": {
+        "es-MX": "test.location"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "location"
+    },
+    "value": {
+      "kind": "location",
+      "name": "Templo"
+    },
+    "path": "content.test.location",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: con address y mapHref",
+    "tag": "PM",
+    "spec": {
+      "id": "test.location",
+      "role": "eventPlace",
+      "label": {
+        "es-MX": "test.location"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "location"
+    },
+    "value": {
+      "kind": "location",
+      "name": "Templo",
+      "address": "Calle 1",
+      "mapHref": "https://maps.example.com/x"
+    },
+    "path": "content.test.location",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra LocationSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.location",
+      "role": "eventPlace",
+      "label": {
+        "es-MX": "test.location"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "location"
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.location",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta name",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.location",
+      "role": "eventPlace",
+      "label": {
+        "es-MX": "test.location"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "location"
+    },
+    "value": {
+      "kind": "location"
+    },
+    "path": "content.test.location",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: name:\"\" (min 1)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.location",
+      "role": "eventPlace",
+      "label": {
+        "es-MX": "test.location"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "location"
+    },
+    "value": {
+      "kind": "location",
+      "name": ""
+    },
+    "path": "content.test.location",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.location",
+      "role": "eventPlace",
+      "label": {
+        "es-MX": "test.location"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "location"
+    },
+    "value": null,
+    "path": "content.test.location",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: mapHref no-http rechazado",
+    "tag": "extra",
+    "spec": {
+      "id": "test.location",
+      "role": "eventPlace",
+      "label": {
+        "es-MX": "test.location"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "location"
+    },
+    "value": {
+      "kind": "location",
+      "name": "Templo",
+      "mapHref": "geo:1,2"
+    },
+    "path": "content.test.location",
+    "expectZodValid": false,
+    "expectViolations": []
+  }
+]

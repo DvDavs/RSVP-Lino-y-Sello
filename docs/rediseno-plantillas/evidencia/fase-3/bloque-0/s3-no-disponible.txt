@@ -1,0 +1,11 @@
+# TAREA 2 — ¿funciona S3 en este entorno? Se INTENTÓ una subida real antes de decidir.
+# Comando:  TEMPLATES2_ASSETS_MODE=s3 scripts/dev-backend.sh register frontend/templates/boda-clasica/1.0.0
+# (modo 's3' = el valor por defecto de application.yml; bucket declarado: templates2-dev-local)
+
+2026-09-04T15:28:39.846Z ERROR m.e.i.m.t.c.TemplateRegisterCommand      : templates2: registro RECHAZADO desde "frontend/templates/boda-clasica/1.0.0": S3 no aceptó "templates2/template/boda-clasica/1.0.0/8e22083a98052e48852458432561c95a0ffb0611f77e60901a67377b6d7866c9.png": The specified bucket does not exist (Service: S3, Status Code: 404, Request ID: AQ7GC5KJHKMQDWFD, Extended Request ID: yU2rP1y6jypIqulgNBmBNXMvdKfMWqj0I0J7Agjgt++8cFWyNgkvc1iNyMbMfZjYnEG02en1dpJ3U4AmaQm06hCnxzd0VDi1)
+
+# Lectura: las credenciales de application.yml SÍ autentican (la respuesta es un 404
+# NoSuchBucket firmado, no un 403 InvalidAccessKeyId), pero NO existe ningún bucket de pruebas
+# y el único bucket real es el de PRODUCCIÓN (invitacionesdigitalesassets), prohibido por
+# ADR-2-ORQ-03. Crear un bucket sería un efecto en la cuenta AWS del dueño: no se hace.
+# Conclusión: hace falta el adaptador local (ADR-3-0a-02).

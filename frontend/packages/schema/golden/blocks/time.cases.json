@@ -1,0 +1,168 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.time",
+      "role": "eventTime",
+      "label": {
+        "es-MX": "test.time"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "time",
+      "formatId": "h12"
+    },
+    "value": {
+      "kind": "time",
+      "value": "23:59"
+    },
+    "path": "content.test.time",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: TimeValue no tiene más campos",
+    "tag": "PM",
+    "spec": {
+      "id": "test.time",
+      "role": "eventTime",
+      "label": {
+        "es-MX": "test.time"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "time",
+      "formatId": "h12"
+    },
+    "value": {
+      "kind": "time",
+      "value": "00:00"
+    },
+    "path": "content.test.time",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra TimeSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.time",
+      "role": "eventTime",
+      "label": {
+        "es-MX": "test.time"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "time",
+      "formatId": "h12"
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.time",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta value",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.time",
+      "role": "eventTime",
+      "label": {
+        "es-MX": "test.time"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "time",
+      "formatId": "h12"
+    },
+    "value": {
+      "kind": "time"
+    },
+    "path": "content.test.time",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: 24:00 no existe (horas 00-23)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.time",
+      "role": "eventTime",
+      "label": {
+        "es-MX": "test.time"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "time",
+      "formatId": "h12"
+    },
+    "value": {
+      "kind": "time",
+      "value": "24:00"
+    },
+    "path": "content.test.time",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.time",
+      "role": "eventTime",
+      "label": {
+        "es-MX": "test.time"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "time",
+      "formatId": "h12"
+    },
+    "value": null,
+    "path": "content.test.time",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: \"9:30\" sin cero a la izquierda falla",
+    "tag": "extra",
+    "spec": {
+      "id": "test.time",
+      "role": "eventTime",
+      "label": {
+        "es-MX": "test.time"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "time",
+      "formatId": "h12"
+    },
+    "value": {
+      "kind": "time",
+      "value": "9:30"
+    },
+    "path": "content.test.time",
+    "expectZodValid": false,
+    "expectViolations": []
+  }
+]

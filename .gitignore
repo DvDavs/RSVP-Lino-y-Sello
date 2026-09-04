@@ -58,4 +58,19 @@ invitados_ejemplo.csv
 
 
 ###  testing files ###
-src/test/
+# `src/test/` estaba ignorado porque el proyecto no tenía pruebas (H-19).
+# La fase 2 escribe pruebas Kotlin en src/test/kotlin/**/templates2/**: dejarlo
+# ignorado las excluiría del commit en silencio y P9 fallaría sin aviso.
+
+### frontend/ (monorepo pnpm, fase 2 en adelante — contratos.md §1) ###
+frontend/node_modules/
+frontend/**/node_modules/
+frontend/**/dist/
+frontend/**/coverage/
+frontend/.turbo/
+frontend/**/.turbo/
+frontend/**/*.tsbuildinfo
+# frontend/packages/schema/json-schema/ y frontend/packages/schema/golden/ SÍ se versionan:
+# son artefactos contractuales (ADR-1R-D-08/D-09), no build output descartable.
+### worktrees de sub-agentes (efímeros, no versionar) ###
+.claude/worktrees/

@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://invitaciones.evolutiondev.mx/schema/theme.schema.json",
+  "$ref": "https://invitaciones.evolutiondev.mx/schema/templates2.schema.json#/$defs/Theme"
+}

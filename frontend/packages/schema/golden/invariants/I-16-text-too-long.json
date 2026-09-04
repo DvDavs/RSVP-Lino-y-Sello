@@ -1,0 +1,158 @@
+[
+  {
+    "name": "text con length > maxLength",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "cover.title",
+      "role": "coverTitle",
+      "label": {
+        "es-MX": "cover.title"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 3,
+        "maxLength": 10,
+        "multiline": false
+      }
+    },
+    "input": {
+      "kind": "text",
+      "value": "esto es mucho mas largo de lo permitido"
+    },
+    "path": "content.cover.title",
+    "expect": [
+      "I-16_TEXT_TOO_LONG"
+    ]
+  },
+  {
+    "name": "text dentro de rango",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "cover.title",
+      "role": "coverTitle",
+      "label": {
+        "es-MX": "cover.title"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 3,
+        "maxLength": 10,
+        "multiline": false
+      }
+    },
+    "input": {
+      "kind": "text",
+      "value": "Hola"
+    },
+    "path": "content.cover.title",
+    "expect": []
+  },
+  {
+    "name": "text con length < minLength (mismo código)",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "cover.title",
+      "role": "coverTitle",
+      "label": {
+        "es-MX": "cover.title"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 3,
+        "maxLength": 10,
+        "multiline": false
+      }
+    },
+    "input": {
+      "kind": "text",
+      "value": "ab"
+    },
+    "path": "content.cover.title",
+    "expect": [
+      "I-16_TEXT_TOO_LONG"
+    ]
+  },
+  {
+    "name": "listText: ítem que excede maxItemLength",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "gallery.tags",
+      "role": "decorative",
+      "label": {
+        "es-MX": "gallery.tags"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 12,
+        "maxItemLength": 5
+      }
+    },
+    "input": {
+      "kind": "listText",
+      "items": [
+        "123456"
+      ]
+    },
+    "path": "content.gallery.tags",
+    "expect": [
+      "I-16_TEXT_TOO_LONG"
+    ]
+  },
+  {
+    "name": "richText cuyo texto plano excede maxLength",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "story.body",
+      "role": "storyBody",
+      "label": {
+        "es-MX": "story.body"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "richText",
+      "constraints": {
+        "maxLength": 20
+      }
+    },
+    "input": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "este parrafo es demasiado largo para el limite"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "path": "content.story.body",
+    "expect": [
+      "I-16_TEXT_TOO_LONG"
+    ]
+  }
+]

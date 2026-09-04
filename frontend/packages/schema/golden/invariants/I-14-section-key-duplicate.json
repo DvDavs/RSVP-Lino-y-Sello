@@ -1,0 +1,278 @@
+[
+  {
+    "name": "dos secciones con la misma key",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "a",
+              "role": "coverTitle",
+              "label": {
+                "es-MX": "a"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        },
+        {
+          "key": "cover",
+          "type": "event",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "b",
+              "role": "eventTitle",
+              "label": {
+                "es-MX": "b"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": [
+      "I-14_SECTION_KEY_DUPLICATE"
+    ]
+  },
+  {
+    "name": "claves distintas",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "a",
+              "role": "coverTitle",
+              "label": {
+                "es-MX": "a"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        },
+        {
+          "key": "event",
+          "type": "event",
+          "title": {
+            "es-MX": "event"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "b",
+              "role": "eventTitle",
+              "label": {
+                "es-MX": "b"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  }
+]

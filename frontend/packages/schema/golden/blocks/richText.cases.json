@@ -1,0 +1,990 @@
+[
+  {
+    "name": "P mínimo: 1 párrafo, 1 span",
+    "tag": "P",
+    "spec": {
+      "id": "test.rich",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.rich"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "richText",
+      "constraints": {
+        "maxLength": 8000
+      }
+    },
+    "value": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Un párrafo."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "path": "content.test.rich",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: 40 párrafos (máximo)",
+    "tag": "PM",
+    "spec": {
+      "id": "test.rich",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.rich"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "richText",
+      "constraints": {
+        "maxLength": 8000
+      }
+    },
+    "value": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 0."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 1."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 2."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 3."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 4."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 5."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 6."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 7."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 8."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 9."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 10."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 11."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 12."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 13."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 14."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 15."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 16."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 17."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 18."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 19."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 20."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 21."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 22."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 23."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 24."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 25."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 26."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 27."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 28."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 29."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 30."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 31."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 32."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 33."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 34."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 35."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 36."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 37."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 38."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 39."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "path": "content.test.rich",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra RichTextSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.rich",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.rich"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "richText",
+      "constraints": {
+        "maxLength": 8000
+      }
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.rich",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta doc",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.rich",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.rich"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "richText",
+      "constraints": {
+        "maxLength": 8000
+      }
+    },
+    "value": {
+      "kind": "richText"
+    },
+    "path": "content.test.rich",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: 41 párrafos excede RichDoc.max(40)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.rich",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.rich"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "richText",
+      "constraints": {
+        "maxLength": 8000
+      }
+    },
+    "value": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 0."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 1."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 2."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 3."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 4."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 5."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 6."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 7."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 8."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 9."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 10."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 11."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 12."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 13."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 14."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 15."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 16."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 17."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 18."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 19."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 20."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 21."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 22."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 23."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 24."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 25."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 26."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 27."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 28."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 29."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 30."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 31."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 32."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 33."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 34."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 35."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 36."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 37."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 38."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 39."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Párrafo 40."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "path": "content.test.rich",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.rich",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.rich"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "richText",
+      "constraints": {
+        "maxLength": 8000
+      }
+    },
+    "value": null,
+    "path": "content.test.rich",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: marks:[\"bold\",\"italic\",\"bold\"] excede max(2)",
+    "tag": "extra",
+    "spec": {
+      "id": "test.rich",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.rich"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "richText",
+      "constraints": {
+        "maxLength": 8000
+      }
+    },
+    "value": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "x",
+                "marks": [
+                  "bold",
+                  "italic",
+                  "bold"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "path": "content.test.rich",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: href con javascript: falla HttpUrl",
+    "tag": "extra",
+    "spec": {
+      "id": "test.rich",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.rich"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "richText",
+      "constraints": {
+        "maxLength": 8000
+      }
+    },
+    "value": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "x",
+                "href": "javascript:alert(1)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "path": "content.test.rich",
+    "expectZodValid": false,
+    "expectViolations": []
+  }
+]

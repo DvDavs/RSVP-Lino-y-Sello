@@ -1,0 +1,138 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.boolean",
+      "role": "rsvpChildrenAllowed",
+      "label": {
+        "es-MX": "test.boolean"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "boolean"
+    },
+    "value": {
+      "kind": "boolean",
+      "value": true
+    },
+    "path": "content.test.boolean",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: BooleanValue no tiene más campos",
+    "tag": "PM",
+    "spec": {
+      "id": "test.boolean",
+      "role": "rsvpChildrenAllowed",
+      "label": {
+        "es-MX": "test.boolean"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "boolean"
+    },
+    "value": {
+      "kind": "boolean",
+      "value": false
+    },
+    "path": "content.test.boolean",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra BooleanSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.boolean",
+      "role": "rsvpChildrenAllowed",
+      "label": {
+        "es-MX": "test.boolean"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "boolean"
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.boolean",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta value",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.boolean",
+      "role": "rsvpChildrenAllowed",
+      "label": {
+        "es-MX": "test.boolean"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "boolean"
+    },
+    "value": {
+      "kind": "boolean"
+    },
+    "path": "content.test.boolean",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: value:\"true\" (string, no boolean)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.boolean",
+      "role": "rsvpChildrenAllowed",
+      "label": {
+        "es-MX": "test.boolean"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "boolean"
+    },
+    "value": {
+      "kind": "boolean",
+      "value": "true"
+    },
+    "path": "content.test.boolean",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.boolean",
+      "role": "rsvpChildrenAllowed",
+      "label": {
+        "es-MX": "test.boolean"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "boolean"
+    },
+    "value": null,
+    "path": "content.test.boolean",
+    "expectZodValid": false,
+    "expectViolations": []
+  }
+]

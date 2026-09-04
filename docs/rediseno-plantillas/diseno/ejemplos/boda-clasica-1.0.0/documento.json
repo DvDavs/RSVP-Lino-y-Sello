@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 1,
+  "template": {
+    "slug": "boda-clasica",
+    "version": "1.0.0"
+  },
+  "theme": {
+    "paletteId": "olive",
+    "fontSetId": "serif-elegante"
+  },
+  "structure": {
+    "sections": [
+      {
+        "key": "cover",
+        "variant": "framed",
+        "visible": true
+      },
+      {
+        "key": "couple",
+        "variant": "side-by-side",
+        "visible": true
+      },
+      {
+        "key": "family",
+        "variant": "cards",
+        "visible": true
+      },
+      {
+        "key": "event",
+        "variant": "timeline",
+        "visible": true
+      },
+      {
+        "key": "gallery",
+        "variant": "grid-6",
+        "visible": true
+      },
+      {
+        "key": "story",
+        "variant": "line",
+        "visible": false
+      },
+      {
+        "key": "giftTable",
+        "variant": "cards",
+        "visible": true
+      },
+      {
+        "key": "suggestions",
+        "variant": "cards",
+        "visible": false
+      },
+      {
+        "key": "amenities",
+        "variant": "cards",
+        "visible": false
+      },
+      {
+        "key": "dressCode",
+        "variant": "two-columns",
+        "visible": true
+      },
+      {
+        "key": "rsvp",
+        "variant": "banner",
+        "visible": true
+      },
+      {
+        "key": "footer",
+        "variant": "simple",
+        "visible": true
+      }
+    ]
+  },
+  "content": {
+    "cover.title": {
+      "kind": "text",
+      "value": "Camila & Antonio"
+    },
+    "cover.image": {
+      "kind": "image",
+      "assetId": "as_01J8YQYX1HD63EACDQ55S8368N",
+      "alt": "Camila y Antonio en el campo",
+      "focal": {
+        "x": 0.5,
+        "y": 0.3
+      }
+    },
+    "couple.groom": {
+      "kind": "person",
+      "name": "Antonio Barrita Rocha"
+    },
+    "couple.bride": {
+      "kind": "person",
+      "name": "Camila Estrada López"
+    },
+    "couple.groomText": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Hoy elijo pasar el resto de mi vida a tu lado."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "family.parentA1": {
+      "kind": "person",
+      "name": "María Rocha Luis"
+    },
+    "family.parentA2": {
+      "kind": "person",
+      "name": "Martín Barrita"
+    },
+    "family.parentB1": {
+      "kind": "person",
+      "name": "Teresa López"
+    },
+    "family.parentB2": {
+      "kind": "person",
+      "name": "Raúl Estrada Santiago"
+    },
+    "family.godparents": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8BH3BJCF42DMY0PXDDDK8KE",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Roberto Cruz y Carolina Aquino"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Padrinos de velación"
+            }
+          }
+        }
+      ]
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8GDAN5TK4BMEJ4BV0CYKXVB",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Ceremonia religiosa"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-12-12T16:30",
+              "end": "2026-12-12T17:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Templo de Santo Domingo de Guzmán",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "01J8PXD520HJGWN52GEKP2DYYS",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Recepción"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-12-12T19:00"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Zorba el Griego"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.photos": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8TZDWP5SW89W647ME9HYN3Q",
+          "values": {
+            "image": {
+              "kind": "image",
+              "assetId": "as_01J8ZHBMS73AXP2DB1GWN2D04T",
+              "alt": "",
+              "focal": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          }
+        }
+      ]
+    },
+    "gifts.options": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J80TKEDJ2TRPS2MWXJBMGKQ5",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "bank"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Depósito o transferencia"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Banco: SANTANDER",
+                "Titular: KARLA ZARATE CRUZ",
+                "Cuenta CLABE: 014610606106246881"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J822JMYWQ3E4G54R452HC10W",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Damas"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo o corto, o traje elegante."
+            }
+          }
+        },
+        {
+          "itemId": "01J85EAPE1BZX5ZE0Y5VA3VTNX",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Caballeros"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje o smoking, corbata, zapatos de vestir."
+            }
+          }
+        }
+      ]
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Por confirmar antes del 1 de diciembre, por favor."
+    }
+  },
+  "attic": {},
+  "meta": {
+    "locale": "es-MX"
+  }
+}

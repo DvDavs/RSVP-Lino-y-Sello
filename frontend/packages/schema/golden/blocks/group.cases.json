@@ -1,0 +1,798 @@
+[
+  {
+    "name": "P mínimo: 1 ítem con values vacío",
+    "tag": "P",
+    "spec": {
+      "id": "test.group",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "test.group"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "test.group item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8GA0AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        }
+      ]
+    },
+    "path": "content.test.group",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: 24 ítems (máximo)",
+    "tag": "PM",
+    "spec": {
+      "id": "test.group",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "test.group"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "test.group item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8G0AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T0"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G1AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T1"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G2AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T2"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G3AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T3"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G4AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T4"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G5AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T5"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G6AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T6"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G7AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T7"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G8AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T8"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G9AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T9"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G10AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T10"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G11AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T11"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G12AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T12"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G13AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T13"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G14AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T14"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G15AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T15"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G16AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T16"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G17AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T17"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G18AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T18"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G19AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T19"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G20AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T20"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G21AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T21"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G22AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T22"
+            }
+          }
+        },
+        {
+          "itemId": "01J8G23AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "T23"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.test.group",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra GroupSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.group",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "test.group"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "test.group item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.group",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta items",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.group",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "test.group"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "test.group item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "group"
+    },
+    "path": "content.test.group",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: 25 ítems excede GroupValue.max(24)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.group",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "test.group"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "test.group item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8H0AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H1AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H2AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H3AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H4AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H5AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H6AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H7AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H8AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H9AAAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H10AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H11AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H12AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H13AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H14AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H15AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H16AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H17AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H18AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H19AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H20AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H21AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H22AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H23AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        },
+        {
+          "itemId": "01J8H24AAAAAAAAAAAAAAAAAAA",
+          "values": {}
+        }
+      ]
+    },
+    "path": "content.test.group",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.group",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "test.group"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "test.group item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "value": null,
+    "path": "content.test.group",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: values con clave no declarada → I-18",
+    "tag": "extra",
+    "spec": {
+      "id": "test.group",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "test.group"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "test.group item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8X1AAAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "noExiste": {
+              "kind": "text",
+              "value": "x"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.test.group",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-18_ITEM_BLOCK_UNKNOWN"
+    ]
+  },
+  {
+    "name": "extra: itemId duplicado → I-03",
+    "tag": "extra",
+    "spec": {
+      "id": "test.group",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "test.group"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "test.group item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8GA1AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "A"
+            }
+          }
+        },
+        {
+          "itemId": "01J8GA1AAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "B"
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.test.group",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-03_ITEM_ID_DUPLICATE"
+    ]
+  },
+  {
+    "name": "extra: grupo anidado dentro de values debe fallar (ScalarValue excluye GroupValue)",
+    "tag": "extra",
+    "spec": {
+      "id": "test.group",
+      "role": "eventCards",
+      "label": {
+        "es-MX": "test.group"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "group",
+      "min": 0,
+      "max": 24,
+      "reorderable": true,
+      "itemLabel": {
+        "es-MX": "test.group item"
+      },
+      "itemBlocks": [
+        {
+          "id": "title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "01J8NESTAAAAAAAAAAAAAAAAAA",
+          "values": {
+            "title": {
+              "kind": "group",
+              "items": []
+            }
+          }
+        }
+      ]
+    },
+    "path": "content.test.group",
+    "expectZodValid": false,
+    "expectViolations": []
+  }
+]

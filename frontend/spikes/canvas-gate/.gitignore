@@ -1,0 +1,6 @@
+node_modules/
+.next/
+test-results/
+playwright-report/
+# package-lock.json SÍ se versiona: el spike se instala con npm (vive fuera del workspace pnpm)
+# y el bloqueo de transitivas es lo único que lo hace reproducible.

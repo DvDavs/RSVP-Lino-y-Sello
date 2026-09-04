@@ -1,0 +1,23 @@
+# TAREA 3 — registro REAL de los dos paquetes con el comando de línea de handoffs/2-3.md,
+# sobre una base recién creada. scripts/dev-backend.sh register <dir> sólo añade
+# --spring.main.web-application-type=none y --templates2.scheduling.enabled=false.
+
+2026-09-04T15:53:30.506Z INFO m.e.i.m.t.c.TemplateRegisterCommand      : templates2: created boda-clasica@1.0.0 (templateVersionId=1, packageHash=sha256:d2f979766e96854ba60c936fc3b9d96883204742ac8373ff1bab15535e5feb01, assets=2)
+2026-09-04T15:53:51.602Z INFO m.e.i.m.t.c.TemplateRegisterCommand      : templates2: created xv-jardin@1.0.0 (templateVersionId=2, packageHash=sha256:8937b2a3ebdb00b76bc46716cb32803c0d6e7cf15814c4081a1fe3a0bae72219, assets=1)
+2026-09-04T15:54:17.789Z INFO m.e.i.m.t.c.TemplateRegisterCommand      : templates2: noop_same_hash boda-clasica@1.0.0 (templateVersionId=1, packageHash=sha256:d2f979766e96854ba60c936fc3b9d96883204742ac8373ff1bab15535e5feb01, assets=0)
+
+# La tercera línea es el MISMO paquete por segunda vez: 'noop_same_hash', mismo
+# templateVersionId y mismo package_hash. Es la idempotencia de ADR-008, verificada.
+
+# Digestos de los assets generados (frontend/templates/scripts/build-packages.mjs):
+  
+  == boda-clasica@1.0.0 — paleta "blush" (#FDF7F5 / #C98B8B) ==
+     assets/preview.png      509379 B  sha256:8e22083a98052e48852458432561c95a0ffb0611f77e60901a67377b6d7866c9
+     assets/rsvp-bg.png      599841 B  sha256:34fbabcdcaf030f55fb5fe236cd71db28c650721e70bf6ea9986e8729f37e9de
+     template.json / theme.json / defaults.json  →  frontend/templates/boda-clasica/1.0.0
+  
+  == xv-jardin@1.0.0 — paleta "garden" (#F6FAF3 / #7CA35C) ==
+     assets/preview.png      518479 B  sha256:b129749cfa8b7648e0b0424be3a0128666ba8ec16c73f83d0cdc7404212bc6d0
+     template.json / theme.json / defaults.json  →  frontend/templates/xv-jardin/1.0.0
+  
+  Sin deriva.

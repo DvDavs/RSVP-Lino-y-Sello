@@ -1,0 +1,352 @@
+{
+  "manifestVersion": 1,
+  "slug": "fixture-tpl",
+  "version": "2.0.0",
+  "name": {
+    "es-MX": "Plantilla de prueba"
+  },
+  "eventKinds": [
+    "generic"
+  ],
+  "minPlanTier": 1,
+  "locales": [
+    "es-MX"
+  ],
+  "capabilities": [],
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "title": {
+        "es-MX": "cover"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "cover.title",
+          "role": "coverTitle",
+          "label": {
+            "es-MX": "cover.title"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        },
+        {
+          "id": "cover.new",
+          "role": "coverSubtitle",
+          "label": {
+            "es-MX": "cover.new"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        },
+        {
+          "id": "cover.added",
+          "role": "decorative",
+          "label": {
+            "es-MX": "cover.added"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "relato",
+      "type": "story",
+      "title": {
+        "es-MX": "relato"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "story.body",
+          "role": "storyBody",
+          "label": {
+            "es-MX": "story.body"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 30,
+            "multiline": true
+          }
+        },
+        {
+          "id": "story.tags",
+          "role": "storyTitle",
+          "label": {
+            "es-MX": "story.tags"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        },
+        {
+          "id": "conv.aRico",
+          "role": "storyImage",
+          "label": {
+            "es-MX": "conv.aRico"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "richText",
+          "constraints": {
+            "maxLength": 8000
+          }
+        },
+        {
+          "id": "conv.aLista",
+          "role": "celebrantsMessage",
+          "label": {
+            "es-MX": "conv.aLista"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "listText",
+          "constraints": {
+            "minItems": 0,
+            "maxItems": 12,
+            "maxItemLength": 200
+          }
+        },
+        {
+          "id": "conv.vacioRico",
+          "role": "familyIntro",
+          "label": {
+            "es-MX": "conv.vacioRico"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "richText",
+          "constraints": {
+            "maxLength": 8000
+          }
+        },
+        {
+          "id": "conv.vacioLista",
+          "role": "galleryIntro",
+          "label": {
+            "es-MX": "conv.vacioLista"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "listText",
+          "constraints": {
+            "minItems": 0,
+            "maxItems": 12,
+            "maxItemLength": 200
+          }
+        }
+      ]
+    },
+    {
+      "key": "gifts",
+      "type": "giftTable",
+      "title": {
+        "es-MX": "gifts"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "gifts.list",
+          "role": "giftOptions",
+          "label": {
+            "es-MX": "gifts.list"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "group",
+          "min": 0,
+          "max": 2,
+          "reorderable": true,
+          "itemLabel": {
+            "es-MX": "gifts.list item"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "giftOptionTitle",
+              "label": {
+                "es-MX": "title"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "detail",
+              "role": "giftOptionDetail",
+              "label": {
+                "es-MX": "detail"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "menu",
+      "type": "amenities",
+      "title": {
+        "es-MX": "menu"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "menu.note",
+          "role": "amenityDetail",
+          "label": {
+            "es-MX": "menu.note"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "event",
+      "type": "event",
+      "title": {
+        "es-MX": "event"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "event.cards",
+          "role": "eventCards",
+          "label": {
+            "es-MX": "event.cards"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "group",
+          "min": 0,
+          "max": 6,
+          "reorderable": true,
+          "itemLabel": {
+            "es-MX": "event.cards item"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "eventTitle",
+              "label": {
+                "es-MX": "title"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "assets": [],
+  "migrationsFrom": []
+}
