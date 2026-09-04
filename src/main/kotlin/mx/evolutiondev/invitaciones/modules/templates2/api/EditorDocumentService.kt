@@ -703,7 +703,11 @@ class EditorDocumentService(
     ): Map<AssetId, AssetUrlResolver.StoredAsset> {
         val salida = LinkedHashMap<AssetId, AssetUrlResolver.StoredAsset>()
         for (a in filasDeAssets(invitationId, version)) {
-            salida[AssetId(a.publicId)] = AssetUrlResolver.StoredAsset(a.bucket, a.s3Key, a.width, a.height)
+            // `almacenado` comprueba en voz alta que la fila vive en el bucket que este módulo
+            // direcciona (ADV-10): una fila en otro bucket daría una URL rota dentro del `composed`
+            // que se congela en `tpl_release`, y ahí ya no la detecta nadie.
+            salida[AssetId(a.publicId)] =
+                AssetUrlResolver.almacenado(bucket, a.publicId, a.bucket, a.s3Key, a.width, a.height)
         }
         return salida
     }

@@ -224,7 +224,10 @@ class TemplateCatalogService(
     private fun previewUrl(fila: TplTemplateVersionEntity, previewImage: String?, shaPorRuta: Map<String, String>): String? {
         val sha = previewImage?.let { shaPorRuta[it] } ?: return null
         val asset = assets.findByTemplateVersionIdAndSha256(fila.id, sha) ?: return null
-        return AssetUrlResolver.url(publicBaseUrl, AssetUrlResolver.StoredAsset(asset.bucket, asset.s3Key, asset.width, asset.height))
+        return AssetUrlResolver.url(
+            publicBaseUrl,
+            AssetUrlResolver.almacenado(bucket, asset.publicId, asset.bucket, asset.s3Key, asset.width, asset.height),
+        )
     }
 
     private fun aRegistrationEntry(f: TplTemplateRegistrationEntity) = RegistrationEntry(
