@@ -1,0 +1,92 @@
+/**
+ * packages/sections/src/blocks/blocks.module.css — estilos compartidos por los bloques escalares
+ * simples (Text, Date, Time, DateTimeRange, Choice, Person, Boolean, Location). Solo `var(--inv-*)`.
+ */
+
+.text {
+  font-family: var(--inv-font-body);
+  font-weight: var(--inv-weight-body);
+  color: var(--inv-color-ink);
+}
+
+.time {
+  font-family: var(--inv-font-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--inv-color-ink);
+}
+
+.muted {
+  color: var(--inv-color-muted);
+}
+
+.personName {
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  color: var(--inv-color-ink);
+}
+
+.personNote {
+  display: block;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-muted);
+  margin-top: var(--inv-space-1);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--inv-space-2);
+}
+
+.listItem {
+  display: flex;
+  gap: var(--inv-space-2);
+  align-items: baseline;
+  font-family: var(--inv-font-body);
+  color: var(--inv-color-ink);
+}
+
+.listItem::before {
+  content: "";
+  flex: none;
+  width: 0.375rem;
+  height: 0.375rem;
+  margin-top: 0.5em;
+  border-radius: var(--inv-radius-sm);
+  background: var(--inv-color-accent);
+}
+
+.location {
+  display: grid;
+  gap: var(--inv-space-1);
+  font-family: var(--inv-font-body);
+  color: var(--inv-color-ink);
+}
+
+.locationName {
+  font-weight: var(--inv-weight-medium);
+}
+
+.locationAddress {
+  color: var(--inv-color-muted);
+  font-size: var(--inv-text-sm);
+}
+
+.link {
+  color: var(--inv-color-accent);
+  text-underline-offset: 0.2em;
+}
+
+.choice {
+  font-family: var(--inv-font-body);
+  color: var(--inv-color-ink);
+}
+
+.boolean {
+  font-family: var(--inv-font-body);
+  color: var(--inv-color-muted);
+  font-size: var(--inv-text-sm);
+}
