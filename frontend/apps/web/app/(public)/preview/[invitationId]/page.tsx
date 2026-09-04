@@ -13,7 +13,7 @@
 // secciones (`mode="public"`).
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ComposedPreviewStub } from "@/components/public/ComposedPreviewStub";
+import { RenderInvitacion } from "../../_componentes/RenderInvitacion";
 import { ApiError, SessionError, getDocument } from "@/lib/api-client";
 import type { GetDocumentResponse } from "@/lib/api-types";
 import { es_MX } from "@/lib/i18n";
@@ -73,5 +73,5 @@ export default function PaginaPreview() {
       </div>
     );
   }
-  return <ComposedPreviewStub composed={estado.datos.composed} />;
+  return <RenderInvitacion composed={estado.datos.composed} />;
 }

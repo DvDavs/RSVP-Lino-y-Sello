@@ -1,0 +1,79 @@
+/* app/(public)/publico.css — la ÚNICA hoja global de la superficie pública.
+ *
+ * Contiene tres cosas y nada más:
+ *   1. Los valores de reserva de los `--inv-*` (`@invitaciones/sections/.../tokens.css`), que ese
+ *      paquete no se autoimporta a propósito ("lo importa apps/web una sola vez", tokens.css:13).
+ *   2. Las tipografías AUTOALOJADAS de las familias que las plantillas de este repositorio declaran
+ *      (ADR-1R-F-07: nunca se pide una fuente a un tercero en tiempo de ejecución).
+ *   3. Un reset mínimo de documento.
+ *
+ * Lo que NO contiene, por P3 y `04 §19`: ni un color, ni un tamaño, ni una fuente propios de
+ * `apps/web`. Tailwind y los `--ui-*` del chrome no entran aquí (grupo de rutas distinto, sin
+ * `globals.css`) — `test/tokens-no-leak.test.ts` lo comprueba mecánicamente. */
+
+/* --------------------------------------------------------------------------- 1. tokens --inv-*
+ * Ruta explícita al archivo dentro del paquete y no `@import "@invitaciones/sections/tokens.css"`:
+ * el `exports` de `packages/sections/package.json` solo publica `"."` y ese paquete es de SOLO
+ * LECTURA para este bloque (no se le puede añadir una subruta). `node_modules/@invitaciones/sections`
+ * es el enlace de pnpm al paquete del workspace, así que la ruta es estable. */
+@import "../../node_modules/@invitaciones/sections/src/theme/tokens.css";
+
+/* ------------------------------------------------------------------- 2. tipografías autoalojadas
+ * `@fontsource/*` declara `@font-face` con el NOMBRE REAL de la familia ('Cormorant Garamond',
+ * 'Inter', …), que es exactamente lo que `ThemeProvider` escribe en `--inv-font-heading/body` a
+ * partir de `ResolvedTheme.fonts.*.family`. `next/font/google` se descartó por lo contrario: mangla
+ * la familia a `__Cormorant_Garamond_<hash>` y entonces el valor del token nunca casa (ADR-3-3-02).
+ *
+ * Se importan los archivos POR PESO (`400.css`, `600.css`), no los de subconjunto
+ * (`latin-400.css`, `latin-ext-400.css`). MEDIDO, no supuesto: los archivos por subconjunto de
+ * `@fontsource` **no llevan `unicode-range`** — cada uno declara un `@font-face` completo para la
+ * misma familia/peso/estilo —, así que el navegador se descarga TODOS los que se importen. Con los
+ * ocho de `latin` + `latin-ext` eran 208 KB de tipografía en la primera carga y Lighthouse medía
+ * **LCP 4,4 s** (`04 §16.2`, punto 4 del orden de actuación: "subconjunto de fuentes más estrecho").
+ * Los archivos por peso sí traen un `@font-face` por subconjunto CON su `unicode-range`, así que el
+ * navegador descarga solo `latin` para un texto en es-MX y `latin-ext` únicamente si aparece un
+ * carácter que lo necesite — que es exactamente lo que pide `04 §5.5` ("latin + latin-ext, nunca
+ * solo latin") sin pagar los dos siempre.
+ *
+ * Solo los pesos que los `theme.json` de `frontend/templates/**` declaran de verdad:
+ *   boda-clasica  serif-elegante  Cormorant Garamond 400/600 + Inter 400/500
+ *   boda-clasica  moderna         Playfair Display 400/700  + Inter 400/500
+ *   xv-jardin     moderna         Playfair Display 400/700  + Source Sans 3 400/600
+ * Las dos familias de `moderna` NO se cargan todavía: ninguna invitación las usa hoy y cada familia
+ * de más son bytes en la primera carga de TODAS. Queda anotado en `handoffs/3-3.md`. */
+@import "@fontsource/cormorant-garamond/400.css";
+@import "@fontsource/cormorant-garamond/600.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+
+/* --------------------------------------------------------------------------- 3. reset de documento */
+html {
+  /* Safari en móvil agranda el texto al girar la pantalla si no se le dice que no. */
+  -webkit-text-size-adjust: 100%;
+  /* El color del documento (`theme.tokens.bg`) lo fija la propia página con un `<style>` en
+   * servidor; este es el de reserva mientras tanto y para `/preview` sin documento. */
+  background: var(--inv-color-bg);
+}
+
+body {
+  margin: 0;
+  background: var(--inv-color-bg);
+  color: var(--inv-color-ink);
+  font-family: var(--inv-font-body);
+  /* Evita el desplazamiento horizontal por un desbordamiento de una sección: en una invitación
+   * abierta desde WhatsApp, un scroll lateral de 3 px se percibe como "está rota". */
+  overflow-x: hidden;
+}
+
+/* 04 §17.5 / 1.4.2: ninguna transición ni animación cuando el sistema pide movimiento reducido.
+ * `packages/sections` ya lo respeta en sus propias hojas; esto cubre el documento entero. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

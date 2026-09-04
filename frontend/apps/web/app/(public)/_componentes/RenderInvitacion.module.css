@@ -1,0 +1,27 @@
+/* app/(public)/_componentes/RenderInvitacion.module.css — ENSAMBLAJE, no presentación.
+ *
+ * Regla que se respeta aquí: esta hoja NO decide ni un color, ni una tipografía, ni un tamaño de
+ * texto (P3 — eso es de la plantilla, vía `--inv-*` de packages/sections). Solo resuelve una cosa
+ * que ninguna sección puede resolver por sí sola: que el documento OCUPE LA VENTANA aunque tenga
+ * pocas secciones, para que no quede una franja del color de reserva bajo el pie.
+ *
+ * `ThemeProvider` renderiza `<style>` + `<div data-theme-palette>`; el `<div>` es el portador de
+ * los `--inv-*`. `[data-theme-palette]` es su gancho estable y documentado
+ * (packages/sections/src/theme/ThemeProvider.tsx:79) — no se acopla a la clase generada `inv-theme-*`,
+ * que sí es un detalle interno. */
+.lienzo {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* El envoltorio del tema y el árbol de secciones se estiran hasta el pie de la ventana. */
+.lienzo > :global([data-theme-palette]) {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.lienzo > :global([data-theme-palette]) > * {
+  flex: 1 1 auto;
+}
