@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.transaction.annotation.Transactional
 import jakarta.persistence.EntityManager
+import jakarta.persistence.LockModeType
 
 /**
  * Consultas nativas de `TplDocumentRepository` (`02 §7.4`): `insertIfAbsent`
@@ -124,7 +125,7 @@ class TplDocumentRepositoryTest : SpringPersistenceTestSupport() {
     }
 
     @Test
-    fun `lockByInvitationId devuelve la fila (el bloqueo pessimistic write no rompe una lectura normal en la misma transaccion)`() {
+    fun `lockByInvitationId toma de verdad un PESSIMISTIC_WRITE (el FOR UPDATE de 02 §11-2)`() {
         val invitationId = fixtureInvitationId()
         val versionId = fixtureVersionId()
         documentRepo.insertIfAbsent(invitationId, versionId, "{}", 2, "pub_" + "G".repeat(26))
@@ -132,5 +133,19 @@ class TplDocumentRepositoryTest : SpringPersistenceTestSupport() {
         val bloqueado = documentRepo.lockByInvitationId(invitationId)
         assertNotNull(bloqueado)
         assertEquals(invitationId, bloqueado!!.invitationId)
+        // Añadido por la revisión 2-1-REV (objeción O-21-05): que el método devuelva la fila NO prueba
+        // que Hibernate haya emitido `FOR UPDATE`. Sin ese bloqueo, `02 §11.2` advierte que
+        // `tpl_release.document_revision` puede no corresponder al `composed` congelado. `getLockMode`
+        // devuelve el modo realmente aplicado a la entidad gestionada.
+        assertEquals(
+            LockModeType.PESSIMISTIC_WRITE,
+            entityManager.getLockMode(bloqueado),
+            "lockByInvitationId debe mantener un bloqueo pesimista de escritura sobre la fila",
+        )
+    }
+
+    @Test
+    fun `lockByInvitationId sobre una invitacion sin documento devuelve null, no lanza`() {
+        assertNull(documentRepo.lockByInvitationId(-1L))
     }
 }

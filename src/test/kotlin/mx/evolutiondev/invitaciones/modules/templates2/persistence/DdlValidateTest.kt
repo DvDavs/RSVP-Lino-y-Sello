@@ -7,7 +7,7 @@ import org.springframework.test.annotation.DirtiesContext
 
 /**
  * **La prueba más importante del brief.** Si cualquier entidad de `templates2` no casa con el DDL de
- * `V29`-`V37` (columna que falta, tipo incompatible, `nullable` que no coincide…), `ddl-auto: validate`
+ * `V29`-`V37` (columna que falta o mal nombrada, tipo JDBC incompatible), `ddl-auto: validate`
  * (`application.yml:32`) hace que el `ApplicationContext` **no arranque** — aquí, y de forma idéntica en
  * producción para toda la aplicación, no solo `templates2` (`02 §1`, `02 §8.2`). Que este `@Test`
  * exista y pase ya es la aserción: si `ddl-auto: validate` fallara, `@BeforeEach` de Spring lanzaría
@@ -18,6 +18,14 @@ import org.springframework.test.annotation.DirtiesContext
  * aplicadas"): `@DataJpaTest` dispara `FlywayAutoConfiguration` como parte del mismo arranque, contra
  * el mismo clúster real de `PgTestCluster`, que aplica `V1`-`V37` completas antes de que Hibernate
  * valide nada.
+ *
+ * **Alcance real de la red de seguridad, medido por la revisión `2-1-REV` con tres sabotajes
+ * deliberados sobre las entidades** (salida literal en `bitacora/2-1-REV.md`): `validate` **sí** detecta
+ * una columna que falta (`missing column [...] in table [...]`) y un tipo JDBC que no casa
+ * (`wrong column type encountered...`); **no** detecta un desajuste de **nulabilidad** — cambiar
+ * `nullable = false` a `true` sobre una columna `NOT NULL` deja esta prueba en verde. Hibernate no
+ * compara `is_nullable` bajo `validate`. Esa clase de desajuste hay que cubrirla con una prueba de
+ * inserción o de `information_schema`, no confiando en esta.
  *
  * `SpringPersistenceTestSupport` restringe el `@EntityScan` a las 8 entidades de `templates2.persistence`
  * (ver su KDoc): un desajuste preexistente y ajeno a este bloque en el módulo antiguo
