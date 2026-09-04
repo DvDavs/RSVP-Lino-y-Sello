@@ -6,7 +6,14 @@
   "type": "module",
   "license": "UNLICENSED",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./canvas": {
+      "types": "./src/canvas-protocol.ts",
+      "default": "./src/canvas-protocol.ts"
+    }
   },
   "scripts": {
     "schema:emit": "tsx scripts/emit-json-schema.ts json-schema",

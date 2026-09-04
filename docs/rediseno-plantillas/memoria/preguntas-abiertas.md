@@ -222,3 +222,45 @@ decidir, para que el dueño no tenga que leerlas todas para encontrar las suyas.
 - [Fase 3 · 3-0a] **`MongoDataInitializer` alarga el arranque ~8 minutos si no hay Mongo** [V]. Es un `CommandLineRunner` del módulo antiguo que hace 16 operaciones y captura sus propias excepciones (no tumba el arranque), pero con el tiempo de selección de servidor por defecto (30 s) cada una espera lo suyo. `scripts/dev-backend.sh` lo evita fijando `serverSelectionTimeoutMS=250` en la URI, sin tocar código. **Supuesto tomado:** es cosa del entorno de desarrollo, no del módulo. ¿Interesa que ese sembrador se pueda apagar con una propiedad (`app.mongo.seed.enabled`), o que el `docker-compose`/entorno de desarrollo de la fase 3 traiga un Mongo?
 - [Fase 3 · 3-0a] **Los paquetes registrables viven en `frontend/templates/<slug>/<version>/` y son una copia derivada de `diseno/ejemplos/`** [V], generada por `frontend/templates/scripts/build-packages.mjs` (que sólo reescribe `assets[]` y `previewImage`). Hay por tanto **dos** sitios con el mismo manifiesto. **Supuesto tomado:** los ejemplos del diseño siguen siendo la fuente y el paquete es derivado y reproducible (`--check` falla si hay deriva); el kit de autor de la fase 4 decidirá dónde vive el original. ¿Debe la fase 4 mover el original a `frontend/templates/` y dejar en `diseno/ejemplos/` sólo un puntero, o al revés?
 - [Fase 3 · 3-0a] **Los assets de los paquetes son PNG generados por script, no WebP** [V]: el entorno no tiene ImageMagick, `sharp`, Pillow ni acceso a bancos de imágenes, y escribir un codificador WebP a mano no era razonable; PNG está en el catálogo de tipos admitidos (`AssetContentType.IMAGE_PNG`) y el número mágico se verifica. Pesan entre 500 KB y 600 KB cada uno. **Supuesto tomado:** obra propia, sin derechos de terceros, calidad suficiente para la miniatura del catálogo. ¿Los sustituye el kit de autor de la fase 4 por WebP reales (mismo dibujo, un tercio del peso), y quién aporta la fotografía de portada de verdad?
+
+## Fase 3 · 3-0b — compuerta A1-A8 del lienzo aislado (6)
+
+1. **El Chromium preinstalado no casa con la versión de Playwright del contrato.** `/opt/pw-browsers`
+   trae la revisión **1194** (`chromium-1194`, `chromium_headless_shell-1194`) y
+   `@playwright/test@1.62.1` (§21) busca la **1234**, así que arranca con
+   `Executable doesn't exist … chromium_headless_shell-1234` y pide `playwright install`, que
+   `contratos.md §7` prohíbe. **Supuesto tomado:** apuntar `launchOptions.executablePath` a
+   `/opt/pw-browsers/chromium-1194/chrome-linux/chrome` (sobreescribible con `PW_CHROMIUM_PATH`);
+   verificado, esa revisión se conduce sin problemas con este driver y los 4 tests pasan. Decisión
+   pendiente para `apps/web` y para el CI: ¿se actualiza la imagen a los binarios de 1.62.1, o se
+   baja `@playwright/test` a la versión que casa con 1194? Fijar `executablePath` a una ruta
+   absoluta funciona en este contenedor pero **no es portable a GitHub Actions**.
+2. **Next 16 renombró el convenio `middleware.ts` a `proxy.ts`.** El build avisa
+   («The "middleware" file convention is deprecated. Please use "proxy" instead») y `04 §8.4` no lo
+   contempla, porque se escribió antes. **Supuesto tomado:** el spike usa `proxy.ts` con
+   `export default function proxy(request)`; funciona y el build lo lista como `ƒ Proxy (Middleware)`.
+   `04 §8.4` debería decir `proxy.ts` cuando se actualice.
+3. **El `jitless` de Zod alcanza también al chrome del editor.** ADR-3-0b-02 desactiva el JIT de Zod
+   al importar `@invitaciones/schema/canvas`, y el puente del padre importa ese mismo módulo, así
+   que el documento del editor —que no tiene CSP restrictiva— pierde la ruta rápida de validación
+   sin necesitarlo. **Supuesto tomado:** se acepta; el coste no está medido y el editor valida
+   poco por interacción. Si 3-4 lo mide y molesta, el chrome puede hacer `z.config({jitless:false})`
+   **después** de importar el puente. Queda anotado para no descubrirlo por sorpresa.
+4. **La tipografía del spike no es la del producto.** A2 se midió con Fraunces (OFL) en `woff2`,
+   copiada desde `/mnt/skills/examples/morning/assets/fonts/` porque el repositorio no tiene ninguna
+   fuente. **Supuesto tomado:** el spike solo demuestra el **mecanismo** (`next/font/local` +
+   `Access-Control-Allow-Origin: *` en `/_next/static/media/**`); el catálogo real de familias
+   `source:"bundled"` de `04 §5.5`, sus licencias y su alojamiento siguen sin decidir y son de la
+   fase 4. No se ha adoptado ninguna tipografía para el producto.
+5. **`APP_ORIGIN` y `CDN_ORIGIN` de la CSP se resuelven en tiempo de build.** La CSP del lienzo lleva
+   hosts literales, y el spike los toma de `NEXT_PUBLIC_EDITOR_ORIGIN`/`NEXT_PUBLIC_CDN_ORIGIN`, que
+   Next **incrusta al compilar**. Un mismo artefacto no sirve para dos dominios. **Supuesto tomado:**
+   se declaran en el entorno de build, con los valores locales como defecto; si se quiere una imagen
+   única para varios entornos, hay que leerlos en `proxy.ts` desde variables de servidor (sin el
+   prefijo `NEXT_PUBLIC_`) y pasar el origen del editor al lienzo por otra vía.
+6. **El spike vive fuera del workspace pnpm y se instala con `npm`.** `frontend/pnpm-workspace.yaml`
+   solo declara `packages/*` y `apps/*`. **Supuesto tomado:** no se añade `spikes/*` al workspace
+   para no chocar con el andamiaje de 3-1, y `frontend/spikes/canvas-gate/` se instala con
+   `npm install` (su `package-lock.json` se versiona). Consume `packages/schema` por
+   `file:../../packages/schema`, lo que produce **dos copias de `zod`** — el motivo por el que existe
+   `configureZodForCanvas()`. En `apps/web`, dentro del workspace, habrá una sola.
