@@ -21,7 +21,7 @@ import { applyBatch, applyOperation, type AssetMeta, type ReducerContext } from 
 import { validateOperations } from "../src/operations-validate.ts";
 import {
   textSpec, imageSpec, audioSpec, groupSpec, sectionSpec, themeFixture, manifestFixture,
-  defaultsFixture, documentFixture, textValue, imageValue, groupItem, groupValue, ulid, assetId,
+  defaultsFixture, documentFixture, textValue, imageValue, audioValue, groupItem, groupValue, ulid, assetId,
 } from "./fixtures.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
@@ -56,11 +56,21 @@ const ASSET_OK = assetId("assetok");        // 1000x1000, 50 KB → cuadrada y d
 const ASSET_GRANDE = assetId("assetbg");    // 1000x1000, 900 KB → excede image.maxBytes
 const ASSET_ANCHO = assetId("assetwd");     // 1600x400  → no es cuadrada
 const ASSET_AJENO = assetId("assetno");     // no está en assetMeta → TPL_ASSET_NOT_OWNED
+// `audio.maxBytes` era la ÚNICA de las tres restricciones de asset de `contratos.md §6` sin caso
+// golden: existía el `audioSpec("cover.music", …, { maxBytes: 100_000 })` del manifiesto y ninguna
+// operación que lo ejercitara, así que la paridad TS↔Kotlin de esa rama no la comprobaba nadie
+// (objeción ADV-07 de `bitacora/2-adv.md`).
+const ASSET_SONIDO = assetId("assetsn");    // 40 KB de audio → dentro de audio.maxBytes
+const ASSET_SONIDO_GRANDE = assetId("assetau"); // 900 KB de audio → excede audio.maxBytes
 
 const ASSET_META: Record<string, AssetMeta> = {
   [ASSET_OK]: { bytes: 50_000, width: 1000, height: 1000, contentType: "image/webp" },
   [ASSET_GRANDE]: { bytes: 900_000, width: 1000, height: 1000, contentType: "image/webp" },
   [ASSET_ANCHO]: { bytes: 50_000, width: 1600, height: 400, contentType: "image/webp" },
+  // Sin `width`/`height`: un MP3 no tiene dimensiones y `AssetMeta` las declara opcionales; el lector
+  // Kotlin de `golden/fixtures/operations-base.json` ya las trata como nulas cuando faltan.
+  [ASSET_SONIDO]: { bytes: 40_000, contentType: "audio/mpeg" },
+  [ASSET_SONIDO_GRANDE]: { bytes: 900_000, contentType: "audio/mpeg" },
 };
 
 const documento: InvitationDocument = documentFixture(manifest, theme, {
@@ -132,6 +142,8 @@ const files: Record<string, () => OpCase[]> = {
     ocase("asset que excede image.maxBytes (X-06)", "invalid-manifest", { op: "setBlock", blockId: "cover.image", value: imageValue(ASSET_GRANDE) }, true),
     ocase("asset que incumple image.aspect=square (X-06)", "invalid-manifest", { op: "setBlock", blockId: "cover.image", value: imageValue(ASSET_ANCHO) }, true),
     ocase("asset correcto: pasa las tres comprobaciones", "valid-shape", { op: "setBlock", blockId: "cover.image", value: imageValue(ASSET_OK) }, true),
+    ocase("asset que excede audio.maxBytes (X-06)", "invalid-manifest", { op: "setBlock", blockId: "cover.music", value: audioValue(ASSET_SONIDO_GRANDE) }, true),
+    ocase("asset de audio dentro de audio.maxBytes", "valid-shape", { op: "setBlock", blockId: "cover.music", value: audioValue(ASSET_SONIDO) }, true),
   ],
   clearBlock: () => [
     ocase("forma válida", "valid-shape", { op: "clearBlock", blockId: "cover.title" }, true),

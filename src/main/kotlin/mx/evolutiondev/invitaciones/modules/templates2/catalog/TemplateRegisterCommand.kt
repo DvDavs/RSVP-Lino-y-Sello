@@ -26,8 +26,13 @@ import java.io.File
  *
  * `path` acepta el **directorio** `templates/<slug>/<version>/` de `01 §2.1` o un **ZIP** con ese
  * árbol. `requester` (opcional) es el `customer.id` que queda en `published_by`/`requested_by`.
- * El resultado se imprime y el proceso termina con código 0 (alta o no-op) o 1 (rechazo), para que un
- * script de despliegue pueda encadenarlo.
+ *
+ * **Aviso sobre el código de salida (2-ADV, objeción ADV-11).** El resultado —alta, no-op o rechazo—
+ * se escribe en el log (`INFO` el éxito, `ERROR` el rechazo) y el proceso **siempre termina con 0**:
+ * [run] captura el fallo con `runCatching` y no lo repropaga, así que Spring Boot arranca con
+ * normalidad. Un script de despliegue que encadene por `$?` verá éxito también en un rechazo: hoy hay
+ * que mirar el log. Convertirlo en código 1 (repropagar y dejar que falle el arranque, o
+ * `SpringApplication.exit`) es un cambio de comportamiento y necesita ADR.
  */
 @Component
 @ConditionalOnProperty(name = [TemplateRegisterCommand.ENABLED], havingValue = "true")

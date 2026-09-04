@@ -180,7 +180,12 @@ export function validateDocument(doc: InvitationDocument, m: TemplateManifest, t
 /** Valor ↔ spec: kind, longitud, opciones, rango, grupos. Es la MISMA función que usa el reductor de operaciones. */
 export function validateValueAgainstSpec(spec: BlockSpec, value: { kind: string } & Record<string, unknown>, path: string): Violation[] {
   const v: Violation[] = [];
-  if (value.kind !== spec.type) return [{ code: "I-15_BLOCK_KIND_MISMATCH", path, detail: `${value.kind} ≠ ${spec.type}` }];
+  // `!=` en ASCII, no `≠`: `Invariants.kt:310` emite `"${value.kind.wire} != ${spec.type.wire}"` y las dos
+  // implementaciones de la misma invariante tienen que decir lo mismo (P1, `contratos.md` §3). Divergían
+  // en este único carácter desde el bloque 2-2 (objeción O-11, `preguntas-abiertas.md`) y ninguna prueba
+  // lo detecta porque `detail` no entra en ningún golden. Se mueve el lado de TypeScript porque
+  // `templates2/schema` estaba congelado para quien lo encontró (2-ADV, objeción ADV-13).
+  if (value.kind !== spec.type) return [{ code: "I-15_BLOCK_KIND_MISMATCH", path, detail: `${value.kind} != ${spec.type}` }];
   switch (spec.type) {
     case "text": {
       const s = value.value as string;

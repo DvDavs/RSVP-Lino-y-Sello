@@ -386,5 +386,106 @@
         }
       }
     }
+  },
+  {
+    "name": "asset que excede audio.maxBytes (X-06)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.music",
+      "value": {
+        "kind": "audio",
+        "assetId": "as_01J8ASSETAAAAAAAAAAAAAAAAA"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_ASSET_SPEC_MISMATCH",
+        "assetId": "as_01J8ASSETAAAAAAAAAAAAAAAAA",
+        "constraint": "maxBytes"
+      }
+    }
+  },
+  {
+    "name": "asset de audio dentro de audio.maxBytes",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.music",
+      "value": {
+        "kind": "audio",
+        "assetId": "as_01J8ASSETSNAAAAAAAAAAAAAAA"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          },
+          "cover.music": {
+            "kind": "audio",
+            "assetId": "as_01J8ASSETSNAAAAAAAAAAAAAAA"
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
   }
 ]

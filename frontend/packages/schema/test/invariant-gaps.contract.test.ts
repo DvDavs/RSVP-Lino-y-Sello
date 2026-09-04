@@ -7,16 +7,34 @@
 // fichero JSON no vacío: no puede fallar) y otras dos casaban una subcadena que aparece en el NOMBRE
 // de un caso ("reductor", "focal"). Es decir: la prueba que sostiene la afirmación "0 huecos" de
 // 06 §4.1 no podía ponerse en rojo. Aquí cada restricción se comprueba ejecutando el esquema o el
-// validador real sobre los casos golden, y las tres restricciones de asset —que HOY no las verifica
-// nadie porque el reductor no existe en esta fase (ADR-2-0a-03)— quedan como `it.todo` visibles en
-// la salida de la suite, no como verdes que no prueban nada.
+// validador real sobre los casos golden.
+//
+// ACTUALIZADO EN LA REVISIÓN 2-ADV (objeción ADV-07). Las tres restricciones de asset quedaron como
+// `it.todo` mientras `operations-reducer.ts` no existía (ADR-2-0a-03), con la instrucción explícita
+// de sustituirlas cuando 2-0b/2-2 lo escribieran. El reductor existe desde 2-2 y `image.maxBytes` y
+// `image.aspect` ya tenían caso en `golden/operations/setBlock.cases.json`, pero los tres `todo`
+// seguían ahí: la compuerta de "0 huecos" declaraba huecos que ya no lo eran y —lo grave— habría
+// seguido diciendo `todo` en vez de rojo si alguien retirase esas comprobaciones del reductor.
+// `audio.maxBytes` sí era un hueco real (no tenía caso golden); se le añadió uno en
+// `scripts/gen-golden-operations.ts` y aquí se comprueban las tres ejecutando el reductor real.
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { BlockSpec } from "../src/blocks.ts";
+import { Operation } from "../src/operations.ts";
+import { applyOperation, type ReducerContext } from "../src/operations-reducer.ts";
 import { validateValueAgainstSpec } from "../src/invariants.ts";
 import { loadCases } from "./golden.ts";
 
 type InvCase = { name: string; fn: string; spec: any; input: any; path: string; expect: string[] };
 type BlockCase = { name: string; tag: string; spec: any; value: any; path: string; expectZodValid: boolean };
+type OpCase = { name: string; tag: string; operation: unknown; expectZodValid: boolean; reducerResult: unknown };
+
+/** El mismo fixture emitido que consume Kotlin (`golden/fixtures/operations-base.json`). */
+function loadFixture(): any {
+  const ruta = fileURLToPath(new URL("../golden/fixtures/operations-base.json", import.meta.url));
+  return JSON.parse(readFileSync(ruta, "utf8"));
+}
 
 describe("invariant-gaps (06 §4.1: 0 huecos)", () => {
   it("RichTextSpec.constraints.maxLength: I-16 trae un caso richText que la viola de verdad", () => {
@@ -60,13 +78,43 @@ describe("invariant-gaps (06 §4.1: 0 huecos)", () => {
     expect(aud.constraints).toHaveProperty("maxBytes");
   });
 
-  // Huecos REALES de esta fase, declarados en vez de disimulados (ADR-2-0a-03 + 06 §4.1: las tres
-  // se prueban "como casos del reductor", y el reductor no existe todavía). Cuando 2-0b escriba
-  // `operations-reducer.ts` con `ReducerContext.assetMeta`, estas tres pasan a ser casos de
-  // golden/operations/ con `expectManifestError: "TPL_ASSET_SPEC_MISMATCH"` y se sustituyen aquí.
-  it.todo("ImageSpec.constraints.aspect → TPL_ASSET_SPEC_MISMATCH (caso del reductor, pendiente 2-0b)");
-  it.todo("ImageSpec.constraints.maxBytes → TPL_ASSET_SPEC_MISMATCH (caso del reductor, pendiente 2-0b)");
-  it.todo("AudioSpec.constraints.maxBytes → TPL_ASSET_SPEC_MISMATCH (caso del reductor, pendiente 2-0b)");
+  // Las tres restricciones de asset, cada una con su caso golden y ejecutando el reductor real
+  // (`contratos.md §6`: "las tres restricciones de asset se prueban como casos del reductor").
+  // Se distingue `image.maxBytes` de `audio.maxBytes` por el bloque, porque el `constraint` del
+  // error es el mismo en las dos.
+  const RESTRICCIONES: Array<{ nombre: string; blockId: string; constraint: string }> = [
+    { nombre: "ImageSpec.constraints.aspect", blockId: "cover.image", constraint: "aspect" },
+    { nombre: "ImageSpec.constraints.maxBytes", blockId: "cover.image", constraint: "maxBytes" },
+    { nombre: "AudioSpec.constraints.maxBytes", blockId: "cover.music", constraint: "maxBytes" },
+  ];
+
+  for (const r of RESTRICCIONES) {
+    it(`${r.nombre} → TPL_ASSET_SPEC_MISMATCH: hay caso golden y el reductor lo rechaza`, () => {
+      const casos = loadCases<OpCase>("operations", "setBlock.cases.json");
+      const caso = casos.find(
+        c =>
+          (c.operation as any)?.blockId === r.blockId &&
+          (c.reducerResult as any)?.ok === false &&
+          (c.reducerResult as any)?.error?.code === "TPL_ASSET_SPEC_MISMATCH" &&
+          (c.reducerResult as any)?.error?.constraint === r.constraint,
+      );
+      expect(caso, `falta el caso golden de ${r.nombre}`).toBeDefined();
+
+      // Y se vuelve a ejecutar el reductor sobre el fixture emitido: el golden no solo lo DICE.
+      const base = loadFixture();
+      const meta = base.assetMeta[(caso!.operation as any).value.assetId];
+      expect(meta, "el assetMeta del fixture no describe el asset del caso").toBeDefined();
+      const ctx: ReducerContext = {
+        pkg: { manifest: base.manifest, theme: base.theme, defaults: base.defaults },
+        newUlid: () => base.ulidSeed,
+        assetMeta: (id: string) => base.assetMeta[id] ?? null,
+      };
+      const salida = applyOperation(base.documento, Operation.parse(caso!.operation), ctx);
+      expect(salida.ok).toBe(false);
+      expect((salida as any).error.code).toBe("TPL_ASSET_SPEC_MISMATCH");
+      expect((salida as any).error.constraint).toBe(r.constraint);
+    });
+  }
 
   it("TextSpec.constraints.pattern NO existe en el esquema (retirada en X-06)", () => {
     // La constraint se retiró (dos motores de regex discrepan, P1). Se comprueba que de verdad NO

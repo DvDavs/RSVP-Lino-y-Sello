@@ -84,7 +84,9 @@ class EditorDocumentService(
     private val composer: Composer = DefaultComposer,
 ) {
 
-    private val bucket: String = bucketConfigurado.ifBlank { "invitaciones-assets" }
+    /** Mismo defecto que [EditorAssetService.BUCKET_POR_DEFECTO] y que `catalog` (`02 §10.1` paso 8):
+     *  si difieren, la URL compuesta apunta a un bucket distinto de donde se subió el asset. */
+    private val bucket: String = bucketConfigurado.ifBlank { EditorAssetService.BUCKET_POR_DEFECTO }
 
     /** `02 §10.4`: por patrón, sin llamar a S3 — `compose` no puede depender de su disponibilidad. */
     val publicBaseUrl: String = baseUrlConfigurada.ifBlank { "https://$bucket.s3.$region.amazonaws.com" }

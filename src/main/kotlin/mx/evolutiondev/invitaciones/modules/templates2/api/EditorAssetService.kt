@@ -1,5 +1,6 @@
 package mx.evolutiondev.invitaciones.modules.templates2.api
 
+import mx.evolutiondev.invitaciones.core.s3.S3Buckets
 import mx.evolutiondev.invitaciones.modules.templates2.catalog.MagicBytes
 import mx.evolutiondev.invitaciones.modules.templates2.domain.AssetContentType
 import mx.evolutiondev.invitaciones.modules.templates2.domain.AudioValue
@@ -296,7 +297,15 @@ class EditorAssetService(
 
         const val LIMITE_POR_DEFECTO = 50
         const val LIMITE_MAXIMO = 100
-        const val BUCKET_POR_DEFECTO = "invitaciones-assets"
+        /**
+         * `02 §10.1` paso 8 fija literalmente `S3Service.uploadPublicFile(S3Buckets.ASSETS, …)`, y es
+         * el mismo bucket que ya usan `catalog.TemplateRegistrationService` y
+         * `catalog.TemplateCatalogService` (los dos con `S3Buckets.ASSETS`). Un literal propio aquí
+         * hacía que, **sin** `templates2.assets.bucket` configurada —que es el estado real:
+         * `contratos.md §4` prohíbe tocar `application.yml` salvo `spring.servlet.multipart`—, el
+         * editor subiera a un bucket y el catálogo compusiera la URL desde otro.
+         */
+        const val BUCKET_POR_DEFECTO = S3Buckets.ASSETS
 
         private const val TROZO = 64 * 1024
 

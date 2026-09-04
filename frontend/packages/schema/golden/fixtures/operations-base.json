@@ -298,6 +298,14 @@
       "width": 1600,
       "height": 400,
       "contentType": "image/webp"
+    },
+    "as_01J8ASSETSNAAAAAAAAAAAAAAA": {
+      "bytes": 40000,
+      "contentType": "audio/mpeg"
+    },
+    "as_01J8ASSETAAAAAAAAAAAAAAAAA": {
+      "bytes": 900000,
+      "contentType": "audio/mpeg"
     }
   },
   "ulidSeed": "01J8NEWATEMAAAAAAAAAAAAAAA",

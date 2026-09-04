@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import mx.evolutiondev.invitaciones.modules.templates2.domain.RegistrationResult
 import mx.evolutiondev.invitaciones.modules.templates2.domain.Templates2Exception
 import mx.evolutiondev.invitaciones.modules.templates2.domain.TplErrorCode
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.TemplateRegistrar
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.TemplateRegistrationAuditor
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2S3KeyService
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.UlidGenerator
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.TplAssetRepository
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.TplTemplateRegistrationQueryRepository
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.TplTemplateRepository
@@ -39,6 +42,11 @@ class TemplateRegistrarIntegrationTest : RegistroTestSupport() {
     @Autowired lateinit var versions: TplTemplateVersionRepository
     @Autowired lateinit var assets: TplAssetRepository
     @Autowired lateinit var auditoria: TplTemplateRegistrationQueryRepository
+    @Autowired lateinit var parser: TemplatePackageParser
+    @Autowired lateinit var claves: Templates2S3KeyService
+    @Autowired lateinit var ulid: UlidGenerator
+    @Autowired lateinit var registrador: TemplateRegistrar
+    @Autowired lateinit var auditor: TemplateRegistrationAuditor
 
     private val slugs = arrayOf("boda-clasica", "xv-jardin")
 
@@ -204,6 +212,67 @@ class TemplateRegistrarIntegrationTest : RegistroTestSupport() {
         assertEquals(TemplateRegistrationAuditor.RECHAZADO, filas[0].result)
         assertEquals(TplErrorCode.TPL_ASSET_STORAGE_UNAVAILABLE.name, filas[0].errorCode)
     }
+
+    /**
+     * **Objeción ADV-06 de `bitacora/2-adv.md`, cerrada aquí.**
+     *
+     * La prueba de arriba fuerza el fallo con `AssetStorageUnavailableException`, que es una
+     * `TemplateRegistryException` y la atrapa el **primer** `catch` de `subirAssets`
+     * (`TemplateRegistrationService.kt:65`). El fallo realista de S3 —un `SdkException`, un socket
+     * cortado, un `IOException`— no es del módulo y cae en el `catch (e: Exception)` de la línea 68,
+     * que al cierre de la fase tenía cobertura **0** (`TemplateRegistrationService.kt:71`, `0/2`).
+     * Esa rama es la que traduce un fallo ajeno a `502 TPL_ASSET_STORAGE_UNAVAILABLE` **y** deja la
+     * fila de auditoría: sin ella, un corte de red habría salido como `500 TPL_INTERNAL` sin rastro
+     * de intento (P1).
+     *
+     * Se prueban las dos ramas del `?:`: excepción con mensaje y excepción sin mensaje.
+     */
+    @Test
+    fun `un fallo de S3 ajeno al modulo tambien sale como 502 y deja auditoria`() {
+        val conMensaje = servicioConS3Roto { RuntimeException("Connection reset by peer") }
+        val e = assertThrows<AssetStorageUnavailableException> {
+            conMensaje.register(PaqueteFixture.ejemplo("boda-clasica-1.0.0"))
+        }
+        assertEquals(502, e.status)
+        assertEquals(TplErrorCode.TPL_ASSET_STORAGE_UNAVAILABLE, e.code)
+        assertTrue(
+            e.message!!.contains("Connection reset by peer"),
+            "el diagnóstico ajeno no puede perderse: ${e.message}",
+        )
+
+        assertEquals(0L, contar("SELECT count(*) FROM tpl_template WHERE slug = ?", "boda-clasica"))
+        assertEquals(0, almacen.subidos.size, "este servicio no usa el almacén falso: nada debió subirse")
+        val filas = auditoria.findByTemplateSlugOrderByCreatedAtDescIdDesc("boda-clasica", PageRequest.of(0, 10))
+        assertEquals(1, filas.size, "un fallo ajeno de S3 también deja intento auditado")
+        assertEquals(TemplateRegistrationAuditor.RECHAZADO, filas[0].result)
+        assertEquals(TplErrorCode.TPL_ASSET_STORAGE_UNAVAILABLE.name, filas[0].errorCode)
+        assertTrue(filas[0].requestedHash.startsWith("sha256:"))
+    }
+
+    @Test
+    fun `un fallo de S3 sin mensaje se audita igual, con el nombre de la clase`() {
+        val sinMensaje = servicioConS3Roto { IllegalStateException() }
+        assertThrows<AssetStorageUnavailableException> {
+            sinMensaje.register(PaqueteFixture.ejemplo("xv-jardin-1.0.0"))
+        }
+        val filas = auditoria.findByTemplateSlugOrderByCreatedAtDescIdDesc("xv-jardin", PageRequest.of(0, 10))
+        assertEquals(1, filas.size)
+        assertEquals(TplErrorCode.TPL_ASSET_STORAGE_UNAVAILABLE.name, filas[0].errorCode)
+    }
+
+    /**
+     * El mismo servicio de producción con un almacén que revienta con una excepción **ajena** al
+     * módulo. No se toca [AlmacenFalso] para no alterar las pruebas que ya dependen de él.
+     */
+    private fun servicioConS3Roto(fallo: () -> Exception) = TemplateRegistrationService(
+        parser,
+        TemplateAssetStorage { _, _, _, _ -> throw fallo() },
+        claves,
+        ulid,
+        registrador,
+        auditor,
+        RegistroTestConfig.BUCKET,
+    )
 
     /**
      * Caso 12 de `03 §12` (`templateRegister_rollbackAfterAssets_auditRowSurvives`). El fallo se fuerza

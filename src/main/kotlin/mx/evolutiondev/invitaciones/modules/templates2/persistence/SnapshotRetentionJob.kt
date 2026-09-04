@@ -82,11 +82,19 @@ class SnapshotRetentionJob(
  * Activa el planificador de Spring **desde el módulo nuevo**, sin tocar `InvitationsApplication`
  * (fuera del alcance de `templates2`, `contratos.md §1`).
  *
- * Verificado antes de añadirlo (`grep -rn "@Scheduled" src/main/kotlin`): [SnapshotRetentionJob] es el
- * **único** `@Scheduled` del repositorio, así que habilitar el planificador no despierta ninguna tarea
- * dormida del módulo antiguo. La propiedad permite apagarlo entero sin recompilar; con ella en
- * `false`, la purga sigue siendo invocable a mano (`SnapshotRetentionJob.purgar()`), que es como la
- * ejercitan las pruebas.
+ * Verificado antes de añadirlo (`grep -rn "@Scheduled" src/main/kotlin`): fuera de `templates2` no hay
+ * ningún `@Scheduled`, así que habilitar el planificador no despierta ninguna tarea dormida del módulo
+ * antiguo. La propiedad permite apagarlo entero sin recompilar; con ella en `false` las tareas siguen
+ * siendo invocables a mano, que es como las ejercitan las pruebas.
+ *
+ * **Aviso de alcance (2-ADV, objeción ADV-08).** Este `@EnableScheduling` es el **único** del
+ * repositorio, así que `templates2.retention.enabled` gobierna **todas** las tareas periódicas del
+ * módulo, no solo la purga: hoy son [SnapshotRetentionJob] (2-4) y `AssetGcJob` (2-5, `@Scheduled` en
+ * `AssetGcJob.kt:69`). Apagar la retención apaga **también** el drenaje de `tpl_asset_gc`, que es el
+ * mecanismo del derecho al olvido (`02 §5.3`, `§10.3`): los objetos de S3 de una invitación o de un
+ * cliente borrados dejarían de retirarse, en silencio. El nombre de la propiedad no lo sugiere. La
+ * corrección —una propiedad neutra para el planificador y una por tarea— es un cambio de contrato de
+ * configuración y necesita ADR.
  */
 @Configuration(proxyBeanMethods = false)
 @EnableScheduling
