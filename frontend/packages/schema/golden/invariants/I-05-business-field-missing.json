@@ -1,0 +1,788 @@
+[
+  {
+    "name": "bloque business sin businessField",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": true,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.title",
+              "role": "coverTitle",
+              "label": {
+                "es-MX": "cover.title"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "cover.image",
+              "role": "coverImage",
+              "label": {
+                "es-MX": "cover.image"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "image",
+              "constraints": {
+                "aspect": "free",
+                "maxBytes": 8388608
+              }
+            },
+            {
+              "id": "cover.subtitle",
+              "role": "coverSubtitle",
+              "label": {
+                "es-MX": "cover.subtitle"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        },
+        {
+          "key": "event",
+          "type": "event",
+          "title": {
+            "es-MX": "event"
+          },
+          "variants": [
+            "default",
+            "alt"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "event.when",
+              "role": "eventWhen",
+              "label": {
+                "es-MX": "event.when"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "dateTimeRange",
+              "formatId": "long-h12"
+            },
+            {
+              "id": "event.cards",
+              "role": "eventCards",
+              "label": {
+                "es-MX": "event.cards"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "group",
+              "min": 0,
+              "max": 4,
+              "reorderable": true,
+              "itemLabel": {
+                "es-MX": "event.cards item"
+              },
+              "itemBlocks": [
+                {
+                  "id": "title",
+                  "role": "sectionTitle",
+                  "label": {
+                    "es-MX": "title"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "text",
+                  "constraints": {
+                    "minLength": 0,
+                    "maxLength": 200,
+                    "multiline": false
+                  }
+                },
+                {
+                  "id": "image",
+                  "role": "decorative",
+                  "label": {
+                    "es-MX": "image"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "image",
+                  "constraints": {
+                    "aspect": "free",
+                    "maxBytes": 8388608
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "family",
+          "type": "family",
+          "title": {
+            "es-MX": "family"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "family.person1",
+              "role": "personName",
+              "label": {
+                "es-MX": "family.person1"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "person"
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {
+        "cover.title": {
+          "kind": "text",
+          "value": "Boda de Ana y Luis"
+        },
+        "cover.image": {
+          "kind": "image",
+          "assetId": "as_01J8CAV1AAAAAAAAAAAAAAAAAA",
+          "alt": "",
+          "focal": {
+            "x": 0.5,
+            "y": 0.5
+          }
+        }
+      }
+    },
+    "expect": [
+      "I-05_BUSINESS_FIELD_MISSING"
+    ]
+  },
+  {
+    "name": "bloque business con businessField",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": true,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.title",
+              "role": "coverTitle",
+              "label": {
+                "es-MX": "cover.title"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "cover.image",
+              "role": "coverImage",
+              "label": {
+                "es-MX": "cover.image"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "image",
+              "constraints": {
+                "aspect": "free",
+                "maxBytes": 8388608
+              }
+            },
+            {
+              "id": "cover.subtitle",
+              "role": "coverSubtitle",
+              "label": {
+                "es-MX": "cover.subtitle"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "businessField": "invitation.hashtag",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        },
+        {
+          "key": "event",
+          "type": "event",
+          "title": {
+            "es-MX": "event"
+          },
+          "variants": [
+            "default",
+            "alt"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "event.when",
+              "role": "eventWhen",
+              "label": {
+                "es-MX": "event.when"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "dateTimeRange",
+              "formatId": "long-h12"
+            },
+            {
+              "id": "event.cards",
+              "role": "eventCards",
+              "label": {
+                "es-MX": "event.cards"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "group",
+              "min": 0,
+              "max": 4,
+              "reorderable": true,
+              "itemLabel": {
+                "es-MX": "event.cards item"
+              },
+              "itemBlocks": [
+                {
+                  "id": "title",
+                  "role": "sectionTitle",
+                  "label": {
+                    "es-MX": "title"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "text",
+                  "constraints": {
+                    "minLength": 0,
+                    "maxLength": 200,
+                    "multiline": false
+                  }
+                },
+                {
+                  "id": "image",
+                  "role": "decorative",
+                  "label": {
+                    "es-MX": "image"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "image",
+                  "constraints": {
+                    "aspect": "free",
+                    "maxBytes": 8388608
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "family",
+          "type": "family",
+          "title": {
+            "es-MX": "family"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "family.person1",
+              "role": "personName",
+              "label": {
+                "es-MX": "family.person1"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "person"
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {
+        "cover.title": {
+          "kind": "text",
+          "value": "Boda de Ana y Luis"
+        },
+        "cover.image": {
+          "kind": "image",
+          "assetId": "as_01J8CAV1AAAAAAAAAAAAAAAAAA",
+          "alt": "",
+          "focal": {
+            "x": 0.5,
+            "y": 0.5
+          }
+        }
+      }
+    },
+    "expect": []
+  },
+  {
+    "name": "bloque user sin businessField no viola",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": true,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.title",
+              "role": "coverTitle",
+              "label": {
+                "es-MX": "cover.title"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            },
+            {
+              "id": "cover.image",
+              "role": "coverImage",
+              "label": {
+                "es-MX": "cover.image"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "image",
+              "constraints": {
+                "aspect": "free",
+                "maxBytes": 8388608
+              }
+            },
+            {
+              "id": "cover.subtitle2",
+              "role": "coverSubtitle",
+              "label": {
+                "es-MX": "cover.subtitle2"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        },
+        {
+          "key": "event",
+          "type": "event",
+          "title": {
+            "es-MX": "event"
+          },
+          "variants": [
+            "default",
+            "alt"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "event.when",
+              "role": "eventWhen",
+              "label": {
+                "es-MX": "event.when"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "dateTimeRange",
+              "formatId": "long-h12"
+            },
+            {
+              "id": "event.cards",
+              "role": "eventCards",
+              "label": {
+                "es-MX": "event.cards"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "group",
+              "min": 0,
+              "max": 4,
+              "reorderable": true,
+              "itemLabel": {
+                "es-MX": "event.cards item"
+              },
+              "itemBlocks": [
+                {
+                  "id": "title",
+                  "role": "sectionTitle",
+                  "label": {
+                    "es-MX": "title"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "text",
+                  "constraints": {
+                    "minLength": 0,
+                    "maxLength": 200,
+                    "multiline": false
+                  }
+                },
+                {
+                  "id": "image",
+                  "role": "decorative",
+                  "label": {
+                    "es-MX": "image"
+                  },
+                  "required": false,
+                  "editable": true,
+                  "source": "user",
+                  "aiEditable": true,
+                  "type": "image",
+                  "constraints": {
+                    "aspect": "free",
+                    "maxBytes": 8388608
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "key": "family",
+          "type": "family",
+          "title": {
+            "es-MX": "family"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "family.person1",
+              "role": "personName",
+              "label": {
+                "es-MX": "family.person1"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "person"
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {
+        "cover.title": {
+          "kind": "text",
+          "value": "Boda de Ana y Luis"
+        },
+        "cover.image": {
+          "kind": "image",
+          "assetId": "as_01J8CAV1AAAAAAAAAAAAAAAAAA",
+          "alt": "",
+          "focal": {
+            "x": 0.5,
+            "y": 0.5
+          }
+        }
+      }
+    },
+    "expect": []
+  }
+]

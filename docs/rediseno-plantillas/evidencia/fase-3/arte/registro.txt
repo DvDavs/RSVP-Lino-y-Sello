@@ -1,0 +1,67 @@
+MASTER=arte.master@example.com  (JWT por POST /auth/token)
+
+### POST /master/templates2/versions   (boda-clasica@1.0.0, 3 assets)
+HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 1,
+  "slug": "boda-clasica",
+  "version": "1.0.0",
+  "packageHash": "sha256:aa3641a7343aebd995b47d30061faab4e4265fa2114571ebeeb3328755b8c614",
+  "assetsRegistered": 3
+}
+
+### POST /master/templates2/versions   (xv-jardin@1.0.0, 3 assets)
+HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 2,
+  "slug": "xv-jardin",
+  "version": "1.0.0",
+  "packageHash": "sha256:0322245f1c20d7972e4c529c9ee36e018ce6de7cf90ea622b46a55a41452ab26",
+  "assetsRegistered": 3
+}
+
+### GET /editor/templates2/catalog
+{
+  "items": [
+    {
+      "templateVersionId": 1,
+      "slug": "boda-clasica",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Boda clásica"
+      },
+      "eventKinds": [
+        "wedding"
+      ],
+      "minPlanTier": 2,
+      "previewUrl": "http://127.0.0.1:6003/public/templates2-assets/templates2/template/boda-clasica/1.0.0/5edcd64d402752bb66f89236a9f4683376ca457d6fed50d4d5114ac189b28ce5.webp",
+      "capabilities": [
+        "story",
+        "hashtags",
+        "music"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 2,
+      "slug": "xv-jardin",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "XV Jardín"
+      },
+      "eventKinds": [
+        "quince"
+      ],
+      "minPlanTier": 1,
+      "previewUrl": "http://127.0.0.1:6003/public/templates2-assets/templates2/template/xv-jardin/1.0.0/91672579ac235a56110ec0a9b93887b6c813f3ca31b4aed244042259740947c9.webp",
+      "capabilities": [
+        "hashtags"
+      ],
+      "status": "published"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "applied": [
+    {
+      "op": "addBlock",
+      "target": "cover.added"
+    },
+    {
+      "op": "renameBlock",
+      "target": "cover.old"
+    },
+    {
+      "op": "changeBlockType",
+      "target": "story.body"
+    },
+    {
+      "op": "moveIntoGroup",
+      "target": "cover.legacy"
+    },
+    {
+      "op": "flattenGroup",
+      "target": "menu.items"
+    },
+    {
+      "op": "shrinkGroup",
+      "target": "gifts.list"
+    },
+    {
+      "op": "renamePalette",
+      "target": "rosa"
+    },
+    {
+      "op": "renameFontSet",
+      "target": "moderna"
+    }
+  ],
+  "moved": [],
+  "toAttic": [],
+  "converted": [],
+  "lossless": true
+}

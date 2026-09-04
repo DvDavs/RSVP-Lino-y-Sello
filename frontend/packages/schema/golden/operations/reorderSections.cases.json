@@ -1,0 +1,115 @@
+[
+  {
+    "name": "forma válida: permutación exacta",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "reorderSections",
+      "order": [
+        "event",
+        "cover"
+      ]
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
+  },
+  {
+    "name": "forma inválida: array vacío (min 1)",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "reorderSections",
+      "order": []
+    },
+    "expectZodValid": false,
+    "expectOpViolations": [],
+    "reducerResult": null
+  },
+  {
+    "name": "no es una permutación (I-24)",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "reorderSections",
+      "order": [
+        "cover",
+        "cover"
+      ]
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_ORDER_NOT_A_PERMUTATION"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_INVARIANT_VIOLATION",
+        "violations": [
+          {
+            "code": "I-24_REORDER_NOT_A_PERMUTATION",
+            "path": "operations.reorderSections.order",
+            "detail": "esperaba una permutación de [cover,event]"
+          }
+        ]
+      }
+    }
+  }
+]

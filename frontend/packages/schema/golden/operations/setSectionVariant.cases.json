@@ -1,0 +1,106 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setSectionVariant",
+      "sectionKey": "cover",
+      "variant": "alt"
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "alt",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
+  },
+  {
+    "name": "forma inválida: falta variant",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "setSectionVariant",
+      "sectionKey": "cover"
+    },
+    "expectZodValid": false,
+    "expectOpViolations": [],
+    "reducerResult": null
+  },
+  {
+    "name": "variant no declarada",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setSectionVariant",
+      "sectionKey": "cover",
+      "variant": "no-existe"
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_VARIANT_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_VARIANT_UNKNOWN",
+        "sectionKey": "cover",
+        "variant": "no-existe"
+      }
+    }
+  }
+]

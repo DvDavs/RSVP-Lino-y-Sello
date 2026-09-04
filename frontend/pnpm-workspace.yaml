@@ -1,0 +1,6 @@
+# Fase 2 (sub-agente 2-0a): solo existe packages/schema.
+# apps/web, packages/sections y packages/migration-legacy son de la fase 3 (contratos.md §1, ADR-017)
+# y NO se crean aquí — no inventar el árbol completo antes de tiempo.
+packages:
+  - "packages/*"
+  - "apps/*"

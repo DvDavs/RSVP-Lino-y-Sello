@@ -1,0 +1,75 @@
+[
+  {
+    "name": "end anterior a start",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.when",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "event.when"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "input": {
+      "kind": "dateTimeRange",
+      "start": "2026-12-12T16:00",
+      "end": "2026-12-12T15:00"
+    },
+    "path": "content.event.when",
+    "expect": [
+      "I-01_RANGE_END_BEFORE_START"
+    ]
+  },
+  {
+    "name": "end ausente no viola",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.when",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "event.when"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "input": {
+      "kind": "dateTimeRange",
+      "start": "2026-12-12T16:00"
+    },
+    "path": "content.event.when",
+    "expect": []
+  },
+  {
+    "name": "end igual a start no viola",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "event.when",
+      "role": "eventWhen",
+      "label": {
+        "es-MX": "event.when"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "dateTimeRange",
+      "formatId": "long-h12"
+    },
+    "input": {
+      "kind": "dateTimeRange",
+      "start": "2026-12-12T16:00",
+      "end": "2026-12-12T16:00"
+    },
+    "path": "content.event.when",
+    "expect": []
+  }
+]

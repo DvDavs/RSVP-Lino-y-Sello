@@ -1,0 +1,6 @@
+.root {
+  position: relative; /* ancla de SelectionOverlay (position: absolute) en modo canvas */
+  background: var(--inv-color-bg);
+  color: var(--inv-color-ink);
+  font-family: var(--inv-font-body);
+}

@@ -1,0 +1,143 @@
+[
+  {
+    "name": "forma válida",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+      "blockId": "title",
+      "value": {
+        "kind": "text",
+        "value": "Misa"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Misa"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
+  },
+  {
+    "name": "forma inválida: falta value",
+    "tag": "invalid-shape",
+    "operation": {
+      "op": "setItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+      "blockId": "title"
+    },
+    "expectZodValid": false,
+    "expectOpViolations": [],
+    "reducerResult": null
+  },
+  {
+    "name": "blockId no es itemBlock del grupo",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+      "blockId": "noExiste",
+      "value": {
+        "kind": "text",
+        "value": "x"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_BLOCK_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_BLOCK_UNKNOWN",
+        "blockId": "noExiste"
+      }
+    }
+  },
+  {
+    "name": "itemId inexistente",
+    "tag": "invalid-manifest",
+    "operation": {
+      "op": "setItemBlock",
+      "groupId": "event.cards",
+      "itemId": "01J8NAEXASTAAAAAAAAAAAAAAA",
+      "blockId": "title",
+      "value": {
+        "kind": "text",
+        "value": "x"
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [
+      "OP_ITEM_UNKNOWN"
+    ],
+    "reducerResult": {
+      "ok": false,
+      "error": {
+        "code": "TPL_ITEM_UNKNOWN",
+        "groupId": "event.cards",
+        "itemId": "01J8NAEXASTAAAAAAAAAAAAAAA"
+      }
+    }
+  }
+]

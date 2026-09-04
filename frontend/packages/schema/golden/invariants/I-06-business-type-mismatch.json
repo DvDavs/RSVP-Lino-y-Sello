@@ -1,0 +1,829 @@
+[
+  {
+    "name": "businessField invitation.date en bloque text",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.biz",
+              "role": "decorative",
+              "label": {
+                "es-MX": "cover.biz"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "businessField": "invitation.date",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": [
+      "I-06_BUSINESS_TYPE_MISMATCH"
+    ]
+  },
+  {
+    "name": "businessField invitation.date en bloque date",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.biz",
+              "role": "decorative",
+              "label": {
+                "es-MX": "cover.biz"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "businessField": "invitation.date",
+              "aiEditable": true,
+              "type": "date",
+              "formatId": "long"
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  },
+  {
+    "name": "businessField invitation.date con tipo correcto date",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.biz0",
+              "role": "decorative",
+              "label": {
+                "es-MX": "cover.biz0"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "businessField": "invitation.date",
+              "aiEditable": true,
+              "type": "date",
+              "formatId": "long"
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  },
+  {
+    "name": "businessField invitation.time con tipo correcto time",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.biz1",
+              "role": "decorative",
+              "label": {
+                "es-MX": "cover.biz1"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "businessField": "invitation.time",
+              "aiEditable": true,
+              "type": "time",
+              "formatId": "h12"
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  },
+  {
+    "name": "businessField invitation.hashtag con tipo correcto text",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.biz2",
+              "role": "decorative",
+              "label": {
+                "es-MX": "cover.biz2"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "businessField": "invitation.hashtag",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 200,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  },
+  {
+    "name": "businessField invitation.coverPhotoUrl con tipo correcto image",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.biz3",
+              "role": "decorative",
+              "label": {
+                "es-MX": "cover.biz3"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "businessField": "invitation.coverPhotoUrl",
+              "aiEditable": true,
+              "type": "image",
+              "constraints": {
+                "aspect": "free",
+                "maxBytes": 8388608
+              }
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  },
+  {
+    "name": "businessField invitation.childrenAllowed con tipo correcto boolean",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.biz4",
+              "role": "decorative",
+              "label": {
+                "es-MX": "cover.biz4"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "businessField": "invitation.childrenAllowed",
+              "aiEditable": true,
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  },
+  {
+    "name": "businessField invitation.youngAllowed con tipo correcto boolean",
+    "fn": "validateManifest",
+    "manifest": {
+      "manifestVersion": 1,
+      "slug": "fixture-tpl",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Plantilla de prueba"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 1,
+      "locales": [
+        "es-MX"
+      ],
+      "capabilities": [],
+      "sections": [
+        {
+          "key": "cover",
+          "type": "cover",
+          "title": {
+            "es-MX": "cover"
+          },
+          "variants": [
+            "default"
+          ],
+          "defaultVariant": "default",
+          "required": false,
+          "defaultVisible": true,
+          "blocks": [
+            {
+              "id": "cover.biz5",
+              "role": "decorative",
+              "label": {
+                "es-MX": "cover.biz5"
+              },
+              "required": false,
+              "editable": true,
+              "source": "business",
+              "businessField": "invitation.youngAllowed",
+              "aiEditable": true,
+              "type": "boolean"
+            }
+          ]
+        }
+      ],
+      "assets": [],
+      "migrationsFrom": []
+    },
+    "theme": {
+      "palettes": [
+        {
+          "id": "olive",
+          "name": {
+            "es-MX": "Olivo"
+          },
+          "tokens": {
+            "bg": "#FFFFFF",
+            "surface": "#F5F5F0",
+            "ink": "#222222",
+            "accent": "#556B2F",
+            "accentInk": "#FFFFFF",
+            "muted": "#999999"
+          }
+        }
+      ],
+      "fontSets": [
+        {
+          "id": "clasica",
+          "name": {
+            "es-MX": "Clásica"
+          },
+          "heading": {
+            "family": "Playfair Display",
+            "weights": [
+              400,
+              700
+            ],
+            "source": "bundled"
+          },
+          "body": {
+            "family": "Lora",
+            "weights": [
+              400
+            ],
+            "source": "bundled"
+          }
+        }
+      ],
+      "defaultPaletteId": "olive",
+      "defaultFontSetId": "clasica"
+    },
+    "defaults": {
+      "templateSlug": "fixture-tpl",
+      "templateVersion": "1.0.0",
+      "content": {}
+    },
+    "expect": []
+  }
+]

@@ -1,0 +1,37 @@
+# Glosario (semilla; se amplía por ADR)
+
+- **Plantilla (template package)**: paquete versionado e inmutable (manifiesto + esquema de contenido + tokens/presets + valores por defecto + assets + migraciones). Identificada por `slug@semver`.
+- **Tema (theme)**: elección de paleta y tipografía entre los presets de la plantilla. Solo ids, nunca CSS.
+- **Estructura (structure)**: lista ordenada de secciones con `key` estable, `variant`, `visible`.
+- **Sección**: unidad de página de la invitación (portada, padres, itinerario, galería, mesa de regalos, RSVP…).
+- **Bloque**: unidad editable dentro de una sección, con id estable y rol explícito (p. ej. `parentsA`, `godparents`).
+- **Contenido (content)**: lo que edita el cliente, por id de bloque. Nunca posicional.
+- **Datos de negocio**: invitación, invitados, RSVP, itinerario en PostgreSQL; nunca dentro del documento.
+- **Documento de invitación**: `{schemaVersion, template, theme, structure, content}` del cliente.
+- **Composición**: función pura `componer(plantilla@v, contenido, datosDeNegocio) → documento renderizable`.
+- **Release (InvitationRelease)**: copia inmutable publicada (documento + versión de plantilla + tema resuelto + hash).
+- **Migración de documento**: función pura que lleva un documento de una versión de plantilla/esquema a otra.
+- **Kit de autor**: herramientas para crear y validar una plantilla nueva sin tocar Kotlin.
+- **Bloque (block)**: unidad editable dentro de una sección, con id estable (`blockId`) y rol explícito (p. ej. `parentA1`, `godparentA`). Catálogo cerrado de 14 tipos (`text`, `richText`, `listText`, `image`, `audio`, `date`, `time`, `dateTimeRange`, `link`, `location`, `choice`, `boolean`, `person`, `group`).
+- **Grupo (group)**: bloque de tipo `group`, lista repetible de ítems (`itemId` ULID del servidor) cada uno con sus propios `itemBlocks` (ids cortos, relativos al grupo — nunca prefijados).
+- **Rol (role)**: etiqueta semántica cerrada de un bloque (qué representa, no cómo se ve). Sustituye al emparejamiento por texto o posición que causaba H-01/H-02. El merge y la IA direccionan siempre por `blockId`/rol, nunca por índice.
+- **Procedencia (provenance)**: de dónde vino el valor resuelto de un bloque al componer — `user` (lo escribió el cliente), `default` (contenido de demostración de la plantilla), `business` (dato real de Postgres), `fixed` (contenido no editable de la plantilla) o `empty` (sin valor en ningún nivel).
+- **`attic`**: contenido huérfano tras una migración de versión o un cambio de plantilla; nunca se borra, se conserva indexado por `slug@version` de origen.
+- **Composición (`compose`)**: función pura `(paquete, documento, datos de negocio, locale) → (ComposedDocument, CompositionReport)`. Se ejecuta en cada lectura del editor y una vez al publicar; no existe "regenerar" como operación aparte.
+- **`InvitationRelease` / `tpl_release`**: copia inmutable publicada (documento compuesto + versión de plantilla + hash de contenido). El render público solo lee esto, nunca el documento de trabajo.
+- **`public_token`**: identificador opaco y estable del enlace público de una invitación (en `tpl_document`, nunca el `invitationId`).
+- **Operación (`Operation`) / lote (`OperationBatch`)**: unidad de edición del reductor único que comparten el editor humano, el autoguardado y la IA. Un lote humano se aplica todo o nada; una propuesta de IA (`EditProposal`) descarta operación por operación.
+- **Invariante (`I-xx`)**: regla entre campos que Zod no puede exportar a JSON Schema (p. ej. `end ≥ start`); se implementa dos veces (TypeScript y Kotlin) y se prueba con la misma tabla de casos. Catálogo actual: `I-01`…`I-23`.
+
+## Añadido al cierre de la fase 1 (ronda 1R)
+
+- **`AssetIndex`**: cuarto parámetro de `compose`. Traduce cada `assetId` del documento a la URL y los metadatos que el render necesita. Vive fuera del `ComposedDocument` a propósito: dentro del compuesto las URL ya van resueltas y ningún `assetId` sobrevive.
+- **`canonicalJson`**: serialización determinista de un JSON (orden de claves fijo, sin espacios, números normalizados). Es la única entrada admisible de cualquier hash del módulo, porque Postgres reordena las claves de un `jsonb` y los bytes almacenados no son estables.
+- **`contentHash`**: hash del par `{composed, report}` de una composición, con prefijo de algoritmo (`sha256:…`). Es el `ETag` del render público. Incluye el informe para que un cambio de estado (por ejemplo, un bloque que deja de estar en su valor de demostración) invalide la caché.
+- **`package_hash`**: hash del paquete de plantilla **entero** (manifiesto, tema, defaults, migraciones y assets). Es la clave de idempotencia del registro: si dos paquetes distintos lo comparten, el segundo se descarta en silencio, y por eso debe cubrirlo todo.
+- **`switchTemplate`**: operación de cambio de plantilla de una invitación ya editada. Transporta contenido solo entre bloques del mismo rol singleton; los grupos van íntegros al `attic`.
+- **`clearItemBlock`**: undécima operación del catálogo. Borra el valor de un bloque dentro de un ítem de grupo. Existe porque sin ella la inversa de un `setItemBlock` sobre un ítem sin valor previo no era expresable, y esa entrada del historial quedaba sin poder deshacerse.
+- **Procedencia `default` y bloqueo de publicación**: un bloque que sigue mostrando el contenido de demostración de la plantilla se marca `stillDefault` y bloquea la publicación. Deshacer una edición debe devolver el bloque a `default` (con `clearBlock`), nunca escribir el valor de demostración como si fuera del cliente: eso desactivaría el bloqueo y volvería a publicar datos ficticios como reales (H-03).
+- **Cohorte de migración**: conjunto de plantillas legadas que comparten origen y tratamiento. Son cuatro, no una: reproducibles desde el repositorio, reconstruibles desde los `payload-template-*`, sin fila Flyway, y no reproducibles.
+- **Texto visible**: todo el texto que un invitado ve renderizado, de demostración incluido. Es la unidad de comparación de la verificación de migración: se compara íntegro y con igualdad exacta tras normalizar, sin umbrales difusos.
+- **Compuerta A1-A8**: las ocho comprobaciones que la fase 3 debe pasar antes de construir el editor, para confirmar que el lienzo en iframe sin `allow-same-origin` es viable (fuentes, imágenes, CSP, selección, medición, captura). Si falla, se activa la contingencia ya aprobada del origen dedicado.

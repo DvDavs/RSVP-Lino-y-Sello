@@ -1,0 +1,137 @@
+package mx.evolutiondev.invitaciones.modules.templates2.catalog
+
+import mx.evolutiondev.invitaciones.modules.templates2.domain.AssetContentType
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestFactory
+
+/**
+ * **Objeción ADV-05 de `bitacora/2-adv.md`, cerrada aquí.**
+ *
+ * [MagicBytes] es un control de seguridad, no una comodidad: `02 §10.1` paso 4 lo pide porque quien
+ * declara el `Content-Type` es exactamente quien sube el archivo, y el módulo antiguo se cree la
+ * cabecera (`core/validation/FileValidationService.kt:21-24`). Aun así, tres de sus seis ramas
+ * llegaban al cierre de la fase con **cobertura 0**: la del `when` para `IMAGE_SVG`, `AUDIO_MPEG` y
+ * `FONT_WOFF2`, y con ellas los cuerpos completos de `esSvg` y `esMp3`
+ * (`MagicBytes.kt:44,49,50,53` — informe JaCoCo del cierre: `0/6`, `0/2`, `0/2`, `0/4`).
+ *
+ * `AUDIO_MPEG` **está** en `EditorAssetService.TIPOS_ACEPTADOS`, así que era la puerta de entrada de
+ * un archivo del cliente sin una sola prueba detrás; `IMAGE_SVG` y `FONT_WOFF2` son la de un paquete
+ * de plantilla (rutas MASTER). La cobertura llegaba de rebote desde
+ * [TemplatePackageParserTest], que solo registra paquetes con WebP y PNG.
+ */
+class MagicBytesTest {
+
+    // =============================================================================================
+    // Los seis tipos aceptan su propia firma
+    // =============================================================================================
+
+    @TestFactory
+    fun `cada tipo del catalogo reconoce su numero magico`(): List<DynamicTest> = listOf(
+        AssetContentType.IMAGE_WEBP to riff("WEBP"),
+        AssetContentType.IMAGE_PNG to PNG + ByteArray(8),
+        AssetContentType.IMAGE_JPEG to byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte(), 0xE0.toByte()),
+        AssetContentType.IMAGE_SVG to "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>".toByteArray(),
+        AssetContentType.AUDIO_MPEG to "ID3".toByteArray(Charsets.ISO_8859_1),
+        AssetContentType.FONT_WOFF2 to "wOF2".toByteArray(),
+    ).map { (tipo, bytes) ->
+        DynamicTest.dynamicTest(tipo.wire) { assertTrue(MagicBytes.coincide(tipo, bytes), tipo.wire) }
+    }
+
+    /**
+     * Lo que de verdad importa: **la firma de un tipo no vale para otro**. Sin esta prueba, un
+     * `coincide` que devolviera `true` siempre pasaría igual la de arriba.
+     */
+    @TestFactory
+    fun `ningun tipo acepta la firma de otro`(): List<DynamicTest> {
+        val muestras = mapOf(
+            AssetContentType.IMAGE_WEBP to riff("WEBP"),
+            AssetContentType.IMAGE_PNG to PNG + ByteArray(8),
+            AssetContentType.IMAGE_JPEG to byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte(), 0xE0.toByte()),
+            AssetContentType.IMAGE_SVG to "<svg></svg>".toByteArray(),
+            AssetContentType.AUDIO_MPEG to "ID3".toByteArray(Charsets.ISO_8859_1),
+            AssetContentType.FONT_WOFF2 to "wOF2".toByteArray(),
+        )
+        return muestras.flatMap { (real, bytes) ->
+            muestras.keys.filter { it != real }.map { otro ->
+                DynamicTest.dynamicTest("${real.wire} declarado como ${otro.wire}") {
+                    assertFalse(MagicBytes.coincide(otro, bytes), "${otro.wire} aceptó bytes de ${real.wire}")
+                }
+            }
+        }
+    }
+
+    // =============================================================================================
+    // audio/mpeg — la rama que entra por la ruta del editor (03 §3.7)
+    // =============================================================================================
+
+    @Test
+    fun `mp3 con etiqueta ID3 y con cabecera de trama`() {
+        assertTrue(MagicBytes.coincide(AssetContentType.AUDIO_MPEG, "ID3".toByteArray()))
+        // MPEG-1 Layer III: `FF` seguido de tres bits a 1 (`0xFB` = 1111 1011).
+        assertTrue(MagicBytes.coincide(AssetContentType.AUDIO_MPEG, byteArrayOf(0xFF.toByte(), 0xFB.toByte(), 0x90.toByte())))
+        assertTrue(MagicBytes.coincide(AssetContentType.AUDIO_MPEG, byteArrayOf(0xFF.toByte(), 0xE0.toByte())))
+    }
+
+    @Test
+    fun `lo que no es mp3 no pasa por mp3`() {
+        assertFalse(MagicBytes.coincide(AssetContentType.AUDIO_MPEG, ByteArray(0)), "cuerpo vacío")
+        assertFalse(MagicBytes.coincide(AssetContentType.AUDIO_MPEG, byteArrayOf(0xFF.toByte())), "un solo byte")
+        assertFalse(MagicBytes.coincide(AssetContentType.AUDIO_MPEG, "ID2".toByteArray() + ByteArray(4)))
+        // `FF` sin los tres bits de sincronía: es lo que distingue una trama de basura que empieza por FF.
+        assertFalse(MagicBytes.coincide(AssetContentType.AUDIO_MPEG, byteArrayOf(0xFF.toByte(), 0x0F)))
+        assertFalse(MagicBytes.coincide(AssetContentType.AUDIO_MPEG, byteArrayOf(0xFF.toByte(), 0xC0.toByte())))
+        // Un HTML renombrado a .mp3, el caso que motiva el paso 4 de `02 §10.1`.
+        assertFalse(MagicBytes.coincide(AssetContentType.AUDIO_MPEG, "<html><script>1</script>".toByteArray()))
+    }
+
+    // =============================================================================================
+    // image/svg+xml y font/woff2 — paquete de plantilla (rutas MASTER)
+    // =============================================================================================
+
+    @Test
+    fun `svg acepta sus tres aperturas y nada mas`() {
+        assertTrue(MagicBytes.coincide(AssetContentType.IMAGE_SVG, "<?xml version=\"1.0\"?><svg/>".toByteArray()))
+        assertTrue(MagicBytes.coincide(AssetContentType.IMAGE_SVG, "<svg/>".toByteArray()))
+        assertTrue(MagicBytes.coincide(AssetContentType.IMAGE_SVG, "<!DOCTYPE svg PUBLIC>".toByteArray()))
+        // Con espacios delante sigue valiendo: `esSvg` recorta antes de mirar.
+        assertTrue(MagicBytes.coincide(AssetContentType.IMAGE_SVG, "\n\t  <svg/>".toByteArray()))
+
+        assertFalse(MagicBytes.coincide(AssetContentType.IMAGE_SVG, ByteArray(0)))
+        assertFalse(MagicBytes.coincide(AssetContentType.IMAGE_SVG, "<html><svg/></html>".toByteArray()))
+        assertFalse(MagicBytes.coincide(AssetContentType.IMAGE_SVG, PNG + ByteArray(8)))
+        // Un `<svg>` más allá de los 512 bytes de cabecera no cuela.
+        assertFalse(MagicBytes.coincide(AssetContentType.IMAGE_SVG, ("x".repeat(600) + "<svg/>").toByteArray()))
+    }
+
+    @Test
+    fun `woff2 exige su firma exacta`() {
+        assertTrue(MagicBytes.coincide(AssetContentType.FONT_WOFF2, "wOF2".toByteArray() + ByteArray(4)))
+        assertFalse(MagicBytes.coincide(AssetContentType.FONT_WOFF2, "wOFF".toByteArray()), "woff1 no es woff2")
+        assertFalse(MagicBytes.coincide(AssetContentType.FONT_WOFF2, "wOF".toByteArray()), "más corto que la firma")
+        assertFalse(MagicBytes.coincide(AssetContentType.FONT_WOFF2, ByteArray(0)))
+    }
+
+    // =============================================================================================
+    // Bordes de las tres funciones auxiliares
+    // =============================================================================================
+
+    @Test
+    fun `un cuerpo mas corto que la firma nunca casa`() {
+        assertFalse(MagicBytes.coincide(AssetContentType.IMAGE_PNG, PNG.copyOfRange(0, 4)))
+        assertFalse(MagicBytes.coincide(AssetContentType.IMAGE_JPEG, byteArrayOf(0xFF.toByte(), 0xD8.toByte())))
+        // `RIFF` sí, pero el cuerpo se corta antes del offset 8 donde va `WEBP`.
+        assertFalse(MagicBytes.coincide(AssetContentType.IMAGE_WEBP, "RIFF1234".toByteArray()))
+        // `RIFF` con tamaño y un contenedor que no es WEBP (p. ej. un WAV).
+        assertFalse(MagicBytes.coincide(AssetContentType.IMAGE_WEBP, riff("WAVE")))
+    }
+
+    private fun riff(contenedor: String): ByteArray =
+        "RIFF".toByteArray() + byteArrayOf(0x10, 0, 0, 0) + contenedor.toByteArray() + ByteArray(8)
+
+    companion object {
+        private val PNG = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
+    }
+}

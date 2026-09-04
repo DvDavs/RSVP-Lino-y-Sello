@@ -1,0 +1,20 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "startServerCommand": "pnpm run build && pnpm run start",
+      "startServerReadyPattern": "Ready in",
+      "url": ["http://127.0.0.1:3000/i/PLACEHOLDER_SEED_TOKEN"],
+      "settings": { "preset": "mobile" }
+    },
+    "assert": {
+      "assertions": {
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
+        "total-blocking-time": ["warn", { "maxNumericValue": 200 }],
+        "categories:accessibility": ["error", { "minScore": 1 }]
+      }
+    },
+    "upload": { "target": "filesystem", "outputDir": "./.lighthouseci" }
+  }
+}

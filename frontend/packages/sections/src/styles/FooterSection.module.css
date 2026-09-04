@@ -1,0 +1,87 @@
+/**
+ * packages/sections/src/styles/FooterSection.module.css — 01 §3.1 tabla, tipo `footer`, variante
+ * `simple`. "El pie de una invitación premium es discreto pero cuidado, no un bloque gris de
+ * relleno" (brief §1): banda mínima, centrada, con ritmo y un ornamento, no un `<div>` de sobras.
+ */
+
+.section {
+  padding-block: var(--inv-space-7);
+  padding-inline: var(--inv-space-5);
+  background: var(--inv-color-surface);
+  color: var(--inv-color-muted);
+  text-align: center;
+}
+
+.inner {
+  max-width: var(--inv-content-max);
+  margin-inline: auto;
+  display: grid;
+  justify-items: center;
+  gap: var(--inv-space-4);
+}
+
+.logo {
+  width: 3.5rem;
+  --inv-image-aspect-default: var(--inv-image-aspect-square);
+}
+
+.ornament {
+  display: inline-block;
+  width: 1.5rem;
+  height: 0.0625rem;
+  background: var(--inv-color-accent);
+}
+
+/* El h2 obligatorio (04 §17.3) es estructural, no una llamada de atención visual — el contenido
+ * real del pie es `footerNote`. Discreto y cuidado, nunca gritado (brief §1). */
+.title {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-weight: var(--inv-weight-medium);
+  font-size: var(--inv-text-xs);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-accent);
+}
+
+.intro {
+  margin: 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  line-height: var(--inv-leading-relaxed);
+  color: var(--inv-color-muted);
+}
+
+/* El bloque delegado (`sectionIntro`) fija su PROPIO `color: var(--inv-color-ink)` en su raíz —
+ * gana sobre el `color` heredado de `.intro`/`.note` (medido [V] en el banco de capturas: la nota
+ * legal salía en tinta llena en vez del tono discreto que pide el brief §1). Se sobrescribe en el
+ * HIJO DIRECTO. */
+.intro > :global(*) {
+  color: inherit;
+}
+
+.audio {
+  width: 100%;
+  max-width: 22rem;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--inv-touch-target-min);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-accent);
+  text-underline-offset: 0.2em;
+}
+
+.note {
+  margin: 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-muted);
+}

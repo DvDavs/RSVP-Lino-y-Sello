@@ -1,0 +1,86 @@
+{
+  "templateSlug": "fixture-tpl",
+  "from": "1.0.0",
+  "to": "2.0.0",
+  "ops": [
+    {
+      "op": "renameBlock",
+      "from": "cover.old",
+      "to": "cover.new"
+    },
+    {
+      "op": "removeBlock",
+      "id": "cover.dropped"
+    },
+    {
+      "op": "addBlock",
+      "id": "cover.added"
+    },
+    {
+      "op": "renameSection",
+      "from": "story",
+      "to": "relato"
+    },
+    {
+      "op": "renamePalette",
+      "from": "olive",
+      "to": "verde"
+    },
+    {
+      "op": "renameFontSet",
+      "from": "clasica",
+      "to": "serif"
+    },
+    {
+      "op": "changeBlockType",
+      "id": "story.body",
+      "converterId": "richTextToText"
+    },
+    {
+      "op": "changeBlockType",
+      "id": "story.tags",
+      "converterId": "listTextToText"
+    },
+    {
+      "op": "changeBlockType",
+      "id": "conv.aRico",
+      "converterId": "textToRichText"
+    },
+    {
+      "op": "changeBlockType",
+      "id": "conv.aLista",
+      "converterId": "textToListText"
+    },
+    {
+      "op": "changeBlockType",
+      "id": "conv.vacioRico",
+      "converterId": "textToRichText"
+    },
+    {
+      "op": "changeBlockType",
+      "id": "conv.vacioLista",
+      "converterId": "textToListText"
+    },
+    {
+      "op": "moveIntoGroup",
+      "blockId": "cover.legacy",
+      "groupId": "event.cards",
+      "itemBlockId": "title"
+    },
+    {
+      "op": "flattenGroup",
+      "groupId": "menu.items",
+      "itemBlockId": "name",
+      "toBlockId": "menu.note"
+    },
+    {
+      "op": "shrinkGroup",
+      "groupId": "gifts.list",
+      "max": 2
+    },
+    {
+      "op": "removeSection",
+      "key": "extra"
+    }
+  ]
+}

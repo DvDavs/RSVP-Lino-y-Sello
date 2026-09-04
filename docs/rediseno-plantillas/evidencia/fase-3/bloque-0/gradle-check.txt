@@ -1,0 +1,21 @@
+# TAREA 5 — ./gradlew clean check  (2026-09-04, tras el bloque 3-0a)
+# TPL_TEST_JDBC_URL apunta al clúster efímero de scripts/pg-ephemeral.sh.
+
+> Task :checkKotlinGradlePluginConfigurationErrors
+> Task :verifyJsonSchemaEmitted
+verifyJsonSchemaEmitted: 11 esquemas identicos a los versionados.
+> Task :testClasses
+> Task :test
+> Task :jacocoTestReport
+> Task :jacocoTestCoverageVerification
+> Task :check
+BUILD SUCCESSFUL in 2m 30s
+10 actionable tasks: 10 executed
+GRADLE_EXIT=0
+
+# Recuento leído de build/test-results/test/*.xml:
+  clases de prueba: 79
+  pruebas: 1186
+  fallos: 0
+  errores: 0
+  omitidas: 0

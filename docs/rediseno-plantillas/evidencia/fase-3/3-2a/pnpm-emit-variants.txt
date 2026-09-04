@@ -1,0 +1,6 @@
+
+> @invitaciones/sections@0.0.0 emit:variants /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-ae1d78e9b42856826/frontend/packages/sections
+> node --experimental-strip-types scripts/emit-section-variants.ts
+
+section-variants.json escrito en /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-ae1d78e9b42856826/frontend/packages/sections/generated/section-variants.json
+exit=0

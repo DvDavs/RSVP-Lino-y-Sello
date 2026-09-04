@@ -1,0 +1,262 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.list",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.list"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 12,
+        "maxItemLength": 200
+      }
+    },
+    "value": {
+      "kind": "listText",
+      "items": [
+        "a"
+      ]
+    },
+    "path": "content.test.list",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: 12 ítems (máximo) de 200 chars",
+    "tag": "PM",
+    "spec": {
+      "id": "test.list",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.list"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 12,
+        "maxItemLength": 200
+      }
+    },
+    "value": {
+      "kind": "listText",
+      "items": [
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ]
+    },
+    "path": "content.test.list",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: ImageValue contra ListTextSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.list",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.list"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 12,
+        "maxItemLength": 200
+      }
+    },
+    "value": {
+      "kind": "image",
+      "assetId": "as_01J8NK2AAAAAAAAAAAAAAAAAAA",
+      "alt": "",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "path": "content.test.list",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta items",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.list",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.list"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 12,
+        "maxItemLength": 200
+      }
+    },
+    "value": {
+      "kind": "listText"
+    },
+    "path": "content.test.list",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: 13 ítems excede ListTextValue.max(12)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.list",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.list"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 12,
+        "maxItemLength": 200
+      }
+    },
+    "value": {
+      "kind": "listText",
+      "items": [
+        "x",
+        "x",
+        "x",
+        "x",
+        "x",
+        "x",
+        "x",
+        "x",
+        "x",
+        "x",
+        "x",
+        "x",
+        "x"
+      ]
+    },
+    "path": "content.test.list",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.list",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.list"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 12,
+        "maxItemLength": 200
+      }
+    },
+    "value": null,
+    "path": "content.test.list",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: items:[] con minItems:0 es válido",
+    "tag": "extra",
+    "spec": {
+      "id": "test.list",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.list"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 12,
+        "maxItemLength": 200
+      }
+    },
+    "value": {
+      "kind": "listText",
+      "items": []
+    },
+    "path": "content.test.list",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: ítem de 150 chars excede maxItemLength:100 declarado → I-16 (sin tocar el máx. duro de 200)",
+    "tag": "extra",
+    "spec": {
+      "id": "test.list2",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.list2"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "listText",
+      "constraints": {
+        "minItems": 0,
+        "maxItems": 12,
+        "maxItemLength": 100
+      }
+    },
+    "value": {
+      "kind": "listText",
+      "items": [
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ]
+    },
+    "path": "content.test.list2",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-16_TEXT_TOO_LONG"
+    ]
+  }
+]

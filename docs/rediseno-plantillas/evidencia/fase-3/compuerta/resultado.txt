@@ -1,0 +1,69 @@
+# Compuerta A1-A8 del lienzo aislado — salida literal de Playwright
+# Bloque 3-0b, fase 3. Ejecutado el 2026-09-04 16:31:42 UTC en este entorno.
+#
+# Comando:
+#   cd frontend/spikes/canvas-gate
+#   npx next build   # producción, NO 'next dev' (C5: sin HMR, sin 'unsafe-eval')
+#   PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers \
+#   NEXT_PUBLIC_EDITOR_ORIGIN=http://127.0.0.1:6100 NEXT_PUBLIC_CDN_ORIGIN=http://127.0.0.1:6003 \
+#   npx playwright test
+#
+# CDN = backend real de 3-0a (scripts/dev-backend.sh start) sirviendo los assets de
+#       boda-clasica@1.0.0 en http://127.0.0.1:6003/public/templates2-assets/...
+# Navegador: Chromium 1194 preinstalado en /opt/pw-browsers (contratos.md §7: sin 'playwright install').
+
+$ npx playwright test
+
+Running 4 tests using 1 worker
+
+
+════════ COMPUERTA A1-A8 · lienzo en <iframe sandbox="allow-scripts"> (origen opaco) ════════
+A1  PASA   READY en 41 ms (< 2000) · buildId "spike-3-0b" · origen opaco: true
+A2  PASA   fontFamily="plantillaSerif, "plantillaSerif Fallback…" · fonts.check("plantillaSerif")=true · caras=[plantillaSerif=loaded, plantillaSerif Fallback=error, ControlSinCors=error] · control sin CORS=false
+A3  PASA   naturalWidth=800, naturalHeight=1120 · origen http://127.0.0.1:6003
+A4  PASA   securitypolicyviolation=0; avisos de CSP en consola=0
+A5  PASA   BLOCK_CLICKED ref={"sectionKey":"cover","blockId":"cover.title"} (RENDER encolado antes del READY: 1 msg)
+A6  PASA   CANVAS_RESIZED height=8191 px (el padre no puede medirlo, §8.3)
+A7  PASA   KEY_COMMAND="undo" con el foco en "cover.title" dentro del iframe
+A8  PASA   fetch/xhr/ws desde el lienzo=0 · peticiones del marco por tipo={"stylesheet":1,"script":7,"font":2,"image":2} · violaciones CSP=0
+─────────────────────────────────────────────────────────────────────────────────────────
+TOTAL: 8/8 criterios en verde
+
+Mediciones de apoyo:
+  · event.origin del lienzo visto por el padre .... "null"  (04 §8.2: por eso el padre NO valida por origen)
+  · window.origin dentro del lienzo .............. "null"
+  · PONG recibido (petición-respuesta) ........... "ping-1"
+  · SECTION_IN_VIEW más reciente ................. "cover"
+  · mensajes rechazados y registrados (P1) ....... []
+  · peticiones del marco del lienzo (todas):
+      stylesheet http://127.0.0.1:6100/_next/static/chunks/0ikagykjs8_v4.css
+      script     http://127.0.0.1:6100/_next/static/chunks/3_ckedxrygw1r.js
+      script     http://127.0.0.1:6100/_next/static/chunks/1r_4dy99o2vqu.js
+      script     http://127.0.0.1:6100/_next/static/chunks/43c8k6gqjoa30.js
+      script     http://127.0.0.1:6100/_next/static/chunks/turbopack-2xeueawaoychi.js
+      script     http://127.0.0.1:6100/_next/static/chunks/1iakeipvj9h_m.js
+      script     http://127.0.0.1:6100/_next/static/chunks/3n1s4fh1341x6.js
+      script     http://127.0.0.1:6100/_next/static/chunks/2fhl2r_f7_r51.js
+      font       http://127.0.0.1:6100/_next/static/media/plantilla_serif-s.00o8rxlzhbj_q.woff2
+      font       http://127.0.0.1:6100/control-fonts/plantilla-serif.woff2
+      image      http://127.0.0.1:6003/public/templates2-assets/templates2/template/boda-clasica/1.0.0/8e22083a98052e48852458432561c95a0ffb0611f77e60901a67377b6d7866c9.png
+      image      http://127.0.0.1:6003/public/templates2-assets/templates2/template/boda-clasica/1.0.0/34fbabcdcaf030f55fb5fe236cd71db28c650721e70bf6ea9986e8729f37e9de.png
+  · respuestas HTTP >= 400 (0):
+  · consola del navegador (2 líneas):
+      [error] Access to font at 'http://127.0.0.1:6100/control-fonts/plantilla-serif.woff2' from origin 'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+      [error] Failed to load resource: net::ERR_FAILED
+
+  ✓  1 [chromium] › e2e/canvas-isolation.spec.ts:58:1 › compuerta A1-A8 · lienzo en iframe de origen opaco (3.0s)
+  ✓  2 [chromium] › e2e/canvas-isolation.spec.ts:247:1 › control · la CSP del lienzo SÍ bloquea (atributo style en línea servido en el HTML) (842ms)
+  ✓  3 [chromium] › e2e/canvas-isolation.spec.ts:256:1 › control · connect-src 'none' bloquea un fetch lanzado desde el lienzo (268ms)
+  ✓  4 [chromium] › e2e/canvas-isolation.spec.ts:268:1 › control · U-15 en vivo: un mensaje v:2 deja el puente en «incompatible» (338ms)
+
+  4 passed (6.4s)
+
+$ node -e ... (versiones exactas instaladas)
+next                 16.3.4
+react                19.2.8
+react-dom            19.2.8
+typescript           5.9.3
+@playwright/test     1.62.1
+zod (vía @invitaciones/schema) 4.5.4

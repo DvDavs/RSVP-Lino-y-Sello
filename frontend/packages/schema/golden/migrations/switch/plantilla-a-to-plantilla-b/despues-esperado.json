@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "template": {
+    "slug": "plantilla-b",
+    "version": "3.1.0"
+  },
+  "theme": {
+    "paletteId": "verde",
+    "fontSetId": "serif"
+  },
+  "structure": {
+    "sections": [
+      {
+        "key": "portada",
+        "variant": "moderna",
+        "visible": true
+      },
+      {
+        "key": "familia",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "pie",
+        "variant": "default",
+        "visible": false
+      }
+    ]
+  },
+  "content": {
+    "b.fecha": {
+      "kind": "date",
+      "value": "2027-04-10"
+    },
+    "b.titulo": {
+      "kind": "text",
+      "value": "Ana & Luis"
+    },
+    "b.parentA1": {
+      "kind": "text",
+      "value": "Sra. Ruiz"
+    }
+  },
+  "attic": {
+    "plantilla-a@1.0.0": {
+      "a.cards": {
+        "kind": "group",
+        "items": [
+          {
+            "itemId": "01J8CARD1AAAAAAAAAAAAAAAAA",
+            "values": {
+              "title": {
+                "kind": "text",
+                "value": "Ceremonia"
+              }
+            }
+          }
+        ]
+      },
+      "a.coverImage": {
+        "kind": "image",
+        "assetId": "as_01J8RETRATAAAAAAAAAAAAAAAA",
+        "alt": "portada",
+        "focal": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      },
+      "a.sectionTitle": {
+        "kind": "text",
+        "value": "Nuestra historia"
+      }
+    }
+  },
+  "meta": {
+    "locale": "es-MX"
+  }
+}

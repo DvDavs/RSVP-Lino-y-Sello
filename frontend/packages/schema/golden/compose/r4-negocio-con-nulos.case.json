@@ -1,0 +1,328 @@
+{
+  "name": "r4-negocio-con-nulos",
+  "descripcion": "R4: date/time/hashtag/coverPhotoUrl nulos → provenance 'empty' y value null; los dos boolean SIEMPRE tienen valor. Los required nulos entran en missingRequired",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "event",
+        "type": "event",
+        "title": {
+          "es-MX": "event"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "biz.date",
+            "role": "eventDate",
+            "label": {
+              "es-MX": "biz.date"
+            },
+            "required": true,
+            "editable": true,
+            "source": "business",
+            "businessField": "invitation.date",
+            "aiEditable": true,
+            "type": "date",
+            "formatId": "long"
+          },
+          {
+            "id": "biz.time",
+            "role": "eventTime",
+            "label": {
+              "es-MX": "biz.time"
+            },
+            "required": true,
+            "editable": true,
+            "source": "business",
+            "businessField": "invitation.time",
+            "aiEditable": true,
+            "type": "time",
+            "formatId": "h12"
+          },
+          {
+            "id": "biz.hashtag",
+            "role": "hashtag",
+            "label": {
+              "es-MX": "biz.hashtag"
+            },
+            "required": false,
+            "editable": true,
+            "source": "business",
+            "businessField": "invitation.hashtag",
+            "aiEditable": true,
+            "type": "text",
+            "constraints": {
+              "minLength": 0,
+              "maxLength": 200,
+              "multiline": false
+            }
+          },
+          {
+            "id": "biz.cover",
+            "role": "coverImage",
+            "label": {
+              "es-MX": "biz.cover"
+            },
+            "required": false,
+            "editable": true,
+            "source": "business",
+            "businessField": "invitation.coverPhotoUrl",
+            "aiEditable": true,
+            "type": "image",
+            "constraints": {
+              "aspect": "free",
+              "maxBytes": 8388608
+            }
+          },
+          {
+            "id": "biz.children",
+            "role": "rsvpChildrenAllowed",
+            "label": {
+              "es-MX": "biz.children"
+            },
+            "required": false,
+            "editable": true,
+            "source": "business",
+            "businessField": "invitation.childrenAllowed",
+            "aiEditable": true,
+            "type": "boolean"
+          },
+          {
+            "id": "biz.young",
+            "role": "rsvpYoungAllowed",
+            "label": {
+              "es-MX": "biz.young"
+            },
+            "required": false,
+            "editable": true,
+            "source": "business",
+            "businessField": "invitation.youngAllowed",
+            "aiEditable": true,
+            "type": "boolean"
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {}
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "event",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {},
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": null,
+    "time": null,
+    "hashtag": null,
+    "coverPhotoUrl": null,
+    "childrenAllowed": true,
+    "youngAllowed": false,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {},
+  "locale": "es-MX",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-MX",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "event",
+        "type": "event",
+        "variant": "default",
+        "visible": true,
+        "title": "event",
+        "blocks": [
+          {
+            "id": "biz.date",
+            "role": "eventDate",
+            "type": "date",
+            "label": "biz.date",
+            "provenance": "empty",
+            "value": null
+          },
+          {
+            "id": "biz.time",
+            "role": "eventTime",
+            "type": "time",
+            "label": "biz.time",
+            "provenance": "empty",
+            "value": null
+          },
+          {
+            "id": "biz.hashtag",
+            "role": "hashtag",
+            "type": "text",
+            "label": "biz.hashtag",
+            "provenance": "empty",
+            "value": null
+          },
+          {
+            "id": "biz.cover",
+            "role": "coverImage",
+            "type": "image",
+            "label": "biz.cover",
+            "provenance": "empty",
+            "value": null
+          },
+          {
+            "id": "biz.children",
+            "role": "rsvpChildrenAllowed",
+            "type": "boolean",
+            "label": "biz.children",
+            "provenance": "business",
+            "value": {
+              "kind": "boolean",
+              "value": true
+            }
+          },
+          {
+            "id": "biz.young",
+            "role": "rsvpYoungAllowed",
+            "type": "boolean",
+            "label": "biz.young",
+            "provenance": "business",
+            "value": {
+              "kind": "boolean",
+              "value": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [
+      "biz.date",
+      "biz.time"
+    ],
+    "stillDefault": [],
+    "orphanContent": [],
+    "orphanSections": [],
+    "invalidValues": [],
+    "themeFallback": null
+  }
+}

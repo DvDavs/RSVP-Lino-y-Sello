@@ -1,0 +1,159 @@
+/**
+ * packages/sections/src/theme/tokens.css — nombres y valores de RESERVA de todas las
+ * custom properties `--inv-*` (04 §5.4). Ninguna hoja de estilo de packages/sections puede
+ * referirse a un color literal ni a una variable que no empiece por `--inv-` (04 §19.2/§19.4).
+ *
+ * Este archivo define los valores de reserva (los que se ven si `ThemeProvider` aún no montó,
+ * o en una prueba/Storybook sin proveedor). En tiempo de ejecución, `ThemeProvider` SOBRESCRIBE
+ * los seis `--inv-color-*` y los dos `--inv-font-*` con los valores de `ComposedDocument.theme`
+ * (`ResolvedTheme`), en el elemento raíz del árbol de secciones — nunca en `:root`/`html`, para
+ * poder montar más de un documento (p. ej. editor + panel de comparación) sin que se pisen.
+ *
+ * Import: cada `.module.css` de sección/bloque asume que este archivo ya está cargado en la
+ * página (lo importa `apps/web` una sola vez; `packages/sections` no se autoimporta a sí mismo
+ * en cada módulo para no duplicar la hoja).
+ */
+
+:root {
+  /* ------------------------------------------------------------------------------------------
+   * 1. Color (04 §5.4 tabla, fila 1). Únicos colores permitidos en packages/sections.
+   *    Reserva: tinta sobre blanco con contraste AA de sobra, para que nunca se vea "roto".
+   *    ThemeProvider los sobrescribe con los 6 tokens de `Palette.tokens` (manifest.ts).
+   * ---------------------------------------------------------------------------------------- */
+  --inv-color-bg: #ffffff;
+  --inv-color-surface: #ffffff;
+  --inv-color-ink: #16130f;
+  --inv-color-accent: #3a3630;
+  --inv-color-accent-ink: #ffffff;
+  --inv-color-muted: #6b655c;
+
+  /* ------------------------------------------------------------------------------------------
+   * 2. Tipografía: familia (04 §5.4 fila 2) + escala derivada (AÑADIDA por 3-2a, ver bitácora:
+   *    "para que una sección nunca elija un número a mano"). `ThemeProvider` sobrescribe SOLO
+   *    `--inv-font-heading`/`--inv-font-body`; la escala de tamaños/interlineado/tracking es
+   *    fija del sistema de secciones (P3: no viene del documento, viene del ritmo visual).
+   * ---------------------------------------------------------------------------------------- */
+  --inv-font-heading: Georgia, "Iowan Old Style", "Noto Serif", "Times New Roman", serif;
+  --inv-font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+
+  /* Escala fluida (clamp) calibrada para 360px–1280px. 9 pasos, de nota al pie a titular de portada. */
+  --inv-text-2xs: clamp(0.6875rem, 0.66rem + 0.15vw, 0.75rem);
+  --inv-text-xs: clamp(0.75rem, 0.72rem + 0.2vw, 0.8125rem);
+  --inv-text-sm: clamp(0.875rem, 0.85rem + 0.2vw, 0.9375rem);
+  --inv-text-base: clamp(1rem, 0.97rem + 0.25vw, 1.0625rem);
+  --inv-text-lg: clamp(1.125rem, 1.05rem + 0.5vw, 1.25rem);
+  --inv-text-xl: clamp(1.375rem, 1.2rem + 1vw, 1.625rem);
+  --inv-text-2xl: clamp(1.75rem, 1.5rem + 1.6vw, 2.25rem);
+  --inv-text-3xl: clamp(2.25rem, 1.8rem + 2.8vw, 3rem);
+  --inv-text-4xl: clamp(3rem, 2.2rem + 5vw, 4.5rem);
+
+  /* Interlineado: cada tamaño de fuente tiene un ritmo propio (los titulares grandes van más
+   * apretados; el cuerpo largo, más suelto — mismo criterio editorial en toda plantilla). */
+  --inv-leading-tight: 1.08;
+  --inv-leading-snug: 1.25;
+  --inv-leading-normal: 1.5;
+  --inv-leading-relaxed: 1.7;
+
+  /* Tracking: los titulares grandes se aprietan un poco; las etiquetas pequeñas en mayúsculas
+   * ("eyebrow") se abren, patrón editorial estándar para que no se vean amontonadas. */
+  --inv-tracking-tight: -0.01em;
+  --inv-tracking-normal: 0em;
+  --inv-tracking-wide: 0.06em;
+
+  /* Peso: semántico, no viene del documento (FontFace.weights solo declara qué pesos EXISTEN,
+   * no cuál usar dónde — hueco de diseño registrado en preguntas-abiertas.md). */
+  --inv-weight-body: 400;
+  --inv-weight-medium: 500;
+  --inv-weight-heading: 600;
+
+  /* ------------------------------------------------------------------------------------------
+   * 3. Ritmo vertical y forma (04 §5.4 fila 3): espaciado, radios, medida de línea.
+   *    Nunca provienen del documento (P3): el documento no lleva tamaños.
+   * ---------------------------------------------------------------------------------------- */
+  --inv-space-1: 0.25rem; /* 4px  — separaciones mínimas (icono‑texto) */
+  --inv-space-2: 0.5rem; /* 8px  — dentro de un grupo de controles */
+  --inv-space-3: 0.75rem; /* 12px — entre líneas de una tarjeta */
+  --inv-space-4: 1rem; /* 16px — margen interior estándar */
+  --inv-space-5: 1.5rem; /* 24px — entre bloques dentro de una sección */
+  --inv-space-6: 2.25rem; /* 36px — entre grupos de bloques */
+  --inv-space-7: 3.5rem; /* 56px — relleno vertical de una sección */
+  --inv-space-8: 5.5rem; /* 88px — separación entre secciones */
+
+  --inv-radius-sm: 0.25rem; /* controles pequeños, insignias */
+  --inv-radius-md: 0.75rem; /* tarjetas, imágenes */
+  --inv-radius-lg: 1.5rem; /* superficies grandes, portada enmarcada */
+
+  /* Medida (measure): ancho de línea legible para texto largo (richText, listas). ~60-65 ch. */
+  --inv-measure: 34rem;
+
+  /* Ancho máximo de columna de contenido de una SECCIÓN (AÑADIDO por 3-2c: ningún token de 3-2a
+   * acota el ancho del contenedor de una sección — `--inv-measure` es para texto largo en línea,
+   * no para la columna completa de tarjetas/grupos). Sin él, en escritorio ancho (1440px+) las
+   * tarjetas de giftTable/suggestions/amenities/family se estirarían de borde a borde, que es
+   * exactamente la lectura visual de "formulario", no de invitación editorial. */
+  --inv-content-max: 68rem;
+
+  /* Ancho mínimo de columna para grillas de tarjetas con `repeat(auto-fit, minmax(…))`
+   * (AÑADIDO por 3-2c: giftTable/suggestions/amenities/family "cards"). Un solo valor para que
+   * las cuatro secciones de tarjetas compartan el mismo punto de quiebre editorial. */
+  --inv-grid-card-min: 16rem;
+
+  /* Grosor de línea fina para separadores de la variante "list" (AÑADIDO por 3-2c). Se tiñe con
+   * `color-mix(in srgb, var(--inv-color-ink) N%, transparent)`, igual criterio que las sombras de
+   * arriba — nunca un `rgba(0,0,0,…)` fijo. */
+  --inv-border-width: 1px;
+
+  /* Sombra: tintada con la tinta de la paleta activa (color-mix), nunca negro puro — se adapta
+   * a cada paleta sin que ninguna hoja de sección escriba un rgba(0,0,0,…) a mano. */
+  --inv-shadow-sm: 0 1px 2px color-mix(in srgb, var(--inv-color-ink) 14%, transparent);
+  --inv-shadow-md: 0 12px 32px -12px color-mix(in srgb, var(--inv-color-ink) 28%, transparent);
+  --inv-shadow-lg: 0 24px 64px -16px color-mix(in srgb, var(--inv-color-ink) 32%, transparent);
+
+  /* ------------------------------------------------------------------------------------------
+   * 4. Accesibilidad (04 §17.2, §17.5): foco visible y objetivo táctil mínimo AA.
+   * ---------------------------------------------------------------------------------------- */
+  --inv-focus-ring-width: 2px;
+  --inv-focus-ring-offset: 2px;
+  --inv-touch-target-min: 1.5rem; /* 24px — WCAG 2.2 AA 2.5.8 Target Size (Minimum) */
+
+  /* Duraciones/easing: toda transición de packages/sections los usa, así el guardia de
+   * `prefers-reduced-motion` (una sola regla, ver shared.module.css) los anula a la vez. */
+  --inv-motion-fast: 120ms;
+  --inv-motion-normal: 200ms;
+  --inv-motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ------------------------------------------------------------------------------------------
+   * 5. Medios (AÑADIDO por 3-2a). `ResolvedValue` de `image` no lleva ancho/alto (compose.ts no
+   *    los resuelve, ADR-2-3-07: los assets de plantilla los traen a NULL) — así que ImageBlock
+   *    no puede reservar espacio por dimensión intrínseca. En su lugar reserva por RELACIÓN DE
+   *    ASPECTO por defecto (una sección real la sobrescribe con la suya vía su propio módulo CSS,
+   *    igual token — nunca un número a mano). Foco de imagen (ImageValue.focal) se aplica por
+   *    CSSOM en tiempo de ejecución (`--inv-focal-x/y`, ver ImageBlock.tsx) porque la CSP del
+   *    lienzo no permite `style="…"` renderizado en servidor (handoffs/3-0b.md §1).
+   * ---------------------------------------------------------------------------------------- */
+  --inv-image-aspect-default: 4 / 3;
+  --inv-focal-x: 50%;
+  --inv-focal-y: 50%;
+
+  /* ------------------------------------------------------------------------------------------
+   * 6. Bordes y trazos (AÑADIDO por 3-2b, bloque de secciones cover/celebrant/event/gallery/
+   *    story/dressCode). Ninguna herramienta de diseño expresa un grosor de trazo por tema (no
+   *    hay campo en `ResolvedTheme` para esto, igual que radios/espaciado en la sección 3), así
+   *    que es un valor FIJO del sistema, no del documento (P3) — igual criterio que
+   *    `--inv-radius-*`. Se usa en trazos finos: eje de línea de tiempo (EventSection/
+   *    StorySection), separadores entre columnas (DressCodeSection) y el borde de tarjeta/marco
+   *    (CoverSection variante "framed"). Nunca un "1px"/"2px" a mano en un .module.css.
+   * ---------------------------------------------------------------------------------------- */
+  --inv-border-width-hairline: 1px;
+  --inv-border-width-axis: 2px;
+  /* Relaciones de aspecto adicionales (AÑADIDAS por 3-2c), con la MISMA técnica que ya usa
+   * `ImageBlock` (`--inv-image-aspect-default` en cascada): una sección envuelve su `<ImageBlock>`
+   * en un contenedor que REDEFINE `--inv-image-aspect-default` para ese subárbol (las custom
+   * properties heredan), sin tocar `ImageBlock.tsx` ni su `.module.css`. Los valores corresponden
+   * a los `constraints.aspect` reales del manifiesto (`01 §3.2` fila 4: "aspect/maxBytes los
+   * valida la subida"; `template.json` declara "square" en `giftOptionImage`/`personPhoto`/etc. y
+   * "wide" en `rsvpBackground`) — no son números inventados, son los dos aspectos que faltaban. */
+  --inv-image-aspect-square: 1 / 1;
+  --inv-image-aspect-wide: 21 / 9;
+}

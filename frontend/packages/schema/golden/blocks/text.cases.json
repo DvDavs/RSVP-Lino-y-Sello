@@ -1,0 +1,231 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.text",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.text"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "value": {
+      "kind": "text",
+      "value": "Ana"
+    },
+    "path": "content.test.text",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: value al límite superior (200)",
+    "tag": "PM",
+    "spec": {
+      "id": "test.text",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.text"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "value": {
+      "kind": "text",
+      "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "path": "content.test.text",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: ImageValue contra TextSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.text",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.text"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "value": {
+      "kind": "image",
+      "assetId": "as_01J8NK1AAAAAAAAAAAAAAAAAAA",
+      "alt": "",
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "path": "content.test.text",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta value",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.text",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.text"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "value": {
+      "kind": "text"
+    },
+    "path": "content.test.text",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: 2001 chars excede el máximo DURO de TextValue (2000)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.text",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.text"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "value": {
+      "kind": "text",
+      "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "path": "content.test.text",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.text",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.text"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "value": null,
+    "path": "content.test.text",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: value:\"\" con minLength:0 es válido",
+    "tag": "extra",
+    "spec": {
+      "id": "test.text",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.text"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "value": {
+      "kind": "text",
+      "value": ""
+    },
+    "path": "content.test.text",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: value:\"\" con minLength:1 viola I-16",
+    "tag": "extra",
+    "spec": {
+      "id": "test.text",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.text"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 1,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "value": {
+      "kind": "text",
+      "value": ""
+    },
+    "path": "content.test.text",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-16_TEXT_TOO_LONG"
+    ]
+  }
+]

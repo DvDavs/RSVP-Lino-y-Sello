@@ -1,0 +1,25 @@
+# Arranque de la aplicación COMPLETA sobre una base construida SÓLO con Flyway,
+# con spring.jpa.hibernate.ddl-auto = validate. Extracto literal de build/dev/backend.log.
+# Comando:  scripts/dev-backend.sh start
+
+2026-09-04T15:54:40.836Z INFO org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:34641/invitaciones_dev (PostgreSQL 16.13)
+2026-09-04T15:54:48.094Z WARN m.e.i.m.t.persistence.LocalAssetStorage  : templates2: MODO DE ASSETS **LOCAL** (templates2.assets.mode=local). Los objetos NO van a S3: se escriben en /home/user/RSVP---Lino-Sello/build/templates2-assets y se sirven sin firmar desde http://127.0.0.1:6003/public/templates2-assets. Es una configuración de DESARROLLO (ADR-3-0a-02).
+2026-09-04T15:54:49.404Z INFO o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 6003 (http) with context path '/'
+2026-09-04T15:54:49.418Z INFO m.e.i.InvitationsApplicationKt           : Started InvitationsApplicationKt in 11.411 seconds (process running for 11.752)
+
+# Flyway construyendo la base DESDE CERO en esa misma sesión (extracto de la primera
+# invocación, build/dev/register.log). V40 es la migración de desbloqueo de ADR-3-0a-01:
+
+  2026-09-04T15:53:15.808Z INFO org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:34641/invitaciones_dev (PostgreSQL 16.13)
+  2026-09-04T15:53:15.951Z INFO o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - initial schema"
+  2026-09-04T15:53:16.490Z INFO o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "40 - add invitation guest graduates name"
+  2026-09-04T15:53:16.496Z INFO o.f.core.internal.command.DbMigrate      : Successfully applied 38 migrations to schema "public", now at version v40 (execution time 00:00.346s)
+  2026-09-04T15:53:43.102Z INFO org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:34641/invitaciones_dev (PostgreSQL 16.13)
+  2026-09-04T15:54:09.123Z INFO org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://127.0.0.1:34641/invitaciones_dev (PostgreSQL 16.13)
+
+# Y una ruta real respondiendo, sin autenticación:
+$ curl -sS -i http://127.0.0.1:6003/public/i/sonda/exists | head -4
+HTTP/1.1 200 
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers

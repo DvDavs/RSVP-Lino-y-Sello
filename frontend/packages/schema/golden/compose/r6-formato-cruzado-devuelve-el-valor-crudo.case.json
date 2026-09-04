@@ -1,0 +1,270 @@
+{
+  "name": "r6-formato-cruzado-devuelve-el-valor-crudo",
+  "descripcion": "R6, guarda de paridad: `formatId` es un `Ident` libre, así que un DateSpec puede declarar formatId 'h12' y un TimeSpec 'long' con datos perfectamente válidos. Sin guarda, JavaScript producía 'NaN:undefined pm' y Kotlin lanzaría NumberFormatException sobre el MISMO documento. Los tres formateadores devuelven el valor crudo cuando la entrada no tiene la forma que ese formato espera",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "event",
+        "type": "event",
+        "title": {
+          "es-MX": "event"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "x.fechaConH12",
+            "role": "eventDate",
+            "label": {
+              "es-MX": "x.fechaConH12"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "date",
+            "formatId": "h12"
+          },
+          {
+            "id": "x.horaConLong",
+            "role": "eventTime",
+            "label": {
+              "es-MX": "x.horaConLong"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "time",
+            "formatId": "long"
+          },
+          {
+            "id": "x.horaConMonthYear",
+            "role": "coverDate",
+            "label": {
+              "es-MX": "x.horaConMonthYear"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "time",
+            "formatId": "month-year"
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {}
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "event",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {
+      "x.fechaConH12": {
+        "kind": "date",
+        "value": "2027-01-31"
+      },
+      "x.horaConLong": {
+        "kind": "time",
+        "value": "13:45"
+      },
+      "x.horaConMonthYear": {
+        "kind": "time",
+        "value": "07:00"
+      }
+    },
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": "2027-03-08",
+    "time": "19:05",
+    "hashtag": "#AnaYLuis",
+    "coverPhotoUrl": "https://cdn.invitaciones.evolutiondev.mx/legacy/portada.jpg",
+    "childrenAllowed": false,
+    "youngAllowed": true,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {},
+  "locale": "es-MX",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-MX",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "event",
+        "type": "event",
+        "variant": "default",
+        "visible": true,
+        "title": "event",
+        "blocks": [
+          {
+            "id": "x.fechaConH12",
+            "role": "eventDate",
+            "type": "date",
+            "label": "x.fechaConH12",
+            "provenance": "user",
+            "value": {
+              "kind": "date",
+              "value": "2027-01-31",
+              "formatted": "2027-01-31"
+            }
+          },
+          {
+            "id": "x.horaConLong",
+            "role": "eventTime",
+            "type": "time",
+            "label": "x.horaConLong",
+            "provenance": "user",
+            "value": {
+              "kind": "time",
+              "value": "13:45",
+              "formatted": "13:45"
+            }
+          },
+          {
+            "id": "x.horaConMonthYear",
+            "role": "coverDate",
+            "type": "time",
+            "label": "x.horaConMonthYear",
+            "provenance": "user",
+            "value": {
+              "kind": "time",
+              "value": "07:00",
+              "formatted": "07:00"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [],
+    "stillDefault": [],
+    "orphanContent": [],
+    "orphanSections": [],
+    "invalidValues": [],
+    "themeFallback": null
+  }
+}

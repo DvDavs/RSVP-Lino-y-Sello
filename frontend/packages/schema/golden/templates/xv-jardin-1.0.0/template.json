@@ -1,0 +1,731 @@
+{
+  "manifestVersion": 1,
+  "slug": "xv-jardin",
+  "version": "1.0.0",
+  "name": {
+    "es-MX": "XV Jardín"
+  },
+  "description": {
+    "es-MX": "Plantilla de XV años, un solo celebrante (honoree). Deliberadamente con menos secciones que boda-clasica (sin story/suggestions/amenities) para ejercitar R1 con manifiestos de distinto tamaño."
+  },
+  "eventKinds": [
+    "quince"
+  ],
+  "minPlanTier": 1,
+  "locales": [
+    "es-MX"
+  ],
+  "capabilities": [
+    "hashtags"
+  ],
+  "previewImage": "assets/preview.webp",
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "title": {
+        "es-MX": "Portada"
+      },
+      "variants": [
+        "full"
+      ],
+      "defaultVariant": "full",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "cover.title",
+          "role": "coverTitle",
+          "label": {
+            "es-MX": "Nombre en portada"
+          },
+          "required": true,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 60,
+            "multiline": false
+          }
+        },
+        {
+          "id": "cover.subtitle",
+          "role": "coverSubtitle",
+          "label": {
+            "es-MX": "Subtítulo"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 80,
+            "multiline": false
+          }
+        },
+        {
+          "id": "cover.date",
+          "role": "coverDate",
+          "label": {
+            "es-MX": "Fecha del evento"
+          },
+          "required": false,
+          "editable": false,
+          "source": "business",
+          "businessField": "invitation.date",
+          "aiEditable": false,
+          "type": "date",
+          "formatId": "long"
+        },
+        {
+          "id": "cover.image",
+          "role": "coverImage",
+          "label": {
+            "es-MX": "Foto de portada"
+          },
+          "required": true,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "image",
+          "constraints": {
+            "aspect": "portrait",
+            "maxBytes": 8388608
+          }
+        }
+      ]
+    },
+    {
+      "key": "honoree",
+      "type": "celebrant",
+      "title": {
+        "es-MX": "La quinceañera"
+      },
+      "variants": [
+        "centered"
+      ],
+      "defaultVariant": "centered",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "honoree.heading",
+          "role": "celebrantsHeading",
+          "label": {
+            "es-MX": "Encabezado"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 60,
+            "multiline": false
+          }
+        },
+        {
+          "id": "honoree.person",
+          "role": "honoree",
+          "label": {
+            "es-MX": "Quinceañera"
+          },
+          "required": true,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "person"
+        },
+        {
+          "id": "honoree.photo",
+          "role": "honoreePhoto",
+          "label": {
+            "es-MX": "Foto"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "image",
+          "constraints": {
+            "aspect": "portrait",
+            "maxBytes": 8388608
+          }
+        },
+        {
+          "id": "honoree.message",
+          "role": "honoreeMessage",
+          "label": {
+            "es-MX": "Mensaje"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "richText",
+          "constraints": {
+            "maxLength": 600
+          }
+        }
+      ]
+    },
+    {
+      "key": "family",
+      "type": "family",
+      "title": {
+        "es-MX": "Mis papás y padrinos"
+      },
+      "variants": [
+        "cards"
+      ],
+      "defaultVariant": "cards",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "family.parentA1",
+          "role": "parentA1",
+          "label": {
+            "es-MX": "Mamá"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "person"
+        },
+        {
+          "id": "family.parentA2",
+          "role": "parentA2",
+          "label": {
+            "es-MX": "Papá"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "person"
+        },
+        {
+          "id": "family.godparents",
+          "role": "familyGroup",
+          "label": {
+            "es-MX": "Padrinos"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "group",
+          "min": 0,
+          "max": 6,
+          "reorderable": true,
+          "itemLabel": {
+            "es-MX": "Padrino o madrina"
+          },
+          "itemBlocks": [
+            {
+              "id": "person",
+              "role": "personName",
+              "label": {
+                "es-MX": "Nombre"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "person"
+            },
+            {
+              "id": "label",
+              "role": "personLabel",
+              "label": {
+                "es-MX": "De qué"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 0,
+                "maxLength": 40,
+                "multiline": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "event",
+      "type": "event",
+      "title": {
+        "es-MX": "Itinerario"
+      },
+      "variants": [
+        "cards"
+      ],
+      "defaultVariant": "cards",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "event.title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 40,
+            "multiline": false
+          }
+        },
+        {
+          "id": "event.cards",
+          "role": "eventCards",
+          "label": {
+            "es-MX": "Momentos"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "group",
+          "min": 1,
+          "max": 6,
+          "reorderable": true,
+          "itemLabel": {
+            "es-MX": "Momento"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "eventTitle",
+              "label": {
+                "es-MX": "Nombre (Misa, Recepción…)"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 1,
+                "maxLength": 60,
+                "multiline": false
+              }
+            },
+            {
+              "id": "when",
+              "role": "eventWhen",
+              "label": {
+                "es-MX": "Cuándo"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "dateTimeRange",
+              "formatId": "long-h12"
+            },
+            {
+              "id": "place",
+              "role": "eventPlace",
+              "label": {
+                "es-MX": "Dónde"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "location"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "gallery",
+      "type": "gallery",
+      "title": {
+        "es-MX": "Galería"
+      },
+      "variants": [
+        "grid-6"
+      ],
+      "defaultVariant": "grid-6",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "gallery.title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 40,
+            "multiline": false
+          }
+        },
+        {
+          "id": "gallery.photos",
+          "role": "galleryPhotos",
+          "label": {
+            "es-MX": "Fotos"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "group",
+          "min": 0,
+          "max": 12,
+          "reorderable": true,
+          "itemLabel": {
+            "es-MX": "Foto"
+          },
+          "itemBlocks": [
+            {
+              "id": "image",
+              "role": "galleryPhoto",
+              "label": {
+                "es-MX": "Foto"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "image",
+              "constraints": {
+                "aspect": "free",
+                "maxBytes": 8388608
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "giftTable",
+      "type": "giftTable",
+      "title": {
+        "es-MX": "Mesa de regalos"
+      },
+      "variants": [
+        "cards"
+      ],
+      "defaultVariant": "cards",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "gifts.title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 40,
+            "multiline": false
+          }
+        },
+        {
+          "id": "gifts.options",
+          "role": "giftOptions",
+          "label": {
+            "es-MX": "Opciones"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "group",
+          "min": 0,
+          "max": 4,
+          "reorderable": true,
+          "itemLabel": {
+            "es-MX": "Opción"
+          },
+          "itemBlocks": [
+            {
+              "id": "kind",
+              "role": "giftOptionKind",
+              "label": {
+                "es-MX": "Tipo"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "choice",
+              "options": [
+                {
+                  "id": "bank",
+                  "label": {
+                    "es-MX": "Depósito o transferencia"
+                  }
+                },
+                {
+                  "id": "store",
+                  "label": {
+                    "es-MX": "Mesa en tienda"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "title",
+              "role": "giftOptionTitle",
+              "label": {
+                "es-MX": "Título"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 1,
+                "maxLength": 60,
+                "multiline": false
+              }
+            },
+            {
+              "id": "detail",
+              "role": "giftOptionDetail",
+              "label": {
+                "es-MX": "Detalles"
+              },
+              "required": false,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "listText",
+              "constraints": {
+                "minItems": 0,
+                "maxItems": 6,
+                "maxItemLength": 120
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "dressCode",
+      "type": "dressCode",
+      "title": {
+        "es-MX": "Código de vestimenta"
+      },
+      "variants": [
+        "two-columns"
+      ],
+      "defaultVariant": "two-columns",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "dressCode.title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 40,
+            "multiline": false
+          }
+        },
+        {
+          "id": "dressCode.rules",
+          "role": "dressCodeRules",
+          "label": {
+            "es-MX": "Reglas"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "group",
+          "min": 1,
+          "max": 3,
+          "reorderable": true,
+          "itemLabel": {
+            "es-MX": "Regla"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "dressCodeTitle",
+              "label": {
+                "es-MX": "Para quién"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 1,
+                "maxLength": 40,
+                "multiline": false
+              }
+            },
+            {
+              "id": "detail",
+              "role": "dressCodeDetail",
+              "label": {
+                "es-MX": "Descripción"
+              },
+              "required": true,
+              "editable": true,
+              "source": "user",
+              "aiEditable": true,
+              "type": "text",
+              "constraints": {
+                "minLength": 1,
+                "maxLength": 200,
+                "multiline": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "rsvp",
+      "type": "rsvp",
+      "title": {
+        "es-MX": "Confirmación"
+      },
+      "variants": [
+        "banner"
+      ],
+      "defaultVariant": "banner",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "rsvp.title",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 60,
+            "multiline": false
+          }
+        },
+        {
+          "id": "rsvp.note",
+          "role": "rsvpNote",
+          "label": {
+            "es-MX": "Nota"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": true
+          }
+        }
+      ]
+    },
+    {
+      "key": "footer",
+      "type": "footer",
+      "title": {
+        "es-MX": "Pie"
+      },
+      "variants": [
+        "simple"
+      ],
+      "defaultVariant": "simple",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "footer.music",
+          "role": "backgroundMusic",
+          "label": {
+            "es-MX": "Música de fondo"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "audio",
+          "constraints": {
+            "maxBytes": 8388608
+          }
+        },
+        {
+          "id": "footer.note",
+          "role": "footerNote",
+          "label": {
+            "es-MX": "Nota legal"
+          },
+          "required": false,
+          "editable": false,
+          "source": "fixed",
+          "aiEditable": false,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 120,
+            "multiline": false
+          }
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "path": "assets/preview.webp",
+      "sha256": "bb00000000000000000000000000000000000000000000000000000000000001",
+      "contentType": "image/webp",
+      "bytes": 110000
+    }
+  ],
+  "migrationsFrom": []
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "name": "salto de línea con multiline:false",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "cover.title",
+      "role": "coverTitle",
+      "label": {
+        "es-MX": "cover.title"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "input": {
+      "kind": "text",
+      "value": "Ana\nMaría"
+    },
+    "path": "content.cover.title",
+    "expect": [
+      "I-30_TEXT_MULTILINE_NOT_ALLOWED"
+    ]
+  },
+  {
+    "name": "mismo valor sin salto de línea",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "cover.title",
+      "role": "coverTitle",
+      "label": {
+        "es-MX": "cover.title"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "input": {
+      "kind": "text",
+      "value": "Ana Maria"
+    },
+    "path": "content.cover.title",
+    "expect": []
+  },
+  {
+    "name": "mismo valor con multiline:true no viola",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "story.body",
+      "role": "storyBody",
+      "label": {
+        "es-MX": "story.body"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": true
+      }
+    },
+    "input": {
+      "kind": "text",
+      "value": "Ana\nMaría"
+    },
+    "path": "content.story.body",
+    "expect": []
+  },
+  {
+    "name": "\"\\r\" solo también viola",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "cover.title",
+      "role": "coverTitle",
+      "label": {
+        "es-MX": "cover.title"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "text",
+      "constraints": {
+        "minLength": 0,
+        "maxLength": 200,
+        "multiline": false
+      }
+    },
+    "input": {
+      "kind": "text",
+      "value": "Ana\rMaria"
+    },
+    "path": "content.cover.title",
+    "expect": [
+      "I-30_TEXT_MULTILINE_NOT_ALLOWED"
+    ]
+  }
+]

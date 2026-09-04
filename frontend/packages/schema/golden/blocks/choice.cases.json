@@ -1,0 +1,261 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.choice",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.choice"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "cash",
+          "label": {
+            "es-MX": "cash"
+          }
+        },
+        {
+          "id": "transfer",
+          "label": {
+            "es-MX": "transfer"
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "choice",
+      "optionId": "cash"
+    },
+    "path": "content.test.choice",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: ChoiceValue no tiene más campos",
+    "tag": "PM",
+    "spec": {
+      "id": "test.choice",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.choice"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "cash",
+          "label": {
+            "es-MX": "cash"
+          }
+        },
+        {
+          "id": "transfer",
+          "label": {
+            "es-MX": "transfer"
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "choice",
+      "optionId": "transfer"
+    },
+    "path": "content.test.choice",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra ChoiceSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.choice",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.choice"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "cash",
+          "label": {
+            "es-MX": "cash"
+          }
+        },
+        {
+          "id": "transfer",
+          "label": {
+            "es-MX": "transfer"
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.choice",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta optionId",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.choice",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.choice"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "cash",
+          "label": {
+            "es-MX": "cash"
+          }
+        },
+        {
+          "id": "transfer",
+          "label": {
+            "es-MX": "transfer"
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "choice"
+    },
+    "path": "content.test.choice",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: optionId en mayúsculas (Ident es kebab minúscula)",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.choice",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.choice"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "cash",
+          "label": {
+            "es-MX": "cash"
+          }
+        },
+        {
+          "id": "transfer",
+          "label": {
+            "es-MX": "transfer"
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "choice",
+      "optionId": "CASH"
+    },
+    "path": "content.test.choice",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.choice",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.choice"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "cash",
+          "label": {
+            "es-MX": "cash"
+          }
+        },
+        {
+          "id": "transfer",
+          "label": {
+            "es-MX": "transfer"
+          }
+        }
+      ]
+    },
+    "value": null,
+    "path": "content.test.choice",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: optionId válido en forma pero ausente de spec.options → I-02",
+    "tag": "extra",
+    "spec": {
+      "id": "test.choice",
+      "role": "decorative",
+      "label": {
+        "es-MX": "test.choice"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "cash",
+          "label": {
+            "es-MX": "cash"
+          }
+        },
+        {
+          "id": "transfer",
+          "label": {
+            "es-MX": "transfer"
+          }
+        }
+      ]
+    },
+    "value": {
+      "kind": "choice",
+      "optionId": "crypto"
+    },
+    "path": "content.test.choice",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-02_CHOICE_UNKNOWN_OPTION"
+    ]
+  }
+]

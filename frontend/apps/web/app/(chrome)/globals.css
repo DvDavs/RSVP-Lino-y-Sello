@@ -1,0 +1,110 @@
+/* app/(chrome)/globals.css — SOLO el chrome del editor (04 §19, P3). Ninguna sección de invitación
+   importa este archivo ni sus utilidades; ver `eslint.config.mjs` y `test/tokens-no-leak.test.ts`
+   para las dos compuertas mecánicas (imports y grep de cadenas, respectivamente).
+
+   Dirección de arte del chrome — MEDIDA, no interpretada (instrucción del dueño, revisor Opus,
+   2026-09-04): `docs/rediseno-plantillas/diseno/arte-chrome.md`, Playwright + Chrome real sobre
+   gigsalad.com, 150 líneas, commit `63c0520`. Valores literales de ese documento; las correcciones
+   de contraste WCAG 2.2 AA ya vienen aplicadas ahí (anotadas junto al valor original del sitio) y
+   se copian tal cual — no se recalculan aquí.
+
+   DESVIACIÓN de fuente respecto al documento medido (instrucción del revisor, corrección 1):
+   `arte-chrome.md` mide `Garnett` peso 600 para los títulos. Garnett es tipografía COMERCIAL de
+   foundry — no se copia, no se referencia por nombre esperando que cargue. Su papel de *display* lo
+   cubre una alternativa de licencia abierta, autoalojada por **npm** (Google Fonts no llega desde
+   este entorno; npm sí): `@fontsource-variable/bricolage-grotesque` (candidata principal) o
+   `@fontsource-variable/outfit` (alternativa) — la elección final del dueño se decide sobre las
+   capturas de `docs/rediseno-plantillas/evidencia/fase-3/chrome/tipografia-display-a.png` / `-b.png`.
+   El cuerpo/UI usa `@fontsource-variable/inter` (la misma familia que mide el sitio de referencia). */
+@import "tailwindcss";
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/bricolage-grotesque/wght.css";
+@import "@fontsource-variable/outfit/wght.css";
+
+@theme {
+  /* 1. Color — arte-chrome.md §1 y "Tokens propuestos" (valores ya corregidos para AA) */
+  --color-ui-bg: #ffffff;
+  --color-ui-bg-alt: #faf4ff; /* purple-50, fondo de sección alterna */
+  --color-ui-surface: #ffffff;
+  --color-ui-border: #e4e4e7;
+  --color-ui-border-field: #d4d4d8;
+
+  --color-ui-ink: #3f3f46; /* texto primario, 10.44:1 sobre blanco */
+  --color-ui-ink-strong: #09090b;
+  --color-ui-ink-heading: #4e027c; /* títulos y acento de acción: 12.93:1 en ambos sentidos */
+  --color-ui-ink-muted: #5f5f68; /* corregido; el sitio mide #71717a = 4.48 sobre --color-ui-bg-alt, falla por 0.02 */
+  --color-ui-ink-placeholder: #6b6b74; /* corregido; el sitio mide #a1a1aa = 2.56, no pasa AA */
+
+  --color-ui-accent: #4e027c; /* 12.93:1 sobre blanco y con texto blanco encima */
+  --color-ui-accent-ink: #ffffff;
+  --color-ui-accent-hover: #751cb5;
+  --color-ui-accent-soft: #f1e2fd;
+  --color-ui-accent-soft-ink: #4e027c;
+  --color-ui-accent-brand: #9f49ec; /* decorativo: héroes y bandas, NUNCA botón (arte-chrome.md §1) */
+  --color-ui-accent-link: #8b31d6; /* corregido; el sitio mide #b264f7 = 3.47, no pasa AA */
+  --color-ui-focus: #1c84f4;
+
+  --color-ui-success: #25944c; /* corregido; el sitio mide #5ccf84 = 1.96 */
+  --color-ui-danger: #e7000b;
+  --color-ui-warning: #ed7308; /* el sitio mide la estrella #ffd447 = 1.42 */
+  --color-ui-info: #1369db;
+
+  /* 3. Forma y profundidad — arte-chrome.md §3 (sombra tintada de púrpura, CERO borde en tarjetas) */
+  --radius-ui-control: 8px;
+  --radius-ui-pill: 9999px;
+  --radius-ui-card: 20px;
+  --radius-ui-media: 16px;
+  --shadow-ui-1: 0 4px 4px -1px rgb(78 2 124 / 0.07), 0 2px 12px -2px rgb(78 2 124 / 0.1); /* tarjetas y paneles */
+  --shadow-ui-2: 0 25px 50px -12px rgb(78 2 124 / 0.14), 0 12px 11px -8px rgb(78 2 124 / 0.09); /* elevación alta */
+
+  /* 4. Espaciado — base 4px, arte-chrome.md §4 (Tailwind ya trae esta escala por defecto: --spacing) */
+  --ui-content-max: 1330px;
+  --ui-gutter: 48px;
+  --ui-gutter-sm: 16px;
+  --ui-grid-gap-x: 24px;
+  --ui-grid-gap-y: 48px;
+
+  /* 2. Tipografía — arte-chrome.md §2, con --font-ui-display sustituyendo a Garnett (ver DESVIACIÓN) */
+  --font-ui-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-ui-display: "Bricolage Grotesque Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+
+  --text-ui-eyebrow: 12px;
+  --text-ui-eyebrow--line-height: 15px;
+  --text-ui-aux: 14px;
+  --text-ui-aux--line-height: 21px;
+  --text-ui-body: 16px;
+  --text-ui-body--line-height: 24px;
+  --text-ui-card: 18px;
+  --text-ui-card--line-height: 27px;
+  --text-ui-title: 24px;
+  --text-ui-title--line-height: 30px;
+  --text-ui-section: 30px;
+  --text-ui-section--line-height: 34.5px;
+  --text-ui-display: 48px;
+  --text-ui-display--line-height: 52.8px;
+
+  /* 9. Movimiento — arte-chrome.md §9 */
+  --ui-duration: 200ms;
+  --ui-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-ui-bg);
+  color: var(--color-ui-ink);
+  font-family: var(--font-ui-sans);
+  font-weight: 500; /* arte-chrome.md §2: "el body es Inter peso 500, no 400" */
+}
+
+/* 6. Foco de teclado — MEJORADO respecto a la referencia a propósito (corrección 5 del revisor: el
+   propio documento mide que el foco nativo es "el punto más flojo del sistema" de gigsalad.com).
+   WCAG 2.2 AA 2.4.11 es requisito duro aquí (contratos.md §8): aro propio, visible sobre fondo claro
+   Y sobre el acento, con separación del elemento. */
+:focus-visible {
+  outline: 3px solid var(--color-ui-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

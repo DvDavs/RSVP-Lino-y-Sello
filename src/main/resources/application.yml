@@ -46,6 +46,13 @@ spring:
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://evolution:evolution123@localhost:27017/invitaciones?authSource=admin}
+  servlet:
+    multipart:
+      # templates2 (contratos.md 4, 03 3.17): POST /master/templates2/versions es la UNICA ruta
+      # multipart del modulo y sube el paquete de una plantilla (hasta 200 assets de 15 MiB).
+      # Es la unica modificacion de este fichero que pide el modulo nuevo.
+      max-file-size: 15MB
+      max-request-size: 64MB
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -79,6 +86,46 @@ whatsapp:
   api-url: https://graph.facebook.com/v19.0
   phone-number-id: 1257270407463833
   access-token: EAALnnvKeQRwBRGrNQ02tZBZBlv83z0Xrk5vhKhhmOuEJX5m04ntH6PJOlnEPy7PY4xATNXZA0RAeZCRPiiZAj5cnGsorjH7FQbCPr7mCN1ZC8SmZCRur3RmuIlCj5gNOBHsM9g68bGLOqd4gwNBb7bOiNZAsZCIHDXe51ZBeEZAFMUxZCVxfQMyp7JiJryro4urvMuTZA8AZDZD
+# templates2 (contratos.md 8, ADR-1R-F-09; anadido por el bloque 2-6, ADR-2-6-01). Invalidacion de la
+# cache del render publico tras publicar, despublicar o rotar el enlace: el backend hace
+# POST {url} con la cabecera x-revalidate-token y el handler de Next.js ejecuta
+# revalidateTag("invitation:{publicToken}").
+# VACIAS = FUNCION DESACTIVADA: sin url y sin token no se llama a nadie y el borde se corrige solo con
+# el max-age de 300 s. No se pone un host por defecto a proposito (app.frontend.url vale
+# http://localhost por defecto y mandar un token a un host adivinado es peor que no llamar).
+# El token sale de la variable de entorno; NUNCA se escribe aqui ni en un log.
+# Es la SEGUNDA modificacion de este fichero que pide el modulo nuevo, tras spring.servlet.multipart
+# (contratos.md 4 decia "unica"); la enmienda queda registrada como ADR-2-6-01.
+templates2:
+  assets:
+    # OBLIGATORIA y SIN VALOR POR DEFECTO a proposito (ADR-2-ORQ-03).
+    # El unico defecto natural seria 'invitacionesdigitalesassets', que es el bucket de PRODUCCION,
+    # y un bucket de produccion no puede ser el valor que se aplica cuando nadie ha pensado en ello.
+    # Sin esta propiedad la aplicacion NO arranca y explica que poner. Para desarrollo y pruebas,
+    # define un bucket propio:  TEMPLATES2_ASSETS_BUCKET=mi-bucket-de-pruebas
+    bucket: ${TEMPLATES2_ASSETS_BUCKET:}
+    # Escribir en el bucket de produccion exige declararlo explicitamente.
+    allow-production-bucket: ${TEMPLATES2_ALLOW_PRODUCTION_BUCKET:false}
+    # --- TERCERA modificacion de este fichero que pide el modulo nuevo (bloque 3-0a, ADR-3-0a-02) ---
+    # Adaptador de assets. 's3' es el comportamiento de siempre y el valor por defecto: sin tocar
+    # nada, este bloque NO cambia como se comporta la aplicacion. Con 'local' (solo DESARROLLO) los
+    # bytes se escriben en disco y se sirven desde el propio backend, porque en el entorno de la
+    # fase 3 no hay ningun bucket de S3 utilizable y sin esto las rutas que suben bytes no se pueden
+    # ejercitar contra un Tomcat real. Con un perfil de produccion activo, 'local' NO ARRANCA.
+    mode: ${TEMPLATES2_ASSETS_MODE:s3}
+    local:
+      # Directorio raiz del modo local; reproduce la clave de S3 tal cual.
+      dir: ${TEMPLATES2_ASSETS_LOCAL_DIR:build/templates2-assets}
+      # Base publica desde la que el propio backend sirve esos bytes (ruta de solo lectura).
+      base-url: ${TEMPLATES2_ASSETS_LOCAL_BASE_URL:http://localhost:6003/public/templates2-assets}
+    # Base publica con la que `AssetUrlResolver` construye la URL de un asset (`02 §10.4`).
+    # VACIA = el comportamiento de siempre: https://{bucket}.s3.{aws.region}.amazonaws.com.
+    # En modo local hay que apuntarla a `local.base-url` (lo hace scripts/dev-backend.sh).
+    public-base-url: ${TEMPLATES2_ASSETS_PUBLIC_BASE_URL:}
+  revalidate:
+    url: ${TEMPLATES2_REVALIDATE_URL:}
+    token: ${TEMPLATES2_REVALIDATE_TOKEN:}
+    timeout-ms: ${TEMPLATES2_REVALIDATE_TIMEOUT_MS:3000}
 logging:
   level:
     root: info

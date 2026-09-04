@@ -1,0 +1,67 @@
+[
+  {
+    "name": "order con clave repetida y faltante",
+    "fn": "validateReorder",
+    "order": [
+      "cover",
+      "cover",
+      "cover"
+    ],
+    "actuales": [
+      "cover",
+      "event",
+      "footer"
+    ],
+    "expect": [
+      "I-24_REORDER_NOT_A_PERMUTATION"
+    ]
+  },
+  {
+    "name": "permutación exacta de las claves actuales",
+    "fn": "validateReorder",
+    "order": [
+      "footer",
+      "cover",
+      "event"
+    ],
+    "actuales": [
+      "cover",
+      "event",
+      "footer"
+    ],
+    "expect": []
+  },
+  {
+    "name": "mismo conjunto en distinto orden no viola",
+    "fn": "validateReorder",
+    "order": [
+      "event",
+      "footer",
+      "cover"
+    ],
+    "actuales": [
+      "cover",
+      "event",
+      "footer"
+    ],
+    "expect": []
+  },
+  {
+    "name": "una clave de más viola",
+    "fn": "validateReorder",
+    "order": [
+      "cover",
+      "event",
+      "footer",
+      "extra"
+    ],
+    "actuales": [
+      "cover",
+      "event",
+      "footer"
+    ],
+    "expect": [
+      "I-24_REORDER_NOT_A_PERMUTATION"
+    ]
+  }
+]

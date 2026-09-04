@@ -1,0 +1,182 @@
+[
+  {
+    "name": "P mínimo",
+    "tag": "P",
+    "spec": {
+      "id": "test.audio",
+      "role": "backgroundMusic",
+      "label": {
+        "es-MX": "test.audio"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "audio",
+      "constraints": {
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "audio",
+      "assetId": "as_01J8AAD1AAAAAAAAAAAAAAAAAA"
+    },
+    "path": "content.test.audio",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "PM: AudioValue no tiene más campos opcionales que rellenar",
+    "tag": "PM",
+    "spec": {
+      "id": "test.audio",
+      "role": "backgroundMusic",
+      "label": {
+        "es-MX": "test.audio"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "audio",
+      "constraints": {
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "audio",
+      "assetId": "as_01J8AAD1AAAAAAAAAAAAAAAAAA"
+    },
+    "path": "content.test.audio",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-kind: TextValue contra AudioSpec",
+    "tag": "N-kind",
+    "spec": {
+      "id": "test.audio",
+      "role": "backgroundMusic",
+      "label": {
+        "es-MX": "test.audio"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "audio",
+      "constraints": {
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "text",
+      "value": "x"
+    },
+    "path": "content.test.audio",
+    "expectZodValid": true,
+    "expectViolations": [
+      "I-15_BLOCK_KIND_MISMATCH"
+    ]
+  },
+  {
+    "name": "N-shape: falta assetId",
+    "tag": "N-shape",
+    "spec": {
+      "id": "test.audio",
+      "role": "backgroundMusic",
+      "label": {
+        "es-MX": "test.audio"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "audio",
+      "constraints": {
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "audio"
+    },
+    "path": "content.test.audio",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "N-limit: no aplica — AudioValue no lleva ningún campo numérico; maxBytes se comprueba en el reductor (X-06), no aquí",
+    "tag": "N-limit",
+    "spec": {
+      "id": "test.audio",
+      "role": "backgroundMusic",
+      "label": {
+        "es-MX": "test.audio"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "audio",
+      "constraints": {
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "audio",
+      "assetId": "as_01J8AAD1AAAAAAAAAAAAAAAAAA"
+    },
+    "path": "content.test.audio",
+    "expectZodValid": true,
+    "expectViolations": []
+  },
+  {
+    "name": "N-null",
+    "tag": "N-null",
+    "spec": {
+      "id": "test.audio",
+      "role": "backgroundMusic",
+      "label": {
+        "es-MX": "test.audio"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "audio",
+      "constraints": {
+        "maxBytes": 8388608
+      }
+    },
+    "value": null,
+    "path": "content.test.audio",
+    "expectZodValid": false,
+    "expectViolations": []
+  },
+  {
+    "name": "extra: ULID en minúsculas es inválido (Crockford exige mayúsculas)",
+    "tag": "extra",
+    "spec": {
+      "id": "test.audio",
+      "role": "backgroundMusic",
+      "label": {
+        "es-MX": "test.audio"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "audio",
+      "constraints": {
+        "maxBytes": 8388608
+      }
+    },
+    "value": {
+      "kind": "audio",
+      "assetId": "as_01j8aad1aaaaaaaaaaaaaaaaaa"
+    },
+    "path": "content.test.audio",
+    "expectZodValid": false,
+    "expectViolations": []
+  }
+]

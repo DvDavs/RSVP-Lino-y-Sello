@@ -1,0 +1,29 @@
+{
+  "matchedByRole": [
+    {
+      "fromBlockId": "a.coverDate",
+      "toBlockId": "b.fecha",
+      "role": "coverDate"
+    },
+    {
+      "fromBlockId": "a.coverTitle",
+      "toBlockId": "b.titulo",
+      "role": "coverTitle"
+    },
+    {
+      "fromBlockId": "a.parentA1",
+      "toBlockId": "b.parentA1",
+      "role": "parentA1"
+    }
+  ],
+  "toAttic": [
+    "a.cards",
+    "a.coverImage",
+    "a.sectionTitle"
+  ],
+  "reset": [
+    "b.imagen",
+    "b.nota",
+    "b.otroTitulo"
+  ]
+}

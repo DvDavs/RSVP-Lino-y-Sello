@@ -1,0 +1,106 @@
+[
+  {
+    "name": "optionId fuera de options",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "rsvp.attend",
+      "role": "decorative",
+      "label": {
+        "es-MX": "rsvp.attend"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "yes",
+          "label": {
+            "es-MX": "yes"
+          }
+        },
+        {
+          "id": "no",
+          "label": {
+            "es-MX": "no"
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "choice",
+      "optionId": "maybe"
+    },
+    "path": "content.rsvp.attend",
+    "expect": [
+      "I-02_CHOICE_UNKNOWN_OPTION"
+    ]
+  },
+  {
+    "name": "optionId de la lista",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "rsvp.attend",
+      "role": "decorative",
+      "label": {
+        "es-MX": "rsvp.attend"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "yes",
+          "label": {
+            "es-MX": "yes"
+          }
+        },
+        {
+          "id": "no",
+          "label": {
+            "es-MX": "no"
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "choice",
+      "optionId": "yes"
+    },
+    "path": "content.rsvp.attend",
+    "expect": []
+  },
+  {
+    "name": "options con un solo elemento",
+    "fn": "validateValueAgainstSpec",
+    "spec": {
+      "id": "rsvp.single",
+      "role": "decorative",
+      "label": {
+        "es-MX": "rsvp.single"
+      },
+      "required": false,
+      "editable": true,
+      "source": "user",
+      "aiEditable": true,
+      "type": "choice",
+      "options": [
+        {
+          "id": "only",
+          "label": {
+            "es-MX": "only"
+          }
+        }
+      ]
+    },
+    "input": {
+      "kind": "choice",
+      "optionId": "only"
+    },
+    "path": "content.rsvp.single",
+    "expect": []
+  }
+]

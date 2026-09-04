@@ -1,0 +1,318 @@
+# .github/workflows/ci.yml — CI del módulo nuevo de plantillas (templates2).
+# Base: docs/rediseno-plantillas/diseno/06-pruebas-y-calidad.md §9 (ADR-026 + ADR-1R-C-12), copiado
+# y ajustado al árbol real por el sub-agente 2-0a. Desviaciones frente a `06 §9` (todas registradas
+# también en memoria/bitacora/2-0a.md y como ADR "propuesta" en memoria/decisiones.md):
+#
+#   1. Nombre de fichero: `ci.yml` (el brief de 2-0a lo pide así; `06 §9` proponía
+#      `templates2-ci.yml` — mismo contenido, distinto nombre de fichero).
+#   2. Ramas: `06 §9` apuntaba a `claude/agent-network-invitation-41nx5y` (rama de
+#      memoria/brief-comun.md) + `main`. Se añade también la rama de trabajo real de ESTA fase,
+#      `claude/fase-2-backend-orchestration-ksyuzi`, para que el CI corra en los PR/push de la
+#      fase 2 sin esperar a que se cambie de rama.
+#   3. Deriva del JSON Schema: `06 §9` comprobaba `packages/schema/dist/*.schema.json`. La ruta
+#      contractual real (contratos.md §5, ADR-1R-D-08) es `packages/schema/json-schema/`, no
+#      `dist/` — corregido aquí.
+#   4. Job `e2e`: **NO OPERATIVO en esta fase** (`if: false` al nivel del job, más abajo). Referencia
+#      `frontend/apps/web`, que no existe todavía — `apps/web` es de la fase 3 (contratos.md §1,
+#      ADR-017). Los pasos se dejan completos y listos para que la fase 3 solo borre el `if: false`
+#      cuando `apps/web` exista; no se inventa una app mínima para "hacerlo pasar" (eso ocultaría
+#      que no hay nada real que probar).
+#   5. El job `backend` asume que `jacocoTestReport`/`jacocoTestCoverageVerification` (06 §2.1) ya
+#      están configurados en build.gradle.kts. **2-0a NO los añade** (fuera de su alcance: "no
+#      añadas dependencias al build.gradle.kts... las añade 2-0b"), así que este job **fallará**
+#      hasta que 2-0b los configure — es el comportamiento correcto (P9: sin pruebas no se integra),
+#      no un error de este YAML.
+#   6. `NODE_VERSION`/`PNPM_VERSION` fijados a las versiones verificadas en este entorno
+#      (contratos.md §7: Node 22.22.2, pnpm 10.33.0), no a los valores de ejemplo de `06 §9`.
+#   7. El job `backend` corre `check` (objeción ADV-16 del cierre de la fase 2, bloque 2-6). La orden
+#      de `contratos.md §6` es `test jacocoTestReport jacocoTestCoverageVerification`, y con ella
+#      `verifyJsonSchemaEmitted` —enganchada a `check` en build.gradle.kts:265-268 y exigida por
+#      `contratos.md §5`— no se ejecutaba en CI. `check` es superconjunto de `test`, así que el
+#      efecto de la orden contractual se conserva íntegro. Como `verifyJsonSchemaEmitted` reemite el
+#      esquema con `pnpm`, este job instala ahora Node/pnpm y las dependencias de `frontend/`.
+#
+# CI no se ha ejecutado (ni puede ejecutarse) desde esta sesión: no hay `gh`/push a GitHub. La
+# validación hecha aquí es sintáctica (yaml.safe_load) y de lectura, no una corrida real — ver
+# memoria/bitacora/2-0a.md.
+name: templates2-ci
+
+on:
+  # `06 §9` traía `pull_request.branches: [claude/agent-network-invitation-41nx5y, main]`. La versión
+  # entregada por 2-0a lo había reducido a `[main]`, contradiciendo su propia nota 2 de cabecera
+  # ("se AÑADE la rama de la fase 2"): un PR contra la rama contractual de trabajo (contratos.md §1)
+  # no habría disparado CI. Restaurado y ampliado (revisión 2-0a-REV, objeción O-05).
+  pull_request:
+    branches: [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi]
+  push:
+    branches: [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi]
+
+concurrency:
+  group: templates2-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  JAVA_VERSION: "21"          # toolchain 21 (handoffs/0-build-jdk.md; build.gradle.kts actualizado por 2-0a)
+  NODE_VERSION: "22.22.2"     # contratos.md §7 (entorno verificado)
+  PNPM_VERSION: "10.33.0"     # contratos.md §7 (entorno verificado)
+
+jobs:
+  backend:
+    name: backend (JDK 21 + Postgres 16)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:                                  # 06 §6.3: el runner tiene Docker; en local se usa scripts/pg-ephemeral.sh
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: templates2_test
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Gradle con caché
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
+      - run: chmod +x gradlew
+
+      # `check` en vez de `test` (objeción ADV-16 de la revisión adversarial global). `check` es un
+      # superconjunto estricto de la orden literal de `contratos.md §6`
+      # (`test jacocoTestReport jacocoTestCoverageVerification`): build.gradle.kts engancha a `check`
+      # tanto `jacocoTestCoverageVerification` como **`verifyJsonSchemaEmitted`**, la compuerta de
+      # deriva del JSON Schema del lado Kotlin (contratos.md §5). Con `test` a secas esa compuerta no
+      # se ejecutaba NUNCA en CI. Se dejan las dos tareas de JaCoCo explícitas para que la orden siga
+      # conteniendo, palabra por palabra, la de `contratos.md §6`.
+      # `verifyJsonSchemaEmitted` necesita `pnpm` en el PATH y `pnpm install` hecho en frontend/: si
+      # falta, falla con instrucciones y NO se salta en silencio (build.gradle.kts:225).
+      - name: Node + pnpm (los necesita verifyJsonSchemaEmitted, contratos.md §5)
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Dependencias del frontend (solo para reemitir el esquema)
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: check + cobertura (06 §2.1 y §5 — incluye verifyJsonSchemaEmitted, ver nota 7 de cabecera)
+        run: ./gradlew --no-daemon check jacocoTestReport jacocoTestCoverageVerification
+        env:
+          TPL_TEST_JDBC_URL: jdbc:postgresql://127.0.0.1:55432/templates2_test
+          TPL_TEST_DB_USER: postgres
+          TPL_TEST_DB_PASSWORD: postgres
+
+      - name: Informes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-reports
+          path: |
+            build/reports/tests/test/**
+            build/reports/jacoco/test/**
+          retention-days: 7
+
+  frontend:
+    name: frontend (Node 22 + pnpm) — packages/schema
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Deriva del JSON Schema (ADR-004; ruta corregida a json-schema/, ver nota 3 de cabecera)
+        run: |
+          pnpm --filter @invitaciones/schema run schema:emit
+          git diff --exit-code -- packages/schema/json-schema
+
+      # ADR-1R-D-09 ("golden files generados, nunca escritos a mano") no tenía NINGUNA compuerta
+      # mecánica: sin este paso, un golden editado a mano pasaba el CI sin que nadie lo notara, y la
+      # promesa de golden/README.md ("regenerar debe dar exactamente estos ficheros") no la
+      # comprobaba nadie. `gen:golden` es determinista — verificado ejecutándolo dos veces seguidas
+      # y comparando sha256 de los 71 ficheros: 0 diferencias (revisión 2-0a-REV, objeción O-04).
+      - name: Deriva de los golden files (ADR-1R-D-09)
+        run: |
+          pnpm --filter @invitaciones/schema run gen:golden
+          git diff --exit-code -- packages/schema/golden
+          test -z "$(git ls-files --others --exclude-standard -- packages/schema/golden)" \
+            || { echo "gen:golden creó ficheros no versionados en packages/schema/golden"; \
+                 git ls-files --others --exclude-standard -- packages/schema/golden; exit 1; }
+
+      - name: Lint (incluye la regla de ADR-005, 06 §7 — placeholder hasta que fase 3 configure ESLint)
+        run: pnpm -r lint
+
+      - name: Tipos
+        run: pnpm -r typecheck
+
+      - name: Pruebas + cobertura (06 §2.2)
+        run: pnpm -r exec vitest run --coverage
+
+      - name: Inventario de golden files (06 §3)
+        run: pnpm --filter @invitaciones/schema exec vitest run golden-inventory
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/**/coverage/**
+          retention-days: 7
+
+  e2e:
+    name: e2e (Playwright/Chromium)
+    # `apps/web` existe desde el bloque 3-1 (contratos.md §1, ADR-017): el `if: false` de la fase 2
+    # queda retirado aquí. Ajustes MÍNIMOS respecto a la versión de la fase 2 (memoria/bitacora/3-1.md):
+    #   - Puerto del backend: 6003 (application.yml:2), no 8080 — no hay actuator expuesto
+    #     (`/actuator/health` da 401, `anyRequest().authenticated()`); la sonda pasa a
+    #     `GET /public/i/sonda/exists`, la misma que usa `scripts/dev-backend.sh` (permitAll, siempre
+    #     responde 2xx sin importar el token).
+    #   - Rol `evolution`: `V1__initial_schema.sql` hace `ALTER TABLE … OWNER TO evolution` y el
+    #     servicio `postgres:16` de GitHub Actions no lo crea solo (a diferencia del clúster efímero
+    #     local de `scripts/pg-ephemeral.sh`, que sí lo hace) — paso nuevo antes de `bootRun`.
+    #   - `TEMPLATES2_ASSETS_BUCKET`/`TEMPLATES2_ASSETS_MODE=local`: obligatoria y sin defecto
+    #     (ADR-2-ORQ-03); no hay S3 real disponible en CI, mismo criterio que ADR-3-0a-02.
+    #   - `SPRING_DATA_MONGODB_URI` con `serverSelectionTimeoutMS` corto: sin Mongo en el runner,
+    #     `MongoDataInitializer` alargaría el arranque ~8 minutos (`handoffs/3-0a.md` §1).
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      # En el runner NO existe /opt/pw-browsers: los navegadores se instalan y se cachean aquí.
+      # En el entorno local de desarrollo esta variable ya apunta a /opt/pw-browsers y NO
+      # debe ejecutarse `playwright install` (contratos.md §7).
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.pw-browsers
+      CI: "true"
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: templates2_e2e
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Caché de navegadores
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: pw-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+
+      - name: Instalar Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Dependencias del sistema para Chromium (cuando el navegador vino de caché)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Rol "evolution" (V1__initial_schema.sql hace ALTER TABLE … OWNER TO evolution)
+        working-directory: .
+        run: |
+          PGPASSWORD=postgres psql -h 127.0.0.1 -p 55432 -U postgres -d postgres -v ON_ERROR_STOP=1 -c \
+            "DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'evolution') THEN CREATE ROLE evolution LOGIN SUPERUSER PASSWORD 'evolution123'; END IF; END \$\$;"
+
+      - name: Backend en segundo plano (perfil test)
+        working-directory: .
+        run: |
+          chmod +x gradlew
+          mkdir -p build/dev
+          ./gradlew --no-daemon bootRun --args='--spring.profiles.active=test' > build/dev/backend-e2e.log 2>&1 &
+          echo "esperando a que $BASE responda…"
+          for i in $(seq 1 60); do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 3 "$BASE/public/i/sonda/exists" || true)"
+            if [ -n "$code" ] && [ "$code" != "000" ]; then echo "backend arriba (HTTP $code)"; break; fi
+            sleep 5
+          done
+        env:
+          BASE: http://127.0.0.1:6003
+          SPRING_DATASOURCE_URL: jdbc:postgresql://127.0.0.1:55432/templates2_e2e
+          SPRING_DATASOURCE_USERNAME: evolution
+          SPRING_DATASOURCE_PASSWORD: evolution123
+          # Sin Mongo en el runner: se recorta el tiempo de selección de servidor, igual que hace
+          # `scripts/dev-backend.sh` (handoffs/3-0a.md §1), para que MongoDataInitializer no alargue
+          # el arranque ~8 minutos.
+          SPRING_DATA_MONGODB_URI: "mongodb://localhost:27017/invitaciones?serverSelectionTimeoutMS=250&connectTimeoutMS=250"
+          # Obligatoria y sin defecto (ADR-2-ORQ-03); sin S3 real en CI, modo local (ADR-3-0a-02).
+          TEMPLATES2_ASSETS_BUCKET: templates2-ci-e2e
+          TEMPLATES2_ASSETS_MODE: local
+          TEMPLATES2_ASSETS_LOCAL_DIR: ${{ github.workspace }}/build/templates2-assets
+          TEMPLATES2_ASSETS_LOCAL_BASE_URL: http://127.0.0.1:6003/public/templates2-assets
+          TEMPLATES2_ASSETS_PUBLIC_BASE_URL: http://127.0.0.1:6003/public/templates2-assets
+
+      # El servidor web del frontend lo arranca Playwright (`webServer` de playwright.config.ts),
+      # NO un `&` suelto en este paso: un proceso lanzado con `&` en un step muere al terminarlo.
+      - name: e2e + a11y
+        run: pnpm --filter web exec playwright test --fail-on-flaky-tests
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            frontend/apps/web/playwright-report/**
+            frontend/apps/web/test-results/**
+          retention-days: 7
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-e2e-log
+          path: build/dev/backend-e2e.log
+          retention-days: 7
