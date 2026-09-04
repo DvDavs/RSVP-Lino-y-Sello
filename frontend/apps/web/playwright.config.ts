@@ -11,6 +11,12 @@ import { defineConfig, devices } from "@playwright/test";
 const RUTA_CHROMIUM_LOCAL = process.env.PW_CHROMIUM_PATH ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const executablePath = existsSync(RUTA_CHROMIUM_LOCAL) ? RUTA_CHROMIUM_LOCAL : undefined;
 
+// Puerto del servidor de pruebas. Configurable porque `reuseExistingServer` da por bueno CUALQUIER
+// servidor que ya escuche en el puerto — incluido el de otra sesión de trabajo sobre otro árbol —,
+// y entonces los e2e miden un build que no es el de este código (visto en el bloque 3-4).
+const PUERTO = process.env.PW_PORT ?? "3000";
+const ORIGEN = `http://127.0.0.1:${PUERTO}`;
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -22,7 +28,7 @@ export default defineConfig({
   expect: { timeout: 5_000 },
   reporter: [["list"]],
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: ORIGEN,
     trace: "on-first-retry",
     video: "retain-on-failure",
   },
@@ -42,13 +48,19 @@ export default defineConfig({
     // esperaba para siempre y agotaba el `timeout` de 180 s aunque el servidor estuviera arriba
     // (confirmado: `curl 127.0.0.1:3000/` responde en <200 ms). Se apunta a `/editor`, que responde
     // `200` de verdad.
-    url: "http://127.0.0.1:3000/editor",
+    url: `${ORIGEN}/editor`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
     env: {
+      // `next start` toma el puerto de `PORT`; pasarlo por argumento exigiria reescribir el script.
+      PORT: PUERTO,
       NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:6003",
-      NEXT_PUBLIC_EDITOR_ORIGIN: process.env.NEXT_PUBLIC_EDITOR_ORIGIN ?? "http://127.0.0.1:3000",
+      NEXT_PUBLIC_EDITOR_ORIGIN: process.env.NEXT_PUBLIC_EDITOR_ORIGIN ?? ORIGEN,
       NEXT_PUBLIC_CDN_ORIGIN: process.env.NEXT_PUBLIC_CDN_ORIGIN ?? "http://127.0.0.1:6003",
+      // Enganche de pruebas del bloque 3-4: expone el store del editor en `window.__editorStore`
+      // para conducir las 11 acciones desde Playwright mientras el panel de formularios (3-5) no
+      // existe. Solo aquí; en un despliegue real esta variable no está definida.
+      NEXT_PUBLIC_E2E_HOOKS: "1",
     },
   },
 });
