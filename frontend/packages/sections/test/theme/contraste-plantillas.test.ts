@@ -108,10 +108,16 @@ const SUPERFICIES_DE_TEXTO: ReadonlyArray<{
   readonly fondo: keyof PaletteTokens;
   readonly umbral: number;
 }> = [
-  // El punto de conversión de la invitación: banda a sangre en `--inv-color-accent`.
+  // El punto de conversión de la invitación: banda a sangre en `--inv-color-accent`. OJO (I-05):
+  // estas dos filas sólo describen el caso SIN fotografía de fondo. Con fotografía, lo que se
+  // pinta detrás del texto es el degradado `.veil` sobre esa foto — lo mide el último `describe`.
   { donde: "RsvpSection .section → .heading (título del RSVP)", texto: "accentInk", fondo: "accent", umbral: 4.5 },
   { donde: "RsvpSection .section → .intro (nota del RSVP)", texto: "accentInk", fondo: "accent", umbral: 4.5 },
-  { donde: "RsvpSection .cta (botón «Confirmar asistencia»)", texto: "accent", fondo: "accentInk", umbral: 4.5 },
+  // I-05: el fondo REAL del botón es `background: var(--inv-color-surface)`
+  // (`RsvpSection.module.css:176`), no `accentInk`. Pasaba por casualidad: en las cinco paletas
+  // los dos tokens valen `#FFFFFF`. Es el mismo error de clase que esta issue persigue —
+  // afirmar una pareja que no es la que se pinta— sólo que aquí no cambiaba el resultado.
+  { donde: "RsvpSection .cta (botón «Confirmar asistencia»)", texto: "accent", fondo: "surface", umbral: 4.5 },
   // Los títulos de las nueve secciones interiores, sobre el fondo del documento.
   { donde: "{Event,Gallery,Story,DressCode,GiftTable,Suggestions,Amenities,Celebrant,Family}Section .heading", texto: "ink", fondo: "bg", umbral: 4.5 },
   // Tarjetas de giftTable/suggestions/amenities/family.
@@ -171,6 +177,123 @@ describe("WCAG 1.4.3 — `muted` y `accent` son texto de tamaño NORMAL aquí: e
             `${token} ${color} sobre surface ${pal.tokens.surface}: ${sobreSurface.toFixed(2)}:1`,
           ).toBeGreaterThanOrEqual(4.5);
         });
+      }
+    }
+  }
+});
+
+/**
+ * I-05 — COMBINACIONES RENDERIZADAS, NO PAREJAS DE TOKENS. Aquí entra el degradado.
+ *
+ * Los tres `describe` de arriba comparan COLORES DE PALETA entre sí. Eso deja fuera la superficie
+ * más difícil de la invitación: la banda del RSVP, donde el texto no cae sobre un token sino sobre
+ * un DEGRADADO semitransparente (`RsvpSection.module.css .veil`) pintado encima de la fotografía
+ * de fondo que suba la clienta. Ahí:
+ *   · `axe-core` se rinde: devuelve `incomplete` ("background gradient"), nunca `violation`, así
+ *     que la compuerta de `e2e/a11y-publico.spec.ts` puede estar en verde con el producto
+ *     incumpliendo — que es exactamente lo que pasó (H-ADV-02).
+ *   · la tabla `SUPERFICIES_DE_TEXTO` tampoco lo veía: afirma `accentInk/accent` (4,90 a 8,78:1 en
+ *     las cinco paletas), pero `accent` sólo es el fondo real cuando NO hay fotografía. Con
+ *     fotografía, el fondo es `ink` al 55 % encima de esa fotografía, que es otro color.
+ *
+ * Medido [V] con `getComputedStyle` + muestreo de píxeles del fondo bajo cada glifo sobre la
+ * invitación PUBLICADA (`bitacora/3b-i05.md` §2), con el velo al 55 %: los cuatro nodos de texto de
+ * tamaño normal de esta banda daban 4,03 a 4,30:1 a 1440×900 y a 390×844. Por debajo de 4,5.
+ *
+ * Este bloque LEE LAS PARADAS DEL DEGRADADO DEL `.module.css` REAL —no una copia— y compone cada
+ * una sobre los tres fondos posibles: sin fotografía (el `--inv-color-accent` de la propia
+ * `.section`), una fotografía BLANCA (el peor caso para texto claro) y una NEGRA. Si alguien vuelve
+ * a aclarar el velo, o cambia `accentInk` en un `theme.json`, esta prueba se pone roja sin que haga
+ * falta que nadie se acuerde de volver a medir en el navegador.
+ */
+const ESTILOS = resolve(here, "../../src/styles");
+
+/** `--inv-color-<esto>` → clave de `PaletteTokens` (`04 §5.4`, los seis tokens de color). */
+const TOKEN_CSS: Readonly<Record<string, keyof PaletteTokens>> = {
+  bg: "bg",
+  surface: "surface",
+  ink: "ink",
+  accent: "accent",
+  "accent-ink": "accentInk",
+  muted: "muted",
+};
+
+/** El bloque de declaraciones de UNA regla de un `.module.css`, tal cual está en disco. */
+function bloqueDeRegla(archivo: string, selector: string): string {
+  const css = readFileSync(join(ESTILOS, archivo), "utf8");
+  const inicio = css.indexOf(`\n${selector} {`);
+  if (inicio < 0) throw new Error(`${archivo}: no existe la regla \`${selector}\``);
+  const fin = css.indexOf("\n}", inicio);
+  if (fin < 0) throw new Error(`${archivo}: la regla \`${selector}\` no cierra`);
+  return css.slice(inicio, fin);
+}
+
+/**
+ * Paradas `color-mix(in srgb, var(--inv-color-X) N%, transparent)` de una regla real, en orden.
+ * Es la forma exacta en la que este paquete escribe una capa semitransparente (04 §19.2 prohíbe
+ * hexadecimales sueltos), así que el patrón cubre el 100 % de los velos existentes.
+ */
+function paradasDeDegradado(archivo: string, selector: string): ReadonlyArray<{
+  readonly token: keyof PaletteTokens;
+  readonly alfa: number;
+  /** El porcentaje TAL CUAL está escrito en el CSS, para que el mensaje de fallo lo cite sin
+   *  arrastrar el ruido binario de `55 / 100 * 100 = 55.00000000000001`. */
+  readonly porcentaje: string;
+}> {
+  const patron = /color-mix\(\s*in srgb,\s*var\(--inv-color-([a-z-]+)\)\s*(\d+(?:\.\d+)?)%\s*,\s*transparent\s*\)/g;
+  const paradas: Array<{ token: keyof PaletteTokens; alfa: number; porcentaje: string }> = [];
+  for (const m of bloqueDeRegla(archivo, selector).matchAll(patron)) {
+    const clave = TOKEN_CSS[m[1]!];
+    if (!clave) throw new Error(`${archivo} ${selector}: --inv-color-${m[1]} no es un token de paleta`);
+    paradas.push({ token: clave, alfa: Number(m[2]) / 100, porcentaje: `${m[2]} %` });
+  }
+  return paradas;
+}
+
+/** Composición alfa en sRGB: lo que hace el navegador al pintar una capa translúcida sobre otra. */
+function componer(colorHex: string, alfa: number, fondoHex: string): string {
+  const canal = (hex: string, i: number) => Number.parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16);
+  const mezcla = (i: number) => Math.round(alfa * canal(colorHex, i) + (1 - alfa) * canal(fondoHex, i));
+  return `#${[0, 1, 2].map((i) => mezcla(i).toString(16).padStart(2, "0").toUpperCase()).join("")}`;
+}
+
+/**
+ * Lo que puede haber DEBAJO del velo del RSVP. `RsvpSection.tsx` monta `.backdrop` con la imagen
+ * que traiga la sección; si no hay imagen, se ve el `background: var(--inv-color-accent)` de
+ * `.section`. Una fotografía es cualquier color, y como la luminancia relativa es monótona en cada
+ * canal, los extremos del cubo sRGB (blanco y negro) acotan TODOS los casos intermedios.
+ */
+const FONDOS_BAJO_EL_VELO: ReadonlyArray<{ readonly nombre: string; readonly color: (t: PaletteTokens) => string }> = [
+  { nombre: "sin fotografía (el --inv-color-accent de .section)", color: (t) => t.accent },
+  { nombre: "fotografía BLANCA (peor caso para texto claro)", color: () => "#FFFFFF" },
+  { nombre: "fotografía NEGRA (peor caso para texto oscuro)", color: () => "#000000" },
+];
+
+describe("I-05 — el velo del RSVP es un DEGRADADO: se compone y se mide, no se supone", () => {
+  const paradas = paradasDeDegradado("RsvpSection.module.css", ".veil");
+
+  it("`.veil` declara un degradado de al menos dos paradas translúcidas (si no, no hay nada que medir)", () => {
+    expect(paradas.length, "RsvpSection.module.css .veil ya no usa color-mix translúcido").toBeGreaterThanOrEqual(2);
+    for (const p of paradas) expect(p.alfa).toBeGreaterThan(0);
+  });
+
+  for (const slug of PLANTILLAS) {
+    for (const pal of leerTheme(slug).palettes) {
+      for (const [i, parada] of paradas.entries()) {
+        for (const fondo of FONDOS_BAJO_EL_VELO) {
+          it(`${slug}/${pal.id}: parada ${i + 1} del velo (${parada.token} al ${parada.porcentaje}) sobre ${fondo.nombre} — accentInk ≥ 4,5:1`, () => {
+            const debajo = fondo.color(pal.tokens);
+            const compuesto = componer(pal.tokens[parada.token], parada.alfa, debajo);
+            const r = contrastRatio(pal.tokens.accentInk, compuesto);
+            expect(
+              r,
+              `accentInk ${pal.tokens.accentInk} sobre ${pal.tokens[parada.token]} al ${parada.porcentaje} ` +
+                `encima de ${debajo} = ${compuesto} → ${r.toFixed(2)}:1. En esta banda hay texto de tamaño ` +
+                "NORMAL (.chip 15 px, .note 17 px, .ctaCaption 12 px), así que WCAG 1.4.3 pide 4,5:1. " +
+                "`axe` deja este nodo en `incomplete` por el degradado: no lo va a cazar nadie más.",
+            ).toBeGreaterThanOrEqual(4.5);
+          });
+        }
       }
     }
   }

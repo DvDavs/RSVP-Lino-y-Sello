@@ -23,15 +23,33 @@
 }
 
 /* Velo de contraste sobre la imagen de fondo, para que el texto claro siga siendo legible
- * encima de cualquier fotografía (1.4.3 Contrast (Minimum), medido sobre el texto, no la imagen). */
+ * encima de cualquier fotografía (1.4.3 Contrast (Minimum), medido sobre el texto, no la imagen).
+ *
+ * I-05 — LOS PORCENTAJES SON UNA GARANTÍA, NO UN GUSTO. El velo declaraba 55 % arriba, y ese
+ * número no lo cumplía: el texto de este bloque es `--inv-color-accent-ink` (blanco en las cinco
+ * paletas) y con `ink` al 55 % sobre una fotografía CLARA el fondo compuesto sube hasta 3,15:1 en
+ * `xv-jardin/garden`, por debajo del 4,5:1 que WCAG 1.4.3 exige al texto de tamaño normal que vive
+ * aquí (`.chip` 15 px, `.note` 17 px, `.ctaCaption` 12 px). No era hipotético: medido [V] con
+ * `getComputedStyle` + muestreo de píxeles sobre la invitación PUBLICADA, los cuatro nodos de texto
+ * normal de esta banda salían a 4,03–4,30:1 a 1440×900 y a 390×844 (`bitacora/3b-i05.md` §2).
+ * `axe` no lo veía: deja el nodo en `incomplete` por el degradado, y el par de tokens
+ * `accentInk/accent` que la compuerta comprobaba (4,90–8,78:1) no es el que se pinta cuando hay
+ * fotografía debajo.
+ *
+ * El 72 % del arranque es el mínimo que, compuesto sobre el peor fondo posible (una fotografía
+ * BLANCA), deja `accentInk` en 5,03:1 en la peor de las cinco paletas; sobre una fotografía negra
+ * da 14,79:1 y sin fotografía —el velo sobre `--inv-color-accent`— 9,24:1. Lo comprueba
+ * `test/theme/contraste-plantillas.test.ts`, que LEE ESTOS PORCENTAJES DE ESTE ARCHIVO y compone
+ * el degradado contra los `theme.json` reales: si alguien vuelve a aclarar el velo, se pone roja.
+ * Ver ADR-3-i05-01. */
 .veil {
   position: absolute;
   inset: 0;
   z-index: 1;
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--inv-color-ink) 55%, transparent),
-    color-mix(in srgb, var(--inv-color-ink) 72%, transparent)
+    color-mix(in srgb, var(--inv-color-ink) 72%, transparent),
+    color-mix(in srgb, var(--inv-color-ink) 82%, transparent)
   );
 }
 
