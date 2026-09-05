@@ -284,14 +284,23 @@
  * escribir en blanco encima de una foto; sobre la lámina de papelería eso borraba la rama detallada
  * que era lo ÚNICO dibujado que entraba en el recorte, y dejaba un lodo pardo (`blush`) o verde
  * militar (`garden`, `O-02a`). Ahora el texto va en tinta sobre la zona clara y medida de la
- * lámina, así que el velo deja de hacer falta para ELLA: se queda sólo como defensa en profundidad
- * para el caso del cliente que sube su propia foto —posiblemente oscura— en el mismo hueco.
+ * lámina, así que el velo deja de hacer falta para ELLA.
  *
- * Por eso es un lavado CLARO (`--inv-color-bg`, el fondo de la paleta activa) y sólo en la banda
- * donde vive el texto: sobre la lámina cae encima de su panel vacío, que ya es prácticamente ese
- * mismo color, y no se ve; sobre una foto oscura levanta el fondo lo bastante para que la tinta se
- * lea. Las guirnaldas de arriba y de abajo de la lámina quedan FUERA del lavado, que es lo que el
- * velo anterior no respetaba. */
+ * I-05b — QUÉ ES Y QUÉ NO ES ESTE LAVADO. Hasta ahora este comentario decía que el velo era la
+ * "defensa en profundidad" que hacía legible la tinta sobre la foto oscura de un cliente. Medido,
+ * era falso: `--inv-color-bg` al 62 % compuesto sobre una fotografía NEGRA deja `ink` en 4,13:1
+ * (`olive`) y `muted` —que es el color real de `.dateRow`— en 1,73:1, contra el 4,5:1 que WCAG
+ * 1.4.3 pide a los 12-15 px que se pintan aquí. Y no se arregla subiendo el número: para que
+ * `muted` llegue a 4,5:1 sobre negro haría falta el **98,6 %-99,0 %** en las cinco paletas [V,
+ * `bitacora/3b-i05b.md` §2], es decir, pintar el papel encima de la lámina entera de banda a
+ * banda — que es A1 otra vez, con el signo cambiado.
+ *
+ * La garantía la da AHORA el papel propio de `.content` (regla de abajo). Este lavado se queda
+ * porque hace bien otro trabajo, que sí es el suyo: la TRANSICIÓN TONAL entre la fotografía y ese
+ * papel, para que el bloque de texto no aparezca como una isla clara recortada sobre una foto
+ * oscura. Es decoración medida, no accesibilidad: si alguien lo sube o lo baja, el contraste no se
+ * mueve. Las guirnaldas de arriba y de abajo de la lámina quedan FUERA del lavado, que es lo que el
+ * velo del 92 % no respetaba. */
 .section[data-variant="full"] .scrim {
   display: block;
   grid-row: 1 / -1;
@@ -306,19 +315,55 @@
   );
 }
 
+/* I-05b — EL TEXTO DE LA PORTADA NO CAE SOBRE LA FOTOGRAFÍA: CAE SOBRE SU PROPIO PAPEL.
+ *
+ * `cover.image` es contenido de la CLIENTA (`template.json`: `editable`, `required`, "Foto de
+ * portada"), así que el peor caso no es la lámina del paquete —cuyo centro está vacío a propósito—
+ * sino cualquier fotografía que suba una persona, incluida una negra. Con el texto directamente
+ * sobre la foto, medido por píxeles sobre la invitación publicada forzando una foto negra
+ * (`bitacora/3b-i05b.md` §3): `.dateRow` 1,87:1 y `.eyebrow` 4,20:1 a 390 px. Incumplimiento de
+ * WCAG 1.4.3, no hipótesis.
+ *
+ * La regla que lo cierra es la de C-01 §"nunca texto sobre fotografía; la legibilidad se resuelve
+ * por SEPARACIÓN", y es también lo que A1 pedía al mandar `.content` "al panel central de la
+ * lámina". El bloque de texto lleva su propio papel: un fondo OPACO de `--inv-color-bg`. Con
+ * alfa = 1 el color bajo cada glifo deja de depender de la foto —el ratio pasa a ser exactamente
+ * el de la pareja de tokens, `ink/bg` y `muted/bg`, que ADR-3-3b-03 ya garantiza a 4,5:1— y la
+ * garantía vale para las cinco paletas y para cualquier fotografía. Verificado [V] en el navegador:
+ * los 36 casos (3 viewports x 3 fondos x 4 huecos de texto) miden el fondo bajo el glifo en
+ * `--inv-color-bg` exacto.
+ *
+ * POR QUÉ NO TAPA LA LÁMINA (no regresa A1):
+ *   · el papel se cierra sobre el texto (`width: fit-content`, relleno corto en horizontal), no
+ *     sobre la banda entera: a 1440x900 mide 542 de los 643 px del `.stage` (x ∈ [0,08 · 0,92]) y
+ *     no llega al filete de la lámina, que corre por x ∈ [0,05 · 0,95];
+ *   · su color es el papel de la paleta, que es el mismo con el que el generador pinta la lámina
+ *     (`build-art.mjs`), así que sobre la lámina cae encima de su panel vacío y no se distingue;
+ *   · y el borde no es un canto duro: el halo del mismo `bg` (`box-shadow`, sin desplazamiento ni
+ *     extensión) lo disuelve en la banda. No es sombra de tarjeta —una invitación no lleva
+ *     tarjetas— sino luz.
+ * El tamaño del halo está MEDIDO, no elegido: barrido de cinco ajustes contando la tinta del arte
+ * que sobrevive (`bitacora/3b-i05b.md` §5). Con 88 px de difuminado y 36 de extensión el móvil
+ * conservaba el 83,6 % del dibujo y el filete bajaba a 2,56 de contraste local (era 7,34): eso SÍ
+ * empieza a tapar la lámina. Con `--inv-space-7` y extensión 0 el móvil conserva el 93,4 % y el
+ * escritorio el 100 %, y el filete se queda en 5,50 sin una sola fila rota en los 278 píxeles de
+ * alto que cruza el bloque de texto.
+ * Capturas antes/después en los tres viewports: `evidencia/fase-3b/i05b/`.
+ *
+ * El `text-shadow` que había aquí se retira: es DECORACIÓN y WCAG no lo cuenta como contraste;
+ * mantenerlo al lado de una garantía real sólo invita a confundirlo con una. */
 .section[data-variant="full"] .content {
   grid-row: 2;
   grid-column: 1;
-  justify-self: stretch;
-  padding-inline: var(--inv-space-5);
+  justify-self: center;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: calc(100% - var(--inv-space-5) * 2);
+  padding: var(--inv-space-5) var(--inv-space-3);
   color: var(--inv-color-ink);
-  /* Refuerzo de legibilidad independiente del velo (defensa en profundidad, para la foto que suba
-   * un cliente): halo del color del fondo, no sombra oscura — el texto ya no es blanco. */
-  text-shadow: 0 0 var(--inv-space-2) color-mix(in srgb, var(--inv-color-bg) 72%, transparent);
-}
-
-.section[data-variant="full"] .badge {
-  text-shadow: none;
+  background: var(--inv-color-bg);
+  border-radius: var(--inv-radius-lg);
+  box-shadow: 0 0 var(--inv-space-7) 0 var(--inv-color-bg);
 }
 
 /* -------------------------------------------------------------------- variante: framed ---- */
