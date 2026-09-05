@@ -51,6 +51,15 @@ class HttpRevalidationClient : RevalidationClient {
     private val http: HttpClient = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(CONEXION_SEGUNDOS))
         .followRedirects(HttpClient.Redirect.NEVER)
+        // Hallazgo de I-07, PROBADO contra un `next start` real (no contra el `HttpServer` del JDK
+        // de `HttpRevalidationClientTest`, que no habla HTTP/2 y por eso nunca lo delató): sin fijar
+        // la versión, este cliente PREFIERE HTTP/2 y manda la cabecera `Upgrade` de un intento h2c en
+        // la petición HTTP/1.1 inicial. El servidor de Next.js no la entiende, cierra la conexión sin
+        // devolver ni un byte, y el envío entero revienta con
+        // `IOException: HTTP/1.1 header parser received no bytes` — SIEMPRE, con las dos claves ya
+        // bien configuradas. `.version(HTTP_1_1)` evita el intento de upgrade; medido: mismo cuerpo,
+        // mismo servidor, pasa de fallar el 100 % de las veces a `200` siempre.
+        .version(HttpClient.Version.HTTP_1_1)
         .build()
 
     override fun post(url: String, token: String, cuerpo: String, timeout: Duration): Int {
