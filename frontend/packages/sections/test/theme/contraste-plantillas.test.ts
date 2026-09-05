@@ -85,6 +85,73 @@ describe("04 §17.1 — las cinco parejas, sobre los theme.json REALES de fronte
   }
 });
 
+/**
+ * A3 del bloque 3-9 — LA COMPUERTA ERA CIEGA AL PEOR CONTRASTE DE LA INVITACIÓN.
+ *
+ * 3-CV midió el título del RSVP en la invitación publicada: `#3A2E2B` sobre `#B05555` = **2,66:1**,
+ * por debajo del 3:1 que AA exige incluso para texto grande. Ni `axe` ni este archivo lo veían:
+ *   · `axe-core@4.13.0` deja ese nodo en `incomplete` ("Element's background color could not be
+ *     determined due to a background gradient"), así que el «0 reglas critical/serious» de 3-3b es
+ *     cierto y a la vez NO cubre ese caso (`bitacora/3-cv.md §3.3`).
+ *   · los `describe` de arriba comprueban PAREJAS DE TOKENS, no qué pareja pinta cada superficie.
+ *     `accentInk/accent` pasaba a 8,5:1 mientras la sección pintaba de verdad `ink` sobre `accent`.
+ *
+ * Esta tabla cierra el hueco por el otro lado: enumera las SUPERFICIES DE TEXTO de las secciones —
+ * qué token pinta el texto y sobre qué token de fondo cae — y las evalúa contra los `theme.json`
+ * REALES. Lo que ninguna aritmética de paletas puede decir (que la hoja de estilo use de verdad ese
+ * par) lo afirma `jerarquia-tipografica.test.tsx` con `getComputedStyle` sobre el CSS Module real:
+ * las dos pruebas juntas son la compuerta, y ninguna de las dos sirve sola.
+ */
+const SUPERFICIES_DE_TEXTO: ReadonlyArray<{
+  readonly donde: string;
+  readonly texto: keyof PaletteTokens;
+  readonly fondo: keyof PaletteTokens;
+  readonly umbral: number;
+}> = [
+  // El punto de conversión de la invitación: banda a sangre en `--inv-color-accent`.
+  { donde: "RsvpSection .section → .heading (título del RSVP)", texto: "accentInk", fondo: "accent", umbral: 4.5 },
+  { donde: "RsvpSection .section → .intro (nota del RSVP)", texto: "accentInk", fondo: "accent", umbral: 4.5 },
+  { donde: "RsvpSection .cta (botón «Confirmar asistencia»)", texto: "accent", fondo: "accentInk", umbral: 4.5 },
+  // Los títulos de las nueve secciones interiores, sobre el fondo del documento.
+  { donde: "{Event,Gallery,Story,DressCode,GiftTable,Suggestions,Amenities,Celebrant,Family}Section .heading", texto: "ink", fondo: "bg", umbral: 4.5 },
+  // Tarjetas de giftTable/suggestions/amenities/family.
+  { donde: "tarjetas de sección (`--inv-color-surface`)", texto: "ink", fondo: "surface", umbral: 4.5 },
+  // A1: la portada pasa a pintar el texto en tinta sobre la lámina, cuyo lavado parte de `bg`.
+  { donde: "CoverSection[data-variant=full] .content (A1 de 3-9)", texto: "ink", fondo: "bg", umbral: 4.5 },
+];
+
+describe("A3 (3-9) — las superficies de TEXTO de las secciones, sobre los theme.json reales", () => {
+  it("la tabla de superficies no está vacía", () => {
+    expect(SUPERFICIES_DE_TEXTO.length).toBeGreaterThan(0);
+  });
+
+  for (const slug of PLANTILLAS) {
+    for (const pal of leerTheme(slug).palettes) {
+      for (const s of SUPERFICIES_DE_TEXTO) {
+        it(`${slug}/${pal.id}: ${s.donde} — ${s.texto} sobre ${s.fondo} ≥ ${s.umbral}:1`, () => {
+          const r = contrastRatio(pal.tokens[s.texto], pal.tokens[s.fondo]);
+          expect(
+            r,
+            `${s.texto} ${pal.tokens[s.texto]} sobre ${s.fondo} ${pal.tokens[s.fondo]}: ${r.toFixed(2)}:1`,
+          ).toBeGreaterThanOrEqual(s.umbral);
+        });
+      }
+
+      // El defecto EXACTO que 3-CV midió, escrito como caso: si alguna hoja volviera a pintar la
+      // tinta del documento sobre la banda de acento, este par es el que se estaría usando. Se deja
+      // documentado el ratio real para que nadie lo vuelva a dar por bueno "porque axe pasa".
+      it(`${slug}/${pal.id}: ink sobre accent NO llega a 3:1 (el defecto de O-04, para que conste)`, () => {
+        const r = contrastRatio(pal.tokens.ink, pal.tokens.accent);
+        expect(
+          r,
+          `ink ${pal.tokens.ink} sobre accent ${pal.tokens.accent} = ${r.toFixed(2)}:1 — ` +
+            "si esto supera 3:1 algún día, revisa si sigue haciendo falta prohibir esa combinación",
+        ).toBeLessThan(3);
+      });
+    }
+  }
+});
+
 describe("WCAG 1.4.3 — `muted` y `accent` son texto de tamaño NORMAL aquí: exigen 4,5:1", () => {
   for (const token of ["muted", "accent"] as const) {
     it(`hay al menos un uso de --inv-color-${token} en texto sin tamaño grande garantizado (${USOS_EN_TEXTO_NORMAL[token].length})`, () => {
