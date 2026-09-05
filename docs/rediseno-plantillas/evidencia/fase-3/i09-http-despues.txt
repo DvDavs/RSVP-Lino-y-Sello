@@ -1,0 +1,26 @@
+I-09 · verificación por HTTP que el sub-agente no pudo hacer (tenía prohibido recompilar el backend)
+Medida por el ORQUESTADOR tras integrar la rama, con el binario y los paquetes nuevos, sobre una
+base recién sembrada (`TPL_DEV_DB=invitaciones_i09`, 2026-09-05 08:56).
+
+ANTES (medido por el sub-agente sobre el binario viejo, invitación 11):
+  cover.image        → {"provenance":"empty","kind":null}
+  CompositionReport  → missingRequired:["cover.image"]
+  preflight          → canPublish:false · TPL_PUBLISH_BLOCKED_MISSING_REQUIRED
+  rsvp.background    → HTTP 422 TPL_BLOCK_NOT_EDITABLE (source:"fixed"): inalcanzable por CUALQUIER vía
+  seed-demo          → "imágenes resueltas: 13"
+
+DESPUÉS (invitación de demostración recién sembrada y publicada):
+  seed-demo          → "imágenes resueltas: 14"
+  rsvp.background    → {"id":"rsvp.background","provenance":"fixed",
+                        "url":"http://127.0.0.1:6003/public/templates2-assets/templates2/template/
+                               boda-clasica/1.0.0/2f62262e765cef18fe523a57a4a46b2633e029c668d981d8fbf5644eefd9777e.webp"}
+
+El bloque `source:"fixed"` que NINGUNA vía podía rellenar —ni el cliente (422), ni su `defaults.json`
+(el assetId no resolvía)— ahora se sirve desde el propio paquete. Es exactamente lo que la issue
+llamaba «corolario peor» (3-2d §5.3).
+
+Nota de entorno: el paquete `boda-clasica@1.0.0` cambió de bytes al declarar los `id` de sus assets,
+así que una base que ya lo tuviera registrado responde `409 TPL_VERSION_HASH_MISMATCH` — que es el
+comportamiento CORRECTO (una versión publicada nunca se pisa). Por eso esta verificación se hizo
+sobre una base nueva. Para producción, el paquete tendría que subir a `1.0.1`: queda en
+`preguntas-abiertas.md`.
