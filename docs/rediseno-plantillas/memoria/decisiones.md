@@ -1426,3 +1426,42 @@ Todas con estado **propuesta**; solo el orquestador cambia el estado. Fecha 2026
 - Decisión: `cover-rise` conserva el `translateY(var(--inv-space-2))`, con la misma duración (200 ms) y la misma curva; se quitan los dos fotogramas de `opacity`. La regla general, escrita en el propio archivo: **ningún `@keyframes` de contenido de la primera pantalla arranca en `opacity: 0`**.
 - Alternativas descartadas y por qué: (a) **el `<link rel="preload">` de la pareja tipográfica que prescribe `04 §16.1`** — se implementó entero y se midió: **empeora** la métrica (2 235 → 2 789 ms sobre 15 corridas cada uno), porque el preload le roba ancho de banda al CSS que sí bloquea el render. Se revirtió; no se conserva código que empeora lo que dice arreglar. Las 4 `.woff2` de hoy ya son `latin` con `unicode-range` correcto: el arreglo de 3-3 sigue bien hecho, y las tipografías **no** eran la causa; (b) **bajar de 4 pesos tipográficos a 2** (`04 §16.2` punto 3) — no se necesitó, y habría cambiado el diseño de verdad; (c) **retrasar la animación con `animation-delay` negativo o `@starting-style`** — más complejo, mismo resultado visual que quitar la opacidad y más superficie para equivocarse; (d) **subir el umbral** — última opción del encargo, innecesaria.
 - Consecuencias: **es un cambio visible.** La portada sigue subiendo, pero ya no funde. Está avisado a los dos agentes que revisan UX y calidad visual en paralelo, por si el fundido se considera irrenunciable: en ese caso la alternativa medida es dejarlo y aceptar 3 565 ms de LCP, lo que exige ADR para subir el umbral. `transform` sigue creando contexto de apilamiento y `.content` conserva su `position: relative` propio, así que el orden de pintado que documenta el comentario de `.scrim` (D1 de 3-3b) no cambia. Los 360 tests de `packages/sections` siguen verdes.
+
+## ADR-3-I04-01 — La ruta 19 de `smoke.sh` deprecia una versión DESECHABLE de `xv-jardin` (`1.0.99`), nunca una real
+- Fecha: 2026-09-05 · Estado: propuesta · Autor: 3-B/I-04
+- Contexto: I-04 (`issues-fase-3.md`, H-ADV-04 de `bitacora/3-adv.md`) pedía hacer la ruta 19
+  (`POST …/versions/{id}:deprecate`) independiente del orden: hoy depreciaba `boda-clasica@1.0.0` y
+  eso daba `409 TPL_VERSION_LAST_PUBLISHED` en cuanto la demostración sembrada la usaba. Verificado
+  [V]: en este backend compartido **las dos** plantillas registradas (`boda-clasica`, `xv-jardin`)
+  tienen exactamente **una** versión publicada de su slug y **las dos están en uso** —
+  `boda-clasica` por la demostración sembrada, `xv-jardin` por el propio documento que crea este
+  smoke en su ruta 2 (`tpl_document.template_version_id`, `TplTemplateVersionQueryRepository.
+  countDocumentsUsing`). `TemplateCatalogService.kt:166` rechaza depreciar cualquiera de las dos
+  reales (`publicadas <= 1 && documentos > 0`), sin importar el orden: no hay ninguna versión REAL,
+  hoy, que se pueda deprecar sin ese `409`.
+- Decisión: la ruta 17 (registro por HTTP) gana un paso adicional, «17b» (no cuenta como una de las
+  19), que registra una versión desechable del mismo paquete de `xv-jardin` con el número de versión
+  fijo `1.0.99` — mismos `theme.json`/assets, `template.json`/`defaults.json` con el campo de
+  versión sustituido por `jq`. Ningún `:choose-template` la elige nunca, así que su
+  `documentsUsing` es 0 por construcción y la ruta 19 la deprecia sin tocar la regla de "última
+  publicada en uso". Es idempotente sin necesitar restaurar nada por SQL: al repetir el script, la
+  17b encuentra la MISMA desechable por `package_hash` (`noop_same_hash`, ADR-008) y la 19 deprecia
+  lo ya deprecado, que `03 §3.19` define como `200`, no como error. `1.0.99` queda **reservado**:
+  ningún paquete real de `xv-jardin` debe usar ese número de versión.
+- Alternativas descartadas y por qué: (a) **elegir dinámicamente, de entre las versiones reales, una
+  con `documentsUsing == 0`** — no existe ninguna con la demostración sembrada, y depender de que
+  algún día exista sería volver a depender del orden; (b) **borrar por SQL el `tpl_document` que crea
+  la propia ruta 2 antes de depreciar** — libera `xv-jardin@1.0.0`, pero exige tocar una tabla del
+  módulo nuevo con un `DELETE` cuyo efecto en cascada (releases, historial) no está documentado, y
+  sigue dejando fuera el caso en que la demostración creciera a más de una plantilla en uso; (c)
+  **restaurar `boda-clasica` a `published` por SQL tras depreciarla (lo que ya hacía el script)** —
+  funciona en un clúster recién creado y sin demostración, pero dejaba una ventana real, aunque
+  breve, en la que `boda-clasica` aparecía `deprecated` en el catálogo de un backend **compartido**
+  con otros agentes leyendo al mismo tiempo; la versión desechable no abre esa ventana porque nunca
+  toca una fila que otro agente pueda estar mirando.
+- Consecuencias: la ruta 19 pasa a depender solo de sí misma: 19/19 en un clúster recién sembrado, en
+  uno con la demostración puesta, y ejecutando el script dos veces seguidas (evidencia en
+  `bitacora/3b-i04.md §4`). Efecto secundario aceptado: `xv-jardin@1.0.99` queda para siempre en
+  `tpl_template_version` con `status=deprecated`, visible en `GET /master/templates2/versions` de
+  cualquiera que lo consulte; no aparece en ningún catálogo público (`status='published'` es
+  obligatorio ahí) y no cambia ningún contrato de `03-api.md`.

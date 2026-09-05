@@ -636,3 +636,17 @@ del arreglo, no — el lienzo **no puede** resolver `paletteId → tokens` (cuat
   tercera vez que la invitación compartida entre sesiones contamina una medición. Es la misma
   pregunta de aprovisionamiento que 3-5 y 3-6 ya elevaron: **una invitación de demostración por
   sesión**, no una por máquina.
+
+## Fase 3-B · I-04 — `smoke.sh` vuelve a las 19 rutas (1)
+
+- [Fase 3-B · I-04] `ADR-3-I04-01` reserva el número de versión `1.0.99` de `xv-jardin` para la
+  versión DESECHABLE que la ruta 19 deprecia (así su `documentsUsing` es 0 por construcción y la
+  ruta deja de depender de qué demostración esté sembrada). Queda para siempre en
+  `tpl_template_version` con `status=deprecated` en cada clúster donde corra `smoke.sh` — no aparece
+  en ningún catálogo público, pero **sí** en `GET /master/templates2/versions` de cualquiera que lo
+  consulte, y ningún paquete real debería usar jamás ese número. **Supuesto tomado:** es preferible a
+  deprecar temporalmente una plantilla real en un backend compartido con otros agentes leyendo al
+  mismo tiempo (ver alternativas descartadas en el ADR); si el dueño prefiere que `smoke.sh` no deje
+  ningún rastro permanente en `tpl_template_version`, la alternativa (b) del ADR —borrar por SQL el
+  `tpl_document` de la propia ruta 2 antes de la 19— libera una versión real, a cambio de un `DELETE`
+  sobre una tabla del módulo nuevo cuyo efecto en cascada no se verificó en este bloque.
