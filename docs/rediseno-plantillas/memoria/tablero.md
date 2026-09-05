@@ -107,3 +107,19 @@ C3 (I-11), que se detuvo esperando una notificación que un sub-agente nunca rec
 **Dos rojos de la re-verificación fueron del orquestador, no del código**: `gradlew clean` borró el
 almacén de assets (10 fallos) y una corrida sin `TPL_DEV_DB` apuntó los ayudantes a otra base
 (6 fallos). Con el entorno sano: **50/50**.
+
+## Fase 3-C — sistema de diseño e identidad visual (2026-09-05, en curso)
+
+Rama `claude/fase-3c-identidad-visual-wqg0d2`. Un solo nivel de agentes; Opus/Fable para dirección de
+arte y revisiones, Sonnet con revisor para lo mecánico; worktrees para lo paralelo, `merge --no-ff` y
+suite completa tras cada merge; commit y push por bloque.
+
+| Bloque | Agente | Modelo | Estado | Verificación del orquestador |
+|---|---|---|---|---|
+| -1 N-01 toma de cuenta por `request-password-reset` | 3c-menos1 | Opus | **aceptada** (`85ce3b6`) | saboteó el arreglo (token de vuelta en el DTO): 3/8 en rojo; restaurado, 8/8. Suite Kotlin 1 271 · 0 fallos |
+| -1 N-02 origen y CSP horneados en el build | 3c-menos1 | Opus | **aceptada** (`85ce3b6`) | 49/49 unitarias nuevas re-ejecutadas; A/B sobre el mismo build en `:3050` y `:3000` leída (lienzo pintado y enlace correcto en ambos); e2e 50/50; smoke 19/19 |
+| 0 dirección de arte (paletas, tipografías, formas, iconos, pantallas) | 3c-0 | Fable | en curso | |
+| 1 cimientos: 3C-1 tokens · 3C-2 tipografía · 3C-3 iconos · 3C-4 formas | | | pendiente | |
+| 2 componentes `packages/ui` + galería `/design` + regresión visual | | | pendiente | |
+| 3 producto: 3C-5 web pública/acceso · 3C-6 catálogo/asistente · 3C-7 chrome · 3C-8 e2e/presupuestos | | | pendiente | |
+| Cierre: revisiones, guía, memoria, handoff | | | pendiente | |
