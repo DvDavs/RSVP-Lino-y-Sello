@@ -76,3 +76,34 @@ Estados: pendiente · en curso · entregada · aceptada · rechazada (motivo)
 
 
 **Resultado de la fase 2:** 1 186 pruebas Kotlin y 458 TypeScript, 0 fallos, 0 omitidas. Cobertura BUNDLE 94,62 % líneas / 81,22 % ramas. 50 ADR aceptadas, ninguna rechazada. **Ningún sub-agente hubo que repetirlo**: los seis entregaron a la primera y las tres revisiones se cerraron sin reintento.
+
+## Fase 3-B — cierre de la fase 3 (2026-09-05)
+
+Modelo real de trabajo: **un solo nivel de agentes**, el orquestador lanzó todos. Máximo 3
+implementadores en paralelo, cada uno en su worktree y con su puerto y su clúster de Postgres
+propios. Integración con `git merge --no-ff` y suite tras cada merge; commit y push tras cada issue
+cerrada, para que una sesión agotada no se lleve nada por delante.
+
+| Issue | Agente | Modelo | Estado | Verificación del orquestador |
+|---|---|---|---|---|
+| I-01 marks → 500 | A1 | Opus | aceptada | saboteó el arreglo: 9 fallos; restaurado, verde. Y 500→200 por HTTP |
+| I-03 compuerta CSP | A2 | Opus | aceptada | comentó el import causal: 2 failed; restaurado, 3 passed |
+| I-04 smoke 19/19 | A3 | Sonnet | aceptada | tercera corrida independiente: 19/19, exit 0 |
+| I-02 seguridad auth | B1 | Opus | aceptada | oráculo propio con el mismo método: 15,0× → 1,01×; 429 a mano |
+| I-06 cambiar la fecha | B2 | Opus | aceptada | suite Kotlin completa tras el merge |
+| I-09 alias de assets | B3 | Opus | aceptada | en vivo: 13 → 14 imágenes; `rsvp.background` resuelve |
+| I-07 webhook | C1 | Sonnet | aceptada | suite Kotlin completa; el diagnóstico de la issue era falso |
+| I-05 WCAG | C2 | Opus | aceptada | devolvió el velo a 55 %: 5 fallos, uno por paleta |
+| I-11 protocolo LCP | C3 | Sonnet | aceptada | puerto ajeno → se niega a medir, código de salida 3 |
+| I-05b portada | — | Opus | aceptada | quitó el papel: 39 fallos. Capturas juzgadas a ojo por el orquestador |
+| I-08 coste de plantilla | orquestador | — | medida | no era un defecto: se cronometró |
+| I-12 trabajo rescatado | orquestador | — | aceptada | 14 ficheros integrados, 1 rechazado con motivo |
+| I-10 cierre formal | orquestador | — | entregada | 69 ADR resueltas |
+| Revisión adversarial | 3B-ADV | Opus | **NO CERRABLE** | 5 altas originales cerradas, **2 nuevas** |
+
+**Lo que se repitió y por qué:** ningún sub-agente hubo que repetirlo. Sí hubo que **reanudar** a
+C3 (I-11), que se detuvo esperando una notificación que un sub-agente nunca recibe.
+
+**Dos rojos de la re-verificación fueron del orquestador, no del código**: `gradlew clean` borró el
+almacén de assets (10 fallos) y una corrida sin `TPL_DEV_DB` apuntó los ayudantes a otra base
+(6 fallos). Con el entorno sano: **50/50**.

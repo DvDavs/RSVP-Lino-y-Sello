@@ -27,7 +27,20 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
 ## Estado actual
 - **Fase 1 — Diseño: CERRADA el 2026-09-03.** Los 7 documentos de diseño existían desde una sesión anterior, pero los había escrito un solo agente Sonnet en secuencia, sin revisión independiente. La **ronda 1R** los revisó adversarialmente y los profundizó hasta grado de implementación: cuatro revisores Opus en paralelo sobre bloques disjuntos, un dirimidor Opus para las 16 contradicciones entre bloques, y una verificación mecánica. 44 objeciones altas encontradas y corregidas, 0 abiertas. 88 ADR aceptadas (34 originales, 15 de ellas con enmienda, más 54 de la ronda). El esquema Zod se verificó **ejecutándolo**, no leyéndolo.
 - **Fase 2 — Backend del módulo nuevo: CERRADA el 2026-09-04.** Seis bloques (dos Sonnet con revisor Opus obligatorio, cuatro Opus) en worktrees aislados, integrados con `git merge --no-ff` y suite completa tras cada merge, más tres revisiones adversariales Opus. **1 186 pruebas Kotlin y 458 TypeScript, 0 fallos.** Las dos verificaciones que la fase 1 dejó pendientes quedaron resueltas **ejecutándolas**: networknt acepta el bundle con `$defs` sin salir a la red y valida 10/10 ejemplos, y el espejo Kotlin de las invariantes casa 102/102. 50 ADR aceptadas, ninguna rechazada.
-- **Fase actual: 3 — Frontend (siguiente).** Arranca leyendo `handoffs/2-para-fase-3.md`.
+- **Fase 3 — Frontend: I-01…I-12 CERRADAS el 2026-09-05 (fase 3-B). CIERRE FORMAL RETENIDO.**
+  La fase 3 se agotó dejando la revisión adversarial con veredicto **NO CERRABLE** y cinco altas
+  abiertas. La fase 3-B las cerró las cinco, más las doce issues numeradas, con **prueba ejecutada y
+  verificada por el orquestador** —no por el reporte del sub-agente—: en la mayoría se saboteó el
+  arreglo para ver la compuerta en rojo antes de aceptarla. Cifras en `contratos.md §12`.
+  **Pero la fase no se declara cerrada**, y el motivo está en `handoffs/3b-adv.md`: la revisión
+  adversarial repetida encontró **dos altas nuevas**. La grave es **N-01**, una toma de cuenta
+  completa en dos peticiones por `POST /auth/request-password-reset`, que devuelve el token de
+  recuperación sin autenticar para cualquier correo, incluida una cuenta MASTER. Vive en
+  `modules/auth`, área que el dueño acotó a I-02 con un «NO tocar nada más», así que **necesita su
+  autorización expresa**; el arreglo propuesto es de una línea y está en `preguntas-abiertas.md`.
+  Rama: `claude/fase-3b-cierre-orquestacion-z0pd4g`.
+- **Fase siguiente: 4 — kit de autor de plantillas.** Arranca leyendo `handoffs/3-para-fase-4.md`,
+  y antes de nada resuelve N-01 con el dueño.
 - **Rama de la fase 2: `claude/fase-2-backend-orchestration-ksyuzi`**, creada desde `claude/agent-network-invitation-41nx5y` en `88238b2` (fase 1 cerrada en `4681b2c` + el prompt de la fase 2). El entorno de esta sesión obliga a trabajar sobre una rama propia por fase; `contratos.md §1` y `brief-comun.md` siguen nombrando la rama de la fase 1, que es la base, no la de trabajo actual.
 - Fases: 0 Preparación (cerrada) · 1 Diseño (cerrada) · 2 Backend (**cerrada**) · **3 Frontend (siguiente)** · 4 Plantillas y kit · 5 Migración · 6 Calidad y entrega.
 - Nota de entorno: en este entorno los sub-agentes **no** pueden lanzar sub-agentes. El orquestador de cada fase lanza todos los agentes directamente (red de un solo nivel).
