@@ -123,7 +123,12 @@ start() {
   : > "$LOG"
   echo "dev-backend: compilando y arrancando… (log: $LOG)" >&2
   # `--console=plain` y sin daemon: el log queda legible y `stop` mata un árbol de procesos pequeño.
+  # `--args=--server.port` es OBLIGATORIO, no un adorno: sin él `bootRun` toma el puerto de
+  # `application.yml` (6003) y `TPL_DEV_PORT` sólo movía la sonda, así que dos instancias con
+  # puertos "distintos" peleaban las dos por el 6003 — medido en la fase 3-B, donde una instancia
+  # de un agente se quedó con el 6003 de otro y sirvió una base sin sembrar.
   nohup ./gradlew bootRun --console=plain --no-daemon \
+      --args="--server.port=$PUERTO" \
       -Dorg.gradle.jvmargs=-Xmx1g >>"$LOG" 2>&1 &
   echo $! > "$PIDFILE"
   local pid; pid="$(cat "$PIDFILE")"
@@ -149,7 +154,12 @@ start() {
       echo >&2
       echo "dev-backend: el arranque FALLÓ. Últimas líneas del log:" >&2
       tail -40 "$LOG" >&2
-      stop >/dev/null 2>&1 || true
+      # NO se llama a `stop`: hace `pkill -f InvitationsApplicationKt` y un arranque fallido aquí
+      # mataría los backends de las demás sesiones de la máquina (ocurrió en la fase 3-B). Se mata
+      # sólo el árbol propio, que es lo único que este arranque ha creado.
+      pkill -TERM -P "$pid" 2>/dev/null || true
+      kill -TERM "$pid" 2>/dev/null || true
+      rm -f "$PIDFILE"
       return 1
     fi
     printf '.' >&2
@@ -188,8 +198,10 @@ stop() {
     fi
     rm -f "$PIDFILE"
   fi
-  # Red de seguridad: cualquier JVM que siga sujetando el puerto (p. ej. tras un `kill -9` previo).
-  local restos; restos="$(pgrep -f "InvitationsApplicationKt" 2>/dev/null || true)"
+  # Red de seguridad, ACOTADA A NUESTRO PUERTO. Antes era `pgrep -f InvitationsApplicationKt`, que
+  # mata cualquier JVM del proyecto en la máquina: con varias sesiones o agentes en paralelo, un
+  # `stop` se llevaba por delante los backends de los demás (medido en la fase 3-B).
+  local restos; restos="$( (ss -ltnpH "sport = :$PUERTO" 2>/dev/null || true) | grep -oP 'pid=\K[0-9]+' | sort -u)"
   if [ -n "$restos" ]; then kill -KILL $restos 2>/dev/null || true; fi
   "$RAIZ/scripts/pg-ephemeral.sh" stop || true
   echo "dev-backend: parado (idempotente)"
