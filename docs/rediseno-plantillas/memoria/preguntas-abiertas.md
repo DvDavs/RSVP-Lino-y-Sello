@@ -360,3 +360,76 @@ decidir, para que el dueño no tenga que leerlas todas para encontrar las suyas.
 - [Fase 3 · 3-3] **`ImageBlock` pone `loading="lazy"` en TODAS las imágenes, incluida la de portada, y nunca `fetchpriority="high"` ni `sizes`/`srcset`** (`packages/sections/src/blocks/ImageBlock.tsx:50-58`), mientras `04 §16.1` pide exactamente lo contrario para la portada ("`priority`/`fetchpriority="high"`, `next/image` con `sizes`"). Hoy no penaliza porque el LCP de la invitación de demostración resultó ser **texto** (el nombre de los novios) y no la lámina; con una fotografía real de portada sí lo hará, y Lighthouse ya marca `uses-responsive-images` con 172 KiB de ahorro estimado. **Supuesto tomado:** no lo toco (`packages/**`), y tampoco añado un `<link rel="preload">` de la portada desde la página, porque el elemento LCP medido no es la imagen y habría sido optimizar a ciegas. ¿Se le da a `ImageBlock` una prop de prioridad que `CoverSection` active para su hueco de imagen, en qué bloque, y se acepta que ese paquete no puede usar `next/image` (04 §19.3 solo lo permite como excepción, pero `next/image` obliga a conocer `width`/`height`, que `ResolvedValue` no trae)?
 
 - [Fase 3 · 3-3] **`@next/bundle-analyzer@16.3.4` no funciona con `next@16.3.4`**: el propio build avisa "The Next Bundle Analyzer is not compatible with Turbopack builds, no report will be generated. Consider trying the new Turbopack analyzer via `next experimental-analyze`" [V]. `04 §16.2` lo nombra como el complemento de diagnóstico oficial. **Supuesto tomado:** se deja enganchado bajo `ANALYZE=1` en `next.config.ts` (antes ni siquiera estaba cableado, así que la orden documentada no hacía nada) y el desglose por ruta se obtiene con `scripts/check-budget.mjs`, que atribuye los chunks a módulos por el `page_client-reference-manifest.js` y es más accionable que un treemap. `next experimental-analyze -o` también funciona y escribe en `.next/diagnostics/analyze`, pero su formato es binario y necesita levantar su interfaz web. ¿Se corrige `04 §16.2` para nombrar `next experimental-analyze`, o se pasa el build a `--webpack` solo para el diagnóstico (probado en 3-1: mismo resultado de tamaños, pero es un bundler distinto del que se despliega)?
+
+---
+
+## Bloque 3-3b (2026-09-05) — correcciones de portada, presupuesto y contraste
+
+**P-3-3b-1 (MEDIA, presupuesto) · El editor arrastra 87,1 KB gz de Zod por el mismo defecto que D2.**
+`apps/web/lib/composed-patch.ts:22-24` importa `ComposedBlock`/`ComposedGroup`/`ComposedSection` por
+VALOR para usarlos solo como `ReturnType<typeof X.parse>`. Con `verbatimModuleSyntax` el import
+sobrevive y, como `packages/schema/package.json` no declara `sideEffects: false`, ningún empaquetador
+lo elimina. `/editor/[invitationId]` mide 268,5 KB de 600, así que no rompe su compuerta, pero son
+87,1 KB que no hacen nada. Es `import type` + mover el uso de valor si lo hubiera. Supuesto tomado:
+no se toca — `apps/web/**` es área prohibida para este bloque y hay otro agente dentro.
+
+**P-3-3b-2 (MEDIA, visual) · Otros dos huecos siguen sin la tipografía de titular.**
+`GallerySection.module.css:130` `.hashtag` y `FamilySection.module.css:79` `.blessing` declaran
+`font-family: var(--inv-font-heading)` alrededor de un `TextBlock`, que fija la de cuerpo en su
+propio `<span>` y gana: salen en palo seco, igual que salía el nombre de portada. Dos caminos
+(ADR-3-3b-01): repetir el `font-family: inherit` en esos dos archivos, o cambiar
+`blocks/blocks.module.css .text` a `inherit` de una vez (arreglaría los tres a la vez y la raíz ya
+fija la familia de cuerpo, así que el defecto no cambia). Supuesto tomado: solo se arregla la
+portada, que es el defecto medido; el resto necesita capturas antes/después que juzgue el dueño.
+
+**P-3-3b-3 (MEDIA, diagnóstico) · El informe de axe se recorta a 4 nodos y ocultó la mitad del
+defecto.** `apps/web/e2e/a11y-publico.spec.ts:29` hace `v.nodes.slice(0, 4)`. La aserción compara la
+lista completa, así que no oculta un fallo — pero el bloque 3-3 diagnosticó con lo que veía y se dejó
+9 de 13 nodos fuera, lo que hizo que D3 llegara descrito como la mitad de lo que era. Conviene subir
+el corte o imprimir el mensaje de axe (que trae los dos colores y el ratio). Área prohibida aquí.
+
+**P-3-3b-4 (BAJA, arte) · El escritorio de la portada queda más liso que el móvil.**
+Con la portada ya corregida, un recorte apaisado (1440×900) de una lámina 5:7 se come el ornamento:
+queda un degradado casi liso arriba y el texto legible abajo. Es exactamente lo que avisaba
+`handoffs/3-2d.md §4` ("un recorte cuadrado de la portada se come el ornamento"). Se arregla con arte
+(una lámina apaisada para la portada, o mover el motivo), no con CSS. En móvil, que es donde se abre
+una invitación, se ve completo: `evidencia/fase-3/correcciones/portada-corregida-movil.png`.
+
+**P-3-3b-5 (MEDIA, pruebas) · `pnpm --filter web run e2e` es inestable con `fullyParallel: true`.**
+Medido en corridas repetidas: fallan pruebas DISTINTAS cada vez (`render-publico` "una sección oculta
+desaparece", `conflicto` E-06, y una vez `a11y-publico`), y en aislamiento los archivos pasan. La
+causa es la que 3-3 ya anotó como riesgo: "una sección oculta" MUTA y republica la invitación de
+demostración compartida mientras las demás la leen, y si se interrumpe la deja con una sección menos.
+La política anti-flake de `contratos.md §6` prohíbe la cuarentena sin issue: esto es el issue.
+Arreglo probable: que esa prueba trabaje sobre una invitación propia, o `fullyParallel: false` para
+los archivos que tocan la demostración. Área prohibida aquí (`apps/web/e2e/**`).
+
+**P-3-3b-6 (BAJA, higiene) · `u08-contrast.test.ts` afirma sobre copias caducadas de la paleta.**
+Sus tres paletas son literales anteriores a 3-2d y a 3-3b, y una prueba dice explícitamente que
+`blush` incumple `accentInk/accent` y `accent/bg`, lo que ya no es cierto del paquete registrado.
+Pasa en verde porque se afirma a sí misma. Se le añadió un aviso de cabecera apuntando a
+`contraste-plantillas.test.ts` (que sí lee los archivos reales); actualizar o retirar los literales
+es decisión del dueño del paquete.
+
+**P-3-3b-7 (BAJA, contrato) · `04 §17.1` y la invariante `I-31` se quedan cortos.**
+Sus umbrales para `muted/bg` y `accent/bg` (3,0) están escritos para texto grande y para componentes
+de interfaz; `packages/sections` usa los dos tokens como color de TEXTO normal, donde manda WCAG
+1.4.3 (4,5). Una paleta puede pasar `04 §17.1` y aun así dar una violación `serious` de `axe` en el
+render público — que es exactamente lo que pasó. ADR-3-3b-03 lo endurece en el generador y en las
+pruebas del frontend; falta enmendarlo en el documento de diseño y en `I-31` cuando el orquestador
+acepte ADR-1R-F-06, o el backend seguirá admitiendo paletas que el render público no puede usar.
+
+**P-3-3b-8 (ALTA para las pruebas, módulo antiguo) · `/auth/token` da 500 con inicios de sesión
+simultáneos del mismo usuario.** Medido [V] en el log del backend, 16 ocurrencias durante las
+corridas de e2e:
+`IncorrectResultSizeDataAccessException: Query did not return a unique result: 2 results were
+returned` en `mx.evolutiondev.invitaciones.modules.auth.service.RefreshTokenService.createOrUpdateRefreshToken(RefreshTokenService.kt:20)`,
+llamado desde `AuthController.attemptAuth(AuthController.kt:40)`. Dos autenticaciones concurrentes del
+mismo usuario crean dos filas de refresh token, y a partir de ahí toda autenticación de ese usuario
+responde 500. `e2e/util/demo.ts` hace `POST /auth/token` desde CADA archivo de prueba y
+`playwright.config.ts` tiene `fullyParallel: true`, así que la carrera se dispara sola: con seis
+corridas seguidas de la suite, seis terminaron con las dos pruebas de `a11y-publico` fallando por
+`POST /auth/token respondió 500`. Es la causa raíz principal de P-3-3b-5. `modules/auth` es el
+módulo ANTIGUO y el brief común lo declara rechazo automático, así que **no se toca**: se reporta con
+archivo y línea para quien tenga ese ámbito. Mitigación posible sin entrar ahí: que `e2e/util/demo.ts`
+autentique una vez y comparta el token entre archivos (`globalSetup`), en vez de una vez por archivo.

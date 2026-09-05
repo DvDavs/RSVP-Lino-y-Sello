@@ -1,0 +1,15 @@
+=== corrida 1 ===
+  ✘   5 [chromium] › e2e/conflicto.spec.ts:61:1 › E-06 · dos navegadores editan lo mismo: el segundo ve el diálogo y nada se pierde en silencio (3.0s)
+  ✘  21 [chromium] › e2e/render-publico.spec.ts:157:1 › una sección oculta desaparece de la invitación publicada tras revalidar (5.6s)
+    Error: expect(locator).toHaveCount(expected) failed
+  2 failed
+  19 passed (27.4s)
+=== corrida 2 ===
+  22 passed (22.3s)
+=== corrida 3 ===
+  ✘   6 [chromium] › e2e/conflicto.spec.ts:61:1 › E-06 · dos navegadores editan lo mismo: el segundo ve el diálogo y nada se pierde en silencio (150ms)
+  ✘  21 [chromium] › e2e/render-publico.spec.ts:157:1 › una sección oculta desaparece de la invitación publicada tras revalidar (5.7s)
+    Error: expect(locator).toHaveCount(expected) failed
+  2 failed
+  19 passed (26.1s)
+DONE
