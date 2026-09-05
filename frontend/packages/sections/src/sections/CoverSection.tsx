@@ -79,6 +79,11 @@ export function CoverSection({ section, variant, mode, onActivate, pending }: Se
               onActivate={onActivate}
               ref_={refFor(imageBlock.id)}
               pending={isPending(pending, mode, imageBlock.id)}
+              /* La portada es, por definición, la primera pantalla: su lámina es el elemento LCP
+               * (medido [V] con Lighthouse tras A1 de 3-9, `largest-contentful-paint-element` =
+               * este `<img>`). Con el `loading="lazy"` por defecto de `ImageBlock` el navegador la
+               * dejaba para el final y el LCP se iba a 4 304 ms, contra un tope de 2 500. */
+              prioritaria
             />
           </div>
         ) : null}

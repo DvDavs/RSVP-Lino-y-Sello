@@ -107,7 +107,18 @@ function piezas(t, p) {
     );
   }
   l.push(
-    { destino: D('cover.webp'), escena: () => E.portada(p, t.familia), q: 84, limite: 420 },
+    // A1 del bloque 3-9 — LA PORTADA ES EL ELEMENTO LCP, Y PESABA 147 KB.
+    // Con la portada convertida en papeleta (`CoverSection`, variante `full`), la lámina pasa a ser
+    // el elemento más grande de la primera pantalla y por tanto el candidato a LCP. Medido [V] con
+    // `@lhci/cli` (`throttlingMethod: devtools`, móvil, 4G real, 5 corridas) sobre la invitación
+    // publicada: a 1600 px y 147 KB, la imagen empezaba a los 604 ms y terminaba a los 3 828 ms, y
+    // el LCP salía **3 858 ms** contra un tope de 2 500 (`contratos §8`).
+    // La lámina se DIBUJA a 1600 px porque a menos resolución el rasterizador estropea el trazo
+    // fino del filete y de las hojas; se SIRVE a 1200, que es lo que de verdad hace falta: el hueco
+    // mide 412×577 CSS en un teléfono y 643×900 en escritorio, así que 1200 px de ancho siguen
+    // dando ~2,9× de densidad en móvil y ~1,9× en escritorio. Dibujar y servir no tienen por qué
+    // ser la misma medida.
+    { destino: D('cover.webp'), escena: () => E.portada(p, t.familia), q: 82, ancho: 1200, limite: 420 },
     { destino: D('portrait-a.webp'), escena: () => E.retrato(p, t.familia, { inicial: t.inicialA, variante: 'a' }), q: 84, limite: 250 },
     { destino: D('portrait-b.webp'), escena: () => E.retrato(p, t.familia, { inicial: t.inicialB, variante: 'b' }), q: 84, limite: 250 },
   );
@@ -162,7 +173,7 @@ for (const t of PLANTILLAS) {
     for (const pieza of piezas(t, P)) {
       const escena = pieza.escena();
       const png = rasterizar(escena.svg, escena.w);
-      const webp = await aWebp(png, pieza.q);
+      const webp = await aWebp(png, pieza.q, pieza.ancho);
       const igual = escribir(pieza.destino, webp, SOLO_COMPROBAR);
       if (SOLO_COMPROBAR && !igual) { console.error(`   DERIVA: ${path.relative(RAIZ, pieza.destino)}`); deriva++; }
 
@@ -176,9 +187,13 @@ for (const t of PLANTILLAS) {
           contraste.push({ nombre: z.nombre, minimo: m.minimo, media: m.media, umbral: z.umbral, peorPx: m.peorPx });
         }
       }
+      // El inventario declara la medida SERVIDA, no la dibujada: desde A1 de 3-9 la portada se
+      // remuestrea antes de codificar y las dos dejaron de coincidir (ver `piezas()`).
       inv.add({
         ruta: path.relative(path.join(TEMPLATES, t.slug), pieza.destino),
-        w: escena.w, h: escena.h, bytes: webp.length, sha256: sha256(webp), contraste,
+        w: pieza.ancho ?? escena.w,
+        h: pieza.ancho ? Math.round((escena.h * pieza.ancho) / escena.w) : escena.h,
+        bytes: webp.length, sha256: sha256(webp), contraste,
       });
       if (webp.length > pieza.limite * 1024) inv.aviso(`${path.basename(pieza.destino)} pesa ${(webp.length / 1024).toFixed(1)} KB (presupuesto declarado ${pieza.limite} KB)`);
     }

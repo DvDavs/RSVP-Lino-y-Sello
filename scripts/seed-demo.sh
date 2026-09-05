@@ -13,7 +13,8 @@
 #     Y decide qué carpeta de arte se sube (`frontend/templates/<slug>/demo/<paletteId>/`). Las dos
 #     cosas van juntas a propósito: el arte está tintado por paleta desde 3-9, y sembrar una paleta
 #     con el arte de otra es exactamente el defecto que 3-CV documentó en `O-07`. Por defecto se usa
-#     la `defaultPaletteId` del `theme.json` real de la plantilla.
+#     la `defaultPaletteId` del `theme.json` real de la plantilla. `TPL_DEMO_FONTSET` hace lo mismo
+#     con el set tipográfico ("serif-elegante" o "moderna"), que va en la misma operación.
 #
 # TODO va por las RUTAS HTTP REALES del módulo nuevo (`handoffs/2-5.md`), sin un solo INSERT en las
 # tablas `tpl_*`. La única excepción, y está documentada desde la fase 2, es `invitation`:
@@ -40,6 +41,10 @@ VERSION="${TPL_DEMO_VERSION:-1.0.0}"
 # tienen que decir lo mismo). Por defecto, la `defaultPaletteId` del `theme.json` REAL de la
 # plantilla — ningún identificador escrito a mano aquí.
 PALETA="${TPL_DEMO_PALETTE:-$(jq -r .defaultPaletteId "$RAIZ/frontend/templates/$SLUG/$VERSION/theme.json")}"
+# El set tipográfico va por el mismo camino (`setTheme` acepta los dos). Sirve para sembrar una
+# invitación con «Moderna», que es la otra opción que el editor ofrece y la que A4 destapó sin
+# autoalojar (`O-02b` de 3-CV).
+FONTSET="${TPL_DEMO_FONTSET:-$(jq -r .defaultFontSetId "$RAIZ/frontend/templates/$SLUG/$VERSION/theme.json")}"
 EMAIL_USER="${TPL_DEMO_EMAIL:-demo.boda@example.com}"
 EMAIL_MASTER="${TPL_DEMO_EMAIL_MASTER:-demo.master@example.com}"
 PASS="${TPL_DEMO_PASS:-Demo1234!}"
@@ -217,14 +222,15 @@ echo "-- 6b. paleta ------------------------------------------------------------
 # además se comparte entre sesiones (`bitacora/3-cv.md §6`).
 llamar GET "$E/document" "${AUTH_U[@]}" >/dev/null
 REV="$(j .revision)"
-jq -nc --argjson r "$REV" --arg p "$PALETA" \
-  '{baseRevision:$r, clientBatchId:("seed-tema-" + $p), operations:[{op:"setTheme", paletteId:$p}]}' > "$TMP/tema.json"
+jq -nc --argjson r "$REV" --arg p "$PALETA" --arg f "$FONTSET" \
+  '{baseRevision:$r, clientBatchId:("seed-tema-" + $p + "-" + $f),
+    operations:[{op:"setTheme", paletteId:$p, fontSetId:$f}]}' > "$TMP/tema.json"
 CODE="$(llamar POST "$E/document/operations" "${AUTH_U[@]}" "${JSON[@]}" --data-binary "@$TMP/tema.json")"
 if [ "$CODE" = 200 ]; then
   REV="$(j .revision)"
-  echo "  setTheme paletteId=$PALETA → HTTP $CODE  applied=$(j .applied)  revision=$REV"
+  echo "  setTheme paletteId=$PALETA fontSetId=$FONTSET → HTTP $CODE  applied=$(j .applied)  revision=$REV"
 else
-  echo "  setTheme paletteId=$PALETA → HTTP $CODE  $(head -c 300 "$TMP/r.json")"; exit 1
+  echo "  setTheme paletteId=$PALETA fontSetId=$FONTSET → HTTP $CODE  $(head -c 300 "$TMP/r.json")"; exit 1
 fi
 
 # ------------------------------------------------------------------------ 7. preflight y release
@@ -265,7 +271,7 @@ echo "==========================================================================
 echo "  INVITACIÓN PUBLICADA"
 echo "    enlace público   $BASE/public/i/$TOKEN_PUB/render   (JSON del render)"
 echo "    ruta de apps/web /i/$TOKEN_PUB"
-echo "    plantilla        $SLUG@$VERSION   paleta $PALETA"
+echo "    plantilla        $SLUG@$VERSION   paleta $PALETA   tipografía $FONTSET"
 echo "    invitationId     $INVITACION      customerId $CUSTOMER_ID"
 echo "    editor           $EMAIL_USER / $PASS"
 echo "=============================================================================="

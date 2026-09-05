@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { CoverSection } from "../src/sections/CoverSection.tsx";
+import { GallerySection } from "../src/sections/GallerySection.tsx";
 import { composedSection, imageBlock, textBlock, dateBlock, realBodaClasicaSection } from "./fixtures.ts";
 import { ComposedBlockSchema } from "./schema-values.ts";
 
@@ -308,5 +309,32 @@ describe("CoverSection — A1 (3-9): la lámina se ve entera y el texto va sobre
     expect(cs.color).toBe("var(--inv-color-ink)");
     // Y en la fila del medio de las tres, que es la que cae dentro de esa zona.
     expect(cs.gridRow).toBe("2");
+  });
+
+  /**
+   * A1 tiene una consecuencia de RENDIMIENTO, no sólo de composición: al ocupar la lámina la
+   * primera pantalla entera, pasa a ser el elemento LCP. Medido [V] con `@lhci/cli`
+   * (`throttlingMethod: devtools`, móvil, 5 corridas) sobre la invitación publicada: con el
+   * `loading="lazy"` por defecto de `ImageBlock`, el navegador la dejaba para el final y el LCP
+   * salía **4 304 ms** contra el tope de 2 500 de `contratos §8`. Con `prioritaria` (y la lámina
+   * servida a 1 200 px en vez de 1 600, ver `templates/scripts/build-art.mjs`), **2 072 ms**.
+   *
+   * La prueba falla sin la prop [V]: `loading` vuelve a resolver a "lazy".
+   */
+  it("la lámina de la portada se carga con prioridad: es el elemento LCP de la invitación", () => {
+    const { container } = render(<CoverSection section={cover()} variant="full" mode="public" />);
+    const img = container.querySelector("img")!;
+    expect(img.getAttribute("loading")).toBe("eager");
+    expect(img.getAttribute("fetchpriority")).toBe("high");
+  });
+
+  it("una imagen de otra sección sigue siendo perezosa (la prioridad no es el valor por defecto)", () => {
+    const { container } = render(<GallerySection section={realBodaClasicaSection("gallery")} variant="grid" mode="public" />);
+    const imgs = Array.from(container.querySelectorAll("img"));
+    expect(imgs.length).toBeGreaterThan(0);
+    for (const img of imgs) {
+      expect(img.getAttribute("loading")).toBe("lazy");
+      expect(img.getAttribute("fetchpriority")).toBeNull();
+    }
   });
 });

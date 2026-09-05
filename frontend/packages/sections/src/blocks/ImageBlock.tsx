@@ -12,6 +12,14 @@
 //   que no hay dimensión intrínseca de la que partir. Se reserva por `aspect-ratio` con el valor
 //   de reserva del sistema (`--inv-image-aspect-default`) — una sección real puede sobrescribirlo
 //   con su propio módulo CSS para su propio hueco (p. ej. el marco cuadrado de un retrato).
+// - CARGA: `loading="lazy"` por defecto, EXCEPTO donde la sección declare que esa imagen es la de
+//   la primera pantalla (`prioritaria`). Medido [V] con `@lhci/cli` (`throttlingMethod: devtools`,
+//   móvil, 5 corridas) sobre la invitación publicada, después de que A1 (3-9) diera a la portada la
+//   forma de la lámina: el elemento LCP pasó a ser ESTA imagen, y con `loading="lazy"` el navegador
+//   la deja para el final — **LCP 4 304 ms**, contra un presupuesto de 2 500 (`contratos §8`). La
+//   bandera es de CARGA, no de presentación: es lo mismo que hace la prop `priority` de
+//   `next/image`, y por eso no rompe el criterio de ADR-3-3b-01 (nada de tipografía ni de color en
+//   el contrato del bloque). El hueco es quien sabe si su imagen está en la primera pantalla.
 import { useEffect, useRef } from "react";
 import type { BlockComponentProps } from "./types.ts";
 import { activationAttrs } from "./activation.ts";
@@ -23,7 +31,12 @@ function clampUnit(n: number): number {
   return Math.min(1, Math.max(0, n));
 }
 
-export function ImageBlock({ block, mode, onActivate, ref_, pending }: BlockComponentProps) {
+interface ImageBlockProps extends BlockComponentProps {
+  /** La sección declara que esta imagen vive en la PRIMERA PANTALLA (candidata a LCP). */
+  readonly prioritaria?: boolean;
+}
+
+export function ImageBlock({ block, mode, onActivate, ref_, pending, prioritaria = false }: ImageBlockProps) {
   const imgRef = useRef<HTMLImageElement>(null);
   const value = block.value;
   const isImage = value !== null && value.kind === "image";
@@ -53,8 +66,9 @@ export function ImageBlock({ block, mode, onActivate, ref_, pending }: BlockComp
         src={value.url}
         alt={isDecorative ? "" : value.alt}
         aria-hidden={isDecorative ? "true" : undefined}
-        loading="lazy"
-        decoding="async"
+        loading={prioritaria ? "eager" : "lazy"}
+        fetchPriority={prioritaria ? "high" : undefined}
+        decoding={prioritaria ? "sync" : "async"}
       />
     </span>
   );
