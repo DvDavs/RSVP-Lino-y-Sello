@@ -2,9 +2,11 @@
 // ruta del lienzo, `app/(canvas)/editor/[invitationId]/canvas/page.tsx`.
 //
 // Diferencias con el padre, todas medidas en la compuerta A1-A8:
-//   · El hijo SÍ valida `event.origin === NEXT_PUBLIC_EDITOR_ORIGIN`. Aquí es válido y es la
-//     comprobación importante: impide que otra página embeba el lienzo y le inyecte contenido
-//     (reforzado por `frame-ancestors` de la CSP).
+//   · El hijo SÍ valida `event.origin`. Aquí es válido y es la comprobación importante: impide que
+//     otra página embeba el lienzo y le inyecte contenido (reforzado por `frame-ancestors` de la
+//     CSP). Contra QUÉ origen compara lo decide `origenDelPadre` — ver ahí: desde N-02
+//     (`ADR-3C-N02-01`) es el origen REAL del que embebe, resuelto en ejecución, no una constante
+//     horneada en el build.
 //   · El hijo **sigue escuchando `window` tras el saludo**, pero solo acepta `HELLO` ahí — sin eso
 //     el reintento del padre no llegaría nunca. Adopta el puerto del ÚLTIMO `HELLO`.
 //   · Drena primero la cola `window.__pendientes` que llena el `<script nonce>` del layout ANTES de
@@ -61,6 +63,49 @@ declare global {
   }
 }
 
+/**
+ * El origen contra el que el hijo valida `event.origin`, resuelto EN EJECUCIÓN (N-02,
+ * `ADR-3C-N02-01`).
+ *
+ * Antes esto era `process.env.NEXT_PUBLIC_EDITOR_ORIGIN`, es decir una constante horneada al
+ * construir. Con el mismo artefacto servido en otro puerto, el hijo descartaba el `HELLO` del padre
+ * legítimo por no coincidir el origen, y la vista previa se quedaba en «Esperando al editor…» sin
+ * decir por qué. Era el segundo candado del mismo defecto medido en `bitacora/3b-adv.md §6.2`: el
+ * primero es la CSP, y aunque se arreglara sólo la CSP, esta comparación seguiría matando el lienzo.
+ *
+ * Orden de resolución:
+ *   1. `opts.expectedParentOrigin` — quien monta el lienzo puede imponerlo (lo usan las pruebas del
+ *      puente, que conducen los dos lados sin navegador).
+ *   2. `location.ancestorOrigins[0]` — el origen del que embebe, según el propio navegador.
+ *      Chromium y WebKit lo exponen incluso en un iframe de origen opaco; **no** es falsificable
+ *      desde la página que embebe.
+ *   3. `document.referrer` — el mismo dato en Firefox, donde `ancestorOrigins` no existe.
+ *   4. La constante horneada, sólo como último recurso, para no cambiar el comportamiento de un
+ *      arranque donde no hubiera ni una cosa ni la otra.
+ *
+ * Qué NO cambia: quién puede embeber el lienzo lo decide `frame-ancestors` de la CSP
+ * (`proxy.ts`), que es la defensa real y que ahora nombra el origen correcto. Esta comparación es
+ * la segunda capa, y sigue haciendo su trabajo: sólo se acepta al marco que de verdad nos embebe.
+ * Por el puente no viaja ningún secreto (C4/P8), así que el peor caso sigue siendo el de siempre.
+ */
+export function origenDelPadre(declarado?: string): string {
+  if (declarado) return declarado;
+  if (typeof window === "undefined") return "";
+
+  const ancestros = window.location?.ancestorOrigins;
+  const primero = ancestros && ancestros.length > 0 ? ancestros[0] : undefined;
+  if (primero && primero !== "null") return primero;
+
+  try {
+    const remitente = typeof document === "undefined" ? "" : document.referrer;
+    if (remitente) return new URL(remitente).origin;
+  } catch {
+    /* un referrer que no es una URL no dice nada: se sigue al último recurso */
+  }
+
+  return process.env.NEXT_PUBLIC_EDITOR_ORIGIN ?? "";
+}
+
 export function createCanvasClient(
   handlers: CanvasClientHandlers,
   opts: { expectedParentOrigin?: string; buildId?: string } = {},
@@ -70,7 +115,7 @@ export function createCanvasClient(
   // `securitypolicyviolation` de `script-src`/`eval`. No se afloja la CSP por esto.
   configureZodForCanvas();
 
-  const origenPadre = opts.expectedParentOrigin ?? process.env.NEXT_PUBLIC_EDITOR_ORIGIN ?? "";
+  const origenPadre = origenDelPadre(opts.expectedParentOrigin);
   const buildId = (opts.buildId ?? "apps-web").slice(0, 64);
   let puerto: MessagePort | null = null;
   let seqSaliente = 0;

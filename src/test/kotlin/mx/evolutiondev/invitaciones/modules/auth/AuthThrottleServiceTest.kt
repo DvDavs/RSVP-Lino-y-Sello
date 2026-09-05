@@ -12,6 +12,7 @@ import mx.evolutiondev.invitaciones.core.auth.service.HierarchyValidationService
 import mx.evolutiondev.invitaciones.core.email.EmailService
 import mx.evolutiondev.invitaciones.core.error.exception.UnauthorizedException
 import mx.evolutiondev.invitaciones.modules.auth.presentation.model.request.AuthRequest
+import mx.evolutiondev.invitaciones.modules.auth.service.AmbitoIntentos
 import mx.evolutiondev.invitaciones.modules.auth.service.AuthThrottleService
 import mx.evolutiondev.invitaciones.modules.auth.service.CustomerService
 import mx.evolutiondev.invitaciones.modules.auth.service.DemasiadosIntentosException
@@ -268,6 +269,88 @@ class AuthThrottleServiceTest {
             assertEquals("Demasiados intentos. Espera unos minutos e inténtalo de nuevo.", bloqueo.message)
         } finally {
             RequestContextHolder.resetRequestAttributes()
+        }
+    }
+
+    // =============================================================================================
+    // (c) Ámbitos — N-01 (`ADR-3C-N01-01`)
+    // =============================================================================================
+
+    /**
+     * La razón de ser del prefijo de ámbito, dicha como prueba: si los tres extremos compartieran
+     * contador, cinco peticiones de recuperación sobre la cuenta de otra persona la dejarían sin
+     * poder ENTRAR durante quince minutos. El arreglo de N-01 habría creado una denegación de
+     * servicio nueva mientras cerraba la toma de cuenta.
+     */
+    @Test
+    @DisplayName("N-01 · agotar la recuperación NO bloquea el acceso de la misma cuenta")
+    fun losAmbitosNoCompartenContador() {
+        val limitador = limitador()
+
+        repeat(5) { limitador.registrarIntento(AmbitoIntentos.RECUPERACION, "victima@example.com") }
+        assertFailsWith<DemasiadosIntentosException> {
+            limitador.comprobar(AmbitoIntentos.RECUPERACION, "victima@example.com")
+        }
+
+        // La víctima puede seguir entrando: su contador de ACCESO está intacto.
+        limitador.comprobar(AmbitoIntentos.ACCESO, "victima@example.com")
+        limitador.comprobar(AmbitoIntentos.REGISTRO, "victima@example.com")
+    }
+
+    @Test
+    @DisplayName("N-01 · agotar el registro NO bloquea ni el acceso ni la recuperación")
+    fun elRegistroNoDerramaEnLosOtrosAmbitos() {
+        val limitador = limitador()
+
+        repeat(5) { limitador.registrarIntento(AmbitoIntentos.REGISTRO, "tomado@example.com") }
+        assertFailsWith<DemasiadosIntentosException> {
+            limitador.comprobar(AmbitoIntentos.REGISTRO, "tomado@example.com")
+        }
+        limitador.comprobar(AmbitoIntentos.ACCESO, "tomado@example.com")
+        limitador.comprobar(AmbitoIntentos.RECUPERACION, "tomado@example.com")
+    }
+
+    @Test
+    @DisplayName("N-01 · el límite por IP tampoco se comparte entre ámbitos")
+    fun elLimitePorIpTambienLlevaAmbito() {
+        val peticion = MockHttpServletRequest()
+        peticion.remoteAddr = "203.0.113.9"
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(peticion))
+        try {
+            val limitador = limitador()
+            // 20 cuentas distintas: ninguna llega a 5, pero la IP llega a 20 en RECUPERACION.
+            repeat(20) { i -> limitador.registrarIntento(AmbitoIntentos.RECUPERACION, "cuenta$i@example.test") }
+            assertFailsWith<DemasiadosIntentosException> {
+                limitador.comprobar(AmbitoIntentos.RECUPERACION, "otra@example.test")
+            }
+            // La misma IP sigue pudiendo intentar entrar: el cubo de ACCESO está vacío.
+            limitador.comprobar(AmbitoIntentos.ACCESO, "otra@example.test")
+        } finally {
+            RequestContextHolder.resetRequestAttributes()
+        }
+    }
+
+    @Test
+    @DisplayName("N-01 · el 429 es el MISMO mensaje en los tres ámbitos: no dice cuál se agotó")
+    fun elMensajeDel429EsElMismoEnLosTresAmbitos() {
+        val mensajes = AmbitoIntentos.entries.map { ambito ->
+            val limitador = limitador()
+            repeat(5) { limitador.registrarIntento(ambito, "victima@example.com") }
+            assertFailsWith<DemasiadosIntentosException> { limitador.comprobar(ambito, "victima@example.com") }.message
+        }
+        assertEquals(1, mensajes.toSet().size, "el 429 delata el ámbito: $mensajes")
+        assertEquals("Demasiados intentos. Espera unos minutos e inténtalo de nuevo.", mensajes.first())
+    }
+
+    @Test
+    @DisplayName("N-01 · registrarExito de un ámbito no limpia el contador de otro")
+    fun elExitoDeUnAmbitoNoLimpiaOtro() {
+        val limitador = limitador()
+        repeat(5) { limitador.registrarIntento(AmbitoIntentos.RECUPERACION, "ana@example.com") }
+        limitador.registrarExito(AmbitoIntentos.REGISTRO, "ana@example.com")
+
+        assertFailsWith<DemasiadosIntentosException> {
+            limitador.comprobar(AmbitoIntentos.RECUPERACION, "ana@example.com")
         }
     }
 

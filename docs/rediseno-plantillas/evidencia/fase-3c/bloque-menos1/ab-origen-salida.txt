@@ -1,0 +1,113 @@
+===============================================================================
+ N-02 · A/B sobre EL MISMO build en dos puertos
+ build horneado con NEXT_PUBLIC_EDITOR_ORIGIN=http://127.0.0.1:3050
+                    NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3050
+ servido en :3050 (coincide) y en :3000 (NO coincide)
+ 2026-09-05T19:04:51.529Z
+===============================================================================
+
+-- 1. build ÚNICO -------------------------------------------------------------
+
+> web@0.0.0 build /home/user/RSVP---Lino-Sello/frontend/apps/web
+> next build
+
+▲ Next.js 16.3.4 (Turbopack)
+✓ Running next.config.ts took 36ms
+Warning: Custom Cache-Control headers detected for the following routes:
+  - /_next/static/media/:path*
+
+Setting a custom Cache-Control header can break Next.js development behavior.
+- Experiments (use with caution):
+  ✓ authInterrupts
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 328ms
+  Running TypeScript ...
+  Finished TypeScript in 3.2s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/7) ...
+  Generating static pages using 3 workers (1/7) 
+  Generating static pages using 3 workers (3/7) 
+  Generating static pages using 3 workers (5/7) 
+✓ Generating static pages using 3 workers (7/7) in 361ms
+Turbopack build encountered 1 warning:
+./apps/web/instrumentation.ts:35:3
+Warning: A Node.js API is used (process.exit at line: 35) which is not supported in the Edge Runtime.
+    Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+  [90m33 |[0m   [36mconst[0m raya = [32m"═"[0m.repeat([35m96[0m);
+  [90m34 |[0m   console.error([32m`\n[0m${raya[32m}\n  ARRANQUE ABORTADO · [0m${titulo[32m}\n[0m${raya[32m}\n  [0m${motivo[32m}\n[0m${raya[32m}...[0m
+[33m[1m>[0m [90m35 |[0m   process.exit([35m1[0m);
+  [90m   |[0m   [33m[1m^^^^^^^^^^^^[0m
+  [90m36 |[0m }
+  [90m37 |[0m
+  [90m38 |[0m [36mexport[0m [36mfunction[0m register(): [36mvoid[0m {
+
+Ecmascript file had an error
+
+
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /_not-found
+├ ○ /acceso
+├ ƒ /api/revalidate
+├ ƒ /api/revalidate/tras-publicar
+├ ○ /ayuda
+├ ○ /editor
+├ ƒ /editor/[invitationId]
+├ ƒ /editor/[invitationId]/canvas
+├ ● /i/[publicToken]
+├ ƒ /i/[publicToken]/opengraph-image-1l4act
+└ ƒ /preview/[invitationId]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+
+invitación de demostración: id=3 publicToken=pub_FDJNBR699ND3Z14RTP1FV60G9B
+
+-- 2. la aserción de arranque de N-02 ------------------------------------------
+   se intenta servir el build de :3050 en :3000 SIN la puerta de escape
+   salida del proceso: 1
+   ARRANQUE ABORTADO · el origen del build no es el que se va a servir (N-02)
+   el proceso murió: la aserción de arranque SÍ impide servir un build desalineado.
+
+-- 3. el MISMO build servido en los dos puertos --------------------------------
+   :3050 escuchando
+   :3000 escuchando
+
+-- 4. medición en :3050 ----------------------------------------------
+   iframe del lienzo presente ........ true
+   frames /canvas ................... 1
+   lienzo pintado ................... true
+   frame-ancestors servido .......... http://127.0.0.1:3050
+   violaciones de CSP en consola .... 0 []
+   violaciones dentro del lienzo .... 0 []
+   «Copiar enlace» ................... http://127.0.0.1:3050/i/pub_FDJNBR699ND3Z14RTP1FV60G9B
+   «Ver como invitado» (href) ....... http://127.0.0.1:3050/i/pub_FDJNBR699ND3Z14RTP1FV60G9B
+   texto de WhatsApp (href) ......... https://wa.me/?text=http%3A%2F%2F127.0.0.1%3A3050%2Fi%2Fpub_FDJNBR699ND3Z14RTP1FV60G9B
+   ese enlace abre en este puerto ... HTTP 200
+   captura .......................... capturas/editor-3050.png
+
+-- 4. medición en :3000 ----------------------------------------------
+   iframe del lienzo presente ........ true
+   frames /canvas ................... 1
+   lienzo pintado ................... true
+   frame-ancestors servido .......... http://127.0.0.1:3000
+   violaciones de CSP en consola .... 0 []
+   violaciones dentro del lienzo .... 0 []
+   «Copiar enlace» ................... http://127.0.0.1:3000/i/pub_FDJNBR699ND3Z14RTP1FV60G9B
+   «Ver como invitado» (href) ....... http://127.0.0.1:3000/i/pub_FDJNBR699ND3Z14RTP1FV60G9B
+   texto de WhatsApp (href) ......... https://wa.me/?text=http%3A%2F%2F127.0.0.1%3A3000%2Fi%2Fpub_FDJNBR699ND3Z14RTP1FV60G9B
+   ese enlace abre en este puerto ... HTTP 200
+   captura .......................... capturas/editor-3000.png
+
+-- 5. veredicto ---------------------------------------------------------------
+   :3050 CUMPLE
+   :3000 CUMPLE
+
+   N-02 CERRADA: el mismo artefacto sirve bien en los dos puertos.

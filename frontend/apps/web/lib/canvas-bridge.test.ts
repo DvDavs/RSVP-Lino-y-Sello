@@ -7,7 +7,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CANVAS_PROTOCOL_TAG } from "@invitaciones/schema/canvas";
 import { createCanvasBridge, HELLO_MAX_ATTEMPTS } from "./canvas-bridge.ts";
-import { createCanvasClient } from "./canvas-client.ts";
+import { createCanvasClient, origenDelPadre } from "./canvas-client.ts";
 import { composedFixture } from "../test/fixtures/composed.ts";
 
 /** `iframe.contentWindow` simulado: recibe el `HELLO` y lo entrega al cliente hijo. */
@@ -297,5 +297,60 @@ describe("lado hijo · `createCanvasClient` (04 §9.2)", () => {
     expect(incompatibles).toEqual([2]);
     expect(cliente.connected()).toBe(false);
     cliente.stop();
+  });
+});
+
+// ───────────────────────────────────────────────────────────────────────────────────────────────
+// N-02 (`ADR-3C-N02-01`) · contra QUÉ origen valida el hijo
+// ───────────────────────────────────────────────────────────────────────────────────────────────
+//
+// Antes de la fase 3-C esto era `process.env.NEXT_PUBLIC_EDITOR_ORIGIN`, una constante horneada al
+// construir. Con el mismo artefacto servido en otro puerto, el hijo descartaba el `HELLO` del padre
+// legítimo y el lienzo se quedaba en «Esperando al editor…» sin decir por qué: es el SEGUNDO candado
+// del defecto medido en `bitacora/3b-adv.md §6.2`, el que sigue matando la vista previa aunque la
+// CSP ya esté bien. Ahora el origen se resuelve en ejecución, preguntándole al navegador quién
+// embebe de verdad.
+describe("origenDelPadre · N-02, el origen del padre se resuelve en EJECUCIÓN", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("lo que pase quien monta el lienzo manda sobre todo lo demás", () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITOR_ORIGIN", "http://horneado.example");
+    expect(origenDelPadre("http://impuesto.example")).toBe("http://impuesto.example");
+  });
+
+  it("usa `location.ancestorOrigins` —lo que dice el navegador— antes que la constante horneada", () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITOR_ORIGIN", "http://127.0.0.1:3050");
+    vi.stubGlobal("location", { ancestorOrigins: ["http://127.0.0.1:3000"], origin: "null" });
+    expect(origenDelPadre()).toBe("http://127.0.0.1:3000");
+  });
+
+  it("cae a `document.referrer` donde no hay `ancestorOrigins` (Firefox), quedándose con el origen", () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITOR_ORIGIN", "http://127.0.0.1:3050");
+    vi.stubGlobal("location", { origin: "null" });
+    vi.stubGlobal("document", { referrer: "http://127.0.0.1:3000/editor/3" });
+    expect(origenDelPadre()).toBe("http://127.0.0.1:3000");
+  });
+
+  it("un `ancestorOrigins` opaco («null») no cuenta: se sigue al referrer", () => {
+    vi.stubGlobal("location", { ancestorOrigins: ["null"] });
+    vi.stubGlobal("document", { referrer: "http://127.0.0.1:3000/editor/3" });
+    expect(origenDelPadre()).toBe("http://127.0.0.1:3000");
+  });
+
+  it("sin nada que preguntar cae a la constante horneada, que es el último recurso", () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITOR_ORIGIN", "http://127.0.0.1:3050");
+    vi.stubGlobal("location", {});
+    vi.stubGlobal("document", { referrer: "" });
+    expect(origenDelPadre()).toBe("http://127.0.0.1:3050");
+  });
+
+  it("un referrer que no es una URL no rompe nada", () => {
+    vi.stubEnv("NEXT_PUBLIC_EDITOR_ORIGIN", "");
+    vi.stubGlobal("location", {});
+    vi.stubGlobal("document", { referrer: "no-es-una-url" });
+    expect(origenDelPadre()).toBe("");
   });
 });

@@ -1,3 +1,12 @@
+/**
+ * N-02 (`ADR-3C-N02-01`): desde la fase 3-C el enlace público se construye con el origen por el que
+ * la clienta NAVEGA (`window.location.origin`), no con `NEXT_PUBLIC_SITE_URL`, que Next hornea en el
+ * build y que por tanto puede apuntar a un servidor que no es el suyo. Este archivo declara el
+ * origen de jsdom para que la expectativa siga siendo un dominio público de verdad y no el
+ * `localhost:3000` por defecto del entorno de pruebas.
+ *
+ * @vitest-environment-options { "url": "https://invitaciones.mx/editor/3" }
+ */
 // components/editor/publicar-enlace-y-cache.test.tsx — las dos mentiras de la pantalla de
 // publicado, medidas en la revisión de uso:
 //   U-6 · el enlace que se copiaba y se mandaba por WhatsApp era `http://localhost/i/…`: no le

@@ -2,12 +2,19 @@
 // Cada `it` de este archivo falla con el código anterior al bloque 3-8 (que entregaba
 // `resultado.publicUrl` tal cual, sin mirar el origen del sitio y sin comprobar nada al arrancar).
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { enlacePublico, esOrigenLocal, motivoDeArranqueInvalido, origenPublico } from "./enlace-publico.ts";
+import {
+  enlacePublico,
+  esOrigenLocal,
+  motivoDeArranqueInvalido,
+  motivoDeOrigenDesalineado,
+  origenPublico,
+} from "./enlace-publico.ts";
 
 const TOKEN = "pub_FCTH3DCWGNP954PYK16F0XH5GV";
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
 });
 
 describe("esOrigenLocal · qué enlaces no le abren a nadie", () => {
@@ -24,9 +31,18 @@ describe("esOrigenLocal · qué enlaces no le abren a nadie", () => {
 });
 
 describe("enlacePublico · lo que se copia y se manda por WhatsApp", () => {
-  it("usa el origen declarado del sitio y NO el publicUrl del servidor (el defecto de U-6)", () => {
+  it("NO usa el publicUrl del servidor (el defecto original de U-6)", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://invitaciones.mx");
-    expect(enlacePublico(TOKEN, `http://localhost/i/${TOKEN}`)).toBe(`https://invitaciones.mx/i/${TOKEN}`);
+    expect(enlacePublico(TOKEN, `http://localhost/i/${TOKEN}`)).not.toMatch(/localhost\/i\//);
+  });
+
+  // N-02 (`ADR-3C-N02-01`): el orden se INVIRTIÓ. `NEXT_PUBLIC_SITE_URL` se hornea en el build, así
+  // que el mismo artefacto servido en otro origen repartía enlaces al origen de compilación
+  // (medido en `bitacora/3b-adv.md §6.2`). Manda el origen por el que la clienta navega de verdad.
+  it("en el navegador manda `window.location.origin`, aunque haya una variable horneada distinta", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://invitaciones.mx");
+    expect(origenPublico()).toBe(window.location.origin);
+    expect(enlacePublico(TOKEN, `http://localhost/i/${TOKEN}`)).toBe(`${window.location.origin}/i/${TOKEN}`);
   });
 
   it("sin origen declarado usa el origen por el que la clienta está entrando ahora mismo", () => {
@@ -37,9 +53,117 @@ describe("enlacePublico · lo que se copia y se manda por WhatsApp", () => {
     expect(origenPublico()).toBe(window.location.origin);
   });
 
-  it("normaliza la barra final del origen declarado", () => {
+  // Sin `window` —SSR, metadatos, cualquier código de servidor— la variable declarada sigue siendo
+  // la única fuente posible, y ahí sí manda. Es exactamente el reparto que fija `ADR-3C-N02-01`.
+  it("en el servidor (sin window) manda la variable declarada, normalizando la barra final", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://invitaciones.mx/");
+    vi.stubGlobal("window", undefined);
+    expect(origenPublico()).toBe("https://invitaciones.mx");
     expect(enlacePublico(TOKEN)).toBe(`https://invitaciones.mx/i/${TOKEN}`);
+    vi.unstubAllGlobals();
+  });
+
+  it("sin window y sin variable declarada cae al publicUrl del servidor, que es el último recurso", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "");
+    vi.stubGlobal("window", undefined);
+    expect(origenPublico()).toBeNull();
+    expect(enlacePublico(TOKEN, `http://localhost/i/${TOKEN}`)).toBe(`http://localhost/i/${TOKEN}`);
+    vi.unstubAllGlobals();
+  });
+});
+
+// ───────────────────────────────────────────────────────────────────────────────────────────────
+// N-02 · la aserción de arranque que compara el origen HORNEADO con el que se va a SERVIR
+// ───────────────────────────────────────────────────────────────────────────────────────────────
+describe("motivoDeOrigenDesalineado · el build para un puerto, el servidor en otro", () => {
+  // El caso EXACTO que midió la revisión adversarial de la fase 3-B: build horneado para `:3050`,
+  // servido con `PORT=3000`. Antes nadie lo veía; ahora el proceso se niega a arrancar.
+  it("detecta el desajuste medido en 3-B: horneado en :3050, servido en :3000", () => {
+    const motivo = motivoDeOrigenDesalineado({
+      NODE_ENV: "production",
+      NEXT_PUBLIC_EDITOR_ORIGIN: "http://127.0.0.1:3050",
+      PORT: "3000",
+    } as NodeJS.ProcessEnv);
+    expect(motivo).toMatch(/NEXT_PUBLIC_EDITOR_ORIGIN/);
+    expect(motivo).toMatch(/3050/);
+    expect(motivo).toMatch(/3000/);
+  });
+
+  it("también mira NEXT_PUBLIC_SITE_URL, que es la que reparte los enlaces a las invitadas", () => {
+    expect(
+      motivoDeOrigenDesalineado({
+        NODE_ENV: "production",
+        NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3050",
+        PORT: "3000",
+      } as NodeJS.ProcessEnv),
+    ).toMatch(/NEXT_PUBLIC_SITE_URL/);
+  });
+
+  it("no dice nada cuando el puerto horneado y el servido coinciden", () => {
+    expect(
+      motivoDeOrigenDesalineado({
+        NODE_ENV: "production",
+        NEXT_PUBLIC_EDITOR_ORIGIN: "http://127.0.0.1:3000",
+        NEXT_PUBLIC_SITE_URL: "http://127.0.0.1:3000",
+        PORT: "3000",
+      } as NodeJS.ProcessEnv),
+    ).toBeNull();
+  });
+
+  it("sin PORT usa el 3000 por defecto de `next start`", () => {
+    expect(
+      motivoDeOrigenDesalineado({ NODE_ENV: "production", NEXT_PUBLIC_EDITOR_ORIGIN: "http://127.0.0.1:3000" } as NodeJS.ProcessEnv),
+    ).toBeNull();
+    expect(
+      motivoDeOrigenDesalineado({ NODE_ENV: "production", NEXT_PUBLIC_EDITOR_ORIGIN: "http://127.0.0.1:3050" } as NodeJS.ProcessEnv),
+    ).toMatch(/3050/);
+  });
+
+  it("con EDITOR_ORIGIN declarado se compara contra ÉL, no contra el puerto", () => {
+    expect(
+      motivoDeOrigenDesalineado({
+        NODE_ENV: "production",
+        EDITOR_ORIGIN: "https://invitaciones.mx",
+        NEXT_PUBLIC_SITE_URL: "https://otra-cosa.mx",
+        PORT: "3000",
+      } as NodeJS.ProcessEnv),
+    ).toMatch(/EDITOR_ORIGIN=https:\/\/invitaciones\.mx/);
+    expect(
+      motivoDeOrigenDesalineado({
+        NODE_ENV: "production",
+        EDITOR_ORIGIN: "https://invitaciones.mx",
+        NEXT_PUBLIC_SITE_URL: "https://invitaciones.mx",
+        PORT: "3000",
+      } as NodeJS.ProcessEnv),
+    ).toBeNull();
+  });
+
+  // Detrás de un proxy inverso el puerto interno (3000) no tiene por qué parecerse al público (443):
+  // afirmar ahí sería un falso positivo que tumbaría un despliegue correcto. Con un origen horneado
+  // público y sin `EDITOR_ORIGIN` no se puede saber nada, y no se afirma nada.
+  it("no inventa un desajuste cuando el origen horneado es público y no hay EDITOR_ORIGIN", () => {
+    expect(
+      motivoDeOrigenDesalineado({
+        NODE_ENV: "production",
+        NEXT_PUBLIC_SITE_URL: "https://invitaciones.mx",
+        PORT: "3000",
+      } as NodeJS.ProcessEnv),
+    ).toBeNull();
+  });
+
+  it("no se mete en desarrollo, ni durante el build, y respeta su puerta de escape", () => {
+    const roto = { NEXT_PUBLIC_EDITOR_ORIGIN: "http://127.0.0.1:3050", PORT: "3000" };
+    expect(motivoDeOrigenDesalineado({ ...roto, NODE_ENV: "development" } as NodeJS.ProcessEnv)).toBeNull();
+    expect(
+      motivoDeOrigenDesalineado({ ...roto, NODE_ENV: "production", NEXT_PHASE: "phase-production-build" } as NodeJS.ProcessEnv),
+    ).toBeNull();
+    expect(
+      motivoDeOrigenDesalineado({ ...roto, NODE_ENV: "production", PERMITIR_ORIGEN_DESALINEADO: "1" } as NodeJS.ProcessEnv),
+    ).toBeNull();
+  });
+
+  it("sin nada horneado no hay nada que comparar", () => {
+    expect(motivoDeOrigenDesalineado({ NODE_ENV: "production", PORT: "3050" } as NodeJS.ProcessEnv)).toBeNull();
   });
 });
 

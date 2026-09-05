@@ -13,7 +13,8 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
 /**
- * `429` uniforme de `POST /auth/token`.
+ * `429` uniforme de `POST /auth/token`, `POST /auth/request-password-reset` y `POST /auth/signup`
+ * (N-01, `ADR-3C-N01-01`).
  *
  * Lleva `@ResponseStatus` en la propia clase a propósito: ningún `@ControllerAdvice` de la
  * aplicación la captura, así que Spring aplica el estado sin tocar los manejadores globales.
@@ -33,6 +34,32 @@ import org.springframework.web.context.request.ServletRequestAttributes
 class DemasiadosIntentosException(
         message: String = "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."
 ) : RuntimeException(message)
+
+/**
+ * Ámbito del contador (N-01, `ADR-3C-N01-01`).
+ *
+ * Cada extremo limitado lleva su **propio espacio de claves**; el prefijo forma parte de la clave
+ * del mapa, así que `acceso:ana@…` y `recuperacion:ana@…` son entradas distintas. No es una
+ * floritura: si las tres rutas compartieran contador, pedir cinco correos de recuperación para la
+ * cuenta de otra persona la dejaría sin poder **entrar** durante 15 minutos — un ataque de
+ * denegación NUEVO, creado por el propio arreglo. Con el prefijo, agotar la recuperación agota
+ * exactamente la recuperación.
+ *
+ * La contrapartida, dicha con todas las letras: un atacante dispone de tres cubos en vez de uno, así
+ * que el techo total de intentos por IP se multiplica por tres (20 → 60 en 15 min). Se acepta porque
+ * los tres cubos protegen cosas distintas y ninguno de ellos es el que adivina contraseñas: el de
+ * `/auth/token` sigue siendo 20 y sigue siendo el único que abre sesión.
+ */
+enum class AmbitoIntentos(val prefijo: String) {
+    /** `POST /auth/token` — el de I-02. Cada fallo de credenciales cuenta; un acceso correcto limpia. */
+    ACCESO("acceso"),
+
+    /** `POST /auth/request-password-reset` — **cada** petición cuenta; no hay «éxito» que limpie. */
+    RECUPERACION("recuperacion"),
+
+    /** `POST /auth/signup` — cuenta el intento rechazado; un alta correcta limpia el contador. */
+    REGISTRO("registro"),
+}
 
 /**
  * I-02 (H-ADV-05): límite de intentos y hash señuelo para `POST /auth/token`.
@@ -56,8 +83,14 @@ class DemasiadosIntentosException(
  * por **cuenta** (correo normalizado) y por **IP**. Un fallo incrementa los dos; basta con que uno
  * esté al límite para bloquear.
  *
+ * ### Ámbitos (N-01, `ADR-3C-N01-01`)
+ * Desde la fase 3-C el limitador cubre **tres** extremos —`/auth/token`, `/auth/signup` y
+ * `/auth/request-password-reset`— y cada uno lleva su propio espacio de claves (`AmbitoIntentos`).
+ * Los límites, la ventana y el cuerpo del `429` son los mismos en los tres; lo que no se comparte es
+ * el contador.
+ *
  * ### Un acceso correcto limpia los contadores
- * `registrarExito` borra la entrada de la cuenta **y** la de la IP. Así, un usuario legítimo nunca
+ * `registrarExito` borra la entrada de la cuenta **y** la de la IP, dentro de su ámbito. Así, un usuario legítimo nunca
  * queda bloqueado después de un `200`, y una oficina tras NAT no se autobloquea porque varios
  * compañeros hayan fallado. Contrapartida asumida y explícita: quien tenga unas credenciales
  * válidas puede reiniciar su propio contador de IP; el control duro sigue siendo el de cuenta
@@ -111,38 +144,53 @@ class AuthThrottleService(
 
     init {
         log.info(
-                "auth: límite de intentos de /auth/token activo — {} fallos/cuenta, {} fallos/IP, ventana {} min, tope {} entradas",
+                "auth: límite de intentos activo en {} — {} fallos/cuenta, {} fallos/IP, ventana {} min, tope {} entradas",
+                AmbitoIntentos.entries.joinToString(", ") { it.prefijo },
                 maxFallosPorCuenta, maxFallosPorIp, ventanaMinutos, maxEntradas
         )
     }
 
     /**
-     * Lanza `DemasiadosIntentosException` si la cuenta **o** la IP están al límite.
+     * Lanza `DemasiadosIntentosException` si la cuenta **o** la IP están al límite en ese ámbito.
      *
      * Se llama **antes** de consultar el repositorio: así el `429` cuesta lo mismo exista o no la
      * cuenta, y no gasta ni una consulta ni un bcrypt.
      */
-    fun comprobar(email: String) {
+    fun comprobar(ambito: AmbitoIntentos, email: String) {
         val ahora = reloj()
-        if (bloqueada(porCuenta, claveCuenta(email), maxFallosPorCuenta, ahora)) throw DemasiadosIntentosException()
-        if (bloqueada(porIp, ipCliente(), maxFallosPorIp, ahora)) throw DemasiadosIntentosException()
+        if (bloqueada(porCuenta, claveCuenta(ambito, email), maxFallosPorCuenta, ahora)) throw DemasiadosIntentosException()
+        if (bloqueada(porIp, claveIp(ambito), maxFallosPorIp, ahora)) throw DemasiadosIntentosException()
     }
 
-    /** Un intento fallido: incrementa el contador de la cuenta y el de la IP. */
-    fun registrarFallo(email: String) {
-        val ahora = reloj()
-        incrementar(porCuenta, claveCuenta(email), ahora)
-        incrementar(porIp, ipCliente(), ahora)
-    }
+    /** `POST /auth/token`. Se conserva sin ámbito para no tocar la firma que usa `CustomerService`. */
+    fun comprobar(email: String) = comprobar(AmbitoIntentos.ACCESO, email)
 
     /**
-     * La contraseña coincidió: se borran los dos contadores. Es lo que garantiza que un usuario
-     * legítimo no quede bloqueado justo después de un acceso correcto.
+     * Un intento que cuenta contra el límite: incrementa el contador de la cuenta y el de la IP
+     * **dentro de su ámbito**. En `ACCESO` y `REGISTRO` es un intento *fallido*; en `RECUPERACION`
+     * lo es toda petición, porque ahí no hay respuesta que distinga el éxito del fracaso.
      */
-    fun registrarExito(email: String) {
-        porCuenta.remove(claveCuenta(email))
-        porIp.remove(ipCliente())
+    fun registrarIntento(ambito: AmbitoIntentos, email: String) {
+        val ahora = reloj()
+        incrementar(porCuenta, claveCuenta(ambito, email), ahora)
+        incrementar(porIp, claveIp(ambito), ahora)
     }
+
+    /** Un intento fallido de `POST /auth/token`. */
+    fun registrarFallo(email: String) = registrarIntento(AmbitoIntentos.ACCESO, email)
+
+    /**
+     * La operación salió bien: se borran los dos contadores **de ese ámbito**. Es lo que garantiza
+     * que un usuario legítimo no quede bloqueado justo después de un acceso —o de un alta— correcta.
+     * `RECUPERACION` nunca llama aquí: no hay «éxito» observable que pueda limpiar su contador.
+     */
+    fun registrarExito(ambito: AmbitoIntentos, email: String) {
+        porCuenta.remove(claveCuenta(ambito, email))
+        porIp.remove(claveIp(ambito))
+    }
+
+    /** Un acceso correcto por `POST /auth/token`. */
+    fun registrarExito(email: String) = registrarExito(AmbitoIntentos.ACCESO, email)
 
     /**
      * Gasta un bcrypt contra el hash señuelo. Se invoca en el camino «el correo no existe» para que
@@ -186,8 +234,17 @@ class AuthThrottleService(
         log.warn("auth: el mapa de intentos llegó al tope de {} entradas; desalojado el decil más antiguo", maxEntradas)
     }
 
-    /** Clave de cuenta normalizada: el mismo correo en otra caja no esquiva el contador. */
-    private fun claveCuenta(email: String): String = email.trim().lowercase(Locale.ROOT).take(320)
+    /**
+     * Clave de cuenta normalizada y con ámbito: el mismo correo en otra caja no esquiva el contador,
+     * y el contador de un extremo no puede bloquear otro (`AmbitoIntentos`). El prefijo va delante y
+     * termina en `:`, que no puede aparecer en la parte normalizada de un correo válido, así que dos
+     * ámbitos nunca colisionan.
+     */
+    private fun claveCuenta(ambito: AmbitoIntentos, email: String): String =
+            ambito.prefijo + ":" + email.trim().lowercase(Locale.ROOT).take(320)
+
+    /** Clave de IP con ámbito, por la misma razón que la de cuenta. */
+    private fun claveIp(ambito: AmbitoIntentos): String = ambito.prefijo + ":" + ipCliente()
 
     /**
      * IP del cliente. Se prefiere el primer salto de `X-Forwarded-For` porque en producción la

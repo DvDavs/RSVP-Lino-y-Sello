@@ -80,14 +80,30 @@ class CustomerService(
         return customer
     }
 
+    /**
+     * N-01 (`ADR-3C-N01-01`): `/auth/signup` es `permitAll` y responde `400` cuando el correo ya
+     * existe y `200` cuando no, así que **enumera cuentas** igual que lo hacía
+     * `/auth/request-password-reset`. Aquí NO se puede unificar la respuesta —el alta tiene que
+     * decirle a la persona que ese correo ya está tomado, o no hay forma de registrarse—, así que lo
+     * que se cierra es el **caudal**: el mismo limitador de I-02, en su propio ámbito
+     * (`AmbitoIntentos.REGISTRO`), comprobado antes de tocar la base y registrado después.
+     *
+     * Un alta correcta limpia el contador de ese ámbito: quien de verdad se está registrando nunca
+     * queda bloqueado por sus propios tanteos, y una red tras NAT no se autobloquea.
+     */
     fun signUp(userRequest: UserRequest): CustomerEntity {
+        authThrottleService.comprobar(AmbitoIntentos.REGISTRO, userRequest.email)
+
         val existingUser = customerRepository.findByEmailEvenIfDisabled(userRequest.email)
         
         if (existingUser != null) {
             if (existingUser.isEnabled) {
+                authThrottleService.registrarIntento(AmbitoIntentos.REGISTRO, userRequest.email)
                 throw DuplicatedEmailException("Este correo no se encuentra disponible, por favor intenta con uno diferente")
             } else {
-                return reactivateDisabledUser(existingUser, userRequest)
+                val reactivado = reactivateDisabledUser(existingUser, userRequest)
+                authThrottleService.registrarExito(AmbitoIntentos.REGISTRO, userRequest.email)
+                return reactivado
             }
         }
 
@@ -95,6 +111,7 @@ class CustomerService(
             if (customerRepository.existsByPhoneEvenIfDisabled(phone)) {
                 val phoneOwner = customerRepository.findByPhone(phone)
                 if (phoneOwner != null) {
+                    authThrottleService.registrarIntento(AmbitoIntentos.REGISTRO, userRequest.email)
                     throw IllegalArgumentException(
                             "Este número de teléfono no se encuentra disponible, por favor intenta con uno diferente"
                     )
@@ -130,6 +147,7 @@ class CustomerService(
             )
         }
 
+        authThrottleService.registrarExito(AmbitoIntentos.REGISTRO, userRequest.email)
         return savedUser
     }
 

@@ -1,3 +1,12 @@
+/**
+ * N-02 (`ADR-3C-N02-01`): desde la fase 3-C el enlace público se construye con el origen por el que
+ * la clienta NAVEGA (`window.location.origin`), no con `NEXT_PUBLIC_SITE_URL`, que Next hornea en el
+ * build y que por tanto puede apuntar a un servidor que no es el suyo. Este archivo declara el
+ * origen de jsdom para que la expectativa siga siendo un dominio público de verdad y no el
+ * `localhost:3000` por defecto del entorno de pruebas.
+ *
+ * @vitest-environment-options { "url": "https://invitaciones.mx/editor/3" }
+ */
 // components/editor/PublishDialog.test.tsx — 04 §6.5, §7.1 pasos 10-12: preflight → lista accionable
 // → publicar → enlace. `422 TPL_PUBLISH_BLOCKED_*` vuelve al preflight con la lista actualizada.
 import { render, screen, waitFor } from "@testing-library/react";

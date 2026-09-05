@@ -1,3 +1,7 @@
+/* eslint-disable no-undef -- `page.evaluate(() => ...)` y `addInitScript` corren en el NAVEGADOR:
+   `window` y `document` existen ahí, no en Node. Misma convención —y misma razón— que
+   `scripts/capturas-editor.mjs:2`. Añadido en la fase 3-C: la regla ya fallaba antes de este
+   bloque (comprobado sobre el árbol sin tocar) y dejaba `pnpm run lint` en rojo. */
 // frontend/apps/web/scripts/capturas-cierre-3b.mjs — capturas finales del cierre de la fase 3 (3-B).
 //
 // Toma la invitación PUBLICADA y el EDITOR en los tres viewports de la revisión de calidad visual.

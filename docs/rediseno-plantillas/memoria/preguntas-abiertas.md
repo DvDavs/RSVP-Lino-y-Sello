@@ -896,3 +896,80 @@ una se tomó la opción conservadora y se siguió.
   y salida en `evidencia/fase-3/trampa-gradle-clean.md`. **Arreglo de fondo sugerido:** sacar
   `TEMPLATES2_ASSETS_LOCAL_DIR` de `build/` (p. ej. a `.dev/`). No se hace aquí por disciplina de
   alcance.
+
+## Fase 3-C · bloque -1 (seguridad heredada) — N-01 y N-02 RESUELTAS
+
+- **[RESUELTA por ADR-3C-N01-01]** [Fase 3-B · N-01 · CRÍTICA] «`POST /auth/request-password-reset`
+  devuelve el token de recuperación en el cuerpo, sin autenticar y para cualquier correo». Cerrada
+  bajo la **excepción explícita del dueño** sobre `modules/auth` (misma clase que la de I-02, acotada
+  a `request-password-reset` y `signup`; no se tocó nada más de `auth`). `RecoveryPasswordSentResponse`
+  pierde `resetToken`; la respuesta es siempre `200` con el mismo cuerpo exista o no la cuenta; los dos
+  extremos entran en `AuthThrottleService` con **prefijo de ámbito**. Reproducido antes y después
+  contra el backend real: `evidencia/fase-3c/bloque-menos1/n01-antes-despues.txt`. Compuertas:
+  `RequestPasswordResetContractTest` (8 casos, afirmando sobre el JSON serializado) y 5 casos de
+  ámbito en `AuthThrottleServiceTest`.
+- **[RESUELTA por ADR-3C-N02-01]** [Fase 3-B · N-02 · ALTA] «El origen del sitio y la CSP del lienzo
+  se hornean en el build». El origen se resuelve en tiempo de petición (`proxy.ts`), el hijo del
+  lienzo valida contra el origen real de quien embebe (`canvas-client.ts`), `origenPublico()` pone
+  `window.location.origin` por delante de `NEXT_PUBLIC_SITE_URL`, y una aserción de arranque niega el
+  servicio cuando el build no cuadra con lo que se va a servir. A/B sobre el MISMO build en `:3050` y
+  `:3000` con los dos puertos CUMPLIENDO: `evidencia/fase-3c/bloque-menos1/ab-origen-salida.txt`.
+  **U-6 queda cerrada por las dos puertas.**
+
+**Supuestos y cuestiones nuevas de este bloque:**
+
+- [Fase 3-C · 3c-menos1] **El oráculo de temporización de `request-password-reset` queda igualado a
+  medias y NO se ha medido.** El camino «el correo no existe» acuña un token igual que el otro y lo
+  descarta, pero no puede fabricar la escritura en la base que sí ocurre cuando la cuenta existe.
+  **Supuesto tomado:** la diferencia residual es aceptable —es órdenes de magnitud menor que el
+  `400` frente a `200` que había— y el brief no exigía medirla con 30 muestras. ¿Quiere el dueño una
+  medición con muestra, o una cola de trabajo asíncrona que iguale también la escritura?
+- [Fase 3-C · 3c-menos1] **El bloqueo de cuenta como denegación de servicio SIGUE ABIERTO**, y ahora
+  también en el ámbito `RECUPERACION`: cinco peticiones ajenas dejan a la dueña sin poder pedir
+  recuperación durante quince minutos. El prefijo de ámbito impide que eso le cierre **el acceso**
+  —que era el riesgo nuevo que el propio arreglo podía crear, y está medido que no ocurre— pero no
+  resuelve la cuestión de fondo. **Queda FUERA de este bloque** por acuerdo; sigue siendo la misma
+  cuestión que `handoffs/3-para-fase-4.md §4` ya listaba (la salida habitual es un desafío al tercer
+  intento en vez de un bloqueo duro).
+- [Fase 3-C · 3c-menos1] **Con tres ámbitos, el techo total de intentos por IP pasa de 20 a 60 por
+  ventana de 15 minutos.** **Supuesto tomado:** es aceptable, porque los tres cubos protegen cosas
+  distintas y sólo el de `/auth/token` abre sesión. ¿Prefiere el dueño un cuarto contador global por
+  IP por encima de los tres, o límites distintos por ámbito?
+- [Fase 3-C · 3c-menos1] **`location.ancestorOrigins` no existe en Firefox.** Ahí el hijo del lienzo
+  cae a `document.referrer`, que una `Referrer-Policy` estricta podría dejar vacío; en ese caso
+  volvería a usar la constante horneada y reaparecería el defecto de N-02 **en ese navegador**. No se
+  ha podido medir: en este entorno sólo hay Chromium (`contratos.md §7` prohíbe `playwright install`).
+  La defensa que sí es transversal es `frame-ancestors`, que ahora nombra el origen correcto. **Riesgo
+  declarado**, no cerrado.
+- [Fase 3-C · 3c-menos1] **`Host` y `x-forwarded-host` los pone el cliente.** Falsificarlos sólo
+  cambia la CSP de la respuesta de quien los manda (ruta dinámica, nonce por petición, sin caché) y no
+  afloja ninguna directiva, pero la recomendación firme para producción es declarar `EDITOR_ORIGIN`
+  (variable de servidor). La aserción de arranque **no** puede exigirla: no sabría distinguir un
+  despliegue legítimo detrás de un proxy inverso. ¿Quiere el dueño que sea obligatoria en producción?
+- [Fase 3-C · 3c-menos1] **`app/(public)/layout.tsx` sigue tomando `metadataBase` de
+  `NEXT_PUBLIC_SITE_URL`.** Es código de servidor —donde la variable es la fuente correcta— pero sigue
+  siendo de compilación, así que una tarjeta de enlace de WhatsApp podría llevar el origen del build.
+  **Supuesto tomado:** no se toca por disciplina de alcance; la aserción de arranque lo cubre
+  indirectamente. Candidato claro a `SITE_URL` de servidor en la fase 4.
+- [Fase 3-C · 3c-menos1] **HALLAZGO: `throw` dentro de `register()` de `instrumentation.ts` NO impide
+  arrancar en `next@16`.** Next captura la excepción, la imprime como un error más del registro y
+  sigue sirviendo (medido: el servidor quedó escuchando y lo delató un `EADDRINUSE`). La guarda de
+  arranque de U-6 (`ADR-3-8-03`, bloque 3-8) llevaba desde entonces siendo un mensaje en un log, no
+  una guarda. Corregido con `process.exit(1)`. **`ADR-3C-N02-01` enmienda de facto esa mitad de
+  `ADR-3-8-03`**; queda para que el orquestador lo registre al aceptar.
+- [Fase 3-C · 3c-menos1] **`pnpm run lint` estaba en rojo ANTES de este bloque** (3 errores `no-undef`
+  en `frontend/apps/web/scripts/capturas-cierre-3b.mjs`; comprobado con `git stash` sobre el árbol sin
+  tocar). Arreglado con la misma convención que su hermano `scripts/capturas-editor.mjs:2`, sin
+  cambiar comportamiento, porque «lint en verde» era compuerta del encargo. Queda dicho para que no se
+  cuente como trabajo de este bloque.
+- [Fase 3-C · 3c-menos1] **La A/B de N-02 no es un e2e y se explica por qué**: `playwright.config.ts`
+  reconstruye con el origen del puerto que va a servir, que es exactamente el punto ciego que N-02
+  describe. Vive como guion reproducible en `evidencia/fase-3c/bloque-menos1/ab-origen.mjs`, con su
+  salida guardada. Cada mitad del mecanismo sí está en pruebas normales (`test/proxy-origen.test.ts`,
+  `origenDelPadre` en `lib/canvas-bridge.test.ts`, `motivoDeOrigenDesalineado` en
+  `lib/enlace-publico.test.ts`). ¿Quiere el dueño que la fase 4 lo convierta en un trabajo de CI con
+  dos `webServer`, asumiendo el coste de un build y dos servidores extra en cada pasada?
+- [Fase 3-C · 3c-menos1] **Este bloque NO aporta medición nueva de LCP ni del presupuesto de JS.**
+  `proxy.ts` sólo corre en la ruta del lienzo y `enlace-publico.ts` apenas cambia de tamaño, pero los
+  márgenes siguen siendo estrechos (144,2 KB de 150; LCP mediana 2 241 ms de 2 500). `e2e/presupuesto.spec.ts`
+  sí pasó dentro de la suite completa (50/50).
