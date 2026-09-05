@@ -9,13 +9,38 @@ import { useState } from "react";
 import type { ComposedDocument } from "@invitaciones/schema";
 import { Button } from "@/components/ui/button.tsx";
 import { getPreflight, publishRelease, rotatePublicToken, unpublishRelease } from "@/lib/api-client.ts";
+import { enlacePublico } from "@/lib/enlace-publico.ts";
 import { ApiError } from "@/lib/errors.ts";
 import { es_MX } from "@/lib/i18n.ts";
+import { useTemplateManifest } from "@/lib/manifest.ts";
 import { useEditorStore } from "@/lib/store.ts";
+import { fechasDiscrepantes } from "./coherencia-fechas.ts";
 import type { PreflightBlocker, PreflightResponse, PublishResponse } from "@/lib/api-types.ts";
 
 type Estado = "cerrado" | "cargando-preflight" | "listo" | "publicando" | "publicado" | "error-preflight" | "error-publicar";
 type AccionEnlace = "idle" | "despublicando" | "despublicada" | "rotando" | "error";
+/** U-5: ¿ya respondió la invalidación del enlace público? Hasta entonces no se afirma nada. */
+type Invalidacion = "pendiente" | "hecha" | "fallida";
+
+/**
+ * U-5 · pide a la propia aplicación que purgue la caché ISR de `/i/{publicToken}` y **espera la
+ * respuesta**. Devuelve `true` solo si la invalidación se confirmó. Nunca lanza: un fallo aquí no
+ * puede tumbar la pantalla de éxito de una publicación que sí ocurrió — se dice y ya.
+ */
+async function invalidarEnlacePublico(publicToken: string, motivo: "published" | "unpublished" | "token-rotated"): Promise<boolean> {
+  try {
+    const r = await fetch("/api/revalidate/tras-publicar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ publicToken, motivo }),
+      cache: "no-store",
+    });
+    if (!r.ok) return false;
+    return ((await r.json()) as { revalidated?: boolean }).revalidated === true;
+  } catch {
+    return false;
+  }
+}
 
 const CODIGOS_BLOQUEO_CONOCIDOS = new Set([
   "TPL_PUBLISH_BLOCKED_MISSING_REQUIRED",
@@ -30,7 +55,16 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [accionEnlace, setAccionEnlace] = useState<AccionEnlace>("idle");
+  const [invalidacion, setInvalidacion] = useState<Invalidacion>("pendiente");
   const puedePublicar = useEditorStore((s) => s.loadState === "ready");
+  // U-4 · la comprobación de coherencia entre la fecha de la portada y la del itinerario se hace
+  // sobre el documento compuesto que el editor ya tiene, con el manifiesto de la versión activa.
+  const composed = useEditorStore((s) => s.composed);
+  const { manifest } = useTemplateManifest(invitationId);
+  const discrepancia = fechasDiscrepantes(manifest, composed);
+
+  /** El enlace que se comparte (U-6): con el origen público del sitio, nunca el `localhost` del servidor. */
+  const enlace = resultado ? enlacePublico(resultado.publicToken, resultado.publicUrl) : "";
 
   async function abrir(): Promise<void> {
     setEstado("cargando-preflight");
@@ -49,10 +83,15 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
   async function confirmar(): Promise<void> {
     setEstado("publicando");
     setError(null);
+    setInvalidacion("pendiente");
     try {
       const r = await publishRelease(invitationId, { baseRevision: useEditorStore.getState().revision });
       setResultado(r);
       setEstado("publicado");
+      // U-5 · NO se afirma «ya se puede ver en internet» hasta que la invalidación responde. Si
+      // falla, se dice la verdad («puede tardar unos minutos»), que era justo lo que no se decía.
+      const ok = await invalidarEnlacePublico(r.publicToken, "published");
+      setInvalidacion(ok ? "hecha" : "fallida");
     } catch (e: unknown) {
       if (e instanceof ApiError && CODIGOS_BLOQUEO_CONOCIDOS.has(e.code)) {
         // El preflight quedó obsoleto (04 §7.1 paso 11): se vuelve al paso 10 con la lista actualizada.
@@ -66,7 +105,9 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
           // sigue al mensaje genérico de abajo
         }
       }
-      setError(e instanceof Error ? e.message : es_MX.editor.publicar.errorPublicar);
+      // U-9 · un fallo de red decía «Failed to fetch», en inglés, a diez centímetros del impecable
+      // «Sin conexión — tus cambios se guardarán cuando vuelva». Mismo tono, mismo idioma.
+      setError(e instanceof TypeError ? es_MX.errores.sinRed : e instanceof Error ? e.message : es_MX.editor.publicar.errorPublicar);
       setEstado("error-publicar");
     }
   }
@@ -84,7 +125,7 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
   async function copiarEnlace(): Promise<void> {
     if (!resultado) return;
     try {
-      await navigator.clipboard.writeText(resultado.publicUrl);
+      await navigator.clipboard.writeText(enlace);
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2500);
     } catch {
@@ -96,6 +137,9 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
     setAccionEnlace("despublicando");
     try {
       await unpublishRelease(invitationId);
+      // Misma razón que al publicar (U-5): sin purgar la etiqueta, el enlace sigue sirviendo la
+      // invitación durante otros cinco minutos después de haberla retirado.
+      if (resultado) await invalidarEnlacePublico(resultado.publicToken, "unpublished");
       setAccionEnlace("despublicada");
     } catch (e: unknown) {
       setAccionEnlace("error");
@@ -106,8 +150,12 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
   async function rotarEnlace(): Promise<void> {
     setAccionEnlace("rotando");
     try {
+      const anterior = resultado?.publicToken;
       const r = await rotatePublicToken(invitationId);
       setResultado((prev) => (prev ? { ...prev, publicToken: r.publicToken, publicUrl: r.publicUrl } : prev));
+      // El token VIEJO tiene que dejar de servir de la caché: si no, quien tenga el enlace anterior
+      // sigue viendo la invitación cinco minutos después de haberlo invalidado.
+      if (anterior) await invalidarEnlacePublico(anterior, "token-rotated");
       setAccionEnlace("idle");
     } catch (e: unknown) {
       setAccionEnlace("error");
@@ -180,10 +228,34 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
               ) : (
                 <p className="text-ui-body text-ui-ink">{es_MX.editor.publicar.antesDePublicar}</p>
               )}
-              {preflight.blockers.length === 0 && preflight.warnings.length === 0 ? (
+              {preflight.blockers.length === 0 && preflight.warnings.length === 0 && !discrepancia ? (
                 <p className="text-ui-body text-ui-ink">{es_MX.editor.publicar.sinPendientes}</p>
               ) : (
                 <ul className="flex flex-col gap-2">
+                  {/* U-4 · dos fechas distintas en la misma invitación. Aviso ⚠ (no bloquea: hay
+                      bodas de dos días), con su «Revisar» que lleva al itinerario. */}
+                  {discrepancia ? (
+                    <li data-testid="aviso-fechas" className="flex items-start justify-between gap-3 rounded-ui-control bg-orange-50 p-2.5">
+                      <span className="flex items-start gap-2 text-ui-aux text-ui-ink">
+                        <span aria-hidden="true" className="text-ui-warning">
+                          ⚠
+                        </span>
+                        {es_MX.editor.publicar.avisoFechasDistintas(discrepancia.textoPortada, discrepancia.textoItinerario)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          useEditorStore.getState().select({ sectionKey: discrepancia.sectionKey, blockId: discrepancia.sectionKey });
+                          useEditorStore.getState().openPanel("block");
+                          useEditorStore.getState().scrollToSection(discrepancia.sectionKey);
+                          setEstado("cerrado");
+                        }}
+                        className="shrink-0 whitespace-nowrap text-ui-aux font-semibold text-ui-accent underline"
+                      >
+                        {es_MX.editor.publicar.revisarFechas}
+                      </button>
+                    </li>
+                  ) : null}
                   {preflight.blockers.map((b, i) => (
                     <li key={`b-${i}`} className="flex items-start justify-between gap-3 rounded-ui-control bg-red-50 p-2.5">
                       <span className="flex items-start gap-2 text-ui-aux text-ui-ink">
@@ -247,10 +319,18 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
 
           {estado === "publicado" && resultado ? (
             <div className="flex flex-col gap-4">
-              <p className="text-ui-body text-ui-ink">✅ Tu invitación ya se puede ver en internet.</p>
+              {/* U-5 · el estado se dice con exactitud: mientras la invalidación no ha respondido
+                  no se promete que ya se vea, y si falló se dice que puede tardar. */}
+              <p role="status" aria-live="polite" data-testid="estado-publicado" data-invalidacion={invalidacion} className="text-ui-body text-ui-ink">
+                {invalidacion === "pendiente"
+                  ? es_MX.editor.publicar.actualizandoEnlace
+                  : invalidacion === "hecha"
+                    ? es_MX.editor.publicar.yaSeVe
+                    : es_MX.editor.publicar.tardaUnosMinutos}
+              </p>
               <div className="flex items-center gap-2 rounded-ui-control border border-ui-border-field bg-ui-bg-alt p-2.5">
                 <span className="flex-1 truncate text-ui-aux text-ui-ink" data-testid="enlace-publicado">
-                  {resultado.publicUrl}
+                  {enlace}
                 </span>
                 <Button size="sm" variant="secondary" onClick={() => void copiarEnlace()} data-testid="copiar-enlace">
                   {copiado ? es_MX.editor.publicar.enlaceCopiado : es_MX.editor.publicar.copiarEnlace}
@@ -258,7 +338,7 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
               </div>
               <div className="flex flex-wrap gap-2">
                 <a
-                  href={resultado.publicUrl}
+                  href={enlace}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex h-11 items-center rounded-ui-pill px-4 text-ui-aux font-semibold text-ui-accent shadow-[inset_0_0_0_1px_var(--color-ui-accent-hover)] hover:bg-ui-accent-soft"
@@ -266,7 +346,7 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
                   {es_MX.editor.publicar.verComoInvitado} ↗
                 </a>
                 <a
-                  href={`https://wa.me/?text=${encodeURIComponent(resultado.publicUrl)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(enlace)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex h-11 items-center rounded-ui-pill px-4 text-ui-aux font-semibold text-ui-accent hover:text-ui-accent-link"
