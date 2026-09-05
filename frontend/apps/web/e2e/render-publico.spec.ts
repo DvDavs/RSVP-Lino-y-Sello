@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { conLockDeInvitacionSembrada } from "./preparar.ts";
 import { aplicarOperacion, leerDocumento, obtenerDemo, publicar, revalidar } from "./util/demo";
 
 // e2e/render-publico.spec.ts — E2E-01 de `06 §8.1` y E-01/E-02 de `04 §20.2`, sobre el BACKEND REAL
@@ -155,6 +156,16 @@ test("un publicToken inexistente cae en el estado de no disponible, sin filtrar 
 });
 
 test("una sección oculta desaparece de la invitación publicada tras revalidar", async ({ page, baseURL }) => {
+  // Bloque 3-6, política anti-flake (`contratos.md` §6): esta prueba OCULTA Y PUBLICA sobre la
+  // invitación sembrada COMPARTIDA con el bloque del editor (ocho archivos más) — bajo el MISMO
+  // mutex entre procesos que usan esos archivos (`preparar.ts` `conLockDeInvitacionSembrada`,
+  // keyed por recurso, no por cómo se descubrió la invitación: `obtenerDemo()` resuelve la MISMA
+  // fila que `invitacionSembrada()`). Medido: sin él, un lote de otra prueba con `baseRevision`
+  // vieja puede aterrizar ENTRE el `setSectionVisible` y el `publicar` de aquí abajo.
+  await conLockDeInvitacionSembrada(() => flujoSeccionOculta(page, baseURL));
+});
+
+async function flujoSeccionOculta(page: import("@playwright/test").Page, baseURL: string | undefined): Promise<void> {
   // Recorre el ciclo COMPLETO y real: ocultar por operación → publicar release → golpear el webhook
   // `/api/revalidate` (ADR-1R-F-09) → recargar. Al final deja la invitación como estaba, para que la
   // demostración que juzga el dueño no se quede mutilada.
@@ -191,7 +202,7 @@ test("una sección oculta desaparece de la invitación publicada tras revalidar"
 
   await page.goto(`/i/${demo.publicToken}`);
   await expect(page.locator("section")).toHaveCount(visiblesAntes.length);
-});
+}
 
 test("el HTML se sirve desde caché ISR y no desde un render por visita", async ({ request, baseURL }) => {
   // `04 §15.1`: "La primera visita genera y cachea; las siguientes se sirven del caché". Sin

@@ -4,7 +4,7 @@
 // Contra el backend REAL: si el undo mandara la operación equivocada (o no la mandara), la recarga
 // lo delataría, porque el documento se relee del servidor.
 import { expect, test } from "@playwright/test";
-import { aplicarOperaciones, invitacionSembrada, jwtDemo, revisionActual, sesionDemo } from "./preparar.ts";
+import { aplicarOperaciones, conLockDeInvitacionSembrada, invitacionSembrada, jwtDemo, revisionActual, sesionDemo } from "./preparar.ts";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
@@ -39,6 +39,14 @@ async function primerTextoDeUsuario(page: import("@playwright/test").Page): Prom
 }
 
 test("E-02 · escribir, deshacer, rehacer y recargar: el estado coincide con lo último confirmado", async ({ page }) => {
+  await conLockDeInvitacionSembrada(() => flujo(page));
+});
+
+// Bloque 3-6: el cuerpo va en una función aparte para poder envolverlo ENTERO en
+// `conLockDeInvitacionSembrada` (política anti-flake, `contratos.md` §6 — ver `preparar.ts` para
+// la medición completa: `invitacionSembrada()` es un recurso compartido con otros siete archivos
+// y sin el mutex esta prueba puede recibir el `409` de OTRA prueba a mitad de camino).
+async function flujo(page: import("@playwright/test").Page): Promise<void> {
   const token = await jwtDemo();
   const invitationId = invitacionSembrada();
   await sesionDemo(page, token);
@@ -95,7 +103,7 @@ test("E-02 · escribir, deshacer, rehacer y recargar: el estado coincide con lo 
     { op: "setBlock", blockId, value: { kind: "text", value: original } },
   ]);
   expect(limpieza.status).toBe(200);
-});
+}
 
 test("E-02b · deshacer antes de que salga el lote no genera tráfico (04 §11.3, caso 1)", async ({ page }) => {
   const token = await jwtDemo();

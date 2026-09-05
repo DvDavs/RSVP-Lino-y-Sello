@@ -30,6 +30,23 @@ async function violacionesGraves(page: import("@playwright/test").Page) {
     }));
 }
 
+/**
+ * Bloque 3-6 (mide, no oculta — política anti-flake de `contratos.md` §6): `axe-core` sampleaba
+ * ocasionalmente `color-contrast` ANTES de que el navegador terminara de aplicar la tipografía
+ * autoalojada (`document.fonts` en carga = repintado en curso = colores/tamaños todavía
+ * inestables). Medido en 3 corridas seguidas de este archivo (2 pruebas cada una, sin ningún
+ * cambio de código entre ellas): 2 fallos de 6 ejecuciones, y la prueba que fallaba CAMBIABA de
+ * corrida en corrida (una vez la de escritorio, otra vez la de móvil, con los mismos 4 nodos y el
+ * mismo mensaje `color-contrast` los dos casos) — la firma exacta de una carrera de temporización,
+ * no de un defecto de contraste real y estable (`bitacora/3-6.md` § "E-08/E-09" trae las 3 salidas
+ * literales). `document.fonts.ready` es una señal de estado OBSERVABLE, no un `waitForTimeout`
+ * (prohibido por `06 §8.2` punto 2): espera exactamente a que la tipografía real esté aplicada
+ * antes de sampleary — que es también el estado en el que un invitado de verdad LEE el texto.
+ */
+async function esperarTipografiaLista(page: import("@playwright/test").Page): Promise<void> {
+  await page.evaluate(() => document.fonts.ready);
+}
+
 test("invitación publicada: 0 violaciones axe críticas o serias", async ({ page }) => {
   const demo = await obtenerDemo();
   await page.goto(`/i/${demo.publicToken}`);
@@ -45,6 +62,7 @@ test("invitación publicada: 0 violaciones axe críticas o serias", async ({ pag
     null,
     { timeout: 30_000 },
   );
+  await esperarTipografiaLista(page);
 
   const graves = await violacionesGraves(page);
   expect(graves, JSON.stringify(graves, null, 2)).toEqual([]);
@@ -57,6 +75,7 @@ test("invitación publicada en móvil (390x844): 0 violaciones axe críticas o s
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`/i/${demo.publicToken}`);
   await expect(page.locator("h1")).toHaveCount(1);
+  await esperarTipografiaLista(page);
   const graves = await violacionesGraves(page);
   expect(graves, JSON.stringify(graves, null, 2)).toEqual([]);
 });

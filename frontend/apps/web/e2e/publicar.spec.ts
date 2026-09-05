@@ -7,13 +7,19 @@
 // temporal-y-restaurado. Despublicar/rotar cambian el enlace público de verdad, así que usan una
 // invitación DESECHABLE (`crearInvitacionPublicable`) para no afectar otras pruebas ni al revisor de
 // UX que abra la demo.
-import { expect, test } from "@playwright/test";
-import { aplicarOperaciones, borrarInvitacion, invitacionSembrada, jwtDemo, sesionDemo } from "./preparar.ts";
+import { expect, test, type Page } from "@playwright/test";
+import { aplicarOperaciones, borrarInvitacion, conLockDeInvitacionSembrada, invitacionSembrada, jwtDemo, sesionDemo } from "./preparar.ts";
 import { crearInvitacionPublicable, documentoActual, restaurarBloque } from "./preparar-panel.ts";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
 test("publicar · sin bloqueos, camino feliz hasta el enlace y copiarlo", async ({ page }) => {
+  // Bloque 3-6, política anti-flake (`contratos.md` §6): publica un release sobre la invitación
+  // sembrada COMPARTIDA — bajo el mutex de `preparar.ts` (medido: ver ahí la evidencia completa).
+  await conLockDeInvitacionSembrada(() => flujoPublicarFeliz(page));
+});
+
+async function flujoPublicarFeliz(page: Page): Promise<void> {
   const token = await jwtDemo();
   const invitationId = invitacionSembrada();
 
@@ -42,9 +48,14 @@ test("publicar · sin bloqueos, camino feliz hasta el enlace y copiarlo", async 
 
   await expect(page.getByRole("link", { name: /ver como invitado/i })).toHaveAttribute("href", enlace ?? "");
   await expect(page.getByRole("link", { name: /compartir por whatsapp/i })).toHaveAttribute("href", /wa\.me/);
-});
+}
 
 test("publicar · un bloqueo real (texto de ejemplo) sale en la lista y es accionable", async ({ page }) => {
+  // Bloque 3-6, política anti-flake (`contratos.md` §6): igual que la prueba anterior — ver ahí.
+  await conLockDeInvitacionSembrada(() => flujoBloqueoReal(page));
+});
+
+async function flujoBloqueoReal(page: Page): Promise<void> {
   const token = await jwtDemo();
   const invitationId = invitacionSembrada();
   const antes = await documentoActual(invitationId, token);
@@ -71,7 +82,7 @@ test("publicar · un bloqueo real (texto de ejemplo) sale en la lista y es accio
   } finally {
     await restaurarBloque(invitationId, token, "cover.title", tituloOriginal);
   }
-});
+}
 
 test("despublicar y rotar el enlace, con sus estados de carga", async ({ page }) => {
   test.slow();

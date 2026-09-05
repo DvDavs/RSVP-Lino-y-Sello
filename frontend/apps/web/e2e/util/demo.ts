@@ -15,10 +15,10 @@
 //      pertenece a ese cliente. Es exactamente lo que haría una persona: no toca la base de datos.
 //
 // Nada de esto vive en `lib/api-client.ts`: es utillaje de pruebas y no debe entrar en el bundle.
+import { tokenCompartido } from "./auth-cache.ts";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:6003";
 const EMAIL = process.env.TPL_DEMO_EMAIL ?? "demo.boda@example.com";
-const PASS = process.env.TPL_DEMO_PASS ?? "Demo1234!";
 /** `seed-demo.sh` crea la invitación por SQL sobre un clúster recién creado: el id es un entero
  *  bajo. 24 intentos cubren de sobra cualquier reejecución sin convertirse en un barrido. */
 const MAX_INVITACIONES = 24;
@@ -31,29 +31,13 @@ export interface Demo {
 
 let cache: Demo | null = null;
 
-async function pedirJwt(): Promise<string> {
-  const r = await fetch(`${API}/auth/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: EMAIL, password: PASS }),
-  });
-  if (!r.ok) {
-    throw new Error(
-      `e2e/util/demo: POST /auth/token respondió ${r.status} para ${EMAIL}. ` +
-        `¿Está sembrada la demostración? Ejecuta 'scripts/dev-backend.sh start && scripts/seed-demo.sh'.`,
-    );
-  }
-  // `POST /auth/token` responde `accessToken`, no `token` (verificado en 3-1, handoffs/3-1.md §1).
-  const cuerpo = (await r.json()) as { accessToken?: string };
-  if (!cuerpo.accessToken) throw new Error("e2e/util/demo: /auth/token no devolvió accessToken");
-  return cuerpo.accessToken;
-}
-
-/** Datos de la invitación de demostración, cacheados para todo el proceso de pruebas. */
+/** Datos de la invitación de demostración, cacheados para todo el proceso de pruebas.
+ *  El JWT NO se pide aquí: `tokenCompartido()` lee el login ÚNICO de `global-setup.ts` (bloque 3-6,
+ *  política anti-flake `contratos.md` §6 — ver `e2e/util/auth-cache.ts` para el porqué). */
 export async function obtenerDemo(): Promise<Demo> {
   if (cache) return cache;
 
-  const jwt = await pedirJwt();
+  const jwt = await tokenCompartido();
 
   const idDeclarado = process.env.TPL_DEMO_INVITATION_ID;
   const tokenDeclarado = process.env.TPL_DEMO_PUBLIC_TOKEN;

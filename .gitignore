@@ -76,6 +76,9 @@ frontend/apps/web/next-env.d.ts
 frontend/apps/web/playwright-report/
 frontend/apps/web/test-results/
 frontend/apps/web/.lighthouseci/
+# bloque 3-6: token JWT de la corrida de e2e (`e2e/global-setup.ts` → `e2e/util/auth-cache.ts`) —
+# vivo y de un solo uso, nunca se versiona.
+frontend/apps/web/e2e/.auth-cache.json
 # frontend/packages/schema/json-schema/ y frontend/packages/schema/golden/ SÍ se versionan:
 # son artefactos contractuales (ADR-1R-D-08/D-09), no build output descartable.
 ### worktrees de sub-agentes (efímeros, no versionar) ###

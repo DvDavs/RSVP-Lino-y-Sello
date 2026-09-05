@@ -19,6 +19,11 @@ const ORIGEN = `http://127.0.0.1:${PUERTO}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // Bloque 3-6, política anti-flake (`contratos.md` §6 / ADR-1R-C-11): autentica la cuenta de
+  // demostración UNA SOLA VEZ, antes de que arranque ningún worker — ver `e2e/global-setup.ts`.
+  // Sin esto, `fullyParallel: true` dispara logins concurrentes de la MISMA cuenta y provoca el 500
+  // de `RefreshTokenService.kt:20` (módulo `auth` antiguo, ajeno — `preguntas-abiertas.md` § P-3-3b-8).
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   workers: process.env.CI ? 4 : undefined,
   // 06 §8.2.1: un reintento en CI, solo para arranques lentos del servidor; una prueba que solo
