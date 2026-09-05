@@ -1,0 +1,25 @@
+{
+  "name": "@invitaciones/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Tokens del sistema de diseño del PRODUCTO (chrome, web pública, acceso, catálogo): fuente única en TS -> generated/tokens.css (--ui-*, data-theme) -> generated/tailwind.css (@theme inline, solo tokens semánticos). Nunca --inv-* (fase 3-C, ADR-3C-0-06).",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./generated/tokens.css",
+    "./tailwind.css": "./generated/tailwind.css"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "26.4.1",
+    "@vitest/coverage-v8": "5.0.0",
+    "typescript": "5.9.3",
+    "vitest": "5.0.0"
+  }
+}
