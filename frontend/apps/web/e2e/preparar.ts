@@ -120,6 +120,9 @@ export async function conLockDeInvitacionSembrada<T>(fn: () => Promise<T>): Prom
         throw new Error(
           `conLockDeInvitacionSembrada: 90 s esperando el lock (${RUTA_LOCK}). ¿Un lock huérfano de una corrida anterior? ` +
             `Bórralo a mano si el problema persiste tras confirmar que no hay una corrida de e2e activa.`,
+          // `preserve-caught-error` (ESLint 10, `js.configs.recommended`): el EEXIST original es la
+          // pista de por qué se esperó; perderlo deja el diagnóstico a medias. Solo añade la causa.
+          { cause: error },
         );
       }
       await esperar(100);
