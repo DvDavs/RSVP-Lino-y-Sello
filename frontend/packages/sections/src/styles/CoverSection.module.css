@@ -71,13 +71,38 @@
   animation: cover-rise var(--inv-motion-normal) var(--inv-motion-ease) both;
 }
 
+/* D3 del bloque 3-7 — `cover-rise` SUBE, pero ya no APARECE desde `opacity: 0`.
+ *
+ * El elemento LCP de una invitación publicada es `.heroName`, el nombre de la portada, que vive
+ * dentro de `.content`. Con la opacidad en los fotogramas y `fill: both`, `.content` está INVISIBLE
+ * antes y durante la animación, y Chrome no registra como candidato a LCP un elemento invisible:
+ * el candidato no se emite hasta que la aparición termina.
+ *
+ * MEDIDO (bitácora 3-7 §4, `@lhci/cli@0.15.1`, `throttlingMethod: devtools` — estrangulamiento 4G
+ * REAL, no el modelo de Lantern —, móvil, 8 corridas por variante sobre la MISMA invitación
+ * publicada y el mismo servidor):
+ *   con `opacity` en los fotogramas   3527 3530 3541 3557 3573 3576 3636 3640  ->  mediana 3565 ms
+ *   sin `opacity` (esto)              1950 1978 1992 2002 2004 2005 2005 2031  ->  mediana 2003 ms
+ * Distribuciones que no se solapan: la aparición costaba **1 562 ms de LCP**, el 44 % de la métrica,
+ * y era la única razón por la que `/i/[publicToken]` incumplía el presupuesto de `contratos §8`
+ * (< 2 500 ms). El mismo 2 003 ms sale midiendo con la animación entera apagada
+ * (`prefers-reduced-motion`, mediana 2 010 ms sobre 15 corridas): la opacidad era TODO el coste.
+ *
+ * Qué se conserva: el movimiento. La portada sigue subiendo sus `--inv-space-2`, con la misma
+ * duración y la misma curva; lo único que desaparece es el fundido, que además era invisible en la
+ * práctica para quien abre la invitación con la red lenta de un móvil — precisamente porque llegaba
+ * tarde. `transform` sigue creando contexto de apilamiento, así que el orden de pintado que
+ * documenta el comentario de `.scrim` (D1 de 3-3b) no cambia; y `.content` conserva su
+ * `position: relative` propio, que era la garantía de que ese orden no dependiera de la animación.
+ *
+ * Animar `opacity` en el primer pantallazo es el patrón que hay que evitar en TODA sección nueva:
+ * cualquier `@keyframes` que arranque en `opacity: 0` sobre contenido de la primera pantalla vuelve
+ * a mover el LCP hasta donde acabe la animación. */
 @keyframes cover-rise {
   from {
-    opacity: 0;
     transform: translateY(var(--inv-space-2));
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }

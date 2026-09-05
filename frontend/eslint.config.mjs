@@ -12,6 +12,8 @@
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 
 const reglasEsquemaADR005 = {
   "no-restricted-syntax": [
@@ -149,5 +151,42 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "warn",
     },
+  },
+
+  // 3-7 D2 — REGISTRO de los dos plugins de React. Sin esto, las directivas
+  // `eslint-disable-next-line react/no-array-index-key` y `react-hooks/exhaustive-deps` de
+  // `packages/sections/**` fallaban con "Definition for rule ... was not found" (6 ERRORES) y
+  // tumbaban el job `frontend` del CI, que `e2e` necesita por `needs:`.
+  //
+  // Los plugins se registran para TODO `*.{ts,tsx}` (así cualquier directiva `react*/…` resuelve
+  // donde se escriba), pero las dos reglas se ENCIENDEN solo en `packages/sections/src/**`, que es
+  // el único árbol con esas directivas hoy (verificado con grep). Una directiva sobre una regla
+  // apagada se vuelve a reportar como "unused disable directive", así que registrar sin encender no
+  // habría bastado. Medido: encender `react/no-array-index-key` en todo el monorepo añade 5 errores
+  // NUEVOS en `apps/web` (ConflictDialog, PublishDialog, ListTextField) y `exhaustive-deps` añade 8
+  // avisos — reales, pero es un cambio de POLÍTICA sobre código que este bloque no revisa, no la
+  // corrección del job roto. Queda en `preguntas-abiertas.md`.
+  {
+    files: ["**/*.{ts,tsx}"],
+    plugins: { react, "react-hooks": reactHooks },
+    settings: { react: { version: "19.2" } },
+  },
+  {
+    files: ["packages/sections/src/**/*.{ts,tsx}"],
+    rules: {
+      "react/no-array-index-key": "error",
+      "react-hooks/exhaustive-deps": "error",
+    },
+  },
+
+  // 3-7 D2 — `no-console` en `packages/sections/**`. Las 14 directivas
+  // `eslint-disable-next-line no-console` que ya estaban escritas sobre los `console.warn` de
+  // variante desconocida daban 14 avisos de "directiva inútil" porque la regla nunca estuvo
+  // encendida. Encenderla las vuelve útiles (0 errores nuevos: los 14 `console.` del paquete son
+  // exactamente esos 14) y hace cumplir de verdad la frontera de 04 §19: el render de invitaciones
+  // no escribe en la consola del invitado salvo el aviso deliberado del modo lienzo.
+  {
+    files: ["packages/sections/src/**/*.{ts,tsx}"],
+    rules: { "no-console": "error" },
   },
 );

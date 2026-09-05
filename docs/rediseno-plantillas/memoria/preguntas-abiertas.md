@@ -581,3 +581,58 @@ del arreglo, no — el lienzo **no puede** resolver `paletteId → tokens` (cuat
   dice «solo archivos nuevos tuyos»). **Supuesto tomado:** no se tocan; quedan aquí anotados con
   archivo y línea. ¿Quién los corrige — el mismo bloque que dejó esos archivos, o quien esté ahora
   sobre `eslint.config.mjs`?
+## Fase 3 · 3-7 — los tres defectos de cierre (5)
+
+- **[Cierra la de ALTA de 3-6]** El defecto de `store.ts` está **corregido** (ADR-3-7-01,
+  `bitacora/3-7.md` §1): `applyOperationToRawDocument` en los cuatro puntos de llamada, más
+  `applyIdMapToRawDocument` que el parche propuesto no contemplaba. La sospecha que 3-6 marcó `[I]`
+  sobre el undo del segundo `setBlock` queda **confirmada `[V]`** y cubierta con prueba.
+- **[Cierra la de MEDIA de 3-6]** El job `frontend` está en verde (ADR-3-7-02): plugins registrados,
+  `pnpm -r lint` con código de salida 0, `e2e` desbloqueado por `needs:`.
+- **[Cierra la del LCP de 3-6]** La contradicción 3-3/3-6 está resuelta **midiendo**, no eligiendo
+  (ADR-3-7-03/04, `evidencia/fase-3/cierre/lcp-3-7.md`): la métrica era bimodal con el simulador de
+  Lantern, y la causa real del incumplimiento era la animación de portada, no las tipografías. Ya no
+  hace falta re-medir en un runner de GitHub para decidir.
+
+- **[MEDIA]** [Fase 3 · 3-7] **`total-blocking-time` incumple el objetivo de `04 §16.1` cuando se
+  mide con estrangulamiento real**: 215-626 ms frente a los 200 ms declarados (con `simulate` salía
+  en 99-160 ms). Está declarado `warn` en `lighthouserc.cjs`, así que no rompe la compuerta. **No es
+  una regresión de 3-7** —es el mismo código medido mejor, ver ADR-3-7-03—, pero es el primer dato
+  fiable de CPU de la ruta pública. El mismo aviso vale para el CLS: pasa de 0,000 simulado a 0,033
+  medido, muy por debajo de 0,1 pero ya no cero. ¿Se abre trabajo de INP/TBT sobre `/i/[publicToken]`
+  (los candidatos que Lighthouse señala son `unused-javascript` 53 KiB y `legacy-javascript`
+  13 KiB), o se acepta el valor y se sube el objetivo de `04 §16.1` con ADR?
+
+- [Fase 3 · 3-7] **`restoreFromHistory()` deja `s.document` obsoleto**, por la misma raíz que D1:
+  `RestoreResponse` (`lib/api-types.ts`) no incluye el documento crudo, igual que
+  `OperationBatchResponse`. El síntoma visible es el mismo (el `assetId` de un campo `image` deja de
+  resolver tras restaurar una revisión), pero el único arreglo posible desde el cliente es recargar
+  entero con `load()`, que es un cambio de flujo y no un parche. No muerde el undo, porque `restore`
+  vacía ambas pilas (§11.4). **Supuesto tomado:** fuera del alcance de este bloque, que corrige el
+  camino de las 11 operaciones. ¿Se resuelve haciendo que `restoreFromHistory` recargue, o
+  añadiendo `document` a `RestoreResponse` y a `OperationBatchResponse` del lado del backend — que
+  es el arreglo de raíz para los dos casos?
+
+- [Fase 3 · 3-7] **Encender `react/no-array-index-key` y `react-hooks/exhaustive-deps` en todo el
+  monorepo saca 5 errores y 8 avisos REALES en `apps/web`** (`ConflictDialog.tsx:79,148`,
+  `PublishDialog.tsx:188,205`, `ListTextField.tsx:52` usan el índice como `key`;
+  `GroupField`/`PhotoManager` recrean una expresión lógica que rompe la memoización de su `useMemo`,
+  el mismo defecto que se corrigió en `CanvasContext.tsx`; cuatro campos de `components/fields/**`
+  omiten `reset` de sus dependencias). ADR-3-7-02 las enciende solo en `packages/sections/src/**`
+  porque ampliar la política sobre código que este bloque no revisa no es «arreglar el job roto».
+  ¿En qué bloque se encienden para todo el monorepo y se corrigen esos 13 hallazgos?
+
+- [Fase 3 · 3-7] **El worktree asignado vuelve a llegar en `4358fc8`** (previo a la fase 2, sin
+  `frontend/` ni `docs/rediseno-plantillas/diseno/`). Es el segundo bloque seguido —3-6 lo documenta
+  en su §1— que gasta su primer turno en `git reset --hard` a la rama de orquestación. ¿Puede el
+  aprovisionamiento crear los worktrees desde `claude/fase-3-frontend-orchestration-yuh8sx` en vez
+  de desde el commit raíz?
+
+- [Fase 3 · 3-7] **La invitación de demostración cambió de contenido a mitad de las mediciones de
+  LCP** (`Paulina & Emilio` → `Teclado & Sololo`): otra sesión de agente corría e2e contra la MISMA
+  fila sembrada. El mutex de ADR-3-6-02 serializa a los workers de Playwright DENTRO de una corrida,
+  pero no puede saber nada de un proceso ajeno como LHCI. No altera las conclusiones de D3 (las
+  comparaciones A/B se hicieron todas después del cambio, sobre el mismo contenido), pero es la
+  tercera vez que la invitación compartida entre sesiones contamina una medición. Es la misma
+  pregunta de aprovisionamiento que 3-5 y 3-6 ya elevaron: **una invitación de demostración por
+  sesión**, no una por máquina.
