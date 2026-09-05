@@ -1,0 +1,1123 @@
+{
+  "name": {
+    "es-MX": "Boda clásica"
+  },
+  "slug": "boda-clasica",
+  "assets": [
+    {
+      "path": "assets/divider.webp",
+      "bytes": 31002,
+      "sha256": "3960f97e40e54783bb851ca34e4afc78c8d8ff540a486aa6451a96db87e1f1ec",
+      "contentType": "image/webp"
+    },
+    {
+      "path": "assets/preview.webp",
+      "bytes": 70120,
+      "sha256": "5edcd64d402752bb66f89236a9f4683376ca457d6fed50d4d5114ac189b28ce5",
+      "contentType": "image/webp"
+    },
+    {
+      "path": "assets/rsvp-bg.webp",
+      "bytes": 43340,
+      "sha256": "2f62262e765cef18fe523a57a4a46b2633e029c668d981d8fbf5644eefd9777e",
+      "contentType": "image/webp"
+    }
+  ],
+  "locales": [
+    "es-MX"
+  ],
+  "version": "1.0.0",
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "title": {
+        "es-MX": "Portada"
+      },
+      "blocks": [
+        {
+          "id": "cover.title",
+          "role": "coverTitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Nombres en portada"
+          },
+          "required": true,
+          "constraints": {
+            "maxLength": 60,
+            "minLength": 1,
+            "multiline": false
+          }
+        },
+        {
+          "id": "cover.subtitle",
+          "role": "coverSubtitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Subtítulo"
+          },
+          "constraints": {
+            "maxLength": 80,
+            "minLength": 0,
+            "multiline": false
+          }
+        },
+        {
+          "id": "cover.date",
+          "role": "coverDate",
+          "type": "date",
+          "label": {
+            "es-MX": "Fecha del evento"
+          },
+          "source": "business",
+          "editable": false,
+          "formatId": "long",
+          "aiEditable": false,
+          "businessField": "invitation.date"
+        },
+        {
+          "id": "cover.image",
+          "role": "coverImage",
+          "type": "image",
+          "label": {
+            "es-MX": "Foto de portada"
+          },
+          "required": true,
+          "constraints": {
+            "aspect": "portrait",
+            "maxBytes": 8388608
+          }
+        },
+        {
+          "id": "cover.buttonLabel",
+          "role": "coverButtonLabel",
+          "type": "text",
+          "label": {
+            "es-MX": "Texto del botón"
+          },
+          "source": "fixed",
+          "editable": false,
+          "aiEditable": false,
+          "constraints": {
+            "maxLength": 30,
+            "minLength": 1,
+            "multiline": false
+          }
+        }
+      ],
+      "required": true,
+      "variants": [
+        "full",
+        "framed"
+      ],
+      "defaultVariant": "full",
+      "defaultVisible": true
+    },
+    {
+      "key": "couple",
+      "type": "celebrant",
+      "title": {
+        "es-MX": "Los novios"
+      },
+      "blocks": [
+        {
+          "id": "couple.heading",
+          "role": "celebrantsHeading",
+          "type": "text",
+          "label": {
+            "es-MX": "Encabezado"
+          },
+          "constraints": {
+            "maxLength": 60,
+            "minLength": 0,
+            "multiline": false
+          }
+        },
+        {
+          "id": "couple.groom",
+          "role": "celebrantA",
+          "type": "person",
+          "label": {
+            "es-MX": "Novio"
+          },
+          "required": true
+        },
+        {
+          "id": "couple.bride",
+          "role": "celebrantB",
+          "type": "person",
+          "label": {
+            "es-MX": "Novia"
+          },
+          "required": true
+        },
+        {
+          "id": "couple.groomPhoto",
+          "role": "celebrantAPhoto",
+          "type": "image",
+          "label": {
+            "es-MX": "Foto del novio"
+          },
+          "constraints": {
+            "aspect": "square",
+            "maxBytes": 8388608
+          }
+        },
+        {
+          "id": "couple.bridePhoto",
+          "role": "celebrantBPhoto",
+          "type": "image",
+          "label": {
+            "es-MX": "Foto de la novia"
+          },
+          "constraints": {
+            "aspect": "square",
+            "maxBytes": 8388608
+          }
+        },
+        {
+          "id": "couple.groomText",
+          "role": "celebrantAText",
+          "type": "richText",
+          "label": {
+            "es-MX": "Palabras del novio"
+          },
+          "constraints": {
+            "maxLength": 600
+          }
+        },
+        {
+          "id": "couple.brideText",
+          "role": "celebrantBText",
+          "type": "richText",
+          "label": {
+            "es-MX": "Palabras de la novia"
+          },
+          "constraints": {
+            "maxLength": 600
+          }
+        },
+        {
+          "id": "couple.date",
+          "role": "celebrantsDate",
+          "type": "date",
+          "label": {
+            "es-MX": "Fecha"
+          },
+          "source": "business",
+          "editable": false,
+          "formatId": "long",
+          "aiEditable": false,
+          "businessField": "invitation.date"
+        }
+      ],
+      "required": true,
+      "variants": [
+        "side-by-side",
+        "stacked"
+      ],
+      "defaultVariant": "side-by-side",
+      "defaultVisible": true
+    },
+    {
+      "key": "family",
+      "type": "family",
+      "title": {
+        "es-MX": "Nuestros padres y padrinos"
+      },
+      "blocks": [
+        {
+          "id": "family.intro",
+          "role": "familyIntro",
+          "type": "listText",
+          "label": {
+            "es-MX": "Frases de introducción"
+          },
+          "constraints": {
+            "maxItems": 4,
+            "minItems": 0,
+            "maxItemLength": 200
+          }
+        },
+        {
+          "id": "family.parentA1",
+          "role": "parentA1",
+          "type": "person",
+          "label": {
+            "es-MX": "Madre del novio"
+          }
+        },
+        {
+          "id": "family.parentA2",
+          "role": "parentA2",
+          "type": "person",
+          "label": {
+            "es-MX": "Padre del novio"
+          }
+        },
+        {
+          "id": "family.parentB1",
+          "role": "parentB1",
+          "type": "person",
+          "label": {
+            "es-MX": "Madre de la novia"
+          }
+        },
+        {
+          "id": "family.parentB2",
+          "role": "parentB2",
+          "type": "person",
+          "label": {
+            "es-MX": "Padre de la novia"
+          }
+        },
+        {
+          "id": "family.godparents",
+          "max": 8,
+          "min": 0,
+          "role": "familyGroup",
+          "type": "group",
+          "label": {
+            "es-MX": "Padrinos"
+          },
+          "itemLabel": {
+            "es-MX": "Padrino o madrina"
+          },
+          "itemBlocks": [
+            {
+              "id": "person",
+              "role": "personName",
+              "type": "person",
+              "label": {
+                "es-MX": "Nombre"
+              },
+              "required": true
+            },
+            {
+              "id": "label",
+              "role": "personLabel",
+              "type": "text",
+              "label": {
+                "es-MX": "De qué (velación, lazo, anillos…)"
+              },
+              "constraints": {
+                "maxLength": 40,
+                "minLength": 0,
+                "multiline": false
+              }
+            },
+            {
+              "id": "photo",
+              "role": "personPhoto",
+              "type": "image",
+              "label": {
+                "es-MX": "Foto"
+              },
+              "constraints": {
+                "aspect": "square",
+                "maxBytes": 8388608
+              }
+            }
+          ],
+          "reorderable": true
+        }
+      ],
+      "required": false,
+      "variants": [
+        "cards",
+        "list"
+      ],
+      "defaultVariant": "cards",
+      "defaultVisible": true
+    },
+    {
+      "key": "event",
+      "type": "event",
+      "title": {
+        "es-MX": "Itinerario"
+      },
+      "blocks": [
+        {
+          "id": "event.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Título de la sección"
+          },
+          "constraints": {
+            "maxLength": 40,
+            "minLength": 1,
+            "multiline": false
+          }
+        },
+        {
+          "id": "event.cards",
+          "max": 8,
+          "min": 1,
+          "role": "eventCards",
+          "type": "group",
+          "label": {
+            "es-MX": "Momentos del día"
+          },
+          "itemLabel": {
+            "es-MX": "Momento"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "eventTitle",
+              "type": "text",
+              "label": {
+                "es-MX": "Nombre (Ceremonia, Recepción…)"
+              },
+              "required": true,
+              "constraints": {
+                "maxLength": 60,
+                "minLength": 1,
+                "multiline": false
+              }
+            },
+            {
+              "id": "when",
+              "role": "eventWhen",
+              "type": "dateTimeRange",
+              "label": {
+                "es-MX": "Cuándo"
+              },
+              "formatId": "long-h12",
+              "required": true
+            },
+            {
+              "id": "place",
+              "role": "eventPlace",
+              "type": "location",
+              "label": {
+                "es-MX": "Dónde"
+              },
+              "required": true
+            },
+            {
+              "id": "note",
+              "role": "eventNote",
+              "type": "text",
+              "label": {
+                "es-MX": "Nota"
+              },
+              "constraints": {
+                "maxLength": 120,
+                "minLength": 0,
+                "multiline": false
+              }
+            }
+          ],
+          "reorderable": true
+        }
+      ],
+      "required": true,
+      "variants": [
+        "timeline",
+        "cards"
+      ],
+      "defaultVariant": "timeline",
+      "defaultVisible": true
+    },
+    {
+      "key": "gallery",
+      "type": "gallery",
+      "title": {
+        "es-MX": "Galería"
+      },
+      "blocks": [
+        {
+          "id": "gallery.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "maxLength": 40,
+            "minLength": 1,
+            "multiline": false
+          }
+        },
+        {
+          "id": "gallery.intro",
+          "role": "galleryIntro",
+          "type": "text",
+          "label": {
+            "es-MX": "Frase"
+          },
+          "constraints": {
+            "maxLength": 160,
+            "minLength": 0,
+            "multiline": true
+          }
+        },
+        {
+          "id": "gallery.photos",
+          "max": 12,
+          "min": 0,
+          "role": "galleryPhotos",
+          "type": "group",
+          "label": {
+            "es-MX": "Fotos"
+          },
+          "itemLabel": {
+            "es-MX": "Foto"
+          },
+          "itemBlocks": [
+            {
+              "id": "image",
+              "role": "galleryPhoto",
+              "type": "image",
+              "label": {
+                "es-MX": "Foto"
+              },
+              "required": true,
+              "constraints": {
+                "aspect": "free",
+                "maxBytes": 8388608
+              }
+            }
+          ],
+          "reorderable": true
+        },
+        {
+          "id": "gallery.hashtag",
+          "role": "hashtag",
+          "type": "text",
+          "label": {
+            "es-MX": "Hashtag"
+          },
+          "source": "business",
+          "editable": false,
+          "aiEditable": false,
+          "constraints": {
+            "maxLength": 80,
+            "minLength": 0,
+            "multiline": false
+          },
+          "businessField": "invitation.hashtag"
+        }
+      ],
+      "required": false,
+      "variants": [
+        "grid-6",
+        "masonry"
+      ],
+      "defaultVariant": "grid-6",
+      "defaultVisible": true
+    },
+    {
+      "key": "story",
+      "type": "story",
+      "title": {
+        "es-MX": "Nuestra historia"
+      },
+      "blocks": [
+        {
+          "id": "story.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "maxLength": 40,
+            "minLength": 1,
+            "multiline": false
+          }
+        },
+        {
+          "id": "story.milestones",
+          "max": 6,
+          "min": 0,
+          "role": "storyMilestones",
+          "type": "group",
+          "label": {
+            "es-MX": "Momentos"
+          },
+          "itemLabel": {
+            "es-MX": "Momento"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "storyTitle",
+              "type": "text",
+              "label": {
+                "es-MX": "Título"
+              },
+              "required": true,
+              "constraints": {
+                "maxLength": 60,
+                "minLength": 1,
+                "multiline": false
+              }
+            },
+            {
+              "id": "date",
+              "role": "storyDate",
+              "type": "date",
+              "label": {
+                "es-MX": "Fecha"
+              },
+              "formatId": "month-year"
+            },
+            {
+              "id": "body",
+              "role": "storyBody",
+              "type": "richText",
+              "label": {
+                "es-MX": "Relato"
+              },
+              "constraints": {
+                "maxLength": 1200
+              }
+            },
+            {
+              "id": "image",
+              "role": "storyImage",
+              "type": "image",
+              "label": {
+                "es-MX": "Foto"
+              },
+              "constraints": {
+                "aspect": "landscape",
+                "maxBytes": 8388608
+              }
+            }
+          ],
+          "reorderable": true
+        }
+      ],
+      "required": false,
+      "variants": [
+        "line"
+      ],
+      "defaultVariant": "line",
+      "defaultVisible": true
+    },
+    {
+      "key": "giftTable",
+      "type": "giftTable",
+      "title": {
+        "es-MX": "Mesa de regalos"
+      },
+      "blocks": [
+        {
+          "id": "gifts.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "maxLength": 40,
+            "minLength": 1,
+            "multiline": false
+          }
+        },
+        {
+          "id": "gifts.options",
+          "max": 4,
+          "min": 0,
+          "role": "giftOptions",
+          "type": "group",
+          "label": {
+            "es-MX": "Opciones de regalo"
+          },
+          "itemLabel": {
+            "es-MX": "Opción"
+          },
+          "itemBlocks": [
+            {
+              "id": "kind",
+              "role": "giftOptionKind",
+              "type": "choice",
+              "label": {
+                "es-MX": "Tipo"
+              },
+              "options": [
+                {
+                  "id": "bank",
+                  "label": {
+                    "es-MX": "Depósito o transferencia"
+                  }
+                },
+                {
+                  "id": "store",
+                  "label": {
+                    "es-MX": "Mesa en tienda"
+                  }
+                },
+                {
+                  "id": "cash",
+                  "label": {
+                    "es-MX": "Lluvia de sobres"
+                  }
+                }
+              ],
+              "required": true
+            },
+            {
+              "id": "title",
+              "role": "giftOptionTitle",
+              "type": "text",
+              "label": {
+                "es-MX": "Título"
+              },
+              "required": true,
+              "constraints": {
+                "maxLength": 60,
+                "minLength": 1,
+                "multiline": false
+              }
+            },
+            {
+              "id": "detail",
+              "role": "giftOptionDetail",
+              "type": "listText",
+              "label": {
+                "es-MX": "Detalles (banco, titular, CLABE…)"
+              },
+              "constraints": {
+                "maxItems": 6,
+                "minItems": 0,
+                "maxItemLength": 120
+              }
+            },
+            {
+              "id": "link",
+              "role": "giftOptionLink",
+              "type": "link",
+              "label": {
+                "es-MX": "Enlace"
+              }
+            },
+            {
+              "id": "image",
+              "role": "giftOptionImage",
+              "type": "image",
+              "label": {
+                "es-MX": "Imagen"
+              },
+              "constraints": {
+                "aspect": "square",
+                "maxBytes": 8388608
+              }
+            }
+          ],
+          "reorderable": true
+        }
+      ],
+      "required": false,
+      "variants": [
+        "cards"
+      ],
+      "defaultVariant": "cards",
+      "defaultVisible": true
+    },
+    {
+      "key": "suggestions",
+      "type": "suggestions",
+      "title": {
+        "es-MX": "Recomendaciones"
+      },
+      "blocks": [
+        {
+          "id": "suggestions.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "maxLength": 40,
+            "minLength": 1,
+            "multiline": false
+          }
+        },
+        {
+          "id": "suggestions.items",
+          "max": 6,
+          "min": 0,
+          "role": "suggestionList",
+          "type": "group",
+          "label": {
+            "es-MX": "Recomendaciones"
+          },
+          "itemLabel": {
+            "es-MX": "Recomendación"
+          },
+          "itemBlocks": [
+            {
+              "id": "name",
+              "role": "suggestionName",
+              "type": "text",
+              "label": {
+                "es-MX": "Nombre"
+              },
+              "required": true,
+              "constraints": {
+                "maxLength": 80,
+                "minLength": 1,
+                "multiline": false
+              }
+            },
+            {
+              "id": "detail",
+              "role": "suggestionDetail",
+              "type": "listText",
+              "label": {
+                "es-MX": "Detalles"
+              },
+              "constraints": {
+                "maxItems": 4,
+                "minItems": 0,
+                "maxItemLength": 160
+              }
+            },
+            {
+              "id": "link",
+              "role": "suggestionLink",
+              "type": "link",
+              "label": {
+                "es-MX": "Enlace"
+              }
+            },
+            {
+              "id": "image",
+              "role": "suggestionImage",
+              "type": "image",
+              "label": {
+                "es-MX": "Imagen"
+              },
+              "constraints": {
+                "aspect": "square",
+                "maxBytes": 8388608
+              }
+            }
+          ],
+          "reorderable": true
+        }
+      ],
+      "required": false,
+      "variants": [
+        "cards"
+      ],
+      "defaultVariant": "cards",
+      "defaultVisible": true
+    },
+    {
+      "key": "amenities",
+      "type": "amenities",
+      "title": {
+        "es-MX": "Amenidades"
+      },
+      "blocks": [
+        {
+          "id": "amenities.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "maxLength": 40,
+            "minLength": 1,
+            "multiline": false
+          }
+        },
+        {
+          "id": "amenities.items",
+          "max": 6,
+          "min": 0,
+          "role": "amenityList",
+          "type": "group",
+          "label": {
+            "es-MX": "Amenidades"
+          },
+          "itemLabel": {
+            "es-MX": "Amenidad"
+          },
+          "itemBlocks": [
+            {
+              "id": "name",
+              "role": "amenityName",
+              "type": "text",
+              "label": {
+                "es-MX": "Nombre"
+              },
+              "required": true,
+              "constraints": {
+                "maxLength": 80,
+                "minLength": 1,
+                "multiline": false
+              }
+            },
+            {
+              "id": "detail",
+              "role": "amenityDetail",
+              "type": "listText",
+              "label": {
+                "es-MX": "Detalles"
+              },
+              "constraints": {
+                "maxItems": 4,
+                "minItems": 0,
+                "maxItemLength": 160
+              }
+            },
+            {
+              "id": "link",
+              "role": "amenityLink",
+              "type": "link",
+              "label": {
+                "es-MX": "Enlace"
+              }
+            },
+            {
+              "id": "image",
+              "role": "amenityImage",
+              "type": "image",
+              "label": {
+                "es-MX": "Imagen"
+              },
+              "constraints": {
+                "aspect": "square",
+                "maxBytes": 8388608
+              }
+            }
+          ],
+          "reorderable": true
+        }
+      ],
+      "required": false,
+      "variants": [
+        "cards"
+      ],
+      "defaultVariant": "cards",
+      "defaultVisible": true
+    },
+    {
+      "key": "dressCode",
+      "type": "dressCode",
+      "title": {
+        "es-MX": "Código de vestimenta"
+      },
+      "blocks": [
+        {
+          "id": "dressCode.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "maxLength": 40,
+            "minLength": 1,
+            "multiline": false
+          }
+        },
+        {
+          "id": "dressCode.rules",
+          "max": 3,
+          "min": 1,
+          "role": "dressCodeRules",
+          "type": "group",
+          "label": {
+            "es-MX": "Reglas"
+          },
+          "itemLabel": {
+            "es-MX": "Regla"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "dressCodeTitle",
+              "type": "text",
+              "label": {
+                "es-MX": "Para quién"
+              },
+              "required": true,
+              "constraints": {
+                "maxLength": 40,
+                "minLength": 1,
+                "multiline": false
+              }
+            },
+            {
+              "id": "detail",
+              "role": "dressCodeDetail",
+              "type": "text",
+              "label": {
+                "es-MX": "Descripción"
+              },
+              "required": true,
+              "constraints": {
+                "maxLength": 200,
+                "minLength": 1,
+                "multiline": true
+              }
+            },
+            {
+              "id": "image",
+              "role": "dressCodeImage",
+              "type": "image",
+              "label": {
+                "es-MX": "Imagen"
+              },
+              "constraints": {
+                "aspect": "portrait",
+                "maxBytes": 8388608
+              }
+            }
+          ],
+          "reorderable": true
+        }
+      ],
+      "required": false,
+      "variants": [
+        "two-columns"
+      ],
+      "defaultVariant": "two-columns",
+      "defaultVisible": true
+    },
+    {
+      "key": "rsvp",
+      "type": "rsvp",
+      "title": {
+        "es-MX": "Confirmación"
+      },
+      "blocks": [
+        {
+          "id": "rsvp.title",
+          "role": "sectionTitle",
+          "type": "text",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "maxLength": 60,
+            "minLength": 1,
+            "multiline": false
+          }
+        },
+        {
+          "id": "rsvp.deadline",
+          "role": "rsvpDeadline",
+          "type": "date",
+          "label": {
+            "es-MX": "Fecha límite para confirmar"
+          },
+          "formatId": "long"
+        },
+        {
+          "id": "rsvp.note",
+          "role": "rsvpNote",
+          "type": "text",
+          "label": {
+            "es-MX": "Nota (niños, etc.)"
+          },
+          "constraints": {
+            "maxLength": 200,
+            "minLength": 0,
+            "multiline": true
+          }
+        },
+        {
+          "id": "rsvp.childrenAllowed",
+          "role": "rsvpChildrenAllowed",
+          "type": "boolean",
+          "label": {
+            "es-MX": "Se admiten niños"
+          },
+          "source": "business",
+          "editable": false,
+          "aiEditable": false,
+          "businessField": "invitation.childrenAllowed"
+        },
+        {
+          "id": "rsvp.background",
+          "role": "rsvpBackground",
+          "type": "image",
+          "label": {
+            "es-MX": "Fondo"
+          },
+          "source": "fixed",
+          "editable": false,
+          "aiEditable": false,
+          "constraints": {
+            "aspect": "wide",
+            "maxBytes": 8388608
+          }
+        }
+      ],
+      "required": true,
+      "variants": [
+        "banner"
+      ],
+      "defaultVariant": "banner",
+      "defaultVisible": true
+    },
+    {
+      "key": "footer",
+      "type": "footer",
+      "title": {
+        "es-MX": "Pie"
+      },
+      "blocks": [
+        {
+          "id": "footer.music",
+          "role": "backgroundMusic",
+          "type": "audio",
+          "label": {
+            "es-MX": "Música de fondo"
+          },
+          "constraints": {
+            "maxBytes": 8388608
+          }
+        },
+        {
+          "id": "footer.note",
+          "role": "footerNote",
+          "type": "text",
+          "label": {
+            "es-MX": "Nota legal"
+          },
+          "source": "fixed",
+          "editable": false,
+          "aiEditable": false,
+          "constraints": {
+            "maxLength": 120,
+            "minLength": 0,
+            "multiline": false
+          }
+        }
+      ],
+      "required": true,
+      "variants": [
+        "simple"
+      ],
+      "defaultVariant": "simple",
+      "defaultVisible": true
+    }
+  ],
+  "eventKinds": [
+    "wedding"
+  ],
+  "description": {
+    "es-MX": "Equivalente funcional de la plantilla sembrada templateId=5 (Boda Premium), sin presentación en el documento."
+  },
+  "minPlanTier": 2,
+  "capabilities": [
+    "story",
+    "hashtags",
+    "music"
+  ],
+  "previewImage": "assets/preview.webp",
+  "migrationsFrom": [],
+  "manifestVersion": 1
+}

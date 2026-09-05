@@ -40,6 +40,8 @@ export default defineConfig({
         // Bloque 3-3: `composed-lectura.ts` es lógica pura (qué sale de la invitación hacia los
         // metadatos y qué NO) y entra en cobertura; las PÁGINAS de esa carpeta siguen fuera.
         "app/(public)/_componentes/composed-lectura.ts",
+        // Bloque 3-5: los 14 campos del panel de contenido y sus pruebas (U-17 y una por tipo de bloque).
+        "components/fields/**/*.{ts,tsx}",
       ],
       exclude: ["**/*.test.{ts,tsx}", "**/*.d.ts"],
       thresholds: { lines: 60, functions: 65, branches: 50, statements: 60 },

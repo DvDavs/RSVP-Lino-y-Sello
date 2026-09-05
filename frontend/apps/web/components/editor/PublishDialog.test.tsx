@@ -1,0 +1,94 @@
+// components/editor/PublishDialog.test.tsx — 04 §6.5, §7.1 pasos 10-12: preflight → lista accionable
+// → publicar → enlace. `422 TPL_PUBLISH_BLOCKED_*` vuelve al preflight con la lista actualizada.
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as apiClient from "@/lib/api-client.ts";
+import { ApiError } from "@/lib/errors.ts";
+import { useEditorStore } from "@/lib/store.ts";
+import { PublishDialog } from "./PublishDialog.tsx";
+
+function preflightConBloqueo() {
+  return {
+    canPublish: false,
+    blockers: [{ code: "TPL_PUBLISH_BLOCKED_MISSING_REQUIRED", blockIds: ["eventPlace"] }],
+    warnings: [],
+    report: { missingRequired: ["eventPlace"], stillDefault: [], orphanContent: [], orphanSections: [], invalidValues: [], themeFallback: null },
+    contentHash: "sha256:" + "a".repeat(64),
+    sameAsActiveRelease: false,
+  };
+}
+
+function preflightLimpio() {
+  return { ...preflightConBloqueo(), canPublish: true, blockers: [] };
+}
+
+describe("PublishDialog", () => {
+  beforeEach(() => {
+    useEditorStore.setState({
+      loadState: "ready",
+      revision: 3,
+      composed: { composedVersion: 1, template: { slug: "x", version: "1.0.0" }, locale: "es-MX", theme: {} as never, sections: [{ key: "event", type: "event", variant: "timeline", visible: true, title: "Ceremonia", blocks: [{ id: "eventPlace", role: "eventPlace", type: "location", label: "Lugar", provenance: "empty", value: null }] }] } as never,
+    });
+  });
+
+  it("con bloqueos, «Publicar» está deshabilitado y la lista es accionable", async () => {
+    const usuario = userEvent.setup();
+    vi.spyOn(apiClient, "getPreflight").mockResolvedValue(preflightConBloqueo());
+    render(<PublishDialog invitationId={3} />);
+    await usuario.click(screen.getByTestId("abrir-publicar"));
+    await waitFor(() => expect(screen.getByTestId("confirmar-publicar")).toBeTruthy());
+    expect((screen.getByTestId("confirmar-publicar") as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/falta completar/i)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /completar/i })).toBeTruthy();
+  });
+
+  it("sin bloqueos, publicar muestra el enlace y permite copiarlo", async () => {
+    const usuario = userEvent.setup();
+    vi.spyOn(apiClient, "getPreflight").mockResolvedValue(preflightLimpio());
+    vi.spyOn(apiClient, "publishRelease").mockResolvedValue({
+      releaseId: 1,
+      contentHash: "sha256:" + "a".repeat(64),
+      documentRevision: 3,
+      publishedAt: new Date().toISOString(),
+      publicToken: "pub_x",
+      publicUrl: "https://invitaciones.mx/i/pub_x",
+      reusedActiveRelease: false,
+    });
+    Object.defineProperty(navigator, "clipboard", { value: { writeText: vi.fn().mockResolvedValue(undefined) }, configurable: true });
+
+    render(<PublishDialog invitationId={3} />);
+    await usuario.click(screen.getByTestId("abrir-publicar"));
+    await waitFor(() => expect((screen.getByTestId("confirmar-publicar") as HTMLButtonElement).disabled).toBe(false));
+    await usuario.click(screen.getByTestId("confirmar-publicar"));
+    await waitFor(() => expect(screen.getByTestId("enlace-publicado")).toBeTruthy());
+    expect(screen.getByTestId("enlace-publicado").textContent).toBe("https://invitaciones.mx/i/pub_x");
+
+    await usuario.click(screen.getByTestId("copiar-enlace"));
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith("https://invitaciones.mx/i/pub_x"));
+  });
+
+  it("un 422 al confirmar vuelve al preflight con la lista actualizada", async () => {
+    const usuario = userEvent.setup();
+    vi.spyOn(apiClient, "getPreflight").mockResolvedValueOnce(preflightLimpio()).mockResolvedValueOnce(preflightConBloqueo());
+    vi.spyOn(apiClient, "publishRelease").mockRejectedValue(
+      new ApiError({ timestamp: "", statusCode: 422, code: "TPL_PUBLISH_BLOCKED_MISSING_REQUIRED", message: "Falta contenido obligatorio." }, 422),
+    );
+
+    render(<PublishDialog invitationId={3} />);
+    await usuario.click(screen.getByTestId("abrir-publicar"));
+    await waitFor(() => expect((screen.getByTestId("confirmar-publicar") as HTMLButtonElement).disabled).toBe(false));
+    await usuario.click(screen.getByTestId("confirmar-publicar"));
+
+    await waitFor(() => expect((screen.getByTestId("confirmar-publicar") as HTMLButtonElement).disabled).toBe(true));
+    expect(screen.getByText(/falta completar/i)).toBeTruthy();
+  });
+
+  it("un error de red en el preflight muestra Reintentar", async () => {
+    const usuario = userEvent.setup();
+    vi.spyOn(apiClient, "getPreflight").mockRejectedValue(new Error("red caída"));
+    render(<PublishDialog invitationId={3} />);
+    await usuario.click(screen.getByTestId("abrir-publicar"));
+    expect(await screen.findByRole("button", { name: /reintentar/i })).toBeTruthy();
+  });
+});
