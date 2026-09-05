@@ -9,9 +9,9 @@
         "bg": "#FDF7F5",
         "surface": "#FFFFFF",
         "ink": "#3A2E2B",
-        "accent": "#B35B5B",
+        "accent": "#B05555",
         "accentInk": "#FFFFFF",
-        "muted": "#9A8A86"
+        "muted": "#7B6E6B"
       }
     },
     {
@@ -23,9 +23,9 @@
         "bg": "#F7F5EE",
         "surface": "#FFFFFF",
         "ink": "#2F3A2B",
-        "accent": "#6B7B4A",
+        "accent": "#657446",
         "accentInk": "#FFFFFF",
-        "muted": "#888F76"
+        "muted": "#6C715D"
       }
     },
     {
@@ -39,7 +39,7 @@
         "ink": "#1E2A44",
         "accent": "#2E4A7D",
         "accentInk": "#FFFFFF",
-        "muted": "#7C889E"
+        "muted": "#647087"
       }
     }
   ],

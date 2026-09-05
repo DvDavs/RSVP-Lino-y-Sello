@@ -9,9 +9,9 @@
         "bg": "#F6FAF3",
         "surface": "#FFFFFF",
         "ink": "#2E3B27",
-        "accent": "#607E47",
+        "accent": "#5D7944",
         "accentInk": "#FFFFFF",
-        "muted": "#7D956E"
+        "muted": "#647757"
       }
     },
     {
@@ -23,9 +23,9 @@
         "bg": "#F8F6FB",
         "surface": "#FFFFFF",
         "ink": "#372C43",
-        "accent": "#8765B3",
+        "accent": "#835FB0",
         "accentInk": "#FFFFFF",
-        "muted": "#9886AC"
+        "muted": "#7D6798"
       }
     }
   ],

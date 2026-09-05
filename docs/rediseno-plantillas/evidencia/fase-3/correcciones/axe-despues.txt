@@ -1,0 +1,2 @@
+viewport 1440x900 — 0 regla(s) critical/serious
+viewport 390x844 — 0 regla(s) critical/serious
