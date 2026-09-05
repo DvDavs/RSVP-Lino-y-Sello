@@ -66,7 +66,12 @@ export default defineConfig({
       // `REVALIDATE_SECRET` configurado (`app/api/revalidate/route.ts:40`), así que sin esta línea
       // la prueba mediría un 401, no la revalidación.
       REVALIDATE_SECRET: process.env.REVALIDATE_SECRET ?? "e2e-secreto-de-pruebas",
-      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000",
+      // Bloque 3-8 (U-6): el enlace que la clienta comparte se construye ahora con el ORIGEN
+      // PÚBLICO del sitio (`lib/enlace-publico.ts`), no con el `publicUrl` que devuelve el backend
+      // (`http://localhost/i/…`, que no le abre a ningún invitado). Este valor estaba fijado a
+      // `:3000` a mano: con `PW_PORT` distinto, el enlace apuntaba a OTRO servidor. Se deriva del
+      // mismo `ORIGEN` que el resto de la configuración.
+      NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? ORIGEN,
       NEXT_PUBLIC_CDN_ORIGIN: process.env.NEXT_PUBLIC_CDN_ORIGIN ?? "http://127.0.0.1:6003",
       // Enganche de pruebas del bloque 3-4: expone el store del editor en `window.__editorStore`
       // para conducir las 11 acciones desde Playwright mientras el panel de formularios (3-5) no
