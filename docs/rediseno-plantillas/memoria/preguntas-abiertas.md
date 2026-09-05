@@ -274,7 +274,32 @@ decidir, para que el dueño no tenga que leerlas todas para encontrar las suyas.
 - [Fase 3 · 3-2a] **`ComposedSection.blocks: Array<ComposedBlock | ComposedGroup>` no es una unión discriminada limpia para TypeScript**: `ComposedBlock.type` es el `BlockKind` COMPLETO (incluye el literal `"group"` como uno de sus 14 valores posibles, aunque el dominio nunca lo produzca ahí — 01 §2.5, los grupos no anidan), así que `block.type === "group"` no excluye de forma fiable el miembro `ComposedBlock` al hacer *narrowing*. **Supuesto tomado:** se distingue por la presencia de `items` (`isComposedGroup`, en `schema-types.ts`), que sí narrowea de forma exclusiva; documentado en el propio código. ¿Vale la pena que `composed.ts` use `z.discriminatedUnion` con una forma que sí distinga limpiamente (p. ej. dando a `ComposedBlock` un `type` que EXCLUYA `"group"` en su propio tipo), o se acepta el patrón `isComposedGroup` como la forma estándar de trabajar con esa unión?
 - [Fase 3 · 3-2a] **`jest-axe@11.0.0` no publica tipos TypeScript propios** (verificado [V]: no hay ningún `.d.ts` en el paquete instalado) y `@types/jest-axe` no está en el `package.json` exacto de `04 §2.1`. **Supuesto tomado:** declaración ambiental mínima propia en `test/jest-axe.d.ts` (solo lo que este paquete usa) + augmentación de `Assertion` de Vitest en `test/vitest-matchers.d.ts` (separado porque un `.d.ts` con `import` propio deja de aplicar su `declare module` de forma global — verificado [V]). ¿Se acepta `@types/jest-axe` como dependencia si en algún momento se publica, o se mantiene la declaración local (más control, menos superficie)?
 - [Fase 3 · 3-2a] **No existe `eslint.config.mjs` en este árbol de trabajo** (raíz del monorepo, propiedad de 3-1 según `contratos.md` §1), así que las prohibiciones duras de `04 §19.3` (`dangerouslySetInnerHTML`, `style={{`, utilidades de Tailwind, imports de `next/*`/`zustand`/etc.) no tienen ninguna compuerta mecánica de CI todavía. **Supuesto tomado:** se añadió `test/lint-guards.test.ts` dentro de `packages/sections` como compuerta real (falla `pnpm test` si se viola una regla), citando exactamente qué archivo del árbol de sección lo comete. ¿Cuándo 3-1 (u otro bloque) publique `eslint.config.mjs`, se retira esta prueba o se deja como red de seguridad adicional (recomendado: dejarla, es barata y no depende de que el lint corra)?
-## Fase 3 · 3-1 — andamiaje de `apps/web` (7)
+## Fase 3-B · I-03 — compuerta de la CSP del lienzo (2)
+
+1. **[MEDIA]** [P-3B-I03-1] **El `jitless` de Zod alcanza ahora a TODO consumidor de
+   `@invitaciones/schema`, no solo al lienzo y al chrome.** ADR-3B-I03-01 mueve el
+   `import "./canvas-runtime.ts"` a `common.ts`, la raíz del grafo del paquete, porque es el único
+   punto donde la garantía «`jitless` antes del primer `z.object`» se sostiene sea cual sea el
+   empaquetador (medido: el orden de ESM no lo respeta Turbopack entre chunks). Eso incluye el
+   **render público en servidor** y la validación de lotes de operaciones, que antes sí usaban la ruta
+   JIT. **Supuesto tomado:** se acepta, porque es el precio de que A4 se cumpla en el producto y no
+   solo en un spike, y porque cerrar el `eval` de otra forma exigiría aflojar la CSP (rechazo
+   automático) o depender de detalles internos de Zod. **El coste NO está medido.** Amplía la pregunta
+   3 de «Fase 3 · 3-0b», que solo hablaba del chrome. Si algún día molesta, la salida es
+   `z.config({ jitless: false })` en el arranque del proceso de servidor, **nunca** dentro del lienzo.
+   ¿Quiere el dueño que se mida el coste con una carga representativa del render público antes de la
+   fase 4, o se deja hasta que aparezca un síntoma?
+2. **[BAJA]** [P-3B-I03-2] **Nada impide a priori que un linter de orden de imports rompa la garantía
+   en silencio.** El invariante «`./canvas-runtime.ts` es la PRIMERA dependencia de `common.ts` y de
+   `canvas-protocol.ts`» está avisado en la cabecera de los dos archivos y **detectado** por dos
+   pruebas (`packages/schema/test/zod-jitless.contract.test.ts` en Node, sin navegador, y
+   `apps/web/e2e/lienzo-csp.spec.ts` en Chromium con CSP real), pero no hay ninguna regla de ESLint
+   que lo **prevenga**. **Supuesto tomado:** basta con detectarlo, porque las dos pruebas corren en CI
+   y fallan con un mensaje que explica la causa. ¿Se quiere además una regla
+   (`import/order` con `pathGroups`, o una regla propia) que fije el primer import de esos dos
+   archivos?
+
+## Fase 3 · 3-1 — andamiaje de `apps/web` (7, una CERRADA por I-03)
 
 1. **Presupuesto de JS de `/i/[publicToken]` (04 §16.1, 150 KB gz): el suelo real de `next@16.3.4` +
    Turbopack, sin código de aplicación, mide 165,9 KB gz** — verificado, `check-budget.mjs` rompe de
@@ -289,17 +314,16 @@ decidir, para que el dueño no tenga que leerlas todas para encontrar las suyas.
    `{rootMainFiles, polyfillFiles}`. **Supuesto tomado:** `scripts/check-budget.mjs` se escribió
    contra esa forma real, documentado en el propio script. ¿Se corrige `04 §16.2` para que el próximo
    bloque no pierda tiempo con el nombre de fichero equivocado?
-3. **`script-src`/`eval` de Zod SÍ se dispara dentro de `apps/web` en `/editor/[id]/canvas`, a pesar de
-   `canvas-runtime.ts`, `configureZodForCanvas()` llamada a nivel de módulo, y un intento de configurar
-   una supuesta segunda copia de `zod` directamente** — verificado con Playwright
-   (`e2e/lienzo-csp.spec.ts`). Descartado con evidencia que sea una segunda instalación física de
-   `zod` (`find node_modules/.pnpm -maxdepth 1 -iname "zod@4.5.4*"` da una sola entrada). Sospecha sin
-   confirmar: Turbopack separa el código de Zod en su propio grupo de *chunks* para esa ruta, con una
-   instancia de módulo propia (el *chunk* violador no contiene el marcador `CANVAS_ZOD_JITLESS` que
-   exporta `canvas-runtime.ts`). **Supuesto tomado:** no se afloja la CSP; el hallazgo queda en
-   cuarentena documentada (`// QUARANTINE`, `06 §8.2.6`) en la propia prueba, que verifica lo que sí
-   se controla (cabeceras, cero violaciones de estilo) y avisa con `console.warn` en cada corrida sin
-   ponerse en rojo. ¿Quién depura el *bundle* sin minificar para confirmar la causa exacta?
+3. ~~**`script-src`/`eval` de Zod SÍ se dispara dentro de `apps/web` en `/editor/[id]/canvas`, a pesar
+   de `canvas-runtime.ts`…** Cuarentena documentada (`// QUARANTINE`, `06 §8.2.6`) en la propia
+   prueba; sospecha sin confirmar de que Turbopack separase Zod con instancia de módulo propia.~~
+   **CERRADA en I-03 (2026-09-05, `bitacora/3b-i03.md`, ADR-3B-I03-01). Ya no hay cuarentena ni
+   `console.warn`: la prueba afirma cero violaciones con `expect` y se ha visto en rojo.** La causa
+   estaba medida al revés: el marcador `CANVAS_ZOD_JITLESS` es un `export const` que nadie consume y
+   el minificador lo elimina de **todos** los chunks, así que su ausencia no probaba nada. La causa
+   real, medida sobre el bundle servido, es de **orden de evaluación**: Turbopack funde `common.ts`
+   con el chunk de Zod y lo evalúa antes de que corra el cuerpo de `canvas-protocol.ts`, que vive en
+   otro chunk. Arreglo: `common.ts` importa `./canvas-runtime.ts` como su primera dependencia.
 4. **`noUncheckedIndexedAccess: true` (04 §2 lo pide para `tsconfig.base.json`) rompe el typecheck de
    `packages/schema`** — verificado: `tsc` desde `apps/web` (que consume `.ts` fuente de
    `@invitaciones/schema`, no `.d.ts` compilados) hereda el *flag* y produce errores nuevos en
