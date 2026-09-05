@@ -298,3 +298,161 @@ describe("I-05 — el velo del RSVP es un DEGRADADO: se compone y se mide, no se
     }
   }
 });
+
+/**
+ * I-05b — LA PORTADA. El mismo agujero de clase que el velo del RSVP, en la sección que decide el
+ * juicio del invitado, y sobre el contenido que NO controlamos.
+ *
+ * `cover.image` es contenido de la CLIENTA (`boda-clasica/1.0.0/template.json`: `editable: true`,
+ * `required: true`, "Foto de portada"). El peor fondo posible no es la lámina del paquete —cuyo
+ * centro está vacío a propósito y mide 12,3:1— sino cualquier fotografía que suba una persona,
+ * incluida una negra. Medido [V] por píxeles sobre la invitación PUBLICADA forzando esa foto
+ * (`bitacora/3b-i05b.md` §3, 3 viewports x 3 fondos):
+ *
+ *     hueco       token   px      sobre lámina   sobre foto NEGRA   umbral
+ *     .eyebrow    ink     14,38   12,16          4,20  FALLA        4,5
+ *     .dateRow    muted   14,38    4,51          1,87  FALLA        4,5
+ *     .badge      ink     12,30   12,04          4,62                4,5
+ *     .heroName   ink     54,70   12,20          5,30                3,0
+ *
+ * `.dateRow` pinta `--inv-color-muted`, no `ink` (`CoverSection.module.css .dateRow`): es el peor
+ * caso de la sección y el que ningún informe anterior había medido.
+ *
+ * Y NO se arreglaba subiendo el lavado: para que `muted` llegue a 4,5:1 sobre una foto negra hace
+ * falta `bg` al **98,6 %-99,0 %** en las cinco paletas — pintar el papel encima de la lámina de
+ * banda a banda, que es la objeción A1 otra vez con el signo cambiado. La corrección es la regla de
+ * C-01: la legibilidad se resuelve por SEPARACIÓN. `.content` lleva su propio papel opaco.
+ *
+ * Esta compuerta compone la PILA REAL leída del `.module.css`: fotografía → cada parada del velo
+ * (`.scrim`) → el fondo de `.content`. Con el papel opaco el velo se cancela en la cuenta, que es
+ * justo lo que se quiere afirmar; si alguien lo vuelve translúcido, o lo borra, la composición
+ * vuelve a depender del velo y estas pruebas se ponen rojas sin que nadie tenga que acordarse.
+ */
+
+/** Un `background` liso de una regla real: `var(--inv-color-X)` o `color-mix(… N %, transparent)`. */
+function fondoDeRegla(archivo: string, selector: string): { readonly token: keyof PaletteTokens; readonly alfa: number; readonly comoEstaEscrito: string } {
+  const bloque = bloqueDeRegla(archivo, selector);
+  const decl = /\n\s*background:\s*([^;]+);/.exec(bloque);
+  // Sin `background` el texto cae DIRECTAMENTE sobre el velo y la fotografía: no es un error de la
+  // prueba, es el estado que esta issue vino a corregir. Se modela como una capa de alfa 0 para que
+  // el fallo salga con el ratio REAL de cada paleta, y no como una excepción de recolección.
+  if (!decl) return { token: "bg", alfa: 0, comoEstaEscrito: "(ninguno: el texto cae sobre la fotografía)" };
+  const valor = decl[1]!.trim();
+  const mezcla = /color-mix\(\s*in srgb,\s*var\(--inv-color-([a-z-]+)\)\s*(\d+(?:\.\d+)?)%\s*,\s*transparent\s*\)/.exec(valor);
+  const liso = /^var\(--inv-color-([a-z-]+)\)$/.exec(valor);
+  const nombre = mezcla?.[1] ?? liso?.[1];
+  const clave = nombre === undefined ? undefined : TOKEN_CSS[nombre];
+  if (!clave) throw new Error(`${archivo} ${selector}: \`background: ${valor}\` no es un token de paleta reconocible`);
+  return { token: clave, alfa: mezcla ? Number(mezcla[2]) / 100 : 1, comoEstaEscrito: valor };
+}
+
+/** Los extremos en px de un `--inv-text-*` escrito como `clamp(min, preferido, max)`. */
+function extremosDeTamano(nombre: string): { readonly minPx: number; readonly maxPx: number } {
+  const css = readFileSync(resolve(here, "../../src/theme/tokens.css"), "utf8");
+  const m = new RegExp(`--inv-text-${nombre}:\\s*clamp\\(\\s*([\\d.]+)rem\\s*,[^,]+,\\s*([\\d.]+)rem\\s*\\)`).exec(css);
+  if (!m) throw new Error(`tokens.css: --inv-text-${nombre} ya no es un clamp(min, …, max) de rem`);
+  return { minPx: Number(m[1]) * 16, maxPx: Number(m[2]) * 16 };
+}
+
+/**
+ * WCAG 1.4.3 al pie de la letra: 3:1 SÓLO si el texto es grande (≥ 24 px, o ≥ 18,66 px con peso
+ * ≥ 700). Se decide con el extremo MENOR del `clamp`, que es lo que se pinta en el viewport más
+ * estrecho; nunca con el mayor. Así el umbral no se elige, se DERIVA del token real: si alguien
+ * encoge `--inv-text-4xl` por debajo de 24 px, el umbral de esa fila sube solo a 4,5.
+ */
+function umbralWcag(minPx: number, peso: number): number {
+  return minPx >= 24 || (minPx >= 18.66 && peso >= 700) ? 3 : 4.5;
+}
+
+/** Los cuatro huecos de texto de `CoverSection[data-variant="full"] .content`, con su token real. */
+const HUECOS_DE_LA_PORTADA: ReadonlyArray<{
+  readonly hueco: string;
+  readonly texto: keyof PaletteTokens;
+  readonly tamano: string;
+  readonly peso: number;
+}> = [
+  { hueco: ".eyebrow (antetítulo, hereda el color de .content)", texto: "ink", tamano: "sm", peso: 500 },
+  { hueco: ".heroName (los nombres)", texto: "ink", tamano: "4xl", peso: 600 },
+  // OJO: `.dateRow` declara `color: var(--inv-color-muted)`, no la tinta del contenedor.
+  { hueco: ".dateRow (la fecha) — pinta `muted`, no `ink`", texto: "muted", tamano: "sm", peso: 400 },
+  { hueco: ".badge (el sello «save the date»)", texto: "ink", tamano: "xs", peso: 500 },
+];
+
+/** Lo que puede haber debajo de todo en la portada: el hueco de imagen es de la clienta. */
+const FONDOS_DE_LA_PORTADA: ReadonlyArray<{ readonly nombre: string; readonly color: (t: PaletteTokens) => string }> = [
+  { nombre: "sin fotografía (el --inv-color-bg de .section)", color: (t) => t.bg },
+  { nombre: "fotografía BLANCA de la clienta", color: () => "#FFFFFF" },
+  { nombre: "fotografía NEGRA de la clienta (peor caso para texto oscuro)", color: () => "#000000" },
+];
+
+describe("I-05b — la portada garantiza contraste sobre CUALQUIER fotografía, no sobre la lámina", () => {
+  const ARCHIVO = "CoverSection.module.css";
+  const SEL_CONTENIDO = '.section[data-variant="full"] .content';
+  const SEL_VELO = '.section[data-variant="full"] .scrim';
+  const papel = fondoDeRegla(ARCHIVO, SEL_CONTENIDO);
+  // Las paradas del velo, más la parada `transparent` que el propio degradado declara en sus dos
+  // extremos: `.content` es la fila 2 de un `grid-template-rows: 2fr auto 5fr` y nada en el CSS
+  // ata su posición a la banda densa del degradado, así que "velo = 0" es un caso REAL, no
+  // pesimismo. Es también el caso que queda si alguien borra el velo entero.
+  const capasDelVelo = [
+    { token: "bg" as const, alfa: 0, porcentaje: "0 % (las paradas `transparent` del degradado)" },
+    ...paradasDeDegradado(ARCHIVO, SEL_VELO),
+  ];
+
+  it("`.content` declara un fondo OPACO: es lo que separa el texto de la fotografía", () => {
+    expect(
+      papel.alfa,
+      `${SEL_CONTENIDO} declara \`background: ${papel.comoEstaEscrito}\` (alfa ${papel.alfa}). Con alfa < 1 ` +
+        "el color bajo el glifo vuelve a depender de la foto que suba la clienta y el ratio deja de " +
+        "estar garantizado: hay que volver a medirlo sobre fotografía blanca Y negra.",
+    ).toBe(1);
+  });
+
+  it("el velo sigue siendo un degradado declarado (si desaparece, esta compuerta tiene que enterarse)", () => {
+    expect(capasDelVelo.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("ningún umbral de esta tabla es más flojo que el que WCAG 1.4.3 da al tamaño REAL del hueco", () => {
+    const derivados = HUECOS_DE_LA_PORTADA.map((h) => {
+      const { minPx, maxPx } = extremosDeTamano(h.tamano);
+      return { ...h, minPx, maxPx, umbral: umbralWcag(minPx, h.peso) };
+    });
+    // Los tres huecos pequeños NUNCA son texto grande, ni en el viewport más ancho.
+    for (const d of derivados.filter((x) => x.umbral === 4.5)) {
+      expect(d.maxPx, `${d.hueco}: --inv-text-${d.tamano} llega a ${d.maxPx} px`).toBeLessThan(24);
+    }
+    // Y el único que usa 3,0 lo hace porque su MÍNIMO ya es texto grande (medido en el navegador:
+    // 54,7 px a 390 de ancho y 72 px a 820/1440 — `bitacora/3b-i05b.md` §3).
+    for (const d of derivados.filter((x) => x.umbral === 3)) {
+      expect(d.minPx, `${d.hueco}: --inv-text-${d.tamano} arranca en ${d.minPx} px`).toBeGreaterThanOrEqual(24);
+    }
+    expect(derivados.filter((x) => x.umbral === 3).map((x) => x.hueco)).toEqual([".heroName (los nombres)"]);
+  });
+
+  for (const slug of PLANTILLAS) {
+    for (const pal of leerTheme(slug).palettes) {
+      for (const h of HUECOS_DE_LA_PORTADA) {
+        const { minPx, maxPx } = extremosDeTamano(h.tamano);
+        const umbral = umbralWcag(minPx, h.peso);
+        for (const fondo of FONDOS_DE_LA_PORTADA) {
+          for (const capa of capasDelVelo) {
+            it(`${slug}/${pal.id}: ${h.hueco} sobre ${fondo.nombre}, velo al ${capa.porcentaje} — ${h.texto} ≥ ${umbral}:1`, () => {
+              const debajo = fondo.color(pal.tokens);
+              const trasElVelo = capa.alfa > 0 ? componer(pal.tokens[capa.token], capa.alfa, debajo) : debajo;
+              const compuesto = componer(pal.tokens[papel.token], papel.alfa, trasElVelo);
+              const r = contrastRatio(pal.tokens[h.texto], compuesto);
+              expect(
+                r,
+                `${h.texto} ${pal.tokens[h.texto]} sobre [${debajo} → velo ${capa.porcentaje} → ` +
+                  `${papel.comoEstaEscrito}] = ${compuesto} → ${r.toFixed(2)}:1, y WCAG 1.4.3 pide ${umbral}:1 ` +
+                  `a un texto de ${minPx}-${maxPx} px con peso ${h.peso}. La portada es la primera pantalla ` +
+                  "que ve el invitado y `cover.image` lo sube la clienta: aquí no vale «con la lámina de la " +
+                  "demostración pasa». `axe` deja estos nodos en `incomplete` por el degradado del velo.",
+              ).toBeGreaterThanOrEqual(umbral);
+            });
+          }
+        }
+      }
+    }
+  }
+});
