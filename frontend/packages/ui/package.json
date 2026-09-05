@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./shapes": "./src/shapes/index.ts",
-    "./estilos.css": "./src/estilos.css"
+    "./estilos.css": "./src/estilos.css",
+    "./shapes/shapes.css": "./src/shapes/shapes.css"
   },
   "scripts": {
     "build": "tsc --noEmit",

@@ -1,0 +1,209 @@
+/* packages/ui/src/shapes/shapes.css — la única hoja de la biblioteca de formas (3C-4).
+   Se carga desde `@invitaciones/ui/estilos.css` (`@import "./shapes/shapes.css"`, lo añade el
+   orquestador al integrar) o directamente por su ruta de exportación.
+
+   Aquí NO hay ni un color literal: todo color sale de `--ui-*` (`@invitaciones/tokens`). Sí hay
+   valores de reserva para longitudes y tiempos (`var(--ui-radius-lg, 24px)`) para que una forma
+   siga siendo una forma si alguien la usa antes de cargar los tokens; un color nunca tiene reserva,
+   porque una pareja de contraste inventada es peor que una forma invisible.
+
+   Movimiento (`11 §6.2` regla 5 y `11 §3.2`): las animaciones se emiten DENTRO de
+   `@media (prefers-reduced-motion: no-preference)` — sin esa preferencia no existe ni la
+   declaración — y ADEMÁS se apagan explícitamente en `@media (prefers-reduced-motion: reduce)`.
+   La segunda regla es redundante a propósito: es la que sobrevive si alguien copia una clase a otra
+   hoja o si un `@layer` reordena la cascada, y es la que comprueba `shapes.css.test.ts`. */
+
+/* ───────────────────────────────────────────────────────────── formas SVG ── */
+
+.ui-forma {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ─────────────────────────────────────────────────── fotografía y máscara ── */
+
+/* `11 §3.4` regla 4: toda foto con máscara o radio ≥ 24 px. */
+.ui-imagen {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+/* Solo transporta el `<clipPath>`: nunca ocupa espacio ni recibe eventos. */
+.ui-imagen__defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ui-imagen__recorte {
+  position: absolute;
+  inset: 0;
+}
+
+.ui-imagen__foto,
+.ui-imagen .ui-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ─────────────────────────────────────────────────────────────── píldora ── */
+
+.ui-pildora {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ui-space-2, 8px);
+  padding: 6px var(--ui-space-3, 12px);
+  border-radius: var(--ui-radius-pill, 999px);
+  font-family: var(--ui-font-text);
+  font-size: var(--ui-text-xs, 13px);
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.ui-pildora__punto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* ───────────────────────────────────────────────── sombra de color (§3.4.8) ── */
+
+.ui-sombra-color {
+  background: var(--ui-surface-raised);
+}
+
+/* ──────────────────────────────────────────────────────────── composición ── */
+
+/* `11 §3.4` regla 3: la forma se recorta al bloque y vive por debajo del contenido. */
+.ui-composicion {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* La capa es CUADRADA por defecto (`aspect-ratio: 1`): un porcentaje sobre un bloque ancho y bajo
+   deformaría la forma o la dejaría minúscula dentro de una caja apaisada. Con `height` explícito
+   manda el alto y `aspect-ratio` deja de aplicarse. */
+.ui-composicion__forma {
+  position: absolute;
+  z-index: 0;
+  width: var(--ui-capa-tam, 100%);
+  height: var(--ui-capa-alto, auto);
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+/* Regla 1: la segunda forma no puede pasar del 30 % del área (45 % × 45 % ≈ 20 %). */
+.ui-composicion__forma--secundaria {
+  max-width: 45%;
+  max-height: 45%;
+}
+
+.ui-composicion__contenido {
+  position: relative;
+  z-index: 1;
+}
+
+.ui-composicion__forma--centro {
+  top: 50%;
+  left: 50%;
+  transform: translate(calc(-50% + var(--ui-capa-dx, 0px)), calc(-50% + var(--ui-capa-dy, 0px)));
+}
+
+.ui-composicion__forma--cubrir {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  transform: translate(var(--ui-capa-dx, 0px), var(--ui-capa-dy, 0px));
+}
+
+.ui-composicion__forma--arriba-izquierda {
+  top: 0;
+  left: 0;
+  transform: translate(calc(-20% + var(--ui-capa-dx, 0px)), calc(-20% + var(--ui-capa-dy, 0px)));
+}
+
+.ui-composicion__forma--arriba-derecha {
+  top: 0;
+  right: 0;
+  transform: translate(calc(20% + var(--ui-capa-dx, 0px)), calc(-20% + var(--ui-capa-dy, 0px)));
+}
+
+.ui-composicion__forma--abajo-izquierda {
+  bottom: 0;
+  left: 0;
+  transform: translate(calc(-20% + var(--ui-capa-dx, 0px)), calc(20% + var(--ui-capa-dy, 0px)));
+}
+
+.ui-composicion__forma--abajo-derecha {
+  right: 0;
+  bottom: 0;
+  transform: translate(calc(20% + var(--ui-capa-dx, 0px)), calc(20% + var(--ui-capa-dy, 0px)));
+}
+
+.ui-composicion__forma--izquierda {
+  top: 50%;
+  left: 0;
+  transform: translate(calc(-20% + var(--ui-capa-dx, 0px)), calc(-50% + var(--ui-capa-dy, 0px)));
+}
+
+.ui-composicion__forma--derecha {
+  top: 50%;
+  right: 0;
+  transform: translate(calc(20% + var(--ui-capa-dx, 0px)), calc(-50% + var(--ui-capa-dy, 0px)));
+}
+
+/* ────────────────────────────────────────────────────────────── movimiento ── */
+
+/* `11 §6.2` regla 2: escala 1 → 1,04 y 2° en 12 s, alternando. Solo en formas de FONDO y como
+   máximo una por vista. */
+@keyframes ui-forma-respira {
+  from {
+    transform: scale(1) rotate(0deg);
+  }
+  to {
+    transform: scale(1.04) rotate(2deg);
+  }
+}
+
+/* Deriva: el mismo espíritu, en traslación, para formas que no pueden crecer sin salirse. */
+@keyframes ui-forma-deriva {
+  from {
+    transform: translate(-1.5%, 0.5%);
+  }
+  to {
+    transform: translate(1.5%, -1%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-forma--respira {
+    transform-origin: 50% 50%;
+    animation: ui-forma-respira var(--ui-dur-respira, 12000ms) var(--ui-ease-in-out, cubic-bezier(0.6, 0, 0.2, 1))
+      infinite alternate;
+  }
+
+  .ui-forma--deriva {
+    transform-origin: 50% 50%;
+    animation: ui-forma-deriva 18000ms var(--ui-ease-in-out, cubic-bezier(0.6, 0, 0.2, 1)) infinite alternate;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-forma--respira {
+    animation: none;
+  }
+
+  .ui-forma--deriva {
+    animation: none;
+  }
+}
