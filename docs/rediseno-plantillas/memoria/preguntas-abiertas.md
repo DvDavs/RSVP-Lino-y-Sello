@@ -440,9 +440,65 @@ autentique una vez y comparta el token entre archivos (`globalSetup`), en vez de
 
 ## Fase 3 · 3-5 — paneles y flujos del editor (6)
 
-- **[ALTA]** [Fase 3 · 3-5] **La vista previa en vivo de paleta/tipografía (`04 §7.1` paso 8) llega al lienzo pero no cambia ningún color** [V: script de diagnóstico aparte — `data-theme-palette` del `<div>` de `ThemeProvider` cambia de `blush` a `olive` al pasar el ratón, pero `getComputedStyle(...).getPropertyValue("--inv-color-bg")` se queda en `#FDF7F5` (el de `blush`) antes y después]. Causa raíz: `app/(canvas)/editor/[invitationId]/canvas/LienzoCliente.tsx` (de 3-4, `app/(canvas)/**`, fuera de mi alcance) construye `compuestoEfectivo` intercambiando solo `theme.paletteId`/`theme.fontSetId` cuando llega `PREVIEW_THEME`, sin volver a resolver `theme.tokens` para ese id nuevo — y `ThemeProvider` (`packages/sections`, contrato integrado, tampoco tocable desde aquí) pinta los `--inv-color-*` a partir de `theme.tokens`, no del id. El protocolo (`PreviewThemeMessage`, `packages/schema/src/canvas-protocol.ts`, congelado) solo lleva los identificadores, nunca los tokens completos — a propósito, es un mensaje efímero y pequeño — así que la resolución tiene que pasar en el receptor. **Supuesto tomado:** de mi lado (`ThemePicker.tsx`) el cableado es correcto y no invento una resolución de tokens fuera de mi archivo; mejoré el propio interruptor de la paleta (borde visible en `:hover`) para que al menos la interacción se vea con claridad mientras el lienzo no reacciona. ¿Quién (3-4, o quien herede `app/(canvas)/**`) añade en `LienzoCliente.tsx` la resolución de `paletteId`→`tokens` usando el mismo `ThemeSpec` que ya expone `lib/manifest.ts`, para que el paso 8 de `04 §7.1` se cumpla de verdad?
+- **[CERRADA por 3-5b — ver `bitacora/3-5b.md` y ADR-3-5b-01]** ~~**[ALTA]**~~ [Fase 3 · 3-5] **La vista previa en vivo de paleta/tipografía (`04 §7.1` paso 8) llega al lienzo pero no cambia ningún color** [V: script de diagnóstico aparte — `data-theme-palette` del `<div>` de `ThemeProvider` cambia de `blush` a `olive` al pasar el ratón, pero `getComputedStyle(...).getPropertyValue("--inv-color-bg")` se queda en `#FDF7F5` (el de `blush`) antes y después]. Causa raíz: `app/(canvas)/editor/[invitationId]/canvas/LienzoCliente.tsx` (de 3-4, `app/(canvas)/**`, fuera de mi alcance) construye `compuestoEfectivo` intercambiando solo `theme.paletteId`/`theme.fontSetId` cuando llega `PREVIEW_THEME`, sin volver a resolver `theme.tokens` para ese id nuevo — y `ThemeProvider` (`packages/sections`, contrato integrado, tampoco tocable desde aquí) pinta los `--inv-color-*` a partir de `theme.tokens`, no del id. El protocolo (`PreviewThemeMessage`, `packages/schema/src/canvas-protocol.ts`, congelado) solo lleva los identificadores, nunca los tokens completos — a propósito, es un mensaje efímero y pequeño — así que la resolución tiene que pasar en el receptor. **Supuesto tomado:** de mi lado (`ThemePicker.tsx`) el cableado es correcto y no invento una resolución de tokens fuera de mi archivo; mejoré el propio interruptor de la paleta (borde visible en `:hover`) para que al menos la interacción se vea con claridad mientras el lienzo no reacciona. ¿Quién (3-4, o quien herede `app/(canvas)/**`) añade en `LienzoCliente.tsx` la resolución de `paletteId`→`tokens` usando el mismo `ThemeSpec` que ya expone `lib/manifest.ts`, para que el paso 8 de `04 §7.1` se cumpla de verdad?
 - **[ALTA]** [Fase 3 · 3-5] **El fallback `required: spec?.required ?? false` de `SectionList.tsx` era inseguro** — sin manifiesto (el caso normal hoy: el contrato `manifest` en `GET .../document` no existe todavía), TODA sección caía a "no obligatoria" y mostraba un interruptor activo, incluidas Portada/Confirmación/Pie. Lo descubrí mirando `enlace-copiado.png` después de un `page.reload()` real (que borra el *fixture* en memoria) — exactamente la situación de producción de hoy. **Corregido en este bloque** (`required: spec ? spec.required : true`, conservador: sin confirmación positiva del manifiesto, toda sección se trata como obligatoria) con prueba unitaria y e2e nuevas (`SectionList.test.tsx`, `secciones.spec.ts` › `U-18/E-degradado`). Lo dejo como pregunta porque es un patrón que puede repetirse en otros componentes que consultan el manifiesto con un `?? false`/`?? true` a ciegas: ¿vale la pena una regla de revisión (o un *lint* propio) que marque cualquier `spec?.<booleano> ?? <valor>` fuera de `lib/manifest.ts`, para que el próximo campo opcional del manifiesto no repita el mismo error por defecto equivocado?
 - [Fase 3 · 3-5] **`ThemeSpec`/`theme.json` no están prometidos por el contrato nuevo** (solo se anunció `manifest` en `GET .../document`, `bitacora/3-4.md §2.1`) — sin ellos, `ThemePicker` no tiene catálogo de paletas/tipografías que ofrecer y se degrada a mostrar la combinación actual de solo lectura, con el texto «Las demás combinaciones de esta plantilla todavía no están disponibles aquí para elegir» (P1: explicado, no oculto ni roto). **Supuesto tomado:** construí y probé el camino completo contra el `theme.json` REAL de `boda-clasica` vía *fixture* (ADR-3-5-01), dejando `useTemplateManifest` listo para el campo real cuando llegue. ¿Se añade `theme` (o se anida dentro de `manifest`) en la misma respuesta que resuelva la pregunta ALTA de 3-4 sobre `manifest`, o llega por una ruta aparte?
 - [Fase 3 · 3-5] **`window.__editorStore` (de 3-4) sigue vivo** aunque `BlockForm` ya existe, porque `editor-nucleo.spec.ts`/`deshacer.spec.ts`/`conflicto.spec.ts` (de 3-4, fuera de mi alcance) siguen tecleando en el store directamente por ese enganche en vez de por la UI real [V: `grep` confirma su uso en los tres]. **Supuesto tomado** (ADR-3-5-05): no lo retiro — retirarlo rompería esos tres archivos en silencio y no tengo mandato para reescribirlos. Añadí `window.__seedManifestFixture` bajo el mismo guardián en vez de crear uno nuevo. ¿Quién reescribe esos tres e2e para conducir la UI real (ahora que existe) y libera el retiro de `window.__editorStore`?
 - [Fase 3 · 3-5] **`editor-nucleo.spec.ts` (de 3-4) tiene 2 pruebas rotas por consecuencia directa de este bloque, no por un defecto mío** — diagnosticado, no corregido (archivo fuera de mi alcance): **E-N2** espera `aside [aria-current="true"]` tras seleccionar un bloque del lienzo, pero mi `BlockForm` reemplaza legítimamente el `<aside>` de secciones por el panel de contenido en cuanto `panel==="block"` (comportamiento pedido por el brief), así que ese `aria-current` ya no existe donde la prueba lo busca. **E-N4** falla en un `waitForFunction` que exige ≥3 `<img>` cargadas en 15 s; verificado por la captura de contexto de error que clic/selección/desplazamiento/`BlockForm` funcionaron correctamente — parece contención de recursos de una máquina con varias sesiones de agentes en paralelo (ver el punto siguiente), no una regresión funcional. ¿Actualiza el dueño de ese archivo el selector de E-N2 para apuntar al panel de contenido real, y confirma si E-N4 es flaky de entorno o una regresión genuina?
 - [Fase 3 · 3-5] **La máquina aloja varias sesiones de agentes en paralelo compartiendo puertos, el clúster de Postgres, el backend y las credenciales de la invitación de demostración** [V: encontrado un proceso `next start` de OTRO *worktree* (`agent-a2c211173de1d1936`) escuchando en el puerto 3000 durante este bloque]. Usé `PW_PORT=3013` (mecanismo de ADR-3-4-04) para no interferir y maté solo los procesos que yo mismo levanté. Relacionado: `POST /auth/token` tiene una condición de carrera real (`500 IncorrectResultSizeDataAccessException`, filas duplicadas en `refresh_tokens` bajo *logins* concurrentes de la misma cuenta de demostración) — `modules/auth`, fuera de mi alcance; mitigado corriendo mis e2e con `--workers=1`. ¿Vale la pena que cada sesión de la fase 3 tenga su propia cuenta/invitación de demostración en vez de compartir la id 3, para que estos dos problemas de contención dejen de aparecer del todo?
+
+## Fase 3 · 3-5b — la vista previa de paleta cambia el color de verdad (4)
+
+**CERRADA la ALTA de 3-5** («la vista previa de paleta llega al lienzo pero no cambia ningún
+color»): corregida y medida en `bitacora/3-5b.md`. El síntoma estaba bien diagnosticado; el sitio
+del arreglo, no — el lienzo **no puede** resolver `paletteId → tokens` (cuatro paredes medidas,
+§2.2 de esa bitácora), así que la resolución vive ahora en `lib/store.ts` y los tokens viajan en un
+`RENDER` efímero (ADR-3-5b-01). `--inv-color-accent` computado dentro del iframe: `#B05555` → 
+`#657446` al pasar el ratón por «Olivo y marfil», y de vuelta al salir [V].
+
+- **[ALTA]** [Fase 3 · 3-5b] **`04 §9.3` describe un `PREVIEW_THEME` que su receptor no puede
+  cumplir, y la corrección de verdad es una línea del protocolo** [V, `bitacora/3-5b.md` §2.2]. El
+  mensaje lleva solo `paletteId`/`fontSetId`, pero el lienzo no tiene el `theme.json` ni ninguna vía
+  para obtenerlo: `PreviewThemeMessage` es `z.strictObject` y un campo extra hace que el mensaje se
+  descarte entero (`canvas-protocol.ts:115-120`, `:242-249`); `connect-src 'none'`
+  (`apps/web/proxy.ts:28`) impide pedirlo; `eslint.config.mjs:118-124` impide importar
+  `lib/manifest.ts`; y el componente de servidor de la ruta del lienzo tampoco puede, porque la
+  sesión va por cabecera `Authorization` desde `sessionStorage` (`lib/api-client.ts:52-71`) y las
+  rutas que sirven `theme.json` están todas bajo `@PreAuthorize` (`api/CatalogController.kt:23-24`).
+  **Supuesto tomado (ADR-3-5b-01):** con el protocolo congelado y `frontend/packages/**` prohibido,
+  los tokens viajan por el único mensaje que los transporta, `RENDER`, con la misma `revision` y sin
+  escribir nada. Funciona y está probado en las dos capas, pero manda un `ComposedDocument` completo
+  por cada entrada/salida del ratón donde el diseño quería dos identificadores. ¿Se añaden
+  `tokens`/`fonts` **opcionales** a `PreviewThemeMessage` (y se corrige `04 §9.3`) cuando
+  `packages/schema` vuelva a ser escribible, para devolver la resolución al lienzo y retirar el
+  `sink.render(...)` de `previewTheme`? Es una línea de esquema más dos de `ThemePicker`.
+
+- [Fase 3 · 3-5b] **`aria-busy` (`04 §12.4`) no aparecía NUNCA en el lienzo desde 3-4, por un choque
+  de espacios de claves** [V: montando `LienzoCliente` con un `PATCH` `pending:true` y contando los
+  nodos ocupados — 0]. `LienzoCliente` indexaba `pendientes` con `refKey(ref)`
+  (`sectionKey::blockId::itemId::itemBlockId`, la clave de la SELECCIÓN,
+  `packages/sections/src/canvas/CanvasContext.tsx:64-66`) mientras `packages/sections` busca por
+  `blockId` (`sections/CoverSection.tsx:38-39`) y por `` `${itemId}.${itemBlockId}` ``
+  (`blocks/dispatch.ts:41`). **Corregido en este bloque** con una función local de tres líneas,
+  porque hacía falta para probar ADR-3-5b-02. La duplicación del formato de clave es fea: el paquete
+  tiene `itemPendingKey` pero **no lo reexporta** (`packages/sections/src/index.ts:33` exporta
+  `refKey` y no `itemPendingKey`). ¿Se añade `itemPendingKey` al `index.ts` del paquete cuando
+  vuelva a ser escribible, y el consumidor lo importa en vez de repetir el formato?
+
+- [Fase 3 · 3-5b] **El titular de la banda de acento («¿Nos acompañas?» de la sección de
+  confirmación) tiene poco contraste en las tres paletas de `boda-clasica`**, visible en las dos
+  capturas de `evidencia/fase-3/correcciones/paleta-preview-{antes,despues}.png` — es tinta sobre
+  acento, no `muted` sobre fondo, así que **no** es el defecto que 3-3b corrigió. **Supuesto
+  tomado:** no lo toco (`packages/sections`/`frontend/templates` prohibidos para este bloque) y no
+  es una regresión: se ve idéntico antes y después. ¿Entra en la próxima pasada de contraste
+  (`04 §17.1` no lista la pareja `ink`/`accent` entre las cinco que audita), o se corrige en la
+  sección?
+
+- [Fase 3 · 3-5b] **`GET .../document` entrega `theme` y ahora lo consumen DOS caminos que no se
+  hablan**: `lib/manifest.ts` (para `ThemePicker`, con su propia caché por invitación+versión) y
+  `lib/store.ts` (`themeSpec`, para resolver la vista previa). Los dos leen el MISMO campo de la
+  MISMA respuesta y los dos hacen su propio `safeParse` porque `lib/api-types.ts` todavía no declara
+  `manifest`/`theme` en `GetDocumentResponse`. **Supuesto tomado:** no unifico — `lib/manifest.ts`
+  es de 3-5 y `lib/store.ts` de 3-4, y unir las dos cachés es un refactor de más de un bloque.
+  ¿Se declaran `manifest` y `theme` en `lib/api-types.ts` (que es donde el contrato de 3-4b debería
+  estar escrito) y se deja una sola fuente para los dos consumidores?

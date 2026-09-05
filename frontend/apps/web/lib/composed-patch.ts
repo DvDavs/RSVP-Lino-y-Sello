@@ -19,6 +19,7 @@
 import type {
   ComposedDocument,
   Operation,
+  ThemeSpec as ThemeSpecType,
   ComposedBlock as ComposedBlockSchema,
   ComposedGroup as ComposedGroupSchema,
   ComposedSection as ComposedSectionSchema,
@@ -211,7 +212,43 @@ export function nombresDe(composed: ComposedDocument | null, op: Operation): { b
  * `removeItem`, `moveItem`) devuelve `structural: true` y el store manda el `RENDER` completo;
  * las escalares devuelven `entries` y viajan como `PATCH`.
  */
-export function applyOperationOptimistic(composed: ComposedDocument, op: Operation): PatchResult {
+/**
+ * `ResolvedTheme` completo a partir de los IDENTIFICADORES y del catálogo (`theme.json`). Lo usan
+ * los dos caminos del paso 8 de `04 §7.1`: la vista previa al pasar el ratón (`lib/store.ts`
+ * → `previewTheme`, ADR-3-5b-01) y el parche optimista de `setTheme` al confirmar.
+ *
+ * Devuelve `null` cuando NO hay nada que resolver: sin catálogo, sin identificadores, o con
+ * identificadores que esa versión de plantilla no declara. Nunca inventa una paleta (P1) — el
+ * `422 TPL_OPERATION_INVALID` del servidor sigue siendo quien manda sobre un id inexistente.
+ * Copia los valores en vez de compartir la referencia con el catálogo: acaban dentro de un
+ * documento que se parchea en sitio.
+ */
+export function resolverTema(
+  spec: ThemeSpecType | null | undefined,
+  actual: ComposedDocument["theme"],
+  paletteId: string | null,
+  fontSetId: string | null,
+): ComposedDocument["theme"] | null {
+  if (!spec) return null;
+  const paleta = paletteId === null ? null : (spec.palettes.find((p) => p.id === paletteId) ?? null);
+  const fuentes = fontSetId === null ? null : (spec.fontSets.find((f) => f.id === fontSetId) ?? null);
+  if (paleta === null && fuentes === null) return null;
+  const cara = (f: { family: string; weights: number[]; source: string }) => ({ ...f, weights: [...f.weights] });
+  return {
+    paletteId: paleta?.id ?? actual.paletteId,
+    fontSetId: fuentes?.id ?? actual.fontSetId,
+    tokens: paleta ? { ...paleta.tokens } : actual.tokens,
+    fonts: fuentes ? { heading: cara(fuentes.heading), body: cara(fuentes.body) } : actual.fonts,
+  };
+}
+
+export function applyOperationOptimistic(
+  composed: ComposedDocument,
+  op: Operation,
+  /** `theme.json` de la versión activa (`lib/store.ts` → `themeSpec`). Sin él, `setTheme` solo
+   *  puede parchear los identificadores, como antes del bloque 3-5b. */
+  themeSpec?: ThemeSpecType | null,
+): PatchResult {
   switch (op.op) {
     case "setBlock": {
       const loc = findBlock(composed, op.blockId);
@@ -319,9 +356,17 @@ export function applyOperationOptimistic(composed: ComposedDocument, op: Operati
       return { entries: [], pending: [], structural: true };
     }
     case "setTheme": {
-      // `ResolvedTheme.tokens`/`.fonts` salen de `theme.json` del PAQUETE (04 §10.3): sin manifiesto
-      // no se pueden resolver en el cliente. Se actualizan solo los dos identificadores, que sí son
-      // del documento, y el `RENDER` del servidor trae los tokens reales (disparo inmediato, §12.1).
+      // `04 §10.3` pide que `setTheme` «sustituya `composed.theme` RESOLVIENDO desde `theme.json`
+      // del TemplateContext». Desde el bloque 3-4b ese `theme.json` llega en `GET .../document` y
+      // el store lo guarda (`themeSpec`), así que la confirmación cambia el color AL INSTANTE en
+      // vez de esperar al `RENDER` del servidor — que sigue siendo la verdad y llega igual (§12.1).
+      // Sin catálogo se cae al comportamiento anterior: solo los dos identificadores, que sí son
+      // del documento, y los tokens los trae el servidor.
+      const resuelto = resolverTema(themeSpec, composed.theme, op.paletteId ?? null, op.fontSetId ?? null);
+      if (resuelto !== null) {
+        composed.theme.tokens = resuelto.tokens;
+        composed.theme.fonts = resuelto.fonts;
+      }
       if (op.paletteId !== undefined) composed.theme.paletteId = op.paletteId;
       if (op.fontSetId !== undefined) composed.theme.fontSetId = op.fontSetId;
       return { entries: [], pending: [], structural: true };

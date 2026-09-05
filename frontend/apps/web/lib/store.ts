@@ -18,8 +18,8 @@ import { useMemo } from "react";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { useShallow } from "zustand/react/shallow";
-import { Operation } from "@invitaciones/schema";
-import type { ComposedDocument, CompositionReport, InvitationDocument } from "@invitaciones/schema";
+import { Operation, ThemeSpec } from "@invitaciones/schema";
+import type { ComposedDocument, CompositionReport, InvitationDocument, ThemeSpec as ThemeSpecType } from "@invitaciones/schema";
 import {
   ApiError,
   chooseTemplate,
@@ -62,6 +62,7 @@ import {
 } from "./undo.ts";
 import {
   applyOperationOptimistic,
+  resolverTema,
   findBlock,
   findGroup,
   findItemBlock,
@@ -122,6 +123,14 @@ export interface EditorState {
   revision: number;
   composed: ComposedDocument | null;
   report: CompositionReport | null;
+  /**
+   * `theme.json` de la version de plantilla activa — el CATALOGO de paletas y conjuntos
+   * tipograficos entre los que elegir, no el tema ya resuelto (eso es `composed.theme`). Llega en
+   * la misma respuesta que el documento desde el bloque 3-4b. Es lo unico que permite resolver
+   * `paletteId` -> `tokens` para la vista previa al pasar el raton (04 §7.1 paso 8); vale `null`
+   * mientras el backend no lo entregue, y entonces la vista previa se degrada de forma explicita.
+   */
+  themeSpec: ThemeSpecType | null;
 
   // interfaz
   selection: BlockRef | null;
@@ -226,6 +235,7 @@ const ESTADO_INICIAL: EditorState = {
   revision: 0,
   composed: null,
   report: null,
+  themeSpec: null,
   selection: null,
   panel: "sections",
   viewport: "desktop",
@@ -273,6 +283,21 @@ const DEPS_POR_DEFECTO: StoreDeps = {
 };
 
 // ---------------------------------------------------------------------------------------------
+// 2 bis. Vista previa de tema (04 §7.1 paso 8, 04 §9.3 `PREVIEW_THEME`) — bloque 3-5b
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * `theme` (el `ThemeSpec` de la version activa) viaja en la MISMA respuesta que el documento desde
+ * el bloque 3-4b (`handoffs/3-4b.md`, ADR-3-4b-01), pero `lib/api-types.ts` todavia no lo declara
+ * — igual que hace `lib/manifest.ts`, se lee con `safeParse` y se degrada a `null` sin romper la
+ * carga si el backend es viejo o el campo cambia de forma.
+ */
+export function leerThemeSpec(respuesta: unknown): ThemeSpecType | null {
+  const r = ThemeSpec.safeParse((respuesta as { theme?: unknown } | null)?.theme);
+  return r.success ? r.data : null;
+}
+
+// ---------------------------------------------------------------------------------------------
 // 3. Fábrica del store
 // ---------------------------------------------------------------------------------------------
 
@@ -280,6 +305,8 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
   const deps: StoreDeps = { ...DEPS_POR_DEFECTO, ...depsParciales };
   let sink: CanvasSink | null = null;
   let timers: AutosaveTimers | null = null;
+  /** ¿Hay una vista previa de tema pintada en el lienzo? Efímera: no es estado de interfaz. */
+  let temaPrevioActivo = false;
   let contadorAviso = 0;
 
   return create<EditorStore>()(
@@ -560,7 +587,7 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
         let structural = false;
         set((s) => {
           if (!s.composed) return;
-          const r = applyOperationOptimistic(s.composed as ComposedDocument, op);
+          const r = applyOperationOptimistic(s.composed as ComposedDocument, op, s.themeSpec);
           entries = r.entries;
           structural = r.structural;
         });
@@ -628,6 +655,7 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
               s.composed = doc.composed;
               s.report = doc.report;
               s.revision = doc.revision;
+              s.themeSpec = leerThemeSpec(doc);
               s.templateVersion = { slug: doc.templateVersion.slug, version: doc.templateVersion.version };
               s.publicToken = doc.publicToken;
               s.loadState = "ready";
@@ -674,6 +702,10 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
               s.composed = res.composed;
               s.report = res.report;
               s.revision = res.revision;
+              // `:choose-template` NO promete `theme` (pregunta abierta de 3-4b): si no viene, el
+              // catalogo de la plantilla ANTERIOR seria mentira, asi que se vacia y la vista previa
+              // se degrada hasta la siguiente carga del documento.
+              s.themeSpec = leerThemeSpec(res);
               s.templateVersion = { slug, version };
               s.publicToken = res.publicToken;
               s.loadState = "ready";
@@ -751,7 +783,7 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
             // (4) Se reaplican encima los parches optimistas de lo que sigue pendiente, para que el
             // texto recién escrito no "salte hacia atrás".
             const pendientes = [...(s.inFlight?.ops ?? []), ...s.queue.flatMap((b) => b.ops), ...s.draft];
-            for (const op of pendientes) applyOperationOptimistic(s.composed as ComposedDocument, op);
+            for (const op of pendientes) applyOperationOptimistic(s.composed as ComposedDocument, op, s.themeSpec);
             // (5) `pendingBlocks` se recalcula desde lo que sigue en vuelo.
             s.pendingBlocks = pendingKeysFor(s.composed as ComposedDocument | null, pendientes);
           });
@@ -979,8 +1011,26 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
         },
 
         previewTheme(paletteId, fontSetId): void {
-          // Efímero: NO genera operación ni entra en el undo (04 §9.3).
+          // Efímero: NO genera operación, NO entra en el undo y NO toca `s.composed` (04 §9.3).
           sink?.previewTheme(paletteId, fontSetId);
+          const s = get();
+          if (!sink || s.composed === null || s.canvas.status !== "ready") return;
+          // `PREVIEW_THEME` solo transporta IDENTIFICADORES, y el lienzo no tiene —ni puede tener—
+          // el catálogo de paletas: vive en un iframe de origen opaco con `connect-src 'none'`, sin
+          // credenciales y con `lib/api-client.ts` prohibido por `eslint.config.mjs`. Así que la
+          // resolución `paletteId → tokens` ocurre AQUÍ, que es donde está `theme.json`, y los
+          // tokens ya resueltos viajan por el único mensaje del protocolo v1 que los transporta:
+          // `RENDER` con el MISMO `revision` y el MISMO documento, solo con `theme` sustituido.
+          // Nada se escribe: el `composed` del store sigue intacto (bloque 3-5b, ADR-3-5b-01).
+          const tema = resolverTema(s.themeSpec, s.composed.theme, paletteId, fontSetId);
+          if (tema === null) {
+            if (!temaPrevioActivo) return; // no había vista previa que deshacer: no se manda nada
+            temaPrevioActivo = false;
+            sink.render(s.composed, s.revision); // al retirar el ratón vuelve el tema REAL
+            return;
+          }
+          temaPrevioActivo = true;
+          sink.render({ ...s.composed, theme: tema }, s.revision);
         },
 
         dismissWarning(id): void {
@@ -1022,7 +1072,7 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           set((s) => {
             if (!s.composed) return;
             for (const op of entry.revert) {
-              const r = applyOperationOptimistic(s.composed as ComposedDocument, op);
+              const r = applyOperationOptimistic(s.composed as ComposedDocument, op, s.themeSpec);
               entries = [...entries, ...r.entries];
               structural = structural || r.structural;
             }
@@ -1054,7 +1104,7 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           set((s) => {
             if (!s.composed) return;
             for (const op of entry.apply) {
-              const r = applyOperationOptimistic(s.composed as ComposedDocument, op);
+              const r = applyOperationOptimistic(s.composed as ComposedDocument, op, s.themeSpec);
               entries = [...entries, ...r.entries];
               structural = structural || r.structural;
             }
