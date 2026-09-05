@@ -1,0 +1,259 @@
+{
+  "manifestVersion": 1,
+  "slug": "bautizo-minimo",
+  "version": "1.0.0",
+  "name": {
+    "es-MX": "Bautizo mínimo"
+  },
+  "description": {
+    "es-MX": "Plantilla mínima de 5 secciones escrita a mano para medir el coste de autoría (dato de I-08 para la fase 4). No es una plantilla de producto."
+  },
+  "eventKinds": [
+    "baptism"
+  ],
+  "minPlanTier": 1,
+  "locales": [
+    "es-MX"
+  ],
+  "capabilities": [],
+  "previewImage": "assets/preview.webp",
+  "assets": [
+    {
+      "path": "assets/preview.webp",
+      "sha256": "91672579ac235a56110ec0a9b93887b6c813f3ca31b4aed244042259740947c9",
+      "contentType": "image/webp",
+      "bytes": 60648
+    }
+  ],
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "title": {
+        "es-MX": "Portada"
+      },
+      "variants": [
+        "full"
+      ],
+      "defaultVariant": "full",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "cover.title",
+          "type": "text",
+          "role": "coverTitle",
+          "label": {
+            "es-MX": "Nombre en portada"
+          },
+          "required": true,
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 60,
+            "multiline": false
+          }
+        },
+        {
+          "id": "cover.date",
+          "type": "date",
+          "role": "coverDate",
+          "label": {
+            "es-MX": "Fecha del evento"
+          },
+          "source": "business",
+          "businessField": "invitation.date",
+          "editable": false,
+          "aiEditable": false,
+          "formatId": "long"
+        },
+        {
+          "id": "cover.image",
+          "type": "image",
+          "role": "coverImage",
+          "label": {
+            "es-MX": "Foto de portada"
+          },
+          "required": true,
+          "constraints": {
+            "aspect": "portrait",
+            "maxBytes": 8388608
+          }
+        }
+      ]
+    },
+    {
+      "key": "celebrant",
+      "type": "celebrant",
+      "title": {
+        "es-MX": "El bebé"
+      },
+      "variants": [
+        "portrait"
+      ],
+      "defaultVariant": "portrait",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "celebrant.heading",
+          "type": "text",
+          "role": "celebrantsHeading",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 60,
+            "multiline": false
+          }
+        },
+        {
+          "id": "celebrant.person",
+          "type": "person",
+          "role": "honoree",
+          "label": {
+            "es-MX": "Nombre"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "key": "event",
+      "type": "event",
+      "title": {
+        "es-MX": "Ceremonia"
+      },
+      "variants": [
+        "timeline"
+      ],
+      "defaultVariant": "timeline",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "event.title",
+          "type": "text",
+          "role": "eventTitle",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 60,
+            "multiline": false
+          }
+        },
+        {
+          "id": "event.moments",
+          "type": "group",
+          "role": "familyGroup",
+          "label": {
+            "es-MX": "Momentos"
+          },
+          "itemBlocks": [
+            {
+              "id": "name",
+              "type": "text",
+              "role": "eventTitle",
+              "label": {
+                "es-MX": "Nombre"
+              },
+              "constraints": {
+                "minLength": 1,
+                "maxLength": 40,
+                "multiline": false
+              }
+            },
+            {
+              "id": "place",
+              "type": "location",
+              "role": "eventPlace",
+              "label": {
+                "es-MX": "Lugar"
+              }
+            }
+          ],
+          "itemLabel": {
+            "es-MX": "Momento"
+          },
+          "min": 1,
+          "max": 4,
+          "reorderable": true
+        }
+      ]
+    },
+    {
+      "key": "rsvp",
+      "type": "rsvp",
+      "title": {
+        "es-MX": "Confirmación"
+      },
+      "variants": [
+        "banner"
+      ],
+      "defaultVariant": "banner",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "rsvp.title",
+          "type": "text",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título"
+          },
+          "constraints": {
+            "minLength": 1,
+            "maxLength": 60,
+            "multiline": false
+          }
+        },
+        {
+          "id": "rsvp.note",
+          "type": "text",
+          "role": "rsvpNote",
+          "label": {
+            "es-MX": "Nota"
+          },
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 200,
+            "multiline": true
+          }
+        }
+      ]
+    },
+    {
+      "key": "footer",
+      "type": "footer",
+      "title": {
+        "es-MX": "Pie"
+      },
+      "variants": [
+        "simple"
+      ],
+      "defaultVariant": "simple",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "footer.note",
+          "type": "text",
+          "role": "footerNote",
+          "label": {
+            "es-MX": "Nota legal"
+          },
+          "source": "fixed",
+          "editable": false,
+          "aiEditable": false,
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 120,
+            "multiline": false
+          }
+        }
+      ]
+    }
+  ]
+}

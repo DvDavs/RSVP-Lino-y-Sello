@@ -1,0 +1,13 @@
+{
+  "templateSlug": "bautizo-minimo",
+  "templateVersion": "1.0.0",
+  "content": {
+    "cover.title": { "kind": "text", "value": "Mi bautizo" },
+    "celebrant.heading": { "kind": "text", "value": "Acompáñanos" },
+    "celebrant.person": { "kind": "person", "name": "Emilia" },
+    "event.title": { "kind": "text", "value": "La ceremonia" },
+    "rsvp.title": { "kind": "text", "value": "Confirma tu asistencia" },
+    "rsvp.note": { "kind": "text", "value": "Avísanos antes del día 15, por favor." },
+    "footer.note": { "kind": "text", "value": "Hecho con cariño." }
+  }
+}

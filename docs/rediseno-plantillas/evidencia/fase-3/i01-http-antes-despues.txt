@@ -1,0 +1,21 @@
+I-01 · verificación por HTTP contra Tomcat real — la que el sub-agente no pudo hacer
+(el backend compartido corría el binario viejo; el orquestador lo recompiló tras el merge)
+
+ANTES (binario sin el arreglo, medido por el sub-agente contra 127.0.0.1:6003, invitación 3, revision 7):
+  POST /editor/invitations/3/document/operations con marks:["bold"]
+  → HTTP 500 {"code":"TPL_INTERNAL"}
+  log: ClassCastException: ObjectNode cannot be cast to ArrayNode
+       DomainJson.kt:291 ← 282 ← 275 ← 245 ← 789 ← EditorDocumentService.kt:429
+
+DESPUÉS (binario CON `o.set<ObjectNode>`, medido por el ORQUESTADOR, 2026-09-05 08:06):
+  mismo verbo, mismo bloque richText (couple.brideText de boda-clasica), mismas marcas:
+  {"op":"setBlock","blockId":"couple.brideText",
+   "value":{"kind":"richText","doc":{"type":"doc","content":[
+     {"type":"paragraph","content":[
+       {"type":"text","text":"Nos casamos "},
+       {"type":"text","text":"por fin","marks":["bold"]}]}]}}}
+  → HTTP 200  {"revision":8,"applied":true,...}
+
+Efecto colateral declarado: la invitación de demostración 3 pasa de revision 7 a 8 y su bloque
+`couple.brideText` queda con texto en negrita. El release publicado queda desactualizado hasta que
+se republique (comportamiento correcto y esperado: `EditorDocumentService.kt:762`).

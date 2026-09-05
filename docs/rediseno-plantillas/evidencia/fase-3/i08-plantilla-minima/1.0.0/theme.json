@@ -1,0 +1,10 @@
+{
+  "palettes": [
+    { "id": "cielo", "name": { "es-MX": "Cielo" }, "tokens": { "bg": "#F4F8FC", "surface": "#FFFFFF", "ink": "#26323D", "accent": "#3D6488", "accentInk": "#FFFFFF", "muted": "#5A6B7A" } }
+  ],
+  "fontSets": [
+    { "id": "clasica", "name": { "es-MX": "Clásica" }, "heading": { "family": "Cormorant Garamond", "weights": [400, 600], "source": "google" }, "body": { "family": "Inter", "weights": [400, 600], "source": "google" } }
+  ],
+  "defaultPaletteId": "cielo",
+  "defaultFontSetId": "clasica"
+}
