@@ -31,8 +31,8 @@ describe("TplErrorResponseSchema (03-api.md §5/§10.2)", () => {
 
 describe("catálogo de códigos TPL_* (03-api.md §5)", () => {
   it("tiene exactamente 35 códigos, sin duplicados", () => {
-    expect(TPL_ERROR_CODES.length).toBe(35);
-    expect(new Set(TPL_ERROR_CODES).size).toBe(35);
+    expect(TPL_ERROR_CODES.length).toBe(36);
+    expect(new Set(TPL_ERROR_CODES).size).toBe(36);
   });
 
   it("todos empiezan por TPL_ y ninguno por TPL_AI_ (prefijo reservado, X-14)", () => {

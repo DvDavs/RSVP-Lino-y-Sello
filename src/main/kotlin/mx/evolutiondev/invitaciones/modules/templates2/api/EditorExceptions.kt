@@ -152,3 +152,20 @@ class TempIdUnresolvedException(message: String, details: Map<String, Any?> = em
 /** `422` — dos `addItem` del mismo lote declaran el mismo `tempId` (`03 §3.4` punto 2). */
 class TempIdDuplicateException(message: String, details: Map<String, Any?> = emptyMap()) :
     EditorException(TplErrorCode.TPL_TEMP_ID_DUPLICATE, message, details)
+
+/**
+ * `422` — el `PUT …/event` trae una fecha o una hora que no encaja con el formato que el módulo
+ * almacena y que la composición sabe leer (`ADR-3B-I06-01`, I-06).
+ *
+ * `details` lleva `field` (`"date"` o `"time"`) y `expected` (el formato literal), que es lo que el
+ * editor necesita para señalar el campo concreto en vez de dar un error de formulario genérico.
+ *
+ * Por qué esta ruta valida y el módulo antiguo no: `InvitationEntity` guarda `date` y `time` como
+ * `String` sin restricción alguna y `InvitationAdminService.kt:414` los asigna en crudo, así que hoy
+ * un formato inválido **no revienta: se cuela**. `composition/DateFormatting` parte `date` por `-`
+ * esperando tres segmentos numéricos y `time` por `:` esperando dos, y **devuelve el valor crudo**
+ * cuando no encajan (R6, punto 2) — es decir, se imprime tal cual en la invitación publicada. Esta
+ * ruta es la primera que escribe esas columnas desde el cliente y corta ahí.
+ */
+class EventDateInvalidException(message: String, details: Map<String, Any?> = emptyMap()) :
+    EditorException(TplErrorCode.TPL_EVENT_DATE_INVALID, message, details)

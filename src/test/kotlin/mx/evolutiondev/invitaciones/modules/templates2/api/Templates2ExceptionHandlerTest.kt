@@ -109,6 +109,7 @@ class Templates2ExceptionHandlerTest {
         TplErrorCode.TPL_ASSET_QUOTA_EXCEEDED to { throw AssetQuotaExceededException("no") },
         TplErrorCode.TPL_ASSET_STORAGE_UNAVAILABLE to { throw AssetStorageUnavailableException("no") },
         TplErrorCode.TPL_DOCUMENT_TOO_LARGE to { throw DocumentTooLargeException("no") },
+        TplErrorCode.TPL_EVENT_DATE_INVALID to { throw EventDateInvalidException("no") },
         TplErrorCode.TPL_BODY_TOO_LARGE to { throw PackageTooLargeException("no") },
         TplErrorCode.TPL_MALFORMED_JSON to { throw Templates2Exception.MalformedJson("no") },
         TplErrorCode.TPL_SNAPSHOT_NOT_FOUND to { throw SnapshotNotFoundException("no") },

@@ -6,7 +6,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.web.bind.annotation.RequestMapping
 
 /**
- * **Las 19 rutas de `03 §2`, ninguna más y ninguna menos.**
+ * **Las 20 rutas de `03 §2`, ninguna más y ninguna menos.**
  *
  * Es el inventario que cierra la superficie HTTP del módulo. Sirve para dos cosas distintas y las dos
  * importan: que no falte ninguna ruta del contrato (la fase 3 construye el frontend contra esta lista)
@@ -37,6 +37,10 @@ class Templates2RouteInventoryTest {
         "POST /master/templates2/versions",
         "GET /master/templates2/versions",
         "POST /master/templates2/versions/{templateVersionId}:deprecate",
+        // Ruta 20 — fase 3-B, issue I-06 (`ADR-3B-I06-01`): la única ruta de cliente que escribe
+        // `invitation.date`. Antes de ella la clienta no podía cambiar la fecha de su evento por
+        // ninguna vía; sólo existía `PUT /admin/invitations/{id}` con rol ADMIN.
+        "PUT /editor/invitations/{invitationId}/event",
     )
 
     private val controladores = listOf(
@@ -46,11 +50,12 @@ class Templates2RouteInventoryTest {
         EditorReleaseController::class.java,
         PublicRenderController::class.java,
         MasterTemplateRegistryController::class.java,
+        EditorEventController::class.java,
     )
 
     @Test
-    fun `los controladores publican exactamente las 19 rutas de 03 2`() {
-        assertEquals(19, esperadas.size, "la tabla de 03 §2 tiene 19 filas")
+    fun `los controladores publican exactamente las 20 rutas de 03 2`() {
+        assertEquals(20, esperadas.size, "la tabla de 03 §2 tiene 20 filas")
         assertEquals(esperadas.sorted(), rutasDeclaradas().sorted())
     }
 

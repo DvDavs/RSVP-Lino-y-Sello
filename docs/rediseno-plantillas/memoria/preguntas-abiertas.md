@@ -636,3 +636,47 @@ del arreglo, no — el lienzo **no puede** resolver `paletteId → tokens` (cuat
   tercera vez que la invitación compartida entre sesiones contamina una medición. Es la misma
   pregunta de aprovisionamiento que 3-5 y 3-6 ya elevaron: **una invitación de demostración por
   sesión**, no una por máquina.
+
+- [Fase 3-B · I-06] **`invitation.updated_at`/`updated_by` no reflejan el cambio de fecha de la
+  clienta.** `PUT …/event` escribe *sólo* `date` y `time`, que es lo que el dueño autorizó
+  literalmente («escritura SÓLO de esas dos columnas»), y está verificado con `curl` real:
+  `updated_at` se queda en el valor anterior. La consecuencia es que la administración no ve quién
+  ni cuándo tocó la fecha. **Supuesto tomado:** se respeta la autorización al pie de la letra y no
+  se tocan las columnas de auditoría del módulo antiguo. ¿Se amplía la autorización a esas dos
+  columnas (`updated_at = now()`, `updated_by = requesterId`), o el rastro de esta ruta debe vivir
+  en el módulo nuevo (una tabla `tpl_*` de auditoría de negocio) para no escribir más de `invitation`?
+
+- [Fase 3-B · I-06] **La página `/ayuda#fecha` quedó desactualizada.** La creó `ADR-3-8-06` para
+  decir, con todas las letras, que «hoy la fecha no se cambia desde el editor ni desde la cuenta».
+  Desde esta issue **sí se cambia desde el editor**. La página no se ha tocado en este bloque
+  porque es texto de producto y su reescritura la debería revisar quien mande en el tono (y porque
+  sigue siendo el destino legítimo de los demás bloques `business`). **Supuesto tomado:** se deja
+  como está y se anota. ¿Quién reescribe `#fecha` y qué debe decir ahora: «cámbiala desde el panel
+  de Portada» y nada más, o conserva el «cómo pedirlo» para los datos que siguen sin ruta?
+
+- [Fase 3-B · I-06] **Los demás bloques `business` siguen sin ruta de cliente.** `invitation.hashtag`,
+  `invitation.childrenAllowed`, `invitation.youngAllowed` y `invitation.coverPhotoUrl` siguen
+  saliendo con candado y enlace a `/ayuda#fecha` — un enlace cuyo ancla ya ni siquiera es la suya.
+  Es el mismo callejón de U-3 con otro dato. **Supuesto tomado:** el encargo era la fecha; abrir el
+  resto sería ampliar la autorización por mi cuenta. ¿Se abre `PUT …/event` a esos campos (deja de
+  llamarse «event»), se abre una ruta por dato, o se decide que esos cuatro sí son de administración?
+
+- [Fase 3-B · I-06] **`invitation.time` no tiene bloque en `boda-clasica@1.0.0`.** La ruta acepta y
+  valida `time`, y la escribe cuando llega, pero el editor nunca la envía porque la plantilla real
+  no declara ningún bloque con `businessField: "invitation.time"` (sólo `invitation.date`, en
+  `cover.date` y `couple.date`). Por eso `time` es opcional en el cuerpo. **Supuesto tomado:**
+  ausente = «no la toques», nunca «bórrala». ¿Debe `boda-clasica` declarar la hora del evento (y
+  entonces el control del panel pasa a editar fecha **y** hora juntas), o la hora del evento es
+  siempre cosa del itinerario y `invitation.time` es un campo muerto del módulo antiguo?
+
+- [Fase 3-B · I-06] **`scripts/dev-backend.sh` no le pasa `TPL_DEV_PORT` a Spring.** El script
+  calcula `BASE`/la sonda con `TPL_DEV_PORT` pero **nunca exporta `SERVER_PORT`** ni pasa
+  `--server.port`, así que `bootRun` arranca siempre en el `server.port: 6003` de `application.yml`.
+  Medido en este bloque: con `TPL_DEV_PORT=6023` el backend arrancó en **6003** (log:
+  `Tomcat started on port 6003`), la sonda del script nunca respondió y el `start` agotó su tope de
+  300 s **con la aplicación arriba**, ocupando el puerto del backend compartido. Se rodeó exportando
+  `SERVER_PORT` a mano. Es una trampa para cualquier sesión con varios agentes: dos backends creen
+  estar en puertos distintos y pelean por el 6003. Peor: la rama de fallo de `start()` llama a
+  `stop()`, que hace `pkill -f InvitationsApplicationKt` y `pg-ephemeral.sh stop` — es decir, un
+  arranque fallido de UN agente puede matar los backends y borrar los clústeres de TODOS.
+  ¿Se corrige el script (`export SERVER_PORT="$PUERTO"` y que `stop` sólo mate su propio PID)?

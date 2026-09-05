@@ -114,11 +114,21 @@ test("una persona sin sesión entra, elige plantilla, escribe, publica y su enla
     await subida;
     await esperarGuardado(page);
 
-    // U-3: la fecha sale con candado, pero YA NO es un candado mudo: dice dónde se cambia.
-    const dondeSeCambia = page.getByRole("link", { name: /Dónde se cambia/i }).first();
-    await expect(dondeSeCambia).toBeVisible();
-    await expect(dondeSeCambia).toHaveAttribute("href", "/ayuda#fecha");
-    await page.screenshot({ path: `${EVIDENCIA}05-fecha-con-salida.png` });
+    // U-3, RESUELTO DEL TODO (I-06): la fecha ya no sale con candado — se cambia AQUÍ, y la
+    // clienta la ve cambiada. Hasta la fase 3-B esta prueba afirmaba lo contrario (un enlace
+    // «Dónde se cambia» hacia `/ayuda#fecha`), porque no existía ninguna ruta de cliente que
+    // escribiera `invitation.date` y `ADR-3-8-06` se negó, con razón, a prometer una edición
+    // imposible. Ahora existe `PUT …/event` (`03 §3.20`) y lo que se afirma es el VERBO.
+    await expect(page.getByText("18 de abril de 2027")).toBeVisible();
+    await page.getByRole("button", { name: "Cambiar la fecha" }).click();
+    await page.getByLabel("Nueva fecha del evento").fill("2027-06-05");
+    const fechaGuardada = page.waitForResponse(
+      (r) => r.url().endsWith(`/editor/invitations/${invitationId}/event`) && r.request().method() === "PUT",
+    );
+    await page.getByRole("button", { name: "Guardar la fecha" }).click();
+    expect((await fechaGuardada).status()).toBe(200);
+    await expect(page.getByText("5 de junio de 2027")).toBeVisible({ timeout: 10_000 });
+    await page.screenshot({ path: `${EVIDENCIA}05-fecha-cambiada.png` });
 
     // Los nombres de los novios también son obligatorios y siguen con el texto de ejemplo.
     await page.getByRole("button", { name: "Volver a secciones" }).click();

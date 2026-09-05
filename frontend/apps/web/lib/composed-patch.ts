@@ -580,3 +580,43 @@ export function applyIdMapToRawDocument(doc: InvitationDocument, idMap: Record<s
     }
   }
 }
+
+// ---------------------------------------------------------------------------------------------
+// Bloques `business` — U-3 / I-06
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Copia en `destino` el valor de todos los bloques con `provenance: "business"` de `origen`, y
+ * devuelve las entradas `PATCH` correspondientes (construidas desde `origen`, que es la respuesta
+ * limpia del servidor, nunca desde el borrador de immer).
+ *
+ * Por qué SÓLO los bloques `business` y no `destino = origen` entero: cuando la clienta cambia la
+ * fecha puede tener tecleo sin confirmar en otros campos (parches optimistas de §12.4). Sustituir el
+ * `composed` completo por el del servidor los borraría de la pantalla. Un bloque `business` no puede
+ * tener parche optimista —no se edita con operaciones, I-21 lo impide—, así que copiar sólo esos es
+ * exactamente lo que cambió y nada más.
+ *
+ * `formatted` viene ya calculado por el servidor: aquí no se formatea ninguna fecha (H-27, ver la
+ * cabecera de este archivo).
+ */
+export function copiarValoresDeNegocio(destino: ComposedDocument, origen: ComposedDocument): PatchEntry[] {
+  const entradas: PatchEntry[] = [];
+  for (const seccionOrigen of origen.sections) {
+    const seccionDestino = destino.sections.find((s) => s.key === seccionOrigen.key);
+    if (!seccionDestino) continue;
+    for (const bloqueOrigen of seccionOrigen.blocks) {
+      if (esGrupo(bloqueOrigen) || bloqueOrigen.provenance !== "business") continue;
+      const bloqueDestino = seccionDestino.blocks.find((b) => !esGrupo(b) && b.id === bloqueOrigen.id);
+      if (!bloqueDestino || esGrupo(bloqueDestino)) continue;
+      bloqueDestino.value = bloqueOrigen.value;
+      bloqueDestino.provenance = bloqueOrigen.provenance;
+      entradas.push({
+        ref: { sectionKey: seccionOrigen.key, blockId: bloqueOrigen.id },
+        value: bloqueOrigen.value,
+        provenance: bloqueOrigen.provenance,
+        pending: false,
+      });
+    }
+  }
+  return entradas;
+}
