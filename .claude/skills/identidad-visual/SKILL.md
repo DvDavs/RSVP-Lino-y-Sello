@@ -14,6 +14,8 @@ Lee primero `docs/rediseno-plantillas/diseno/10-identidad-visual.md` (dirección
 - **Color solo desde tokens** (`frontend/packages/tokens`): parejas fondo/texto garantizadas AA; nada de hex sueltos en componentes.
 - **Fotos siempre con máscara, radio grande o forma**; nunca rectángulo duro sobre color plano. Sin imagen real, usa el placeholder del sistema y anota la imagen en `imagenes-pendientes.md`.
 - **Formas de la biblioteca** (rayos, rayas, ondas, blobs, triángulos, cuadrados rotados, sombras de color) como recurso de composición: una protagonista por bloque.
+- **Nunca texto directamente sobre fotografía**: legibilidad por separación (papel opaco, banda, tarjeta), nunca por velo, degradado ni `text-shadow`.
+- **Contraste medido sobre la pila renderizada** (`getComputedStyle`, degradados y opacidades incluidos), umbral por tamaño computado (4,5 normal / 3,0 texto grande demostrado); cada pareja de tokens con prueba que cae si se quita la corrección. `axe` no vale como compuerta de contraste (deja `incomplete`).
 - **Movimiento sobrio** y con `prefers-reduced-motion`.
 - **Separación estricta** entre el chrome del producto y los tokens de las plantillas de invitación.
 - Al cambiar algo de identidad (paleta, tipografía, forma, componente base): ADR en `docs/rediseno-plantillas/memoria/decisiones.md` y galería actualizada.

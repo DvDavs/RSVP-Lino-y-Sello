@@ -24,3 +24,10 @@
 
 ## 3. Entregables esperados del sistema (fase 3-C)
 `frontend/packages/tokens` (o dentro de `packages/ui`: colores con escalas y parejas AA, tipografía, espaciado, radios, sombras, movimiento; export CSS variables + TS), `frontend/packages/ui` (componentes, formas, iconos, placeholders, utilidades de composición), `frontend/packages/icons` (SVG propios, generados a componentes), galería `/design`, guía `docs/rediseno-plantillas/guias/identidad-visual.md` (cómo usar tokens, formas y componentes en un módulo nuevo en 15 minutos), `imagenes-pendientes.md`, ADR de cada decisión de identidad, capturas en `evidencia/fase-3c/`.
+
+## 4. Reglas demostradas con cifras en la fase 3-B (obligatorias para el sistema de diseño)
+Salen de defectos reales medidos (I-05, I-05b, `handoffs/3b-adv.md`), no de preferencia:
+1. **Nunca texto directamente sobre fotografía.** La legibilidad se resuelve por separación (papel opaco propio, banda, tarjeta), no con velos, degradados ni `text-shadow`. Para que un velo garantizara 4,5:1 sobre foto negra habría que subirlo al 99 %, es decir, tapar la foto: no hay punto medio.
+2. **El contraste se mide sobre la pila renderizada real** (fondo compuesto, paradas de degradado incluidas las transparentes, opacidades, `getComputedStyle`), con el umbral derivado del tamaño computado: 4,5 para texto normal, 3,0 solo para texto grande demostrado en píxeles. Cada pareja del sistema de tokens lleva su prueba, y la prueba debe caer cuando se retira la corrección (sabotaje documentado).
+3. **`axe` no es la compuerta de contraste.** Devuelve `violations=0, incomplete=[color-contrast]` tanto para un producto que cumple como para uno que no. Solo cuenta la medición propia; `axe` queda para estructura, roles y teclado.
+4. **Nada se hornea en el build que dependa del origen** (CSP, `frame-ancestors`, enlaces públicos): se lee en tiempo de petición y una aserción de arranque compara el origen esperado con el servido (N-02).
