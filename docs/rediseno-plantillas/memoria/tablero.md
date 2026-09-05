@@ -118,7 +118,7 @@ suite completa tras cada merge; commit y push por bloque.
 |---|---|---|---|---|
 | -1 N-01 toma de cuenta por `request-password-reset` | 3c-menos1 | Opus | **aceptada** (`85ce3b6`) | saboteó el arreglo (token de vuelta en el DTO): 3/8 en rojo; restaurado, 8/8. Suite Kotlin 1 271 · 0 fallos |
 | -1 N-02 origen y CSP horneados en el build | 3c-menos1 | Opus | **aceptada** (`85ce3b6`) | 49/49 unitarias nuevas re-ejecutadas; A/B sobre el mismo build en `:3050` y `:3000` leída (lienzo pintado y enlace correcto en ambos); e2e 50/50; smoke 19/19 |
-| 0 dirección de arte (paletas, tipografías, formas, iconos, pantallas) | 3c-0 | Fable | en curso | |
+| 0 dirección de arte (paletas, tipografías, formas, iconos, pantallas) | 3c-0 | Fable | **aceptada** | `verificar-paletas.mjs` re-ejecutado (252 filas, 0 fallos); 0 emojis por code point en 34 ficheros; capturas revisadas a ojo y enviadas al dueño; ADR-3C-0-01..06 aceptadas (06 con dos enmiendas). Se cortó una vez por límite de uso y se reanudó |
 | 1 cimientos: 3C-1 tokens · 3C-2 tipografía · 3C-3 iconos · 3C-4 formas | | | pendiente | |
 | 2 componentes `packages/ui` + galería `/design` + regresión visual | | | pendiente | |
 | 3 producto: 3C-5 web pública/acceso · 3C-6 catálogo/asistente · 3C-7 chrome · 3C-8 e2e/presupuestos | | | pendiente | |

@@ -1,0 +1,280 @@
+<section class="bloque" id="pantallas">
+  <div class="wrap pantallas">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="w-img-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--ui-primary-soft)"/><stop offset="1" stop-color="var(--ui-support-2-soft)"/></linearGradient></defs></svg>
+    <header>
+      <span class="label">Mapa de pantallas · wireframes de baja fidelidad</span>
+      <h2>Un objetivo por pantalla, progreso visible.</h2>
+      <p class="intro">Las pantallas del producto que esta fase rediseña, a 390 px y a escritorio. Cada una lleva su objetivo, sus textos clave en es-MX y qué forma la protagoniza. Las plantillas de invitación (<code>packages/sections</code>) quedan fuera: el chrome nunca les impone su estética.</p>
+    </header>
+
+    <!-- ── Landing ─────────────────────────────────────────────────────────────────────────── -->
+    <div class="pantalla">
+      <header><h3>Web pública · <code>/</code></h3><p>Objetivo: que quien llega entienda en cinco segundos qué es y empiece. Hoy la raíz es un 404 en inglés (3b-adv §8.1). Forma protagonista: rayos detrás de la foto con máscara de sello.</p></header>
+      <div class="wires">
+        <div class="wire"><small>390 px</small>
+          <svg viewBox="0 0 390 900" aria-hidden="true">
+            <rect width="390" height="900" class="w-fondo"/>
+            <text x="20" y="34" class="w-d" style="font-size:18px">Invitaciones</text>
+            <rect x="262" y="16" width="108" height="30" rx="15" class="w-prim"/><text x="316" y="35" text-anchor="middle" class="w-t on">Empezar</text>
+            <rect x="222" y="16" width="32" height="30" rx="15" class="w-prim-soft"/>
+            <clipPath id="w-banda-landing-m"><rect x="0" y="62" width="390" height="330"/></clipPath>
+            <rect x="0" y="62" width="390" height="330" class="w-alt"/>
+            <g clip-path="url(#w-banda-landing-m)"><g transform="translate(300 200)"><path d="{{RAYOS:12:150}}" class="w-prim-soft"/></g>
+            <path d="{{SELLO:12:4}}" transform="translate(210 100) scale(1.5)" class="w-img"/></g>
+            <text x="20" y="100" class="w-l">Invitaciones digitales con RSVP</text>
+            <text x="20" y="140" class="w-d" style="font-size:30px">Tu invitación,</text><text x="20" y="172" class="w-d" style="font-size:30px">lista en una</text><text x="20" y="204" class="w-d" style="font-size:30px">tarde.</text>
+            <text x="20" y="236" class="w-t">Elige un diseño, escribe los nombres y la</text><text x="20" y="252" class="w-t">fecha, comparte por WhatsApp.</text>
+            <rect x="20" y="272" width="200" height="44" rx="22" class="w-prim"/><text x="120" y="299" text-anchor="middle" class="w-t on">Empezar mi invitación</text>
+            <rect x="20" y="326" width="180" height="30" rx="15" class="w-papel"/><circle cx="36" cy="341" r="6" class="w-apoyo2"/><text x="48" y="345" class="w-t m">12 400 invitaciones enviadas</text>
+            <text x="20" y="430" class="w-l">Cómo funciona</text>
+            <text x="20" y="462" class="w-d">Tres pasos y a repartir.</text>
+            <g transform="translate(20 484)"><rect width="350" height="70" rx="14" class="w-papel"/><circle cx="30" cy="35" r="16" class="w-prim-soft"/><text x="30" y="40" text-anchor="middle" class="w-t b">1</text><text x="58" y="30" class="w-t b">Elige el tipo de evento y la plantilla</text><text x="58" y="48" class="w-t m">Boda, XV años, bautizo, cumpleaños, graduación…</text></g>
+            <g transform="translate(20 564)"><rect width="350" height="70" rx="14" class="w-papel"/><circle cx="30" cy="35" r="16" class="w-prim-soft"/><text x="30" y="40" text-anchor="middle" class="w-t b">2</text><text x="58" y="30" class="w-t b">Escribe, sube fotos, elige colores</text><text x="58" y="48" class="w-t m">Se guarda solo. Sin diseño ni programación.</text></g>
+            <g transform="translate(20 644)"><rect width="350" height="70" rx="14" class="w-papel"/><circle cx="30" cy="35" r="16" class="w-prim-soft"/><text x="30" y="40" text-anchor="middle" class="w-t b">3</text><text x="58" y="30" class="w-t b">Comparte el enlace y recibe confirmaciones</text><text x="58" y="48" class="w-t m">Tus invitados confirman desde el teléfono.</text></g>
+            <text x="20" y="760" class="w-l">Para cada celebración</text>
+            <g transform="translate(20 776)"><rect width="108" height="40" rx="20" class="w-prim-soft"/><text x="54" y="25" text-anchor="middle" class="w-t b">Boda</text><rect x="118" width="108" height="40" rx="20" class="w-prim-soft"/><text x="172" y="25" text-anchor="middle" class="w-t b">XV años</text><rect x="236" width="114" height="40" rx="20" class="w-prim-soft"/><text x="293" y="25" text-anchor="middle" class="w-t b">Bautizo</text></g>
+            <g transform="translate(20 826)"><rect width="128" height="40" rx="20" class="w-prim-soft"/><text x="64" y="25" text-anchor="middle" class="w-t b">Cumpleaños</text><rect x="138" width="118" height="40" rx="20" class="w-prim-soft"/><text x="197" y="25" text-anchor="middle" class="w-t b">Graduación</text><rect x="266" width="84" height="40" rx="20" class="w-prim-soft"/><text x="308" y="25" text-anchor="middle" class="w-t b">Más</text></g>
+          </svg>
+        </div>
+        <div class="wire"><small>1440 px (contenido 1200)</small>
+          <svg viewBox="0 0 1200 620" aria-hidden="true">
+            <rect width="1200" height="620" class="w-fondo"/>
+            <text x="40" y="40" class="w-d" style="font-size:22px">Invitaciones</text>
+            <text x="760" y="40" class="w-t b">Ejemplos</text><text x="840" y="40" class="w-t b">Precios</text><text x="910" y="40" class="w-t b">Ayuda</text><text x="980" y="40" class="w-t b">Entrar</text>
+            <rect x="1040" y="18" width="120" height="34" rx="17" class="w-prim"/><text x="1100" y="40" text-anchor="middle" class="w-t on">Empezar</text>
+            <clipPath id="w-banda-landing"><rect x="0" y="72" width="1200" height="380"/></clipPath>
+            <rect x="0" y="72" width="1200" height="380" class="w-alt"/>
+            <g clip-path="url(#w-banda-landing)"><g transform="translate(900 262)"><path d="{{RAYOS:14:260}}" class="w-prim-soft"/></g>
+            <path d="{{SELLO:14:4}}" transform="translate(720 110) scale(3.2)" class="w-img"/></g>
+            <text x="40" y="130" class="w-l">Invitaciones digitales con RSVP</text>
+            <text x="40" y="196" class="w-d" style="font-size:56px">Tu invitación,</text><text x="40" y="256" class="w-d" style="font-size:56px">lista en una tarde.</text>
+            <text x="40" y="300" class="w-t" style="font-size:16px">Elige un diseño, escribe los nombres y la fecha, sube tus fotos y comparte</text><text x="40" y="322" class="w-t" style="font-size:16px">el enlace por WhatsApp. Tus invitados confirman desde el teléfono.</text>
+            <rect x="40" y="350" width="230" height="52" rx="26" class="w-prim"/><text x="155" y="382" text-anchor="middle" class="w-t on" style="font-size:14px">Empezar mi invitación</text>
+            <text x="300" y="382" class="w-t b" style="font-size:14px">Ver ejemplos</text>
+            <text x="40" y="500" class="w-l">Cómo funciona</text>
+            <text x="40" y="540" class="w-d" style="font-size:28px">Tres pasos y a repartir.</text>
+            <g transform="translate(40 560)"><rect width="360" height="50" rx="14" class="w-papel"/><text x="16" y="30" class="w-t b">1 · Elige el tipo de evento y la plantilla</text><rect x="380" width="360" height="50" rx="14" class="w-papel"/><text x="396" y="30" class="w-t b">2 · Escribe, sube fotos, elige colores</text><rect x="760" width="360" height="50" rx="14" class="w-papel"/><text x="776" y="30" class="w-t b">3 · Comparte y recibe confirmaciones</text></g>
+          </svg>
+        </div>
+      </div>
+      <div class="textos"><b>Textos clave</b><ul><li>Eyebrow: «Invitaciones digitales con RSVP».</li><li>Título: «Tu invitación, lista en una tarde.» · CTA: «Empezar mi invitación» · secundario: «Ver ejemplos».</li><li>Prueba social (píldora): «12 400 invitaciones enviadas» (dato real o se retira; nunca inventado).</li><li>Bloques: «Cómo funciona» → «Tres pasos y a repartir.» · «Para cada celebración» (chips por tipo de evento) · testimonio · planes («Elige tu plan») · pie con «Ayuda» y contacto.</li></ul></div>
+    </div>
+
+    <!-- ── Acceso ──────────────────────────────────────────────────────────────────────────── -->
+    <div class="pantalla">
+      <header><h3>Acceso y registro · <code>/acceso</code></h3><p>Objetivo: entrar o crear cuenta sin fricción. Una tarjeta sobre ondas suaves; el registro es un asistente de tres pasos (correo → contraseña → nombre) con progreso. Forma protagonista: ondas de dos capas.</p></header>
+      <div class="wires dos-moviles">
+        <div class="wire"><small>390 px · entrar</small>
+          <svg viewBox="0 0 390 640" aria-hidden="true">
+            <rect width="390" height="640" class="w-alt"/>
+            <path d="M0 520 C80 470 160 560 240 510 C300 475 350 500 390 480 V640 H0 Z" class="w-prim-soft"/>
+            <path d="M0 560 C90 520 170 590 260 545 C320 515 360 540 390 525 V640 H0 Z" class="w-papel"/>
+            <text x="195" y="48" text-anchor="middle" class="w-d" style="font-size:18px">Invitaciones</text>
+            <rect x="20" y="80" width="350" height="400" rx="24" class="w-papel"/>
+            <rect x="36" y="100" width="318" height="40" rx="20" class="w-alt"/><rect x="38" y="102" width="157" height="36" rx="18" class="w-papel"/><text x="116" y="125" text-anchor="middle" class="w-t b">Entrar</text><text x="274" y="125" text-anchor="middle" class="w-t m">Crear cuenta</text>
+            <text x="36" y="182" class="w-d" style="font-size:24px">Entra a tu cuenta</text>
+            <text x="36" y="206" class="w-t m">Usa el correo con el que contrataste tu invitación.</text>
+            <text x="36" y="240" class="w-t b">Correo electrónico</text><rect x="36" y="250" width="318" height="46" rx="8" class="w-papel"/><text x="50" y="278" class="w-t m">nombre@correo.com</text>
+            <text x="36" y="326" class="w-t b">Contraseña</text><rect x="36" y="336" width="318" height="46" rx="8" class="w-papel"/><text x="330" y="364" text-anchor="end" class="w-t m">Mostrar</text>
+            <rect x="36" y="402" width="318" height="48" rx="24" class="w-prim"/><text x="195" y="431" text-anchor="middle" class="w-t on">Iniciar sesión</text>
+            <text x="195" y="472" text-anchor="middle" class="w-t b" style="fill:var(--ui-link)">¿Olvidaste tu contraseña?</text>
+          </svg>
+        </div>
+        <div class="wire"><small>390 px · crear cuenta, paso 1 de 3</small>
+          <svg viewBox="0 0 390 640" aria-hidden="true">
+            <rect width="390" height="640" class="w-alt"/>
+            <path d="M0 520 C80 470 160 560 240 510 C300 475 350 500 390 480 V640 H0 Z" class="w-prim-soft"/>
+            <path d="M0 560 C90 520 170 590 260 545 C320 515 360 540 390 525 V640 H0 Z" class="w-papel"/>
+            <text x="195" y="48" text-anchor="middle" class="w-d" style="font-size:18px">Invitaciones</text>
+            <rect x="20" y="80" width="350" height="400" rx="24" class="w-papel"/>
+            <text x="36" y="118" class="w-l">Paso 1 de 3 · Tu correo</text>
+            <rect x="36" y="128" width="318" height="4" rx="2" class="w-gris"/><rect x="36" y="128" width="106" height="4" rx="2" class="w-prim"/>
+            <text x="36" y="176" class="w-d" style="font-size:24px">Crea tu cuenta</text>
+            <text x="36" y="200" class="w-t m">Solo necesitas un correo. Sin tarjeta hasta que elijas plan.</text>
+            <text x="36" y="240" class="w-t b">Correo electrónico</text><rect x="36" y="250" width="318" height="46" rx="8" class="w-papel"/><text x="50" y="278" class="w-t m">nombre@correo.com</text>
+            <rect x="36" y="320" width="318" height="48" rx="24" class="w-prim"/><text x="195" y="349" text-anchor="middle" class="w-t on">Continuar</text>
+            <text x="36" y="400" class="w-t m">Al continuar aceptas los términos y el aviso de privacidad.</text>
+            <text x="195" y="450" text-anchor="middle" class="w-t b" style="fill:var(--ui-link)">Ya tengo cuenta</text>
+          </svg>
+        </div>
+      </div>
+      <div class="textos"><b>Textos clave</b><ul><li>Pestañas: «Entrar» / «Crear cuenta». Título: «Entra a tu cuenta» · «Crea tu cuenta».</li><li>Error de credenciales: «El correo o la contraseña no coinciden. Revísalos e inténtalo otra vez.» · Sesión: «Tu sesión terminó. Vuelve a entrar para seguir donde lo dejaste.»</li><li>Recuperación: «Si el correo corresponde a una cuenta, te enviamos un enlace para cambiar la contraseña.» (respuesta única, ADR-3C-N01-01).</li><li>Registro paso 2: «Elige una contraseña» (mín. 8, medidor sencillo) · paso 3: «¿Cómo te llamamos?» → «Listo. Elige el tipo de evento.»</li></ul></div>
+    </div>
+
+    <!-- ── Asistente ───────────────────────────────────────────────────────────────────────── -->
+    <div class="pantalla">
+      <header><h3>Asistente de creación · <code>/editor</code></h3><p>Objetivo: llegar al editor con una plantilla coherente con el evento. Cuatro pasos con stepper: tipo de evento → plantilla (filtrada por <code>eventKinds</code>, así se corrige la fricción de 3b-adv §8.1: hoy el tipo no se comprueba) → datos básicos → editor. Forma protagonista: cuadros de tipo de evento con icono de dos tonos; en la plantilla, la tarjeta con onda.</p></header>
+      <div class="wires">
+        <div class="wire"><small>390 px · paso 1, tipo de evento</small>
+          <svg viewBox="0 0 390 720" aria-hidden="true">
+            <rect width="390" height="720" class="w-fondo"/>
+            <text x="20" y="34" class="w-d" style="font-size:18px">Invitaciones</text><text x="370" y="34" text-anchor="end" class="w-t b">Ayuda</text>
+            <g transform="translate(20 60)"><circle cx="14" cy="14" r="13" class="w-prim"/><text x="14" y="18" text-anchor="middle" class="w-t on">1</text><rect x="32" y="12" width="70" height="3" class="w-gris"/><circle cx="116" cy="14" r="13" class="w-papel"/><text x="116" y="18" text-anchor="middle" class="w-t m">2</text><rect x="134" y="12" width="70" height="3" class="w-gris"/><circle cx="218" cy="14" r="13" class="w-papel"/><text x="218" y="18" text-anchor="middle" class="w-t m">3</text><rect x="236" y="12" width="70" height="3" class="w-gris"/><circle cx="320" cy="14" r="13" class="w-papel"/><text x="320" y="18" text-anchor="middle" class="w-t m">4</text></g>
+            <text x="20" y="112" class="w-l">Paso 1 de 4 · Tipo de evento</text>
+            <text x="20" y="146" class="w-d" style="font-size:26px">¿Qué vamos a celebrar?</text>
+            <text x="20" y="170" class="w-t m">Elige uno; te mostramos solo las plantillas que le van.</text>
+            <g transform="translate(20 190)">
+              <rect width="170" height="112" rx="16" class="w-papel" style="stroke:var(--ui-primary);stroke-width:2"/><rect x="14" y="14" width="40" height="40" rx="10" class="w-prim-soft"/><text x="14" y="82" class="w-t b">Boda</text><text x="14" y="98" class="w-t m">Anillos, ceremonia, fiesta</text>
+              <rect x="180" width="170" height="112" rx="16" class="w-papel"/><rect x="194" y="14" width="40" height="40" rx="10" class="w-acento"/><text x="194" y="82" class="w-t b">XV años</text><text x="194" y="98" class="w-t m">Vals, chambelanes</text>
+              <rect y="122" width="170" height="112" rx="16" class="w-papel"/><rect x="14" y="136" width="40" height="40" rx="10" class="w-apoyo1" opacity=".35"/><text x="14" y="204" class="w-t b">Bautizo</text><text x="14" y="220" class="w-t m">Padrinos, convivio</text>
+              <rect x="180" y="122" width="170" height="112" rx="16" class="w-papel"/><rect x="194" y="136" width="40" height="40" rx="10" class="w-apoyo2" opacity=".35"/><text x="194" y="204" class="w-t b">Primera comunión</text><text x="194" y="220" class="w-t m">Misa, desayuno</text>
+              <rect y="244" width="170" height="112" rx="16" class="w-papel"/><rect x="14" y="258" width="40" height="40" rx="10" class="w-prim-soft"/><text x="14" y="326" class="w-t b">Cumpleaños</text><text x="14" y="342" class="w-t m">De 1 a 100</text>
+              <rect x="180" y="244" width="170" height="112" rx="16" class="w-papel"/><rect x="194" y="258" width="40" height="40" rx="10" class="w-acento" opacity=".5"/><text x="194" y="326" class="w-t b">Graduación</text><text x="194" y="342" class="w-t m">Toga, birrete, brindis</text>
+              <rect y="366" width="350" height="64" rx="16" class="w-papel"/><rect x="14" y="378" width="40" height="40" rx="10" class="w-apoyo1" opacity=".35"/><text x="66" y="394" class="w-t b">Evento corporativo</text><text x="66" y="410" class="w-t m">Conferencia, cena, aniversario</text>
+            </g>
+            <rect x="20" y="650" width="350" height="48" rx="24" class="w-prim"/><text x="195" y="679" text-anchor="middle" class="w-t on">Continuar con Boda</text>
+          </svg>
+        </div>
+        <div class="wire"><small>1440 px · paso 2, plantilla</small>
+          <svg viewBox="0 0 1200 640" aria-hidden="true">
+            <rect width="1200" height="640" class="w-fondo"/>
+            <text x="40" y="40" class="w-d" style="font-size:22px">Invitaciones</text><text x="1160" y="40" text-anchor="end" class="w-t b">Ayuda · Mi cuenta</text>
+            <g transform="translate(40 70)"><circle cx="14" cy="14" r="13" class="w-prim"/><text x="14" y="18" text-anchor="middle" class="w-t on">1</text><text x="34" y="18" class="w-t m">Boda</text><rect x="80" y="12" width="60" height="3" class="w-prim"/><circle cx="154" cy="14" r="13" class="w-papel" style="stroke:var(--ui-primary);stroke-width:2"/><text x="154" y="18" text-anchor="middle" class="w-t b">2</text><text x="174" y="18" class="w-t b">Plantilla</text><rect x="240" y="12" width="60" height="3" class="w-gris"/><circle cx="314" cy="14" r="13" class="w-papel"/><text x="314" y="18" text-anchor="middle" class="w-t m">3</text><text x="334" y="18" class="w-t m">Datos</text><rect x="380" y="12" width="60" height="3" class="w-gris"/><circle cx="454" cy="14" r="13" class="w-papel"/><text x="454" y="18" text-anchor="middle" class="w-t m">4</text><text x="474" y="18" class="w-t m">Editor</text></g>
+            <text x="40" y="150" class="w-d" style="font-size:34px">Elige el punto de partida</text>
+            <text x="40" y="178" class="w-t" style="font-size:14px">Plantillas para boda. Podrás cambiar colores, tipografía y fotos después.</text>
+            <g transform="translate(700 130)"><rect width="150" height="36" rx="18" class="w-prim-soft"/><text x="75" y="23" text-anchor="middle" class="w-t b">Todas · 12</text><rect x="160" width="180" height="36" rx="18" class="w-papel"/><text x="250" y="23" text-anchor="middle" class="w-t">Incluidas en mi plan</text><rect x="350" width="110" height="36" rx="18" class="w-papel"/><text x="405" y="23" text-anchor="middle" class="w-t">Jardín</text></g>
+            <g transform="translate(40 210)">
+              <g><rect width="270" height="400" rx="20" class="w-papel"/><path d="M0 20 A20 20 0 0 1 20 0 H250 A20 20 0 0 1 270 20 V230 C220 250 180 220 130 240 C80 260 40 235 0 250 Z" class="w-img"/><text x="18" y="290" class="w-t b" style="font-size:15px">Jardín de San Ángel</text><text x="18" y="312" class="w-t m">Boda · Incluida en todos los planes</text><rect x="18" y="340" width="234" height="42" rx="21" class="w-prim"/><text x="135" y="366" text-anchor="middle" class="w-t on">Elegir esta plantilla</text></g>
+              <g transform="translate(290 0)"><rect width="270" height="400" rx="20" class="w-papel"/><path d="M0 20 A20 20 0 0 1 20 0 H250 A20 20 0 0 1 270 20 V230 C220 250 180 220 130 240 C80 260 40 235 0 250 Z" class="w-img"/><text x="18" y="290" class="w-t b" style="font-size:15px">Clásica de noche</text><text x="18" y="312" class="w-t m">Boda · Incluida en todos los planes</text><rect x="18" y="340" width="234" height="42" rx="21" class="w-prim"/><text x="135" y="366" text-anchor="middle" class="w-t on">Elegir esta plantilla</text></g>
+              <g transform="translate(580 0)"><rect width="270" height="400" rx="20" class="w-papel"/><path d="M0 20 A20 20 0 0 1 20 0 H250 A20 20 0 0 1 270 20 V230 C220 250 180 220 130 240 C80 260 40 235 0 250 Z" class="w-img"/><rect x="90" y="-2" width="90" height="26" rx="0 0 8 8" class="w-acento"/><text x="135" y="15" text-anchor="middle" class="w-l" style="fill:var(--ui-on-accent)">Plan 2</text><text x="18" y="290" class="w-t b" style="font-size:15px">Art déco</text><text x="18" y="312" class="w-t m">Boda · Requiere el plan 2</text><rect x="18" y="340" width="234" height="42" rx="21" class="w-papel" style="stroke:var(--ui-primary);stroke-width:2"/><text x="135" y="366" text-anchor="middle" class="w-t b" style="fill:var(--ui-link)">Ver qué incluye el plan 2</text></g>
+              <g transform="translate(870 0)"><rect width="270" height="400" rx="20" class="w-papel"/><path d="M0 20 A20 20 0 0 1 20 0 H250 A20 20 0 0 1 270 20 V230 C220 250 180 220 130 240 C80 260 40 235 0 250 Z" class="w-img"/><text x="18" y="290" class="w-t b" style="font-size:15px">Minimal</text><text x="18" y="312" class="w-t m">Boda · Incluida en todos los planes</text><rect x="18" y="340" width="234" height="42" rx="21" class="w-prim"/><text x="135" y="366" text-anchor="middle" class="w-t on">Elegir esta plantilla</text></g>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="textos"><b>Textos clave</b><ul><li>Paso 1: «¿Qué vamos a celebrar?» · «Elige uno; te mostramos solo las plantillas que le van.» · CTA «Continuar con Boda».</li><li>Paso 2: «Elige el punto de partida» · filtros «Todas · 12», «Incluidas en mi plan» · bloqueada: «Requiere el plan 2» → «Ver qué incluye el plan 2» (nunca un botón deshabilitado mudo).</li><li>Paso 3: «Los datos básicos» → «¿Quiénes celebran?», «¿Cuándo?», «¿Dónde?» · «Puedes cambiarlos después». CTA «Abrir mi invitación».</li><li>Sin invitación contratada: estado vacío ilustrado «Todavía no tienes invitaciones» + «Ver planes».</li></ul></div>
+    </div>
+
+    <!-- ── Editor ──────────────────────────────────────────────────────────────────────────── -->
+    <div class="pantalla">
+      <header><h3>Chrome del editor · <code>/editor/[id]</code></h3><p>Objetivo: editar sin miedo. Barra fija con deshacer/rehacer, indicador de guardado y «Publicar» siempre visibles; panel de secciones con asas, interruptores y menú; selector de paleta y tipografía de la plantilla con muestras reales; lienzo aislado. En móvil, pestañas «Editar / Vista previa» (ADR-3-8-01). Ninguna forma decorativa dentro del editor: el protagonista es la invitación.</p></header>
+      <div class="wires">
+        <div class="wire"><small>390 px · pestaña Editar</small>
+          <svg viewBox="0 0 390 720" aria-hidden="true">
+            <rect width="390" height="720" class="w-fondo"/>
+            <rect width="390" height="56" class="w-papel"/><text x="16" y="34" class="w-d" style="font-size:16px">Invitaciones</text>
+            <rect x="290" y="12" width="84" height="32" rx="16" class="w-prim"/><text x="332" y="32" text-anchor="middle" class="w-t on">Publicar</text>
+            <rect y="56" width="390" height="44" class="w-papel"/><rect x="16" y="64" width="28" height="28" rx="14" class="w-alt"/><rect x="50" y="64" width="28" height="28" rx="14" class="w-alt"/><text x="90" y="82" class="w-t m">Guardado 12:41</text>
+            <g transform="translate(16 110)"><rect width="358" height="40" rx="20" class="w-alt"/><rect x="2" y="2" width="177" height="36" rx="18" class="w-papel"/><text x="90" y="25" text-anchor="middle" class="w-t b">Editar</text><text x="268" y="25" text-anchor="middle" class="w-t m">Vista previa</text></g>
+            <text x="16" y="186" class="w-l">Secciones</text>
+            <g transform="translate(16 198)">
+              <rect width="358" height="52" rx="12" class="w-papel"/><text x="16" y="31" class="w-t m">⠿</text><rect x="36" y="14" width="24" height="24" rx="6" class="w-prim-soft"/><text x="70" y="31" class="w-t b">Portada</text><rect x="300" y="14" width="40" height="24" rx="12" class="w-prim"/><circle cx="330" cy="26" r="9" class="w-papel"/>
+              <rect y="60" width="358" height="52" rx="12" class="w-papel"/><text x="16" y="91" class="w-t m">⠿</text><rect x="36" y="74" width="24" height="24" rx="6" class="w-prim-soft"/><text x="70" y="91" class="w-t b">Los novios</text><rect x="300" y="74" width="40" height="24" rx="12" class="w-prim"/><circle cx="330" cy="86" r="9" class="w-papel"/>
+              <rect y="120" width="358" height="52" rx="12" class="w-papel"/><text x="16" y="151" class="w-t m">⠿</text><rect x="36" y="134" width="24" height="24" rx="6" class="w-prim-soft"/><text x="70" y="151" class="w-t b">Nuestra historia</text><rect x="200" y="141" width="88" height="18" rx="9" class="w-acento" opacity=".5"/><text x="244" y="153" text-anchor="middle" class="w-l">ejemplo</text><rect x="300" y="134" width="40" height="24" rx="12" class="w-gris"/><circle cx="312" cy="146" r="9" class="w-papel"/>
+              <rect y="180" width="358" height="52" rx="12" class="w-papel"/><text x="16" y="211" class="w-t m">⠿</text><rect x="36" y="194" width="24" height="24" rx="6" class="w-prim-soft"/><text x="70" y="211" class="w-t b">Ceremonia</text><rect x="300" y="194" width="40" height="24" rx="12" class="w-prim"/><circle cx="330" cy="206" r="9" class="w-papel"/>
+              <rect y="240" width="358" height="52" rx="12" class="w-papel"/><text x="16" y="271" class="w-t m">⠿</text><rect x="36" y="254" width="24" height="24" rx="6" class="w-prim-soft"/><text x="70" y="271" class="w-t b">Galería · 6 fotos</text><rect x="300" y="254" width="40" height="24" rx="12" class="w-prim"/><circle cx="330" cy="266" r="9" class="w-papel"/>
+              <rect y="300" width="358" height="52" rx="12" class="w-papel"/><text x="16" y="331" class="w-t m">⠿</text><rect x="36" y="314" width="24" height="24" rx="6" class="w-prim-soft"/><text x="70" y="331" class="w-t b">Confirmación</text><rect x="300" y="314" width="40" height="24" rx="12" class="w-prim"/><circle cx="330" cy="326" r="9" class="w-papel"/>
+            </g>
+            <text x="16" y="588" class="w-l">Apariencia de la invitación</text>
+            <g transform="translate(16 600)"><rect width="358" height="96" rx="12" class="w-papel"/><text x="16" y="26" class="w-t b">Paleta</text><circle cx="30" cy="58" r="14" class="w-img"/><circle cx="66" cy="58" r="14" class="w-apoyo2" opacity=".5"/><circle cx="102" cy="58" r="14" class="w-acento" opacity=".5"/><circle cx="138" cy="58" r="14" class="w-apoyo1" opacity=".5"/><text x="200" y="26" class="w-t b">Tipografía</text><rect x="200" y="42" width="140" height="34" rx="8" class="w-alt"/><text x="212" y="64" class="w-t">Serif elegante</text></g>
+          </svg>
+        </div>
+        <div class="wire"><small>1440 px · dos paneles</small>
+          <svg viewBox="0 0 1200 660" aria-hidden="true">
+            <rect width="1200" height="660" class="w-alt"/>
+            <rect width="1200" height="60" class="w-papel"/><text x="24" y="37" class="w-d" style="font-size:18px">Invitaciones</text><text x="150" y="37" class="w-t m">Boda de Mariana y Rodrigo</text>
+            <rect x="500" y="16" width="30" height="28" rx="14" class="w-alt"/><rect x="536" y="16" width="30" height="28" rx="14" class="w-alt"/><text x="580" y="35" class="w-t m">Guardado 12:41</text>
+            <g transform="translate(760 16)"><rect width="140" height="28" rx="14" class="w-alt"/><rect x="2" y="2" width="68" height="24" rx="12" class="w-papel"/><text x="36" y="19" text-anchor="middle" class="w-t b">Móvil</text><text x="104" y="19" text-anchor="middle" class="w-t m">Escritorio</text></g>
+            <rect x="960" y="14" width="100" height="32" rx="16" class="w-papel" style="stroke:var(--ui-primary);stroke-width:2"/><text x="1010" y="34" text-anchor="middle" class="w-t b" style="fill:var(--ui-link)">Ver</text>
+            <rect x="1072" y="14" width="104" height="32" rx="16" class="w-prim"/><text x="1124" y="34" text-anchor="middle" class="w-t on">Publicar</text>
+            <rect y="60" width="340" height="600" class="w-papel"/>
+            <text x="20" y="92" class="w-l">Secciones</text>
+            <g transform="translate(20 104)">
+              <rect width="300" height="44" rx="10" class="w-alt"/><text x="12" y="27" class="w-t m">⠿</text><text x="34" y="27" class="w-t b">Portada</text><rect x="252" y="11" width="36" height="22" rx="11" class="w-prim"/><circle cx="279" cy="22" r="8" class="w-papel"/>
+              <rect y="50" width="300" height="44" rx="10" class="w-fondo"/><text x="12" y="77" class="w-t m">⠿</text><text x="34" y="77" class="w-t b">Los novios</text><rect x="252" y="61" width="36" height="22" rx="11" class="w-prim"/><circle cx="279" cy="72" r="8" class="w-papel"/>
+              <rect y="100" width="300" height="44" rx="10" class="w-fondo"/><text x="12" y="127" class="w-t m">⠿</text><text x="34" y="127" class="w-t b">Nuestra historia</text><rect x="252" y="111" width="36" height="22" rx="11" class="w-gris"/><circle cx="263" cy="122" r="8" class="w-papel"/>
+              <rect y="150" width="300" height="44" rx="10" class="w-fondo"/><text x="12" y="177" class="w-t m">⠿</text><text x="34" y="177" class="w-t b">Ceremonia</text><rect x="252" y="161" width="36" height="22" rx="11" class="w-prim"/><circle cx="279" cy="172" r="8" class="w-papel"/>
+              <rect y="200" width="300" height="44" rx="10" class="w-fondo"/><text x="12" y="227" class="w-t m">⠿</text><text x="34" y="227" class="w-t b">Galería</text><rect x="252" y="211" width="36" height="22" rx="11" class="w-prim"/><circle cx="279" cy="222" r="8" class="w-papel"/>
+              <rect y="250" width="300" height="44" rx="10" class="w-fondo"/><text x="12" y="277" class="w-t m">⠿</text><text x="34" y="277" class="w-t b">Mesa de regalos</text><rect x="252" y="261" width="36" height="22" rx="11" class="w-prim"/><circle cx="279" cy="272" r="8" class="w-papel"/>
+              <rect y="300" width="300" height="44" rx="10" class="w-fondo"/><text x="12" y="327" class="w-t m">⠿</text><text x="34" y="327" class="w-t b">Confirmación</text><rect x="252" y="311" width="36" height="22" rx="11" class="w-prim"/><circle cx="279" cy="322" r="8" class="w-papel"/>
+            </g>
+            <text x="20" y="480" class="w-l">Apariencia de la invitación</text>
+            <g transform="translate(20 494)"><text x="0" y="14" class="w-t b">Paleta</text><circle cx="14" cy="44" r="14" class="w-img"/><circle cx="50" cy="44" r="14" class="w-apoyo2" opacity=".5"/><circle cx="86" cy="44" r="14" class="w-acento" opacity=".5"/><circle cx="122" cy="44" r="14" class="w-apoyo1" opacity=".5"/><circle cx="158" cy="44" r="14" class="w-gris"/><text x="0" y="90" class="w-t b">Tipografía</text><rect x="0" y="100" width="300" height="40" rx="8" class="w-alt"/><text x="12" y="125" class="w-t">Serif elegante · Cormorant + Source Sans</text></g>
+            <rect x="420" y="90" width="360" height="560" rx="24" class="w-papel" style="stroke:var(--ui-ink-muted)"/>
+            <text x="600" y="80" text-anchor="middle" class="w-l">Vista previa de la invitación · lienzo aislado · 390 px</text>
+            <rect x="440" y="110" width="320" height="200" rx="16" class="w-img"/><text x="600" y="350" text-anchor="middle" class="w-t b" style="font-size:16px">Mariana y Rodrigo</text><text x="600" y="372" text-anchor="middle" class="w-t m">18 de abril de 2027 · Querétaro</text>
+            <rect x="480" y="400" width="240" height="40" rx="20" class="w-tinta-2"/><text x="600" y="425" text-anchor="middle" class="w-t on">Confirmar asistencia</text>
+            <rect x="440" y="470" width="320" height="2" class="w-gris"/><text x="600" y="500" text-anchor="middle" class="w-t m">(secciones siguientes)</text>
+            <rect x="880" y="90" width="300" height="200" rx="16" class="w-papel"/><text x="896" y="118" class="w-l">Bloque seleccionado · Portada</text><text x="896" y="146" class="w-t b">Título</text><rect x="896" y="156" width="268" height="40" rx="8" class="w-fondo" style="stroke:var(--ui-primary);stroke-width:2"/><text x="908" y="181" class="w-t">Mariana y Rodrigo</text><text x="1160" y="212" text-anchor="end" class="w-t m">17/40</text><text x="896" y="240" class="w-t b">Foto de portada</text><rect x="896" y="250" width="60" height="30" rx="8" class="w-img"/><text x="966" y="270" class="w-t b" style="fill:var(--ui-link)">Cambiar · Recortar</text>
+          </svg>
+        </div>
+      </div>
+      <div class="textos"><b>Textos clave</b><ul><li>Barra: nombre humano de la invitación (nunca «boda-clasica · versión 194» al lado de la marca); «Guardando…» → «Guardado 12:41»; «Ver» (vista previa autenticada) y «Publicar».</li><li>Fila de sección: asa, icono de la sección, nombre, badge «ejemplo» si el contenido es el de muestra, interruptor «Mostrar Nuestra historia», menú (Subir, Bajar, Cambiar diseño).</li><li>Panel de bloque: «Volver a secciones» · contador «17/40» al 80 % · fecha con candado y «Cambiar la fecha» (I-06).</li></ul></div>
+    </div>
+
+    <!-- ── Publicar / compartir ────────────────────────────────────────────────────────────── -->
+    <div class="pantalla">
+      <header><h3>Publicar y compartir</h3><p>Objetivo: salida clara. Diálogo de revisión (bloqueos con acción) y, tras publicar, la tarjeta del enlace con «Copiar», «WhatsApp», «Ver como invitado» y código QR. Forma protagonista: la chispa sobre sello, una sola vez.</p></header>
+      <div class="wires">
+        <div class="wire"><small>390 px · hoja de publicación</small>
+          <svg viewBox="0 0 390 640" aria-hidden="true">
+            <rect width="390" height="640" class="w-tinta" opacity=".4"/>
+            <rect y="120" width="390" height="520" rx="28" class="w-papel"/><rect x="175" y="132" width="40" height="5" rx="2.5" class="w-gris"/>
+            <text x="20" y="176" class="w-l">Publicar invitación</text>
+            <text x="20" y="208" class="w-d" style="font-size:22px">Antes de publicar, revisamos</text>
+            <g transform="translate(20 230)"><rect width="350" height="60" rx="12" class="w-papel" style="fill:var(--ui-danger-soft);stroke:none"/><text x="16" y="26" class="w-t b" style="fill:var(--ui-on-danger-soft)">Falta el nombre del lugar</text><text x="16" y="44" class="w-t m" style="fill:var(--ui-on-danger-soft)">Ceremonia · bloquea la publicación</text><text x="334" y="36" text-anchor="end" class="w-t b" style="fill:var(--ui-on-danger-soft)">Completar</text></g>
+            <g transform="translate(20 300)"><rect width="350" height="60" rx="12" class="w-papel" style="fill:var(--ui-warning-soft);stroke:none"/><text x="16" y="26" class="w-t b" style="fill:var(--ui-on-warning-soft)">«Mesa de regalos» usa el texto de ejemplo</text><text x="16" y="44" class="w-t m" style="fill:var(--ui-on-warning-soft)">Opcional · no bloquea</text><text x="334" y="36" text-anchor="end" class="w-t b" style="fill:var(--ui-on-warning-soft)">Editar</text></g>
+            <g transform="translate(20 370)"><rect width="350" height="60" rx="12" class="w-papel" style="fill:var(--ui-success-soft);stroke:none"/><text x="16" y="26" class="w-t b" style="fill:var(--ui-on-success-soft)">Portada, novios, galería y confirmación</text><text x="16" y="44" class="w-t m" style="fill:var(--ui-on-success-soft)">Listas</text></g>
+            <rect x="20" y="560" width="164" height="48" rx="24" class="w-papel" style="stroke:var(--ui-primary);stroke-width:2"/><text x="102" y="589" text-anchor="middle" class="w-t b" style="fill:var(--ui-link)">Cancelar</text>
+            <rect x="206" y="560" width="164" height="48" rx="24" class="w-prim" opacity=".45"/><text x="288" y="589" text-anchor="middle" class="w-t on">Publicar</text>
+          </svg>
+        </div>
+        <div class="wire"><small>1440 px · publicada</small>
+          <svg viewBox="0 0 1200 460" aria-hidden="true">
+            <rect width="1200" height="460" class="w-alt"/>
+            <g transform="translate(340 60)">
+              <rect width="520" height="360" rx="24" class="w-papel"/>
+              <g transform="translate(60 40)"><path d="{{SELLO:12:4}}" transform="translate(-50 -50) scale(1.1) translate(45 45)" class="w-prim-soft"/><path d="M0 -22 C1.4 -11 8 -4.4 19 -3 C8 -1.6 1.4 5 0 16 C-1.4 5 -8 -1.6 -19 -3 C-8 -4.4 -1.4 -11 0 -22 Z" class="w-prim"/></g>
+              <text x="120" y="52" class="w-d" style="font-size:24px">Tu invitación ya está en vivo</text>
+              <text x="120" y="76" class="w-t m">Publicada hoy a las 12:44. El enlace de tus invitados ya muestra esta versión.</text>
+              <rect x="40" y="110" width="440" height="52" rx="12" class="w-alt"/><text x="56" y="142" class="w-t" style="font-size:14px">invitaciones.mx/i/01J8ZCQX</text><rect x="360" y="118" width="108" height="36" rx="18" class="w-prim"/><text x="414" y="141" text-anchor="middle" class="w-t on">Copiar enlace</text>
+              <rect x="40" y="184" width="210" height="48" rx="24" class="w-papel" style="stroke:var(--ui-primary);stroke-width:2"/><text x="145" y="213" text-anchor="middle" class="w-t b" style="fill:var(--ui-link)">Compartir por WhatsApp</text>
+              <rect x="270" y="184" width="210" height="48" rx="24" class="w-papel" style="stroke:var(--ui-primary);stroke-width:2"/><text x="375" y="213" text-anchor="middle" class="w-t b" style="fill:var(--ui-link)">Ver como invitado</text>
+              <rect x="40" y="256" width="80" height="80" rx="10" class="w-gris"/><text x="136" y="284" class="w-t b">Código QR para imprimir</text><text x="136" y="304" class="w-t m">Pégalo en la invitación física o en el recuerdo.</text><text x="136" y="330" class="w-t b" style="fill:var(--ui-link)">Descargar PNG</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="textos"><b>Textos clave</b><ul><li>Diálogo: «Antes de publicar, revisamos» · bloqueos «Falta el nombre del lugar → Completar» · opcional «usa el texto de ejemplo → Editar» · «Publicar» deshabilitado con explicación mientras haya bloqueos.</li><li>Éxito: «Tu invitación ya está en vivo» (texto, sin emoji: sustituye la palomita verde (U+2705) que hoy vive en <code>lib/i18n.ts</code>) · «Copiar enlace» → toast «Enlace copiado. Ya puedes pegarlo en WhatsApp.» · «Compartir por WhatsApp» · «Ver como invitado» · «Código QR para imprimir».</li><li>Mientras invalida: «Estamos actualizando el enlace de tus invitados…» (U-5).</li></ul></div>
+    </div>
+
+    <!-- ── Estados ─────────────────────────────────────────────────────────────────────────── -->
+    <div class="pantalla">
+      <header><h3>Estados de error, vacío y 404 · <code>/ayuda</code></h3><p>Objetivo: que ningún callejón sea sin salida. Ilustración del sistema, un título en display, una frase y una acción. La raíz y cualquier ruta desconocida llevan a esta 404 en es-MX con salida a la portada.</p></header>
+      <div class="wires dos-moviles">
+        <div class="wire"><small>390 px · 404 y sin conexión</small>
+          <svg viewBox="0 0 390 640" aria-hidden="true">
+            <rect width="390" height="640" class="w-fondo"/>
+            <text x="20" y="34" class="w-d" style="font-size:18px">Invitaciones</text>
+            <path d="{{SELLO:12:5}}" transform="translate(95 70) scale(2)" class="w-prim-soft"/>
+            <rect x="150" y="130" width="90" height="70" rx="12" class="w-papel" style="stroke:var(--ui-ink);stroke-width:4" transform="rotate(-8 195 165)"/><rect x="156" y="136" width="90" height="70" rx="12" class="w-apoyo2" transform="rotate(-8 195 165)" opacity=".9"/><rect x="150" y="130" width="90" height="70" rx="12" class="w-papel" style="stroke:var(--ui-ink);stroke-width:4" transform="rotate(-8 195 165)"/>
+            <text x="195" y="316" text-anchor="middle" class="w-l">Error 404</text>
+            <text x="195" y="350" text-anchor="middle" class="w-d" style="font-size:24px">Esta página no existe</text>
+            <text x="195" y="376" text-anchor="middle" class="w-t m">El enlace que abriste no existe o cambió de dirección.</text>
+            <rect x="95" y="400" width="200" height="48" rx="24" class="w-prim"/><text x="195" y="429" text-anchor="middle" class="w-t on">Ir a la portada</text>
+            <text x="195" y="480" text-anchor="middle" class="w-t b" style="fill:var(--ui-link)">Ir a mis invitaciones</text>
+            <rect x="20" y="540" width="350" height="70" rx="14" class="w-alt"/><text x="36" y="566" class="w-t b">Sin conexión</text><text x="36" y="586" class="w-t m">No hay internet. Tus cambios se guardan aquí y se envían al volver.</text>
+          </svg>
+        </div>
+        <div class="wire"><small>390 px · ayuda</small>
+          <svg viewBox="0 0 390 640" aria-hidden="true">
+            <rect width="390" height="640" class="w-fondo"/>
+            <text x="20" y="34" class="w-d" style="font-size:18px">Invitaciones</text><text x="370" y="34" text-anchor="end" class="w-t b" style="fill:var(--ui-link)">Volver a mis invitaciones</text>
+            <rect x="0" y="56" width="390" height="130" class="w-alt"/><g transform="translate(340 120)"><path d="{{RAYOS:10:90}}" class="w-prim-soft"/></g>
+            <text x="20" y="100" class="w-l">Ayuda</text><text x="20" y="136" class="w-d" style="font-size:26px">¿En qué te ayudamos?</text><text x="20" y="160" class="w-t m">Las dudas que más nos llegan mientras preparas tu invitación.</text>
+            <rect x="20" y="204" width="350" height="46" rx="23" class="w-papel"/><text x="44" y="232" class="w-t m">Buscar una duda…</text>
+            <g transform="translate(20 270)">
+              <rect width="350" height="56" rx="14" class="w-papel"/><text x="16" y="33" class="w-t b">¿Cómo empiezo mi invitación?</text><text x="330" y="34" text-anchor="end" class="w-t m">+</text>
+              <rect y="66" width="350" height="56" rx="14" class="w-papel"/><text x="16" y="99" class="w-t b">¿Dónde se cambia la fecha del evento?</text><text x="330" y="100" text-anchor="end" class="w-t m">+</text>
+              <rect y="132" width="350" height="56" rx="14" class="w-papel"/><text x="16" y="165" class="w-t b">¿Qué pasa cuando publico?</text><text x="330" y="166" text-anchor="end" class="w-t m">+</text>
+              <rect y="198" width="350" height="56" rx="14" class="w-papel"/><text x="16" y="231" class="w-t b">¿Cómo comparto por WhatsApp?</text><text x="330" y="232" text-anchor="end" class="w-t m">+</text>
+              <rect y="264" width="350" height="56" rx="14" class="w-papel"/><text x="16" y="297" class="w-t b">¿Puedo cambiar de plantilla después?</text><text x="330" y="298" text-anchor="end" class="w-t m">+</text>
+            </g>
+            <rect x="20" y="570" width="350" height="56" rx="28" class="w-prim-soft"/><text x="195" y="603" text-anchor="middle" class="w-t b">Escríbenos por WhatsApp</text>
+          </svg>
+        </div>
+      </div>
+      <div class="textos"><b>Textos clave</b><ul><li>404: «Esta página no existe» · «El enlace que abriste no existe o cambió de dirección.» · «Ir a la portada» / «Ir a mis invitaciones».</li><li>Vacío: «Todavía no tienes invitaciones» · «Todavía no hay fotos» → «Agregar fotos» · «Nadie ha confirmado todavía» → «Compartir el enlace».</li><li>Error: «Algo salió mal. Inténtalo de nuevo.» + «Código: TPL_…» · red: «No hay internet. Tus cambios se guardan aquí y se envían al volver.»</li><li>Ayuda: «¿En qué te ayudamos?» · acordeón de dudas reales · «Escríbenos por WhatsApp».</li></ul></div>
+    </div>
+  </div>
+</section>

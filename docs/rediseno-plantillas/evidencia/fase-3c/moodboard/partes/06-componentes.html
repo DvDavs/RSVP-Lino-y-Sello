@@ -1,0 +1,166 @@
+<section class="bloque" id="componentes">
+  <div class="wrap stack">
+    <header>
+      <span class="label">Componentes · <code>@invitaciones/ui</code></span>
+      <h2>Controles a medida, con todos sus estados.</h2>
+      <p class="intro">Bocetos estáticos con la paleta y la tipografía recomendadas. Radix aporta el comportamiento accesible (roles, teclado, foco); el aspecto es 100 % propio: píldora para acciones, radio de 8 px para campos, anillo de foco de 3 px en <code>focus</code> con halo de 2 px de superficie, objetivos ≥ 44 px (radios y casillas ≥ 24 px).</p>
+    </header>
+
+    <div class="grid">
+      <div class="comp">
+        <h4>Botón · variantes y estados</h4>
+        <div class="fila">
+          <div><span class="btn btn-primario">Publicar</span><small>reposo</small></div>
+          <div><span class="btn btn-primario" style="background:var(--ui-primary-hover);transform:translateY(-1px)">Publicar</span><small>hover</small></div>
+          <div><span class="btn btn-primario" data-estado="foco">Publicar</span><small>foco</small></div>
+          <div><span class="btn btn-primario" data-estado="activo">Publicar</span><small>activo</small></div>
+          <div><span class="btn btn-primario" data-estado="deshabilitado">Publicar</span><small>deshabilitado</small></div>
+          <div><span class="btn btn-primario"><i class="spinner"></i>Publicando</span><small>cargando (aria-busy)</small></div>
+        </div>
+        <div class="fila">
+          <div><span class="btn btn-secundario">Ver como invitado</span><small>secundario</small></div>
+          <div><span class="btn btn-secundario" style="background:var(--ui-primary-soft)">Ver como invitado</span><small>secundario hover</small></div>
+          <div><span class="btn btn-terciario">Cancelar</span><small>terciario</small></div>
+          <div><span class="btn btn-secundario" data-estado="deshabilitado">Ver como invitado</span><small>deshabilitado</small></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <h4>Botón · tamaños, icono y peligro</h4>
+        <div class="fila">
+          <div><span class="btn btn-primario btn-sm">Guardar</span><small>sm · 36</small></div>
+          <div><span class="btn btn-primario">Guardar</span><small>md · 44</small></div>
+          <div><span class="btn btn-primario btn-lg">Empezar mi invitación</span><small>lg · 52</small></div>
+        </div>
+        <div class="fila">
+          <div><span class="btn btn-primario"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 12.5 L14.5 7.5 M11 7.5 H14.5 V11"/><path d="M4 6.5 A2.5 2.5 0 0 1 6.5 4 H17.5 A2.5 2.5 0 0 1 20 6.5 V13.5 A2.5 2.5 0 0 1 17.5 16 H10.5 L6 20 V16 A2.5 2.5 0 0 1 4 13.5 Z"/></svg>Compartir</span><small>con icono</small></div>
+          <div><span class="btn btn-secundario btn-icono" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6 L18 18 M18 6 L6 18"/></svg></span><small>icono · aria-label</small></div>
+          <div><span class="btn btn-primario" style="background:var(--ui-danger);color:var(--ui-on-danger)">Despublicar</span><small>peligro</small></div>
+          <div><span class="btn btn-primario" style="background:var(--ui-accent);color:var(--ui-on-accent)">Mejorar plan</span><small>acento</small></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <h4>Input · Textarea</h4>
+        <div class="campo"><label>Correo electrónico</label><div class="control"><span class="ph">nombre@correo.com</span></div><span class="ayuda">reposo · el mismo con el que contrataste</span></div>
+        <div class="campo"><label>Correo electrónico</label><div class="control" data-estado="hover"><span class="ph">nombre@correo.com</span></div><span class="ayuda">hover</span></div>
+        <div class="campo"><label>Correo electrónico</label><div class="control" data-estado="foco">mariana@<span style="border-left:2px solid currentColor;height:20px;display:inline-block;margin-left:1px"></span></div><span class="ayuda">foco: borde primario + anillo</span></div>
+        <div class="campo"><label>Correo electrónico</label><div class="control" data-estado="error">mariana@correo</div><span class="error"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8 V12.5 M12 16 h.01"/></svg>Revisa el correo: le falta el dominio.</span></div>
+        <div class="campo"><label>Fecha del evento</label><div class="control" data-estado="deshabilitado">18 de abril de 2027<svg class="flecha" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11 V8 a4 4 0 0 1 8 0 v3"/></svg></div><span class="ayuda">deshabilitado: nunca mudo, dice dónde se cambia</span></div>
+        <div class="campo"><label>Mensaje para tus invitados</label><div class="control area"><span class="ph">Nos hace mucha ilusión compartir este día contigo…</span></div><span class="ayuda" style="text-align:right">0/280</span></div>
+      </div>
+
+      <div class="comp">
+        <h4>Select y Combobox propios</h4>
+        <div class="campo"><label>Tipo de evento</label><div class="control">Boda<svg class="flecha" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 L12 15 L18 9"/></svg></div></div>
+        <div class="lista" role="presentation">
+          <div class="control buscar" style="height:40px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20 L16 16"/></svg><span class="ph">Buscar…</span></div>
+          <div class="opcion" data-estado="elegida">Boda<svg class="check" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17 L19 7.5"/></svg></div>
+          <div class="opcion" data-estado="resaltada">XV años</div>
+          <div class="opcion">Bautizo</div>
+          <div class="opcion">Primera comunión</div>
+          <div class="opcion" style="color:var(--ui-ink-muted)">Corporativo · plan 2</div>
+        </div>
+        <span class="ayuda muted" style="font-size:12.5px">Teclado: flechas, Inicio/Fin, escribir para saltar, Esc cierra. <code>role="combobox"</code> + <code>aria-expanded</code> + <code>aria-activedescendant</code>. En móvil, la lista es una hoja inferior con la búsqueda arriba.</span>
+      </div>
+
+      <div class="comp">
+        <h4>Chip · estados</h4>
+        <div class="fila">
+          <div><span class="chip" data-estado="reposo">Jardín</span><small>reposo</small></div>
+          <div><span class="chip" data-estado="hover">Jardín</span><small>hover</small></div>
+          <div><span class="chip">Jardín<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17 L19 7.5"/></svg></span><small>seleccionado</small></div>
+          <div><span class="chip" data-estado="foco">Jardín</span><small>foco</small></div>
+          <div><span class="chip" data-estado="reposo deshabilitado" style="opacity:.45">Jardín</span><small>deshabilitado</small></div>
+        </div>
+        <div class="fila">
+          <div><span class="chip chip-exito"><i class="punto"></i>128 confirmados</span><small>estado</small></div>
+          <div><span class="chip chip-aviso">3 por revisar</span><small>aviso</small></div>
+          <div><span class="chip chip-peligro">Falta el lugar</span><small>peligro</small></div>
+          <div><span class="chip chip-info">Enlace copiado</span><small>info</small></div>
+          <div><span class="chip chip-acento">Plan 2</span><small>acento</small></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <h4>Radio y Checkbox grandes · opción grande</h4>
+        <div class="fila">
+          <div><span class="radio"></span><small>radio 26</small></div>
+          <div><span class="radio" data-estado="marcado"></span><small>marcado</small></div>
+          <div><span class="radio" data-estado="foco"></span><small>foco</small></div>
+          <div><span class="check"></span><small>casilla 26</small></div>
+          <div><span class="check" data-estado="marcado"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ui-on-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17 L19 7.5"/></svg></span><small>marcada</small></div>
+          <div><span class="check" data-estado="foco"></span><small>foco</small></div>
+        </div>
+        <div class="opcion-grande" data-estado="marcado"><span class="radio" data-estado="marcado"></span>Sí, ahí estaré<span class="muted" style="margin-left:auto;font-size:13px;font-weight:450">2 lugares</span></div>
+        <div class="opcion-grande"><span class="radio"></span>No podré acompañarlos</div>
+        <div class="opcion-grande"><span class="check" data-estado="marcado"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--ui-on-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17 L19 7.5"/></svg></span>Mostrar «Nuestra historia»</div>
+      </div>
+
+      <div class="comp">
+        <h4>Switch · Stepper · Progreso anular</h4>
+        <div class="fila">
+          <div><span class="switch"></span><small>apagado</small></div>
+          <div><span class="switch" data-estado="on"></span><small>encendido</small></div>
+          <div><span class="switch" data-estado="foco"></span><small>foco</small></div>
+          <div><span class="switch" style="opacity:.45"></span><small>deshabilitado</small></div>
+        </div>
+        <div class="stepper">
+          <div class="paso-s" data-estado="hecho"><i><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 L10 17 L19 7.5"/></svg></i>Evento</div><div class="linea" data-estado="hecho"></div>
+          <div class="paso-s" data-estado="actual"><i>2</i>Plantilla</div><div class="linea"></div>
+          <div class="paso-s"><i>3</i>Datos</div><div class="linea"></div>
+          <div class="paso-s"><i>4</i>Editor</div>
+        </div>
+        <div class="fila">
+          <div><span class="anular"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="var(--ui-divider)" stroke-width="7"/><circle cx="36" cy="36" r="30" fill="none" stroke="var(--ui-primary)" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="75" transform="rotate(-90 36 36)"/></svg>60 %</span><small>progresión 60 %</small></div>
+          <div><span class="anular"><svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="none" stroke="var(--ui-divider)" stroke-width="7"/><circle cx="36" cy="36" r="30" fill="none" stroke="var(--ui-success)" stroke-width="7" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="0" transform="rotate(-90 36 36)"/></svg><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--ui-success-text)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="position:relative"><path d="M5 12.5 L10 17 L19 7.5"/></svg></span><small>completo</small></div>
+          <div style="max-width:200px;text-align:left"><span class="ayuda muted" style="font-size:12.5px">El anular lleva siempre el número como texto (<code>role="progressbar"</code> + <code>aria-valuenow</code>): nunca solo el arco.</span></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <h4>Card · plana, elevada, sombra de color, tinta</h4>
+        <div class="tarjetas">
+          <div class="tarjeta-v plana"><b>Plana</b><span class="muted">Listas y filas. Borde de 1,5 px, sin sombra.</span></div>
+          <div class="tarjeta-v elevada"><b>Elevada</b><span class="muted">Diálogos, menús y tarjetas sobre color.</span></div>
+          <div class="tarjeta-v color"><b>Sombra de color</b><span class="muted">La destacada. Una por vista.</span></div>
+          <div class="tarjeta-v tinta"><b>Tinta</b><span>Banda de apoyo: <code>-deep</code> sobre <code>-soft</code>.</span></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <h4>Tabs · Toast · Tooltip · Badge · Avatar</h4>
+        <div class="tabs"><span data-estado="activa">Secciones</span><span>Apariencia</span><span>Fotos</span></div>
+        <div class="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5 L11 15.5 L16 9.5"/></svg><span><b>Enlace copiado.</b> Ya puedes pegarlo en WhatsApp.</span></div>
+        <div class="fila">
+          <div><span class="tooltip">Deshacer (Ctrl+Z)</span><small>tooltip · visible con foco</small></div>
+          <div><span class="badge" style="background:var(--ui-primary-soft);color:var(--ui-on-primary-soft)">Nuevo</span><small>badge</small></div>
+          <div><span class="badge" style="background:var(--ui-warning-soft);color:var(--ui-on-warning-soft)">Texto de ejemplo</span><small>badge aviso</small></div>
+          <div><span class="avatar">MR</span><small>avatar</small></div>
+        </div>
+      </div>
+
+      <div class="comp">
+        <h4>Dialog · Sheet</h4>
+        <div class="dialogo">
+          <span class="label">Publicar invitación</span>
+          <h4>Antes de publicar revisamos tu invitación</h4>
+          <p>Falta el nombre del lugar de la ceremonia. «Nuestra historia» sigue con el texto de ejemplo.</p>
+          <div class="opcion-grande" style="box-shadow:inset 0 0 0 1.5px var(--ui-danger-soft);background:var(--ui-danger-soft);color:var(--ui-on-danger-soft);font-size:14px">Falta el lugar de la ceremonia<span class="btn btn-sm btn-terciario" style="margin-left:auto;color:var(--ui-on-danger-soft)">Completar</span></div>
+          <div class="row" style="justify-content:flex-end;margin-top:6px"><span class="btn btn-terciario">Cancelar</span><span class="btn btn-primario" data-estado="deshabilitado">Publicar</span></div>
+        </div>
+        <span class="ayuda muted" style="font-size:12.5px">En móvil el diálogo es una hoja inferior (<code>Sheet</code>) con asa y el botón primario pegado abajo. Esc cierra (salvo publicación en curso), foco atrapado y devuelto.</span>
+      </div>
+
+      <div class="comp">
+        <h4>Skeleton · Image con placeholder y máscara · Breadcrumb</h4>
+        <div class="row" style="align-items:flex-start">
+          <div class="skeleton" style="flex:1;min-width:140px"><i style="width:60%"></i><i></i><i style="width:80%"></i><i style="width:40%;height:34px;border-radius:999px;margin-top:6px"></i></div>
+          <div class="imagen" style="flex:1;min-width:140px;border-radius:0;clip-path:path('M22 92 V46 A28 28 0 0 1 78 46 V92 Z');clip-path:none;border-radius:36px 36px 14px 14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3.5 18 L8.5 12 L12.5 16 L15 13.5 L20.5 18.5"/><circle cx="16.5" cy="9" r="1.75" fill="currentColor" stroke="none"/></svg></div>
+        </div>
+        <div class="row" style="font-size:13.5px;gap:8px"><a href="#">Mis invitaciones</a><span class="muted">/</span><a href="#">Boda de Mariana y Rodrigo</a><span class="muted">/</span><b>Plantilla</b></div>
+        <span class="ayuda muted" style="font-size:12.5px">El breadcrumb solo en escritorio; en móvil, el stepper del asistente o el botón «Atrás» con el nombre del paso anterior.</span>
+      </div>
+    </div>
+  </div>
+</section>

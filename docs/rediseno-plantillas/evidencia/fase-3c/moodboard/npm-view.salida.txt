@@ -1,0 +1,84 @@
+$ for p in <paquetes>; do npm view "$p" version license dist.unpackedSize; done   # 2026-09-05, registro npm por el proxy del entorno
+== @fontsource-variable/fraunces
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 1924482
+== @fontsource-variable/onest
+version = '5.3.1'
+license = 'OFL-1.1'
+dist.unpackedSize = 175277
+== @fontsource-variable/red-hat-mono
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 90781
+== @fontsource-variable/bricolage-grotesque
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 544183
+== @fontsource-variable/figtree
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 81105
+== @fontsource-variable/azeret-mono
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 104782
+== @fontsource-variable/gabarito
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 64549
+== @fontsource-variable/instrument-sans
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 424093
+== @fontsource-variable/spline-sans-mono
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 136699
+== @fontsource-variable/inter
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 1909049
+== @fontsource-variable/outfit
+version = '5.3.0'
+license = 'OFL-1.1'
+dist.unpackedSize = 65131
+
+$ npm pack @fontsource-variable/{fraunces,onest,red-hat-mono,bricolage-grotesque,figtree,azeret-mono,gabarito,instrument-sans,spline-sans-mono}@5.3.x && tar -tzvf <cada .tgz> | grep latin.*normal   # ficheros woff2 latinos y su tamaño en bytes
+== fontsource-variable-fraunces-5.3.0.tgz
+  121016 package/files/fraunces-latin-full-normal.woff2
+  67304 package/files/fraunces-latin-opsz-normal.woff2
+  36620 package/files/fraunces-latin-wght-normal.woff2
+== fontsource-variable-onest-5.3.1.tgz
+  33760 package/files/onest-latin-wght-normal.woff2
+== fontsource-variable-red-hat-mono-5.3.0.tgz
+  22412 package/files/red-hat-mono-latin-wght-normal.woff2
+== fontsource-variable-bricolage-grotesque-5.3.0.tgz
+  76888 package/files/bricolage-grotesque-latin-opsz-normal.woff2
+  78156 package/files/bricolage-grotesque-latin-wdth-normal.woff2
+  41344 package/files/bricolage-grotesque-latin-wght-normal.woff2
+== fontsource-variable-figtree-5.3.0.tgz
+  20156 package/files/figtree-latin-wght-normal.woff2
+== fontsource-variable-azeret-mono-5.3.0.tgz
+  26164 package/files/azeret-mono-latin-wght-normal.woff2
+== fontsource-variable-gabarito-5.3.0.tgz
+  34236 package/files/gabarito-latin-wght-normal.woff2
+== fontsource-variable-instrument-sans-5.3.0.tgz
+  57332 package/files/instrument-sans-latin-wdth-normal.woff2
+  30092 package/files/instrument-sans-latin-wght-normal.woff2
+== fontsource-variable-spline-sans-mono-5.3.0.tgz
+  36476 package/files/spline-sans-mono-latin-wght-normal.woff2
+
+$ ls -la fonts/*.woff2   # copiados desde npm pack al moodboard
+26164 fonts/azeret-mono-latin-wght-normal.woff2
+76888 fonts/bricolage-grotesque-latin-opsz-normal.woff2
+20156 fonts/figtree-latin-wght-normal.woff2
+121016 fonts/fraunces-latin-full-normal.woff2
+34236 fonts/gabarito-latin-wght-normal.woff2
+30092 fonts/instrument-sans-latin-wght-normal.woff2
+33760 fonts/onest-latin-wght-normal.woff2
+22412 fonts/red-hat-mono-latin-wght-normal.woff2
+36476 fonts/spline-sans-mono-latin-wght-normal.woff2
+
+$ du -sh fonts/
+484K	fonts/

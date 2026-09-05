@@ -1,0 +1,105 @@
+<section class="bloque" id="formas">
+  <div class="wrap stack">
+    <header>
+      <span class="label">Biblioteca de formas · <code>@invitaciones/ui/shapes</code></span>
+      <h2>Papel picado, no clipart.</h2>
+      <p class="intro">Las formas son el recurso de composición del sistema: rayos, rayas, ondas, blobs, triángulos, cuadrados rotados, píldoras, sombras de color y máscaras de foto. Todas se parametrizan por token de color, rotación, escala, densidad y <code>seed</code>; ninguna lleva hex propio. Aquí van dibujadas con la paleta recomendada, en SVG real: lo que se ve es lo que el componente emite.</p>
+    </header>
+
+    <div class="formas">
+      <div class="forma">
+        <div class="lienzo"><svg viewBox="-100 -75 200 150" aria-hidden="true"><rect x="-100" y="-75" width="200" height="150" fill="var(--ui-surface-alt)"/><g class="respira"><path d="{{RAYOS:12:160}}" fill="var(--ui-primary-soft)"/></g><circle r="22" fill="var(--ui-surface-raised)"/><path d="{{SELLO:12:2.5}}" transform="translate(-50 -50) scale(0.44) translate(-50 -50) translate(100 100)" fill="var(--ui-primary)"/></svg></div>
+        <h4>Rayos radiales</h4>
+        <p>Cuñas alternas del mismo matiz en dos pasos (50 y 100). Fondo de héroe y de testimonio. Respira 12 s; se apaga con <code>reduced-motion</code>.</p>
+        <code>&lt;Rays tone="primary" density={12} rotate={0} scale={1.6} breathe /&gt;</code>
+      </div>
+      <div class="forma">
+        <div class="lienzo"><svg viewBox="0 0 200 150" aria-hidden="true"><defs><pattern id="rayas" width="18" height="18" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)"><rect width="9" height="18" fill="var(--ui-support-2-soft)"/></pattern></defs><rect width="200" height="150" fill="var(--ui-surface-raised)"/><rect width="200" height="150" fill="url(#rayas)"/><rect x="40" y="40" width="120" height="70" rx="14" fill="var(--ui-support-2)"/></svg></div>
+        <h4>Rayas</h4>
+        <p>Franjas de un solo tono a 45°, 90° o -24°. Fondo de banda, nunca detrás de texto de cuerpo.</p>
+        <code>&lt;Stripes tone="support-2" angle={-24} gap={18} width={9} /&gt;</code>
+      </div>
+      <div class="forma">
+        <div class="lienzo"><svg viewBox="0 0 200 150" aria-hidden="true" preserveAspectRatio="none"><rect width="200" height="150" fill="var(--ui-primary-soft)"/><path d="M0 84 C40 64 70 104 110 88 C150 72 170 96 200 80 V150 H0 Z" fill="var(--ui-surface-raised)"/></svg></div>
+        <h4>Onda, una capa</h4>
+        <p>Divisor de sección: la parte de abajo hereda el fondo de la siguiente sección. Tres perfiles fijos (<code>suave</code>, <code>marcada</code>, <code>doble</code>).</p>
+        <code>&lt;WaveDivider from="primary-soft" to="surface" profile="suave" flip /&gt;</code>
+      </div>
+      <div class="forma">
+        <div class="lienzo"><svg viewBox="0 0 200 150" aria-hidden="true" preserveAspectRatio="none"><rect width="200" height="150" fill="var(--ui-primary-soft)"/><path d="M0 92 C50 60 90 118 140 88 C170 70 185 92 200 84 V150 H0 Z" fill="var(--ui-support-1-soft)"/><path d="M0 104 C40 84 80 126 130 100 C165 82 180 104 200 96 V150 H0 Z" fill="var(--ui-surface-raised)"/></svg></div>
+        <h4>Onda, dos capas</h4>
+        <p>La segunda capa va en un tono de apoyo y desfasada: profundidad sin sombra.</p>
+        <code>&lt;WaveDivider layers={2} tones={["support-1-soft","surface"]} /&gt;</code>
+      </div>
+      <div class="forma">
+        <div class="lienzo"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="{{BLOB:7}}" fill="var(--ui-support-2-soft)"/><path d="{{BLOB:23:6:0.18}}" transform="translate(28 22) scale(0.42)" fill="var(--ui-support-2)"/></svg></div>
+        <h4>Blob orgánico</h4>
+        <p>Determinista por <code>seed</code> (mulberry32 → puntos polares → Catmull-Rom): el mismo número da el mismo blob en servidor y en cliente, sin saltos de hidratación.</p>
+        <code>&lt;Blob seed={7} points={7} amplitude={0.22} tone="support-2-soft" /&gt;</code>
+      </div>
+      <div class="forma">
+        <div class="lienzo"><svg viewBox="0 0 200 150" aria-hidden="true"><rect width="200" height="150" fill="var(--ui-surface-alt)"/><path d="M112 22 L184 128 L60 128 Z" fill="var(--ui-accent)" transform="rotate(-8 122 75)"/><rect x="44" y="52" width="80" height="80" rx="18" fill="var(--ui-surface-raised)"/><path d="M44 118 L84 78 L104 98 L124 78 V132 H44 Z" fill="var(--ui-primary-soft)" clip-path="inset(0 round 18px)"/></svg></div>
+        <h4>Triángulo</h4>
+        <p>Detrás de una foto o tarjeta, rotado entre -12° y 12°, en matiz distinto del fondo y del elemento que sostiene.</p>
+        <code>&lt;Triangle tone="accent" rotate={-8} scale={1.2} /&gt;</code>
+      </div>
+      <div class="forma">
+        <div class="lienzo"><svg viewBox="0 0 200 150" aria-hidden="true"><rect width="200" height="150" fill="var(--ui-surface-raised)"/><rect x="58" y="30" width="90" height="90" rx="16" fill="var(--ui-primary-bright)" transform="rotate(12 103 75)"/><rect x="66" y="38" width="74" height="74" rx="14" fill="var(--ui-surface-alt)"/></svg></div>
+        <h4>Cuadrado rotado</h4>
+        <p>El único sitio del 500 (<code>primary-bright</code>): decorativo, grande, nunca texto encima.</p>
+        <code>&lt;RotatedSquare tone="primary-bright" rotate={12} radius="md" /&gt;</code>
+      </div>
+      <div class="forma">
+        <div class="lienzo"><svg viewBox="0 0 200 150" aria-hidden="true"><rect width="200" height="150" fill="var(--ui-surface-alt)"/><rect x="18" y="52" width="164" height="46" rx="23" fill="var(--ui-support-1-soft)"/><rect x="18" y="52" width="46" height="46" rx="23" fill="var(--ui-support-1)"/><text x="72" y="80" font-family="Onest" font-size="13" font-weight="600" fill="var(--ui-support-1-deep)">128 confirmados</text></svg></div>
+        <h4>Píldora</h4>
+        <p>Chip de prueba social, insignia colgada del borde de una tarjeta o fondo de eyebrow. Texto en <code>-deep</code> sobre <code>-soft</code>, pareja verificada.</p>
+        <code>&lt;Pill tone="support-1" dot&gt;128 confirmados&lt;/Pill&gt;</code>
+      </div>
+      <div class="forma">
+        <div class="lienzo"><svg viewBox="0 0 200 150" aria-hidden="true"><rect width="200" height="150" fill="var(--ui-surface-alt)"/><rect x="48" y="38" width="112" height="76" rx="14" fill="var(--ui-support-2)"/><rect x="40" y="30" width="112" height="76" rx="14" fill="var(--ui-surface-raised)" stroke="var(--ui-ink)" stroke-width="2"/><rect x="56" y="46" width="52" height="8" rx="4" fill="var(--ui-ink)"/><rect x="56" y="62" width="80" height="6" rx="3" fill="var(--ui-divider)"/><rect x="56" y="76" width="40" height="16" rx="8" fill="var(--ui-primary)"/></svg></div>
+        <h4>Sombra de color desplazada</h4>
+        <p>Una por vista, en la tarjeta destacada: desplazamiento 8/8 px, borde de tinta de 2 px, color de apoyo. Nunca junto a una sombra difusa.</p>
+        <code>&lt;Card shadow="color" tone="support-2" /&gt;</code>
+      </div>
+    </div>
+
+    <h3>Máscaras de foto</h3>
+    <p class="muted" style="max-width:70ch">Toda fotografía pasa por una máscara o un radio ≥ 24 px. Sin foto, el placeholder del sistema: degradado de dos tonos de la paleta + icono propio + la nota en <code>imagenes-pendientes.md</code>. Nunca rectángulo duro sobre color plano, nunca texto encima.</p>
+    <div class="formas">
+      <div class="forma"><div class="lienzo"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="foto1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--ui-primary-soft)"/><stop offset="1" stop-color="var(--ui-accent-soft)"/></linearGradient></defs><rect x="10" y="10" width="80" height="80" rx="24" fill="url(#foto1)"/><g transform="translate(38 38) scale(1)" fill="none" stroke="var(--ui-primary)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="0" y="2" width="24" height="20" rx="4" fill="var(--ui-surface-raised)"/><path d="M0 18 L7 11 L11 15 L14.5 11.5 L24 20"/><circle cx="17" cy="8" r="2" fill="var(--ui-accent)" stroke="none"/></g></svg></div><h4>Radio grande</h4><code>&lt;Image mask="radius-lg" /&gt;</code></div>
+      <div class="forma"><div class="lienzo"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><clipPath id="m-blob"><path d="{{BLOB:31:7:0.2}}"/></clipPath><linearGradient id="foto2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--ui-support-2-soft)"/><stop offset="1" stop-color="var(--ui-support-1-soft)"/></linearGradient></defs><rect width="100" height="100" fill="url(#foto2)" clip-path="url(#m-blob)"/></svg></div><h4>Blob</h4><code>&lt;Image mask="blob" seed={31} /&gt;</code></div>
+      <div class="forma"><div class="lienzo"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="foto3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--ui-accent-soft)"/><stop offset="1" stop-color="var(--ui-primary-soft)"/></linearGradient></defs><path d="M22 92 V46 A28 28 0 0 1 78 46 V92 Z" fill="url(#foto3)"/></svg></div><h4>Arco</h4><code>&lt;Image mask="arch" /&gt;</code></div>
+      <div class="forma"><div class="lienzo"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><clipPath id="m-sello"><path d="{{SELLO:14:3.2}}"/></clipPath><linearGradient id="foto4" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="var(--ui-primary-soft)"/><stop offset="1" stop-color="var(--ui-support-2-soft)"/></linearGradient></defs><rect width="100" height="100" fill="url(#foto4)" clip-path="url(#m-sello)"/></svg></div><h4>Sello (estrella suave)</h4><code>&lt;Image mask="seal" points={14} /&gt;</code></div>
+      <div class="forma"><div class="lienzo"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="foto5" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--ui-support-1-soft)"/><stop offset="1" stop-color="var(--ui-accent-soft)"/></linearGradient></defs><rect x="20" y="20" width="60" height="60" rx="12" fill="url(#foto5)" transform="rotate(10 50 50)"/></svg></div><h4>Cuadrado rotado</h4><code>&lt;Image mask="rotated" rotate={10} /&gt;</code></div>
+    </div>
+
+    <h3>Reglas de composición</h3>
+    <div class="reglas">
+      <div class="regla"><b>1. Una protagonista por bloque.</b>Cada sección o tarjeta lleva como máximo una forma protagonista; si hay una segunda es <code>-soft</code>, ocupa menos del 30 % del área y no toca a la primera.</div>
+      <div class="regla"><b>2. Contraste de matiz forma/fondo.</b>La forma nunca es del mismo matiz que su fondo, salvo los rayos (dos pasos del mismo matiz por definición). Con fondo <code>surface-alt</code> (principal 50), la forma va en apoyo o acento.</div>
+      <div class="regla"><b>3. La forma nunca compite con el texto.</b>Solo puede quedar detrás de un título display o de una foto; nunca debajo de un párrafo, un campo o un botón. Se recorta al contenedor con <code>overflow: hidden</code>.</div>
+      <div class="regla"><b>4. Fotos siempre con máscara.</b>Radio ≥ 24 px o una de las cinco máscaras. Sin foto: placeholder del sistema.</div>
+      <div class="regla"><b>5. Texto nunca sobre foto.</b>La legibilidad se resuelve por separación: papel opaco, banda o tarjeta al lado o encima del borde. Nunca velo, degradado ni <code>text-shadow</code> (regla demostrada, <code>10-identidad-visual.md §4</code>).</div>
+      <div class="regla"><b>6. El 500 es decorativo.</b>El paso más saturado solo vive en formas grandes; texto en 600-900, superficies en 50-200.</div>
+      <div class="regla"><b>7. Movimiento.</b>Solo <code>breathe</code> (escala 1 → 1.04 en 12 s, alterna) y solo en formas de fondo. <code>prefers-reduced-motion</code> lo apaga. Nada parpadea, nada gira rápido.</div>
+      <div class="regla"><b>8. Sombra de color, una por vista.</b>Y nunca mezclada con sombra difusa en el mismo elemento.</div>
+    </div>
+
+    <div class="composicion">
+      <figure>
+        <div class="caja">
+          <svg class="fondo" viewBox="0 0 400 300" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><rect width="400" height="300" fill="var(--ui-surface-alt)"/><path d="M300 20 L392 190 L200 190 Z" fill="var(--ui-accent)" transform="rotate(8 300 110)"/><defs><linearGradient id="fotoc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--ui-primary-soft)"/><stop offset="1" stop-color="var(--ui-support-2-soft)"/></linearGradient></defs><rect x="44" y="34" width="176" height="176" rx="28" fill="url(#fotoc)"/></svg>
+          <div class="papel"><b>Mariana y Rodrigo</b><span>Boda · 18 de abril de 2027 · Querétaro</span></div>
+        </div>
+        <figcaption><b>Así sí.</b> Foto con máscara sobre triángulo de acento; el texto en su propio papel opaco con sombra. Una protagonista (el triángulo), contraste de matiz, texto separado.</figcaption>
+      </figure>
+      <figure>
+        <div class="caja mal">
+          <svg class="fondo" viewBox="0 0 400 300" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><rect width="400" height="300" fill="var(--ui-ink-muted)"/><rect width="400" height="300" fill="url(#fotoc)" opacity="0.5"/><rect y="180" width="400" height="120" fill="var(--ui-ink)" opacity="0.5"/></svg>
+          <div class="texto-sobre-foto">Mariana y Rodrigo</div>
+        </div>
+        <figcaption><b>Así nunca.</b> Texto sobre la foto con un velo: el contraste depende de la fotografía que suba la clienta y no se puede garantizar (medido en 3-B: haría falta un velo del 99 %).</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
