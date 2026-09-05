@@ -26,7 +26,7 @@
 //
 // CERO `style={{…}}`: la CSP del lienzo no habilita atributos `style` (medido, `3-0b.md §1`). Todo
 // el CSS del documento vive en el único `<style nonce>` de `(canvas)/layout.tsx`.
-import { CanvasProvider, SectionsRoot, refKey, type BlockRef as SectionsBlockRef } from "@invitaciones/sections";
+import { CanvasProvider, SectionsRoot, type BlockRef as SectionsBlockRef } from "@invitaciones/sections";
 import type { ComposedDocument } from "@invitaciones/schema";
 import { Component, useCallback, useEffect, useMemo, useRef, useState, type ErrorInfo, type ReactNode } from "react";
 import { createCanvasClient, type CanvasClient, type PatchEntryIn } from "@/lib/canvas-client";
@@ -66,6 +66,19 @@ class LimiteDeError extends Component<
   }
 }
 
+/**
+ * Clave con la que `@invitaciones/sections` busca un bloque en `pending` (`04 §5.2`, §12.4):
+ * `blockId` a nivel de sección y `` `${itemId}.${itemBlockId}` `` dentro de un grupo
+ * (`packages/sections/src/blocks/dispatch.ts:41`, `itemPendingKey`, que el paquete no reexporta).
+ *
+ * NO es `refKey()`: esa es la clave de SELECCIÓN (`sectionKey::blockId::itemId::itemBlockId`) y
+ * pertenece a otro espacio de nombres. Usarla aquí hacía que `aria-busy` no apareciera NUNCA en el
+ * lienzo — medido en el bloque 3-5b montando el componente y contando los nodos ocupados: 0.
+ */
+function clavePendiente(ref: { blockId: string; itemId?: string; itemBlockId?: string }): string {
+  return ref.itemId !== undefined && ref.itemBlockId !== undefined ? `${ref.itemId}.${ref.itemBlockId}` : ref.blockId;
+}
+
 export interface LienzoClienteProps {
   /** Nonce por peticion de la CSP (`proxy.ts`). Obligatorio: sin el, el tema no se aplica. */
   readonly nonce: string;
@@ -79,6 +92,8 @@ export function LienzoCliente({ nonce }: LienzoClienteProps) {
   const [temaPrevio, setTemaPrevio] = useState<{ paletteId: string | null; fontSetId: string | null } | null>(null);
   const clienteRef = useRef<CanvasClient | null>(null);
   const raizRef = useRef<HTMLDivElement>(null);
+  /** Última revisión pintada. Distingue un `RENDER` nuevo del servidor de un repintado del padre. */
+  const revisionPintadaRef = useRef<number | null>(null);
 
   // ── Puente ────────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -86,7 +101,16 @@ export function LienzoCliente({ nonce }: LienzoClienteProps) {
       {
         onRender: (composed, revision) => {
           setEstado({ tipo: "pintando", composed, revision });
-          setPendientes(new Set());
+          // Un `RENDER` con la MISMA revisión no trae verdad nueva del servidor: es el documento que
+          // el padre ya tenía, repintado. Hoy lo usa la vista previa de tema (`04 §7.1` paso 8), que
+          // no puede perder las marcas `aria-busy` de los bloques con valor sin confirmar (§12.4)
+          // solo porque el cliente pasó el ratón por una paleta. Con revisión nueva sí se limpian:
+          // el servidor ya confirmó lo que hubiera pendiente.
+          // El valor se lee ANTES de actualizarlo: el actualizador de `setPendientes` corre después
+          // (en el render), y leer la ref dentro de él daría siempre la revisión nueva.
+          const revisionPrevia = revisionPintadaRef.current;
+          revisionPintadaRef.current = revision;
+          setPendientes((previas) => (revisionPrevia === revision ? previas : new Set()));
         },
         onPatch: (entries: PatchEntryIn[]) => {
           setEstado((previo) => {
@@ -96,7 +120,7 @@ export function LienzoCliente({ nonce }: LienzoClienteProps) {
           setPendientes((previas) => {
             const siguiente = new Set(previas);
             for (const e of entries) {
-              const clave = refKey(e.ref as SectionsBlockRef);
+              const clave = clavePendiente(e.ref);
               if (e.pending) siguiente.add(clave);
               else siguiente.delete(clave);
             }
@@ -109,6 +133,13 @@ export function LienzoCliente({ nonce }: LienzoClienteProps) {
           destino?.scrollIntoView({ behavior: "smooth", block: "start" });
         },
         onViewport: (width) => setViewport(width),
+        // PREVIEW_THEME solo transporta IDENTIFICADORES (`04 §9.3`, protocolo v1 congelado). El
+        // lienzo NO puede resolverlos a `tokens` por sí mismo: no tiene el `theme.json` de la
+        // plantilla, no puede pedirlo (`connect-src 'none'`, sin credenciales, `lib/api-client.ts`
+        // prohibido aquí) y `ThemeProvider` pinta los `--inv-color-*` desde `theme.tokens`, nunca
+        // desde el id. Los tokens ya resueltos llegan por el `RENDER` efímero que envía el padre
+        // (`lib/store.ts` → `resolverTemaPrevio`, bloque 3-5b). Esto se queda para que el atributo
+        // `data-theme-palette` sea correcto también cuando el padre NO tiene catálogo que resolver.
         onPreviewTheme: (paletteId, fontSetId) => setTemaPrevio(paletteId === null && fontSetId === null ? null : { paletteId, fontSetId }),
         onIncompatible: (version) => setEstado({ tipo: "incompatible", version }),
         onConnected: () => setEstado((p) => (p.tipo === "esperando" ? { tipo: "conectado" } : p)),
@@ -126,8 +157,9 @@ export function LienzoCliente({ nonce }: LienzoClienteProps) {
   const compuestoEfectivo = useMemo<ComposedDocument | null>(() => {
     if (estado.tipo !== "pintando") return null;
     if (temaPrevio === null) return estado.composed;
-    // PREVIEW_THEME es EFÍMERO: cambia solo los identificadores, no genera operación ni undo. Los
-    // tokens reales llegan con el `RENDER` que sigue al `setTheme` confirmado (04 §9.3).
+    // PREVIEW_THEME es EFÍMERO: no genera operación ni undo (04 §9.3). Los `tokens` de la paleta
+    // previsualizada ya vienen dentro de `estado.composed.theme` (el `RENDER` efímero del padre);
+    // aquí solo se sellan los identificadores, que es lo único que este mensaje transporta.
     return {
       ...estado.composed,
       theme: {
