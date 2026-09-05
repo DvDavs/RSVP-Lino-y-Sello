@@ -21,6 +21,23 @@
 @import "@fontsource-variable/bricolage-grotesque/wght.css";
 @import "@fontsource-variable/outfit/wght.css";
 
+/* FASE 3-C, BLOQUE 1 — sistema de diseño del producto (`diseno/11-sistema-de-diseno.md`).
+   `tokens.css` trae las variables `--ui-*` de la paleta Bugambilia (claro y oscuro por
+   `data-theme`) y `tailwind.css` el preset semántico (`bg-ui-primary`, `text-ui-on-primary`,
+   `ring-ui-focus`, `font-ui-display`, `text-ui-display-xl`…).
+
+   CONVIVEN A PROPÓSITO con el bloque `@theme` provisional de la fase 3 que sigue más abajo: quien
+   migra el chrome entero y borra ese bloque antiguo es el BLOQUE 3 de esta fase, no este. Como los `@import` van antes, cualquier
+   nombre repetido (`--color-ui-surface`, `--color-ui-focus`, `--radius-ui-card`, `--shadow-ui-1`,
+   `--font-ui-display`…) lo sigue ganando el valor ANTIGUO, así que ni un píxel del chrome actual
+   cambia (verificado compilando Tailwind: `.bg-ui-surface` sigue apuntando a `--color-ui-surface`).
+   Los nombres nuevos (`--color-ui-primary`, `--color-ui-on-primary`, `--text-ui-display-xl`…) se
+   inlinean como `var(--ui-*)` y por eso responden a `data-theme` sin recompilar.
+   Los tokens crudos tampoco chocan: el contenedor nuevo es `--ui-container-max` (1200 px), no
+   `--ui-content-max` (1330 px), que es del chrome viejo y lo usan tres pantallas. */
+@import "@invitaciones/tokens/tokens.css";
+@import "@invitaciones/tokens/tailwind.css";
+
 /* Sistema de diseño nuevo (fase 3-C, bloque 1, 3C-2): Fraunces + Onest + Red Hat Mono autoalojadas,
    tokens `--ui-*` y utilidades `display-*`/`heading-*`/`text-*`/`label-*`/`.prose`
    (`@invitaciones/ui/estilos.css` → `fonts/fonts.css` + `styles/typography.css`,

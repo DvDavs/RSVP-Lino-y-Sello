@@ -1,0 +1,83 @@
+/* app/(chrome)/design/galeria.module.css — la galería viva del sistema de diseño.
+ *
+ * PUENTE TEMPORAL (lo borra el bloque 3 junto con el `@theme` antiguo de `globals.css`): mientras
+ * el chrome de la fase 3 siga vivo, los nombres de token que existen en los DOS sistemas
+ * (`--color-ui-surface`, `--color-ui-ink`, `--radius-ui-card`, `--shadow-ui-1`…) los gana el valor
+ * antiguo, porque su `@theme` se declara después. Eso es lo que queremos fuera de aquí — el chrome
+ * actual no se mueve —, pero DENTRO de la galería esos mismos nombres tienen que enseñar el sistema
+ * nuevo y seguir a `data-theme`. Se remapean aquí, en un solo sitio, y solo para este subárbol.
+ *
+ * Los nombres que NO existen en el chrome antiguo (`--color-ui-primary`, `--text-ui-display-xl`,
+ * `--ease-ui-spring`…) no necesitan puente: el preset los inlinea ya como `var(--ui-*)`. */
+.raiz {
+  --color-ui-surface: var(--ui-surface);
+  --color-ui-ink: var(--ui-ink);
+  --color-ui-ink-muted: var(--ui-ink-muted);
+  --color-ui-ink-placeholder: var(--ui-ink-placeholder);
+  --color-ui-border: var(--ui-border);
+  --color-ui-focus: var(--ui-focus);
+  --color-ui-accent: var(--ui-accent);
+  --color-ui-success: var(--ui-success);
+  --color-ui-danger: var(--ui-danger);
+  --color-ui-warning: var(--ui-warning);
+  --color-ui-info: var(--ui-info);
+  --radius-ui-control: var(--ui-radius-control);
+  --radius-ui-card: var(--ui-radius-card);
+  --radius-ui-media: var(--ui-radius-media);
+  --radius-ui-pill: var(--ui-radius-pill);
+  --shadow-ui-1: var(--ui-shadow-1);
+  --shadow-ui-2: var(--ui-shadow-2);
+  --font-ui-display: var(--ui-font-display);
+  --font-ui-sans: var(--ui-font-text);
+
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-family: var(--ui-font-text);
+  font-weight: var(--ui-weight-texto);
+}
+
+/* Foco del sistema (11 §1.4): el anillo NUNCA toca el control, lleva un halo de 2 px de `surface`
+ * en medio. Se declara aquí porque el `:focus-visible` global sigue siendo el del chrome viejo. */
+.raiz :focus-visible {
+  outline: 3px solid var(--ui-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Los ítems de rejilla no se estrechan solos (`min-width: auto`): una tabla de 42 filas o una escala
+ * de once pasos empujaría la página entera a 390 px. En la galería, lo ancho scrollea DENTRO de su
+ * contenedor y la página nunca scrollea en horizontal. `:where()` no suma especificidad, así que
+ * cualquier utilidad `min-w-*` puntual sigue ganando. */
+.raiz :where(*) {
+  min-width: 0;
+}
+
+/* Cuadrícula de una escala: 10 pasos (11 en los neutros) que no se estrechan por debajo de lo
+ * legible; en móvil se desplaza en horizontal en vez de aplastarse. */
+.pasos {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(64px, 1fr);
+  gap: 3px;
+}
+
+.paso {
+  aspect-ratio: 1 / 1.5;
+  border-radius: var(--ui-radius-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 6px 6px 8px;
+  overflow: hidden;
+}
+
+.muestraRol {
+  height: 44px;
+  border-radius: var(--ui-radius-sm);
+  box-shadow: inset 0 0 0 1px var(--ui-divider);
+}
+
+.cuadroForma {
+  height: 72px;
+  background: var(--ui-primary-soft);
+}

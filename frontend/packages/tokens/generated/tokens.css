@@ -1,23 +1,390 @@
-/* packages/tokens/generated/tokens.css — PLACEHOLDER DE PUENTE escrito por 3C-2 (tipografía),
-   NO por el dueño de este paquete (3C-1). `packages/ui/src/estilos.css` importa
-   `@invitaciones/tokens/tokens.css` por instrucción del orquestador (fase 3-C, ajuste 2 del bloque
-   1); en el worktree de 3C-2 este fichero generado todavía no existe porque `packages/tokens`
-   corre en un worktree paralelo (`wt/3c-1`) que aún no se ha fusionado, y sin un fichero real en
-   esta ruta el `@import` de `estilos.css` no resuelve y rompe `next build` de `apps/web`
-   (`pnpm run build` desde `frontend/`, compuerta obligatoria de este bloque).
+/* GENERADO por `pnpm run emit:css` (scripts/emit-css.ts) desde src/*.ts — NO EDITAR A MANO.
 
-   Contenido MÍNIMO a propósito: solo las tres variables de familia tipográfica que ya fija
-   `docs/rediseno-plantillas/evidencia/fase-3c/moodboard/styles.css` (la referencia que cita
-   `11 §2.2`), porque son las únicas que `typography.css` necesita para verse bien sin depender de
-   la reserva `var(--ui-…, valor)`. Nada de color, espacio, radios ni sombra: eso es entero de 3C-1
-   y no se inventa aquí.
+   Paleta activa: a · Bugambilia — Rosa mexicano, tinta de cacao, jade y mango. Fiesta y elegancia a la manera de Barragán.
+   Tema: `data-theme="light|dark"` en <html> (claro por defecto). El tema oscuro es un MAPA de
+   roles, no una excepción: ningún componente sabe en qué tema está (11 §1.5).
+   Contrastes verificados por `pnpm run verify-contrast` (rompe el build si una pareja baja). */
 
-   AL INTEGRAR: `packages/tokens/scripts/build-css.mjs` (3C-1) escribe en esta MISMA ruta y debe
-   sustituir este fichero sin más — no hay nada aquí que conservar. Si el merge lo marca en
-   conflicto, gana siempre la versión generada por ese script. Registrado también en
-   `memoria/preguntas-abiertas.md` § Fase 3-C · 3c-2 y en `memoria/bitacora/3c-2.md`. */
 :root {
-  --ui-font-display: "Fraunces", Georgia, serif;
-  --ui-font-text: "Onest", system-ui, sans-serif;
-  --ui-font-label: "Red Hat Mono", ui-monospace, monospace;
+  color-scheme: light;
+
+  /* Escalas de la paleta activa (a · Bugambilia). Existen como VARIABLE para las formas y la
+     galería; nunca como utilidad de Tailwind: ningún componente elige un paso a mano (11 §8.2). */
+  --ui-primary-50: #fff3f8;
+  --ui-primary-100: #ffe5ef;
+  --ui-primary-200: #ffcce1;
+  --ui-primary-300: #ffa4cc;
+  --ui-primary-400: #ff62b2;
+  --ui-primary-500: #e52995;
+  --ui-primary-600: #bb0076;
+  --ui-primary-700: #95005d;
+  --ui-primary-800: #710045;
+  --ui-primary-900: #530031;
+  --ui-support1-50: #f3f7ff;
+  --ui-support1-100: #e4edff;
+  --ui-support1-200: #ccddff;
+  --ui-support1-300: #a7c4ff;
+  --ui-support1-400: #76a2ff;
+  --ui-support1-500: #457cfd;
+  --ui-support1-600: #2a5cda;
+  --ui-support1-700: #1b46b4;
+  --ui-support1-800: #11338a;
+  --ui-support1-900: #0a2466;
+  --ui-support2-50: #eafcf4;
+  --ui-support2-100: #d3f6e7;
+  --ui-support2-200: #acedd3;
+  --ui-support2-300: #77dbb7;
+  --ui-support2-400: #2dbf94;
+  --ui-support2-500: #009e77;
+  --ui-support2-600: #007c5d;
+  --ui-support2-700: #006249;
+  --ui-support2-800: #004936;
+  --ui-support2-900: #003426;
+  --ui-accent-50: #fff5e7;
+  --ui-accent-100: #ffeaca;
+  --ui-accent-200: #fed698;
+  --ui-accent-300: #f2b95a;
+  --ui-accent-400: #d79700;
+  --ui-accent-500: #b07b00;
+  --ui-accent-600: #8b6000;
+  --ui-accent-700: #6e4b00;
+  --ui-accent-800: #523700;
+  --ui-accent-900: #3c2700;
+  --ui-success-50: #edfcee;
+  --ui-success-100: #d8f6db;
+  --ui-success-200: #b7edbd;
+  --ui-success-300: #8bda97;
+  --ui-success-400: #57be6b;
+  --ui-success-500: #1ca045;
+  --ui-success-600: #007f30;
+  --ui-success-700: #006425;
+  --ui-success-800: #004b19;
+  --ui-success-900: #003610;
+  --ui-danger-50: #fff4f2;
+  --ui-danger-100: #ffe6e3;
+  --ui-danger-200: #ffcfc9;
+  --ui-danger-300: #ffaba1;
+  --ui-danger-400: #ff7266;
+  --ui-danger-500: #ea3d38;
+  --ui-danger-600: #c50516;
+  --ui-danger-700: #9e000e;
+  --ui-danger-800: #780008;
+  --ui-danger-900: #580004;
+  --ui-warning-50: #fff5ed;
+  --ui-warning-100: #ffe8d7;
+  --ui-warning-200: #ffd2b2;
+  --ui-warning-300: #ffb072;
+  --ui-warning-400: #ee8722;
+  --ui-warning-500: #c66b00;
+  --ui-warning-600: #9c5300;
+  --ui-warning-700: #7c4100;
+  --ui-warning-800: #5e2f00;
+  --ui-warning-900: #442100;
+  --ui-info-50: #eef8ff;
+  --ui-info-100: #daf1ff;
+  --ui-info-200: #b7e3ff;
+  --ui-info-300: #7ecfff;
+  --ui-info-400: #2ab1f2;
+  --ui-info-500: #0091cb;
+  --ui-info-600: #0071a0;
+  --ui-info-700: #00597f;
+  --ui-info-800: #004260;
+  --ui-info-900: #002f46;
+  --ui-neutral-50: #fdf9f6;
+  --ui-neutral-100: #f7f1ec;
+  --ui-neutral-200: #ece5de;
+  --ui-neutral-300: #d8cfc8;
+  --ui-neutral-400: #b3a9a1;
+  --ui-neutral-500: #988d84;
+  --ui-neutral-600: #6c6158;
+  --ui-neutral-700: #554b42;
+  --ui-neutral-800: #3d332b;
+  --ui-neutral-900: #292018;
+  --ui-neutral-950: #150e07;
+
+  /* Tipografía: tres voces y escala modular (11 §2.2). Las fuentes las instala packages/ui. */
+  --ui-font-display: "Fraunces Variable", "Fraunces", Georgia, "Times New Roman", serif;
+  --ui-font-text: "Onest Variable", "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ui-font-label: "Red Hat Mono Variable", "Red Hat Mono", ui-monospace, "SFMono-Regular", monospace;
+  --ui-weight-texto: 450;
+  --ui-weight-texto-fuerte: 650;
+  --ui-weight-etiqueta: 500;
+  --ui-weight-titulo: 700;
+  --ui-weight-titulo-fuerte: 800;
+  --ui-text-display-2xl: clamp(40px, 25.237px + 3.785vw, 64px);
+  --ui-leading-display-2xl: 1.05;
+  --ui-tracking-display-2xl: -0.035em;
+  --ui-weight-display-2xl: 800;
+  --ui-variacion-display-2xl: "opsz" 96, "SOFT" 70, "WONK" 1;
+  --ui-text-display-xl: clamp(32px, 22.158px + 2.524vw, 48px);
+  --ui-leading-display-xl: 1.05;
+  --ui-tracking-display-xl: -0.03em;
+  --ui-weight-display-xl: 800;
+  --ui-variacion-display-xl: "opsz" 72, "SOFT" 60, "WONK" 1;
+  --ui-text-display-lg: clamp(28px, 23.079px + 1.262vw, 36px);
+  --ui-leading-display-lg: 1.1;
+  --ui-tracking-display-lg: -0.025em;
+  --ui-weight-display-lg: 700;
+  --ui-variacion-display-lg: "opsz" 48, "SOFT" 50;
+  --ui-text-display-md: clamp(24px, 21.539px + 0.631vw, 28px);
+  --ui-leading-display-md: 1.15;
+  --ui-tracking-display-md: -0.02em;
+  --ui-weight-display-md: 700;
+  --ui-variacion-display-md: "opsz" 32, "SOFT" 40;
+  --ui-text-display-sm: clamp(20px, 18.77px + 0.315vw, 22px);
+  --ui-leading-display-sm: 1.2;
+  --ui-tracking-display-sm: -0.02em;
+  --ui-weight-display-sm: 700;
+  --ui-variacion-display-sm: "opsz" 20, "SOFT" 30;
+  --ui-text-heading-lg: clamp(24px, 21.539px + 0.631vw, 28px);
+  --ui-leading-heading-lg: 1.15;
+  --ui-tracking-heading-lg: -0.02em;
+  --ui-weight-heading-lg: 700;
+  --ui-variacion-heading-lg: "opsz" 32, "SOFT" 40;
+  --ui-text-heading-md: clamp(20px, 18.77px + 0.315vw, 22px);
+  --ui-leading-heading-md: 1.2;
+  --ui-tracking-heading-md: -0.02em;
+  --ui-weight-heading-md: 700;
+  --ui-variacion-heading-md: "opsz" 20, "SOFT" 30;
+  --ui-text-heading-sm: clamp(17px, 16.385px + 0.158vw, 18px);
+  --ui-leading-heading-sm: 1.3;
+  --ui-tracking-heading-sm: -0.01em;
+  --ui-weight-heading-sm: 700;
+  --ui-variacion-heading-sm: "opsz" 14, "SOFT" 20;
+  --ui-text-text-lg: 18px;
+  --ui-leading-text-lg: 1.5;
+  --ui-tracking-text-lg: 0;
+  --ui-weight-text-lg: 450;
+  --ui-text-text-md: 16px;
+  --ui-leading-text-md: 1.5;
+  --ui-tracking-text-md: 0;
+  --ui-weight-text-md: 450;
+  --ui-text-text-sm: 14px;
+  --ui-leading-text-sm: 1.5;
+  --ui-tracking-text-sm: 0;
+  --ui-weight-text-sm: 450;
+  --ui-text-text-xs: 13px;
+  --ui-leading-text-xs: 1.45;
+  --ui-tracking-text-xs: 0;
+  --ui-weight-text-xs: 450;
+  --ui-text-label-lg: 14px;
+  --ui-leading-label-lg: 1.3;
+  --ui-tracking-label-lg: 0.06em;
+  --ui-weight-label-lg: 500;
+  --ui-text-label-md: 12px;
+  --ui-leading-label-md: 1.3;
+  --ui-tracking-label-md: 0.12em;
+  --ui-weight-label-md: 500;
+  --ui-text-label-sm: 11px;
+  --ui-leading-label-sm: 1.3;
+  --ui-tracking-label-sm: 0.14em;
+  --ui-weight-label-sm: 500;
+
+  /* Espacio (base 4), radios, sombras, contenedor, capas y puntos de corte (11 §8.1). */
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-5: 24px;
+  --ui-space-6: 32px;
+  --ui-space-7: 48px;
+  --ui-space-8: 64px;
+  --ui-space-9: 96px;
+  --ui-radius-sm: 8px;
+  --ui-radius-md: 14px;
+  --ui-radius-lg: 24px;
+  --ui-radius-xl: 36px;
+  --ui-radius-pill: 999px;
+  --ui-radius-control: 8px;
+  --ui-radius-card: 14px;
+  --ui-radius-media: 24px;
+  --ui-radius-hero: 36px;
+  --ui-radius-pill: 999px;
+  --ui-shadow-1: 0 1px 2px rgb(41 32 24 / 0.06), 0 4px 12px -4px rgb(41 32 24 / 0.10);
+  --ui-shadow-2: 0 2px 6px rgb(41 32 24 / 0.06), 0 16px 32px -12px rgb(41 32 24 / 0.16);
+  --ui-shadow-color: 8px 8px 0 0 var(--ui-support-2);
+  --ui-container-max: 1200px;
+  --ui-container-gutter: clamp(16px, 4vw, 48px);
+  --ui-z-base: 0;
+  --ui-z-elevado: 10;
+  --ui-z-pegajoso: 20;
+  --ui-z-hoja: 30;
+  --ui-z-dialogo: 40;
+  --ui-z-toast: 50;
+  --ui-bp-sm: 480px;
+  --ui-bp-md: 768px;
+  --ui-bp-lg: 1024px;
+  --ui-bp-xl: 1280px;
+
+  /* Movimiento (11 §6.1). Toda animación se emite bajo prefers-reduced-motion: no-preference. */
+  --ui-dur-1: 120ms;
+  --ui-dur-2: 200ms;
+  --ui-dur-3: 320ms;
+  --ui-dur-4: 600ms;
+  --ui-dur-respira: 12000ms;
+  --ui-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ui-ease-in-out: cubic-bezier(0.6, 0, 0.2, 1);
+  --ui-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ui-ease-linear: linear;
+
+  /* Roles semánticos — tema claro (11 §1.3). */
+  --ui-surface: #fdf9f6;
+  --ui-surface-raised: #ffffff;
+  --ui-surface-alt: #fff3f8;
+  --ui-ink: #292018;
+  --ui-ink-muted: #554b42;
+  --ui-ink-placeholder: #6c6158;
+  --ui-border: #988d84;
+  --ui-divider: #ece5de;
+  --ui-primary: #bb0076;
+  --ui-on-primary: #ffffff;
+  --ui-primary-hover: #95005d;
+  --ui-primary-soft: #ffe5ef;
+  --ui-on-primary-soft: #710045;
+  --ui-primary-bright: #e52995;
+  --ui-link: #95005d;
+  --ui-accent: #d79700;
+  --ui-on-accent: #150e07;
+  --ui-accent-soft: #ffeaca;
+  --ui-on-accent-soft: #523700;
+  --ui-success: #007f30;
+  --ui-on-success: #ffffff;
+  --ui-success-text: #006425;
+  --ui-success-soft: #d8f6db;
+  --ui-on-success-soft: #004b19;
+  --ui-danger: #c50516;
+  --ui-on-danger: #ffffff;
+  --ui-danger-text: #c50516;
+  --ui-danger-soft: #ffe6e3;
+  --ui-on-danger-soft: #780008;
+  --ui-warning: #ee8722;
+  --ui-on-warning: #150e07;
+  --ui-warning-text: #7c4100;
+  --ui-warning-soft: #ffe8d7;
+  --ui-on-warning-soft: #5e2f00;
+  --ui-info: #0071a0;
+  --ui-on-info: #ffffff;
+  --ui-info-text: #00597f;
+  --ui-info-soft: #daf1ff;
+  --ui-on-info-soft: #004260;
+  --ui-focus: #457cfd;
+  --ui-support-1: #457cfd;
+  --ui-support-1-soft: #e4edff;
+  --ui-support-1-deep: #11338a;
+  --ui-support-2: #009e77;
+  --ui-support-2-soft: #d3f6e7;
+  --ui-support-2-deep: #004936;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --ui-leading-display-2xl: 1.02;
+    --ui-tracking-display-2xl: -0.04em;
+    --ui-tracking-display-xl: -0.035em;
+    --ui-leading-display-lg: 1.08;
+    --ui-leading-display-md: 1.12;
+  }
+}
+
+/* Los dos temas explícitos permiten anidar (una tarjeta en oscuro dentro de una página clara,
+   que es como la galería /design enseña los dos a la vez). Misma especificidad que `:root`, así
+   que el orden manda: claro, y después oscuro. */
+[data-theme="light"] {
+  color-scheme: light;
+  --ui-surface: #fdf9f6;
+  --ui-surface-raised: #ffffff;
+  --ui-surface-alt: #fff3f8;
+  --ui-ink: #292018;
+  --ui-ink-muted: #554b42;
+  --ui-ink-placeholder: #6c6158;
+  --ui-border: #988d84;
+  --ui-divider: #ece5de;
+  --ui-primary: #bb0076;
+  --ui-on-primary: #ffffff;
+  --ui-primary-hover: #95005d;
+  --ui-primary-soft: #ffe5ef;
+  --ui-on-primary-soft: #710045;
+  --ui-primary-bright: #e52995;
+  --ui-link: #95005d;
+  --ui-accent: #d79700;
+  --ui-on-accent: #150e07;
+  --ui-accent-soft: #ffeaca;
+  --ui-on-accent-soft: #523700;
+  --ui-success: #007f30;
+  --ui-on-success: #ffffff;
+  --ui-success-text: #006425;
+  --ui-success-soft: #d8f6db;
+  --ui-on-success-soft: #004b19;
+  --ui-danger: #c50516;
+  --ui-on-danger: #ffffff;
+  --ui-danger-text: #c50516;
+  --ui-danger-soft: #ffe6e3;
+  --ui-on-danger-soft: #780008;
+  --ui-warning: #ee8722;
+  --ui-on-warning: #150e07;
+  --ui-warning-text: #7c4100;
+  --ui-warning-soft: #ffe8d7;
+  --ui-on-warning-soft: #5e2f00;
+  --ui-info: #0071a0;
+  --ui-on-info: #ffffff;
+  --ui-info-text: #00597f;
+  --ui-info-soft: #daf1ff;
+  --ui-on-info-soft: #004260;
+  --ui-focus: #457cfd;
+  --ui-support-1: #457cfd;
+  --ui-support-1-soft: #e4edff;
+  --ui-support-1-deep: #11338a;
+  --ui-support-2: #009e77;
+  --ui-support-2-soft: #d3f6e7;
+  --ui-support-2-deep: #004936;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --ui-surface: #150e07;
+  --ui-surface-raised: #292018;
+  --ui-surface-alt: #3d332b;
+  --ui-ink: #fdf9f6;
+  --ui-ink-muted: #d8cfc8;
+  --ui-ink-placeholder: #b3a9a1;
+  --ui-border: #988d84;
+  --ui-divider: #3d332b;
+  --ui-primary: #ffa4cc;
+  --ui-on-primary: #150e07;
+  --ui-primary-hover: #ffcce1;
+  --ui-primary-soft: #530031;
+  --ui-on-primary-soft: #ffe5ef;
+  --ui-primary-bright: #e52995;
+  --ui-link: #ffa4cc;
+  --ui-accent: #f2b95a;
+  --ui-on-accent: #150e07;
+  --ui-accent-soft: #3c2700;
+  --ui-on-accent-soft: #ffeaca;
+  --ui-success: #8bda97;
+  --ui-on-success: #150e07;
+  --ui-success-text: #8bda97;
+  --ui-success-soft: #003610;
+  --ui-on-success-soft: #d8f6db;
+  --ui-danger: #ffaba1;
+  --ui-on-danger: #150e07;
+  --ui-danger-text: #ffaba1;
+  --ui-danger-soft: #580004;
+  --ui-on-danger-soft: #ffe6e3;
+  --ui-warning: #ffb072;
+  --ui-on-warning: #150e07;
+  --ui-warning-text: #ffb072;
+  --ui-warning-soft: #442100;
+  --ui-on-warning-soft: #ffe8d7;
+  --ui-info: #7ecfff;
+  --ui-on-info: #150e07;
+  --ui-info-text: #7ecfff;
+  --ui-info-soft: #002f46;
+  --ui-on-info-soft: #daf1ff;
+  --ui-focus: #a7c4ff;
+  --ui-support-1: #76a2ff;
+  --ui-support-1-soft: #0a2466;
+  --ui-support-1-deep: #ccddff;
+  --ui-support-2: #2dbf94;
+  --ui-support-2-soft: #003426;
+  --ui-support-2-deep: #acedd3;
 }

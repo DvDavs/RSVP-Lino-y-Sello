@@ -1036,3 +1036,30 @@ Supuestos que tomé para no bloquear. Ninguno cambia el catálogo ni la API acor
 - **Dónde vive el valor por defecto de `--tono`.** `ADR-3C-0-04` fija que el relleno es `fill="var(--tono)"` con `--tono` por defecto `var(--ui-primary-soft)`, pero no dice si ese valor por defecto lo pone una hoja de estilos global (como hace el moodboard, con una regla CSS fuera de mi alcance) o el propio componente. **Supuesto tomado:** el componente generado lo fija por `style` inline según la prop `tone`, registrado como `ADR-3C-3-01` (propuesta) en `decisiones.md`; si la mitad A resuelve el segundo tono de otra forma (p. ej. una clase CSS en `packages/ui/estilos.css`), habrá que unificar un solo mecanismo al fusionar `src/index.ts` y decidir cuál de las dos ADR queda vigente.
 - **Transformador de SVG a componente sin `@svgr/core`.** El brief permite «un transformador propio si svgr da problemas… documenta cuál y por qué». No llegué a intentar `@svgr/core`: con 41 SVG de un puñado de elementos y atributos conocidos, una tabla de conversión kebab→camel de 4 atributos (`stroke-width/linecap/linejoin/dasharray`) cubre el 100 % de los casos sin fijar una versión de dependencia nueva. **Supuesto tomado:** válido para este inventario; si el bloque 2 (o una fase futura) añade SVG con `<defs>`, `clip-path`, gradientes o `xlink:href`, esa tabla se queda corta y ese es el momento de evaluar `svgr` de verdad — no antes, para no añadir una dependencia sin necesidad medida.
 - **Página `/design/iconos` mínima queda en el worktree aunque la sobrescriba A.** No until el merge, esta página SÍ es lo que se ve en `/design/iconos` de este worktree (usada para la captura de evidencia). ¿Confirma el orquestador que efectivamente se descarta en el merge en favor de la de A (ajuste #2), y no hace falta que yo la borre antes de entregar?
+## Fase 3-C · 3c-1 — tokens y galería (5)
+
+Supuestos que tomé para no bloquear el bloque. Evidencia para decidir: `/design/tokens` en el propio
+producto (conmutador claro/oscuro) y `evidencia/fase-3c/bloque-1/*.png`.
+
+- [Fase 3-C · 3c-1] **Bandera `DESIGN_GALLERY`.** `11 §8.1` pide que la galería quede fuera de
+  producción tras una bandera; el orquestador la aplazó. **Supuesto:** `/design` se construye siempre
+  (dos rutas estáticas, no toca ninguna otra) y solo lleva `robots: noindex` en sus metadatos. ¿Se
+  quiere además una variable de entorno que la haga devolver 404 en producción, o basta con `noindex`
+  y que sea documentación viva accesible para el equipo?
+- [Fase 3-C · 3c-1] **Puntos de corte de marca.** `11` no los fija. **Supuesto (ADR-3C-1-03):**
+  `sm 480 · md 768 · lg 1024 · xl 1280` como DATO (`--ui-bp-*`), sin publicarlos como variantes de
+  Tailwind para no tener dos escalas (`md:` y `ui-md:`) en el mismo código; `lg` = 1024 es además la
+  anchura de referencia de la escala tipográfica. ¿De acuerdo, o se quiere una escala propia
+  sustituyendo a la de Tailwind cuando el bloque 3 migre el chrome?
+- [Fase 3-C · 3c-1] **Capas (z-index).** Tampoco estaban escritas. **Supuesto:** `base 0 · elevado 10 ·
+  pegajoso 20 · hoja 30 · dialogo 40 · toast 50`, con el aviso por encima del diálogo. ¿Hay algún caso
+  del producto (el lienzo del editor, un panel flotante) que necesite otra capa?
+- [Fase 3-C · 3c-1] **Radio de tarjeta.** `11 §5` dice «14-24» sin elegir. **Supuesto (ADR-3C-1-03):**
+  `card` = 14 y `media`/bloques grandes = 24, para que una rejilla de tarjetas no se vea blanda. Se
+  juzga en `/design/tokens`, sección «Espacio y forma».
+- [Fase 3-C · 3c-1] **Sombra de color: 6 px o 8 px.** `moodboard/styles.css` usa `6px 6px`, mientras
+  `11 §3.1` y `handoffs/3c-0.md §4` dicen `8px 8px`. **Supuesto:** 8 px (las dos fuentes normativas).
+  Si el dueño prefiere el boceto, es un número en `espacio.ts` y regenerar.
+
+Sin resolver, heredado y NO tocado por este bloque: el emoji de `lib/i18n.ts` (`publicar.yaSeVe`) y
+`lucide-react` en el chrome siguen ahí; `handoffs/3c-0.md` los asigna al agente de iconos.
