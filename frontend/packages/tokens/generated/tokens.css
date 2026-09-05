@@ -1,0 +1,23 @@
+/* packages/tokens/generated/tokens.css — PLACEHOLDER DE PUENTE escrito por 3C-2 (tipografía),
+   NO por el dueño de este paquete (3C-1). `packages/ui/src/estilos.css` importa
+   `@invitaciones/tokens/tokens.css` por instrucción del orquestador (fase 3-C, ajuste 2 del bloque
+   1); en el worktree de 3C-2 este fichero generado todavía no existe porque `packages/tokens`
+   corre en un worktree paralelo (`wt/3c-1`) que aún no se ha fusionado, y sin un fichero real en
+   esta ruta el `@import` de `estilos.css` no resuelve y rompe `next build` de `apps/web`
+   (`pnpm run build` desde `frontend/`, compuerta obligatoria de este bloque).
+
+   Contenido MÍNIMO a propósito: solo las tres variables de familia tipográfica que ya fija
+   `docs/rediseno-plantillas/evidencia/fase-3c/moodboard/styles.css` (la referencia que cita
+   `11 §2.2`), porque son las únicas que `typography.css` necesita para verse bien sin depender de
+   la reserva `var(--ui-…, valor)`. Nada de color, espacio, radios ni sombra: eso es entero de 3C-1
+   y no se inventa aquí.
+
+   AL INTEGRAR: `packages/tokens/scripts/build-css.mjs` (3C-1) escribe en esta MISMA ruta y debe
+   sustituir este fichero sin más — no hay nada aquí que conservar. Si el merge lo marca en
+   conflicto, gana siempre la versión generada por ese script. Registrado también en
+   `memoria/preguntas-abiertas.md` § Fase 3-C · 3c-2 y en `memoria/bitacora/3c-2.md`. */
+:root {
+  --ui-font-display: "Fraunces", Georgia, serif;
+  --ui-font-text: "Onest", system-ui, sans-serif;
+  --ui-font-label: "Red Hat Mono", ui-monospace, monospace;
+}

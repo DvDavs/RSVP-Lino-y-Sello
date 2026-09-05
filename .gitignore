@@ -83,3 +83,6 @@ frontend/apps/web/e2e/.auth-cache.json
 # son artefactos contractuales (ADR-1R-D-08/D-09), no build output descartable.
 ### worktrees de sub-agentes (efímeros, no versionar) ###
 .claude/worktrees/
+
+# Fase 3-C (3C-2): los .woff2 de apps/web/public/fonts los copia packages/ui en su build (scripts/copiar-fuentes-publicas.ts)
+frontend/apps/web/public/fonts/

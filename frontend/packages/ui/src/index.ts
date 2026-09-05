@@ -1,2 +1,6 @@
 // @invitaciones/ui — esqueleto creado por el orquestador de la fase 3-C. Lo llena el bloque 1.
 export const PAQUETE = "@invitaciones/ui" as const;
+
+// Fuentes autoalojadas (3C-2, `11 §2.1-2.4`): manifiesto y rutas de precarga de la display. El CSS
+// (`@font-face`, utilidades tipográficas) se consume aparte, vía `@invitaciones/ui/estilos.css`.
+export * from "./fonts/preload.ts";

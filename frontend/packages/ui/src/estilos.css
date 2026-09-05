@@ -1,2 +1,12 @@
 /* @invitaciones/ui/estilos.css — hoja raíz del sistema de diseño del producto (fase 3-C).
-   La llena el bloque 1: tokens, @font-face de las tres voces y utilidades tipográficas. */
+   Orden importa: tokens (`--ui-*`) primero, luego `@font-face` (las tres voces autoalojadas) y por
+   último las utilidades tipográficas que consumen ambos.
+
+   `@invitaciones/tokens/tokens.css` lo emite 3C-1 en paralelo (`packages/tokens/scripts/
+   build-css.mjs` → `generated/tokens.css`, mapeado por el `exports` del paquete). Si ese fichero no
+   existe todavía en este worktree, el `@import` de abajo no rompe nada: los `@font-face` y las
+   clases de `typography.css` siguen funcionando por sus valores de reserva
+   (`var(--ui-…, valor)`, ver `styles/typography.css`). */
+@import "@invitaciones/tokens/tokens.css";
+@import "./fonts/fonts.css";
+@import "./styles/typography.css";
