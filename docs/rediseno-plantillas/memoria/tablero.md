@@ -119,7 +119,10 @@ suite completa tras cada merge; commit y push por bloque.
 | -1 N-01 toma de cuenta por `request-password-reset` | 3c-menos1 | Opus | **aceptada** (`85ce3b6`) | saboteó el arreglo (token de vuelta en el DTO): 3/8 en rojo; restaurado, 8/8. Suite Kotlin 1 271 · 0 fallos |
 | -1 N-02 origen y CSP horneados en el build | 3c-menos1 | Opus | **aceptada** (`85ce3b6`) | 49/49 unitarias nuevas re-ejecutadas; A/B sobre el mismo build en `:3050` y `:3000` leída (lienzo pintado y enlace correcto en ambos); e2e 50/50; smoke 19/19 |
 | 0 dirección de arte (paletas, tipografías, formas, iconos, pantallas) | 3c-0 | Fable | **aceptada** | `verificar-paletas.mjs` re-ejecutado (252 filas, 0 fallos); 0 emojis por code point en 34 ficheros; capturas revisadas a ojo y enviadas al dueño; ADR-3C-0-01..06 aceptadas (06 con dos enmiendas). Se cortó una vez por límite de uso y se reanudó |
-| 1 cimientos: 3C-1 tokens · 3C-2 tipografía · 3C-3 iconos · 3C-4 formas | | | pendiente | |
+| 1 · 3C-1 tokens (`packages/tokens`, preset semántico, `verify-contrast`, galería `/design` y `/design/tokens`) | 3c-1 | Opus | **aceptada** (`84b7747`) | `verify-contrast` re-ejecutado en la rama: 252 filas, 0 fallos; suite 10/10 tras el merge |
+| 1 · 3C-2 tipografía autoalojada y utilidades | 3c-2 → rev-2 | Sonnet → Opus | **aceptada** (`146b148`, `cb5f5a9`) | revisor: 6 `@font-face` con swap y `unicode-range`, preload en el `<head>`, 177 188 B, sabotajes en rojo; corrigió `.prose` y el contraste de los especímenes en oscuro; 3C-2b unifica la escala y añade metric override |
+| 1 · 3C-3 iconos (dos mitades) | 3c-3a, 3c-3b → rev-3 | Sonnet ×2 → Opus | **aceptada** (`abe0e7d`, `e75b1f7`, `329684a`) | 82/82 nombres = `11 §4.2`; revisor de coherencia midió tinta y centrado en Chromium y redibujó 14 iconos; 179/179 pruebas |
+| 1 · 3C-4 formas (`packages/ui/shapes`) | 3c-4 | Opus | **aceptada** (`46d40f4`) | 111 pruebas, 100 % líneas; `blob(7)` idéntico al moodboard; galería `/design/formas` |
 | 2 componentes `packages/ui` + galería `/design` + regresión visual | | | pendiente | |
 | 3 producto: 3C-5 web pública/acceso · 3C-6 catálogo/asistente · 3C-7 chrome · 3C-8 e2e/presupuestos | | | pendiente | |
 | Cierre: revisiones, guía, memoria, handoff | | | pendiente | |
