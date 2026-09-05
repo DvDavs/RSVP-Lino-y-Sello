@@ -13,6 +13,7 @@ import { AudioBlock } from "../blocks/AudioBlock.tsx";
 import { LinkBlock } from "../blocks/LinkBlock.tsx";
 import { SECTION_REGISTRY_DATA } from "../registry-data.ts";
 import styles from "../styles/FooterSection.module.css";
+import shared from "../styles/shared.module.css";
 
 const { supportedVariants, defaultVariant } = SECTION_REGISTRY_DATA.footer;
 const KNOWN_VARIANTS = new Set<string>(supportedVariants);
@@ -112,7 +113,20 @@ export function FooterSection({ section, variant, mode, onActivate, pending }: S
           <span className={styles.ornament} aria-hidden="true" />
         )}
 
-        <h2 id={headingId} className={styles.title}>
+        {/* A5 (3-CV `O-05`) — `section.title` del pie es la etiqueta INTERNA del editor
+         * ("Pie", `template.json` `sections[].title.es-MX`) en las DOS plantillas, porque ninguna
+         * declara un bloque `sectionTitle` para esta sección. Pintarla imprime la palabra «PIE»
+         * en la invitación publicada, encima del aviso legal: vocabulario del editor dentro de la
+         * pieza del cliente. Cuando el bloque editable no aporta texto (`titleNode === null`, que
+         * cubre tanto "no existe el bloque" como "existe y su valor es null"), el `<h2>` se
+         * mantiene en el árbol de accesibilidad —`aria-labelledby` de la `<section>` apunta a él
+         * (04 §17.3)— pero se oculta VISUALMENTE con la misma técnica de clip que ya usa
+         * `CoverSection.tsx:70` para «Portada». Nunca `display:none`: eso sí lo borraría del
+         * árbol y dejaría la sección sin nombre accesible. */}
+        <h2
+          id={headingId}
+          className={titleNode !== null ? styles.title : shared.visuallyHidden}
+        >
           {titleNode ?? section.title}
         </h2>
 
