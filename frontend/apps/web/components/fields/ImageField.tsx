@@ -11,7 +11,7 @@
 // para la miniatura — nunca lo inventa ni lo deriva de la URL.
 import { zodResolver } from "@hookform/resolvers/zod";
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import "react-image-crop/dist/ReactCrop.css";
@@ -21,7 +21,8 @@ import { uploadAsset } from "@/lib/api-client.ts";
 import { ApiError } from "@/lib/errors.ts";
 import { cargarImagenDesdeArchivo, proporcionParaAspect, recortarAWebp, recorteCentradoConProporcion, textoFocal, RECORTE_COMPLETO } from "@/lib/crop.ts";
 import { Progress } from "@/components/ui/progress.tsx";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { es_MX } from "@/lib/i18n.ts";
+import { CLASES_CONTROL, FieldShell, describedByPara, idsAyudaError } from "./FieldShell.tsx";
 
 const ReactCrop = dynamic(() => import("react-image-crop").then((m) => m.default), { ssr: false });
 
@@ -45,7 +46,9 @@ export interface ImageFieldProps {
   onCommit: (value: ImageValue) => void;
 }
 
-type Fase = "reposo" | "recortando" | "subiendo";
+// `preparando` es NUEVO (U-7): leer y decodificar un JPG de 27 MB del móvil tarda, y hasta ahora
+// durante ese rato no se veía absolutamente nada — «no pasa nada visible» era literal.
+type Fase = "reposo" | "preparando" | "recortando" | "subiendo";
 
 export function ImageField({ id, invitationId, spec, esDecorativo, value, esContenidoDeEjemplo, onCommit }: ImageFieldProps) {
   const [fase, setFase] = useState<Fase>("reposo");
@@ -55,7 +58,31 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
   const [archivoOriginal, setArchivoOriginal] = useState<{ imagen: HTMLImageElement; url: string } | null>(null);
   const [crop, setCrop] = useState<Crop>({ unit: "%", ...RECORTE_COMPLETO });
   const inputArchivoRef = useRef<HTMLInputElement | null>(null);
+  const errorRef = useRef<HTMLParagraphElement | null>(null);
   const proporcion = proporcionParaAspect(spec.constraints.aspect);
+  const mbMaximos = Math.round(spec.constraints.maxBytes / (1024 * 1024));
+
+  /**
+   * U-7 — «la foto demasiado grande falla en silencio». El mensaje existía y era bueno, pero se
+   * pintaba al FINAL del `FieldShell` (por debajo del texto alternativo y de los dos deslizadores
+   * del punto focal): medido en `y=928` con la ventana en 900, **28 px por debajo del borde
+   * visible** y lejos del botón que falló. La clienta no vio nada y volvió a intentarlo con el mismo
+   * archivo. Ahora el mensaje se pinta pegado al control y el panel se desplaza hasta él.
+   *
+   * `focus()` además de `scrollIntoView()`: si el panel ya lo tenía a la vista no habría
+   * desplazamiento, y quien usa lector de pantalla necesita que el foco llegue al mensaje (el
+   * `role="alert"` lo anuncia, el foco lo deja donde se puede releer). No roba el foco si no hay
+   * error.
+   */
+  useEffect(() => {
+    if (!error) return;
+    const nodo = errorRef.current;
+    if (!nodo) return;
+    // `scrollIntoView` no existe en todos los entornos (jsdom, algunos navegadores incrustados):
+    // si falta, el foco por sí solo ya lleva la vista al mensaje.
+    nodo.scrollIntoView?.({ block: "center", behavior: "smooth" });
+    nodo.focus({ preventScroll: true });
+  }, [error]);
 
   const { register, formState, trigger, getValues } = useForm({
     resolver: zodResolver(
@@ -80,14 +107,23 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
       setError(`Esta foto pesa más de ${mb} MB. Elige otra o recórtala antes de subirla.`);
       return;
     }
-    void cargarImagenDesdeArchivo(archivo).then(({ imagen, url }) => {
-      setArchivoOriginal({ imagen, url });
-      setCrop({
-        unit: "%",
-        ...(proporcion ? recorteCentradoConProporcion(proporcion, imagen.naturalWidth, imagen.naturalHeight) : RECORTE_COMPLETO),
+    setFase("preparando");
+    setProgreso(5);
+    void cargarImagenDesdeArchivo(archivo)
+      .then(({ imagen, url }) => {
+        setArchivoOriginal({ imagen, url });
+        setCrop({
+          unit: "%",
+          ...(proporcion ? recorteCentradoConProporcion(proporcion, imagen.naturalWidth, imagen.naturalHeight) : RECORTE_COMPLETO),
+        });
+        setFase("recortando");
+      })
+      .catch(() => {
+        // Un archivo que el navegador no puede decodificar (renombrado, corrupto) tampoco puede
+        // fallar en silencio.
+        setFase("reposo");
+        setError("No pudimos abrir esa foto. Prueba con otra en JPG, PNG o WebP.");
       });
-      setFase("recortando");
-    });
   }
 
   async function confirmarRecorte(): Promise<void> {
@@ -165,7 +201,9 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
       help={spec.help?.["es-MX"]}
       required={spec.required}
       esContenidoDeEjemplo={esContenidoDeEjemplo}
-      error={error ?? undefined}
+      // El error NO se delega al pie del `FieldShell` (ahí es donde quedaba fuera de pantalla,
+      // U-7): se pinta abajo, pegado al botón que falló, con el mismo `id` para que
+      // `aria-describedby` siga apuntando al nodo correcto.
     >
       <div id={id} aria-describedby={describedBy} className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
@@ -197,7 +235,27 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
           />
         </div>
 
-        {fase === "subiendo" ? <Progress value={progreso} label="Subiendo foto" /> : null}
+        {/* U-7 · el mismo pie que la galería ya tenía en su zona de soltar y que a «Cambiar foto» le
+            faltaba: la asimetría explicaba la sorpresa (la galería avisa ANTES del límite; esta no
+            decía nada de formatos ni de peso). */}
+        <p className="text-ui-eyebrow text-ui-ink-muted">{es_MX.editor.foto.limites(mbMaximos)}</p>
+
+        {/* U-7 · el error, pegado al control que falló. */}
+        {error ? (
+          <p
+            id={idsAyudaError(id).errorId}
+            ref={errorRef}
+            tabIndex={-1}
+            role="alert"
+            className="rounded-ui-control bg-red-50 p-2.5 text-ui-eyebrow text-ui-danger"
+          >
+            {error}
+          </p>
+        ) : null}
+
+        {fase === "subiendo" || fase === "preparando" ? (
+          <Progress value={progreso} label={fase === "preparando" ? "Preparando la foto" : es_MX.editor.foto.subiendo} />
+        ) : null}
 
         {!esDecorativo ? (
           <div>

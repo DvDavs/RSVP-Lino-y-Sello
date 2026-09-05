@@ -2,7 +2,7 @@
 // → publicar → enlace. `422 TPL_PUBLISH_BLOCKED_*` vuelve al preflight con la lista actualizada.
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as apiClient from "@/lib/api-client.ts";
 import { ApiError } from "@/lib/errors.ts";
 import { useEditorStore } from "@/lib/store.ts";
@@ -43,8 +43,18 @@ describe("PublishDialog", () => {
     expect(screen.getByRole("button", { name: /completar/i })).toBeTruthy();
   });
 
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("sin bloqueos, publicar muestra el enlace y permite copiarlo", async () => {
     const usuario = userEvent.setup();
+    // ACTUALIZADO en el bloque 3-8 (U-6): el enlace que se enseña, se copia y se comparte ya NO es
+    // el `publicUrl` que devuelve el servidor —que en el arranque real vale `http://localhost/i/…`
+    // y no le abre a ningún invitado— sino el que se construye con el ORIGEN PÚBLICO del sitio
+    // (`lib/enlace-publico.ts`). La prueba declara ese origen para que la expectativa siga siendo
+    // exacta y no dependa del `window.location` de jsdom.
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://invitaciones.mx");
     vi.spyOn(apiClient, "getPreflight").mockResolvedValue(preflightLimpio());
     vi.spyOn(apiClient, "publishRelease").mockResolvedValue({
       releaseId: 1,

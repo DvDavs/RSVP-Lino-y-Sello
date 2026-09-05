@@ -67,8 +67,28 @@ export function FieldShell({ id, label, help, required, esContenidoDeEjemplo, co
 export const CLASES_CONTROL =
   "h-11 w-full rounded-ui-control border border-ui-border-field bg-white px-4 text-ui-body text-ui-ink placeholder:text-ui-ink-placeholder focus-visible:border-ui-focus disabled:cursor-not-allowed disabled:bg-ui-bg-alt disabled:text-ui-ink-muted aria-[invalid=true]:border-ui-danger";
 
-/** Bloque de solo lectura (04 §6.3, §7.1 paso 5): NUNCA un input deshabilitado y mudo. */
-export function SoloLectura({ label, valor, explicacion }: { label: string; valor: string; explicacion: string }) {
+/**
+ * Bloque de solo lectura (04 §6.3, §7.1 paso 5): NUNCA un input deshabilitado y mudo.
+ *
+ * U-3 — el candado sin salida costó cinco minutos de búsqueda a la clienta y le impidió el TERCER
+ * verbo del criterio de terminado. `04 §6.3` dibuja, junto a la explicación, un botón `[Editar
+ * allí]`; nunca se implementó. Ahora la explicación va acompañada de `dondeSeCambia`, un enlace REAL
+ * al sitio donde se resuelve. Se llama «Dónde se cambia» y no «Editar allí» porque en esta fase
+ * ningún destino EDITA la fecha (no existe ruta de cliente que escriba `invitation.date`: solo
+ * `PUT /admin/invitations/{id}`, rol ADMIN — `InvitationAdminService.kt:414`), y prometer «editar»
+ * sería el mismo callejón sin salida con otro nombre. Ver `bitacora/3-8.md` § U-3.
+ */
+export function SoloLectura({
+  label,
+  valor,
+  explicacion,
+  dondeSeCambia,
+}: {
+  label: string;
+  valor: string;
+  explicacion: string;
+  dondeSeCambia?: { href: string; etiqueta: string };
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <span className="flex items-center gap-1.5 text-ui-aux font-semibold text-ui-ink">
@@ -78,7 +98,22 @@ export function SoloLectura({ label, valor, explicacion }: { label: string; valo
         </span>
       </span>
       <p className="rounded-ui-control bg-ui-bg-alt px-4 py-2.5 text-ui-body text-ui-ink">{valor || "—"}</p>
-      <p className="text-ui-eyebrow text-ui-ink-muted">{explicacion}</p>
+      <p className="text-ui-eyebrow text-ui-ink-muted">
+        {explicacion}
+        {dondeSeCambia ? (
+          <>
+            {" "}
+            <a
+              href={dondeSeCambia.href}
+              target="_blank"
+              rel="noreferrer"
+              className="font-semibold text-ui-accent underline"
+            >
+              {dondeSeCambia.etiqueta} ↗
+            </a>
+          </>
+        ) : null}
+      </p>
     </div>
   );
 }

@@ -111,12 +111,20 @@ export function BlockForm({ invitationId, manifest, manifestStatus }: { invitati
 
             const bloque = composedSection.blocks.find((b): b is ComposedBlock => !("items" in b) && b.id === blockSpec.id) ?? null;
             if (!esEditable(blockSpec)) {
+              // U-3 · `04 §6.3` «[Editar allí]». Solo los bloques `business` tienen un «allí»: su
+              // valor vive en los datos de la invitación. Los `fixed` los define la plantilla y su
+              // explicación ya se basta. `/ayuda#fecha` responde, con todas las letras, quién puede
+              // cambiar la fecha hoy y cómo pedirlo.
+              const esDeNegocio = blockSpec.source === "business";
               return (
                 <SoloLectura
                   key={blockSpec.id}
                   label={etiqueta(blockSpec.label)}
                   valor={textoLegible(bloque?.value ?? null)}
-                  explicacion={explicacionSoloLectura(blockSpec)}
+                  explicacion={esDeNegocio ? es_MX.editor.soloLectura.deLaInvitacion : explicacionSoloLectura(blockSpec)}
+                  dondeSeCambia={
+                    esDeNegocio ? { href: "/ayuda#fecha", etiqueta: es_MX.editor.soloLectura.dondeSeCambia } : undefined
+                  }
                 />
               );
             }
