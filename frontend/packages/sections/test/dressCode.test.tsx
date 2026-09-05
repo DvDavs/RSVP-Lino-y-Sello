@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { DressCodeSection } from "../src/sections/DressCodeSection.tsx";
 import { composedSection, textBlock, realBodaClasicaSection } from "./fixtures.ts";
-import { ComposedBlockSchema, ComposedGroupSchema } from "../src/schema-types.ts";
+import { ComposedBlockSchema, ComposedGroupSchema } from "./schema-values.ts";
 
 function ruleItem(itemId: string, title: string, detail: string) {
   return {

@@ -13,7 +13,7 @@
 // importa el MISMO `compuesto.json` como módulo JSON (soportado nativamente por Vite, sin tocar
 // disco en el navegador) y se replica aquí la extracción por tipo, sin duplicar lectura de disco.
 import { ComposedDocument } from "@invitaciones/schema";
-import { ComposedBlockSchema, ComposedGroupSchema, ComposedSectionSchema } from "../../src/schema-types.ts";
+import { ComposedBlockSchema, ComposedGroupSchema, ComposedSectionSchema } from "../schema-values.ts";
 import type { ComposedSection, ResolvedTheme } from "../../src/schema-types.ts";
 import goldenRaw from "../../../schema/golden/templates/boda-clasica-1.0.0/compuesto.json" with { type: "json" };
 import { placeholderPhoto } from "./placeholder-image.ts";

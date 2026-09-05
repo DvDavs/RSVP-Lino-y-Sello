@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { CelebrantSection } from "../src/sections/CelebrantSection.tsx";
 import { composedSection, textBlock, richTextBlock, imageBlock, realBodaClasicaSection } from "./fixtures.ts";
-import { ComposedBlockSchema } from "../src/schema-types.ts";
+import { ComposedBlockSchema } from "./schema-values.ts";
 
 function personBlock(overrides: Record<string, unknown> = {}) {
   return ComposedBlockSchema.parse({

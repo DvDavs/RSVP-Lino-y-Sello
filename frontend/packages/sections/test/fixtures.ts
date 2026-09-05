@@ -9,7 +9,7 @@ import {
   ComposedGroupSchema,
   ComposedSectionSchema,
   ResolvedThemeSchema,
-} from "../src/schema-types.ts";
+} from "./schema-values.ts";
 import type { ComposedBlock, ComposedGroup, ComposedSection, ResolvedTheme } from "../src/schema-types.ts";
 import {
   compose,

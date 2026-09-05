@@ -7,7 +7,7 @@ import { axe } from "jest-axe";
 import { SectionsRoot } from "../src/SectionsRoot.tsx";
 import { ComposedDocument } from "@invitaciones/schema";
 import { blushTheme, groupBlock, imageBlock, richTextBlock, textBlock } from "./fixtures.ts";
-import { ComposedSectionSchema } from "../src/schema-types.ts";
+import { ComposedSectionSchema } from "./schema-values.ts";
 
 function makeDocument() {
   const cover = ComposedSectionSchema.parse({

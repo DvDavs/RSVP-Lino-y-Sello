@@ -5,7 +5,7 @@ import { axe } from "jest-axe";
 import { SuggestionsSection } from "../src/sections/SuggestionsSection.tsx";
 import { SectionsRoot } from "../src/SectionsRoot.tsx";
 import { ComposedDocument } from "@invitaciones/schema";
-import { ComposedBlockSchema, ComposedSectionSchema } from "../src/schema-types.ts";
+import { ComposedBlockSchema, ComposedSectionSchema } from "./schema-values.ts";
 import { goldenSection, goldenTheme } from "./golden-c.ts";
 
 // El golden real de boda-clasica trae `suggestions.visible: false` (04 §17.3 solo exige

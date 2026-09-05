@@ -16,7 +16,7 @@ import {
   AudioBlock,
   ListTextBlock,
 } from "../../src/blocks/index.ts";
-import { ComposedBlockSchema } from "../../src/schema-types.ts";
+import { ComposedBlockSchema } from "../schema-values.ts";
 import type { ComposedBlock } from "../../src/schema-types.ts";
 import { textBlock, dateBlock } from "../fixtures.ts";
 

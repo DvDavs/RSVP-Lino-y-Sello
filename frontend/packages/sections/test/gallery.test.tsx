@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { GallerySection } from "../src/sections/GallerySection.tsx";
 import { composedSection, textBlock, realBodaClasicaSection } from "./fixtures.ts";
-import { ComposedBlockSchema, ComposedGroupSchema } from "../src/schema-types.ts";
+import { ComposedBlockSchema, ComposedGroupSchema } from "./schema-values.ts";
 
 function photoItem(itemId: string, alt = "") {
   return {

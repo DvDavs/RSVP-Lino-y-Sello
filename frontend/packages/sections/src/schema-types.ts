@@ -10,7 +10,20 @@
 // `ReturnType<typeof X.parse>` — produce EXACTAMENTE el mismo tipo de salida sin importar "zod".
 // Registrado como hueco de higiene en `preguntas-abiertas.md` (no se toca `packages/schema`, es
 // solo lectura para este agente).
-import {
+//
+// `import type` NO ES COSMÉTICO: es la diferencia entre 230,2 KB y 143,3 KB gz en la primera carga
+// de `/i/[publicToken]` (bloque 3-3 §3.4, medido de nuevo por 3-3b con `pnpm --filter web run
+// budget`). Los cinco nombres se usan SOLO en posición de tipo (`ReturnType<typeof X.parse>`), pero
+// con `verbatimModuleSyntax: true` (`tsconfig.base.json:16`) TypeScript conserva literalmente la
+// sentencia `import` de valor, y el grafo de `@invitaciones/schema` —que construye esquemas Zod al
+// cargarse y cuyo `package.json` no declara `sideEffects: false`, así que ningún empaquetador puede
+// sacudirlo— viaja entero al navegador: 87,8 KB gz de Zod en una ruta pública que no valida nada.
+// `import type` admite `typeof` sobre lo importado, así que los cinco tipos derivados no cambian.
+//
+// COROLARIO, y por eso la guarda de `test/lint-guards.test.ts`: `src/**` no puede tener NI UN import
+// de valor de `@invitaciones/schema`. Los esquemas como valor (para `.parse()` en fixtures) viven en
+// `test/schema-values.ts`, fuera de `src/`, donde ningún empaquetador de `apps/web` los alcanza.
+import type {
   ComposedBlock as ComposedBlockSchema,
   ComposedGroup as ComposedGroupSchema,
   ComposedSection as ComposedSectionSchema,
@@ -49,12 +62,8 @@ export type RichDoc = RichTextResolvedValue["doc"];
 export type RichParagraph = RichDoc["content"][number];
 export type RichSpan = RichParagraph["content"][number];
 
-// Re-export de los esquemas (valor) para quien quiera `.parse()`/`.safeParse()` — útil en pruebas
-// para construir fixtures VALIDADAS en vez de simples `as ComposedSection` sin comprobar nada.
-export {
-  ComposedBlockSchema,
-  ComposedGroupSchema,
-  ComposedSectionSchema,
-  ResolvedThemeSchema,
-  ResolvedValueSchema,
-};
+// Aquí había un re-export de VALOR de los cinco esquemas, para que las pruebas construyeran
+// fixtures con `.parse()`. Lo consumían SOLO ficheros de `test/**` (verificado con grep: ni un
+// `src/**` lo usaba), y bastaba para que el grafo de Zod entrase en el bundle público. Se mudó tal
+// cual a `test/schema-values.ts`; el contrato para las pruebas no cambia, solo el módulo del que
+// se importa.
