@@ -86,6 +86,13 @@
   /* 9. Movimiento — arte-chrome.md §9 */
   --ui-duration: 200ms;
   --ui-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 10. Punto de corte del EDITOR (U-8, ADR-3-8-01). No es un breakpoint de marca: es la anchura
+     por debajo de la cual el panel de secciones (280-340 px) y un lienzo utilizable dejan de caber
+     a la vez, medido sobre el propio editor. `ed:` = «de 900 px en adelante», es decir, la
+     disposición de dos paneles de `04 §6.2`; por debajo, una columna con pestañas. Ninguna sección
+     de invitación usa este token (`test/tokens-no-leak.test.ts` sigue valiendo: vive en el chrome). */
+  --breakpoint-ed: 900px;
 }
 
 :root {

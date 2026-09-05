@@ -10,6 +10,7 @@
 // reordenar con arrastre y la subida de imágenes. Los puntos de extensión están marcados con
 // «EXTENSIÓN 3-5» y todos consumen el MISMO store: `useSectionRows`, `useActiveBlock`, y las 11
 // acciones de `useEditorStore`.
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BlockForm } from "@/components/editor/BlockForm";
@@ -21,15 +22,48 @@ import { SectionList } from "@/components/editor/SectionList";
 import { ThemePicker } from "@/components/editor/ThemePicker";
 import { UndoRedoBar } from "@/components/editor/UndoRedoBar";
 import { ViewportToggle } from "@/components/editor/ViewportToggle";
-import { Button } from "@/components/ui/button";
+import { Button, estilosBoton } from "@/components/ui/button";
+import { getAuthToken, haySesionCaducada } from "@/lib/api-client";
 import { es_MX } from "@/lib/i18n";
 import { sembrarManifiestoFixture, useTemplateManifest } from "@/lib/manifest";
 import { useEditorStore } from "@/lib/store";
 import { createTabLock, type TabLock } from "@/lib/tab-lock";
 
+/**
+ * U-8 — «el editor no se puede usar en un teléfono». Medido en la revisión de uso: a 390×844 la
+ * página desbordaba 182 px (`scrollWidth` 572 / `clientWidth` 390), «Publicar» quedaba fuera de
+ * pantalla en `x=481` y la vista previa no se veía. Incumple WCAG 2.2 AA **1.4.10 Reflow**.
+ *
+ * `04 §6` NUNCA dibujó el editor en móvil (§6.2 es un wireframe de dos paneles a lo ancho y §7.4
+ * solo cambia el ancho del `<iframe>`): es el hueco de diseño D-16. El wireframe que se decide
+ * aquí, y queda como **ADR-3-8-01**, es el más simple que resuelve el problema: una columna,
+ * cabecera en dos filas con «Publicar» SIEMPRE en la primera, y lista/vista previa en dos pestañas.
+ *
+ * 900 px es el umbral: por debajo, el panel de 340 px y un lienzo utilizable no caben a la vez.
+ * Se decide en JS y no solo en CSS porque los dos paneles tienen que seguir MONTADOS (el `<iframe>`
+ * del lienzo se recargaría entero en cada cambio de disposición si se remontara el árbol).
+ */
+const CONSULTA_MOVIL = "(max-width: 899px)";
+
+function useEsMovil(): boolean {
+  // Arranca en `false` a propósito: es lo que renderiza el servidor, así la hidratación coincide.
+  const [esMovil, setEsMovil] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const consulta = window.matchMedia(CONSULTA_MOVIL);
+    const aplicar = (): void => setEsMovil(consulta.matches);
+    aplicar();
+    consulta.addEventListener("change", aplicar);
+    return () => consulta.removeEventListener("change", aplicar);
+  }, []);
+  return esMovil;
+}
+
 export default function PaginaEditorInvitacion() {
   const params = useParams<{ invitationId: string }>();
   const invitationId = Number(params.invitationId);
+  const esMovil = useEsMovil();
+  const [pestana, setPestana] = useState<"editar" | "vista-previa">("editar");
 
   const loadState = useEditorStore((s) => s.loadState);
   const loadError = useEditorStore((s) => s.loadError);
@@ -143,6 +177,23 @@ export default function PaginaEditorInvitacion() {
   if (loadState === "not-started") return <ElegirPlantilla invitationId={invitationId} />;
 
   if (loadState === "error") {
+    // U-1 — antes, sin sesión, esta pantalla decía «Sesión inválida o token ausente/expirado.» con
+    // un «Reintentar» que NO podía funcionar nunca, porque no existía forma de iniciar sesión. Se
+    // distingue el fallo de sesión (no hay token, o el backend lo rechazó) de cualquier otro: el
+    // primero tiene una salida real —la pantalla de acceso—, y el segundo sí es un «Reintentar».
+    const sinSesion = getAuthToken() === null || haySesionCaducada();
+    if (sinSesion) {
+      const volver = encodeURIComponent(`/editor/${params.invitationId}`);
+      const caducada = haySesionCaducada();
+      return (
+        <div role="alert" className="m-8 flex max-w-prose flex-col items-start gap-3 rounded-ui-card bg-ui-surface p-6 shadow-ui-1">
+          <p className="text-ui-body text-ui-ink">{caducada ? es_MX.acceso.sesionTerminada : es_MX.acceso.hayQueEntrar}</p>
+          <Link href={`/acceso?volver=${volver}${caducada ? "&motivo=sesion" : ""}`} className={estilosBoton()}>
+            {es_MX.comun.iniciarSesion}
+          </Link>
+        </div>
+      );
+    }
     return (
       <div role="alert" className="m-8 rounded-ui-card bg-ui-surface p-6 shadow-ui-1">
         <p className="text-ui-body text-ui-ink">{loadError ?? es_MX.errores.generico}</p>
@@ -154,29 +205,89 @@ export default function PaginaEditorInvitacion() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-ui-bg">
+    <div className="flex h-screen flex-col overflow-x-hidden bg-ui-bg">
       {/*
         Barra de aplicación FIJA y compacta: el editor necesita deshacer/rehacer, el indicador de
         guardado y "Publicar" visibles SIEMPRE, o el cliente pierde el botón al hacer scroll dentro
         del lienzo (divergencia deliberada de `arte-chrome.md §7`, que mide `position: static` para
         la cabecera del SITIO — válida en el catálogo, no aquí).
       */}
-      <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-ui-border bg-ui-surface px-4">
-        <div className="flex min-w-0 items-center gap-3">
+      {/*
+        U-8 · cabecera en DOS filas por debajo de 900 px. Fila 1: la marca y «Publicar», que es la
+        acción que la clienta no podía alcanzar en el teléfono (estaba en x=481, fuera de la
+        pantalla de 390 px). Fila 2: deshacer/rehacer y el indicador de guardado. El conmutador
+        «Escritorio / Móvil» —que solo cambia el ancho del `<iframe>` de la vista previa— se oculta
+        en el teléfono: ahí la vista previa ya es del ancho del teléfono y el control no significa
+        nada. `flex-wrap` en la fila y `min-w-0` en los hijos: cero desbordamiento horizontal.
+      */}
+      <header className="sticky top-0 z-10 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-ui-border bg-ui-surface px-4 py-2 ed:h-16 ed:flex-nowrap ed:justify-between ed:py-0">
+        <div className="order-1 flex min-w-0 flex-1 items-center gap-3">
           <a href="/editor" className="shrink-0 font-ui-display text-ui-body font-semibold text-ui-ink-heading">
             Invitaciones
           </a>
-          <span className="truncate text-ui-aux text-ui-ink-muted">
+          {/* «boda-clasica · versión 194» es contabilidad interna al lado del nombre de marca
+              (U-18); en el teléfono, además, es lo primero que sobra. Se mantiene en escritorio. */}
+          <span className="hidden truncate text-ui-aux text-ui-ink-muted ed:inline">
             {templateVersion ? `${templateVersion.slug} · versión ${revision}` : `versión ${revision}`}
           </span>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <UndoRedoBar />
-          <ViewportToggle />
-          <SaveIndicator />
+        {/* «Publicar»: en el teléfono acompaña a la marca en la PRIMERA fila —es lo único que no
+            puede quedar nunca fuera de la pantalla—; en escritorio, el último de la derecha. Es UNA
+            sola instancia, movida con `order`: dos instancias serían dos diálogos en el DOM. */}
+        <div className="order-2 shrink-0 ed:order-3">
           <PublishDialog invitationId={invitationId} />
         </div>
+        <div className="order-3 flex w-full min-w-0 flex-wrap items-center gap-3 ed:order-2 ed:w-auto ed:flex-nowrap">
+          <UndoRedoBar />
+          {/* El conmutador «Escritorio / Móvil» solo cambia el ancho del `<iframe>` de la vista
+              previa: en un teléfono de 390 px no significa nada y roba sitio. */}
+          <span className="hidden ed:inline-flex">
+            <ViewportToggle />
+          </span>
+          <SaveIndicator />
+        </div>
       </header>
+
+      {esMovil ? (
+        <div
+          role="tablist"
+          aria-label={es_MX.editor.movil.pestanas}
+          className="flex shrink-0 gap-1 border-b border-ui-border bg-ui-surface px-4 pb-2"
+        >
+          {(
+            [
+              ["editar", es_MX.editor.movil.editar],
+              ["vista-previa", es_MX.editor.movil.vistaPrevia],
+            ] as const
+          ).map(([clave, etiqueta]) => (
+            <button
+              key={clave}
+              type="button"
+              role="tab"
+              id={`pestana-${clave}`}
+              aria-selected={pestana === clave}
+              aria-controls={`panel-${clave}`}
+              tabIndex={pestana === clave ? 0 : -1}
+              data-testid={`pestana-${clave}`}
+              onClick={() => setPestana(clave)}
+              onKeyDown={(e) => {
+                // Flechas entre pestañas: patrón de `tablist` (WAI-ARIA APG).
+                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  const otra = clave === "editar" ? "vista-previa" : "editar";
+                  setPestana(otra);
+                  document.getElementById(`pestana-${otra}`)?.focus();
+                }
+              }}
+              className={`h-11 flex-1 rounded-ui-pill px-3 text-ui-aux font-semibold ${
+                pestana === clave ? "bg-ui-accent-soft text-ui-accent-soft-ink" : "text-ui-ink-muted"
+              }`}
+            >
+              {etiqueta}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {tabRole === "readonly" ? (
         <div role="alert" className="flex items-center justify-between gap-4 bg-ui-accent-soft px-4 py-2 text-ui-aux text-ui-accent-soft-ink">
@@ -241,8 +352,16 @@ export default function PaginaEditorInvitacion() {
         </div>
       ))}
 
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(280px,340px)_1fr]">
-        <aside ref={panelRef} className="overflow-y-auto border-r border-ui-border bg-ui-surface p-4" aria-label={es_MX.editor.panel.secciones}>
+      <div className={esMovil ? "flex min-h-0 flex-1 flex-col" : "grid min-h-0 flex-1 grid-cols-[minmax(280px,340px)_1fr]"}>
+        <aside
+          ref={panelRef}
+          id="panel-editar"
+          hidden={esMovil && pestana !== "editar"}
+          {...(esMovil
+            ? ({ role: "tabpanel", "aria-labelledby": "pestana-editar" } as const)
+            : ({ "aria-label": es_MX.editor.panel.secciones } as const))}
+          className={`min-w-0 overflow-y-auto bg-ui-surface p-4 ${esMovil ? "flex-1" : "border-r border-ui-border"}`}
+        >
           {panel === "block" && selection ? (
             <BlockForm invitationId={invitationId} manifest={manifest} manifestStatus={manifestStatus} />
           ) : (
@@ -258,7 +377,14 @@ export default function PaginaEditorInvitacion() {
           )}
         </aside>
 
-        <section className="min-h-0 p-4" aria-label={es_MX.editor.lienzo.tituloIframe}>
+        <section
+          id="panel-vista-previa"
+          hidden={esMovil && pestana !== "vista-previa"}
+          {...(esMovil
+            ? ({ role: "tabpanel", "aria-labelledby": "pestana-vista-previa" } as const)
+            : ({ "aria-label": es_MX.editor.lienzo.tituloIframe } as const))}
+          className={`min-h-0 min-w-0 p-4 ${esMovil ? "flex-1" : ""}`}
+        >
           <CanvasFrame invitationId={params.invitationId} />
         </section>
       </div>
