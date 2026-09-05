@@ -20,6 +20,11 @@
 #   TEMPLATES2_ASSETS_MODE    's3' o 'local'                  (por defecto local, ver más abajo)
 #   TPL_DEV_LOG            archivo de log                     (por defecto build/dev/backend.log)
 #   TPL_DEV_TIMEOUT        segundos de espera del arranque    (por defecto 300)
+#   TPL_DEV_FRONTEND_URL   origen de `apps/web` para el webhook de revalidación (por defecto
+#                          http://127.0.0.1:3000, el puerto de `next start`; usa TPL_DEV_FRONTEND_URL
+#                          o PW_PORT si tu `apps/web` escucha en otro puerto, p.ej. Playwright)
+#   TEMPLATES2_REVALIDATE_TOKEN  secreto compartido con `REVALIDATE_SECRET` de `apps/web`
+#                          (por defecto un valor DE DESARROLLO, nunca uses este valor en producción)
 set -euo pipefail
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -57,6 +62,22 @@ if [ "$TEMPLATES2_ASSETS_MODE" = "local" ]; then
   # apuntar al propio backend, o el `composed` traería URL de un bucket que no existe.
   export TEMPLATES2_ASSETS_PUBLIC_BASE_URL="${TEMPLATES2_ASSETS_PUBLIC_BASE_URL:-$TEMPLATES2_ASSETS_LOCAL_BASE_URL}"
 fi
+
+# --- Revalidación del render público (I-07, ADR-2-6-01, ADR-3-8-04) ---------------------------
+# `templates2.revalidate.url`/`.token` (`RevalidationNotifier.kt`) llegan VACÍAS de
+# `application.yml` a propósito (ADR-2-6-01: sin host por defecto). Sin ellas el webhook queda
+# desactivado y el enlace público sólo se corrige con el `max-age` de 300 s (`contratos.md §8`,
+# issue I-07, U-5). Aquí sí puede ir un valor de desarrollo — nunca en `application.yml` — porque
+# este script es exclusivamente de entorno local.
+# `TPL_DEV_FRONTEND_URL` apunta a `apps/web`: 3000 es el puerto de `next start` sin nada más
+# declarado; con Playwright, pásalo (o exporta PW_PORT) para que el webhook golpee ESE servidor.
+TPL_DEV_FRONTEND_URL="${TPL_DEV_FRONTEND_URL:-http://127.0.0.1:${PW_PORT:-3000}}"
+export TEMPLATES2_REVALIDATE_URL="${TEMPLATES2_REVALIDATE_URL:-$TPL_DEV_FRONTEND_URL/api/revalidate}"
+# Mismo valor por defecto que `playwright.config.ts` ya usa para `REVALIDATE_SECRET`
+# (`app/api/revalidate/route.ts`): así el backend y `apps/web` quedan cableados con el MISMO
+# secreto sin que nadie tenga que exportar nada a mano para que las e2e midan el webhook real.
+# Evidentemente de desarrollo: no es apto para ningún entorno con tráfico real.
+export TEMPLATES2_REVALIDATE_TOKEN="${TEMPLATES2_REVALIDATE_TOKEN:-e2e-secreto-de-pruebas}"
 
 # --- Mongo ------------------------------------------------------------------------------------
 # `templates2` no usa Mongo (ADR-009) pero `MongoDataInitializer` es un `CommandLineRunner` del
@@ -180,6 +201,8 @@ imprimir_resumen() {
   Log          $LOG
   Postgres     ${SPRING_DATASOURCE_URL:-(ya en marcha; usa 'status')}
   Assets       modo=$TEMPLATES2_ASSETS_MODE bucket=$TEMPLATES2_ASSETS_BUCKET
+  Revalidate   url=$TEMPLATES2_REVALIDATE_URL (token de desarrollo cableado; exporta REVALIDATE_SECRET
+               con el MISMO valor al arrancar apps/web para que el webhook se acepte)
 RESUMEN
 }
 
@@ -201,7 +224,13 @@ stop() {
   # Red de seguridad, ACOTADA A NUESTRO PUERTO. Antes era `pgrep -f InvitationsApplicationKt`, que
   # mata cualquier JVM del proyecto en la máquina: con varias sesiones o agentes en paralelo, un
   # `stop` se llevaba por delante los backends de los demás (medido en la fase 3-B).
-  local restos; restos="$( (ss -ltnpH "sport = :$PUERTO" 2>/dev/null || true) | grep -oP 'pid=\K[0-9]+' | sort -u)"
+  # Hallazgo de I-07: con `set -o pipefail`, cuando NO quedan restos (el caso normal: el PID de
+  # arriba ya se mató solo) `grep` no encuentra nada y sale con estado 1, lo que abortaba el script
+  # entero por `set -e` ANTES de llegar a `pg-ephemeral.sh stop` de la línea siguiente — cada `stop`
+  # que sí lograba matar el proceso por PID dejaba el clúster de Postgres efímero huérfano
+  # (medido: el proceso `postgres -D .../data-*` seguía vivo tras un `stop` con salida 1). El
+  # `|| true` de `grep` es el que falta; el de `ss` de arriba no cubre esta rama.
+  local restos; restos="$( (ss -ltnpH "sport = :$PUERTO" 2>/dev/null || true) | (grep -oP 'pid=\K[0-9]+' || true) | sort -u)"
   if [ -n "$restos" ]; then kill -KILL $restos 2>/dev/null || true; fi
   "$RAIZ/scripts/pg-ephemeral.sh" stop || true
   echo "dev-backend: parado (idempotente)"
@@ -228,6 +257,8 @@ env_vars() {
   echo "export TPL_DEV_BASE=$BASE"
   echo "export TEMPLATES2_ASSETS_BUCKET=$TEMPLATES2_ASSETS_BUCKET"
   echo "export TEMPLATES2_ASSETS_MODE=$TEMPLATES2_ASSETS_MODE"
+  # `apps/web` necesita el MISMO valor en `REVALIDATE_SECRET` para aceptar el webhook (I-07).
+  echo "export REVALIDATE_SECRET=$TEMPLATES2_REVALIDATE_TOKEN"
 }
 
 # Registro de un paquete por línea de comandos (handoffs/2-3.md). Recorre EXACTAMENTE el mismo

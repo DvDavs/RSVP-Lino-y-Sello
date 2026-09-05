@@ -819,3 +819,28 @@ una se tomó la opción conservadora y se siguió.
   rendimiento, solo dejar el procedimiento en pie— pero se deja escrito que ninguna cifra de LCP
   publicada hasta ahora en la memoria (incluida la propia de este bloque) debería tratarse como "el
   LCP del producto" sin decir también en qué máquina y con qué carga se tomó.
+
+- [Fase 3-B · I-07] **`templates2.revalidate.url`/`.token` ya estaban en `application.yml` desde el
+  bloque 2-6** (ADR-2-6-01, commit `52e0b4a`), con los mismos nombres que pedía el encargo de I-07.
+  La premisa de la issue («faltan las dos claves de configuración… es configuración, no código») ya
+  no describía el estado real del repositorio en el momento de ejecutar este bloque; lo que faltaba
+  de verdad era fijarlas en `scripts/dev-backend.sh` (hecho aquí) **y** una línea de código en el
+  cliente HTTP (`.version(HTTP_1_1)`, `ADR-3B-I07-01`) sin la cual el webhook fallaba siempre contra
+  un `apps/web` real, con las dos claves ya bien puestas. ¿Quién actualiza `issues-fase-3.md` para
+  que I-07 refleje que el defecto real era doble (config + cliente HTTP), no sólo config, por si
+  alguien vuelve a leer la issue original sin leer esta bitácora?
+
+- [Fase 3-B · I-07] **No se probó el cliente HTTP de `RevalidationNotifier` contra `apps/web` detrás
+  de HTTPS** (el hallazgo de `ADR-3B-I07-01` es sobre HTTP en claro / intento de upgrade h2c; con TLS
+  el mismo `HttpClient` negocia HTTP/2 por ALPN de forma distinta y el fallo observado podría no
+  reproducirse, o podría reproducirse por otra vía). No hay certificado ni dominio real en este
+  entorno para probarlo. ¿Alguien con un despliegue de staging con TLS puede confirmar que
+  `.version(HTTP_1_1)` sigue siendo necesario o si allí el problema no existía?
+
+- [Fase 3-B · I-07] **`scripts/dev-backend.sh stop` dejaba huérfano el clúster de Postgres efímero
+  en el caso normal** (regresión de pipefail del commit `fd4c47d`, `ADR-3B-I07-02`), afectando a
+  cualquier agente que use el script, no sólo a I-07. Se corrigió por ser un bloqueador directo del
+  propio flujo que este encargo pedía (`stop` seguido de `start` sobre el `TPL_TEST_STATE_DIR`
+  propio). ¿Vale la pena una compuerta de CI que ejercite `dev-backend.sh start`→`stop` y falle si
+  el código de salida no es 0, para que esta clase de regresión no dependa de que alguien la note a
+  mano?
