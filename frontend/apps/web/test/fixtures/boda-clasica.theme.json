@@ -1,0 +1,94 @@
+{
+  "fontSets": [
+    {
+      "id": "serif-elegante",
+      "body": {
+        "family": "Inter",
+        "source": "google",
+        "weights": [
+          400,
+          500
+        ]
+      },
+      "name": {
+        "es-MX": "Serif elegante"
+      },
+      "heading": {
+        "family": "Cormorant Garamond",
+        "source": "google",
+        "weights": [
+          400,
+          600
+        ]
+      }
+    },
+    {
+      "id": "moderna",
+      "body": {
+        "family": "Source Sans 3",
+        "source": "google",
+        "weights": [
+          400,
+          600
+        ]
+      },
+      "name": {
+        "es-MX": "Moderna"
+      },
+      "heading": {
+        "family": "Playfair Display",
+        "source": "google",
+        "weights": [
+          400,
+          700
+        ]
+      }
+    }
+  ],
+  "palettes": [
+    {
+      "id": "blush",
+      "name": {
+        "es-MX": "Rosa empolvado"
+      },
+      "tokens": {
+        "bg": "#FDF7F5",
+        "ink": "#3A2E2B",
+        "muted": "#7B6E6B",
+        "accent": "#B05555",
+        "surface": "#FFFFFF",
+        "accentInk": "#FFFFFF"
+      }
+    },
+    {
+      "id": "olive",
+      "name": {
+        "es-MX": "Olivo y marfil"
+      },
+      "tokens": {
+        "bg": "#F7F5EE",
+        "ink": "#2F3A2B",
+        "muted": "#6C715D",
+        "accent": "#657446",
+        "surface": "#FFFFFF",
+        "accentInk": "#FFFFFF"
+      }
+    },
+    {
+      "id": "navy",
+      "name": {
+        "es-MX": "Azul noche"
+      },
+      "tokens": {
+        "bg": "#F4F6FA",
+        "ink": "#1E2A44",
+        "muted": "#647087",
+        "accent": "#2E4A7D",
+        "surface": "#FFFFFF",
+        "accentInk": "#FFFFFF"
+      }
+    }
+  ],
+  "defaultFontSetId": "serif-elegante",
+  "defaultPaletteId": "blush"
+}
