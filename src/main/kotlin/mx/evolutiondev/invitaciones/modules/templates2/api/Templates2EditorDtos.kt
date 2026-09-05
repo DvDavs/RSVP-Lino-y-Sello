@@ -102,12 +102,32 @@ data class ChooseTemplateResponse(
     val publicUrl: String,
 )
 
-/** `03 §3.3`. */
+/**
+ * `03 §3.3`.
+ *
+ * `manifest` y `theme` son el paquete de la versión de plantilla que **esta** invitación usa, tal cual
+ * lo guardan `tpl_template_version.manifest` y `.theme` (ADR-3-4b-01). Sin ellos el editor no podía
+ * editar, sólo pintar: el [composed] lleva `label`, `role`, `type`, `provenance` y `value` por bloque,
+ * pero **no** `BlockSpec.constraints` (`maxLength`, `multiline` — escenario U-17 de `04 §20.1`), ni las
+ * opciones de un bloque `choice`, ni `SectionSpec.required` (U-18: sin él, ocultar una sección
+ * obligatoria sólo se descubría fallando con `TPL_SECTION_REQUIRED`), ni `SectionSpec.variants`, ni el
+ * catálogo de paletas y conjuntos tipográficos — `composed.theme` es el tema **ya resuelto**, no los
+ * presets entre los que elegir. Duplicar el manifiesto en el frontend habría reintroducido H-27 y roto
+ * P4 (añadir una plantilla no debe tocar el frontend).
+ *
+ * Son **campos aditivos**, no una ruta nueva: siguen siendo 19 rutas y `Templates2RouteInventoryTest`
+ * no cambia. Van aquí y no en `GET /editor/templates2/catalog` porque el editor necesita el manifiesto
+ * de la plantilla de esta invitación, no el catálogo entero.
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class DocumentResponse(
     val document: JsonNode,
     val revision: Long,
     val templateVersion: TemplateVersionRef,
+    /** `template.json` de la versión vigente, completo y sin recortar (P1, P3). */
+    val manifest: JsonNode,
+    /** `theme.json` de la versión vigente: las paletas y los conjuntos tipográficos entre los que elegir. */
+    val theme: JsonNode,
     val composed: JsonNode,
     val report: JsonNode,
     val publicToken: String,

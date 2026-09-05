@@ -1,0 +1,11 @@
+mx.evolutiondev.invitaciones.modules.templates2.api.ManifestEnDocumentoContractTest: tests=9 failures=0 errors=0 skipped=0
+
+PASA    U-18 — el editor ve required de cada seccion sin tener que fallar()  (1.508s)
+PASA    manifest y theme son byte a byte lo que guarda tpl_template_version()  (0.396s)
+PASA    manifest y theme validan contra los esquemas emitidos desde Zod()  (0.489s)
+PASA    otra invitacion con otra plantilla recibe su propio manifiesto()  (0.354s)
+PASA    U-17 — el editor ve maxLength y multiline de cada bloque de texto()  (0.326s)
+PASA    GET document trae el manifiesto completo de la version de plantilla vigente()  (0.274s)
+PASA    el editor ve el catalogo de paletas y de conjuntos tipograficos()  (0.298s)
+PASA    el editor ve las variants disponibles de cada seccion()  (0.276s)
+PASA    el editor ve las opciones de un bloque choice()  (0.326s)

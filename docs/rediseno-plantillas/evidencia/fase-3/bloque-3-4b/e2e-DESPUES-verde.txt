@@ -1,0 +1,39 @@
+== e2e 3-4b — el manifiesto de la plantilla en GET .../document ==
+backend: http://127.0.0.1:6013 · invitación: 3
+
+1. campos de primer nivel de la respuesta
+["activeRelease","composed","document","manifest","publicToken","publicUrl","report","revision","templateVersion","theme"]
+  OK    existe .manifest → true
+  OK    existe .theme → true
+  OK    .manifest es el de la plantilla vigente → boda-clasica@1.0.0
+
+2. U-17 — constraints de un TextSpec (maxLength y multiline)
+[{"id":"cover.title","constraints":{"minLength":1,"maxLength":60,"multiline":false}},{"id":"cover.subtitle","constraints":{"minLength":0,"maxLength":80,"multiline":false}},{"id":"cover.buttonLabel","constraints":{"minLength":1,"maxLength":30,"multiline":false}}]
+  OK    family.godparents/label declara maxLength 40 → 40
+  OK    cover.title declara multiline → false
+
+3. opciones de un bloque choice
+  OK    gifts.options/kind trae sus 3 opciones → bank,store,cash
+
+4. U-18 — SectionSpec.required (hoy sólo se descubre fallando)
+[{"key":"cover","required":true,"variants":["full","framed"]},{"key":"couple","required":true,"variants":["side-by-side","stacked"]},{"key":"family","required":false,"variants":["cards","list"]},{"key":"event","required":true,"variants":["timeline","cards"]}]
+  OK    la sección cover es required → true
+  OK    la sección gallery NO es required → false
+
+5. SectionSpec.variants — selector de variante
+  OK    cover ofrece full y framed → full,framed
+
+6. paletas y conjuntos tipográficos (el compuesto sólo trae el tema YA resuelto)
+{"composed_theme_resuelto":{"paletteId":"blush","fontSetId":"serif-elegante"},"presets":{"palettes":["blush","olive","navy"],"fontSets":["serif-elegante","moderna"]}}
+  OK    3 paletas entre las que elegir → blush,olive,navy
+  OK    2 conjuntos tipográficos → serif-elegante,moderna
+  OK    los tokens de cada paleta viajan completos → 6
+
+7. control: ninguna OTRA ruta lo daba (por eso hacía falta este campo)
+  OK    el catálogo NO trae sections → 0
+  OK    el catálogo NO trae palettes → 0
+  OK    el compuesto NO trae constraints → 0
+  OK    el compuesto NO trae required de sección → 0
+  OK    el compuesto NO trae variants disponibles → 0
+
+RESULTADO: 0 fallos — el editor ya puede construir formularios, selector de variante y de tema.

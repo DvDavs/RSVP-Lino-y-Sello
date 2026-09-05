@@ -119,6 +119,20 @@ Convenciones comunes: todas las respuestas son `application/json; charset=UTF-8`
                 "content": {…}, "attic": {…}, "meta": {"locale":"es-MX"} },
   "revision": 42,
   "templateVersion": { "slug": "boda-clasica", "version": "1.0.0", "status": "published" },
+  // El paquete de la versión de plantilla vigente, tal cual lo guardan `tpl_template_version.manifest`
+  // y `.theme` (ADR-3-4b-01, fase 3). Es lo que el editor necesita para EDITAR, no sólo para pintar.
+  "manifest": { "manifestVersion": 1, "slug": "boda-clasica", "version": "1.0.0", "name": {…},
+                "sections": [ { "key": "cover", "type": "cover", "title": {…},
+                                "variants": ["full","framed"], "defaultVariant": "full",
+                                "required": true, "defaultVisible": true,
+                                "blocks": [ { "id": "cover.title", "type": "text", "role": "coverTitle",
+                                              "label": {…}, "required": true, "editable": true,
+                                              "source": "user", "aiEditable": true,
+                                              "constraints": {"minLength":1,"maxLength":60,"multiline":false} } ] } ],
+                "assets": […], "migrationsFrom": [] },
+  "theme": { "palettes": [ {"id":"blush","name":{…},"tokens":{"bg":"#FDF7F5", …}} ],
+             "fontSets": [ {"id":"serif-elegante","name":{…},"heading":{…},"body":{…}} ],
+             "defaultPaletteId": "blush", "defaultFontSetId": "serif-elegante" },
   "composed": { "composedVersion": 1, "template": {…}, "locale": "es-MX", "theme": {…}, "sections": […] },
   "report": { "missingRequired": [], "stillDefault": ["couple.brideText"], "orphanContent": [],
               "orphanSections": [], "invalidValues": [], "themeFallback": null },
@@ -129,6 +143,8 @@ Convenciones comunes: todas las respuestas son `application/json; charset=UTF-8`
 }
 ```
 `composed` se calcula en cada `GET` (`compose()`, ADR-007) — nunca se lee de una tabla; el `BusinessSnapshot` se toma de `invitation` en la misma transacción de lectura. `stale` se calcula comparando `tpl_release.business_snapshot` congelado con el actual (`02 §2` V34), sin recomponer el release.
+
+`manifest` y `theme` (**añadidos en la fase 3, ADR-3-4b-01**) son el `TemplateManifest` y el `ThemeSpec` **completos** de la versión de plantilla que esta invitación usa, sin filtrar ni transformar (P1, P3): salen de `version.pkg` con `DomainJson.encode`, el mismo códec que ya emite `document`/`composed`/`report`, y validan contra los punteros `template-manifest` y `theme` del esquema compartido. Sin ellos el editor podía **pintar** pero no **editar**: el `ComposedDocument` lleva `label`, `role`, `type`, `provenance` y `value` por bloque, pero no `BlockSpec.constraints` (`maxLength`, `multiline` — escenario **U-17** de `04 §20.1`), ni las opciones de un bloque `choice`, ni `SectionSpec.required` (**U-18**: sin él, ocultar una sección obligatoria sólo se descubría fallando con `TPL_SECTION_REQUIRED`), ni `SectionSpec.variants`, ni el catálogo de paletas y conjuntos tipográficos — `composed.theme` es el tema **ya resuelto**, no los presets entre los que elegir. Duplicar el manifiesto en el frontend habría reintroducido H-27 y roto P4. Son **campos aditivos**, no una ruta nueva: siguen siendo 19 rutas y `Templates2RouteInventoryTest` no cambia; y van aquí, no en `GET /editor/templates2/catalog`, porque el editor necesita el manifiesto de la plantilla de **esta** invitación, no el catálogo entero.
 - **Errores**: `404 TPL_DOCUMENT_NOT_STARTED` · `403 TPL_FORBIDDEN` · `409 TPL_NOT_MIGRATED`.
 - **Idempotencia**: lectura pura; **no** crea el documento (la creación perezosa la hace `:choose-template`, no un `GET` — así el orden de operaciones queda explícito y H-39 no puede repetirse).
 

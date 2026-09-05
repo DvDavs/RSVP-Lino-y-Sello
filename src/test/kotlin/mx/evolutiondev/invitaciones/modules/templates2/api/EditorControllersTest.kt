@@ -87,6 +87,7 @@ class EditorControllersTest {
             DocumentResponse(
                 document = nodo(), revision = 42,
                 templateVersion = TemplateVersionRef("boda-clasica", "1.0.0", "published"),
+                manifest = nodo(), theme = nodo(),
                 composed = nodo(), report = nodo(),
                 publicToken = "pub_x", publicUrl = "https://app/i/pub_x",
                 activeRelease = ActiveReleaseRef(7, Instant.EPOCH, "sha256:ab", 41, true, listOf("business.date")),

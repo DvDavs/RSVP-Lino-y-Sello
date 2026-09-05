@@ -1,0 +1,38 @@
+mx.evolutiondev.invitaciones.modules.templates2.api.ManifestEnDocumentoContractTest: tests=9 failures=9 errors=0
+
+FAILED  U-18 — el editor ve required de cada seccion sin tener que fallar()
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede editar con lo que recibe ==> expected: not <null>
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede editar con lo que recibe ==> expected: not <null>
+
+FAILED  manifest y theme son byte a byte lo que guarda tpl_template_version()
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest` ==> expected: not <null>
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest` ==> expected: not <null>
+
+FAILED  manifest y theme validan contra los esquemas emitidos desde Zod()
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest` ==> expected: not <null>
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest` ==> expected: not <null>
+
+FAILED  otra invitacion con otra plantilla recibe su propio manifiesto()
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest` ==> expected: not <null>
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest` ==> expected: not <null>
+
+FAILED  U-17 — el editor ve maxLength y multiline de cada bloque de texto()
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede editar con lo que recibe ==> expected: not <null>
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede editar con lo que recibe ==> expected: not <null>
+
+FAILED  GET document trae el manifiesto completo de la version de plantilla vigente()
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede construir formularios ==> expected: not <null>
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede construir formularios ==> expected: not <null>
+
+FAILED  el editor ve el catalogo de paletas y de conjuntos tipograficos()
+        org.opentest4j.AssertionFailedError: sin los presets del tema no hay selector de paleta ni de tipografía ==> expected: not <null>
+        org.opentest4j.AssertionFailedError: sin los presets del tema no hay selector de paleta ni de tipografía ==> expected: not <null>
+
+FAILED  el editor ve las variants disponibles de cada seccion()
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede editar con lo que recibe ==> expected: not <null>
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede editar con lo que recibe ==> expected: not <null>
+
+FAILED  el editor ve las opciones de un bloque choice()
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede editar con lo que recibe ==> expected: not <null>
+        org.opentest4j.AssertionFailedError: la respuesta no trae `manifest`: el editor no puede editar con lo que recibe ==> expected: not <null>
+
