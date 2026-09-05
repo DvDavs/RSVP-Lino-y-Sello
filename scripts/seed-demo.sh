@@ -8,6 +8,13 @@
 #   scripts/dev-backend.sh start     # si no está levantado
 #   scripts/seed-demo.sh             # imprime la URL pública al final
 #
+#   TPL_DEMO_SLUG=xv-jardin TPL_DEMO_PALETTE=lilac scripts/seed-demo.sh
+#     `TPL_DEMO_PALETTE` (A6 del bloque 3-9) escoge la paleta: se aplica al documento con `setTheme`
+#     Y decide qué carpeta de arte se sube (`frontend/templates/<slug>/demo/<paletteId>/`). Las dos
+#     cosas van juntas a propósito: el arte está tintado por paleta desde 3-9, y sembrar una paleta
+#     con el arte de otra es exactamente el defecto que 3-CV documentó en `O-07`. Por defecto se usa
+#     la `defaultPaletteId` del `theme.json` real de la plantilla.
+#
 # TODO va por las RUTAS HTTP REALES del módulo nuevo (`handoffs/2-5.md`), sin un solo INSERT en las
 # tablas `tpl_*`. La única excepción, y está documentada desde la fase 2, es `invitation`:
 # `uses_templates2` NO tiene ruta HTTP que la active (ADR-2-4-02, `handoffs/3-0a.md §3`), porque
@@ -29,6 +36,10 @@ ESTADO="${TPL_TEST_STATE_DIR:-/tmp/templates2-pg}/state.env"
 DB="${TPL_DEV_DB:-invitaciones_dev}"
 SLUG="${TPL_DEMO_SLUG:-boda-clasica}"
 VERSION="${TPL_DEMO_VERSION:-1.0.0}"
+# A6 del bloque 3-9: la paleta que se aplica al documento Y la carpeta de arte que se sube (las dos
+# tienen que decir lo mismo). Por defecto, la `defaultPaletteId` del `theme.json` REAL de la
+# plantilla — ningún identificador escrito a mano aquí.
+PALETA="${TPL_DEMO_PALETTE:-$(jq -r .defaultPaletteId "$RAIZ/frontend/templates/$SLUG/$VERSION/theme.json")}"
 EMAIL_USER="${TPL_DEMO_EMAIL:-demo.boda@example.com}"
 EMAIL_MASTER="${TPL_DEMO_EMAIL_MASTER:-demo.master@example.com}"
 PASS="${TPL_DEMO_PASS:-Demo1234!}"
@@ -147,8 +158,18 @@ echo "  (los assetId de defaults.json NO se resuelven: cover.image queda 'empty'
 # ---------------------------------------------------- 5. assets por el camino real (binario crudo)
 echo
 echo "-- 5. assets ----------------------------------------------------------------"
-DEMO="$RAIZ/frontend/templates/$SLUG/demo"
-[ -d "$DEMO" ] || { echo "  falta $DEMO: ejecuta antes 'node frontend/templates/scripts/build-art.mjs'"; exit 1; }
+# A6 del bloque 3-9 — EL ARTE DE DEMOSTRACIÓN ES POR PALETA. `build-art.mjs` genera un juego en
+# `demo/<paletteId>/` por cada paleta del `theme.json`, y aquí se sube el que casa con la paleta que
+# se va a aplicar. Antes había un solo juego, tintado con la paleta por defecto: con `navy` la
+# invitación quedaba con trece imágenes rosas sobre un fondo azul frío (`O-07` de 3-CV).
+DEMO="$RAIZ/frontend/templates/$SLUG/demo/$PALETA"
+if [ ! -d "$DEMO" ]; then
+  echo "  falta $DEMO"
+  echo "  paletas con arte generado para $SLUG: $(ls "$RAIZ/frontend/templates/$SLUG/demo" 2>/dev/null | tr '\n' ' ')"
+  echo "  ejecuta antes 'node frontend/templates/scripts/build-art.mjs', o fija TPL_DEMO_PALETTE a una de ellas"
+  exit 1
+fi
+echo "  arte de la paleta \"$PALETA\" ($DEMO)"
 echo '{}' > "$TMP/assets.json"
 for f in "$DEMO"/*.webp; do
   n="$(basename "$f")"
@@ -182,6 +203,29 @@ for i in $(seq 0 $((N - 1))); do
     "$(jq -r --argjson i "$i" '.[$i].clientBatchId' "$TMP/lotes.json")" "$c" "$(j .applied)" "$REV" \
     "$(jq -r --argjson i "$i" '.[$i].operations | length' "$TMP/lotes.json")"
 done
+
+# -------------------------------------------------------- 6b. paleta (A6 del bloque 3-9)
+# El arte que se acaba de subir está tintado con `$PALETA`; el documento tiene que decir lo mismo, o
+# el sistema vuelve a prometer tres paletas y servir una. Se aplica con `setTheme`, que es la
+# operación REAL del editor (`DomainJson.kt:830`), no un atajo por SQL.
+echo
+echo "-- 6b. paleta ---------------------------------------------------------------"
+# La revisión se relee del servidor en vez de arrastrar `$REV`: cuando un lote sale `applied=false`
+# —porque ese `clientBatchId` ya se aplicó en una corrida anterior, que es lo normal en un script
+# idempotente— la respuesta trae la revisión de ENTONCES, no la actual, y el `setTheme` se iría
+# contra una base vieja (`409 TPL_REVISION_CONFLICT`). Medido [V] sobre la invitación sembrada, que
+# además se comparte entre sesiones (`bitacora/3-cv.md §6`).
+llamar GET "$E/document" "${AUTH_U[@]}" >/dev/null
+REV="$(j .revision)"
+jq -nc --argjson r "$REV" --arg p "$PALETA" \
+  '{baseRevision:$r, clientBatchId:("seed-tema-" + $p), operations:[{op:"setTheme", paletteId:$p}]}' > "$TMP/tema.json"
+CODE="$(llamar POST "$E/document/operations" "${AUTH_U[@]}" "${JSON[@]}" --data-binary "@$TMP/tema.json")"
+if [ "$CODE" = 200 ]; then
+  REV="$(j .revision)"
+  echo "  setTheme paletteId=$PALETA → HTTP $CODE  applied=$(j .applied)  revision=$REV"
+else
+  echo "  setTheme paletteId=$PALETA → HTTP $CODE  $(head -c 300 "$TMP/r.json")"; exit 1
+fi
 
 # ------------------------------------------------------------------------ 7. preflight y release
 echo
@@ -221,6 +265,7 @@ echo "==========================================================================
 echo "  INVITACIÓN PUBLICADA"
 echo "    enlace público   $BASE/public/i/$TOKEN_PUB/render   (JSON del render)"
 echo "    ruta de apps/web /i/$TOKEN_PUB"
+echo "    plantilla        $SLUG@$VERSION   paleta $PALETA"
 echo "    invitationId     $INVITACION      customerId $CUSTOMER_ID"
 echo "    editor           $EMAIL_USER / $PASS"
 echo "=============================================================================="

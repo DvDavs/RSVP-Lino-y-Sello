@@ -5,7 +5,7 @@
 // (que los cose al paquete registrable). Si sólo la aplicara uno, el arte y el tema del paquete
 // dirían cosas distintas.
 
-import { ratio, r2 } from './color.mjs';
+import { ratio, r2, mix } from './color.mjs';
 
 /**
  * CORRECCIÓN DE PALETA POR WCAG 2.2 AA (ADR-3-2d-04).
@@ -125,6 +125,37 @@ export const PIGMENTO_ARTE = {
 /** Devuelve los tokens con los que se PINTA (no los que se publican en `theme.json`). */
 export function pigmentoArte(slug, paletaId, tokens) {
   return { ...tokens, ...(PIGMENTO_ARTE[slug]?.[paletaId] ?? {}) };
+}
+
+/**
+ * TINTE DE ORNAMENTO DENTRO DE UNA ZONA DE TEXTO — A6 del bloque 3-9.
+ *
+ * Los ornamentos del arte se tintaban con `accent` a una opacidad fija. Eso da una LIGEREZA
+ * relativa constante, no un CONTRASTE constante: con `blush` (`#B35B5B`, 2,84:1 contra su tinta)
+ * la zona del título de la portada medía 5,33:1, pero con `navy` (`#2E4A7D`, 1,63:1 contra la suya)
+ * caía a **3,53:1** y con `olive` a **4,28:1** — por debajo del 4,5 que el propio generador exige.
+ * No se veía porque hasta A6 sólo se generaba la paleta por defecto: el defecto estaba latente en
+ * las otras cuatro. Y con A1 deja de ser teórico, porque ahora el texto de la portada se pinta de
+ * verdad en esa zona.
+ *
+ * Aclara `color` hacia el blanco lo JUSTO para que, pintado a `alfa` sobre `fondo`, la tinta encima
+ * llegue a `objetivo`. Si ya llega, devuelve el color intacto (ninguna paleta paga por otra).
+ * Es "corrige el arte, no el umbral" hecho función: el umbral no se toca, se aclara el pigmento.
+ *
+ * `alfa = 0.70` NO es la opacidad declarada del ornamento (0,52): es la opacidad EFECTIVA, medida
+ * sobre el píxel peor de la lámina real. Los trazos de una ramita se solapan (tallo + hoja +
+ * contorno) y el alfa se acumula. Despejada de la medición de `navy` —píxel (1390,263)
+ * `rgb(108,127,162)` con `accent #2E4A7D` sobre `bg #F4F6FA`— da 0,69 en los tres canales; se
+ * redondea a 0,70. Con este valor el modelo reproduce el píxel medido con un error de 3/255, y
+ * `blush` (4,67:1 modelado, 4,65:1 medido) sale INTACTA, que era el objetivo: la paleta que ya
+ * cumplía no cambia ni un byte por arreglar las otras.
+ */
+export function tinteEnZonaDeTexto(color, fondo, ink, alfa = 0.70, objetivo = 4.6) {
+  for (let t = 0; t <= 1.0001; t += 0.01) {
+    const c = mix(color, '#FFFFFF', t);
+    if (ratio(mix(fondo, c, alfa), ink) >= objetivo) return c;
+  }
+  return '#FFFFFF';
 }
 
 /**
