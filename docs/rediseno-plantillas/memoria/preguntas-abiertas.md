@@ -514,3 +514,125 @@ del arreglo, no — el lienzo **no puede** resolver `paletteId → tokens` (cuat
 - [Fase 3 · 3-6] **El alcance de teclado DENTRO del `<iframe>` del lienzo (E-10) queda sin determinar, no como "sin trampa"** — `document.activeElement` del documento padre solo informa el `<IFRAME>` en sí, nunca el nodo real con foco dentro del `sandbox` sin `allow-same-origin`; preguntándole al FRAME por su propio `activeElement` se obtuvieron lecturas INCONSISTENTES entre corridas idénticas (medido: un `<span>` decorativo de `SelectionOverlay.tsx` sin `tabIndex` — verificado leyendo el componente, no puede tener foco de verdad — se reportó "enfocado" varias veces seguidas en una corrida y ninguna en la siguiente). **Supuesto tomado:** `e2e/teclado-editor.spec.ts` se detiene, sin fallar, en el borde del `<iframe>`, y deja el interior sin afirmar nada en ningún sentido — territorio de una auditoría dedicada del lienzo (E-07/A1-A8), no de este archivo. ¿Vale la pena una auditoría de teclado específica DENTRO del lienzo (con el mismo mecanismo que `editor-nucleo.spec.ts` usa para leer su documento — `page.frames().find(f => f.url().includes("/canvas"))` — pero con foco real, no lectura entre documentos), y en qué bloque?
 - [Fase 3 · 3-6] **`window.__editorStore` (de 3-4, ADR-3-5-05) sigue vivo** — `conflicto.spec.ts`/`deshacer.spec.ts` (ambos ahora también envueltos en el mutex de ADR-3-6-02, pero con su lógica interna intacta) lo siguen usando para teclear directamente en el store. No lo retiré por el mismo motivo que 3-5: no tengo mandato para reescribir archivos ajenos bajo presión de tiempo. Sigue siendo la MISMA pregunta abierta de 3-5, sin resolver: ¿quién reescribe esos e2e para conducir la UI real?
 - [Fase 3 · 3-6] **El paso de siembra que añadí a `.github/workflows/ci.yml` (`scripts/seed-demo.sh` con un `state.env` mínimo escrito a mano y `PGPASSWORD` forzado) no se verificó contra un runner real de GitHub Actions** — solo contra el clúster de Postgres de ESTA sesión, simulando el escenario (puerto fijo conocido, sin `pg-ephemeral.sh` de por medio). Riesgos concretos sin confirmar: (a) si `postgresql-client` viene preinstalado en la imagen `ubuntu-latest` que use el runner real en el momento de correr (documentado por GitHub como parte del "toolset" por defecto, pero no verificado aquí); (b) si el `pg_hba.conf` por defecto del servicio `postgres:16` de GitHub Actions exige contraseña de la misma forma que se asumió. ¿Confirma alguien con acceso a GitHub Actions que el paso corre limpio la primera vez que se dispare el workflow?
+
+## Fase 3 · 3-8 — corrección de las ocho fricciones altas de la revisión de uso (7)
+
+- **[ALTA]** [P-3-8-6] **La fecha del evento sigue sin poder cambiarla la clienta** (U-3, resuelto solo
+  a medias). Verificado en el backend: **ninguna ruta de cliente escribe `invitation.date`** — solo
+  `PUT /admin/invitations/{id}`, rol ADMIN (`InvitationAdminService.kt:414`); `POST
+  /user/invitations/create` la fija al contratar y nada la modifica después. El editor la muestra 🔒
+  porque es `source: "business"` y la composición ignora cualquier valor que se escriba en
+  `document.content` para esos bloques (I-28). **Supuesto tomado (ADR-3-8-06):** el candado deja de
+  ser mudo —lleva un enlace «Dónde se cambia» a `/ayuda#fecha`, que explica con todas las letras que
+  hoy solo puede cambiarla quien gestiona la cuenta y cómo pedirlo—, pero **no se inventa una
+  pantalla que edite lo que la API no deja editar**. ¿Se abre una ruta de cliente para la fecha (y
+  con qué reglas: se puede cambiar después de publicar, hay que avisar a los invitados) y en qué
+  fase? Sin ella, el tercer verbo del criterio de terminado del dueño («cambiar la fecha») no lo
+  puede completar nadie sin escribir a soporte.
+
+- **[ALTA]** [P-3-8-5] **El webhook `/api/revalidate` del backend sigue sin configurarse en el
+  arranque** — `application.yml:125-128` deja `TEMPLATES2_REVALIDATE_URL`/`_TOKEN` vacías («VACIAS =
+  FUNCION DESACTIVADA») y el arranque documentado no fija `REVALIDATE_SECRET` en el frontend, así que
+  el `RevalidationNotifier` (que funciona y está probado) no llama a nadie. `src/**` y `scripts/**`
+  son zona prohibida para este bloque. **Supuesto tomado (ADR-3-8-04):** el editor dispara la
+  invalidación por su cuenta contra un handler propio (`/api/revalidate/tras-publicar`) y espera su
+  respuesta antes de decir «ya se puede ver». Eso cubre lo que la clienta hace desde el editor, pero
+  **no** cubre los cambios que no nacen del editor (una despublicación administrativa, un cambio de
+  datos de negocio que altera el render). ¿Quién fija las tres variables de entorno en el arranque
+  real —y en `scripts/dev-backend.sh` para que se pueda medir de punta a punta— y en qué bloque?
+
+- [P-3-8-1] **Qué hace `/editor` cuando el cliente tiene varias invitaciones, o ninguna** — la pregunta
+  no estaba respondida en `04 §6` (que solo define `/editor` como catálogo) ni en ninguna memoria.
+  **Supuesto tomado (ADR-3-8-02, el más conservador):** `/editor` lista «Mis invitaciones»; con
+  ninguna, se explica que la invitación se crea al contratar y **no se pinta ningún botón**; con una
+  sin plantilla, las tarjetas actúan sobre ella; con varias, un `<select>` etiquetado elige el
+  destino. Elegir plantilla **nunca crea** una invitación (no existe ruta que lo permita, ADR-2-4-02).
+  ¿Es esta la puerta de entrada que quiere el dueño, o el cliente debería llegar al editor desde el
+  sitio de marketing / su panel de cuenta, con la invitación ya elegida en la URL?
+
+- [P-3-8-2] **Una invitación no tiene nombre propio en el modelo de datos.** `InvitationResponseItem`
+  (`InvitationResponse.kt:3`) da `id`, `status`, `event` («Boda»), `plan`, `date`, `time` — nada que
+  distinga dos bodas de la misma fecha, y `04 §6.2` dibuja «Boda de Ana y Luis». **Supuesto tomado:**
+  la lista muestra el nombre HUMANO leído del documento ya empezado (`tituloDe(composed)` →
+  «Mariana & Rodrigo»); las que aún no tienen plantilla no tienen de dónde sacarlo y salen como
+  «Boda · sin plantilla todavía», con la fecha y su número («nº 37») para poder distinguirlas y para
+  poder citarlo a soporte. ¿Se añade un nombre editable a la invitación (campo de negocio), o basta
+  con derivarlo del documento?
+
+- [P-3-8-3] **Cómo se decide que un arranque es «un despliegue real»** para exigir un origen público
+  no local (U-6). El criterio obvio —`NODE_ENV=production`— tumbaría las propias compuertas del
+  repositorio: Playwright y Lighthouse levantan `next start` (producción) sobre `127.0.0.1`, y
+  `lighthouserc.cjs` es zona prohibida para este bloque, así que no se le puede pasar una puerta de
+  escape. **Supuesto tomado (ADR-3-8-03):** el arranque falla cuando `NEXT_PUBLIC_SITE_URL` falta o
+  es local **y** `NEXT_PUBLIC_API_BASE_URL` NO apunta al bucle local (señal de que se habla con un
+  backend real); `PERMITIR_ORIGEN_LOCAL=1` es la puerta de escape explícita. ¿Prefiere el dueño una
+  bandera de despliegue explícita (`INVITACIONES_ENTORNO=produccion`) en vez de la heurística?
+
+- [P-3-8-4] **La incoherencia de fechas avisa, no bloquea** (U-4). El brief pedía «un bloqueo o al
+  menos un aviso». **Supuesto tomado (ADR-3-8-05):** aviso ⚠ que no impide publicar, porque una boda
+  de dos días, un civil la víspera o un brunch al día siguiente son legítimos y un bloqueo dejaría a
+  esas clientas sin publicar y sin entender por qué. ¿Se quiere endurecer a bloqueo cuando la
+  diferencia supera cierto margen (p. ej. más de 2 días), o se deja como aviso?
+
+- [P-3-8-7] **`pnpm -r lint` está en rojo por dos hallazgos ajenos a este bloque**, ninguno en
+  archivos que 3-8 haya tocado: `e2e/preparar.ts:120` («There is no `cause` attached to the symptom
+  error being thrown», regla `preserve-caught-error`) y `e2e/flujo-principal.spec.ts:94`
+  (`campoFoto` asignada y no usada). `e2e/**` ajeno es de solo lectura para este bloque (el encargo
+  dice «solo archivos nuevos tuyos»). **Supuesto tomado:** no se tocan; quedan aquí anotados con
+  archivo y línea. ¿Quién los corrige — el mismo bloque que dejó esos archivos, o quien esté ahora
+  sobre `eslint.config.mjs`?
+## Fase 3 · 3-7 — los tres defectos de cierre (5)
+
+- **[Cierra la de ALTA de 3-6]** El defecto de `store.ts` está **corregido** (ADR-3-7-01,
+  `bitacora/3-7.md` §1): `applyOperationToRawDocument` en los cuatro puntos de llamada, más
+  `applyIdMapToRawDocument` que el parche propuesto no contemplaba. La sospecha que 3-6 marcó `[I]`
+  sobre el undo del segundo `setBlock` queda **confirmada `[V]`** y cubierta con prueba.
+- **[Cierra la de MEDIA de 3-6]** El job `frontend` está en verde (ADR-3-7-02): plugins registrados,
+  `pnpm -r lint` con código de salida 0, `e2e` desbloqueado por `needs:`.
+- **[Cierra la del LCP de 3-6]** La contradicción 3-3/3-6 está resuelta **midiendo**, no eligiendo
+  (ADR-3-7-03/04, `evidencia/fase-3/cierre/lcp-3-7.md`): la métrica era bimodal con el simulador de
+  Lantern, y la causa real del incumplimiento era la animación de portada, no las tipografías. Ya no
+  hace falta re-medir en un runner de GitHub para decidir.
+
+- **[MEDIA]** [Fase 3 · 3-7] **`total-blocking-time` incumple el objetivo de `04 §16.1` cuando se
+  mide con estrangulamiento real**: 215-626 ms frente a los 200 ms declarados (con `simulate` salía
+  en 99-160 ms). Está declarado `warn` en `lighthouserc.cjs`, así que no rompe la compuerta. **No es
+  una regresión de 3-7** —es el mismo código medido mejor, ver ADR-3-7-03—, pero es el primer dato
+  fiable de CPU de la ruta pública. El mismo aviso vale para el CLS: pasa de 0,000 simulado a 0,033
+  medido, muy por debajo de 0,1 pero ya no cero. ¿Se abre trabajo de INP/TBT sobre `/i/[publicToken]`
+  (los candidatos que Lighthouse señala son `unused-javascript` 53 KiB y `legacy-javascript`
+  13 KiB), o se acepta el valor y se sube el objetivo de `04 §16.1` con ADR?
+
+- [Fase 3 · 3-7] **`restoreFromHistory()` deja `s.document` obsoleto**, por la misma raíz que D1:
+  `RestoreResponse` (`lib/api-types.ts`) no incluye el documento crudo, igual que
+  `OperationBatchResponse`. El síntoma visible es el mismo (el `assetId` de un campo `image` deja de
+  resolver tras restaurar una revisión), pero el único arreglo posible desde el cliente es recargar
+  entero con `load()`, que es un cambio de flujo y no un parche. No muerde el undo, porque `restore`
+  vacía ambas pilas (§11.4). **Supuesto tomado:** fuera del alcance de este bloque, que corrige el
+  camino de las 11 operaciones. ¿Se resuelve haciendo que `restoreFromHistory` recargue, o
+  añadiendo `document` a `RestoreResponse` y a `OperationBatchResponse` del lado del backend — que
+  es el arreglo de raíz para los dos casos?
+
+- [Fase 3 · 3-7] **Encender `react/no-array-index-key` y `react-hooks/exhaustive-deps` en todo el
+  monorepo saca 5 errores y 8 avisos REALES en `apps/web`** (`ConflictDialog.tsx:79,148`,
+  `PublishDialog.tsx:188,205`, `ListTextField.tsx:52` usan el índice como `key`;
+  `GroupField`/`PhotoManager` recrean una expresión lógica que rompe la memoización de su `useMemo`,
+  el mismo defecto que se corrigió en `CanvasContext.tsx`; cuatro campos de `components/fields/**`
+  omiten `reset` de sus dependencias). ADR-3-7-02 las enciende solo en `packages/sections/src/**`
+  porque ampliar la política sobre código que este bloque no revisa no es «arreglar el job roto».
+  ¿En qué bloque se encienden para todo el monorepo y se corrigen esos 13 hallazgos?
+
+- [Fase 3 · 3-7] **El worktree asignado vuelve a llegar en `4358fc8`** (previo a la fase 2, sin
+  `frontend/` ni `docs/rediseno-plantillas/diseno/`). Es el segundo bloque seguido —3-6 lo documenta
+  en su §1— que gasta su primer turno en `git reset --hard` a la rama de orquestación. ¿Puede el
+  aprovisionamiento crear los worktrees desde `claude/fase-3-frontend-orchestration-yuh8sx` en vez
+  de desde el commit raíz?
+
+- [Fase 3 · 3-7] **La invitación de demostración cambió de contenido a mitad de las mediciones de
+  LCP** (`Paulina & Emilio` → `Teclado & Sololo`): otra sesión de agente corría e2e contra la MISMA
+  fila sembrada. El mutex de ADR-3-6-02 serializa a los workers de Playwright DENTRO de una corrida,
+  pero no puede saber nada de un proceso ajeno como LHCI. No altera las conclusiones de D3 (las
+  comparaciones A/B se hicieron todas después del cambio, sobre el mismo contenido), pero es la
+  tercera vez que la invitación compartida entre sesiones contamina una medición. Es la misma
+  pregunta de aprovisionamiento que 3-5 y 3-6 ya elevaron: **una invitación de demostración por
+  sesión**, no una por máquina.

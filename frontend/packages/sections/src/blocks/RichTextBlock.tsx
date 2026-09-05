@@ -26,13 +26,11 @@ function renderSpan(span: RichSpan, key: number) {
       </a>
     );
   }
-  // eslint-disable-next-line react/no-array-index-key
   return <span key={key}>{node}</span>;
 }
 
 function renderParagraph(paragraph: RichParagraph, key: number) {
   return (
-    // eslint-disable-next-line react/no-array-index-key
     <p key={key} className={styles.paragraph}>
       {paragraph.content.map((span, index) => renderSpan(span, index))}
     </p>

@@ -9,7 +9,13 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 import { twMerge } from "tailwind-merge";
 
-const estilosBoton = cva(
+/**
+ * Se exporta (bloque 3-8) para poder vestir un `<Link>` con la MISMA apariencia sin convertirlo en
+ * `<button>`: un destino que navega debe ser un enlace de verdad — se abre en pestaña nueva, se
+ * copia, y los lectores de pantalla lo anuncian como enlace. No se añade `asChild`/Slot: sería una
+ * dependencia nueva para un caso que una clase resuelve.
+ */
+export const estilosBoton = cva(
   "inline-flex items-center justify-center gap-2 rounded-ui-pill text-ui-aux font-semibold transition-colors duration-[var(--ui-duration)] ease-[var(--ui-ease)] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {

@@ -40,10 +40,12 @@ export function CanvasProvider({
 }: CanvasProviderProps) {
   // `onActivate` no tiene valor por defecto útil (activar sin destino no significa nada): si no
   // se da, se sustituye por un no-op que además avisa en desarrollo — mejor que fallar en silencio.
-  const activate = onActivate ?? (() => {});
+  // `useMemo` y no una expresion suelta: recrear el no-op en cada render hacia que el `useMemo` de
+  // abajo cambiara de valor SIEMPRE, es decir, que no memoizara nada y todo consumidor del contexto
+  // se re-renderizara en cada render del proveedor (`react-hooks/exhaustive-deps`, 3-7 D2).
+  const activate = useMemo(() => onActivate ?? (() => {}), [onActivate]);
   const value = useMemo<CanvasContextValue>(
     () => ({ selected, onActivate: activate, pending, reportWarning }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selected, activate, pending, reportWarning],
   );
   return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;

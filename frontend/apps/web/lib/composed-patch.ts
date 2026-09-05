@@ -18,6 +18,8 @@
 // valor anterior y `aria-busy="true"` hasta que llega la respuesta. Nada se descarta en silencio (P1).
 import type {
   ComposedDocument,
+  InvitationDocument,
+  GroupValue,
   Operation,
   ThemeSpec as ThemeSpecType,
   ComposedBlock as ComposedBlockSchema,
@@ -420,4 +422,161 @@ export function applyPatchEntries(composed: ComposedDocument, entries: readonly 
     loc.block.provenance = entrada.provenance;
   }
   return copia;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Aplicación optimista sobre el documento CRUDO (3-7 D1, ADR-3-7-01)
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Hermana de `applyOperationOptimistic`, pero sobre `InvitationDocument` (el árbol CRUDO) en vez de
+ * sobre `ComposedDocument`.
+ *
+ * POR QUÉ EXISTE (bitácora 3-6 §6.1, ADR-3-6-04): el store mantiene los dos árboles en paralelo y
+ * hasta 3-6 solo parcheaba el compuesto. `document.content` únicamente se asignaba en `load()` y al
+ * resolver un conflicto, y la respuesta de `POST .../document/operations` **no** reenvía el
+ * documento (`OperationBatchResponse`, `lib/api-types.ts`: `revision`, `applied`, `idMap`,
+ * `composed`, `report` — y nada más). Consecuencias medidas: (a) `ScalarBlockField.tsx:74` saca el
+ * `assetId` de un campo `image` del árbol crudo, así que tras subir la PRIMERA foto de un bloque el
+ * botón seguía diciendo «Elegir foto» y `alCambiarAlt`/`alMoverFocal` (que hacen `if (!value)
+ * return`) dejaban de mandar nada hasta recargar; (b) `ctxBloque`/`ctxItemBlock` calculan la INVERSA
+ * de undo leyendo ese mismo árbol, así que un segundo `setBlock` sobre el mismo bloque en la misma
+ * sesión se invertía contra el valor ORIGINAL, no contra el de la primera edición.
+ *
+ * ES UN ESPEJO EXACTO DE LAS MUTACIONES DE `applyOperation` (`packages/schema/operations-reducer.ts`,
+ * el reductor único de `01 §6.5`), **sin** su validación: la validación la hace el servidor, es él
+ * quien manda, y el paso (1) de `aplicarOperacion` ya rechaza lo malformado. Cuando el servidor
+ * rechaza un lote (`422`), `04 §12.5` obliga a recargar `GET .../document` entero, que es lo que
+ * repara cualquier deriva. Cada `case` cita la línea del reductor que copia.
+ *
+ * Muta `doc` EN SITIO (siempre se llama sobre un borrador de Immer, igual que su hermana).
+ */
+export function applyOperationToRawDocument(doc: InvitationDocument, op: Operation): void {
+  // El documento puede llegar parcial (fixtures de prueba, o un `GET` futuro que recorte campos):
+  // se parchea lo que existe y se ignora lo que no, nunca se lanza. Parchear es una MEJORA de la
+  // interfaz optimista; la verdad sigue llegando del servidor (§12.4), así que reventar aquí sería
+  // cambiar un desfase de pintado por un editor caído.
+  const contenido: Record<string, unknown> | undefined = doc.content as Record<string, unknown> | undefined;
+  const secciones = doc.structure?.sections;
+  switch (op.op) {
+    // reducer `setBlock`: `d.content[op.blockId] = op.value`
+    case "setBlock":
+      if (contenido) contenido[op.blockId] = op.value;
+      return;
+    // reducer `clearBlock`: `delete d.content[op.blockId]` — BORRA la clave, no la pone a `null`.
+    // Es justo lo que `ctxBloque` necesita para distinguir "el usuario tenía un valor" de "no lo
+    // tenía" y elegir `clearBlock` como inversa (ADR-1R-F-04, U-09) en vez de `setBlock(default)`.
+    case "clearBlock":
+      if (contenido) delete contenido[op.blockId];
+      return;
+    // reducer `addItem`: inserta con el ULID del servidor. Aquí se inserta con el `tempId`, y
+    // `applyIdMapToRawDocument` lo reescribe en cuanto llega el `idMap` (§12.3).
+    case "addItem": {
+      if (!contenido) return;
+      const items = itemsCrudos(doc, op.groupId);
+      const i = op.index ?? items.length;
+      items.splice(Math.min(Math.max(i, 0), items.length), 0, { itemId: op.tempId, values: { ...op.values } });
+      contenido[op.groupId] = { kind: "group", items };
+      return;
+    }
+    case "removeItem": {
+      if (!contenido) return;
+      const items = itemsCrudos(doc, op.groupId);
+      const i = items.findIndex((x) => x.itemId === op.itemId);
+      if (i < 0) return;
+      items.splice(i, 1);
+      contenido[op.groupId] = { kind: "group", items };
+      return;
+    }
+    case "moveItem": {
+      if (!contenido) return;
+      const items = itemsCrudos(doc, op.groupId);
+      const i = items.findIndex((x) => x.itemId === op.itemId);
+      if (i < 0) return;
+      const [x] = items.splice(i, 1);
+      if (x) items.splice(Math.min(Math.max(op.toIndex, 0), items.length), 0, x);
+      contenido[op.groupId] = { kind: "group", items };
+      return;
+    }
+    case "setItemBlock": {
+      if (!contenido) return;
+      const items = itemsCrudos(doc, op.groupId);
+      const item = items.find((x) => x.itemId === op.itemId);
+      if (!item) return;
+      item.values[op.blockId] = op.value;
+      contenido[op.groupId] = { kind: "group", items };
+      return;
+    }
+    // reducer `clearItemBlock`: `delete nuevos[i].values[op.blockId]` — misma razón que `clearBlock`.
+    case "clearItemBlock": {
+      if (!contenido) return;
+      const items = itemsCrudos(doc, op.groupId);
+      const item = items.find((x) => x.itemId === op.itemId);
+      if (!item) return;
+      delete item.values[op.blockId];
+      contenido[op.groupId] = { kind: "group", items };
+      return;
+    }
+    case "setSectionVisible": {
+      const e = secciones?.find((x) => x.key === op.sectionKey);
+      if (e) e.visible = op.visible;
+      return;
+    }
+    case "setSectionVariant": {
+      const e = secciones?.find((x) => x.key === op.sectionKey);
+      if (e) e.variant = op.variant;
+      return;
+    }
+    // reducer `reorderSections`: exige PERMUTACIÓN exacta (I-24). El cliente no la valida (lo hace
+    // el servidor), así que las claves que el lote no nombre conservan su orden relativo al final
+    // en vez de desaparecer — misma regla que `applyOperationOptimistic` sobre el compuesto (P1).
+    case "reorderSections": {
+      if (!secciones) return;
+      const porClave = new Map(secciones.map((e) => [e.key, e] as const));
+      const ordenadas: InvitationDocument["structure"]["sections"] = [];
+      for (const key of op.order) {
+        const e = porClave.get(key);
+        if (e) {
+          ordenadas.push(e);
+          porClave.delete(key);
+        }
+      }
+      for (const e of secciones) if (porClave.has(e.key)) ordenadas.push(e);
+      doc.structure.sections = ordenadas;
+      return;
+    }
+    // reducer `setTheme`: solo los dos IDENTIFICADORES; los tokens no viven en el documento.
+    case "setTheme":
+      if (!doc.theme) return;
+      if (op.paletteId !== undefined) doc.theme.paletteId = op.paletteId;
+      if (op.fontSetId !== undefined) doc.theme.fontSetId = op.fontSetId;
+      return;
+  }
+}
+
+/** Ítems crudos del grupo, o `[]` si el bloque aún no existe (`itemsOf` del reductor). */
+function itemsCrudos(doc: InvitationDocument, groupId: string): GroupValue["items"] {
+  const v = doc.content?.[groupId];
+  return v !== undefined && v !== null && typeof v === "object" && (v as { kind?: string }).kind === "group"
+    ? (v as GroupValue).items
+    : [];
+}
+
+/**
+ * Reescritura `tempId → ULID` dentro del documento CRUDO (§12.3). Sin ella, un `addItem` dejaría el
+ * `tmp:…` grabado para siempre en `document.content[grupo].items[].itemId` mientras el servidor ya
+ * usa el ULID: `ctxItemBlock` buscaría por el ULID reescrito y no encontraría el ítem, y la inversa
+ * de un `setItemBlock` posterior saldría mal (`clearItemBlock` donde tocaba `setItemBlock`).
+ */
+export function applyIdMapToRawDocument(doc: InvitationDocument, idMap: Record<string, string>): void {
+  if (Object.keys(idMap).length === 0) return;
+  if (!doc.content) return;
+  for (const valor of Object.values(doc.content)) {
+    if (valor === undefined || valor === null || typeof valor !== "object") continue;
+    if ((valor as { kind?: string }).kind !== "group") continue;
+    for (const item of (valor as GroupValue).items) {
+      const nuevo = idMap[item.itemId];
+      if (nuevo !== undefined) item.itemId = nuevo;
+    }
+  }
 }

@@ -627,3 +627,104 @@ describe("candado de pestaña y avisos", () => {
     expect(store.getState().avisos.some((a) => a.texto.includes("v2"))).toBe(true);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// D1 (bloque 3-7, ADR-3-7-01) · el documento CRUDO sigue a las 11 operaciones
+//
+// Estas cinco pruebas FALLAN sin el arreglo de 3-7: antes, `applyOperationOptimistic` parcheaba
+// solo `composed` y `document.content` se quedaba en el valor que trajo `load()` hasta recargar la
+// página. El servidor tampoco lo reenvía (`OperationBatchResponse` no incluye `document`).
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+
+const ULID_C = "01J8ZQ5W9K3TQY7B4N2XCVMR8K";
+
+const ASSET_1 = "as_01J8ZQ5W9K3TQY7B4N2XCVMR6H";
+const foto = (assetId: string, alt = "") =>
+  ({ kind: "image", assetId, alt, focal: { x: 0.5, y: 0.5 } }) as Extract<Operation, { op: "setBlock" }>["value"];
+
+function itemsCrudosDe(store: ReturnType<typeof nuevoStore>["store"], groupId: string): { itemId: string }[] {
+  const v = store.getState().document?.content[groupId];
+  return v !== undefined && (v as { kind?: string }).kind === "group" ? (v as { items: { itemId: string }[] }).items : [];
+}
+
+describe("D1 · el documento CRUDO sigue a las operaciones (3-7, ADR-3-7-01)", () => {
+  it("subir una foto deja el `assetId` en `document.content` SIN recargar, y sigue ahí tras la respuesta del servidor", async () => {
+    const { store } = await cargado();
+    expect(store.getState().document?.content["cover.image"]).toBeUndefined();
+
+    // Exactamente lo que hace `ImageField.onCommit` cuando termina la subida.
+    store.getState().setBlock("cover.image", foto(ASSET_1));
+
+    // ANTES de 3-7 esto seguía `undefined`: `ScalarBlockField.tsx:74` saca el `assetId` de aquí, así
+    // que `ImageField` recibía `value: null`, el botón se quedaba en «Elegir foto» el resto de la
+    // sesión y `alCambiarAlt`/`alMoverFocal` (ambos con `if (!value) return`) no mandaban nada.
+    expect(store.getState().document?.content["cover.image"]).toEqual(foto(ASSET_1));
+
+    // Y la reconciliación de §12.4 no lo borra: la respuesta trae `composed`/`report`, nunca el
+    // documento crudo, así que el `assetId` optimista es el único que hay hasta el próximo `load()`.
+    store.getState().flushNow();
+    await vi.waitFor(() => expect(store.getState().saveState).toBe("idle"));
+    expect(store.getState().document?.content["cover.image"]).toEqual(foto(ASSET_1));
+  });
+
+  it("un SEGUNDO `setBlock` sobre el mismo bloque se invierte contra la PRIMERA edición, no contra el valor original de la sesión", async () => {
+    let reloj = 1_000_000;
+    const { store } = nuevoStore({ now: () => reloj });
+    await store.getState().load(5);
+    // `cover.subtitle` llega con valor de USUARIO ("Te esperamos") en `documentFixture()`.
+    store.getState().setBlock("cover.subtitle", texto("Primera"));
+    reloj += 60_000; // fuera de la ventana de coalescencia: dos entradas de undo distintas
+    store.getState().setBlock("cover.subtitle", texto("Segunda"));
+
+    expect(store.getState().undo).toHaveLength(2);
+    // Sin el arreglo la inversa era `setBlock("Te esperamos")`: `ctxBloque` leía el árbol crudo, que
+    // seguía con el valor de `load()`. Un solo «deshacer» saltaba DOS ediciones hacia atrás.
+    expect(store.getState().undo[1]?.revert).toEqual([
+      { op: "setBlock", blockId: "cover.subtitle", value: texto("Primera") },
+    ]);
+  });
+
+  it("`clearBlock` BORRA la clave del árbol crudo, así la inversa de un `setBlock` posterior vuelve a ser `clearBlock` (ADR-1R-F-04)", async () => {
+    let reloj = 1_000_000;
+    const { store } = nuevoStore({ now: () => reloj });
+    await store.getState().load(5);
+    store.getState().clearBlock("cover.subtitle");
+    expect(store.getState().document?.content["cover.subtitle"]).toBeUndefined();
+
+    reloj += 60_000;
+    store.getState().setBlock("cover.subtitle", texto("Nuevo"));
+    // Sin el arreglo el árbol crudo seguía diciendo "Te esperamos" y la inversa habría RESUCITADO
+    // un valor que el usuario ya había borrado.
+    expect(store.getState().undo.at(-1)?.revert).toEqual([{ op: "clearBlock", blockId: "cover.subtitle" }]);
+  });
+
+  it("`addItem` escribe el ítem con su `tempId` y `applyServerState` lo reescribe al ULID (§12.3, U-11)", async () => {
+    const { store } = await cargado();
+    const tempId = store.getState().addItem("gallery.photos", {});
+    expect(itemsCrudosDe(store, "gallery.photos").map((i) => i.itemId)).toContain(tempId);
+
+    store.getState().applyServerState({
+      revision: 4,
+      applied: true,
+      idMap: { [tempId]: ULID_C },
+      composed: composedFixture(),
+      report: { missingRequired: [], stillDefault: [], orphanContent: [], orphanSections: [], invalidValues: [], themeFallback: null },
+    });
+
+    const ids = itemsCrudosDe(store, "gallery.photos").map((i) => i.itemId);
+    expect(ids).toContain(ULID_C);
+    expect(ids).not.toContain(tempId);
+  });
+
+  it("las operaciones estructurales también llegan al árbol crudo (`setSectionVisible`, `reorderSections`, `setTheme`)", async () => {
+    const { store } = await cargado();
+    store.getState().setSectionVisible("story", false);
+    store.getState().reorderSections(["gallery", "cover", "story"]);
+    store.getState().setTheme({ paletteId: "blush" });
+
+    const doc = store.getState().document;
+    expect(doc?.structure.sections.find((s) => s.key === "story")?.visible).toBe(false);
+    expect(doc?.structure.sections.map((s) => s.key)).toEqual(["gallery", "cover", "story"]);
+    expect(doc?.theme.paletteId).toBe("blush");
+  });
+});
