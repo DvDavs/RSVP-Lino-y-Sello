@@ -37,6 +37,8 @@ export default defineConfig({
         "components/ui/**/*.{ts,tsx}",
         "components/public/**/*.{ts,tsx}",
         "components/editor/**/*.{ts,tsx}",
+        // Bloque 3-5: los 14 campos del panel de contenido y sus pruebas (U-17 y una por tipo de bloque).
+        "components/fields/**/*.{ts,tsx}",
       ],
       exclude: ["**/*.test.{ts,tsx}", "**/*.d.ts"],
       thresholds: { lines: 60, functions: 65, branches: 50, statements: 60 },

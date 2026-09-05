@@ -12,14 +12,19 @@
 // acciones de `useEditorStore`.
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { BlockForm } from "@/components/editor/BlockForm";
 import { CanvasFrame } from "@/components/editor/CanvasFrame";
 import { ConflictDialog } from "@/components/editor/ConflictDialog";
+import { PublishDialog } from "@/components/editor/PublishDialog";
 import { SaveIndicator } from "@/components/editor/SaveIndicator";
+import { SectionList } from "@/components/editor/SectionList";
+import { ThemePicker } from "@/components/editor/ThemePicker";
 import { UndoRedoBar } from "@/components/editor/UndoRedoBar";
 import { ViewportToggle } from "@/components/editor/ViewportToggle";
 import { Button } from "@/components/ui/button";
 import { es_MX } from "@/lib/i18n";
-import { useEditorStore, useSectionRows } from "@/lib/store";
+import { sembrarManifiestoFixture, useTemplateManifest } from "@/lib/manifest";
+import { useEditorStore } from "@/lib/store";
 import { createTabLock, type TabLock } from "@/lib/tab-lock";
 
 export default function PaginaEditorInvitacion() {
@@ -34,8 +39,18 @@ export default function PaginaEditorInvitacion() {
   const recovered = useEditorStore((s) => s.recovered);
   const tabRole = useEditorStore((s) => s.tabRole);
   const selection = useEditorStore((s) => s.selection);
-  const filas = useSectionRows();
+  const panel = useEditorStore((s) => s.panel);
   const candadoRef = useRef<TabLock | null>(null);
+  const panelRef = useRef<HTMLElement | null>(null);
+  const { manifest, theme, status: manifestStatus } = useTemplateManifest(invitationId);
+
+  // Al cambiar entre "lista de secciones" y "contenido de un bloque" el panel es contenido NUEVO:
+  // sin esto, el `<aside>` conserva el `scrollTop` de la vista anterior y el título/las primeras
+  // preguntas del formulario nuevo quedan tapados arriba del recuadro visible (visto en las
+  // capturas de evidencia — `bitacora/3-5.md`).
+  useEffect(() => {
+    panelRef.current?.scrollTo({ top: 0 });
+  }, [panel, selection?.sectionKey]);
 
   // ── Carga ─────────────────────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -58,16 +73,30 @@ export default function PaginaEditorInvitacion() {
   }, [invitationId]);
 
   // ── Enganche de pruebas de punta a punta ──────────────────────────────────────────────────
-  // `e2e/` conduce el editor por las MISMAS 11 acciones que usará el panel de 3-5, porque los
-  // formularios del panel son de ese bloque y todavía no existen. Va detrás de una variable de
-  // entorno pública que solo pone `playwright.config.ts`: en un despliegue real no está definida y
-  // este `useEffect` no expone nada. El store NO contiene el token de sesión (vive solo en
-  // `lib/api-client.ts`, P8), así que el enganche no filtra ningún secreto.
+  // `window.__editorStore` sigue vivo: 3-4 avisó en su handoff que se retira "cuando BlockForm
+  // permita teclear de verdad" — ya lo permite (este bloque), pero `editor-nucleo.spec.ts`,
+  // `deshacer.spec.ts` y `conflicto.spec.ts` (e2e AJENOS, fuera de mi alcance) siguen construidos
+  // sobre él; quitarlo los rompe. Se deja para un bloque posterior que migre esos tres archivos a
+  // interacción real y entonces sí lo retire (`bitacora/3-5.md`).
+  //
+  // `window.__seedManifestFixture` es NUEVO de este bloque: el `manifest` que promete el contrato
+  // congelado (`handoffs/3-5.md` §1) todavía no llega por HTTP (verificado sobre
+  // `Templates2EditorDtos.kt`). Mis propios e2e (`paneles.spec.ts`, `imagenes.spec.ts`) lo usan para
+  // sembrar un manifiesto REAL (`TemplateManifest.safeParse`, mismo esquema) mientras el resto del
+  // flujo sigue siendo el backend de verdad, sin mocks (`secciones.spec.ts`/`publicar.spec.ts` no lo
+  // necesitan: ni reordenar ni publicar dependen del manifiesto). Ambos ganchos comparten guarda:
+  // en un despliegue real `NEXT_PUBLIC_E2E_HOOKS` no está definida y este `useEffect` no expone nada.
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_E2E_HOOKS !== "1") return;
-    (window as unknown as { __editorStore?: typeof useEditorStore }).__editorStore = useEditorStore;
+    const w = window as unknown as {
+      __editorStore?: typeof useEditorStore;
+      __seedManifestFixture?: typeof sembrarManifiestoFixture;
+    };
+    w.__editorStore = useEditorStore;
+    w.__seedManifestFixture = sembrarManifiestoFixture;
     return () => {
-      delete (window as unknown as { __editorStore?: typeof useEditorStore }).__editorStore;
+      delete w.__editorStore;
+      delete w.__seedManifestFixture;
     };
   }, []);
 
@@ -145,10 +174,7 @@ export default function PaginaEditorInvitacion() {
           <UndoRedoBar />
           <ViewportToggle />
           <SaveIndicator />
-          {/* EXTENSIÓN 3-5: `PublishDialog` (preflight → release, 04 §7.1 pasos 10-12). */}
-          <Button size="sm" disabled title="La publicación llega en el siguiente bloque">
-            Publicar
-          </Button>
+          <PublishDialog invitationId={invitationId} />
         </div>
       </header>
 
@@ -216,44 +242,20 @@ export default function PaginaEditorInvitacion() {
       ))}
 
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(280px,340px)_1fr]">
-        <aside className="overflow-y-auto border-r border-ui-border bg-ui-surface p-4" aria-label={es_MX.editor.panel.secciones}>
-          <h2 className="text-ui-body font-semibold text-ui-ink-heading">{es_MX.editor.panel.secciones}</h2>
-          {/*
-            EXTENSIÓN 3-5 — aquí van `SectionList` (mostrar/ocultar con `setSectionVisible`,
-            reordenar con dnd-kit + alternativa de teclado sobre `reorderSections`, elegir variante
-            con `setSectionVariant`) y, con un bloque seleccionado, `BlockForm` (react-hook-form +
-            resolver del `BlockSpec`, llamando a `setBlock`/`clearBlock`/`setItemBlock`/
-            `clearItemBlock`/`addItem`/`removeItem`/`moveItem`).
-            La lista de abajo es la mínima navegable: da clic-a-seleccionar y el estado de
-            visibilidad, para que el ciclo completo del núcleo se pueda ver y probar hoy.
-          */}
-          <ul className="mt-3 flex flex-col gap-1">
-            {filas.map((fila) => (
-              <li key={fila.key}>
-                <button
-                  type="button"
-                  data-testid={`section-row-${fila.key}`}
-                  aria-current={selection?.sectionKey === fila.key ? "true" : undefined}
-                  onClick={() => {
-                    // Al pulsar una fila el lienzo se desplaza a esa sección (04 §9.3
-                    // `SCROLL_TO_SECTION`) y la selección pasa a la sección.
-                    useEditorStore.getState().select({ sectionKey: fila.key, blockId: fila.key });
-                    useEditorStore.getState().scrollToSection(fila.key);
-                  }}
-                  className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-ui-control border-l-3 px-3 text-left text-ui-aux transition-colors ${
-                    selection?.sectionKey === fila.key
-                      ? "border-ui-accent bg-ui-accent-soft font-semibold text-ui-accent-soft-ink"
-                      : "border-transparent text-ui-ink hover:bg-ui-bg-alt"
-                  }`}
-                >
-                  <span className="truncate">{fila.title}</span>
-                  <span className={`shrink-0 ${fila.visible ? "text-ui-ink-muted" : "text-ui-warning"}`}>
-                    {fila.visible ? "Visible" : "Oculta"}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+        <aside ref={panelRef} className="overflow-y-auto border-r border-ui-border bg-ui-surface p-4" aria-label={es_MX.editor.panel.secciones}>
+          {panel === "block" && selection ? (
+            <BlockForm invitationId={invitationId} manifest={manifest} manifestStatus={manifestStatus} />
+          ) : (
+            <div className="flex flex-col gap-6">
+              <div>
+                <h2 className="mb-3 text-ui-body font-semibold text-ui-ink-heading">{es_MX.editor.panel.secciones}</h2>
+                <SectionList manifest={manifest} />
+              </div>
+              <div className="border-t border-ui-border pt-4">
+                <ThemePicker theme={theme} />
+              </div>
+            </div>
+          )}
         </aside>
 
         <section className="min-h-0 p-4" aria-label={es_MX.editor.lienzo.tituloIframe}>
