@@ -141,14 +141,17 @@ echo "         revision=$REV publicToken=$TOKEN_PUB"
 llamar "3" GET "$IID/document" 200 "${AUTH_U[@]}"
 
 # 7 --- se adelanta: el lote de operaciones necesita un assetId real ---------------------------
-FOTO="frontend/templates/xv-jardin/1.0.0/assets/preview.png"
-llamar "7" POST "$IID/assets" "201|200" "${AUTH_U[@]}" -H 'Content-Type: image/png' --data-binary "@$FOTO"
+# WebP, no PNG: ADR-3-2d-02 pasó toda la imaginería de los paquetes a `.webp` y los `.png` dejaron de
+# existir. Mientras esto decía `preview.png`, `curl` no abría el fichero, el `assetId` salía `null` y
+# cascadeaban ocho rutas (4, 6, 7, 7b, 9, 11, 15, 15b) — H-ADV-04 de `bitacora/3-adv.md`.
+FOTO="frontend/templates/xv-jardin/1.0.0/assets/preview.webp"
+llamar "7" POST "$IID/assets" "201|200" "${AUTH_U[@]}" -H 'Content-Type: image/webp' --data-binary "@$FOTO"
 ASSET="$(jqv '.assetId')"; PREVIEW="$(jqv '.previewUrl')"
 echo "         assetId=$ASSET previewUrl=$PREVIEW"
 # Segundo asset, que NO se referencia desde el documento: es el que se podrá borrar en la ruta 9
 # (borrar uno referenciado por el documento, su attic o cualquier release da 409, ADR-2-5-05).
-llamar "7b" POST "$IID/assets" "201|200" "${AUTH_U[@]}" -H 'Content-Type: image/png' \
-  --data-binary "@frontend/templates/boda-clasica/1.0.0/assets/rsvp-bg.png"
+llamar "7b" POST "$IID/assets" "201|200" "${AUTH_U[@]}" -H 'Content-Type: image/webp' \
+  --data-binary "@frontend/templates/boda-clasica/1.0.0/assets/rsvp-bg.webp"
 ASSET_LIBRE="$(jqv '.assetId')"
 TOTAL=$((TOTAL - 1)); OK=$((OK - 1))   # 7b es la misma ruta 7: no cuenta como una de las 19
 
@@ -240,24 +243,60 @@ llamar "12" DELETE "$IID/release" 204 "${AUTH_U[@]}"
 llamar "9" DELETE "$IID/assets/$ASSET_LIBRE" 204 "${AUTH_U[@]}"
 
 # 17 — registro por HTTP; el paquete ya está registrado ⇒ 200 con alreadyRegistered ---------------
+# Los TRES assets, no uno: `template.json` declara `assets/divider.webp`, `assets/preview.webp` y
+# `assets/rsvp-bg.webp` (`jq '.assets[].path'`, no a mano), y mandar sólo uno da
+# `422 TPL_PACKAGE_ASSET_MISMATCH` («declara assets que no vienen»). Con `preview.png` ni siquiera
+# abría el fichero.
 PKG="frontend/templates/xv-jardin/1.0.0"
+ASSET_ARGS=()
+while IFS= read -r ruta_asset; do
+  ASSET_ARGS+=(-F "$ruta_asset=@$PKG/$ruta_asset")
+done < <(jq -r '.assets[].path' "$PKG/template.json")
 llamar "17" POST "/master/templates2/versions" "200|201" "${AUTH_M[@]}" \
   -F "template=@$PKG/template.json" -F "theme=@$PKG/theme.json" -F "defaults=@$PKG/defaults.json" \
-  -F "assets/preview.png=@$PKG/assets/preview.png"
+  "${ASSET_ARGS[@]}"
 echo "         result=$(jqv '.result') alreadyRegistered=$(jqv '.alreadyRegistered')"
+
+# 17b — versión DESECHABLE del mismo paquete (`1.0.99`), sólo para que la 19 tenga qué deprecar sin
+# depender de lo que haya sembrado nadie. No cuenta como una de las 19: es la misma ruta 17.
+# Por qué no basta con deprecar una versión real: `boda-clasica@1.0.0` y `xv-jardin@1.0.0` son hoy
+# la ÚNICA versión publicada de su slug, así que `TemplateCatalogService.kt:166` exige que la
+# deprecación NO deje "documentsUsing > 0" sin ninguna versión publicada. En un clúster recién
+# sembrado, `xv-jardin@1.0.0` ya tiene un documento (el de este mismo smoke, ruta 2) y, en cuanto
+# `scripts/dev-backend.sh register` siembra la demostración, `boda-clasica@1.0.0` también lo tiene
+# (H-ADV-04) — cualquiera de las dos reales da `409 TPL_VERSION_LAST_PUBLISHED` según el orden en que
+# se ejecute. La desechable no la elige `:choose-template` en ningún sitio, así que su
+# `documentsUsing` es 0 por construcción y la ruta 19 deja de depender del orden.
+VERSION_DESECHABLE="1.0.99"
+PKG_TMP="$TMP/pkg-desechable"
+mkdir -p "$PKG_TMP/assets"
+jq --arg v "$VERSION_DESECHABLE" '.version = $v' "$PKG/template.json" > "$PKG_TMP/template.json"
+jq --arg v "$VERSION_DESECHABLE" '.templateVersion = $v' "$PKG/defaults.json" > "$PKG_TMP/defaults.json"
+cp "$PKG/theme.json" "$PKG_TMP/theme.json"
+ASSET_ARGS_TMP=()
+while IFS= read -r ruta_asset; do
+  cp "$PKG/$ruta_asset" "$PKG_TMP/$ruta_asset"
+  ASSET_ARGS_TMP+=(-F "$ruta_asset=@$PKG_TMP/$ruta_asset")
+done < <(jq -r '.assets[].path' "$PKG/template.json")
+llamar "17b" POST "/master/templates2/versions" "200|201" "${AUTH_M[@]}" \
+  -F "template=@$PKG_TMP/template.json" -F "theme=@$PKG_TMP/theme.json" -F "defaults=@$PKG_TMP/defaults.json" \
+  "${ASSET_ARGS_TMP[@]}"
+ID_DESECHABLE="$(jqv '.templateVersionId')"
+echo "         xv-jardin@$VERSION_DESECHABLE id=$ID_DESECHABLE alreadyRegistered=$(jqv '.alreadyRegistered')"
+TOTAL=$((TOTAL - 1)); OK=$((OK - 1))   # 17b es la misma ruta 17: no cuenta como una de las 19
 
 # 18 -------------------------------------------------------------------------------------------
 llamar "18" GET "/master/templates2/versions?limit=20" 200 "${AUTH_M[@]}"
 echo "         versiones = $(jqv '[.items[] | "\(.slug)@\(.version):\(.status)"] | join(", ")')"
-ID_BODA="$(jqv '.items[] | select(.slug=="boda-clasica") | .templateVersionId' | head -1)"
 
-# 19 — se deprecia `boda-clasica`, que no la usa ningún documento (la de la invitación de prueba es
-#      `xv-jardin`, y deprecar la única versión publicada que alguien usa da 409, `TemplateCatalog
-#      Service.kt:166`). Después se devuelve a 'published' por SQL para que el script sea repetible.
-llamar "19" POST "/master/templates2/versions/$ID_BODA:deprecate" 200 "${AUTH_M[@]}"
-echo "         status=$(jqv '.status')"
-sql "UPDATE tpl_template_version SET status = 'published' WHERE id = $ID_BODA;" >/dev/null
-echo "         (repuesta a 'published' por SQL para que el smoke sea repetible)"
+# 19 — se deprecia la versión DESECHABLE de la 17b, no una real: da igual el orden en que se ejecute
+# el script y da igual qué demostración esté sembrada (ver comentario de la 17b). Idempotente:
+# deprecar lo ya deprecado responde 200 igualmente (`TemplateCatalogService.kt:151`), así que una
+# segunda corrida — que reencuentra la MISMA desechable por `package_hash`, ADR-008 — también pasa.
+# No hace falta 'restaurar' nada por SQL: la desechable nace y muere deprecada, sin tocar
+# `boda-clasica` ni `xv-jardin@1.0.0`, que es lo que de verdad usan la demostración y este smoke.
+llamar "19" POST "/master/templates2/versions/$ID_DESECHABLE:deprecate" 200 "${AUTH_M[@]}"
+echo "         status=$(jqv '.status') documentsUsing=$(jqv '.documentsUsing')"
 
 # --- Extra: el asset se puede LEER por la URL que devolvió el backend --------------------------
 CODIGO_ASSET="$(curl -sS -o /dev/null -w '%{http_code}' "$PREVIEW")"
