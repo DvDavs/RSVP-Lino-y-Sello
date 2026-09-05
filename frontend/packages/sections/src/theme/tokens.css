@@ -156,4 +156,12 @@
    * "wide" en `rsvpBackground`) — no son números inventados, son los dos aspectos que faltaban. */
   --inv-image-aspect-square: 1 / 1;
   --inv-image-aspect-wide: 21 / 9;
+  /* Retrato (AÑADIDO por 3-9 para A1). Es el tercer valor de `constraints.aspect` del manifiesto
+   * (`"portrait"`, que `packages/schema/src/blocks.ts:208` declara y `operations-reducer.ts:101`
+   * valida como "más alto que ancho"), y el que faltaba. `5 / 7` es la proporción EXACTA de la
+   * lámina de portada que genera `templates/scripts/build-art.mjs` (1600 × 2240) y la proporción
+   * clásica de una papeleta de invitación impresa. `CoverSection` lo usa para dar al escenario de
+   * la variante `full` la forma de la lámina en vez de recortarla como si fuera una fotografía
+   * apaisada: ver el bloque "variante: full" de `styles/CoverSection.module.css`. */
+  --inv-image-aspect-portrait: 5 / 7;
 }

@@ -37,14 +37,33 @@
  *
  * Solo los pesos que los `theme.json` de `frontend/templates/**` declaran de verdad:
  *   boda-clasica  serif-elegante  Cormorant Garamond 400/600 + Inter 400/500
- *   boda-clasica  moderna         Playfair Display 400/700  + Inter 400/500
+ *   boda-clasica  moderna         Playfair Display 400/700  + Source Sans 3 400/600
  *   xv-jardin     moderna         Playfair Display 400/700  + Source Sans 3 400/600
- * Las dos familias de `moderna` NO se cargan todavía: ninguna invitación las usa hoy y cada familia
- * de más son bytes en la primera carga de TODAS. Queda anotado en `handoffs/3-3.md`. */
+ *
+ * A4 del bloque 3-9 (objeción ALTA de `3-CV`, `O-02a`/`O-02b`). Hasta aquí este archivo cargaba
+ * SÓLO el set `serif-elegante` con este razonamiento escrito: "las dos familias de `moderna` NO se
+ * cargan todavía: ninguna invitación las usa hoy". Era **falso**, y de dos maneras a la vez:
+ *   · `xv-jardin/1.0.0/theme.json` declara `"defaultFontSetId": "moderna"` y NO tiene ningún otro
+ *     set, así que la segunda plantilla ENTERA se pintaba en Georgia + la sans del sistema
+ *     (verificado por 3-CV con `document.fonts` sobre la invitación publicada: Playfair Display y
+ *     Source Sans 3 ni siquiera se declaraban);
+ *   · «Moderna» es una de las DOS opciones que el editor ofrece en `boda-clasica`, así que
+ *     cualquier cliente que la eligiera se llevaba lo mismo sin que nada se lo dijera.
+ * La lista de arriba tenía además un error de transcripción: el `moderna` de `boda-clasica` empareja
+ * Playfair Display con **Source Sans 3**, no con Inter (`boda-clasica/1.0.0/theme.json`).
+ *
+ * Que no vuelva a quedarse corta lo comprueba `test/fuentes-autoalojadas.test.ts`: recorre TODOS los
+ * `theme.json` de `frontend/templates/**`, saca cada `fontSets[].heading/body` con sus pesos y exige
+ * un `@import` por cada par familia+peso. Una plantilla nueva con una familia nueva pone la prueba
+ * en rojo antes de que ninguna invitación salga en Georgia. */
 @import "@fontsource/cormorant-garamond/400.css";
 @import "@fontsource/cormorant-garamond/600.css";
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/500.css";
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/source-sans-3/400.css";
+@import "@fontsource/source-sans-3/600.css";
 
 /* --------------------------------------------------------------------------- 3. reset de documento */
 html {

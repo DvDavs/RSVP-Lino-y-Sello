@@ -129,3 +129,61 @@ describe("FooterSection — a11y (jest-axe, datos reales de boda-clasica)", () =
     expect(results).toHaveNoViolations();
   });
 });
+
+/**
+ * A5 del bloque 3-9 (objeción ALTA de `3-CV`, evidencia `O-05`) — LA INVITACIÓN IMPRIMÍA «PIE».
+ *
+ * `section.title` del pie es la etiqueta INTERNA del editor: `template.json` la declara como
+ * `"Pie"` en `boda-clasica@1.0.0` y en `xv-jardin@1.0.0`, y NINGUNA de las dos declara un bloque
+ * `sectionTitle` para el pie — así que `{titleNode ?? section.title}` la pintaba, en versalitas de
+ * acento, encima del aviso legal. Es exactamente el caso que `CoverSection.tsx:70` ya resolvía con
+ * «Portada».
+ *
+ * Estas pruebas fallan sin el arreglo [V]: con el `className={styles.title}` incondicional,
+ * `position` resuelve a `static` y `textTransform` a `uppercase` — la etiqueta se VE.
+ */
+describe("FooterSection — A5 (3-9): la etiqueta de editor «Pie» no se pinta nunca", () => {
+  it("sin bloque `sectionTitle`, el <h2> se oculta VISUALMENTE (clip), no con display:none", () => {
+    const { container } = render(<FooterSection section={REAL_SECTION} variant="simple" mode="public" />);
+    const h2 = container.querySelector("h2")!;
+    // El golden real de boda-clasica@1.0.0 no trae `sectionTitle` en el pie: cae a la etiqueta.
+    expect(h2.textContent).toBe("Pie");
+    const cs = getComputedStyle(h2);
+    expect(cs.position).toBe("absolute"); // técnica de clip de shared.visuallyHidden
+    expect(cs.clip).toBe("rect(0px, 0px, 0px, 0px)");
+    // NUNCA display:none — borraría el nombre accesible de la <section> (aria-labelledby, 04 §17.3).
+    expect(cs.display).not.toBe("none");
+    expect(container.querySelector("section")!.getAttribute("aria-labelledby")).toBe(h2.id);
+  });
+
+  it("con `sectionTitle` real, el <h2> SÍ se ve y usa la tipografía del pie", () => {
+    const conTitulo = ComposedSectionSchema.parse({
+      key: "footer", type: "footer", variant: "simple", visible: true, title: "Pie",
+      blocks: [
+        ComposedBlockSchema.parse({
+          id: "footer.title", role: "sectionTitle", type: "text", label: "Título",
+          provenance: "user", value: { kind: "text", value: "Con cariño" },
+        }),
+      ],
+    });
+    const { container } = render(<FooterSection section={conTitulo} variant="simple" mode="public" />);
+    const h2 = container.querySelector("h2")!;
+    expect(h2.textContent).toBe("Con cariño");
+    expect(getComputedStyle(h2).position).toBe("static");
+    expect(getComputedStyle(h2).textTransform).toBe("uppercase");
+  });
+
+  it("el bloque `sectionTitle` VACÍO también oculta la etiqueta (titleNode === null)", () => {
+    const vacio = ComposedSectionSchema.parse({
+      key: "footer", type: "footer", variant: "simple", visible: true, title: "Pie",
+      blocks: [
+        ComposedBlockSchema.parse({
+          id: "footer.title", role: "sectionTitle", type: "text", label: "Título",
+          provenance: "empty", value: null,
+        }),
+      ],
+    });
+    const { container } = render(<FooterSection section={vacio} variant="simple" mode="public" />);
+    expect(getComputedStyle(container.querySelector("h2")!).position).toBe("absolute");
+  });
+});

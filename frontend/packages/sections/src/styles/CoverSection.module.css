@@ -3,9 +3,11 @@
  *
  * Una sola estructura de DOM (`CoverSection.tsx`) para tres variantes con lecturas visuales
  * DELIBERADAMENTE distintas — nunca "la misma con un borde":
- *   - `full`    — foto a sangre (grid de una sola celda, imagen y texto apilados con
- *                 `grid-area: 1 / 1`), velo de degradado, nombres y fecha ANCLADOS ABAJO sobre
- *                 la foto (patrón hero clásico de invitación premium).
+ *   - `full`    — LA PAPELETA: una lámina de proporción retrato centrada en una pantalla completa,
+ *                 con el nombre y la fecha sobre su panel central en la tinta de la paleta. (Hasta
+ *                 A1 de 3-9 era "foto a sangre con velo oscuro y el texto anclado abajo": ver el
+ *                 bloque "variante: full" de más abajo, que explica por qué eso vaciaba la
+ *                 portada.)
  *   - `framed`  — sin foto a sangre: retrato enmarcado (sombra + borde + radio grande) como
  *                 pieza de arte independiente, con la tipografía ALREDEDOR (no encima) —
  *                 `.content` pasa a `display: contents` y cada hijo toma su propio `order` para
@@ -183,15 +185,65 @@
 
 /* ---------------------------------------------------------------------- variante: full ---- */
 
-/* La primera pantalla completa (04 §2, "la que decide si la invitación parece cara"): el
- * `min-height` va en el `.stage`, INDEPENDIENTE de la relación de aspecto de la foto — si dejara
- * que `aspect-ratio` decidiera la altura (como en `framed`/`split`), una foto ancha dejaría un
- * hueco en blanco bajo el contenido en pantallas altas. `100svh` con reserva `100vh` (Chromium
- * antiguo / sin soporte de unidades "small viewport"). */
-.section[data-variant="full"] .stage {
+/* A1 del bloque 3-9 — LA PORTADA ERA UN DEGRADADO GRIS VACÍO (objeción ALTA de `3-CV`, capturas
+ * `O-01a`, `O-01b` y `O-02a`). Es la peor de las seis porque es la única pantalla que el invitado
+ * ve entera, y el juicio se forma ahí.
+ *
+ * LA CAUSA no era el arte. `templates/<slug>/demo/cover.webp` es una lámina de papelería de
+ * 1600×2240 (retrato 5:7) bien resuelta: filete a un hilo con cuatro florones de esquina,
+ * guirnalda superior, divisor central con rombo, rama inferior detallada — y **el centro
+ * deliberadamente vacío, porque ahí va el texto**. El generador lo dice con todas las letras y lo
+ * MIDE: `templates/scripts/art/scenes.mjs` declara para esta pieza una zona de texto
+ * `[0.12, 0.09, 0.88, 0.55]` con umbral 4,5:1 **contra `ink`**, y `build-art.mjs` aborta si el
+ * dibujo la invade. Es decir: el arte está compuesto para llevar TINTA OSCURA en su mitad superior.
+ *
+ * La sección hacía justo lo contrario, dos veces:
+ *   1. trataba la lámina como una fotografía — `min-height: 100svh` en un escenario a sangre y
+ *      `object-fit: cover` —, así que en 1440×900 sólo se veía la franja CENTRAL de una lámina 5:7:
+ *      exactamente la que el ilustrador dejó en blanco. Filete, florones y guirnalda, fuera del
+ *      recorte;
+ *   2. y encima ponía un velo del 92 % de tinta sobre el tercio inferior, que es donde sí había
+ *      dibujo, para escribir en blanco. Resultado medido: la mitad de arriba vacía porque no hay
+ *      dibujo, y la de abajo tapada porque sí lo había.
+ *
+ * LA CORRECCIÓN: el escenario toma la FORMA DE LA LÁMINA (`--inv-image-aspect-portrait`) y se
+ * contiene dentro de la pantalla, en vez de estirarse a ella. La `<section>` sigue midiendo una
+ * pantalla completa (04 §2, "una sola idea") y hace de fondo con `--inv-color-bg`; la lámina se
+ * centra dentro como la papeleta que es. Con la lámina y el escenario en la misma proporción, el
+ * `object-fit: cover` que trae `ImageBlock` ya no recorta NADA: se ve entera. Y si el cliente sube
+ * su propia foto de retrato —de la proporción que sea—, ese mismo `cover` la encuadra en la
+ * papeleta respetando el punto focal que el editor fija (`ImageBlock` lo aplica por CSSOM), que es
+ * la razón de no cambiarlo por `contain`: un `contain` metería franjas de fondo alrededor de la
+ * foto de cualquier cliente para arreglar un problema que sólo tenía la lámina.
+ *
+ * `100svh` con reserva `100vh` (Chromium antiguo / sin unidades "small viewport"). */
+.section[data-variant="full"] {
   display: grid;
+  align-content: center;
   min-height: 100vh;
   min-height: 100svh;
+}
+
+/* El escenario es la papeleta: tan ancho como el hueco permita, nunca más alto que la pantalla.
+ *
+ * Las tres filas colocan el texto DENTRO de la zona que el generador mide como segura
+ * (`scenes.mjs`: y ∈ [0,09 · 0,55] de la lámina, umbral 4,5:1 contra `ink`). Son fracciones, no
+ * medidas: con `2fr auto 5fr` el bloque de texto queda a DOS SÉPTIMOS del espacio libre desde
+ * arriba, así que se mantiene en esa banda tanto si ocupa un 26 % de la lámina (escritorio, el
+ * nombre en una línea) como si ocupa un 42 % (teléfono, el nombre en dos). Medido [V] sobre las
+ * cuatro invitaciones publicadas: el texto cae en y ∈ [0,17 · 0,59] en 390, [0,24 · 0,41] en 820 y
+ * [0,23 · 0,45] en 1440 — por encima del filete central de la lámina, que está en 0,618.
+ * `min-height: min-content` es la red de seguridad: si algún día el texto no cupiera en la
+ * proporción, el escenario crece en vez de desbordar por fuera de la papeleta. */
+.section[data-variant="full"] .stage {
+  display: grid;
+  grid-template-rows: 2fr auto 5fr;
+  width: 100%;
+  max-width: calc(100vh * var(--inv-image-aspect-portrait));
+  max-width: calc(100svh * var(--inv-image-aspect-portrait));
+  margin-inline: auto;
+  aspect-ratio: var(--inv-image-aspect-portrait);
+  min-height: min-content;
 }
 
 /* D1b del bloque 3-3b — LA FOTO NO DECIDE LA ALTURA DE LA PORTADA.
@@ -213,7 +265,8 @@
  * el DOM, así que el orden de pintado foto → velo → texto no cambia. `overflow: hidden` en el hueco
  * porque el recorte deja de hacerlo el marco. */
 .section[data-variant="full"] .imageWrap {
-  grid-area: 1 / 1;
+  grid-row: 1 / -1;
+  grid-column: 1;
   position: relative;
   height: 100%;
   overflow: hidden;
@@ -227,44 +280,45 @@
   border-radius: 0;
 }
 
+/* A1 — EL VELO CAMBIA DE SIGNO. Antes era un 92 % de TINTA sobre el tercio inferior, para poder
+ * escribir en blanco encima de una foto; sobre la lámina de papelería eso borraba la rama detallada
+ * que era lo ÚNICO dibujado que entraba en el recorte, y dejaba un lodo pardo (`blush`) o verde
+ * militar (`garden`, `O-02a`). Ahora el texto va en tinta sobre la zona clara y medida de la
+ * lámina, así que el velo deja de hacer falta para ELLA: se queda sólo como defensa en profundidad
+ * para el caso del cliente que sube su propia foto —posiblemente oscura— en el mismo hueco.
+ *
+ * Por eso es un lavado CLARO (`--inv-color-bg`, el fondo de la paleta activa) y sólo en la banda
+ * donde vive el texto: sobre la lámina cae encima de su panel vacío, que ya es prácticamente ese
+ * mismo color, y no se ve; sobre una foto oscura levanta el fondo lo bastante para que la tinta se
+ * lea. Las guirnaldas de arriba y de abajo de la lámina quedan FUERA del lavado, que es lo que el
+ * velo anterior no respetaba. */
 .section[data-variant="full"] .scrim {
   display: block;
-  grid-area: 1 / 1;
-  align-self: end;
+  grid-row: 1 / -1;
+  grid-column: 1;
   width: 100%;
-  height: 85%;
-  /* Texto blanco sobre foto: el velo tiene que quedar de verdad oscuro donde vive el texto (el
-   * primer intento, 70%→transparent en 55%, dejaba la franja del "eyebrow" casi sin oscurecer —
-   * medido en captura, contraste insuficiente). Ahora el 92% de tinta cubre el tercio inferior
-   * completo (donde vive TODO el bloque de texto) antes de empezar a aclarar. */
   background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--inv-color-ink) 92%, transparent),
-    color-mix(in srgb, var(--inv-color-ink) 78%, transparent) 38%,
-    color-mix(in srgb, var(--inv-color-ink) 20%, transparent) 72%,
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--inv-color-bg) 62%, transparent) 20%,
+    color-mix(in srgb, var(--inv-color-bg) 62%, transparent) 60%,
     transparent
   );
 }
 
 .section[data-variant="full"] .content {
-  grid-area: 1 / 1;
-  align-self: end;
+  grid-row: 2;
+  grid-column: 1;
   justify-self: stretch;
-  padding: var(--inv-space-7) var(--inv-space-5) var(--inv-space-6);
-  color: var(--inv-color-surface);
-  /* Refuerzo de legibilidad independiente del velo (defensa en profundidad, mismo motivo que un
-   * velo insuficiente en una paleta con foto muy clara): sombra sutil, nunca decorativa. */
-  text-shadow: 0 var(--inv-border-width-hairline) var(--inv-space-2)
-    color-mix(in srgb, var(--inv-color-ink) 65%, transparent);
+  padding-inline: var(--inv-space-5);
+  color: var(--inv-color-ink);
+  /* Refuerzo de legibilidad independiente del velo (defensa en profundidad, para la foto que suba
+   * un cliente): halo del color del fondo, no sombra oscura — el texto ya no es blanco. */
+  text-shadow: 0 0 var(--inv-space-2) color-mix(in srgb, var(--inv-color-bg) 72%, transparent);
 }
 
 .section[data-variant="full"] .badge {
   text-shadow: none;
-}
-
-.section[data-variant="full"] .dateRow {
-  color: var(--inv-color-surface);
-  opacity: 0.9;
 }
 
 /* -------------------------------------------------------------------- variante: framed ---- */

@@ -3,10 +3,42 @@
  * simples (Text, Date, Time, DateTimeRange, Choice, Person, Boolean, Location). Solo `var(--inv-*)`.
  */
 
+/* A2 + A3 del bloque 3-9 (objeciones ALTAS de `3-CV`, `O-03a`/`O-03b`/`O-04`) — EL HUECO MANDA.
+ *
+ * Antes esta regla declaraba `font-family: var(--inv-font-body)`, `font-weight: var(--inv-weight-
+ * body)` y `color: var(--inv-color-ink)` EN EL PROPIO `<span>` que pinta `TextBlock`. Una
+ * declaración en el elemento gana SIEMPRE sobre un valor heredado del padre, sea cual sea la
+ * especificidad comparada entre selectores, así que cualquier hueco que declarase otra tipografía
+ * se quedaba sin efecto en cuanto su contenido era un bloque de texto EDITABLE. Medido por 3-CV
+ * sobre la invitación publicada: 8 de los 12 títulos de sección (`event`, `gallery`, `story`,
+ * `dressCode`, `giftTable`, `suggestions`, `amenities`, `rsvp`) pintaban su `<h2>` en la fuente de
+ * CUERPO, y sólo `celebrant` y `family` —las dos cuyo título NO es editable— conservaban la serif
+ * de titular. Consecuencia perversa: cuanto más personalizaba el cliente, peor se veía.
+ *
+ * ADR-3-3b-01 diagnosticó esto con precisión y lo arregló SÓLO en la portada, con un
+ * `> * { font-family: inherit }` en `CoverSection.module.css`; descartó esta alternativa (su
+ * opción (a)) por no tener evidencia del antes y después. Hoy la hay —`3-CV` §3.1 y las capturas de
+ * `evidencia/fase-3/calidad-visual/`—, y el arreglo por hueco tiene un defecto de contrato: hay que
+ * acordarse de repetirlo en cada `.heading` nuevo, así que la sección número 13 vuelve a nacer con
+ * el mismo agujero. Aquí la regla es estructural: el BLOQUE no aporta tipografía, la aporta el
+ * HUECO, que es quien conoce el diseño (que es exactamente lo que la propia ADR-3-3b-01 afirma que
+ * debe pasar). Ver ADR-3-9-01, que la enmienda.
+ *
+ * `inherit` y no "quitar la declaración": las tres propiedades ya se heredan por defecto, pero
+ * escribirlas deja dicho —y hace comprobable— que este archivo NO decide tipografía. El valor por
+ * defecto no cambia: `SectionsRoot.module.css:3-5` fija `color: var(--inv-color-ink)` y
+ * `font-family: var(--inv-font-body)` en la raíz del árbol de secciones, y el peso por defecto del
+ * documento (`normal`, 400) es el mismo que `--inv-weight-body`.
+ *
+ * A3 sale de aquí también, sin una línea más: `RsvpSection.module.css` declara
+ * `.section { color: var(--inv-color-accent-ink) }` y `.heading { color: inherit }`, así que el
+ * título del RSVP pasa de `#3A2E2B` sobre `#B05555` (2,66:1, por debajo del 3:1 de AA para texto
+ * grande) al par `accentInk/accent`, que las cinco paletas ya garantizan a ≥ 4,5:1
+ * (`theme/contrast.ts` `PALETTE_AA_PAIRS`, comprobado en `test/theme/contraste-plantillas.test.ts`). */
 .text {
-  font-family: var(--inv-font-body);
-  font-weight: var(--inv-weight-body);
-  color: var(--inv-color-ink);
+  font-family: inherit;
+  font-weight: inherit;
+  color: inherit;
 }
 
 .time {

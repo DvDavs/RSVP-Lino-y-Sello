@@ -58,7 +58,15 @@ export function rasterizar(svg, ancho) {
 }
 
 /** PNG → WebP con `sharp`. `effort: 6` y calidad fija: mismos bytes en cada ejecución. */
-export const aWebp = (png, calidad) => sharp(png).webp({ quality: calidad, effort: 6, smartSubsample: true }).toBuffer();
+/**
+ * PNG → WebP. `ancho` (opcional) REMUESTREA antes de codificar: una lámina se dibuja a la
+ * resolución que hace falta para rasterizar bien el trazo, no a la que hace falta para servirla.
+ * Lo añadió 3-9 al medir el LCP de la portada — ver el comentario de `piezas()` en `build-art.mjs`.
+ */
+export const aWebp = (png, calidad, ancho) =>
+  (ancho ? sharp(png).resize({ width: ancho }) : sharp(png))
+    .webp({ quality: calidad, effort: 6, smartSubsample: true })
+    .toBuffer();
 
 /**
  * Contraste real: ratio WCAG 2.x mínimo entre `tinta` y CADA píxel de la zona.

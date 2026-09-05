@@ -16,6 +16,7 @@ import {
   branch, tendril, leafSolid, leafRound, leafOutline, flower, fillerDots, flourish, rule, doubleFrame,
   archPath, ogeePath, wreath, trellis, textLine, blobPath, doc, prng, mix, lighten, darken, num as n,
 } from './svg.mjs';
+import { tinteEnZonaDeTexto } from './paleta-aa.mjs';
 
 // ---------------------------------------------------------------------------- fondos compartidos
 
@@ -189,6 +190,22 @@ export function portada(p, familia) {
     : { direccion: 'd', claroEn: [0.46, 0.30], fuerza: 0.30, semilla: 41 });
   let b = f.cuerpo;
 
+  /* A6 del bloque 3-9 — PIGMENTO PARA LO QUE CAE DENTRO DE LA ZONA DEL TÍTULO.
+   *
+   * `zonas` (abajo) declara la mitad superior de esta lámina como zona de texto y `build-art.mjs`
+   * mide ahí 4,5:1 contra `ink`. Los ornamentos de esa mitad —las cuatro esquinas del marco— se
+   * tintaban con `p.accent` a secas: una LIGEREZA relativa fija, no un CONTRASTE fijo. Con `blush`
+   * salía 5,33:1; con `olive` 4,28:1 y con `navy` **3,53:1**, porque su acento es mucho más oscuro
+   * contra su propia tinta (1,63:1 frente a 2,84:1). El defecto estaba latente y sólo se vio al
+   * generar las cinco paletas. `tinteEnZonaDeTexto` aclara el pigmento lo justo, paleta por paleta,
+   * y deja intacta a la que ya cumple. Fuera de la zona (la guirnalda baja, el filete central) se
+   * sigue usando `p` a plena fuerza: ahí no va texto y el dibujo no tiene por qué palidecer. */
+  const pOrn = {
+    ...p,
+    accent: tinteEnZonaDeTexto(p.accent, p.bg, p.ink),
+    muted: tinteEnZonaDeTexto(p.muted, p.bg, p.ink),
+  };
+
   if (familia === 'boda') {
     b += wash('fWash', w * 0.16, h * 0.95, w * 0.44, p.accent, 0.34, 0, 0.72);
     b += wash('fWash', w * 0.93, h * 0.80, w * 0.36, mix(p.accent, p.ink, 0.10), 0.24, 0, 0.8);
@@ -196,14 +213,14 @@ export function portada(p, familia) {
     b += lavadosDeBorde(w, h, p, 3301, 0.9);
     b += claro(w, h);
     b += `<g opacity="0.95">${doubleFrame(w, h, 86, mix(p.muted, p.ink, 0.25), 0.62)}</g>`;
-    b += volutas(w, h, 86, 0.70, p, 0.52);
+    b += volutas(w, h, 86, 0.70, pOrn, 0.52);
     // Guirnalda baja, simétrica y AMPLIA: ocupa casi todo el ancho de la lámina y deja la mitad
     // superior libre para el título. Es el peso visual de la portada.
     b += ramoLinea(w / 2, h * 0.862, 1.86, p, { op: 0.84 });
     b += ramoLinea(w / 2, h * 0.906, 0.88, p, { op: 0.42, semilla: 97 });
     for (const lado of [-1, 1]) {
       b += branch([w / 2, h * 0.128], [w / 2 + lado * w * 0.06, h * 0.118], [w / 2 + lado * w * 0.12, h * 0.116], [w / 2 + lado * w * 0.175, h * 0.129],
-        { hojas: 8, largo: 52, ancho: 19, color: mix(p.accent, '#FFFFFF', 0.52), color2: mix(p.muted, '#FFFFFF', 0.5),
+        { hojas: 8, largo: 52, ancho: 19, color: mix(pOrn.accent, '#FFFFFF', 0.52), color2: mix(pOrn.muted, '#FFFFFF', 0.5),
           op: 0.8, estilo: 'line', trazo: 1.6, tallo: 1.5, apertura: 48, merma: 0.5, semilla: 1201 + lado });
     }
     b += rule(w / 2, h * 0.618, w * 0.30, p.muted, 0.55, 1.4);
