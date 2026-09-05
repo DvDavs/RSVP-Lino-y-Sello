@@ -31,19 +31,48 @@ class CustomerService(
         private val customerRepository: CustomerRepository,
         private val passwordEncoder: PasswordEncoder,
         private val hierarchyValidationService: HierarchyValidationService,
-        private val emailService: EmailService
+        private val emailService: EmailService,
+        private val authThrottleService: AuthThrottleService
 ) {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    companion object {
+        /**
+         * I-02: un unico literal para el `401`. Los tres caminos que fallan devuelven exactamente el
+         * mismo texto -«no existe», «existe con contrasena mala» y «existe pero deshabilitado»- asi
+         * que la respuesta no distingue cual de ellos ocurrio.
+         */
+        private const val CREDENCIALES_NO_COINCIDEN = "Las credenciales no coinciden con nuestros registros"
+    }
+
+    /**
+     * I-02 (H-ADV-05). Tres cambios y ninguno mas:
+     *
+     * 1. `comprobar` **antes** de tocar el repositorio: si la cuenta o la IP estan al limite se
+     *    responde `429` sin consulta ni bcrypt, y por tanto en el mismo tiempo exista o no la cuenta.
+     * 2. Cuando el correo no existe se gasta igualmente un bcrypt contra el **hash senuelo**. Antes
+     *    se salia en cuanto el repositorio devolvia `null`, sin llegar al `PasswordEncoder`: ese era
+     *    el oraculo de temporizacion (~15x medido, sin solape) que permitia enumerar cuentas.
+     * 3. Se registra el fallo tras cada `401` de credenciales y se limpian los contadores en cuanto
+     *    la contrasena coincide, para que un acceso correcto nunca deje al usuario bloqueado.
+     */
     fun validateUser(authRequest: AuthRequest): CustomerEntity {
+        authThrottleService.comprobar(authRequest.email)
+
         val customer = customerRepository.findByEmailEvenIfDisabled(authRequest.email)
-                ?: throw UnauthorizedException("Las credenciales no coinciden con nuestros registros")
-        if (!passwordEncoder.matches(authRequest.password, customer.password)) {
-            throw UnauthorizedException("Las credenciales no coinciden con nuestros registros")
+        if (customer == null) {
+            authThrottleService.gastarHashSenuelo(authRequest.password)
+            authThrottleService.registrarFallo(authRequest.email)
+            throw UnauthorizedException(CREDENCIALES_NO_COINCIDEN)
         }
+        if (!passwordEncoder.matches(authRequest.password, customer.password)) {
+            authThrottleService.registrarFallo(authRequest.email)
+            throw UnauthorizedException(CREDENCIALES_NO_COINCIDEN)
+        }
+        authThrottleService.registrarExito(authRequest.email)
         if (!customer.isEnabled) {
-            throw UnauthorizedException("Las credenciales no coinciden con nuestros registros")
+            throw UnauthorizedException(CREDENCIALES_NO_COINCIDEN)
         }
         if (customer.isBanned) {
             throw UserBannedException("Su cuenta ha sido bloqueada. Contacte al administrador.")
