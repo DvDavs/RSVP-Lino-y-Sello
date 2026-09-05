@@ -56,7 +56,7 @@ class GoldenInventoryTest {
      */
     @Test
     fun `cada carpeta de plantilla trae sus ocho ficheros`() {
-        for (plantilla in Golden.Ejemplos.plantillas) {
+        for (plantilla in Golden.plantillas) {
             val esperados = listOf(
                 "assets.json", "business.json", "compuesto.json", "defaults.json", "documento.json",
                 "reporte.json", "template.json", "theme.json",

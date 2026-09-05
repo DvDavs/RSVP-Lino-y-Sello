@@ -1,0 +1,38 @@
+{
+  "templateSlug": "richtext-marcas",
+  "templateVersion": "1.0.0",
+  "content": {
+    "cover.title": {
+      "kind": "text",
+      "value": "Camila & Antonio"
+    },
+    "story.note": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Escribe aquí vuestra historia. "
+              },
+              {
+                "type": "text",
+                "text": "En cursiva",
+                "marks": [
+                  "italic"
+                ]
+              },
+              {
+                "type": "text",
+                "text": "."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

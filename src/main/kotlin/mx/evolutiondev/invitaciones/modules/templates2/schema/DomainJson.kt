@@ -288,7 +288,11 @@ object DomainJson {
         s.marks?.let { marcas ->
             val arr = nuevoArray()
             marcas.forEach { arr.add(it.wire) }
-            o.set<ArrayNode>("marks", arr)
+            // `ObjectNode.set` devuelve **`this`** (un `ObjectNode`), no el nodo insertado. Como esta
+            // expresión es el valor de retorno del lambda de `let`, el parámetro de tipo explícito
+            // hace que Kotlin inserte un `CHECKCAST`: con `<ArrayNode>` reventaba en tiempo de
+            // ejecución (`500 TPL_INTERNAL` al escribir negrita o cursiva; H-ADV-01).
+            o.set<ObjectNode>("marks", arr)
         }
         s.href?.let { o.put("href", it) }
         return o

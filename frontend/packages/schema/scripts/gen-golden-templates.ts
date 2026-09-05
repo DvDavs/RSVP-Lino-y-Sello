@@ -7,6 +7,10 @@ import { TemplateManifest, ThemeSpec, DefaultsFile } from "../src/manifest.ts";
 import { InvitationDocument } from "../src/document.ts";
 import { compose, type TemplatePackage } from "../src/compose.ts";
 import type { AssetIndex, BusinessSnapshot } from "../src/composed.ts";
+import {
+  textSpec, richTextSpec, sectionSpec, themeFixture, manifestFixture, defaultsFixture,
+  documentFixture, textValue, richTextValueMarcado,
+} from "./fixtures.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const EJEMPLOS = HERE + "../../../../docs/rediseno-plantillas/diseno/ejemplos/";
@@ -120,9 +124,106 @@ export function genGoldenTemplates(): { dir: string; matched: boolean }[] {
   return results;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Caso SINTETIZADO — `richtext-marcas-1.0.0` (I-01).
+//
+// Los dos golden de arriba vienen de `diseno/ejemplos/`, y **ninguno de sus documentos lleva un solo
+// `marks`**: hasta la fase 3-B `marks` sólo aparecía en `golden/blocks/richText.cases.json`, que es un
+// fichero de casos de ESQUEMA y no pasa jamás por `DomainJson.encode`. Resultado medido (H-ADV-01):
+// poner negrita o cursiva en el editor devolvía `500 TPL_INTERNAL` con 2 390 pruebas en verde.
+//
+// Este caso no puede salir de `diseno/ejemplos/` (esa carpeta es la referencia INMUTABLE de la ronda
+// 1R y su `compuesto.json` no se toca), así que se SINTETIZA con los constructores de `fixtures.ts`
+// y se compone con el `compose()` real. ADR-1R-D-09 prohíbe *escribir* golden a mano, no
+// *sintetizarlos* — es el mismo camino que `gen-golden-compose.ts` y `gen-golden-migrations.ts`.
+//
+// Cubre las tres procedencias de un `richText` con marcas: `user` (story.body, en `content`),
+// `default` (story.note, sólo en `defaults.json`) y un span con `href` además de `marks`.
+// ---------------------------------------------------------------------------------------------
+const DIR_MARCAS = "richtext-marcas-1.0.0";
+
+export function genGoldenMarcas(): string {
+  const theme = themeFixture();
+  const manifest = manifestFixture(
+    [
+      sectionSpec("cover", "cover", [
+        textSpec("cover.title", "coverTitle", { maxLength: 80, required: true }),
+      ], { required: true }),
+      sectionSpec("story", "story", [
+        richTextSpec("story.body", "storyBody"),
+        richTextSpec("story.note", "sectionIntro"),
+      ]),
+    ],
+    { slug: "richtext-marcas", version: "1.0.0" },
+  );
+
+  const defaults = defaultsFixture(manifest, {
+    "cover.title": textValue("Camila & Antonio"),
+    // Escalón `default` (R2) con marcas: el codificador lo ve también por `defaults.json`.
+    "story.note": richTextValueMarcado([
+      [{ text: "Escribe aquí vuestra historia. " }, { text: "En cursiva", marks: ["italic"] }, { text: "." }],
+    ]),
+  });
+
+  const documento = documentFixture(manifest, theme, {
+    content: {
+      "cover.title": textValue("Camila & Antonio"),
+      // Escalón `user` (R2): exactamente la forma que emite el editor al teclear `**negrita**`
+      // y `*cursiva*` (`apps/web/lib/rich-text.ts:43`), más un span con las dos marcas y otro con href.
+      "story.body": richTextValueMarcado([
+        [
+          { text: "Nos conocimos en " },
+          { text: "Oaxaca", marks: ["bold"] },
+          { text: " un martes " },
+          { text: "cualquiera", marks: ["italic"] },
+          { text: "." },
+        ],
+        [
+          { text: "Las dos marcas a la vez", marks: ["bold", "italic"] },
+          { text: " y un enlace ", marks: [] },
+          { text: "al mapa", href: "https://maps.example.com/oaxaca" },
+        ],
+        [],
+      ]),
+    },
+  });
+
+  const business: BusinessSnapshot = {
+    invitationId: 9301, date: "2027-05-22", time: "18:00", hashtag: "#CamilaYAntonio",
+    coverPhotoUrl: null, childrenAllowed: true, youngAllowed: true, eventKind: "generic",
+    planTier: 1, timezone: "America/Mexico_City",
+  };
+  const assets: AssetIndex = {};   // este caso no referencia ningún asset: el foco es `marks`.
+
+  // Las entradas se validan con el Zod real ANTES de componer: un golden sintetizado que no pase el
+  // esquema sería un golden inválido, y aquí no hay `compuesto.json` de referencia que lo delate.
+  const manifestOk = TemplateManifest.parse(manifest);
+  const themeOk = ThemeSpec.parse(theme);
+  const defaultsOk = DefaultsFile.parse(defaults);
+  const docOk = InvitationDocument.parse(documento);
+
+  const pkg: TemplatePackage = { manifest: manifestOk, theme: themeOk, defaults: defaultsOk };
+  const r = compose(pkg, docOk, business, assets, docOk.meta.locale);
+  const dos = compose(pkg, docOk, business, assets, docOk.meta.locale);
+  if (JSON.stringify(r) !== JSON.stringify(dos)) throw new Error(`${DIR_MARCAS}: compose() no es idempotente`);
+
+  const outDir = OUT + DIR_MARCAS + "/";
+  mkdirSync(outDir, { recursive: true });
+  writeJson(outDir + "template.json", manifestOk);
+  writeJson(outDir + "theme.json", themeOk);
+  writeJson(outDir + "defaults.json", defaultsOk);
+  writeJson(outDir + "documento.json", docOk);
+  writeJson(outDir + "business.json", business);
+  writeJson(outDir + "assets.json", assets);
+  writeJson(outDir + "compuesto.json", r.composed);
+  writeJson(outDir + "reporte.json", r.report);
+  return DIR_MARCAS;
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   const r = genGoldenTemplates();
   for (const { dir, matched } of r) {
     console.log(`golden/templates/${dir}: ${matched ? "coincide byte a byte con diseno/ejemplos" : "NO coincide con diseno/ejemplos (ver consola)"}`);
   }
+  console.log(`golden/templates/${genGoldenMarcas()}: sintetizado (richText con marks, I-01)`);
 }

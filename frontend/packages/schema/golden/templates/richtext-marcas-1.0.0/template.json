@@ -1,0 +1,97 @@
+{
+  "manifestVersion": 1,
+  "slug": "richtext-marcas",
+  "version": "1.0.0",
+  "name": {
+    "es-MX": "Plantilla de prueba"
+  },
+  "eventKinds": [
+    "generic"
+  ],
+  "minPlanTier": 1,
+  "locales": [
+    "es-MX"
+  ],
+  "capabilities": [],
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "title": {
+        "es-MX": "cover"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "cover.title",
+          "role": "coverTitle",
+          "label": {
+            "es-MX": "cover.title"
+          },
+          "required": true,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "text",
+          "constraints": {
+            "minLength": 0,
+            "maxLength": 80,
+            "multiline": false
+          }
+        }
+      ]
+    },
+    {
+      "key": "story",
+      "type": "story",
+      "title": {
+        "es-MX": "story"
+      },
+      "variants": [
+        "default"
+      ],
+      "defaultVariant": "default",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "story.body",
+          "role": "storyBody",
+          "label": {
+            "es-MX": "story.body"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "richText",
+          "constraints": {
+            "maxLength": 8000
+          }
+        },
+        {
+          "id": "story.note",
+          "role": "sectionIntro",
+          "label": {
+            "es-MX": "story.note"
+          },
+          "required": false,
+          "editable": true,
+          "source": "user",
+          "aiEditable": true,
+          "type": "richText",
+          "constraints": {
+            "maxLength": 8000
+          }
+        }
+      ]
+    }
+  ],
+  "assets": [],
+  "migrationsFrom": []
+}

@@ -5,14 +5,17 @@ import { describe, it, expect } from "vitest";
 import { listDirs, goldenDir } from "./golden.ts";
 import { readdirSync } from "node:fs";
 
-const EXPECTED_TEMPLATE_DIRS = ["boda-clasica-1.0.0", "xv-jardin-1.0.0"];
+// `richtext-marcas-1.0.0` (I-01) es SINTETIZADO por `gen-golden-templates.ts`, no viene de
+// `diseno/ejemplos/`: esa carpeta es la referencia inmutable de la ronda 1R y ninguno de sus dos
+// documentos lleva un solo `marks`. ADR-1R-D-09 prohíbe escribir golden a mano, no sintetizarlos.
+const EXPECTED_TEMPLATE_DIRS = ["boda-clasica-1.0.0", "richtext-marcas-1.0.0", "xv-jardin-1.0.0"];
 // OCHO ficheros desde 2-2: `assets.json` emite el `AssetIndex` como DATO (objeción O-06). Antes la
 // regla `assetId → url` vivía solo en un `.ts` del generador, así que Kotlin no podía reproducir
 // `compuesto.json` sin copiar una convención de fixture que NO es la regla de producción (02 §10.4).
 const EXPECTED_FILES = ["template.json", "theme.json", "defaults.json", "documento.json", "business.json", "assets.json", "compuesto.json", "reporte.json"].sort();
 
 describe("golden/templates — inventario", () => {
-  it("exactamente las 2 plantillas de ejemplo (contratos.md §3)", () => {
+  it("exactamente las 3 carpetas: las 2 de diseno/ejemplos más la sintetizada de I-01", () => {
     expect(listDirs("templates")).toEqual([...EXPECTED_TEMPLATE_DIRS].sort());
   });
 

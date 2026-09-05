@@ -27,6 +27,16 @@ object Golden {
     fun listar(sub: String): List<String> =
         resolver.getResources("classpath:/" + sub + "/" + "*" + ".json").mapNotNull { it.filename }.sorted()
 
+    /**
+     * Carpetas de `golden/templates/`. **No** coincide con [Ejemplos.plantillas]: son las dos que
+     * salen de `diseno/ejemplos/` MÁS `richtext-marcas-1.0.0`, que el generador SINTETIZA porque
+     * `diseno/ejemplos/` es la referencia inmutable de la ronda 1R y ninguno de sus dos documentos
+     * lleva un solo `marks` (I-01 / H-ADV-01: por eso escribir negrita devolvía `500 TPL_INTERNAL`
+     * con 2 390 pruebas en verde). Quien lee de `golden/` usa esta lista; quien lee de
+     * `diseno/ejemplos/` usa [Ejemplos.plantillas].
+     */
+    val plantillas: List<String> = listOf("boda-clasica-1.0.0", "richtext-marcas-1.0.0", "xv-jardin-1.0.0")
+
     /** Los 10 ejemplos completos de la fase 1. No van al classpath: llegan por propiedad del sistema. */
     object Ejemplos {
         private val dir: File = File(

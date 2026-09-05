@@ -168,6 +168,24 @@ export const textValue = (value: string): ScalarValue => ({ kind: "text", value 
 export const richTextValue = (paragraphs: string[]): ScalarValue => ({
   kind: "richText", doc: { type: "doc", content: paragraphs.map(t => ({ type: "paragraph" as const, content: t === "" ? [] : [{ type: "text" as const, text: t }] })) },
 });
+/**
+ * `richText` con **marcas** (`bold`/`italic`) y `href`, que es lo que el editor produce en cuanto
+ * la clienta teclea `**negrita**`, `_cursiva_` o `[texto](url)` (`apps/web/lib/rich-text.ts:43`).
+ * `richTextValue` de arriba NUNCA emite `marks`, y por eso ningún golden de documento las llevaba:
+ * el codificador Kotlin de `RichSpan` reventaba con `500 TPL_INTERNAL` sin que ninguna prueba lo
+ * viera (H-ADV-01 de `bitacora/3-adv.md`).
+ */
+export type SpanMarcado = { text: string; marks?: ("bold" | "italic")[]; href?: string };
+export const richTextValueMarcado = (paragraphs: SpanMarcado[][]): ScalarValue => ({
+  kind: "richText",
+  doc: {
+    type: "doc",
+    content: paragraphs.map(spans => ({
+      type: "paragraph" as const,
+      content: spans.map(s => ({ type: "text" as const, ...s })),
+    })),
+  },
+});
 export const listTextValue = (items: string[]): ScalarValue => ({ kind: "listText", items });
 export const imageValue = (id: string, o: Partial<{ alt: string; x: number; y: number }> = {}): ScalarValue => ({
   kind: "image", assetId: id, alt: o.alt ?? "", focal: { x: o.x ?? 0.5, y: o.y ?? 0.5 },
