@@ -66,6 +66,10 @@ altas, **las 6 corregidas**; revisión adversarial: 5 altas, **0 corregidas**).
 Aceptar o rechazar las ADR de la fase (todas en *propuesta*), añadir `contratos.md §12`,
 actualizar `tablero.md` y `00-INDICE.md`, y escribir `handoffs/3-para-fase-4.md`.
 
+## 3.5 Issues numeradas
+El inventario completo de pendientes, con causa y arreglo, está en
+`memoria/issues-fase-3.md` (I-01 a I-12). Es lo primero que debe leer quien retome.
+
 ## 4. Correcciones del dueño aplicadas
 `bitacora/3-correcciones-dueno.md` — C-01: referencia visual `gigsalad.com`, medida por un
 agente local del dueño (`diseno/arte-chrome.md`), adoptada en el **chrome** y no en la
