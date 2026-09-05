@@ -1,0 +1,40 @@
+== e2e 3-4b — el manifiesto de la plantilla en GET .../document ==
+backend: http://127.0.0.1:6003 · invitación: 3
+
+1. campos de primer nivel de la respuesta
+["activeRelease","composed","document","publicToken","publicUrl","report","revision","templateVersion"]
+  FALLA existe .manifest: esperaba <true>, obtuve <false>
+  FALLA existe .theme: esperaba <true>, obtuve <false>
+  FALLA .manifest es el de la plantilla vigente: esperaba <boda-clasica@1.0.0>, obtuve <?@?>
+
+2. U-17 — constraints de un TextSpec (maxLength y multiline)
+[]
+  FALLA family.godparents/label declara maxLength 40: esperaba <40>, obtuve <AUSENTE>
+  FALLA cover.title declara multiline: esperaba <false>, obtuve <AUSENTE>
+
+3. opciones de un bloque choice
+  FALLA gifts.options/kind trae sus 3 opciones: esperaba <bank,store,cash>, obtuve <AUSENTE>
+
+4. U-18 — SectionSpec.required (hoy sólo se descubre fallando)
+[]
+  FALLA la sección cover es required: esperaba <true>, obtuve <AUSENTE>
+  FALLA la sección gallery NO es required: esperaba <false>, obtuve <AUSENTE>
+
+5. SectionSpec.variants — selector de variante
+  FALLA cover ofrece full y framed: esperaba <full,framed>, obtuve <AUSENTE>
+
+6. paletas y conjuntos tipográficos (el compuesto sólo trae el tema YA resuelto)
+{"composed_theme_resuelto":{"paletteId":"blush","fontSetId":"serif-elegante"},"presets":{"palettes":[],"fontSets":[]}}
+  FALLA 3 paletas entre las que elegir: esperaba <blush,olive,navy>, obtuve <AUSENTE>
+  FALLA 2 conjuntos tipográficos: esperaba <serif-elegante,moderna>, obtuve <AUSENTE>
+jq: error (at <stdin>:0): null (null) has no keys
+  FALLA los tokens de cada paleta viajan completos: esperaba <6>, obtuve <>
+
+7. control: ninguna OTRA ruta lo daba (por eso hacía falta este campo)
+  OK    el catálogo NO trae sections → 0
+  OK    el catálogo NO trae palettes → 0
+  OK    el compuesto NO trae constraints → 0
+  OK    el compuesto NO trae required de sección → 0
+  OK    el compuesto NO trae variants disponibles → 0
+
+RESULTADO: 12 comprobaciones FALLAN — el editor no puede editar con lo que hoy recibe.

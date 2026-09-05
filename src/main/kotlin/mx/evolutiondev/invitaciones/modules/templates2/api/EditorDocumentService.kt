@@ -347,6 +347,12 @@ class EditorDocumentService(
             document = DomainJson.encode(documento),
             revision = fila.revision,
             templateVersion = TemplateVersionRef(version.slug, version.version, version.status),
+            // El paquete de plantilla que el editor necesita para EDITAR y que el compuesto no lleva
+            // (ADR-3-4b-01): `constraints`, opciones de `choice`, `required` y `variants` de sección, y
+            // el catálogo de paletas y tipografías. Se expone tal cual está registrado — ni se filtra ni
+            // se transforma (P3) — con el mismo códec que ya emite `document`/`composed`/`report`.
+            manifest = DomainJson.encode(version.pkg.manifest),
+            theme = DomainJson.encode(version.pkg.theme),
             composed = DomainJson.encode(resultado.composed),
             report = DomainJson.encode(resultado.report),
             publicToken = fila.publicToken,
