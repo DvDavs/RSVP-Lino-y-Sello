@@ -71,6 +71,29 @@ export const ASSET_MAX_BYTES = 15 * 1024 * 1024;
 const TOKEN_STORAGE_KEY = "invitaciones.auth.token";
 let tokenEnMemoria: string | null = null;
 
+/**
+ * U-1 — la clienta se atascó porque el editor decía «Inicia sesión de nuevo» y **no había dónde**.
+ * Para poder ofrecerle el botón hay que distinguir «nunca entró» de «su sesión caducó», y eso solo
+ * lo sabe el único sitio que ve los 401: este archivo. `lib/store.ts` clasifica el `SessionError`
+ * como `loadState: "error"` genérico y NO se puede tocar en este bloque (lo está editando otro
+ * agente), así que la señal viaja por aquí en vez de por el store.
+ */
+let sesionCaducada = false;
+
+/** ¿El último 401/403 del backend invalidó la sesión que teníamos? */
+export function haySesionCaducada(): boolean {
+  return sesionCaducada;
+}
+
+/** Se llama desde `peticion()`/`uploadAsset()` al clasificar un 401/403 sin código `TPL_*`. */
+function marcarSesionCaducada(): void {
+  // Solo es «caducada» si de verdad había token: sin token es «todavía no ha entrado».
+  sesionCaducada = getAuthToken() !== null;
+  // El token que ya no vale se tira: dejarlo puesto hace que cada ruta vuelva a fallar igual y que
+  // la pantalla de acceso no sepa que hay que volver a entrar.
+  if (sesionCaducada) clearAuthToken();
+}
+
 /** Solo en el navegador: RSC no debe leer `sessionStorage`, y no lo necesita (rutas públicas). */
 function sessionStorageSiDisponible(): Storage | null {
   if (typeof window === "undefined") return null;
@@ -84,6 +107,7 @@ function sessionStorageSiDisponible(): Storage | null {
 
 export function setAuthToken(token: string): void {
   tokenEnMemoria = token;
+  sesionCaducada = false;
   try {
     sessionStorageSiDisponible()?.setItem(TOKEN_STORAGE_KEY, token);
   } catch {
@@ -246,6 +270,7 @@ async function peticion<T>(opciones: OpcionesPeticion): Promise<RespuestaCruda<T
 
   // `handoffs/2-5.md`: 401/403 de la cadena de filtros de Spring Security no llevan `code` TPL_*.
   if (respuesta.status === 401 || respuesta.status === 403) {
+    marcarSesionCaducada();
     throw new SessionError(respuesta.status, textoCrudo);
   }
 
@@ -384,6 +409,7 @@ export async function uploadAsset(invitationId: number, input: SubirAssetInput):
     throw new ApiError(comoErrorTpl.data, respuesta.status);
   }
   if (respuesta.status === 401 || respuesta.status === 403) {
+    marcarSesionCaducada();
     throw new SessionError(respuesta.status, texto);
   }
   throw new UnknownApiError(respuesta.status, texto);
@@ -563,6 +589,32 @@ export async function authLogin(credenciales: AuthTokenRequest): Promise<AuthTok
     setAuthToken(data.accessToken);
   }
   return data;
+}
+
+/**
+ * `GET /user/invitations/all` — las invitaciones que YA tiene el cliente (módulo `user`, antiguo;
+ * no es una de las 19 rutas de `03-api.md`, igual que `/auth/token` de arriba).
+ *
+ * Por qué entra aquí (U-2, U-19): en el producto real **una invitación nace de una compra**, no del
+ * catálogo — `templates2` no crea invitaciones (ADR-2-4-02, `handoffs/3-0a.md` §3) y ninguna de sus
+ * 19 rutas lo hace. Sin esta lista, `/editor` no puede saber a QUÉ invitación aplicar la plantilla
+ * que la clienta elige, y el botón «Elegir esta plantilla» no puede dejar de ser un botón muerto.
+ *
+ * Forma verificada contra `InvitationResponse.kt:3` (`InvitationResponseItem`). Se tipa solo lo que
+ * la interfaz usa; el resto de campos del DTO viajan y se ignoran.
+ */
+export interface InvitacionDelCliente {
+  id: number;
+  status: string;
+  event: string;
+  plan: string;
+  /** `YYYY-MM-DD` tal cual lo guarda `invitation.date`; puede venir vacía. */
+  date: string;
+  time: string;
+}
+export async function listarInvitaciones(): Promise<InvitacionDelCliente[]> {
+  const r = await peticion<InvitacionDelCliente[]>({ method: "GET", path: "/user/invitations/all" });
+  return (r.data ?? []) as InvitacionDelCliente[];
 }
 
 export { ApiError, ApiClientValidationError, SessionError, UnknownApiError } from "./errors.ts";
