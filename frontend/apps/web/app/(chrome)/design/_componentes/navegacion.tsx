@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 const PAGINAS = [
   { href: "/design", etiqueta: "Índice", estado: "" },
   { href: "/design/tokens", etiqueta: "Tokens", estado: "" },
-  { href: "/design/tipografia", etiqueta: "Tipografía", estado: "bloque 1" },
-  { href: "/design/iconos", etiqueta: "Iconos", estado: "bloque 2" },
-  { href: "/design/formas", etiqueta: "Formas", estado: "bloque 2" },
+  { href: "/design/tipografia", etiqueta: "Tipografía", estado: "disponible" },
+  { href: "/design/iconos", etiqueta: "Iconos", estado: "disponible" },
+  { href: "/design/formas", etiqueta: "Formas", estado: "disponible" },
   { href: "/design/componentes", etiqueta: "Componentes", estado: "bloque 2" },
 ] as const;
 

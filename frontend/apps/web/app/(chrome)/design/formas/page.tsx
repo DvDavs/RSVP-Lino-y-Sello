@@ -6,12 +6,8 @@
 // Qué hay aquí: las once formas con sus parámetros manipulables, las cinco máscaras de foto, las
 // ocho reglas de composición de `11 §3.4` y los cinco ejemplos de composición que las aplican.
 //
-// TOKENS PROVISIONALES: `@invitaciones/tokens` (bloque 3C-1) todavía no emite `dist/tokens.css` en
-// esta rama, así que la página trae una copia de la paleta A «Bugambilia» en claro
-// (`evidencia/fase-3c/moodboard/semantica.css`) DENTRO de `@layer galeria-provisional`. Una
-// declaración sin capa gana a cualquier capa, de modo que en cuanto `estilos.css` importe los
-// tokens de verdad estos dejan de aplicarse solos. Al integrar, borrar `TOKENS_PROVISIONALES` y el
-// `<style>` que lo pinta, y quitar el import de `shapes.css` (lo traerá `@invitaciones/ui/estilos.css`).
+// Integración (orquestador 3-C): los tokens provisionales de la vista previa se retiraron al fusionar
+// 3C-1; `shapes.css` llega por `@invitaciones/ui/estilos.css` desde `globals.css`.
 import { useId, useState } from "react";
 import {
   Blob,
@@ -30,58 +26,6 @@ import {
   type Mascara,
   type PerfilOnda,
 } from "@invitaciones/ui";
-import "@invitaciones/ui/shapes/shapes.css";
-
-/* ─────────────────────────────────────────────────────── tokens provisionales ── */
-
-const TOKENS_PROVISIONALES = `
-@layer galeria-provisional {
-  :root {
-    --ui-surface: #fdf9f6;
-    --ui-surface-raised: #ffffff;
-    --ui-surface-alt: #fff3f8;
-    --ui-ink: #292018;
-    --ui-ink-muted: #554b42;
-    --ui-border: #988d84;
-    --ui-divider: #ece5de;
-    --ui-primary: #bb0076;
-    --ui-on-primary: #ffffff;
-    --ui-primary-hover: #95005d;
-    --ui-primary-soft: #ffe5ef;
-    --ui-on-primary-soft: #710045;
-    --ui-primary-bright: #e52995;
-    --ui-accent: #d79700;
-    --ui-accent-soft: #ffeaca;
-    --ui-on-accent-soft: #523700;
-    --ui-focus: #457cfd;
-    --ui-support-1: #457cfd;
-    --ui-support-1-soft: #e4edff;
-    --ui-support-1-deep: #11338a;
-    --ui-support-2: #009e77;
-    --ui-support-2-soft: #d3f6e7;
-    --ui-support-2-deep: #004936;
-    --ui-radius-sm: 8px;
-    --ui-radius-md: 14px;
-    --ui-radius-lg: 24px;
-    --ui-radius-xl: 36px;
-    --ui-radius-pill: 999px;
-    --ui-space-2: 8px;
-    --ui-space-3: 12px;
-    --ui-dur-1: 120ms;
-    --ui-dur-2: 200ms;
-    --ui-dur-respira: 12000ms;
-    --ui-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
-    --ui-ease-in-out: cubic-bezier(0.6, 0, 0.2, 1);
-    --ui-shadow-1: 0 1px 2px rgb(41 32 24 / 0.06), 0 4px 12px -4px rgb(41 32 24 / 0.1);
-    --ui-shadow-2: 0 2px 6px rgb(41 32 24 / 0.06), 0 16px 32px -12px rgb(41 32 24 / 0.16);
-    --ui-content-max: 1200px;
-    --ui-gutter: clamp(16px, 4vw, 48px);
-    --ui-text-xs: 13px;
-    --ui-font-display: "Bricolage Grotesque Variable", "Inter Variable", serif;
-    --ui-font-text: "Inter Variable", sans-serif;
-  }
-}
-`;
 
 /* ───────────────────────────────────────────────────────── estilos de galería ── */
 
@@ -484,7 +428,6 @@ export default function GaleriaDeFormas() {
 
   return (
     <div className="gf-pagina">
-      <style>{TOKENS_PROVISIONALES}</style>
       <style>{ESTILOS}</style>
 
       <header className="gf-ancho gf-cabecera">
@@ -495,11 +438,6 @@ export default function GaleriaDeFormas() {
           salen en SVG en línea, sin un solo color propio (el color viene de los tokens
           <code> --ui-*</code>), y todo lo que parece aleatorio deriva de una <code>seed</code>: el mismo número da el
           mismo dibujo en el servidor y en el navegador.
-        </p>
-        <p className="gf-aviso">
-          Vista previa del bloque 1. Los tokens definitivos los emiten <code>@invitaciones/tokens</code> (3C-1) y las
-          tres voces tipográficas llegan con 3C-2; mientras tanto esta página trae una copia provisional de la paleta A
-          «Bugambilia» en claro y usa las familias ya instaladas en el chrome.
         </p>
       </header>
 

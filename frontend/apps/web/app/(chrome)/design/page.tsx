@@ -13,19 +13,19 @@ const SECCIONES = [
     href: "/design/tipografia",
     titulo: "Tipografía",
     descripcion: "Las tres voces en uso: Fraunces para titular, Onest para leer, Red Hat Mono para etiquetar.",
-    estado: "bloque 1",
+    estado: "disponible",
   },
   {
     href: "/design/iconos",
     titulo: "Iconos",
     descripcion: "Inventario propio con búsqueda: retícula 24, trazo 1,75 redondeado, dos tonos.",
-    estado: "bloque 2",
+    estado: "disponible",
   },
   {
     href: "/design/formas",
     titulo: "Formas",
     descripcion: "Rayos, rayas, ondas, blobs, sello festoneado y máscaras de foto, con sus reglas de composición.",
-    estado: "bloque 2",
+    estado: "disponible",
   },
   {
     href: "/design/componentes",
