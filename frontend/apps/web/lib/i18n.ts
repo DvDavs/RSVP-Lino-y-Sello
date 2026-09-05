@@ -90,6 +90,26 @@ export const es_MX = {
         "Se toma de los datos de tu invitación. Es la fecha que quedó registrada al contratarla.",
       deLaPlantilla: "Este contenido lo define el diseño de la plantilla y no se puede editar.",
     },
+    /**
+     * U-3 resuelto de verdad (I-06): la fecha del evento ya se cambia DESDE AQUÍ. Es el
+     * `[Editar allí]` que `04 §6.3` dibujaba y que nunca tuvo destino, ahora con destino: este
+     * mismo panel. La frase de §6.3 se conserva entera y se le añade la salida real.
+     */
+    fechaEvento: {
+      explicacion:
+        "Se toma de los datos de tu invitación. Es la fecha que quedó registrada al contratarla, y puedes cambiarla aquí.",
+      abrir: "Cambiar la fecha",
+      etiquetaCampo: "Nueva fecha del evento",
+      guardar: "Guardar la fecha",
+      cancelar: "Cancelar",
+      guardando: "Guardando la fecha",
+      guardada: "Fecha actualizada.",
+      // No se invalida nada solo (`ADR-3B-I06-01`): se le dice qué falta y qué hacer.
+      republicar:
+        "Tu invitación publicada sigue mostrando la fecha anterior. Vuelve a publicar para que tus invitados vean la nueva.",
+      formatoInvalido: "Escribe la fecha como día, mes y año. Por ejemplo: 18 de abril de 2027.",
+      sinGuardar: "No pudimos guardar la fecha. Inténtalo de nuevo.",
+    },
     foto: {
       /** Mismo pie que ya tiene la galería, ahora también en la foto suelta (U-7). */
       limites: (mb: number) => `JPG, PNG o WebP · hasta ${mb} MB`,

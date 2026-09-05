@@ -297,6 +297,29 @@ export interface DeprecateTemplateVersionResponse {
 }
 
 // ---------------------------------------------------------------------------------------------
+// 20. PUT .../event — la fecha del evento (03 §3.20, I-06)
+// ---------------------------------------------------------------------------------------------
+/**
+ * `time` es opcional y su ausencia significa «no toques la hora», nunca «bórrala»: la plantilla
+ * puede no declarar ningún bloque con `businessField: "invitation.time"`, y entonces el editor no
+ * tiene ninguna hora que conservar ni que mostrar.
+ */
+export interface SetEventRequest {
+  /** `YYYY-MM-DD`. */
+  date: string;
+  /** `HH:mm`. */
+  time?: string;
+}
+export interface SetEventResponse {
+  invitationId: number;
+  date: string | null;
+  time: string | null;
+  /** ¿La invitación ya publicada quedó desactualizada por este cambio? No se invalida sola. */
+  releaseStale: boolean;
+  staleReason: string[];
+}
+
+// ---------------------------------------------------------------------------------------------
 // Auth (modules/auth, reusado — no es parte de templates2 pero el JWT sale de ahí, 03 preámbulo)
 // ---------------------------------------------------------------------------------------------
 export interface AuthTokenRequest {

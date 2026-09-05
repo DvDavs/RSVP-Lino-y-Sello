@@ -142,8 +142,10 @@ class DomainContractTest {
 
     /** `03 §5`: la tabla de errores y el enum tienen que coincidir; aquí se fija el tamaño y el HTTP. */
     @Test
-    fun `TplErrorCode cubre los 35 codigos de la tabla y su HTTP`() {
-        assertEquals(35, TplErrorCode.entries.size)
+    fun `TplErrorCode cubre los 36 codigos de la tabla y su HTTP`() {
+        // 36 desde la fase 3-B: `TPL_EVENT_DATE_INVALID` lo añade la ruta 20 (`03 §3.20`, I-06).
+        assertEquals(36, TplErrorCode.entries.size)
+        assertEquals(422, TplErrorCode.TPL_EVENT_DATE_INVALID.httpStatus)
         assertEquals(403, TplErrorCode.TPL_FORBIDDEN.httpStatus)
         assertEquals(409, TplErrorCode.TPL_REVISION_CONFLICT.httpStatus)
         assertEquals(422, TplErrorCode.TPL_OPERATION_INVALID.httpStatus)

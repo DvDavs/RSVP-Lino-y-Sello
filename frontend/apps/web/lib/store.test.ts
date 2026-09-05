@@ -728,3 +728,90 @@ describe("D1 · el documento CRUDO sigue a las operaciones (3-7, ADR-3-7-01)", (
     expect(doc?.theme.paletteId).toBe("blush");
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+// U-3 / I-06 — la clienta cambia la fecha de SU evento (`PUT …/event`, `03 §3.20`)
+// ═══════════════════════════════════════════════════════════════════════════════════════════════
+
+describe("cambiarFechaDelEvento (bloque `business`, no operación del documento)", () => {
+  /** El mismo `composedFixture`, con la fecha ya cambiada: es lo que devolvería el servidor. */
+  function composedConFecha(valor: string, formateado: string) {
+    const doc = composedFixture();
+    const bloque = doc.sections[0].blocks.find((b) => "id" in b && b.id === "cover.date");
+    if (bloque && "value" in bloque) bloque.value = { kind: "date", value: valor, formatted: formateado };
+    return doc;
+  }
+
+  it("escribe por la ruta del editor y refresca el bloque `business` con lo que devuelve el servidor", async () => {
+    const setEvent = vi.fn(async () => ({
+      invitationId: 5, date: "2028-05-20", time: "17:00", releaseStale: false, staleReason: [],
+    }));
+    let fresco = respuestaDocumento();
+    const ctx = nuevoStore({
+      setEvent: setEvent as unknown as StoreDeps["setEvent"],
+      getDocument: vi.fn(async () => fresco) as unknown as StoreDeps["getDocument"],
+    });
+    await ctx.store.getState().load(5);
+    fresco = { ...respuestaDocumento(), composed: composedConFecha("2028-05-20", "20 de mayo de 2028") };
+
+    const respuesta = await ctx.store.getState().cambiarFechaDelEvento("2028-05-20");
+
+    expect(setEvent).toHaveBeenCalledWith(5, { date: "2028-05-20" });
+    expect(respuesta.releaseStale).toBe(false);
+    const bloque = ctx.store.getState().composed?.sections[0].blocks.find((b) => "id" in b && b.id === "cover.date");
+    expect(bloque && "value" in bloque ? bloque.value : null).toEqual({
+      kind: "date", value: "2028-05-20", formatted: "20 de mayo de 2028",
+    });
+  });
+
+  it("NO produce ninguna operación: ni cola de guardado, ni pila de deshacer", async () => {
+    let fresco = respuestaDocumento();
+    const ctx = nuevoStore({
+      setEvent: vi.fn(async () => ({
+        invitationId: 5, date: "2028-05-20", time: null, releaseStale: true, staleReason: ["business.date"],
+      })) as unknown as StoreDeps["setEvent"],
+      getDocument: vi.fn(async () => fresco) as unknown as StoreDeps["getDocument"],
+    });
+    await ctx.store.getState().load(5);
+    fresco = { ...respuestaDocumento(), composed: composedConFecha("2028-05-20", "20 de mayo de 2028") };
+    const revisionAntes = ctx.store.getState().revision;
+
+    await ctx.store.getState().cambiarFechaDelEvento("2028-05-20");
+
+    expect(ctx.store.getState().undo).toHaveLength(0);
+    expect(ctx.store.getState().draft).toHaveLength(0);
+    expect(ctx.store.getState().queue).toHaveLength(0);
+    expect(ctx.store.getState().revision).toBe(revisionAntes);
+    expect(ctx.enviados).toHaveLength(0);
+  });
+
+  it("no pisa el tecleo sin confirmar de los bloques del USUARIO", async () => {
+    let fresco = respuestaDocumento();
+    const ctx = nuevoStore({
+      setEvent: vi.fn(async () => ({
+        invitationId: 5, date: "2028-05-20", time: null, releaseStale: false, staleReason: [],
+      })) as unknown as StoreDeps["setEvent"],
+      getDocument: vi.fn(async () => fresco) as unknown as StoreDeps["getDocument"],
+    });
+    await ctx.store.getState().load(5);
+    // Tecleo optimista todavía en el borrador, con el servidor sin enterarse.
+    ctx.store.getState().setBlock("cover.title", texto("Ana y Luis"));
+    fresco = { ...respuestaDocumento(), composed: composedConFecha("2028-05-20", "20 de mayo de 2028") };
+
+    await ctx.store.getState().cambiarFechaDelEvento("2028-05-20");
+
+    const titulo = ctx.store.getState().composed?.sections[0].blocks.find((b) => "id" in b && b.id === "cover.title");
+    expect(titulo && "value" in titulo ? titulo.value : null).toEqual({ kind: "text", value: "Ana y Luis" });
+  });
+
+  it("propaga el error tipado del servidor en vez de tragárselo", async () => {
+    const ctx = nuevoStore({
+      setEvent: vi.fn(async () => {
+        throw new ApiError({ timestamp: "x", statusCode: 422, code: "TPL_EVENT_DATE_INVALID", message: "mal" }, 422);
+      }) as unknown as StoreDeps["setEvent"],
+    });
+    await ctx.store.getState().load(5);
+
+    await expect(ctx.store.getState().cambiarFechaDelEvento("18/04/2027")).rejects.toBeInstanceOf(ApiError);
+  });
+});

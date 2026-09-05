@@ -34,10 +34,13 @@ async function flujoPanel(page: Page): Promise<void> {
   await expect(page.getByRole("radio", { name: "Pantalla completa" })).toBeVisible();
   await expect(page.getByRole("radio", { name: "Enmarcada" })).toBeVisible();
 
-  // ── bloque de negocio (cover.date, source: business): solo lectura CON explicación ─────────
+  // ── bloque de negocio (cover.date, source: business): explicación + salida REAL ────────────
+  // Sigue sin ser un campo del documento (`setBlock` sobre él es `422 TPL_BLOCK_NOT_EDITABLE` por
+  // I-21), así que en reposo no hay ningún control de formulario; pero desde I-06 ya no es un
+  // candado mudo: hay un botón que abre su propio control y escribe por `PUT …/event`.
   await expect(page.getByText("Se toma de los datos de tu invitación.")).toBeVisible();
-  // Nunca un <input disabled> mudo: no hay NINGÚN control de formulario para "Fecha del evento".
   await expect(page.getByRole("textbox", { name: /fecha del evento/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Cambiar la fecha" })).toBeVisible();
 
   // ── escribir en el título: autoguardado real contra el backend ─────────────────────────────
   const campo = page.getByRole("textbox", { name: "Nombres en portada" });

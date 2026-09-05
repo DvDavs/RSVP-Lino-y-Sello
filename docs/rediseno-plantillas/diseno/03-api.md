@@ -38,6 +38,9 @@ Todas las rutas autenticadas de invitación exigen `HierarchyValidationService.v
 | 17 | `POST /master/templates2/versions` | rol `MASTER` | Registro de plantilla, único camino de alta | `201`/`200 RegisterTemplateResponse` |
 | 18 | `GET /master/templates2/versions` | rol `MASTER` | Lista versiones registradas y su auditoría | `200` |
 | 19 | `POST /master/templates2/versions/{templateVersionId}:deprecate` | rol `MASTER` | Marca `status = 'deprecated'` | `200` |
+| 20 | `PUT /editor/invitations/{invitationId}/event` | invitación | Cambia la fecha (y opcionalmente la hora) del evento en `invitation` | `200 EventResponse` |
+
+La ruta 20 es **nueva de la fase 3-B** (issue I-06, `ADR-3B-I06-01`): hasta ella **ninguna ruta de cliente escribía `invitation.date`** — sólo `PUT /admin/invitations/{id}`, rol ADMIN (`InvitationAdminService.kt:414`) — y la clienta no podía cambiar la fecha de su propio evento por ninguna vía, que era el tercer verbo del criterio de terminado (U-3).
 
 Rutas 12, 14, 8, 9, 1, 18 y 19 **son nuevas de la ronda 1R**; el borrador no tenía forma de despublicar, de revocar un enlace filtrado, de listar o borrar assets, de listar el catálogo ni de deprecar una versión — huecos que fase 2 habría tenido que inventar (objeción **A-01**).
 
@@ -384,6 +387,19 @@ Nunca devuelve `composed` (cuerpo enorme); para verlo está el render público. 
 - **Errores**: `404 TPL_TEMPLATE_VERSION_NOT_FOUND` · `409 TPL_VERSION_LAST_PUBLISHED` si es la única versión `published` del slug y hay documentos usándola.
 - **Idempotencia**: sí (deprecar lo ya deprecado → `200`).
 
+### 3.20 `PUT /editor/invitations/{invitationId}/event`
+
+Añadida en la fase 3-B (issue I-06, `ADR-3B-I06-01`) con autorización explícita del dueño. Es **la única ruta de cliente que escribe `invitation.date` / `invitation.time`**.
+
+- **Auth**: invitación (`HierarchyValidationService.validateInvitationAccess`, ADR-015). `@PreAuthorize("hasAnyRole('USER','ADMIN','MASTER')")` a nivel de clase (ADR-1R-B-10).
+- **Cuerpo**: `{date: "YYYY-MM-DD", time?: "HH:mm"}`, leído con el lector estricto (`z.strictObject`): una clave desconocida es `400 TPL_MALFORMED_JSON`. `time` ausente = "no toques la hora"; **nunca** la borra.
+- **Efecto**: `UPDATE invitation SET date = :date[, time = :time] WHERE id = :invitationId`, por SQL nativo desde `persistence/InvitationEventWriter` — el mismo camino por el que `BusinessSnapshotReader` ya lee esas columnas. **Sólo esas dos columnas**: ni `updated_at`, ni `updated_by`, ni nada más de `invitation`. No escribe un byte en ninguna tabla `tpl_*`.
+- **Validación de formato**: `date` debe casar `^\d{4}-\d{2}-\d{2}$` **y** existir en el calendario; `time` debe casar `^\d{2}:\d{2}$` y ser una hora real. El patrón lo impone el consumidor: `composition/DateFormatting` parte `date` por `-` esperando tres segmentos numéricos y `time` por `:` esperando dos, y **devuelve el valor crudo** cuando no encajan (R6, punto 2), de modo que un formato inválido no revienta: se imprime tal cual en la invitación publicada. El módulo antiguo **no valida nada** (`InvitationEntity:29,31` son `String`; `InvitationAdminService.kt:414` asigna en crudo); esta ruta sí, y la divergencia es deliberada.
+- **Respuesta**: `200 EventResponse = {invitationId, date, time, releaseStale, staleReason}`. `date`/`time` se **releen** del `BusinessSnapshot` tras escribir: es la verdad de Postgres, no el eco del cuerpo.
+- **No invalida el release activo.** El `composed` publicado está congelado en `tpl_release` (ADR-007) y el mecanismo de "quedó desactualizado" ya existe: `EditorDocumentService.razonesDeStale` compara el `business_snapshot` congelado con el actual y `GET …/document` lo expone como `activeRelease.stale` + `staleReason: ["business.date"]` (§3.3). La clienta republica cuando quiera; `EventResponse` devuelve ese mismo cálculo para que el editor no tenga que pedirlo aparte.
+- **Errores**: `422 TPL_EVENT_DATE_INVALID` (`details.field` ∈ `{date, time}`, `details.expected` con el formato) · `400 TPL_MALFORMED_JSON` · `413 TPL_BODY_TOO_LARGE` (8 KiB, como el resto de rutas JSON) · `403 TPL_FORBIDDEN` (también cuando la invitación no existe: no se filtra cuáles existen).
+- **Idempotencia**: sí. Repetir la misma llamada deja exactamente el mismo estado; `tpl_document.revision` no cambia nunca.
+
 ## 4. Undo e historial (ADR-011, ADR-019, ADR-029)
 
 El undo *interactivo* (Ctrl+Z mientras se edita) es enteramente del cliente (pila de operaciones inversas, ADR-019) — no genera tráfico de red. `GET .../document/history` y `POST .../document/restore` son la red de seguridad del **servidor**: recuperar una sesión de edición si el cliente perdió su estado (recarga de página, otro dispositivo). `restore` nunca hace `UPDATE … SET revision = <pasada>`: siempre crea una revisión nueva con el contenido de la vieja, preservando el historial completo (mismo espíritu que `attic`, ADR-006 — nada retrocede destructivamente). El pipeline exacto y la obligatoriedad de `baseRevision` están en §3.6.
@@ -417,6 +433,7 @@ Todos los códigos del módulo, su HTTP y su origen. La fuente única en código
 | `TPL_ASSET_QUOTA_EXCEEDED` | 409 | Más de 200 assets por invitación |
 | `TPL_ASSET_STORAGE_UNAVAILABLE` | 502 | S3 rechaza o no responde al subir/borrar (nunca un 500 opaco) |
 | `TPL_DOCUMENT_TOO_LARGE` | 422 | El documento resultante supera 1 MiB serializado (`02 §2` V32) |
+| `TPL_EVENT_DATE_INVALID` | 422 | `PUT …/event` con una fecha fuera de `YYYY-MM-DD` (o inexistente en el calendario) o una hora fuera de `HH:mm`. `details.field` ∈ `{date, time}`, `details.expected` con el formato (§3.20, `ADR-3B-I06-01`) |
 | `TPL_BODY_TOO_LARGE` | 413 | Cuerpo HTTP por encima del límite de la ruta (768 KiB en `operations`) |
 | `TPL_MALFORMED_JSON` | 400 | Cuerpo no parseable, o con claves desconocidas (los esquemas son `strictObject`) |
 | `TPL_SNAPSHOT_NOT_FOUND` | 404 | `restore` de una revisión inexistente o ya purgada |

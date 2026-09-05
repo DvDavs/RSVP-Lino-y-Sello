@@ -17,6 +17,7 @@ import { esEditable, etiqueta, explicacionSoloLectura, findSectionSpec, type Man
 import { useEditorStore } from "@/lib/store.ts";
 import { ScalarBlockField, type ScalarSpec } from "@/components/fields/ScalarBlockField.tsx";
 import { SoloLectura } from "@/components/fields/FieldShell.tsx";
+import { FechaDelEvento } from "@/components/fields/FechaDelEvento.tsx";
 
 const SIN_ELEMENTOS: never[] = [];
 
@@ -110,11 +111,28 @@ export function BlockForm({ invitationId, manifest, manifestStatus }: { invitati
             }
 
             const bloque = composedSection.blocks.find((b): b is ComposedBlock => !("items" in b) && b.id === blockSpec.id) ?? null;
+
+            // U-3 · `04 §6.3` «[Editar allí]», ahora CON destino (I-06, `ADR-3B-I06-01`): la fecha
+            // del evento se cambia AQUÍ, con `PUT …/event`. Sigue sin ser un campo del documento
+            // —es un bloque `business` y `setBlock` sobre él es `422 TPL_BLOCK_NOT_EDITABLE` por
+            // I-21—, así que tiene su propio control y su propia ruta.
+            if (blockSpec.source === "business" && blockSpec.businessField === "invitation.date") {
+              const valor = bloque?.value;
+              return (
+                <FechaDelEvento
+                  key={blockSpec.id}
+                  label={etiqueta(blockSpec.label)}
+                  valor={valor && valor.kind === "date" ? valor.value : ""}
+                  formateado={valor && valor.kind === "date" ? valor.formatted : ""}
+                />
+              );
+            }
+
             if (!esEditable(blockSpec)) {
-              // U-3 · `04 §6.3` «[Editar allí]». Solo los bloques `business` tienen un «allí»: su
-              // valor vive en los datos de la invitación. Los `fixed` los define la plantilla y su
-              // explicación ya se basta. `/ayuda#fecha` responde, con todas las letras, quién puede
-              // cambiar la fecha hoy y cómo pedirlo.
+              // El resto de bloques bloqueados sigue como estaba. Los `business` que NO son la fecha
+              // (hashtag, «se admiten niños»…) todavía no tienen ruta de cliente que los escriba, así
+              // que conservan el enlace a `/ayuda`; los `fixed` los define la plantilla y su
+              // explicación ya se basta.
               const esDeNegocio = blockSpec.source === "business";
               return (
                 <SoloLectura

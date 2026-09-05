@@ -26,8 +26,9 @@ import {
   getDocument,
   postOperations,
   restoreRevision,
+  setEvent,
 } from "./api-client.ts";
-import type { OperationBatchResponse } from "./api-types.ts";
+import type { OperationBatchResponse, SetEventResponse } from "./api-types.ts";
 import {
   classifySaveError,
   clearPending,
@@ -64,6 +65,7 @@ import {
   applyOperationOptimistic,
   applyOperationToRawDocument,
   applyIdMapToRawDocument,
+  copiarValoresDeNegocio,
   resolverTema,
   findBlock,
   findGroup,
@@ -183,6 +185,17 @@ export interface EditorActions {
   resolveConflict: (mode: ConflictChoice) => Promise<void>;
   restoreRecovered: (aplicar: boolean) => void;
   reset: () => void;
+  /**
+   * U-3 / I-06 — la clienta cambia la fecha de SU evento. No es una operación del documento: la
+   * fecha vive en `invitation` (bloque `business`, R4), así que ni entra en la pila de undo ni pasa
+   * por el autoguardado. Tras escribirla se relee el documento y se refrescan **sólo los bloques
+   * `business`** del `composed`: lo demás puede tener parches optimistas sin confirmar y pisarlos
+   * sería perder tecleo de la clienta.
+   *
+   * Devuelve la respuesta de la ruta (lleva `releaseStale`); propaga el `ApiError` para que el campo
+   * pinte el mensaje junto al control, que es donde el error significa algo.
+   */
+  cambiarFechaDelEvento: (date: string) => Promise<SetEventResponse>;
 
   // — las 11 operaciones de `@invitaciones/schema` —
   setBlock: (blockId: string, value: Extract<Operation, { op: "setBlock" }>["value"]) => void;
@@ -267,6 +280,7 @@ export interface StoreDeps {
   chooseTemplate: typeof chooseTemplate;
   postOperations: typeof postOperations;
   restoreRevision: typeof restoreRevision;
+  setEvent: typeof setEvent;
   now: () => number;
   setTimeoutImpl: (fn: () => void, ms: number) => ReturnType<typeof setTimeout>;
   clearTimeoutImpl: (h: ReturnType<typeof setTimeout>) => void;
@@ -278,6 +292,7 @@ const DEPS_POR_DEFECTO: StoreDeps = {
   chooseTemplate,
   postOperations,
   restoreRevision,
+  setEvent,
   now: () => Date.now(),
   setTimeoutImpl: (fn, ms) => setTimeout(fn, ms),
   clearTimeoutImpl: (h) => clearTimeout(h),
@@ -766,6 +781,24 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           } catch (error: unknown) {
             aviso("error", error instanceof Error ? error.message : "No pudimos restaurar esa versión.");
           }
+        },
+
+        async cambiarFechaDelEvento(date: string): Promise<SetEventResponse> {
+          const invitationId = get().invitationId;
+          const respuesta = await deps.setEvent(invitationId, { date });
+          // El `composed` se recalcula EN EL SERVIDOR en cada lectura (ADR-007): la fecha nueva no
+          // se puede formatear aquí sin duplicar `DateFormatting` (H-27). Se relee y se copian
+          // SÓLO los bloques `business`, que son los únicos que este cambio puede tocar.
+          const fresco = await deps.getDocument(invitationId);
+          const cambiados: PatchEntry[] = [];
+          set((s) => {
+            // `copiarValoresDeNegocio` muta el borrador de immer y devuelve las entradas construidas
+            // desde `fresco` (nunca desde el borrador, cuyos proxies se revocan al salir de `set`).
+            if (s.composed) cambiados.push(...copiarValoresDeNegocio(s.composed, fresco.composed));
+            s.report = fresco.report;
+          });
+          if (sink && cambiados.length > 0) sink.patch(cambiados);
+          return respuesta;
         },
 
         /** 04 §12.4, pasos 1-6. */

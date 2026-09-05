@@ -15,6 +15,7 @@ import mx.evolutiondev.invitaciones.modules.templates2.domain.TextValue
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.BusinessSnapshotReader
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.DocumentStore
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.InvitationAvailabilityReader
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.InvitationEventWriter
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.LegacyConfigProbe
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.PgTestCluster
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.PublicTokenGenerator
@@ -155,6 +156,16 @@ class EditorTestConfig {
         BASE_URL, Templates2AssetBucket("bucket-de-pruebas", false), "us-east-2", FRONTEND,
     )
 
+    /** Ruta 20 (`03 §3.20`, I-06): el servicio real, con la misma jerarquía simulada que el resto. */
+    @Bean
+    fun editorEventService(
+        hierarchy: HierarchyValidationService,
+        negocio: BusinessSnapshotReader,
+        escritor: InvitationEventWriter,
+        releases: TplReleaseRepository,
+        documentos: EditorDocumentService,
+    ) = EditorEventService(hierarchy, negocio, escritor, releases, documentos)
+
     @Bean
     fun releaseService(
         editor: EditorDocumentService,
@@ -207,7 +218,7 @@ class EditorTestConfig {
  * evaluaría siempre sobre la misma imagen. A cambio hay que limpiar a mano: [limpiarInvitacion].
  */
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-@Import(EditorTestConfig::class, InvitationAvailabilityReader::class)
+@Import(EditorTestConfig::class, InvitationAvailabilityReader::class, InvitationEventWriter::class)
 @DirtiesContext
 abstract class EditorTestSupport : SpringPersistenceTestSupport() {
 

@@ -37,6 +37,18 @@ object EditorRequests {
     /** `03 §3.12`: `{baseRevision}`. */
     data class PublishRequest(val baseRevision: Long)
 
+    /**
+     * `03 §3.20`: `{date, time?}` del `PUT …/event` (I-06, `ADR-3B-I06-01`).
+     *
+     * `date` es obligatoria porque es el verbo de la ruta ("cambiar la fecha de mi evento"). `time`
+     * es **opcional** y su ausencia significa "no toques la hora", no "bórrala": la plantilla
+     * `boda-clasica@1.0.0` no declara ningún bloque con `businessField: "invitation.time"`, así que
+     * el editor no puede mostrar ni conservar un valor que nunca recibe — exigirla obligaría al
+     * cliente a inventarse una hora, que es justo el dato fabricado que P1 prohíbe. Un cuerpo
+     * `{date, time}` completo (el que fija el encargo) se acepta y escribe las dos columnas.
+     */
+    data class EventRequest(val date: String, val time: String?)
+
     fun chooseTemplate(node: JsonNode): ChooseTemplateRequest {
         val o = Obj(node, "body")
         val slug = o.texto("templateSlug")
@@ -59,6 +71,14 @@ object EditorRequests {
         val base = o.largo("baseRevision")
         o.fin()
         return PublishRequest(base)
+    }
+
+    fun event(node: JsonNode): EventRequest {
+        val o = Obj(node, "body")
+        val date = o.texto("date")
+        val time = o.textoOpcional("time")
+        o.fin()
+        return EventRequest(date, time)
     }
 
     private fun enteroLargo(node: JsonNode, path: String): Long {
@@ -217,3 +237,21 @@ data class ReleaseListResponse(val items: List<ReleaseItemResponse>, val nextCur
 
 /** `03 §3.10`. Rotar es explícito y **no** es idempotente: cada llamada revoca el enlace anterior. */
 data class PublicTokenResponse(val publicToken: String, val publicUrl: String, val rotatedAt: Instant)
+
+/**
+ * `03 §3.20`. Lo que quedó guardado en `invitation`, releído del propio `BusinessSnapshot` tras la
+ * escritura: la respuesta es la verdad de Postgres, nunca el eco del cuerpo que llegó.
+ *
+ * `releaseStale` dice si la invitación publicada quedó **desactualizada** por este cambio. No se
+ * invalida nada de forma automática (`ADR-3B-I06-01`): la fecha del release está congelada en
+ * `tpl_release.business_snapshot` y el mecanismo que ya existe para eso es
+ * `EditorDocumentService.razonesDeStale` — el editor lo lee y la clienta vuelve a publicar cuando
+ * quiera. `staleReason` es esa misma lista (`["business.date"]`, y `"business.time"` si cambió).
+ */
+data class EventResponse(
+    val invitationId: Long,
+    val date: String?,
+    val time: String?,
+    val releaseStale: Boolean,
+    val staleReason: List<String>,
+)

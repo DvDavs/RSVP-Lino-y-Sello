@@ -5,7 +5,7 @@
 import { z } from "zod";
 
 /**
- * Los 35 códigos `TPL_*` de `03-api.md` §5 (`enum TplErrorCode`, fuente única en Kotlin). El
+ * Los 36 códigos `TPL_*` de `03-api.md` §5 (`enum TplErrorCode`, fuente única en Kotlin). El
  * prefijo `TPL_AI_*` está reservado y sin listar (X-14): no hay rutas de IA implementadas.
  */
 export const TPL_ERROR_CODES = [
@@ -30,6 +30,7 @@ export const TPL_ERROR_CODES = [
   "TPL_ASSET_QUOTA_EXCEEDED",
   "TPL_ASSET_STORAGE_UNAVAILABLE",
   "TPL_DOCUMENT_TOO_LARGE",
+  "TPL_EVENT_DATE_INVALID",
   "TPL_BODY_TOO_LARGE",
   "TPL_MALFORMED_JSON",
   "TPL_SNAPSHOT_NOT_FOUND",

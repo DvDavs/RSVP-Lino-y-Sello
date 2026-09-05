@@ -47,6 +47,7 @@ class RouteAuthorizationMatrixTest : EditorTestSupport() {
     @Autowired private lateinit var releases: ReleaseService
     @Autowired private lateinit var assets: EditorAssetService
     @Autowired private lateinit var render: PublicRenderService
+    @Autowired private lateinit var evento: EditorEventService
     @Autowired private lateinit var hierarchy: HierarchyValidationService
 
     private val slug = "prueba-matriz"
@@ -85,7 +86,7 @@ class RouteAuthorizationMatrixTest : EditorTestSupport() {
         actualizar("DELETE FROM tpl_asset_gc WHERE public_id LIKE 'as_%'")
     }
 
-    /** Las 13 rutas de invitación de `03 §2` (filas 2-14), cada una con su llamada real. */
+    /** Las 14 rutas de invitación de `03 §2` (filas 2-14 y 20), cada una con su llamada real. */
     private fun rutasDeInvitacion(quien: Long): List<Pair<String, () -> Unit>> = listOf(
         "2 POST :choose-template" to {
             editor.chooseTemplate(
@@ -125,6 +126,9 @@ class RouteAuthorizationMatrixTest : EditorTestSupport() {
         "12 DELETE /release" to { releases.unpublish(quien, invitationId) },
         "13 GET /releases" to { releases.list(quien, invitationId, null, null); Unit },
         "14 POST /public-token:rotate" to { releases.rotatePublicToken(quien, invitationId); Unit },
+        // Ruta 20 (fase 3-B, I-06): escribe `invitation.date`, no `tpl_document` — con más razón
+        // tiene que preguntar a la jerarquía antes de tocar nada.
+        "20 PUT /event" to { evento.setEvent(quien, invitationId, json("""{"date":"2027-04-18"}""")); Unit },
     )
 
     /**
@@ -156,7 +160,7 @@ class RouteAuthorizationMatrixTest : EditorTestSupport() {
 
     /** Las dos columnas que **deben** cerrarse, y además sin efectos secundarios. */
     @TestFactory
-    fun `matriz 03 9-1 - sin acceso, las trece rutas responden 403 TPL_FORBIDDEN y no escriben`(): List<DynamicTest> {
+    fun `matriz 03 9-1 - sin acceso, las catorce rutas responden 403 TPL_FORBIDDEN y no escriben`(): List<DynamicTest> {
         val revisionInicial = revisionDe(invitationId)
         return listOf("USER ajeno" to 777L, "ADMIN ajeno" to 888L).flatMap { (rol, quien) ->
             rutasDeInvitacion(quien).map { (nombre, llamada) ->
@@ -203,6 +207,7 @@ class RouteAuthorizationMatrixTest : EditorTestSupport() {
             EditorDocumentController::class.java,
             EditorReleaseController::class.java,
             EditorAssetController::class.java,
+            EditorEventController::class.java,
         )
         for (clase in editorControllers) {
             val anotacion = AnnotatedElementUtils.findMergedAnnotation(clase, PreAuthorize::class.java)

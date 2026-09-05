@@ -1,4 +1,4 @@
-// lib/api-client.ts — ÚNICO cliente HTTP tipado contra las 19 rutas de `03-api.md`. El token de
+// lib/api-client.ts — ÚNICO cliente HTTP tipado contra las 20 rutas de `03-api.md`. El token de
 // sesión vive SOLO aquí (P8, contratos §8 C4): ninguna otra parte de `apps/web` lee ni escribe el
 // token, y el lienzo (`app/(canvas)/**`) tiene prohibido importar este archivo (ver
 // `eslint.config.mjs`, regla sobre `apps/web/app/(canvas)/**`).
@@ -44,6 +44,8 @@ import type {
   RestoreRequest,
   RestoreResponse,
   RotateTokenResponse,
+  SetEventRequest,
+  SetEventResponse,
 } from "./api-types.ts";
 
 // -------------------------------------------------------------------------------------------
@@ -175,7 +177,7 @@ function construirQuery(params?: Record<string, string | number | undefined>): s
 }
 
 interface OpcionesPeticion {
-  method: "GET" | "POST" | "DELETE" | "PATCH";
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   path: string;
   query?: Record<string, string | number | undefined>;
   /** Se limpia de nulos y se serializa a JSON; se comprueba contra `bodyLimitBytes` antes de enviar. */
@@ -570,6 +572,28 @@ export async function deprecateTemplateVersion(
     path: `/master/templates2/versions/${templateVersionId}:deprecate`,
   });
   return r.data as DeprecateTemplateVersionResponse;
+}
+
+// =============================================================================================
+// 20. PUT /editor/invitations/{invitationId}/event — la fecha del evento (§3.20, I-06)
+// =============================================================================================
+/**
+ * La ÚNICA ruta de cliente que escribe `invitation.date`. Hasta la fase 3-B sólo existía la de
+ * administración (`PUT /admin/invitations/{id}`, rol ADMIN), así que la clienta no podía cambiar la
+ * fecha de su propio evento por ninguna vía y el editor la enseñaba con candado (U-3).
+ *
+ * El backend valida el formato y responde `422 TPL_EVENT_DATE_INVALID` con `details.field`; aquí no
+ * se duplica esa validación (sería H-27 otra vez, dos validadores que divergen). Lo único que se
+ * hace en el cliente es no enviar `time` cuando no hay hora que cambiar (`quitarNulos`).
+ */
+export async function setEvent(invitationId: number, body: SetEventRequest): Promise<SetEventResponse> {
+  const r = await peticion<SetEventResponse>({
+    method: "PUT",
+    path: `/editor/invitations/${invitationId}/event`,
+    jsonBody: body,
+    bodyLimitBytes: DEFAULT_JSON_BODY_LIMIT_BYTES,
+  });
+  return r.data as SetEventResponse;
 }
 
 // =============================================================================================
