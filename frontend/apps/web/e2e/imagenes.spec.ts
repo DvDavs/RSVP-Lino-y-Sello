@@ -3,8 +3,8 @@
 // punto focal. El manifiesto se siembra (`preparar-panel.ts`); la subida, el recorte a `<canvas>` y
 // el guardado del `assetId` son reales y sin mocks (04 §20.3).
 import { fileURLToPath } from "node:url";
-import { expect, test } from "@playwright/test";
-import { API_BASE, invitacionSembrada, jwtDemo, sesionDemo } from "./preparar.ts";
+import { expect, test, type Page } from "@playwright/test";
+import { API_BASE, conLockDeInvitacionSembrada, invitacionSembrada, jwtDemo, sesionDemo } from "./preparar.ts";
 import { documentoActual, restaurarBloque, sembrarManifiesto } from "./preparar-panel.ts";
 
 test.use({ viewport: { width: 1440, height: 900 } });
@@ -12,6 +12,13 @@ test.use({ viewport: { width: 1440, height: 900 } });
 const FOTO_PRUEBA = fileURLToPath(new URL("./fixtures/foto-prueba.png", import.meta.url));
 
 test("imágenes · elegir, recortar, subir, alt obligatorio y punto focal", async ({ page }) => {
+  // Bloque 3-6, política anti-flake (`contratos.md` §6): esta prueba sube y guarda una foto en la
+  // invitación sembrada COMPARTIDA — bajo el mutex de `preparar.ts` (medido: sin él, un `409` de
+  // otra prueba a mitad de la subida deja el diálogo de conflicto abierto y esta prueba no lo espera).
+  await conLockDeInvitacionSembrada(() => flujoImagen(page));
+});
+
+async function flujoImagen(page: Page): Promise<void> {
   const token = await jwtDemo();
   const invitationId = invitacionSembrada();
   const antes = await documentoActual(invitationId, token);
@@ -62,7 +69,7 @@ test("imágenes · elegir, recortar, subir, alt obligatorio y punto focal", asyn
   expect((conFocal.content["couple.groomPhoto"] as { focal?: { x: number } }).focal?.x).toBeCloseTo(0.1, 5);
 
   await restaurarBloque(invitationId, token, "couple.groomPhoto", groomPhotoOriginal);
-});
+}
 
 test("imágenes · un formato no admitido se rechaza antes de subir, con texto es-MX", async ({ page }) => {
   const token = await jwtDemo();

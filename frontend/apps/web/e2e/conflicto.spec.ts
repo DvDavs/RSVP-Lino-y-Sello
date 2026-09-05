@@ -7,7 +7,7 @@
 // la prueba de que esa prevención no tapa el caso que sí importa.
 import { existsSync, mkdirSync } from "node:fs";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
-import { API_BASE, aplicarOperaciones, invitacionSembrada, jwtDemo, revisionActual, sesionDemo } from "./preparar.ts";
+import { API_BASE, aplicarOperaciones, conLockDeInvitacionSembrada, invitacionSembrada, jwtDemo, revisionActual, sesionDemo } from "./preparar.ts";
 
 const EVIDENCIA = new URL("../../../../docs/rediseno-plantillas/evidencia/fase-3/editor/", import.meta.url).pathname;
 if (!existsSync(EVIDENCIA)) mkdirSync(EVIDENCIA, { recursive: true });
@@ -59,6 +59,14 @@ async function escribirYGuardar(page: Page, blockId: string, valor: string): Pro
 }
 
 test("E-06 · dos navegadores editan lo mismo: el segundo ve el diálogo y nada se pierde en silencio", async ({ browser }) => {
+  // Bloque 3-6, política anti-flake (`contratos.md` §6): esta prueba mide una CADENA EXACTA de
+  // revisiones sobre la invitación sembrada COMPARTIDA — un `409` de una prueba AJENA en medio de
+  // la secuencia la rompería de una forma indistinguible del `409` que la prueba SÍ espera. Va
+  // bajo el mutex de `preparar.ts` (ver ahí la medición completa).
+  await conLockDeInvitacionSembrada(() => flujoConflicto(browser));
+});
+
+async function flujoConflicto(browser: import("@playwright/test").Browser): Promise<void> {
   const token = await jwtDemo();
   const invitationId = invitacionSembrada();
 
@@ -124,7 +132,7 @@ test("E-06 · dos navegadores editan lo mismo: el segundo ve el diálogo y nada 
     await contextoA.close();
     await contextoB.close();
   }
-});
+}
 
 test("E-06b · dos PESTAÑAS del mismo navegador no llegan a chocar: la segunda entra en solo lectura", async ({ context }) => {
   const token = await jwtDemo();

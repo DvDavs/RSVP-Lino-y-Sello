@@ -41,10 +41,16 @@ on:
   # entregada por 2-0a lo había reducido a `[main]`, contradiciendo su propia nota 2 de cabecera
   # ("se AÑADE la rama de la fase 2"): un PR contra la rama contractual de trabajo (contratos.md §1)
   # no habría disparado CI. Restaurado y ampliado (revisión 2-0a-REV, objeción O-05).
+  # Bloque 3-6: se añade la rama de trabajo REAL de la fase 3 — sin ella, un PR/push contra
+  # `claude/fase-3-frontend-orchestration-yuh8sx` (la que existe de verdad en este repositorio hoy)
+  # nunca dispara este workflow, exactamente el mismo defecto que la objeción O-05 de 2-0a-REV ya
+  # había corregido una vez para la rama de la fase 2.
   pull_request:
-    branches: [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi]
+    branches:
+      [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx]
   push:
-    branches: [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi]
+    branches:
+      [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx]
 
 concurrency:
   group: templates2-ci-${{ github.ref }}
@@ -296,6 +302,29 @@ jobs:
           TEMPLATES2_ASSETS_LOCAL_BASE_URL: http://127.0.0.1:6003/public/templates2-assets
           TEMPLATES2_ASSETS_PUBLIC_BASE_URL: http://127.0.0.1:6003/public/templates2-assets
 
+      # Bloque 3-6 — GAP CRÍTICO cerrado: hasta aquí NINGUNA prueba de este archivo podía correr,
+      # porque el job arranca un backend VACÍO (Flyway sin datos: cero plantillas registradas, cero
+      # cuenta de demostración). Las 35 pruebas de `frontend/apps/web/e2e/**` (medido en esta misma
+      # sesión, contra el backend real) dependen TODAS, directa o indirectamente, de
+      # `scripts/seed-demo.sh` (cuenta `demo.boda@example.com`, las dos plantillas registradas, una
+      # invitación publicada) — sin él, el primer `POST /auth/token` de `e2e/global-setup.ts`
+      # respondería 401 y el job entero fallaría en el primer segundo, no por un defecto del
+      # producto sino porque nadie sembró nada. `scripts/seed-demo.sh` NO se edita (prohibido, brief
+      # de este bloque): se le da el mismo `state.env` que ya lee para encontrar el puerto de
+      # Postgres — aquí no hay `scripts/pg-ephemeral.sh` (CI usa el servicio `postgres:` de arriba,
+      # puerto fijo 55432) — y el `PGPASSWORD` que sus llamadas a `psql` necesitan contra un
+      # servidor con contraseña (el clúster efímero local no la pide; este servicio sí).
+      - name: Sembrar demo (cuenta, plantillas registradas, invitación publicada)
+        working-directory: .
+        run: |
+          mkdir -p /tmp/templates2-pg
+          echo "TPL_TEST_PGPORT=55432" > /tmp/templates2-pg/state.env
+          bash scripts/seed-demo.sh
+        env:
+          TPL_DEV_BASE: http://127.0.0.1:6003
+          TPL_DEV_DB: templates2_e2e
+          PGPASSWORD: postgres
+
       # El servidor web del frontend lo arranca Playwright (`webServer` de playwright.config.ts),
       # NO un `&` suelto en este paso: un proceso lanzado con `&` en un step muere al terminarlo.
       - name: e2e + a11y
@@ -315,4 +344,26 @@ jobs:
         with:
           name: backend-e2e-log
           path: build/dev/backend-e2e.log
+          retention-days: 7
+
+      # Bloque 3-6 — compuerta (b) de `04 §16.2` (LCP y el resto de Core Web Vitals): AUSENTE por
+      # completo de este workflow hasta ahora — solo la compuerta (a) (`check-budget.mjs`, vía
+      # `presupuesto.spec.ts` dentro del paso de arriba) se ejecutaba en CI. `lighthouserc.cjs`
+      # (bloque 3-3) ya descubre la URL publicada por la API real, así que solo hace falta
+      # apuntarlo a un Chrome real: se reutiliza el que el paso "Instalar Chromium"/la caché de
+      # arriba ya dejó en `PLAYWRIGHT_BROWSERS_PATH`, localizado por patrón porque el número de
+      # revisión cambia con la versión de Playwright.
+      - name: LCP y Core Web Vitals (LHCI, 04 §16.2)
+        working-directory: frontend/apps/web
+        run: |
+          CHROME_PATH="$(find "$PLAYWRIGHT_BROWSERS_PATH" -maxdepth 2 -type d -name 'chromium-*' -print -quit)/chrome-linux/chrome"
+          echo "CHROME_PATH=$CHROME_PATH"
+          test -x "$CHROME_PATH" || { echo "No encuentro el Chromium de Playwright en $PLAYWRIGHT_BROWSERS_PATH"; exit 1; }
+          CHROME_PATH="$CHROME_PATH" npx lhci autorun --config=./lighthouserc.cjs
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lhci-reports
+          path: frontend/apps/web/.lighthouseci/**
           retention-days: 7

@@ -11,6 +11,7 @@ import {
   API_BASE,
   aplicarOperaciones,
   borrarInvitacion,
+  conLockDeInvitacionSembrada,
   invitacionSembrada,
   invitacionSinDocumento,
   jwtDemo,
@@ -82,9 +83,20 @@ test.describe("núcleo del editor", () => {
     // Se elige un bloque con TEXTO REAL a la vista (no el fondo decorativo de la portada): así el
     // recuadro de selección del lienzo y la fila resaltada del panel salen los dos en la captura.
     const bloqueConTexto = marco.locator("[data-block-id]").filter({ hasText: /\S/ }).first();
+    const blockId = await bloqueConTexto.getAttribute("data-block-id");
+    expect(blockId, "el bloque elegido debe traer su data-block-id").toBeTruthy();
     await bloqueConTexto.scrollIntoViewIfNeeded();
     await bloqueConTexto.click();
-    await expect(page.locator('aside [aria-current="true"]')).toBeVisible({ timeout: 10_000 });
+    // CORREGIDO en el bloque 3-6 (documentado, no una prueba nueva ajena): la aserción original
+    // buscaba `aside [aria-current="true"]`, que `SectionList` sí pinta pero `BlockForm` (bloque
+    // 3-5, posterior a este archivo) REEMPLAZA legítimamente el `<aside>` de la lista de secciones
+    // por el panel de contenido en cuanto `panel === "block"` — el `aria-current` de la fila deja
+    // de existir en el DOM en ese momento, no porque la selección haya fallado (diagnosticado y sin
+    // corregir por 3-5, `preguntas-abiertas.md` § "Fase 3 · 3-5"). La señal correcta —y más
+    // precisa: confirma el bloque EXACTO, no solo que “algún” panel abrió— es que el panel de
+    // contenido pinte el campo de ESE `blockId` (`components/editor/BlockForm.tsx:128`,
+    // `id="campo-<blockId>"`), es decir el ciclo completo BLOCK_CLICKED → store.select → panel.
+    await expect(page.locator(`[id="campo-${blockId}"]`)).toBeVisible({ timeout: 10_000 });
     // El recuadro de selección lo dibuja `SelectionOverlay` de `@invitaciones/sections` cuando el
     // padre devuelve el `SELECT_BLOCK`: es el ciclo completo BLOCK_CLICKED → store → SELECT_BLOCK.
     await expect(marco.locator("[aria-hidden='true'] > span").first()).toBeVisible({ timeout: 10_000 });
@@ -109,6 +121,13 @@ test.describe("núcleo del editor", () => {
   });
 
   test("E-N4 · el autoguardado escribe de verdad: la revisión del servidor sube", async ({ page }) => {
+    // Bloque 3-6, política anti-flake (`contratos.md` §6): esta prueba mide un delta EXACTO de
+    // revisión sobre la invitación sembrada COMPARTIDA — sin el mutex, otra prueba que escribe a
+    // la vez infla ese delta o dispara un `409` que esta prueba no espera (medido, ver `preparar.ts`).
+    await conLockDeInvitacionSembrada(() => flujoAutoguardado(page));
+  });
+
+  async function flujoAutoguardado(page: import("@playwright/test").Page): Promise<void> {
     const token = await jwtDemo();
     const invitationId = invitacionSembrada();
     const antes = await revisionActual(invitationId, token);
@@ -179,5 +198,5 @@ test.describe("núcleo del editor", () => {
       { op: "setSectionVisible", sectionKey: clave, visible: true },
     ]);
     expect(limpieza.status).toBe(200);
-  });
+  }
 });

@@ -3,13 +3,19 @@
 // de negocio en solo lectura CON explicación. Contra el backend real (04 §20.3); el único dato que no
 // llega todavía por HTTP es `manifest` (`bitacora/3-5.md` §1), sembrado con
 // `e2e/preparar-panel.ts` → `sembrarManifiesto` sobre el manifiesto REAL de la plantilla sembrada.
-import { expect, test } from "@playwright/test";
-import { invitacionSembrada, jwtDemo, sesionDemo } from "./preparar.ts";
+import { expect, test, type Page } from "@playwright/test";
+import { conLockDeInvitacionSembrada, invitacionSembrada, jwtDemo, sesionDemo } from "./preparar.ts";
 import { documentoActual, restaurarBloque, sembrarManifiesto } from "./preparar-panel.ts";
 
 test.use({ viewport: { width: 1440, height: 900 } });
 
 test("panel de contenido · variante, texto con autoguardado y bloque de negocio en solo lectura", async ({ page }) => {
+  // Bloque 3-6, política anti-flake (`contratos.md` §6): escribe en la invitación sembrada
+  // COMPARTIDA — bajo el mutex de `preparar.ts` (medido: ver ahí la evidencia completa).
+  await conLockDeInvitacionSembrada(() => flujoPanel(page));
+});
+
+async function flujoPanel(page: Page): Promise<void> {
   const token = await jwtDemo();
   const invitationId = invitacionSembrada();
   const antes = await documentoActual(invitationId, token);
@@ -42,4 +48,4 @@ test("panel de contenido · variante, texto con autoguardado y bloque de negocio
   expect(despues.revision).toBeGreaterThan(antes.revision);
 
   await restaurarBloque(invitationId, token, "cover.title", tituloOriginal);
-});
+}

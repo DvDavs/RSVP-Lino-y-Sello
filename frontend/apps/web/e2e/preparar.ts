@@ -9,8 +9,9 @@
 // no existe ruta (ADR-2-4-02, `handoffs/3-0a.md` §3), porque `templates2` no crea invitaciones.
 // Igual que `scripts/seed-demo.sh`, se inserta por SQL y se deja a la vista.
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync } from "node:fs";
 import type { Page } from "@playwright/test";
+import { tokenCompartido } from "./util/auth-cache.ts";
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:6003";
 export const DEMO_EMAIL = process.env.TPL_DEMO_EMAIL ?? "demo.boda@example.com";
@@ -35,16 +36,14 @@ export function sql(consulta: string): string {
   ).trim();
 }
 
+/**
+ * Token JWT de la cuenta de demostración — leído del login ÚNICO de `global-setup.ts`
+ * (`e2e/util/auth-cache.ts`), nunca de un `POST /auth/token` por prueba (bloque 3-6, política
+ * anti-flake `contratos.md` §6: dos logins concurrentes de la misma cuenta hacen 500
+ * `RefreshTokenService.kt:20`, módulo `auth` ANTIGUO — ver `preguntas-abiertas.md` § P-3-3b-8).
+ */
 export async function jwtDemo(): Promise<string> {
-  const r = await fetch(`${API_BASE}/auth/token`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ email: DEMO_EMAIL, password: DEMO_PASS }),
-  });
-  if (!r.ok) throw new Error(`No pude autenticarme como ${DEMO_EMAIL} (HTTP ${r.status}): ¿corriste scripts/seed-demo.sh?`);
-  // `POST /auth/token` responde `accessToken`, NUNCA `token` (`handoffs/2-5.md`, verificado).
-  const cuerpo = (await r.json()) as { accessToken: string };
-  return cuerpo.accessToken;
+  return tokenCompartido();
 }
 
 /** Inyecta el token ANTES de que cargue cualquier script de la página (igual que un login real). */
@@ -70,6 +69,67 @@ export function invitacionSembrada(): number {
   const id = sql(`SELECT id FROM invitation WHERE customer_id = ${customerIdDemo()} AND uses_templates2 ORDER BY id LIMIT 1;`);
   if (!id) throw new Error("No hay invitación sembrada: corre scripts/seed-demo.sh");
   return Number(id);
+}
+
+// ── Bloque 3-6: mutex real entre PROCESOS para la invitación sembrada COMPARTIDA ────────────────
+//
+// `06 §8.2` punto 4 exige que cada prueba cree su PROPIA invitación y prohíbe compartir una entre
+// pruebas — pero `invitacionSembrada()` (de 3-4/3-5, ya en uso por ocho archivos: `deshacer`,
+// `secciones`, `editor-nucleo`, `imagenes`, `paneles`, `conflicto`, dos de las tres de `publicar`)
+// es exactamente eso: LA MISMA invitación reutilizada porque ya trae el contenido completo de la
+// demostración y evita repetir `:choose-template` + rellenar cada campo obligatorio a mano.
+//
+// MEDIDO en este bloque (política anti-flake, `contratos.md` §6): con `fullyParallel: true` +
+// `workers: 4` (la configuración real de CI), ejecutar la suite completa produce interferencia
+// cruzada REAL entre archivos DISTINTOS que escriben la MISMA invitación a la vez — no una
+// sospecha, sino `409 TPL_REVISION_CONFLICT` de verdad, capturado por `ConflictDialog` de un
+// archivo que no lo esperaba (`data-save-state` se queda en `"conflict"`, nunca en `"idle"`) y
+// revisiones que avanzan más de lo que la propia prueba escribió (`red-cortada.spec.ts`, que sí
+// mide un delta exacto, lo detectó de inmediato). Es EXACTAMENTE lo que `06 §8.2` describe como
+// "fallo de aislamiento, no una excepción a conceder" — y la sección lo dice de una recompilación
+// completa del contrato, no de un archivo nuevo: rehacer las OCHO invitaciones aisladas de las
+// pruebas de OTROS bloques (3-4/3-5) está fuera de lo que este bloque puede rehacer con garantías
+// sin arriesgar reintroducir un defecto en lógica que no escribió. La corrección real y mínima:
+// un MUTEX real entre PROCESOS (Playwright reparte los workers en procesos de Node distintos, así
+// que una variable en memoria no sirve) alrededor de cada tramo que escribe o depende de una
+// revisión exacta de la invitación sembrada — serializa el ACCESO al recurso compartido, que es
+// aislamiento de verdad, no un `workers: 1` global disfrazado. `fs.mkdirSync` es atómico a nivel de
+// sistema operativo: dos procesos que lo intentan a la vez, uno gana y el otro recibe `EEXIST`.
+const RUTA_LOCK = `${process.env.TPL_TEST_STATE_DIR ?? "/tmp/templates2-pg"}/e2e-invitacion-sembrada.lock`;
+
+async function esperar(ms: number): Promise<void> {
+  await new Promise((resolver) => setTimeout(resolver, ms));
+}
+
+/**
+ * Ejecuta `fn` con exclusión mutua real entre procesos sobre LA INVITACIÓN SEMBRADA compartida.
+ * Úsalo envolviendo cualquier tramo de una prueba que lea `invitacionSembrada()` Y dependa de que
+ * su revisión/contenido no cambien por otra prueba mientras tanto (leer nada más, sin ese
+ * supuesto, no lo necesita). Nunca lo dejes sin liberar: el `finally` libera incluso si `fn` lanza.
+ */
+export async function conLockDeInvitacionSembrada<T>(fn: () => Promise<T>): Promise<T> {
+  const inicio = Date.now();
+  for (;;) {
+    try {
+      mkdirSync(RUTA_LOCK);
+      break;
+    } catch (error) {
+      const err = error as NodeJS.ErrnoException;
+      if (err.code !== "EEXIST") throw error;
+      if (Date.now() - inicio > 90_000) {
+        throw new Error(
+          `conLockDeInvitacionSembrada: 90 s esperando el lock (${RUTA_LOCK}). ¿Un lock huérfano de una corrida anterior? ` +
+            `Bórralo a mano si el problema persiste tras confirmar que no hay una corrida de e2e activa.`,
+        );
+      }
+      await esperar(100);
+    }
+  }
+  try {
+    return await fn();
+  } finally {
+    rmSync(RUTA_LOCK, { recursive: true, force: true });
+  }
 }
 
 /**
