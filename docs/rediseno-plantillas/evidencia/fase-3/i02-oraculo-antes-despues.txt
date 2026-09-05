@@ -1,0 +1,25 @@
+I-02 · oráculo de temporización de POST /auth/token — medición INDEPENDIENTE del orquestador
+Mismo script, mismo método, misma máquina, N=30 por caso, curl time_total,
+contraseña con formato válido (`ContrasenaIncorrecta1!`; una corta da 400 de validación, no 401).
+
+ANTES (binario sin el hotfix, 2026-09-05 07:36)
+  inexistente        n=30  min=0.0053  mediana=0.0065  max=0.0128
+  existente/mala     n=30  min=0.0956  mediana=0.0978  max=0.1297
+  ratio de medianas = 15,0x    SIN SOLAPE (max inexistente 0.0128 < min existente 0.0956)
+  60 fallos seguidos: ninguno bloqueado; la contraseña BUENA responde 200 justo después.
+
+DESPUÉS · (a) configuración de PRODUCCIÓN (5 fallos/cuenta, 20/IP, ventana 15 min)
+  inexistente        n=30  min=0.0053  mediana=0.0066  max=0.3666
+  existente/mala     n=30  min=0.0043  mediana=0.0056  max=0.1205
+  ratio = 0,85x. Ambos casos son RÁPIDOS porque a partir del 6º intento responde 429 sin bcrypt:
+  desde fuera no hay oráculo, porque el ataque se corta antes de poder medir nada.
+
+DESPUÉS · (b) limitador APARTADO a propósito (umbrales a 100000) para aislar el hash señuelo
+  inexistente        n=30  min=0.0981  mediana=0.1023  max=0.3120
+  existente/mala     n=30  min=0.0997  mediana=0.1031  max=0.1317
+  ratio de medianas = 1,01x    CON SOLAPE TOTAL. Objetivo del dueño (< 1,5x) cumplido.
+  El camino «el correo no existe» ahora paga el mismo bcrypt que el camino «existe»: era el
+  early-return de `CustomerService.validateUser` lo que creaba el oráculo.
+
+Las dos medidas del «después» hacen falta: (a) sola no probaría el señuelo (mide el 429), y (b)
+sola no probaría que en producción el atacante nunca llega a tomar 30 muestras.
