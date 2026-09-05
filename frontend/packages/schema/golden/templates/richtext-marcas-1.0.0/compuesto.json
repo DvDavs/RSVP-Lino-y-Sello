@@ -1,0 +1,176 @@
+{
+  "composedVersion": 1,
+  "template": {
+    "slug": "richtext-marcas",
+    "version": "1.0.0"
+  },
+  "locale": "es-MX",
+  "theme": {
+    "paletteId": "olive",
+    "fontSetId": "clasica",
+    "tokens": {
+      "bg": "#FFFFFF",
+      "surface": "#F5F5F0",
+      "ink": "#222222",
+      "accent": "#556B2F",
+      "accentInk": "#FFFFFF",
+      "muted": "#999999"
+    },
+    "fonts": {
+      "heading": {
+        "family": "Playfair Display",
+        "weights": [
+          400,
+          700
+        ],
+        "source": "bundled"
+      },
+      "body": {
+        "family": "Lora",
+        "weights": [
+          400
+        ],
+        "source": "bundled"
+      }
+    }
+  },
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "variant": "default",
+      "visible": true,
+      "title": "cover",
+      "blocks": [
+        {
+          "id": "cover.title",
+          "role": "coverTitle",
+          "type": "text",
+          "label": "cover.title",
+          "provenance": "user",
+          "value": {
+            "kind": "text",
+            "value": "Camila & Antonio"
+          }
+        }
+      ]
+    },
+    {
+      "key": "story",
+      "type": "story",
+      "variant": "default",
+      "visible": true,
+      "title": "story",
+      "blocks": [
+        {
+          "id": "story.body",
+          "role": "storyBody",
+          "type": "richText",
+          "label": "story.body",
+          "provenance": "user",
+          "value": {
+            "kind": "richText",
+            "doc": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Nos conocimos en "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Oaxaca",
+                      "marks": [
+                        "bold"
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " un martes "
+                    },
+                    {
+                      "type": "text",
+                      "text": "cualquiera",
+                      "marks": [
+                        "italic"
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Las dos marcas a la vez",
+                      "marks": [
+                        "bold",
+                        "italic"
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " y un enlace ",
+                      "marks": []
+                    },
+                    {
+                      "type": "text",
+                      "text": "al mapa",
+                      "href": "https://maps.example.com/oaxaca"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": []
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "story.note",
+          "role": "sectionIntro",
+          "type": "richText",
+          "label": "story.note",
+          "provenance": "default",
+          "value": {
+            "kind": "richText",
+            "doc": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Escribe aquí vuestra historia. "
+                    },
+                    {
+                      "type": "text",
+                      "text": "En cursiva",
+                      "marks": [
+                        "italic"
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

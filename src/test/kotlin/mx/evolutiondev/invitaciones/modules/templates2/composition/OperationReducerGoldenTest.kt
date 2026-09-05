@@ -104,6 +104,44 @@ class OperationReducerGoldenTest {
         assertEquals(setOf("maxBytes", "aspect"), restricciones)
     }
 
+    /**
+     * **I-01 / H-ADV-01**: un `RichSpan` con `marks` tiene que llegar al CODIFICADOR, no sólo al
+     * validador de esquema. `DomainJson.encode(RichSpan)` hacía `o.set<ArrayNode>("marks", arr)`;
+     * como `ObjectNode.set()` devuelve `this` y esa expresión era el valor de retorno del lambda de
+     * `s.marks?.let {}`, Kotlin insertaba un `CHECKCAST` a `ArrayNode` → `ClassCastException` →
+     * `500 TPL_INTERNAL` al escribir negrita o cursiva en el editor.
+     *
+     * Las 2 390 pruebas de la fase 3 no lo veían porque `marks` sólo aparecía en
+     * `golden/blocks/richText.cases.json`, un fichero de casos de ESQUEMA que **nunca** pasa por
+     * `DomainJson.encode`. Esta prueba recorre el camino real del editor —reductor y después
+     * codificación del documento resultante— y ancla el caso: si desapareciera del generador,
+     * fallaría aquí en vez de esfumarse en silencio.
+     */
+    @Test
+    fun `un richText con marks pasa por el reductor y por el codificador (I-01)`() {
+        val casos = Golden.leer("operations", "setBlock.cases.json")
+            .filter { it.get("operation").toString().contains("\"marks\"") }
+        assertTrue(casos.isNotEmpty(), "golden/operations/setBlock.cases.json sin ningún caso con `marks` (I-01)")
+
+        for (caso in casos) {
+            val op = DomainJson.operation(caso.get("operation"), "operation")
+            val resultado = DefaultOperationReducer.apply(documento, op, ctx)
+            assertTrue(resultado is OperationResult.Ok, "el reductor rechazó el caso: ${caso.get("name")}")
+
+            // `GoldenComposition.encode` llama a `DomainJson.encode(doc)`: AQUÍ reventaba.
+            val json = GoldenComposition.encode(resultado).toString()
+            for (marca in listOf("[\"bold\"]", "[\"italic\"]", "[\"bold\",\"italic\"]"))
+                assertTrue(json.contains("\"marks\":$marca"), "falta marks:$marca en el documento codificado")
+            assertTrue(json.contains("\"href\":\"https://ejemplo.mx/mapa\""), "falta el href del span enlazado")
+
+            // Y el resultado codificado es exactamente el `reducerResult` que emitió TypeScript.
+            assertEquals(
+                GoldenComposition.canonical(GoldenComposition.sinDetail(caso.get("reducerResult"))),
+                GoldenComposition.canonical(GoldenComposition.sinDetail(GoldenComposition.encode(resultado))),
+            )
+        }
+    }
+
     /** ADR-1R-F-04: la inversa de `setBlock` sobre un default es `clearBlock`, que BORRA la clave. */
     @Test
     fun `clearBlock borra la clave y no promueve el default a contenido de usuario`() {

@@ -650,3 +650,27 @@ del arreglo, no — el lienzo **no puede** resolver `paletteId → tokens` (cuat
   ningún rastro permanente en `tpl_template_version`, la alternativa (b) del ADR —borrar por SQL el
   `tpl_document` de la propia ruta 2 antes de la 19— libera una versión real, a cambio de un `DELETE`
   sobre una tabla del módulo nuevo cuyo efecto en cascada no se verificó en este bloque.
+
+## Fase 3-B · I-01 — negrita y cursiva devolvían 500 (3)
+
+- [Fase 3-B · I-01] **El «después» de I-01 no está medido por HTTP**, sólo por la suite. El backend
+  compartido de `127.0.0.1:6003` corre el binario SIN el arreglo y el encargo prohíbe recompilarlo o
+  reiniciarlo, así que el `500 TPL_INTERNAL` con `marks` está reproducido contra el servidor real
+  (evidencia en la bitácora) pero el `200 applied=true` posterior no. **Supuesto con el que sigo**:
+  la prueba de verdad es la de la suite —162 pruebas en las cuatro clases tocadas, de 9 fallos a 0—
+  y el arreglo de una línea no tiene ninguna rama que la suite no recorra. ¿Quiere el dueño una
+  pasada HTTP contra un backend con el binario nuevo antes de aceptar la ADR?
+
+- [Fase 3-B · I-01] **`golden/templates/` deja de ser el espejo de `diseno/ejemplos/`.** Hasta hoy
+  toda carpeta de `golden/templates/` venía de un ejemplo de la fase 1 y `Golden.Ejemplos.plantillas`
+  servía para las dos cosas; `richtext-marcas-1.0.0` es sintetizada, así que en Kotlin se separan
+  `Golden.plantillas` (lo que hay en `golden/`) y `Golden.Ejemplos.plantillas` (lo que hay en
+  `diseno/ejemplos/`). **Supuesto**: es la separación correcta, porque el catálogo de golden tiene
+  que poder crecer con casos que ningún ejemplo de negocio cubre. ¿Se registra en `contratos.md §3`?
+
+- [Fase 3-B · I-01] **El hueco de método que produjo I-01 sigue abierto.** El defecto no fue la línea
+  de `DomainJson`, fue que un campo opcional del esquema (`RichSpan.marks`) tenía casos de *esquema*
+  y ningún golden de *documento*, y nadie lo notaba. No hay hoy ninguna compuerta que diga «todo
+  campo opcional de `blocks.ts` aparece al menos una vez en un golden que pase por el codificador».
+  **Supuesto**: fuera del alcance de esta issue, que era cerrar `marks`. ¿Se abre issue para la
+  fase 4 (una prueba de cobertura de campos sobre `golden/templates` + `golden/operations`)?

@@ -1,10 +1,11 @@
 // packages/schema/scripts/gen-golden.ts — entrypoint único: `pnpm --filter @invitaciones/schema run gen:golden`.
 // Regenera TODOS los golden files (contratos.md §3/§6, ADR-1R-D-09: generados, nunca a mano).
-import { genGoldenTemplates } from "./gen-golden-templates.ts";
+import { genGoldenTemplates, genGoldenMarcas } from "./gen-golden-templates.ts";
 
 console.log("== golden/templates ==");
 for (const { dir, matched } of genGoldenTemplates())
   console.log(`  ${dir}: ${matched ? "OK (coincide con diseno/ejemplos)" : "AVISO: no coincide con diseno/ejemplos"}`);
+console.log(`  ${genGoldenMarcas()}: OK (sintetizado: richText con marks, I-01)`);
 
 console.log("== golden/compose ==");
 await import("./gen-golden-compose.ts");

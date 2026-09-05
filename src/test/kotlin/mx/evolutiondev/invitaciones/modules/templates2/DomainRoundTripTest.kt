@@ -26,7 +26,7 @@ class DomainRoundTripTest {
 
     @TestFactory
     fun `manifiesto, tema, defaults, documento, negocio, compuesto e informe`(): List<DynamicTest> =
-        Golden.Ejemplos.plantillas.flatMap { plantilla ->
+        Golden.plantillas.flatMap { plantilla ->
             val dir = "templates/$plantilla"
             listOf(
                 DynamicTest.dynamicTest("$plantilla/template.json") {

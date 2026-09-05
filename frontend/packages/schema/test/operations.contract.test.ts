@@ -50,6 +50,37 @@ describe("golden/operations — inventario y fixture", () => {
   });
 });
 
+/**
+ * I-01 (`issues-fase-3.md`, H-ADV-01 de `handoffs/3-adv.md`): un `RichSpan` con `marks` tiene que
+ * pasar por el REDUCTOR, no sólo por el validador de esquema. Hasta la fase 3-B `marks` únicamente
+ * aparecía en `golden/blocks/richText.cases.json` —casos de esquema que nunca llegan al codificador—,
+ * así que escribir negrita o cursiva devolvía `500 TPL_INTERNAL` con 2 390 pruebas en verde.
+ *
+ * El caso vive en `golden/operations/setBlock.cases.json` y lo consume el bucle de abajo en TS y
+ * `OperationReducerGoldenTest` en Kotlin. Esta prueba lo ANCLA: si alguien lo quita del generador,
+ * falla aquí en vez de desaparecer en silencio (que es exactamente cómo se coló el defecto).
+ */
+describe("golden/operations — richText con marks pasa por el reductor (I-01)", () => {
+  const casos = loadCases<OpCase>("operations", "setBlock.cases.json");
+  const conMarcas = casos.filter(c => JSON.stringify(c.operation).includes('"marks"'));
+
+  it("hay al menos un caso de setBlock con marks", () => {
+    expect(conMarcas.length).toBeGreaterThan(0);
+  });
+
+  it("el documento que devuelve el reductor conserva bold, italic, las dos juntas y el href", () => {
+    for (const c of conMarcas) {
+      const r = c.reducerResult as { ok: boolean; doc: unknown };
+      expect(r.ok).toBe(true);
+      const spans = JSON.stringify(r.doc);
+      expect(spans).toContain('"marks":["bold"]');
+      expect(spans).toContain('"marks":["italic"]');
+      expect(spans).toContain('"marks":["bold","italic"]');
+      expect(spans).toContain('"href":"https://ejemplo.mx/mapa"');
+    }
+  });
+});
+
 for (const op of EXPECTED_OPS) {
   describe(`golden/operations/${op}.cases.json`, () => {
     const cases = loadCases<OpCase>("operations", `${op}.cases.json`);

@@ -487,5 +487,190 @@
         }
       }
     }
+  },
+  {
+    "name": "richText con marks: negrita, cursiva y enlace (H-ADV-01)",
+    "tag": "valid-shape",
+    "operation": {
+      "op": "setBlock",
+      "blockId": "cover.story",
+      "value": {
+        "kind": "richText",
+        "doc": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Te queremos "
+                },
+                {
+                  "type": "text",
+                  "text": "muchísimo",
+                  "marks": [
+                    "bold"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " de "
+                },
+                {
+                  "type": "text",
+                  "text": "verdad",
+                  "marks": [
+                    "italic"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "gritándolo",
+                  "marks": [
+                    "bold",
+                    "italic"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " y con "
+                },
+                {
+                  "type": "text",
+                  "text": "un enlace",
+                  "href": "https://ejemplo.mx/mapa"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "expectZodValid": true,
+    "expectOpViolations": [],
+    "reducerResult": {
+      "ok": true,
+      "doc": {
+        "schemaVersion": 1,
+        "template": {
+          "slug": "fixture-tpl",
+          "version": "1.0.0"
+        },
+        "theme": {
+          "paletteId": "olive",
+          "fontSetId": "clasica"
+        },
+        "structure": {
+          "sections": [
+            {
+              "key": "cover",
+              "variant": "default",
+              "visible": true
+            },
+            {
+              "key": "event",
+              "variant": "default",
+              "visible": true
+            }
+          ]
+        },
+        "content": {
+          "cover.title": {
+            "kind": "text",
+            "value": "Ana & Luis"
+          },
+          "event.cards": {
+            "kind": "group",
+            "items": [
+              {
+                "itemId": "01J8KNAWN1AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Ceremonia"
+                  }
+                }
+              },
+              {
+                "itemId": "01J8KNAWN2AAAAAAAAAAAAAAAA",
+                "values": {
+                  "title": {
+                    "kind": "text",
+                    "value": "Recepción"
+                  }
+                }
+              }
+            ]
+          },
+          "cover.story": {
+            "kind": "richText",
+            "doc": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Te queremos "
+                    },
+                    {
+                      "type": "text",
+                      "text": "muchísimo",
+                      "marks": [
+                        "bold"
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " de "
+                    },
+                    {
+                      "type": "text",
+                      "text": "verdad",
+                      "marks": [
+                        "italic"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "gritándolo",
+                      "marks": [
+                        "bold",
+                        "italic"
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " y con "
+                    },
+                    {
+                      "type": "text",
+                      "text": "un enlace",
+                      "href": "https://ejemplo.mx/mapa"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "attic": {},
+        "meta": {
+          "locale": "es-MX"
+        }
+      }
+    }
   }
 ]

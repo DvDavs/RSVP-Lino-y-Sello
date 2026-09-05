@@ -43,7 +43,7 @@ class ComposerGoldenTest {
 
     @TestFactory
     fun `compose reproduce compuesto punto json de TypeScript`(): List<DynamicTest> =
-        Golden.Ejemplos.plantillas.map { p ->
+        Golden.plantillas.map { p ->
             DynamicTest.dynamicTest(p) {
                 val (r, compuesto, _) = caso(p)
                 assertEquals(compuesto, GoldenComposition.canonical(DomainJson.encode(r.composed)))
@@ -52,7 +52,7 @@ class ComposerGoldenTest {
 
     @TestFactory
     fun `compose reproduce reporte punto json de TypeScript`(): List<DynamicTest> =
-        Golden.Ejemplos.plantillas.map { p ->
+        Golden.plantillas.map { p ->
             DynamicTest.dynamicTest(p) {
                 val (r, _, reporte) = caso(p)
                 assertEquals(reporte, GoldenComposition.canonical(DomainJson.encode(r.report)))
@@ -62,7 +62,7 @@ class ComposerGoldenTest {
     /** R9: componer dos veces produce bytes idénticos. Sin reloj, sin aleatoriedad, sin ULIDs. */
     @TestFactory
     fun `compose es idempotente y determinista`(): List<DynamicTest> =
-        Golden.Ejemplos.plantillas.map { p ->
+        Golden.plantillas.map { p ->
             DynamicTest.dynamicTest(p) {
                 val dir = "templates/$p"
                 val pkg = GoldenComposition.paquete(
@@ -81,7 +81,7 @@ class ComposerGoldenTest {
     /** El `ComposedDocument` producido es válido contra el JSON Schema emitido (P1, las dos capas). */
     @TestFactory
     fun `el compuesto valida contra el JSON Schema emitido`(): List<DynamicTest> =
-        Golden.Ejemplos.plantillas.map { p ->
+        Golden.plantillas.map { p ->
             DynamicTest.dynamicTest(p) {
                 val (r, _, _) = caso(p)
                 val violaciones = validador.validate("composed-document", DomainJson.encode(r.composed))
@@ -92,7 +92,7 @@ class ComposerGoldenTest {
     /** El informe también: `composition-report` es uno de los 10 punteros del bundle. */
     @TestFactory
     fun `el reporte valida contra el JSON Schema emitido`(): List<DynamicTest> =
-        Golden.Ejemplos.plantillas.map { p ->
+        Golden.plantillas.map { p ->
             DynamicTest.dynamicTest(p) {
                 val (r, _, _) = caso(p)
                 val violaciones = validador.validate("composition-report", DomainJson.encode(r.report))

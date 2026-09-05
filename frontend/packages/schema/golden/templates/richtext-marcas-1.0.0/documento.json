@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "template": {
+    "slug": "richtext-marcas",
+    "version": "1.0.0"
+  },
+  "theme": {
+    "paletteId": "olive",
+    "fontSetId": "clasica"
+  },
+  "structure": {
+    "sections": [
+      {
+        "key": "cover",
+        "variant": "default",
+        "visible": true
+      },
+      {
+        "key": "story",
+        "variant": "default",
+        "visible": true
+      }
+    ]
+  },
+  "content": {
+    "cover.title": {
+      "kind": "text",
+      "value": "Camila & Antonio"
+    },
+    "story.body": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Nos conocimos en "
+              },
+              {
+                "type": "text",
+                "text": "Oaxaca",
+                "marks": [
+                  "bold"
+                ]
+              },
+              {
+                "type": "text",
+                "text": " un martes "
+              },
+              {
+                "type": "text",
+                "text": "cualquiera",
+                "marks": [
+                  "italic"
+                ]
+              },
+              {
+                "type": "text",
+                "text": "."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Las dos marcas a la vez",
+                "marks": [
+                  "bold",
+                  "italic"
+                ]
+              },
+              {
+                "type": "text",
+                "text": " y un enlace ",
+                "marks": []
+              },
+              {
+                "type": "text",
+                "text": "al mapa",
+                "href": "https://maps.example.com/oaxaca"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": []
+          }
+        ]
+      }
+    }
+  },
+  "attic": {},
+  "meta": {
+    "locale": "es-MX"
+  }
+}
