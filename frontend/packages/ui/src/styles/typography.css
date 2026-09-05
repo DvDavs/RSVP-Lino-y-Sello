@@ -1,208 +1,217 @@
-/* @invitaciones/ui/styles/typography.css — escala tipográfica del chrome (fase 3-C, 3C-2),
-   `11 §2.2`. Tres voces, nunca intercambiables: `display-*`/`heading-*` en Fraunces, `text-*` en
-   Onest, `label-*` en Red Hat Mono. Prueba `test/tipografia.test.ts`: ninguna clase `display-*` ni
+/* @invitaciones/ui/styles/typography.css — escala tipográfica del chrome (fase 3-C), `11 §2.2`.
+   Tres voces, nunca intercambiables: `display-*`/`heading-*` en Fraunces, `text-*` en Onest,
+   `label-*` en Red Hat Mono. Prueba `test/tipografia.test.ts`: ninguna clase `display-*` ni
    `heading-*` referencia la familia de cuerpo (ni al revés).
 
-   Tokens: cada declaración usa `var(--ui-…, valor-de-11-§2.2)`. Los nombres de familia
-   (`--ui-font-display/text/label`) son los que ya fija `moodboard/styles.css` y por tanto los que
-   con más seguridad emite `packages/tokens` (3C-1, en paralelo). Los nombres por rol de tamaño/
-   interlineado/tracking/peso (`--ui-display-2xl-size`, …) son una convención propia de este bloque:
-   el doc 11 no fija esos nombres exactos, así que llevan de reserva el valor literal de la tabla y
-   NO dependen de que packages/tokens los use — el `clamp()`/media query de aquí ya garantiza la
-   escala responsiva por sí solo, con o sin ese token (detalle y riesgo documentado en
-   `preguntas-abiertas.md`, sección Fase 3-C · 3c-2).
+   FUENTE ÚNICA (3c-2b, revisor 3c-rev-2 §"Dos implementaciones que ya divergen"): cada declaración
+   consume la variable REAL que emite `packages/tokens/generated/tokens.css`
+   (`packages/tokens/src/tipografia.ts` + `scripts/emit-css.ts`), nunca un nombre propio de esta
+   hoja. Nombres exactos por rol (p. ej. `display-2xl`): `--ui-text-<rol>` (tamaño, `clamp()`),
+   `--ui-leading-<rol>` (interlineado), `--ui-tracking-<rol>` (tracking), `--ui-weight-<rol>` (peso),
+   `--ui-variacion-<rol>` (`font-variation-settings`, solo en `display-*`/`heading-*`, donde `11
+   §2.2` fija ejes de Fraunces). Familias: `--ui-font-{display,text,label}`. El peso de énfasis
+   (`strong`/`b` en 650) usa el token general `--ui-weight-texto-fuerte` (no hay un token por rol
+   para eso: 650 es el mismo en todo `text-*`, `11 §2.2`).
 
-   Responsivo: 390 px → 1024 px+ (`11 §2.2`). Tamaño con `clamp()` (interpolación lineal exacta
-   entre ambos extremos); interlineado y tracking que cambian de valor entre extremos, con
-   `@media (min-width: 1024px)` — mezclar un número sin unidad (line-height) con `vw` dentro de un
-   mismo `calc()` no es fiable entre motores, así que ahí se resuelve con el salto de breakpoint en
-   lugar de una interpolación continua. */
+   El `clamp()` del tamaño y el cambio de interlineado/tracking a partir de 1024 px YA están en el
+   valor del token (tokens.css redefine `--ui-leading-*`/`--ui-tracking-*` en su propio `@media
+   (min-width: 1024px) { :root { … } }`): con la variable sola basta, sin media query propia aquí.
+   La única razón para repetir el `@media` en esta hoja es que la RESERVA (el segundo argumento de
+   `var()`, para cuando `tokens.css` no se ha importado) es un valor CSS estático que no cambia solo
+   por sí mismo con el viewport — así que la reserva de escritorio se fija en el mismo punto de
+   corte, con el mismo valor de `11 §2.2` que ya trae el token. Con tokens presentes, esa reserva
+   nunca se usa (la variable ya vale lo que toca); son solo el segundo argumento de `var()`, no una
+   sobrescritura del token.
+
+   Prueba `test/tipografia.test.ts` (sección "una sola fuente de verdad"): lee `tokens.css` generado
+   y esta hoja, y falla si un rol usa una variable que los tokens no emiten, o si la reserva no
+   coincide con el valor del token. */
 
 /* ─── Display (titulares de pantalla o de sección; uno por vista, `11 §2.2`) ─────────────────── */
 
 .display-2xl {
-  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
-  font-size: var(--ui-display-2xl-size, clamp(40px, calc(25.237px + 3.7855vw), 64px));
-  line-height: var(--ui-display-2xl-leading, 1.05);
-  letter-spacing: var(--ui-display-2xl-tracking, -0.035em);
-  font-weight: var(--ui-display-2xl-weight, 800);
+  font-family: var(--ui-font-display, "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif);
+  font-size: var(--ui-text-display-2xl, clamp(40px, 25.237px + 3.785vw, 64px));
+  line-height: var(--ui-leading-display-2xl, 1.05);
+  letter-spacing: var(--ui-tracking-display-2xl, -0.035em);
+  font-weight: var(--ui-weight-display-2xl, 800);
   font-optical-sizing: none;
-  font-variation-settings: "opsz" 96, "SOFT" 70, "WONK" 1;
+  font-variation-settings: var(--ui-variacion-display-2xl, "opsz" 96, "SOFT" 70, "WONK" 1);
 }
 @media (min-width: 1024px) {
   .display-2xl {
-    line-height: var(--ui-display-2xl-leading-lg, 1.02);
-    letter-spacing: var(--ui-display-2xl-tracking-lg, -0.04em);
+    line-height: var(--ui-leading-display-2xl, 1.02);
+    letter-spacing: var(--ui-tracking-display-2xl, -0.04em);
   }
 }
 
 .display-xl {
-  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
-  font-size: var(--ui-display-xl-size, clamp(32px, calc(22.158px + 2.5237vw), 48px));
-  line-height: var(--ui-display-xl-leading, 1.05);
-  letter-spacing: var(--ui-display-xl-tracking, -0.03em);
-  font-weight: var(--ui-display-xl-weight, 800);
+  font-family: var(--ui-font-display, "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif);
+  font-size: var(--ui-text-display-xl, clamp(32px, 22.158px + 2.524vw, 48px));
+  line-height: var(--ui-leading-display-xl, 1.05);
+  letter-spacing: var(--ui-tracking-display-xl, -0.03em);
+  font-weight: var(--ui-weight-display-xl, 800);
   font-optical-sizing: none;
-  font-variation-settings: "opsz" 72, "SOFT" 60, "WONK" 1;
+  font-variation-settings: var(--ui-variacion-display-xl, "opsz" 72, "SOFT" 60, "WONK" 1);
 }
 @media (min-width: 1024px) {
   .display-xl {
-    letter-spacing: var(--ui-display-xl-tracking-lg, -0.035em);
+    letter-spacing: var(--ui-tracking-display-xl, -0.035em);
   }
 }
 
 .display-lg {
-  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
-  font-size: var(--ui-display-lg-size, clamp(28px, calc(23.079px + 1.2618vw), 36px));
-  line-height: var(--ui-display-lg-leading, 1.1);
-  letter-spacing: var(--ui-display-lg-tracking, -0.025em);
-  font-weight: var(--ui-display-lg-weight, 700);
+  font-family: var(--ui-font-display, "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif);
+  font-size: var(--ui-text-display-lg, clamp(28px, 23.079px + 1.262vw, 36px));
+  line-height: var(--ui-leading-display-lg, 1.1);
+  letter-spacing: var(--ui-tracking-display-lg, -0.025em);
+  font-weight: var(--ui-weight-display-lg, 700);
   font-optical-sizing: none;
-  font-variation-settings: "opsz" 48, "SOFT" 50;
+  font-variation-settings: var(--ui-variacion-display-lg, "opsz" 48, "SOFT" 50);
 }
 @media (min-width: 1024px) {
   .display-lg {
-    line-height: var(--ui-display-lg-leading-lg, 1.08);
+    line-height: var(--ui-leading-display-lg, 1.08);
   }
 }
 
 .display-md {
-  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
-  font-size: var(--ui-display-md-size, clamp(24px, calc(21.539px + 0.6309vw), 28px));
-  line-height: var(--ui-display-md-leading, 1.15);
-  letter-spacing: var(--ui-display-md-tracking, -0.02em);
-  font-weight: var(--ui-display-md-weight, 700);
+  font-family: var(--ui-font-display, "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif);
+  font-size: var(--ui-text-display-md, clamp(24px, 21.539px + 0.631vw, 28px));
+  line-height: var(--ui-leading-display-md, 1.15);
+  letter-spacing: var(--ui-tracking-display-md, -0.02em);
+  font-weight: var(--ui-weight-display-md, 700);
   font-optical-sizing: none;
-  font-variation-settings: "opsz" 32, "SOFT" 40;
+  font-variation-settings: var(--ui-variacion-display-md, "opsz" 32, "SOFT" 40);
 }
 @media (min-width: 1024px) {
   .display-md {
-    line-height: var(--ui-display-md-leading-lg, 1.12);
+    line-height: var(--ui-leading-display-md, 1.12);
   }
 }
 
 .display-sm {
-  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
-  font-size: var(--ui-display-sm-size, clamp(20px, calc(18.77px + 0.3155vw), 22px));
-  line-height: var(--ui-display-sm-leading, 1.2);
-  letter-spacing: var(--ui-display-sm-tracking, -0.02em);
-  font-weight: var(--ui-display-sm-weight, 700);
+  font-family: var(--ui-font-display, "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif);
+  font-size: var(--ui-text-display-sm, clamp(20px, 18.77px + 0.315vw, 22px));
+  line-height: var(--ui-leading-display-sm, 1.2);
+  letter-spacing: var(--ui-tracking-display-sm, -0.02em);
+  font-weight: var(--ui-weight-display-sm, 700);
   font-optical-sizing: none;
-  font-variation-settings: "opsz" 20, "SOFT" 30;
+  font-variation-settings: var(--ui-variacion-display-sm, "opsz" 20, "SOFT" 30);
 }
 
 /* ─── Heading (titula bloques y tarjetas; jerarquía por nivel HTML, nunca por tamaño, `04 §17.3`) ── */
 
 .heading-lg {
-  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
-  font-size: var(--ui-heading-lg-size, clamp(24px, calc(21.539px + 0.6309vw), 28px));
-  line-height: var(--ui-heading-lg-leading, 1.15);
-  letter-spacing: var(--ui-heading-lg-tracking, -0.02em);
-  font-weight: var(--ui-heading-lg-weight, 700);
+  font-family: var(--ui-font-display, "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif);
+  font-size: var(--ui-text-heading-lg, clamp(24px, 21.539px + 0.631vw, 28px));
+  line-height: var(--ui-leading-heading-lg, 1.15);
+  letter-spacing: var(--ui-tracking-heading-lg, -0.02em);
+  font-weight: var(--ui-weight-heading-lg, 700);
   font-optical-sizing: none;
-  font-variation-settings: "opsz" 32, "SOFT" 40;
+  font-variation-settings: var(--ui-variacion-heading-lg, "opsz" 32, "SOFT" 40);
 }
 
 .heading-md {
-  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
-  font-size: var(--ui-heading-md-size, clamp(20px, calc(18.77px + 0.3155vw), 22px));
-  line-height: var(--ui-heading-md-leading, 1.2);
-  letter-spacing: var(--ui-heading-md-tracking, -0.02em);
-  font-weight: var(--ui-heading-md-weight, 700);
+  font-family: var(--ui-font-display, "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif);
+  font-size: var(--ui-text-heading-md, clamp(20px, 18.77px + 0.315vw, 22px));
+  line-height: var(--ui-leading-heading-md, 1.2);
+  letter-spacing: var(--ui-tracking-heading-md, -0.02em);
+  font-weight: var(--ui-weight-heading-md, 700);
   font-optical-sizing: none;
-  font-variation-settings: "opsz" 20, "SOFT" 30;
+  font-variation-settings: var(--ui-variacion-heading-md, "opsz" 20, "SOFT" 30);
 }
 
 .heading-sm {
-  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
-  font-size: var(--ui-heading-sm-size, clamp(17px, calc(16.385px + 0.1577vw), 18px));
-  line-height: var(--ui-heading-sm-leading, 1.3);
-  letter-spacing: var(--ui-heading-sm-tracking, -0.01em);
-  font-weight: var(--ui-heading-sm-weight, 700);
+  font-family: var(--ui-font-display, "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif);
+  font-size: var(--ui-text-heading-sm, clamp(17px, 16.385px + 0.158vw, 18px));
+  line-height: var(--ui-leading-heading-sm, 1.3);
+  letter-spacing: var(--ui-tracking-heading-sm, -0.01em);
+  font-weight: var(--ui-weight-heading-sm, 700);
   font-optical-sizing: none;
-  font-variation-settings: "opsz" 14, "SOFT" 20;
+  font-variation-settings: var(--ui-variacion-heading-sm, "opsz" 14, "SOFT" 20);
 }
 
 /* ─── Text (cuerpo; Onest, peso 450 —no 400— porque a 16 px sobre hueso 400 se ve fina) ────────── */
 
 .text-lg {
-  font-family: var(--ui-font-text, "Onest", system-ui, sans-serif);
-  font-size: var(--ui-text-lg-size, 18px);
-  line-height: var(--ui-text-lg-leading, 1.5);
-  letter-spacing: var(--ui-text-lg-tracking, 0);
-  font-weight: var(--ui-text-lg-weight, 450);
+  font-family: var(--ui-font-text, "Onest Variable", "Onest", "Onest Fallback", system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: var(--ui-text-text-lg, 18px);
+  line-height: var(--ui-leading-text-lg, 1.5);
+  letter-spacing: var(--ui-tracking-text-lg, 0);
+  font-weight: var(--ui-weight-text-lg, 450);
 }
 .text-lg strong,
 .text-lg b {
-  font-weight: var(--ui-text-lg-weight-bold, 650);
+  font-weight: var(--ui-weight-texto-fuerte, 650);
 }
 
 .text-md {
-  font-family: var(--ui-font-text, "Onest", system-ui, sans-serif);
-  font-size: var(--ui-text-md-size, 16px);
-  line-height: var(--ui-text-md-leading, 1.5);
-  letter-spacing: var(--ui-text-md-tracking, 0);
-  font-weight: var(--ui-text-md-weight, 450);
+  font-family: var(--ui-font-text, "Onest Variable", "Onest", "Onest Fallback", system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: var(--ui-text-text-md, 16px);
+  line-height: var(--ui-leading-text-md, 1.5);
+  letter-spacing: var(--ui-tracking-text-md, 0);
+  font-weight: var(--ui-weight-text-md, 450);
 }
 .text-md strong,
 .text-md b {
-  font-weight: var(--ui-text-md-weight-bold, 650);
+  font-weight: var(--ui-weight-texto-fuerte, 650);
 }
 
 .text-sm {
-  font-family: var(--ui-font-text, "Onest", system-ui, sans-serif);
-  font-size: var(--ui-text-sm-size, 14px);
-  line-height: var(--ui-text-sm-leading, 1.5);
-  letter-spacing: var(--ui-text-sm-tracking, 0);
-  font-weight: var(--ui-text-sm-weight, 450);
+  font-family: var(--ui-font-text, "Onest Variable", "Onest", "Onest Fallback", system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: var(--ui-text-text-sm, 14px);
+  line-height: var(--ui-leading-text-sm, 1.5);
+  letter-spacing: var(--ui-tracking-text-sm, 0);
+  font-weight: var(--ui-weight-text-sm, 450);
 }
 .text-sm strong,
 .text-sm b {
-  font-weight: var(--ui-text-sm-weight-bold, 650);
+  font-weight: var(--ui-weight-texto-fuerte, 650);
 }
 
 /* Mínimo de interfaz (`11 §2.2`): nada de texto de producto por debajo de 13 px. */
 .text-xs {
-  font-family: var(--ui-font-text, "Onest", system-ui, sans-serif);
-  font-size: var(--ui-text-xs-size, 13px);
-  line-height: var(--ui-text-xs-leading, 1.45);
-  letter-spacing: var(--ui-text-xs-tracking, 0);
-  font-weight: var(--ui-text-xs-weight, 450);
+  font-family: var(--ui-font-text, "Onest Variable", "Onest", "Onest Fallback", system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: var(--ui-text-text-xs, 13px);
+  line-height: var(--ui-leading-text-xs, 1.45);
+  letter-spacing: var(--ui-tracking-text-xs, 0);
+  font-weight: var(--ui-weight-text-xs, 450);
 }
 .text-xs strong,
 .text-xs b {
-  font-weight: var(--ui-text-xs-weight-bold, 650);
+  font-weight: var(--ui-weight-texto-fuerte, 650);
 }
 
 /* ─── Label (Red Hat Mono; metadatos/contadores en minúscula, badges/pasos en mayúscula) ───────── */
 
 .label-lg {
-  font-family: var(--ui-font-label, "Red Hat Mono", ui-monospace, monospace);
-  font-size: var(--ui-label-lg-size, 14px);
-  line-height: var(--ui-label-lg-leading, 1.3);
-  letter-spacing: var(--ui-label-lg-tracking, 0.06em);
-  font-weight: var(--ui-label-lg-weight, 500);
+  font-family: var(--ui-font-label, "Red Hat Mono Variable", "Red Hat Mono", "Red Hat Mono Fallback", ui-monospace, "SFMono-Regular", monospace);
+  font-size: var(--ui-text-label-lg, 14px);
+  line-height: var(--ui-leading-label-lg, 1.3);
+  letter-spacing: var(--ui-tracking-label-lg, 0.06em);
+  font-weight: var(--ui-weight-label-lg, 500);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
 
 .label-md {
-  font-family: var(--ui-font-label, "Red Hat Mono", ui-monospace, monospace);
-  font-size: var(--ui-label-md-size, 12px);
-  line-height: var(--ui-label-md-leading, 1.3);
-  letter-spacing: var(--ui-label-md-tracking, 0.12em);
-  font-weight: var(--ui-label-md-weight, 500);
+  font-family: var(--ui-font-label, "Red Hat Mono Variable", "Red Hat Mono", "Red Hat Mono Fallback", ui-monospace, "SFMono-Regular", monospace);
+  font-size: var(--ui-text-label-md, 12px);
+  line-height: var(--ui-leading-label-md, 1.3);
+  letter-spacing: var(--ui-tracking-label-md, 0.12em);
+  font-weight: var(--ui-weight-label-md, 500);
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
 
 .label-sm {
-  font-family: var(--ui-font-label, "Red Hat Mono", ui-monospace, monospace);
-  font-size: var(--ui-label-sm-size, 11px);
-  line-height: var(--ui-label-sm-leading, 1.3);
-  letter-spacing: var(--ui-label-sm-tracking, 0.14em);
-  font-weight: var(--ui-label-sm-weight, 500);
+  font-family: var(--ui-font-label, "Red Hat Mono Variable", "Red Hat Mono", "Red Hat Mono Fallback", ui-monospace, "SFMono-Regular", monospace);
+  font-size: var(--ui-text-label-sm, 11px);
+  line-height: var(--ui-leading-label-sm, 1.3);
+  letter-spacing: var(--ui-tracking-label-sm, 0.14em);
+  font-weight: var(--ui-weight-label-sm, 500);
   text-transform: uppercase;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
@@ -219,10 +228,10 @@
 /* ─── Prose (párrafos largos: ayuda, textos legales, contenido editorial del chrome) ────────────── */
 
 .prose {
-  font-family: var(--ui-font-text, "Onest", system-ui, sans-serif);
-  font-size: var(--ui-text-md-size, 16px);
-  line-height: var(--ui-text-md-leading, 1.5);
-  font-weight: var(--ui-text-md-weight, 450);
+  font-family: var(--ui-font-text, "Onest Variable", "Onest", "Onest Fallback", system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: var(--ui-text-text-md, 16px);
+  line-height: var(--ui-leading-text-md, 1.5);
+  font-weight: var(--ui-weight-text-md, 450);
   max-width: 68ch;
 }
 .prose > * + * {
@@ -248,33 +257,33 @@
 .prose h3,
 .prose h4 {
   margin-top: 1.5em;
-  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
+  font-family: var(--ui-font-display, "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif);
   font-optical-sizing: none;
 }
 .prose h2 {
-  font-size: var(--ui-heading-lg-size, clamp(24px, calc(21.539px + 0.6309vw), 28px));
-  line-height: var(--ui-heading-lg-leading, 1.15);
-  letter-spacing: var(--ui-heading-lg-tracking, -0.02em);
-  font-weight: var(--ui-heading-lg-weight, 700);
-  font-variation-settings: "opsz" 32, "SOFT" 40;
+  font-size: var(--ui-text-heading-lg, clamp(24px, 21.539px + 0.631vw, 28px));
+  line-height: var(--ui-leading-heading-lg, 1.15);
+  letter-spacing: var(--ui-tracking-heading-lg, -0.02em);
+  font-weight: var(--ui-weight-heading-lg, 700);
+  font-variation-settings: var(--ui-variacion-heading-lg, "opsz" 32, "SOFT" 40);
 }
 .prose h3 {
-  font-size: var(--ui-heading-md-size, clamp(20px, calc(18.77px + 0.3155vw), 22px));
-  line-height: var(--ui-heading-md-leading, 1.2);
-  letter-spacing: var(--ui-heading-md-tracking, -0.02em);
-  font-weight: var(--ui-heading-md-weight, 700);
-  font-variation-settings: "opsz" 20, "SOFT" 30;
+  font-size: var(--ui-text-heading-md, clamp(20px, 18.77px + 0.315vw, 22px));
+  line-height: var(--ui-leading-heading-md, 1.2);
+  letter-spacing: var(--ui-tracking-heading-md, -0.02em);
+  font-weight: var(--ui-weight-heading-md, 700);
+  font-variation-settings: var(--ui-variacion-heading-md, "opsz" 20, "SOFT" 30);
 }
 .prose h4 {
-  font-size: var(--ui-heading-sm-size, clamp(17px, calc(16.385px + 0.1577vw), 18px));
-  line-height: var(--ui-heading-sm-leading, 1.3);
-  letter-spacing: var(--ui-heading-sm-tracking, -0.01em);
-  font-weight: var(--ui-heading-sm-weight, 700);
-  font-variation-settings: "opsz" 14, "SOFT" 20;
+  font-size: var(--ui-text-heading-sm, clamp(17px, 16.385px + 0.158vw, 18px));
+  line-height: var(--ui-leading-heading-sm, 1.3);
+  letter-spacing: var(--ui-tracking-heading-sm, -0.01em);
+  font-weight: var(--ui-weight-heading-sm, 700);
+  font-variation-settings: var(--ui-variacion-heading-sm, "opsz" 14, "SOFT" 20);
 }
 .prose strong,
 .prose b {
-  font-weight: var(--ui-text-md-weight-bold, 650);
+  font-weight: var(--ui-weight-texto-fuerte, 650);
 }
 .prose a {
   color: var(--ui-link, currentColor);
