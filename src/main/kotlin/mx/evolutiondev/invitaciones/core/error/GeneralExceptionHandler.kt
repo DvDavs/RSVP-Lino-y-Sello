@@ -8,6 +8,7 @@ import mx.evolutiondev.invitaciones.core.error.exception.UnauthorizedAccessExcep
 import mx.evolutiondev.invitaciones.core.error.exception.UnauthorizedException
 import mx.evolutiondev.invitaciones.core.error.exception.UserBannedException
 import mx.evolutiondev.invitaciones.core.error.exception.UserDisabledException
+import mx.evolutiondev.invitaciones.modules.auth.service.DemasiadosIntentosException
 import mx.evolutiondev.invitaciones.modules.shared.guests.exception.DuplicateGuestException
 import mx.evolutiondev.invitaciones.modules.shared.guests.exception.GuestNotFoundException
 import mx.evolutiondev.invitaciones.modules.shared.guests.exception.InvalidFileFormatException
@@ -35,6 +36,32 @@ class GeneralExceptionHandler(
                 statusCode = HttpStatus.UNAUTHORIZED.value(),
                 errors = mutableMapOf(
                         "username" to ex.message
+                )
+        )
+    }
+
+    /**
+     * I-02 (H-ADV-05): `429` de `POST /auth/token`.
+     *
+     * La excepcion ya lleva `@ResponseStatus(TOO_MANY_REQUESTS)` y ningun advice la capturaba, asi
+     * que este handler NO hace falta para que el estado salga bien. Se anade por el **cuerpo**: sin
+     * el, la respuesta la fabrica `BasicErrorController`, cuyo contenido depende de la
+     * configuracion del entorno -con `spring-boot-devtools` en el classpath
+     * (`server.error.include-stacktrace=ALWAYS`) el `429` devolvia la **traza de pila completa**,
+     * con nombres de clase, la cadena de filtros de seguridad y `path`. Un `429` de seguridad tiene
+     * que ser identico y mudo siempre, y con la misma forma que el `401` de al lado.
+     *
+     * El cuerpo es **constante**: no dice si el bloqueo fue por cuenta o por IP, ni si la cuenta
+     * existe, ni cuanto falta para que caduque la ventana.
+     */
+    @ExceptionHandler(DemasiadosIntentosException::class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    fun handleDemasiadosIntentos(ex: DemasiadosIntentosException): ErrorMessage {
+        return ErrorMessage(
+                timestamp = dateFormatter.parseCurrentDate("dd/MM/yyyy HH:mm:ss"),
+                statusCode = HttpStatus.TOO_MANY_REQUESTS.value(),
+                errors = mutableMapOf(
+                        "error" to ex.message
                 )
         )
     }
