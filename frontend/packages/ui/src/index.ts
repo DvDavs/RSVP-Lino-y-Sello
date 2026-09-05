@@ -7,3 +7,7 @@ export * from "./shapes/index.ts";
 // (`@font-face`, utilidades tipográficas) se consume aparte, vía `@invitaciones/ui/estilos.css`.
 export * from "./fonts/preload.ts";
 export * from "./ilustraciones/index.ts";
+
+// Galería de historias (bloque 2): tipos y registro.
+export * from "./historias/tipos.ts";
+export { registro, historiaPorSlug } from "./historias/registro.ts";
