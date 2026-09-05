@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { CoverSection } from "../src/sections/CoverSection.tsx";
 import { composedSection, imageBlock, textBlock, dateBlock, realBodaClasicaSection } from "./fixtures.ts";
-import { ComposedBlockSchema } from "../src/schema-types.ts";
+import { ComposedBlockSchema } from "./schema-values.ts";
 
 function cover(overrides: Record<string, unknown> = {}) {
   return composedSection({
@@ -153,6 +153,74 @@ describe("CoverSection — estructura semántica (04 §17.3)", () => {
     expect(container.querySelectorAll("h1").length).toBe(0);
     const heading = container.querySelector("h2")!;
     expect(container.querySelector("section")!.getAttribute("aria-labelledby")).toBe(heading.id);
+  });
+});
+
+/**
+ * D1 del bloque 3-3b — la PORTADA es la primera pantalla que ve un invitado, y salía rota.
+ *
+ * Estas dos pruebas fallan sin las declaraciones de `CoverSection.module.css` que las acompañan
+ * (verificado [V] revirtiéndolas: `font-family` resolvía a `var(--inv-font-body)` y `.scrim`
+ * resolvía a `position: static`). No comprueban píxeles —jsdom no maqueta ni pinta—, comprueban
+ * las DOS causas exactas que el navegador convierte en el defecto, medidas con `getComputedStyle`
+ * sobre el CSS Module real (`vitest.config.ts` declara `css: true`, así que la hoja se carga de
+ * verdad y cascada de por medio). La comprobación de píxeles vive en la captura de
+ * `evidencia/fase-3/correcciones/portada-corregida.png`.
+ */
+describe("CoverSection — D1 (3-3b): la portada se lee y usa la tipografía de titular", () => {
+  it("el nombre de portada hereda la familia de TITULAR, no la de cuerpo del <span> de TextBlock", () => {
+    const { container } = render(<CoverSection section={cover()} variant="full" mode="public" />);
+    // El `<p>` del hueco declara la familia de titular…
+    const heroName = container.querySelector("p + p")!;
+    expect(getComputedStyle(heroName).fontFamily).toBe("var(--inv-font-heading)");
+
+    // …y el nodo que TextBlock pinta dentro tiene que resolver a lo mismo. Sin `font-family:
+    // inherit`, `blocks.module.css .text` gana en el propio elemento y esto da
+    // "var(--inv-font-body)": el nombre de los novios sale en palo seco.
+    const textoReal = heroName.querySelector("span")!;
+    expect(textoReal.textContent).toBe("Ana & Luis");
+    expect(getComputedStyle(textoReal).fontFamily).toBe("var(--inv-font-heading)");
+  });
+
+  it("el velo se pinta por ENCIMA de la foto: está posicionado y va después de la imagen en el DOM", () => {
+    const { container } = render(<CoverSection section={cover()} variant="full" mode="public" />);
+    const stage = container.querySelector("section > div")!;
+    const hijos = Array.from(stage.children) as HTMLElement[];
+
+    const marco = container.querySelector("img")!.closest("span")!;
+    const velo = hijos.find((h) => h.children.length === 0)!;
+    const contenido = hijos[hijos.length - 1]!;
+
+    // (1) El marco de `ImageBlock` está POSICIONADO: es lo que lo empuja a la fase de pintado
+    // tardía. `relative` es lo que declara `blocks/ImageBlock.module.css:3`; en la variante "full"
+    // pasa a `absolute` por D1b (que la foto no estire la fila). Cualquiera de los dos sirve para
+    // esta prueba: lo que importa es que NO sea `static`, porque entonces la foto pintaría antes
+    // que todo lo demás y no habría nada que ordenar.
+    expect(["relative", "absolute"]).toContain(getComputedStyle(marco).position);
+
+    // (2) Velo y contenido tienen que estar en ESA MISMA fase, o la foto los tapa a los dos.
+    expect(getComputedStyle(velo).position).toBe("relative");
+    expect(getComputedStyle(contenido).position).toBe("relative");
+
+    // (3) Dentro de la fase manda el orden del documento: foto → velo → texto.
+    const orden = hijos.map((h) => (h.contains(marco) ? "foto" : h === velo ? "velo" : "contenido"));
+    expect(orden).toEqual(["foto", "velo", "contenido"]);
+  });
+
+  /**
+   * D1b: la foto no puede decidir cuánto mide la portada. Medido [V] a 1440×900 sobre la
+   * invitación publicada antes del arreglo: con el marco EN FLUJO, su relación intrínseca (retrato
+   * 5:7) estiraba la fila a 2 016 px y el texto quedaba en y = 1 730 — fuera de una ventana de 900.
+   * Sacado del flujo, la altura la fija el `min-height: 100svh` del `.stage` y la foto cubre.
+   */
+  it("en la variante full la foto sale del flujo: no puede estirar la primera pantalla", () => {
+    const { container } = render(<CoverSection section={cover()} variant="full" mode="public" />);
+    const marco = container.querySelector("img")!.closest("span")!;
+    expect(getComputedStyle(marco).position).toBe("absolute");
+
+    // Y el hueco que la contiene recorta, porque el recorte deja de hacerlo el marco.
+    const hueco = marco.parentElement!;
+    expect(getComputedStyle(hueco).overflow).toBe("hidden");
   });
 });
 
