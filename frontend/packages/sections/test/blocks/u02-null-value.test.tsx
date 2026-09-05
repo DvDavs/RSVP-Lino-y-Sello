@@ -11,7 +11,7 @@ import {
   GroupBlock,
 } from "../../src/blocks/index.ts";
 import { nullTextBlock } from "../fixtures.ts";
-import { ComposedBlockSchema, ComposedGroupSchema } from "../../src/schema-types.ts";
+import { ComposedBlockSchema, ComposedGroupSchema } from "../schema-values.ts";
 
 const ref_ = { sectionKey: "cover", blockId: "cover.subtitle" };
 

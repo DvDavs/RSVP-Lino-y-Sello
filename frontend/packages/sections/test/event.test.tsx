@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { EventSection } from "../src/sections/EventSection.tsx";
 import { composedSection, textBlock, realBodaClasicaSection } from "./fixtures.ts";
-import { ComposedBlockSchema, ComposedGroupSchema } from "../src/schema-types.ts";
+import { ComposedBlockSchema, ComposedGroupSchema } from "./schema-values.ts";
 
 function eventCardsGroup(overrides: Record<string, unknown> = {}) {
   return ComposedGroupSchema.parse({

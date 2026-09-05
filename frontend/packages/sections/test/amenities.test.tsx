@@ -5,7 +5,7 @@ import { axe } from "jest-axe";
 import { AmenitiesSection } from "../src/sections/AmenitiesSection.tsx";
 import { SectionsRoot } from "../src/SectionsRoot.tsx";
 import { ComposedDocument } from "@invitaciones/schema";
-import { ComposedBlockSchema, ComposedSectionSchema } from "../src/schema-types.ts";
+import { ComposedBlockSchema, ComposedSectionSchema } from "./schema-values.ts";
 import { goldenSection, goldenTheme } from "./golden-c.ts";
 
 // El golden real de boda-clasica trae `amenities.visible: false` (04 §17.3 solo exige

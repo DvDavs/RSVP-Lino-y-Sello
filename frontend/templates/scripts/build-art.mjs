@@ -24,7 +24,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { rasterizar, aWebp, contrasteEnZona, escribir, Inventario, sha256 } from './art/render.mjs';
 import { r2, ratio } from './art/color.mjs';
-import { themeAA, PAREJAS } from './art/paleta-aa.mjs';
+import { themeAA, PAREJAS, pigmentoArte } from './art/paleta-aa.mjs';
 import * as E from './art/scenes.mjs';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
@@ -41,7 +41,10 @@ function paletaDe(slug) {
   const theme = themeAA(slug, JSON.parse(fs.readFileSync(path.join(EJEMPLOS, `${slug}-1.0.0/theme.json`), 'utf8')), true);
   const pal = theme.palettes.find((p) => p.id === theme.defaultPaletteId);
   if (!pal) throw new Error(`${slug}: defaultPaletteId "${theme.defaultPaletteId}" no existe en palettes[]`);
-  return { id: pal.id, ...pal.tokens, theme };
+  // `pigmentoArte` sustituye SÓLO lo que se usa como tinte (hoy `muted`, ver `art/paleta-aa.mjs`):
+  // ese token lo gobierna WCAG 1.4.3 para el TEXTO de las secciones, no la legibilidad de la tinta
+  // encima del dibujo. `theme` sale intacto: es el que se comprueba abajo y el que se publica.
+  return { id: pal.id, ...pigmentoArte(slug, pal.id, pal.tokens), theme };
 }
 
 const PLANTILLAS = [

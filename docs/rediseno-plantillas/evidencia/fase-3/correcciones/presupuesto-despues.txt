@@ -1,0 +1,38 @@
+
+> web@0.0.0 budget /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-a2c211173de1d1936/frontend/apps/web
+> node scripts/check-budget.mjs
+
+
+/i/[publicToken]: 142.4 KB gz de primera carga (límite 150.0 KB)
+  runtime común de Next   127.4 KB   (5 chunks)
+        69.8 KB  static/chunks/34qr-jx8gdlro.js
+        43.0 KB  static/chunks/0xzpcq3lwxjbo.js
+         8.4 KB  static/chunks/2-mbfmpjbnsj8.js
+         4.3 KB  static/chunks/turbopack-2nrz6hsi-37ej.js
+         2.0 KB  static/chunks/2fiuha08lovck.js
+  JS propio de la ruta     15.0 KB   (4 chunks)
+         9.9 KB  static/chunks/3b1aysog3n-xb.js
+         3.6 KB  static/chunks/2rv_n8nb5psvv.js
+         1.2 KB  static/chunks/3-0axdll0td7g.js
+         0.3 KB  static/chunks/1zv61kkn84rxv.js
+  polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+
+/editor/[invitationId]: 268.5 KB gz de primera carga (límite 600.0 KB)
+  runtime común de Next   127.4 KB   (5 chunks)
+        69.8 KB  static/chunks/34qr-jx8gdlro.js
+        43.0 KB  static/chunks/0xzpcq3lwxjbo.js
+         8.4 KB  static/chunks/2-mbfmpjbnsj8.js
+         4.3 KB  static/chunks/turbopack-2nrz6hsi-37ej.js
+         2.0 KB  static/chunks/2fiuha08lovck.js
+  JS propio de la ruta    141.1 KB   (8 chunks)
+        87.1 KB  static/chunks/12qky8nsxhx-e.js
+        31.2 KB  static/chunks/0kmie3x5hxocw.js
+         9.1 KB  static/chunks/3boe600tk0neo.js
+         4.1 KB  static/chunks/3f0ug5u3w7awn.js
+         3.6 KB  static/chunks/2rv_n8nb5psvv.js
+         3.6 KB  static/chunks/250r_rch8wkxn.js
+         1.1 KB  static/chunks/3rix9pmk03_yy.js
+         1.1 KB  static/chunks/2fa424n-74m-7.js
+  polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+
+check-budget: dentro de presupuesto.

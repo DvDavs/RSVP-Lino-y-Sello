@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { sectionRegistry } from "../../src/registry.ts";
 import { composedSection } from "../fixtures.ts";
-import { ComposedBlockSchema } from "../../src/schema-types.ts";
+import { ComposedBlockSchema } from "../schema-values.ts";
 
 describe("SectionPlaceholder — estructura semántica (04 §17.3)", () => {
   it("<section aria-labelledby> con un <h2> con el título de la sección", () => {

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
 import { RichTextBlock } from "../../src/blocks/index.ts";
 import { richTextBlock } from "../fixtures.ts";
-import { ComposedBlockSchema } from "../../src/schema-types.ts";
+import { ComposedBlockSchema } from "../schema-values.ts";
 import type { ComposedBlock } from "../../src/schema-types.ts";
 
 const ref_ = { sectionKey: "couple", blockId: "couple.groomText" };

@@ -39,8 +39,25 @@
   width: 100%;
 }
 
+/* D1 del bloque 3-3b — ORDEN DE PINTADO, no de DOM. `position: relative` aquí no mueve nada: mete
+ * al velo y al texto en la MISMA fase de pintado que la foto, y dentro de esa fase manda el orden
+ * del documento (foto → velo → texto), que es el que el JSX ya declara.
+ *
+ * Sin esto, el `<span class="frame">` de `ImageBlock` (`blocks/ImageBlock.module.css:3`,
+ * `position: relative`) es lo ÚNICO posicionado del grupo, y CSS pinta lo posicionado DESPUÉS de
+ * lo que no lo está: la foto tapaba el velo entero — el 92 % de tinta del degradado no se veía y
+ * el texto blanco de la portada quedaba sobre una lámina de papelería clara, ilegible (evidencia
+ * lado a lado en `evidencia/fase-3/render-publico/defecto-portada-{antes,despues}.png`).
+ *
+ * `.content` se posiciona por el mismo motivo, y NO es redundante: hoy el texto se salva por un
+ * efecto colateral —la animación `cover-rise` termina en `translateY(0)` con `fill: both`, y un
+ * `transform` distinto de `none` crea contexto de apilamiento, que también se pinta en esa fase
+ * tardía—, pero justo debajo `@media (prefers-reduced-motion: reduce)` apaga esa animación: sin
+ * `position` propio, quien pide menos movimiento se quedaría con el velo ENCIMA del texto. La
+ * legibilidad de la primera pantalla no puede depender de si el invitado acepta animaciones. */
 .scrim {
   display: none;
+  position: relative;
 }
 
 .content {
@@ -49,6 +66,7 @@
   align-items: center;
   gap: var(--inv-space-3);
   text-align: center;
+  position: relative;
   color: var(--inv-color-ink);
   animation: cover-rise var(--inv-motion-normal) var(--inv-motion-ease) both;
 }
@@ -76,12 +94,24 @@
  * propio elemento SIEMPRE gana sobre un valor heredado del padre, sea cual sea la especificidad
  * comparada entre selectores. `> *` fuerza a ese hijo (el `<span>`/`<time>` real) a heredar el
  * color que de verdad quiero (medido con una captura real: sin esto, el texto de la variante
- * "full" salía en tinta oscura sobre foto en vez de blanco — ver bitácora 3-2b). */
+ * "full" salía en tinta oscura sobre foto en vez de blanco — ver bitácora 3-2b).
+ *
+ * D1 del bloque 3-3b: EXACTAMENTE lo mismo pasaba con la TIPOGRAFÍA, y a nadie se le había medido.
+ * `blocks/blocks.module.css:6` fija `font-family: var(--inv-font-body)` en el propio `<span>` de
+ * `TextBlock`, así que `.heroName { font-family: var(--inv-font-heading) }` (línea 121) se quedaba
+ * en el `<p>` y NO llegaba al texto: el nombre de los novios —lo más grande de la primera
+ * pantalla— salía en palo seco en vez de en la serif de titular de la plantilla. `font-family:
+ * inherit` en el hijo hace lo mismo que ya hacía `color: inherit`: que el bloque tome la decisión
+ * tipográfica del hueco que lo contiene, que es quien conoce el diseño. Para `.eyebrow`,
+ * `.dateRow` y `.badge` no cambia nada (los tres declaran `--inv-font-body`, igual que el bloque);
+ * se listan juntos para que la regla sea una sola y para que una variante futura que cambie la
+ * fuente de cualquiera de esos huecos funcione sin volver a tropezar aquí. */
 .eyebrow > *,
 .heroName > *,
 .dateRow > *,
 .badge > * {
   color: inherit;
+  font-family: inherit;
 }
 
 .eyebrow {
@@ -139,12 +169,34 @@
   min-height: 100svh;
 }
 
+/* D1b del bloque 3-3b — LA FOTO NO DECIDE LA ALTURA DE LA PORTADA.
+ *
+ * `aspect-ratio: auto` quita la relación declarada del marco, pero entonces el marco toma la
+ * INTRÍNSECA de la foto y, como es un hijo de rejilla en flujo, ESTIRA la fila. Medido [V] sobre la
+ * invitación publicada a 1440×900 con la portada real (1600×2240, retrato 5:7):
+ *
+ *   .stage 2016 px de alto (= 1440 × 2240/1600)  ·  .content en y = 1730  ·  ventana 900 px
+ *
+ * O sea: los primeros 900 px —lo único que ve el invitado al abrir el enlace— eran el tercio
+ * superior de la lámina, vacío. Ni nombres, ni fecha, ni velo. `min-height: 100svh` es un MÍNIMO y
+ * no lo impedía; el comentario de arriba preveía el caso contrario (una foto ANCHA dejando hueco) y
+ * este es el simétrico, que sale con cualquier foto de retrato en una pantalla apaisada.
+ *
+ * Sacando el marco del flujo (`position: absolute; inset: 0`) deja de aportar altura: la fila la
+ * fija `min-height: 100svh` del `.stage` y la foto la cubre con el `object-fit: cover` y el punto
+ * focal que `ImageBlock` ya aplica. Sigue siendo un elemento posicionado y sigue yendo primero en
+ * el DOM, así que el orden de pintado foto → velo → texto no cambia. `overflow: hidden` en el hueco
+ * porque el recorte deja de hacerlo el marco. */
 .section[data-variant="full"] .imageWrap {
   grid-area: 1 / 1;
+  position: relative;
   height: 100%;
+  overflow: hidden;
 }
 
 .section[data-variant="full"] .imageWrap > span {
+  position: absolute;
+  inset: 0;
   height: 100%;
   aspect-ratio: auto;
   border-radius: 0;

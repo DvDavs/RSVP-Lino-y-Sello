@@ -1,6 +1,16 @@
 // U-08 (04 §20.1): "contrast.ts con las tres paletas de boda-clasica → las cinco parejas de §17.1
 // cumplen su umbral."
 //
+// AVISO DEL BLOQUE 3-3b — ESTE ARCHIVO YA NO DESCRIBE LA PLANTILLA QUE SE REGISTRA. Los tres
+// literales de abajo son COPIAS A MANO de `theme.json` de antes de la corrección de paleta de 3-2d
+// (`accent #C98B8B`, `olive.muted #8A9178`) y de la de 3-3b (`muted` en las cinco paletas). Siguen
+// en verde porque afirman sobre sus propias copias, no sobre el archivo real: eso es exactamente lo
+// que dejó pasar el defecto D3 hasta `axe`. Lo que hoy vale como prueba del contraste de las
+// plantillas es `contraste-plantillas.test.ts`, que LEE los `theme.json` reales de
+// `frontend/templates/**`. Este archivo se conserva como prueba de la FÓRMULA de `contrast.ts` (los
+// casos de referencia de arriba, que no caducan); actualizar o retirar sus tres literales queda
+// como pregunta abierta para el dueño del paquete.
+//
 // HALLAZGO REGISTRADO (bitácora/3-2a.md, preguntas-abiertas.md): la paleta "blush" —la PRIMERA y
 // `defaultPaletteId` de `boda-clasica@1.0.0/theme.json`— NO cumple AA en 2 de las 5 parejas:
 // `accentInk/accent` (2.78, exige ≥ 4.5) y `accent/bg` (2.62, exige ≥ 3.0). Verificado [V] con la

@@ -14,14 +14,26 @@ const here = dirname(fileURLToPath(import.meta.url));
 const SRC_DIR = join(here, "../src");
 
 /**
- * Quita comentarios `//…` y `/*…*\/` antes de buscar patrones prohibidos — sin esto, un
+ * Quita comentarios `//…` y de bloque antes de buscar patrones prohibidos — sin esto, un
  * comentario que EXPLICA por qué el código no hace algo (p. ej. "nunca uses style={{…}}") se
  * detecta a sí mismo como si lo hiciera. Heurística simple (no entiende cadenas con `//` dentro),
- * suficiente para el código de este paquete: se verificó a mano que no produce falsos negativos
- * contra los archivos reales de `src/`.
+ * suficiente para el código de este paquete.
+ *
+ * EL ORDEN IMPORTA, y estaba al revés (hallazgo medido del bloque 3-3b). Quitando primero los
+ * comentarios de bloque, un comentario de LÍNEA que menciona una ruta con comodín —
+ * `src` + `/` + `**`, que aparece hoy en `src/sections/GallerySection.tsx:11` — abre un comentario
+ * de bloque para esta heurística, que se traga TODO hasta el siguiente cierre de bloque real. Con
+ * el orden anterior, ese archivo quedaba parcialmente CIEGO a todas las guardas de abajo:
+ * verificado [V] revirtiendo `src/schema-types.ts` al import de valor de D2 y viendo la guarda
+ * pasar en verde con el defecto delante. Quitando primero los `//`, ese `/` + `*` desaparece con
+ * su propia línea y el resto del archivo se examina de verdad.
+ *
+ * El coste del orden nuevo es un comentario de bloque que contenga `//` dentro: se corta ahí y su
+ * cola no se elimina. Eso produce como mucho un FALSO POSITIVO (una guarda que se queja de más),
+ * nunca un falso negativo — que es la dirección segura para una compuerta.
  */
 function stripComments(text: string): string {
-  return text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+  return text.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
 }
 
 function sourceFiles(): string[] {
@@ -61,6 +73,31 @@ describe("lint-guards — 04 §19.3: prohibiciones duras en packages/sections/sr
 
   it("cero import de next/*, zustand, react-hook-form, @radix-ui/*, lucide-react (04 §19.3)", () => {
     const pattern = /from\s+["'](next\/(?!image)|zustand|react-hook-form|@radix-ui\/|lucide-react)/;
+    const offenders = readAllCode().filter(({ text }) => pattern.test(text));
+    expect(offenders.map((o) => relative(SRC_DIR, o.path))).toEqual([]);
+  });
+
+  /**
+   * D2 del bloque 3-3b — PRESUPUESTO DE JS, no higiene de estilo.
+   *
+   * `@invitaciones/schema` construye sus esquemas Zod al cargarse y su `package.json` NO declara
+   * `sideEffects: false`, así que ningún empaquetador puede eliminarlo por análisis estático. Con
+   * `verbatimModuleSyntax: true` (`tsconfig.base.json:16`) TypeScript conserva LITERALMENTE toda
+   * sentencia `import` de valor, aunque los nombres importados solo se usen en posición de tipo.
+   * Resultado medido [V] con `pnpm --filter web run budget`: un único import de valor en
+   * `src/schema-types.ts:13` metía 87,8 KB gz de Zod en la primera carga de `/i/[publicToken]`
+   * (230,2 KB contra un tope de 150). Con `import type`, 143,3 KB — dentro del presupuesto.
+   *
+   * Por eso la regla es sobre `src/**` y no sobre todo el paquete: los esquemas como VALOR (para
+   * `.parse()` en las fixtures) viven en `test/schema-values.ts`, que ningún empaquetador de
+   * `apps/web` alcanza. Si esta prueba se pone roja, el presupuesto de `contratos.md §8` se ha roto
+   * otra vez y la compuerta de `check-budget.mjs` lo confirmará: la corrección es `import type`,
+   * nunca subir el límite.
+   */
+  it("cero import de VALOR de @invitaciones/schema en src/** (arrastra Zod al bundle público)", () => {
+    // Un import de valor es cualquier `import {...} from "@invitaciones/schema"` SIN `type` justo
+    // detrás de `import` (y sin que todos sus especificadores lleven `type`, que aquí no se usa).
+    const pattern = /import\s+(?!type\b)[^;]*?from\s+["']@invitaciones\/schema["']/s;
     const offenders = readAllCode().filter(({ text }) => pattern.test(text));
     expect(offenders.map((o) => relative(SRC_DIR, o.path))).toEqual([]);
   });

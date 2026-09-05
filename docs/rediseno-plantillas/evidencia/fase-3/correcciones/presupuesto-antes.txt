@@ -1,0 +1,40 @@
+
+> web@0.0.0 budget /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-a2c211173de1d1936/frontend/apps/web
+> node scripts/check-budget.mjs
+
+
+/i/[publicToken]: 230.2 KB gz de primera carga (límite 150.0 KB)
+  runtime común de Next   127.4 KB   (5 chunks)
+        69.8 KB  static/chunks/34qr-jx8gdlro.js
+        43.0 KB  static/chunks/0xzpcq3lwxjbo.js
+         8.4 KB  static/chunks/2-mbfmpjbnsj8.js
+         4.3 KB  static/chunks/turbopack-2nrz6hsi-37ej.js
+         2.0 KB  static/chunks/2fiuha08lovck.js
+  JS propio de la ruta    102.8 KB   (5 chunks)
+        87.8 KB  static/chunks/1udyfo4ri1bk0.js
+         9.9 KB  static/chunks/2tuh7ya_5wdv_.js
+         3.6 KB  static/chunks/2rv_n8nb5psvv.js
+         1.2 KB  static/chunks/3-0axdll0td7g.js
+         0.3 KB  static/chunks/1zv61kkn84rxv.js
+  polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+  EXCEDIDO por 80.2 KB
+
+/editor/[invitationId]: 268.2 KB gz de primera carga (límite 600.0 KB)
+  runtime común de Next   127.4 KB   (5 chunks)
+        69.8 KB  static/chunks/34qr-jx8gdlro.js
+        43.0 KB  static/chunks/0xzpcq3lwxjbo.js
+         8.4 KB  static/chunks/2-mbfmpjbnsj8.js
+         4.3 KB  static/chunks/turbopack-2nrz6hsi-37ej.js
+         2.0 KB  static/chunks/2fiuha08lovck.js
+  JS propio de la ruta    140.7 KB   (7 chunks)
+        87.8 KB  static/chunks/1udyfo4ri1bk0.js
+        31.2 KB  static/chunks/0kmie3x5hxocw.js
+         9.1 KB  static/chunks/3boe600tk0neo.js
+         6.8 KB  static/chunks/1lkf2o49qn96z.js
+         3.6 KB  static/chunks/2rv_n8nb5psvv.js
+         1.1 KB  static/chunks/3rix9pmk03_yy.js
+         1.1 KB  static/chunks/2fa424n-74m-7.js
+  polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+
+check-budget: presupuesto de JS excedido (04 §16.2). Orden de actuación: 1) ¿se coló el chrome en la ruta pública? 2) diferir la isla de RSVP; 3) reducir pesos tipográficos; 4) subconjunto de fuentes más estrecho; 5) si nada basta, ADR para subir el presupuesto.
+ ELIFECYCLE  Command failed with exit code 1.

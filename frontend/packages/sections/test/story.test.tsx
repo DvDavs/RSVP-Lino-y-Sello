@@ -4,7 +4,7 @@ import { render } from "@testing-library/react";
 import { axe } from "jest-axe";
 import { StorySection } from "../src/sections/StorySection.tsx";
 import { composedSection, textBlock, realBodaClasicaSection } from "./fixtures.ts";
-import { ComposedBlockSchema, ComposedGroupSchema } from "../src/schema-types.ts";
+import { ComposedBlockSchema, ComposedGroupSchema } from "./schema-values.ts";
 
 function milestoneItem(itemId: string, title: string) {
   return {

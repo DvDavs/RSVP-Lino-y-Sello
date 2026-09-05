@@ -1,0 +1,65 @@
+
+Running 22 tests using 2 workers
+
+  ✓   1 [chromium] › e2e/a11y-publico.spec.ts:53:1 › invitación publicada en móvil (390x844): 0 violaciones axe críticas o serias (2.0s)
+  ✓   2 [chromium] › e2e/a11y-publico.spec.ts:33:1 › invitación publicada: 0 violaciones axe críticas o serias (2.1s)
+  ✓   3 [chromium] › e2e/a11y.spec.ts:8:1 › página de invitación no disponible: 0 violaciones axe críticas o serias (1.1s)
+  ✓   4 [chromium] › e2e/a11y.spec.ts:16:1 › catálogo del editor (sin sesión): 0 violaciones axe críticas o serias (1.1s)
+  ✓   6 [chromium] › e2e/conflicto.spec.ts:129:1 › E-06b · dos PESTAÑAS del mismo navegador no llegan a chocar: la segunda entra en solo lectura (1.8s)
+  ✓   5 [chromium] › e2e/conflicto.spec.ts:61:1 › E-06 · dos navegadores editan lo mismo: el segundo ve el diálogo y nada se pierde en silencio (2.6s)
+  ✓   8 [chromium] › e2e/deshacer.spec.ts:100:1 › E-02b · deshacer antes de que salga el lote no genera tráfico (04 §11.3, caso 1) (943ms)
+  ✓   9 [chromium] › e2e/editor-nucleo.spec.ts:27:3 › núcleo del editor › E-N1 · `:choose-template` es el primer paso: sin él, `GET .../document` da 404 y no crea nada (975ms)
+  ✓  10 [chromium] › e2e/editor-nucleo.spec.ts:56:3 › núcleo del editor › E-N2 · el lienzo arranca, pinta la invitación y un clic abre el bloque en el panel (1.6s)
+  ✓  11 [chromium] › e2e/editor-nucleo.spec.ts:94:3 › núcleo del editor › E-N3 · la vista móvil cambia el ancho del lienzo (flujo D, 04 §7.4) (1.2s)
+  ✓  12 [chromium] › e2e/editor-nucleo.spec.ts:111:3 › núcleo del editor › E-N4 · el autoguardado escribe de verdad: la revisión del servidor sube (3.3s)
+lienzo-csp: script-src/eval sigue abierto (QUARANTINE, ver preguntas-abiertas.md): [{"directive":"script-src","blockedURI":"eval","sourceFile":"http://127.0.0.1:3000/_next/static/chunks/12qky8nsxhx-e.js","lineNumber":1}]
+  ✓  13 [chromium] › e2e/lienzo-csp.spec.ts:8:1 › la ruta del lienzo lleva la CSP sin 'self', y sin violaciones de estilo en línea (360ms)
+  ✓  14 [chromium] › e2e/presupuesto.spec.ts:32:1 › el JS de primera carga de /i/[publicToken] cabe en el presupuesto de 150 KB gz (105ms)
+  ✓  15 [chromium] › e2e/presupuesto.spec.ts:37:1 › la compuerta de presupuesto rompe de verdad cuando se excede (106ms)
+  ✓  16 [chromium] › e2e/presupuesto.spec.ts:45:1 › la compuerta mide el JS PROPIO de cada ruta, no solo el runtime común (108ms)
+  ✓  17 [chromium] › e2e/publico-no-disponible.spec.ts:8:1 › publicToken inexistente muestra el estado de no disponible, sin trampas de foco (373ms)
+  ✓  18 [chromium] › e2e/render-publico.spec.ts:65:1 › la invitación publicada se abre y muestra el texto y las imágenes sembradas (598ms)
+  ✓  19 [chromium] › e2e/render-publico.spec.ts:123:1 › noindex: la invitación nunca se indexa (etiqueta y cabecera) (418ms)
+  ✓  20 [chromium] › e2e/render-publico.spec.ts:139:1 › un publicToken inexistente cae en el estado de no disponible, sin filtrar nada (371ms)
+  ✓  21 [chromium] › e2e/render-publico.spec.ts:157:1 › una sección oculta desaparece de la invitación publicada tras revalidar (876ms)
+  ✓  22 [chromium] › e2e/render-publico.spec.ts:196:1 › el HTML se sirve desde caché ISR y no desde un render por visita (30ms)
+  ✘   7 [chromium] › e2e/deshacer.spec.ts:41:1 › E-02 · escribir, deshacer, rehacer y recargar: el estado coincide con lo último confirmado (21.9s)
+
+
+  1) [chromium] › e2e/deshacer.spec.ts:41:1 › E-02 · escribir, deshacer, rehacer y recargar: el estado coincide con lo último confirmado 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('[data-save-state]')
+    Expected: "idle"
+    Received: "conflict"
+    Timeout:  20000ms
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 20000ms
+      - waiting for locator('[data-save-state]')
+        3 × locator resolved to <span role="status" aria-live="polite" data-save-state="saving" class="inline-flex items-center gap-1.5 text-ui-aux text-ui-ink-muted">…</span>
+          - unexpected value "saving"
+        40 × locator resolved to <span role="status" aria-live="polite" data-save-state="conflict" class="inline-flex items-center gap-1.5 text-ui-aux text-ui-danger">…</span>
+           - unexpected value "conflict"
+
+
+      59 |     [blockId, nuevo] as const,
+      60 |   );
+    > 61 |   await expect(page.locator("[data-save-state]")).toHaveAttribute("data-save-state", "idle", { timeout: 20_000 });
+         |                                                   ^
+      62 |   expect(await revisionActual(invitationId, token)).toBeGreaterThan(revisionInicial);
+      63 |   // El botón de deshacer dice QUÉ va a deshacer, en es-MX.
+      64 |   await expect(page.getByTestId("undo")).toHaveAttribute("aria-label", /^Deshacer: /);
+        at /home/user/RSVP---Lino-Sello/.claude/worktrees/agent-a2c211173de1d1936/frontend/apps/web/e2e/deshacer.spec.ts:61:51
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/deshacer-E-02-·-escribir-d-a2317-de-con-lo-último-confirmado-chromium/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/deshacer-E-02-·-escribir-d-a2317-de-con-lo-último-confirmado-chromium/error-context.md
+
+  1 failed
+    [chromium] › e2e/deshacer.spec.ts:41:1 › E-02 · escribir, deshacer, rehacer y recargar: el estado coincide con lo último confirmado 
+  21 passed (28.3s)
+EXIT=1
