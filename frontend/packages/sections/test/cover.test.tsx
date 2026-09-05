@@ -246,3 +246,67 @@ describe("CoverSection — jest-axe con datos reales de boda-clasica@1.0.0", () 
     expect(results).toHaveNoViolations();
   });
 });
+
+/**
+ * A1 del bloque 3-9 (objeción ALTA de `3-CV`, capturas `O-01a`, `O-01b`, `O-02a`) — LA PORTADA ERA
+ * UN DEGRADADO GRIS VACÍO.
+ *
+ * jsdom no maqueta ni pinta, así que estas pruebas comprueban las TRES DECLARACIONES que el
+ * navegador convertía en el defecto —mismo criterio que las dos pruebas de D1 de 3-3b de arriba—,
+ * y la comprobación de píxeles vive en las capturas de
+ * `evidencia/fase-3/calidad-visual-corregido/`:
+ *
+ *   1. el escenario de la variante `full` tiene la FORMA de la lámina, no la de la pantalla: sin
+ *      esto, `object-fit: cover` sobre `min-height: 100svh` enseñaba en 1440×900 sólo la franja
+ *      central de una lámina 5:7, que es justo la que el ilustrador deja vacía para el texto;
+ *   2. el velo es un lavado CLARO del fondo de la paleta, no un 92 % de TINTA: el velo antiguo
+ *      tapaba la rama inferior, lo único dibujado que entraba en el recorte;
+ *   3. el texto va en `--inv-color-ink`, que es contra lo que el generador de arte MIDE la zona
+ *      segura de la lámina (`templates/scripts/art/scenes.mjs`, zona "título", umbral 4,5:1).
+ */
+describe("CoverSection — A1 (3-9): la lámina se ve entera y el texto va sobre su panel vacío", () => {
+  function partes() {
+    const { container } = render(<CoverSection section={cover()} variant="full" mode="public" />);
+    const stage = container.querySelector("section > div")! as HTMLElement;
+    const hijos = Array.from(stage.children) as HTMLElement[];
+    return {
+      section: container.querySelector("section")! as HTMLElement,
+      stage,
+      velo: hijos.find((h) => h.children.length === 0)!,
+      contenido: hijos[hijos.length - 1]!,
+    };
+  }
+
+  it("el escenario toma la relación de aspecto de la lámina, y se acota a la pantalla", () => {
+    const { stage } = partes();
+    const cs = getComputedStyle(stage);
+    // La forma de la papeleta, no la de la ventana. Antes: sin `aspect-ratio` y con `min-height:100svh`.
+    expect(cs.aspectRatio).toBe("var(--inv-image-aspect-portrait)");
+    // Y nunca más alta que la pantalla: el ancho se limita por la altura disponible.
+    expect(cs.maxWidth).toContain("var(--inv-image-aspect-portrait)");
+    expect(cs.gridTemplateRows).toBe("2fr auto 5fr");
+  });
+
+  it("la pantalla completa la mide la SECCIÓN, que hace de fondo con la paleta activa", () => {
+    const { section } = partes();
+    const cs = getComputedStyle(section);
+    expect(cs.minHeight).toBe("100svh");
+    expect(cs.alignContent).toBe("center");
+    expect(cs.background).toContain("var(--inv-color-bg)");
+  });
+
+  it("el velo es un lavado CLARO del fondo, nunca tinta: no puede volver a tapar el dibujo", () => {
+    const { velo } = partes();
+    const fondo = getComputedStyle(velo).background;
+    expect(fondo).toContain("var(--inv-color-bg)");
+    expect(fondo).not.toContain("var(--inv-color-ink)");
+  });
+
+  it("el texto se pinta en la tinta de la paleta, que es contra lo que el arte mide su zona segura", () => {
+    const { contenido } = partes();
+    const cs = getComputedStyle(contenido);
+    expect(cs.color).toBe("var(--inv-color-ink)");
+    // Y en la fila del medio de las tres, que es la que cae dentro de esa zona.
+    expect(cs.gridRow).toBe("2");
+  });
+});
