@@ -987,3 +987,30 @@ Todo lo de abajo se tomó como **supuesto** para no bloquear; la elección recom
 - [Fase 3-C · 3c-0] **Prueba social en la landing** («12 400 invitaciones enviadas»). Es un hueco: solo se muestra con un dato real. ¿Existe una cifra real que se pueda publicar?
 - [Fase 3-C · 3c-0] **Hallazgo:** `lib/i18n.ts` `publicar.yaSeVe` lleva un emoji (palomita verde, U+2705) en la interfaz, contra `10 §1.2`. No se toca en este bloque (no modifica `frontend/`); queda para el bloque 1 con el texto «Tu invitación ya se puede ver en internet.».
 - [Fase 3-C · 3c-0] **Peso de las capturas.** Las 17 capturas a 2× pesan 18 MB en `evidencia/`. **Supuesto:** se dejan a 2× para juzgar tipografía y trazo con fidelidad; si el dueño prefiere aligerar el repositorio, `deviceScaleFactor: 1` en `capturar.mjs` las deja en torno a 5 MB.
+
+## Fase 3-C · 3c-3a (bloque 1, iconos mitad A)
+
+- **Supuesto:** el reparto de la mitad A/B es "los primeros/segundos 41 nombres en el orden
+  literal del inventario de 82" (ajuste del orquestador en el prompt de sesión), no la lista de
+  categorías del brief `3c-3-iconos.md` §"Reparto" (que agrupa "navegación, edición, cuenta,
+  estados y acciones genéricas" para A). Con el reparto por categorías, `chispa`, `compartir`,
+  `enlace`, `boda`, `xv-anos`, `cumpleanos`, `graduacion`, `invitacion` (estados/compartir/tipos de
+  evento, ya dibujados en el moodboard) habrían caído en A; con el reparto estricto por orden caen
+  en B. Se siguió el ajuste del orquestador (más específico y sin ambigüedad de qué nombre cae en
+  qué mitad), pero si el dueño prefería el reparto por categorías, faltan 8 SVG ya resueltos en el
+  moodboard que habría que mover de mitad.
+- **Supuesto:** `tone="duo"` es el valor por defecto de cada icono generado (no lo fija el doc 11
+  ni el brief). Alternativa descartada: sin valor por defecto (prop obligatoria) — se prefirió un
+  valor por defecto porque casi todo uso del sistema es "dos tonos" y obligar a pasar la prop en
+  cada uso habría sido ruido. Ver `ADR-3C-3-01`.
+- **Pendiente de otro bloque, no bloquea:** `apps/web/app/(chrome)/design/iconos/iconos.module.css`
+  fija tokens `--ui-*` con los valores verificados de la Paleta A (claro) como *fallback local*
+  porque `packages/tokens` no publica aún `generated/tokens.css` en este worktree y el chrome
+  todavía no lo importa. En cuanto ese paquete y el chrome lo hagan, revisar que el `:root` real
+  gane sobre `.pagina` (mismo nombre de variable, mayor alcance debería bastar) y, si no, borrar el
+  bloque de variables local.
+- **Pendiente de otro bloque, no bloquea:** tras fusionar `packages/icons/svg/*.svg` de la mitad B,
+  alguien debe volver a ejecutar `node --experimental-strip-types scripts/generar.ts` desde
+  `packages/icons/` para que `src/generated/`, `src/index.ts` e `inventario.json` reflejen los 82
+  nombres (cada mitad solo generó y commiteó los suyos; el merge de esos tres artefactos por Git
+  no basta sin una regeneración).

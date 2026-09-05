@@ -1,0 +1,174 @@
+/* app/(chrome)/design/iconos/iconos.module.css — galería de @invitaciones/icons.
+   Solo `--ui-` (permitido bajo app/(chrome)/**, test/tokens-no-leak.test.ts), cero hex fuera de
+   este bloque de variables.
+
+   `--ui-*` locales TEMPORALES (registrado en preguntas-abiertas.md «Fase 3-C · 3c-3a»): el brief
+   pide que esta página renderice igual sin `packages/tokens` ni el layout de `/design` (ambos los
+   crea otro bloque en paralelo, en otro worktree). Los valores son los verificados de la Paleta A
+   — Bugambilia, tema claro (`diseno/11-sistema-de-diseno.md` §1.2/§1.3, `verificar-paletas.salida.txt`),
+   no inventados. Cuando `@invitaciones/tokens` publique `generated/tokens.css` y el chrome lo
+   importe, ese `:root` (mayor alcance, cargado después) debe ganar sobre este `.pagina`; si algún
+   día no fuera así, quien lo integre borra este bloque de variables y dead-code el comentario. */
+.pagina {
+  --ui-surface: #fdf9f6;
+  --ui-surface-raised: #ffffff;
+  --ui-surface-alt: #fff3f8;
+  --ui-ink: #292018;
+  --ui-ink-muted: #554b42;
+  --ui-border: #988d84;
+  --ui-divider: #ece5de;
+  --ui-primary: #bb0076;
+  --ui-on-primary: #ffffff;
+  --ui-primary-hover: #95005d;
+  --ui-primary-soft: #ffe5ef;
+  --ui-on-primary-soft: #710045;
+  --ui-link: #95005d;
+  --ui-focus: #457cfd;
+  --ui-accent-soft: #ffeaca;
+  --ui-on-accent-soft: #523700;
+
+  min-height: 100dvh;
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-family: system-ui, sans-serif; /* 04 §19: esta página de inventario no es "producto" con
+    voces tipográficas propias; las tres voces (`display`/`text`/`label`) las trae `packages/ui`
+    cuando exista — ver preguntas-abiertas.md. */
+  padding: 32px clamp(16px, 4vw, 48px) 96px;
+}
+
+.cabecera {
+  max-width: 72ch;
+  margin: 0 0 32px;
+}
+
+.etiqueta {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ui-link);
+}
+
+.titulo {
+  margin: 0 0 12px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.intro {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ui-ink-muted);
+}
+
+.intro code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--ui-surface-alt);
+  font-size: 0.92em;
+}
+
+.buscadorEtiqueta {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.buscador {
+  width: 100%;
+  max-width: 360px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--ui-border);
+  background: var(--ui-surface-raised);
+  color: var(--ui-ink);
+  font-size: 15px;
+}
+
+.buscador:focus-visible {
+  outline: 3px solid var(--ui-focus);
+  outline-offset: 2px;
+  border-color: var(--ui-primary);
+}
+
+.sinResultados {
+  color: var(--ui-ink-muted);
+  font-size: 15px;
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tarjeta {
+  border: 1.5px solid var(--ui-divider);
+  border-radius: 14px;
+  background: var(--ui-surface-raised);
+  padding: 14px;
+}
+
+.nombreIcono {
+  margin: 0 0 10px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  color: var(--ui-ink);
+  word-break: break-word;
+}
+
+.combinaciones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filaSuperficie,
+.filaPrimario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.filaSuperficie {
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  border: 1px solid var(--ui-divider);
+}
+
+.filaPrimario {
+  background: var(--ui-primary);
+  color: var(--ui-on-primary);
+}
+
+.grupoTono {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.etiquetaTono {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.tamanos {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}

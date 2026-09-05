@@ -1,0 +1,32 @@
+// GENERADO por scripts/generar.ts a partir de svg/itinerario.svg — no editar a mano.
+// Regenerar: `node --experimental-strip-types scripts/generar.ts` desde packages/icons/.
+import { forwardRef } from "react";
+import type { CSSProperties } from "react";
+import type { IconProps } from "../tipos.ts";
+
+export const IconoItinerario = forwardRef<SVGSVGElement, IconProps>(function IconoItinerario(
+  { size = 24, title, tone = "duo", className, style, ...resto },
+  ref,
+) {
+  return (
+    <svg
+      ref={ref}
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role={title ? "img" : undefined}
+      aria-hidden={title ? undefined : true}
+      className={className}
+      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      {...resto}
+    >
+      {title ? <title>{title}</title> : null}
+      <path d="M6 6 V18"/><circle cx="6" cy="7" r="1.6" fill="var(--tono)"/><circle cx="6" cy="12" r="1.6" fill="var(--tono)"/><circle cx="6" cy="17" r="1.6" fill="var(--tono)"/><path d="M10 7 H20"/><path d="M10 12 H20"/><path d="M10 17 H17"/>
+    </svg>
+  );
+});
