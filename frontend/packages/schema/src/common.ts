@@ -2,6 +2,19 @@
 // REGLA DURA: ningún esquema de este paquete usa .refine()/.superRefine(): z.toJSONSchema los descarta
 // en silencio (verificado con zod@4.5.4, ver 01-dominio-y-esquema.md §8). Las invariantes entre campos
 // viven en invariants.ts y se implementan también en Kotlin (templates2/schema/Invariants.kt).
+//
+// ⚠ ORDEN DE IMPORTS SIGNIFICATIVO — I-03 / H-ADV-03. `./canvas-runtime.ts` fija `jitless` en Zod y
+// DEBE evaluarse antes de que se construya el primer `z.object`/`z.strictObject` del paquete. Este
+// módulo es la raíz del grafo (todo lo demás lo importa), así que es el único sitio donde esa
+// garantía se sostiene sea cual sea el empaquetador. Ponerlo SOLO en `canvas-protocol.ts`
+// (ADR-3-0b-02) bastaba en el spike aislado de 3-0b y NO en `apps/web`, y está MEDIDO sobre el
+// bundle servido (bitacora/3b-i03.md §2): Turbopack funde este módulo con el grupo de Zod en el
+// mismo chunk y lo evalúa al cargarlo, ANTES de que corra el cuerpo de `canvas-protocol.ts`, que
+// vive en otro chunk. `LocalizedText` se construía entonces con `jitless` sin poner, Zod ejecutaba
+// su sonda `new Function("")` y la CSP del lienzo registraba un `securitypolicyviolation` de
+// `script-src`/`eval`: el criterio A4 de la compuerta A1-A8 incumplido en el producto.
+// Lo fija `test/zod-jitless.contract.test.ts` sin pasar por `canvas-protocol.ts`.
+import "./canvas-runtime.ts";
 import { z } from "zod";
 
 /** Identificador de bloque: segmentos camelCase separados por punto, ≤ 4 segmentos, ≤ 80 chars. */
