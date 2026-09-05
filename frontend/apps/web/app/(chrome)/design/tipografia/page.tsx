@@ -6,15 +6,17 @@ import type { Metadata } from "next";
  * Hat Mono), autoalojadas y NUNCA intercambiables entre sí (regla dura, `brief-comun.md`).
  *
  * Ruta independiente a propósito (brief 3c-2, ajuste 3 del orquestador): `app/(chrome)/design/**`
- * y su índice/layout los crea 3C-1 en paralelo; esta página no depende de que existan todavía —
- * cuelga directamente del layout raíz `(chrome)` ya existente y no importa nada de `/design` que
- * no sea suyo.
+ * y su índice/layout los crea 3C-1 en paralelo. Ya integrados: el `layout.tsx` de `/design` aporta
+ * el `<main>` y el marco `data-theme` conmutable, así que esta página empieza por `<section>` (un
+ * documento tiene UN solo `<main>`) y toma el color de los tokens de ese marco.
  *
- * Clases: las de `@invitaciones/ui/estilos.css` (`display-*`, `heading-*`, `text-*`, `label-*`,
- * `.prose`, `.numeros-tabulares`), NUNCA las utilidades `text-ui-*` del chrome antiguo
- * (`arte-chrome.md`) que este bloque va a sustituir. El resto de la maqueta (contenedor, espaciado,
- * rejilla) usa utilidades neutras de Tailwind sin tokens de color, para no acoplar esta página a
- * un sistema de color que no es de este bloque.
+ * Clases: las tipográficas de `@invitaciones/ui/estilos.css` (`display-*`, `heading-*`, `text-*`,
+ * `label-*`, `.prose`, `.numeros-tabulares`) — nunca las de tamaño `text-ui-*` del chrome antiguo
+ * (`arte-chrome.md`) que este bloque sustituye. El COLOR, en cambio, sí sale de los tokens
+ * (`text-ui-ink`, `text-ui-ink-muted`, `text-ui-ink-placeholder`, `border-ui-border`): con la
+ * paleta escrita a mano (`text-neutral-*`) la página era ilegible en el tema oscuro de la galería
+ * — 86 de 87 nodos de texto por debajo del umbral AA, la mayoría en 1,02-1,26:1, medido en
+ * Chromium sobre la pila renderizada. Corrección del revisor 3c-rev-2.
  */
 export const metadata: Metadata = {
   title: "Tipografía",
@@ -63,11 +65,11 @@ const PARRAFO_ES_MX =
 
 export default function EspecimenesTipografia() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-16 text-neutral-900">
+    <section className="mx-auto max-w-4xl py-8 text-ui-ink">
       <header className="mb-16">
-        <p className="label-md text-neutral-500">Sistema de diseño · Tipografía</p>
+        <p className="label-md text-ui-ink-muted">Sistema de diseño · Tipografía</p>
         <h1 className="display-xl mt-3">Tres voces, una jerarquía</h1>
-        <p className="text-lg mt-4 max-w-2xl text-neutral-600">
+        <p className="text-lg mt-4 max-w-2xl text-ui-ink-muted">
           Fraunces para titular, Onest para leer, Red Hat Mono para orientar. Autoalojadas,
           subconjunto latino + latin-ext, sin depender de ningún servicio externo.
         </p>
@@ -79,25 +81,25 @@ export default function EspecimenesTipografia() {
           Las tres voces
         </h2>
         <div className="grid gap-6 sm:grid-cols-3">
-          <article className="rounded-2xl border border-neutral-200 p-6">
-            <p className="label-sm text-neutral-500">Display / heading</p>
+          <article className="rounded-2xl border border-ui-border p-6">
+            <p className="label-sm text-ui-ink-muted">Display / heading</p>
             <p className="display-sm mt-3">Fraunces</p>
-            <p className="text-sm mt-2 text-neutral-600">
+            <p className="text-sm mt-2 text-ui-ink-muted">
               Variable, ejes wght + opsz + SOFT + WONK. Cambia de carácter con el tamaño: juguetona
               a 64&nbsp;px, sobria a 18&nbsp;px.
             </p>
           </article>
-          <article className="rounded-2xl border border-neutral-200 p-6">
-            <p className="label-sm text-neutral-500">Text</p>
+          <article className="rounded-2xl border border-ui-border p-6">
+            <p className="label-sm text-ui-ink-muted">Text</p>
             <p className="text-lg mt-3">Onest</p>
-            <p className="text-sm mt-2 text-neutral-600">
+            <p className="text-sm mt-2 text-ui-ink-muted">
               Peso 450 de base (no 400): a 16&nbsp;px sobre papel hueso, 400 se ve fina. Negrita a 650.
             </p>
           </article>
-          <article className="rounded-2xl border border-neutral-200 p-6">
-            <p className="label-sm text-neutral-500">Label</p>
+          <article className="rounded-2xl border border-ui-border p-6">
+            <p className="label-sm text-ui-ink-muted">Label</p>
             <p className="label-lg mt-3">Red Hat Mono</p>
-            <p className="text-sm mt-2 text-neutral-600">
+            <p className="text-sm mt-2 text-ui-ink-muted">
               Mayúsculas con tracking positivo para eyebrows y pasos; minúsculas para metadatos y
               contadores.
             </p>
@@ -110,16 +112,16 @@ export default function EspecimenesTipografia() {
         <h2 id="escala" className="heading-md mb-2">
           Escala completa
         </h2>
-        <p className="text-sm mb-6 text-neutral-500">
+        <p className="text-sm mb-6 text-ui-ink-muted">
           Tamaño en px, móvil 390 / escritorio 1024+ (`11 §2.2`). Redimensiona la ventana para ver
           el <code className="label-sm">clamp()</code>.
         </p>
-        <dl className="divide-y divide-neutral-200">
+        <dl className="divide-y divide-ui-border">
           {ESCALA.map((fila) => (
             <div key={fila.clase} className="grid grid-cols-1 gap-2 py-5 sm:grid-cols-[minmax(0,220px)_1fr] sm:items-baseline sm:gap-6">
-              <dt className="label-sm text-neutral-400">
+              <dt className="label-sm text-ui-ink-placeholder">
                 {fila.clase}
-                <span className="block text-neutral-300">
+                <span className="block text-ui-ink-placeholder">
                   {FAMILIA_POR_VOZ[fila.voz]} · {fila.tamano} px · {fila.peso}
                 </span>
               </dt>
@@ -153,19 +155,19 @@ export default function EspecimenesTipografia() {
         </h2>
         <div className="flex flex-wrap gap-8">
           <div>
-            <p className="label-md text-neutral-500">Confirmados</p>
+            <p className="label-md text-ui-ink-muted">Confirmados</p>
             <p className="display-sm numeros-tabulares mt-1">128</p>
           </div>
           <div>
-            <p className="label-md text-neutral-500">Pendientes</p>
+            <p className="label-md text-ui-ink-muted">Pendientes</p>
             <p className="display-sm numeros-tabulares mt-1">24</p>
           </div>
           <div>
-            <p className="label-md text-neutral-500">Días restantes</p>
+            <p className="label-md text-ui-ink-muted">Días restantes</p>
             <p className="display-sm numeros-tabulares mt-1">07</p>
           </div>
         </div>
-        <p className="text-sm numeros-tabulares mt-4 text-neutral-500">
+        <p className="text-sm numeros-tabulares mt-4 text-ui-ink-muted">
           11:11 · 03:07:42 · $1,280.00 MXN — los dígitos ocupan siempre el mismo ancho en columna.
         </p>
       </section>
@@ -176,14 +178,14 @@ export default function EspecimenesTipografia() {
           Pesos y tracking
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-neutral-200 p-6">
-            <p className="label-sm text-neutral-500 mb-3">Onest — regular (450) / negrita (650)</p>
+          <div className="rounded-2xl border border-ui-border p-6">
+            <p className="label-sm text-ui-ink-muted mb-3">Onest — regular (450) / negrita (650)</p>
             <p className="text-lg">
               Confirma tu asistencia <strong>antes del viernes</strong> para reservar tu lugar.
             </p>
           </div>
-          <div className="rounded-2xl border border-neutral-200 p-6">
-            <p className="label-sm text-neutral-500 mb-3">Red Hat Mono — tracking +0.06em / +0.12em</p>
+          <div className="rounded-2xl border border-ui-border p-6">
+            <p className="label-sm text-ui-ink-muted mb-3">Red Hat Mono — tracking +0.06em / +0.12em</p>
             <p className="label-lg">48 confirmados</p>
             <p className="label-md mt-2">Paso 2 de 4</p>
           </div>
@@ -195,15 +197,15 @@ export default function EspecimenesTipografia() {
         <h2 id="tarjeta" className="heading-md mb-6">
           Jerarquía en una tarjeta
         </h2>
-        <article className="max-w-sm rounded-3xl border border-neutral-200 p-8">
-          <p className="label-md text-neutral-500">Quince años</p>
+        <article className="max-w-sm rounded-3xl border border-ui-border p-8">
+          <p className="label-md text-ui-ink-muted">Quince años</p>
           <h3 className="heading-lg mt-2">Andrea Muñoz Íñiguez</h3>
-          <p className="text-sm mt-3 text-neutral-600">
+          <p className="text-sm mt-3 text-ui-ink-muted">
             Sábado 14 de febrero, 6:00 p.m. Jardín Los Encinos, Querétaro.
           </p>
-          <p className="label-sm mt-6 text-neutral-400">Confirma antes del 1.º de febrero</p>
+          <p className="label-sm mt-6 text-ui-ink-placeholder">Confirma antes del 1.º de febrero</p>
         </article>
       </section>
-    </main>
+    </section>
   );
 }

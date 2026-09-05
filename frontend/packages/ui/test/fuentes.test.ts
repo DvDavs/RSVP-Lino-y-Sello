@@ -8,7 +8,11 @@
 //     LATINO que se carga en primera vista es el presupuesto de `11 §2.4` (177 188 B): Fraunces
 //     `full` + Onest `wght` + Red Hat Mono `wght`, sin `latin-ext` (es-MX no lo necesita).
 // (3) `RUTAS_PRECARGA` solo contiene la voz `display`, subconjunto latino (una única ruta).
-import { existsSync, statSync } from "node:fs";
+// (4) Revisor 3c-rev-2: `fonts.css` y el manifiesto no pueden divergir. Un `@font-face` con una
+//     `url(/fonts/…)` que no esté en `FUENTES_AUTOALOJADAS` NO lo copia
+//     `scripts/copiar-fuentes-publicas.ts` y da 404 en producción (y no cuenta en el presupuesto);
+//     una entrada del manifiesto sin `@font-face` se copia para nada. Se comparan los dos conjuntos.
+import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { FUENTES_AUTOALOJADAS, PRESUPUESTO_PRIMERA_VISTA_BYTES, RUTAS_PRECARGA } from "../src/fonts/preload.ts";
@@ -48,6 +52,23 @@ describe("fuentes autoalojadas — existencia y peso real (11 §2.3/§2.4)", () 
 
   it("RUTAS_PRECARGA solo trae la voz display, subconjunto latino", () => {
     expect(RUTAS_PRECARGA).toEqual(["/fonts/fraunces-latin-full-normal.woff2"]);
+  });
+
+  it("fonts.css y el manifiesto declaran EXACTAMENTE los mismos ficheros (sin deriva)", () => {
+    const css = readFileSync(path.join(RAIZ_UI, "src/fonts/fonts.css"), "utf8");
+    const enCss = [...css.matchAll(/url\((\/fonts\/[^)]+\.woff2)\)/g)].map((m) => m[1]!).sort();
+    const enManifiesto = FUENTES_AUTOALOJADAS.map((f) => f.rutaPublica).sort();
+    expect(enCss, "un @font-face que no está en el manifiesto no se copia a public/fonts: 404").toEqual(enManifiesto);
+  });
+
+  it("los seis @font-face de fonts.css llevan font-display: swap y unicode-range", () => {
+    const css = readFileSync(path.join(RAIZ_UI, "src/fonts/fonts.css"), "utf8");
+    const reglas = [...css.matchAll(/@font-face\s*\{[^}]*\}/g)].map((m) => m[0]);
+    expect(reglas).toHaveLength(FUENTES_AUTOALOJADAS.length);
+    for (const regla of reglas) {
+      expect(regla, `sin font-display: swap → texto invisible mientras carga:\n${regla}`).toMatch(/font-display:\s*swap/);
+      expect(regla, `sin unicode-range → el navegador descarga subconjuntos que no usa:\n${regla}`).toMatch(/unicode-range:\s*U\+/);
+    }
   });
 
   it("cada ruta de RUTAS_PRECARGA corresponde a un fichero de origen existente", () => {

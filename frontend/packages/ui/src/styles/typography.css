@@ -239,10 +239,38 @@
 .prose li + li {
   margin-top: 0.35em;
 }
+/* Los títulos DENTRO de `.prose` heredaban la familia de cuerpo y el tamaño de `.prose` (16 px,
+   Onest 450): rompían la regla dura «nunca la fuente de cuerpo en títulos» (`10 §1.5`,
+   `brief-comun.md`) y, además, no se distinguían del párrafo. Se les da la voz `heading` que les
+   corresponde por nivel (`11 §2.2`, jerarquía por nivel HTML, nunca por tamaño). Revisor 3c-rev-2;
+   fijado por `test/tipografia.test.ts`. */
 .prose h2,
 .prose h3,
 .prose h4 {
   margin-top: 1.5em;
+  font-family: var(--ui-font-display, "Fraunces", Georgia, serif);
+  font-optical-sizing: none;
+}
+.prose h2 {
+  font-size: var(--ui-heading-lg-size, clamp(24px, calc(21.539px + 0.6309vw), 28px));
+  line-height: var(--ui-heading-lg-leading, 1.15);
+  letter-spacing: var(--ui-heading-lg-tracking, -0.02em);
+  font-weight: var(--ui-heading-lg-weight, 700);
+  font-variation-settings: "opsz" 32, "SOFT" 40;
+}
+.prose h3 {
+  font-size: var(--ui-heading-md-size, clamp(20px, calc(18.77px + 0.3155vw), 22px));
+  line-height: var(--ui-heading-md-leading, 1.2);
+  letter-spacing: var(--ui-heading-md-tracking, -0.02em);
+  font-weight: var(--ui-heading-md-weight, 700);
+  font-variation-settings: "opsz" 20, "SOFT" 30;
+}
+.prose h4 {
+  font-size: var(--ui-heading-sm-size, clamp(17px, calc(16.385px + 0.1577vw), 18px));
+  line-height: var(--ui-heading-sm-leading, 1.3);
+  letter-spacing: var(--ui-heading-sm-tracking, -0.01em);
+  font-weight: var(--ui-heading-sm-weight, 700);
+  font-variation-settings: "opsz" 14, "SOFT" 20;
 }
 .prose strong,
 .prose b {

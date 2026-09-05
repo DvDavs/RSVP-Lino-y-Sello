@@ -69,6 +69,38 @@ describe("typography.css — familia correcta por voz, nunca cruzada (regla dura
     const bloque = bloqueDe(".prose");
     expect(bloque).toMatch(/font-family:\s*var\(--ui-font-text|font-family:\s*"Onest"/);
   });
+
+  // Revisor 3c-rev-2: los títulos dentro de `.prose` heredaban la familia de CUERPO (medido en
+  // Chromium sobre /design/tipografia: `getComputedStyle(h3).fontFamily` = "Onest Variable"), que
+  // es exactamente lo que la regla dura prohíbe. La declaración conjunta les da la voz display y
+  // cada nivel su tamaño de `heading-*`.
+  it(".prose h2/h3/h4 usan la familia display, nunca la de cuerpo", () => {
+    const bloque = bloqueDe(".prose h2,\n.prose h3,\n.prose h4");
+    expect(bloque).toMatch(/font-family:\s*var\(--ui-font-display|font-family:\s*"Fraunces"/);
+    expect(bloque).not.toMatch(/--ui-font-text|--ui-font-label|"Onest"|"Red Hat Mono"/);
+  });
+
+  /** Como `bloqueDe`, pero exige que el selector sea el ÚNICO de su regla (precedido de `}`), para
+   *  no confundir `.prose h4 { … }` con el último miembro de la lista `.prose h2, .prose h3,
+   *  .prose h4 { … }`. */
+  function bloqueExactoDe(selector: string): string {
+    const escapado = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const m = new RegExp(`(?<=\\})\\s*${escapado}\\s*\\{([^}]*)\\}`).exec(CSS);
+    if (!m) throw new Error(`No se encontró una regla propia para ${selector} en typography.css`);
+    return m[1]!;
+  }
+
+  for (const [selector, rol] of [
+    [".prose h2", "heading-lg"],
+    [".prose h3", "heading-md"],
+    [".prose h4", "heading-sm"],
+  ] as const) {
+    it(`${selector} toma el tamaño y el peso de ${rol} (no los 16 px de .prose)`, () => {
+      const bloque = bloqueExactoDe(selector);
+      expect(bloque).toContain(`--ui-${rol}-size`);
+      expect(bloque).toContain(`--ui-${rol}-weight`);
+    });
+  }
 });
 
 describe("typography.css — pesos de énfasis 450/650 documentados (11 §2.2)", () => {
