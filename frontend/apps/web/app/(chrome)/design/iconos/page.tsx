@@ -1,7 +1,7 @@
 "use client";
 // app/(chrome)/design/iconos/page.tsx — galería de `@invitaciones/icons` (brief 3C-3 §"Entregables"
 // 4). Combina `mitad-a.tsx` (navegación, edición, y las secciones que caen en los primeros 41
-// nombres) y `mitad-b.tsx` (el resto; hoy una lista vacía — placeholder de la mitad A). No depende
+// nombres) y `mitad-b.tsx` (los nombres 42 a 82, integrados desde 3C-3B). No depende
 // de `app/(chrome)/design/layout.tsx` ni de un índice `/design` (los crea otro bloque en paralelo,
 // en otro worktree): esta ruta funciona sola, con `app/(chrome)/layout.tsx` como único ancestro.
 //

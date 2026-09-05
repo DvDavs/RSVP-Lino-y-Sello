@@ -18,6 +18,12 @@
     "archivo": "svg/ajustes.svg"
   },
   {
+    "nombre": "alergia",
+    "categoria": "rsvp",
+    "dibujadoOriginal": false,
+    "archivo": "svg/alergia.svg"
+  },
+  {
     "nombre": "arrastrar",
     "categoria": "edicion",
     "dibujadoOriginal": false,
@@ -28,6 +34,12 @@
     "categoria": "navegacion",
     "dibujadoOriginal": false,
     "archivo": "svg/atras.svg"
+  },
+  {
+    "nombre": "aviso",
+    "categoria": "estados",
+    "dibujadoOriginal": false,
+    "archivo": "svg/aviso.svg"
   },
   {
     "nombre": "ayuda",
@@ -42,6 +54,18 @@
     "archivo": "svg/bajar.svg"
   },
   {
+    "nombre": "bautizo",
+    "categoria": "tipos-evento",
+    "dibujadoOriginal": false,
+    "archivo": "svg/bautizo.svg"
+  },
+  {
+    "nombre": "boda",
+    "categoria": "tipos-evento",
+    "dibujadoOriginal": true,
+    "archivo": "svg/boda.svg"
+  },
+  {
     "nombre": "borrar",
     "categoria": "edicion",
     "dibujadoOriginal": false,
@@ -52,6 +76,18 @@
     "categoria": "navegacion",
     "dibujadoOriginal": false,
     "archivo": "svg/buscar.svg"
+  },
+  {
+    "nombre": "candado",
+    "categoria": "estados",
+    "dibujadoOriginal": false,
+    "archivo": "svg/candado.svg"
+  },
+  {
+    "nombre": "cargando",
+    "categoria": "estados",
+    "dibujadoOriginal": false,
+    "archivo": "svg/cargando.svg"
   },
   {
     "nombre": "celebrantes",
@@ -66,6 +102,12 @@
     "archivo": "svg/cerrar.svg"
   },
   {
+    "nombre": "chat",
+    "categoria": "compartir",
+    "dibujadoOriginal": false,
+    "archivo": "svg/chat.svg"
+  },
+  {
     "nombre": "chevron-abajo",
     "categoria": "navegacion",
     "dibujadoOriginal": false,
@@ -78,10 +120,70 @@
     "archivo": "svg/chevron-derecha.svg"
   },
   {
+    "nombre": "chispa",
+    "categoria": "estados",
+    "dibujadoOriginal": true,
+    "archivo": "svg/chispa.svg"
+  },
+  {
     "nombre": "comodidades",
     "categoria": "secciones",
     "dibujadoOriginal": false,
     "archivo": "svg/comodidades.svg"
+  },
+  {
+    "nombre": "compartir",
+    "categoria": "compartir",
+    "dibujadoOriginal": true,
+    "archivo": "svg/compartir.svg"
+  },
+  {
+    "nombre": "comunion",
+    "categoria": "tipos-evento",
+    "dibujadoOriginal": false,
+    "archivo": "svg/comunion.svg"
+  },
+  {
+    "nombre": "confirmar",
+    "categoria": "rsvp",
+    "dibujadoOriginal": false,
+    "archivo": "svg/confirmar.svg"
+  },
+  {
+    "nombre": "copiar",
+    "categoria": "compartir",
+    "dibujadoOriginal": false,
+    "archivo": "svg/copiar.svg"
+  },
+  {
+    "nombre": "corporativo",
+    "categoria": "tipos-evento",
+    "dibujadoOriginal": false,
+    "archivo": "svg/corporativo.svg"
+  },
+  {
+    "nombre": "correo",
+    "categoria": "compartir",
+    "dibujadoOriginal": false,
+    "archivo": "svg/correo.svg"
+  },
+  {
+    "nombre": "cuenta",
+    "categoria": "cuenta",
+    "dibujadoOriginal": false,
+    "archivo": "svg/cuenta.svg"
+  },
+  {
+    "nombre": "cumpleanos",
+    "categoria": "tipos-evento",
+    "dibujadoOriginal": true,
+    "archivo": "svg/cumpleanos.svg"
+  },
+  {
+    "nombre": "descargar",
+    "categoria": "compartir",
+    "dibujadoOriginal": false,
+    "archivo": "svg/descargar.svg"
   },
   {
     "nombre": "deshacer",
@@ -102,6 +204,24 @@
     "archivo": "svg/editar.svg"
   },
   {
+    "nombre": "enlace",
+    "categoria": "compartir",
+    "dibujadoOriginal": true,
+    "archivo": "svg/enlace.svg"
+  },
+  {
+    "nombre": "entrar",
+    "categoria": "cuenta",
+    "dibujadoOriginal": false,
+    "archivo": "svg/entrar.svg"
+  },
+  {
+    "nombre": "error",
+    "categoria": "estados",
+    "dibujadoOriginal": false,
+    "archivo": "svg/error.svg"
+  },
+  {
     "nombre": "escritorio",
     "categoria": "edicion",
     "dibujadoOriginal": false,
@@ -112,6 +232,12 @@
     "categoria": "secciones",
     "dibujadoOriginal": true,
     "archivo": "svg/evento-fecha.svg"
+  },
+  {
+    "nombre": "exito",
+    "categoria": "estados",
+    "dibujadoOriginal": false,
+    "archivo": "svg/exito.svg"
   },
   {
     "nombre": "externo",
@@ -132,10 +258,34 @@
     "archivo": "svg/galeria.svg"
   },
   {
+    "nombre": "graduacion",
+    "categoria": "tipos-evento",
+    "dibujadoOriginal": true,
+    "archivo": "svg/graduacion.svg"
+  },
+  {
     "nombre": "guardar",
     "categoria": "edicion",
     "dibujadoOriginal": false,
     "archivo": "svg/guardar.svg"
+  },
+  {
+    "nombre": "historia",
+    "categoria": "secciones",
+    "dibujadoOriginal": false,
+    "archivo": "svg/historia.svg"
+  },
+  {
+    "nombre": "imagen-pendiente",
+    "categoria": "estados",
+    "dibujadoOriginal": false,
+    "archivo": "svg/imagen-pendiente.svg"
+  },
+  {
+    "nombre": "info",
+    "categoria": "estados",
+    "dibujadoOriginal": false,
+    "archivo": "svg/info.svg"
   },
   {
     "nombre": "inicio",
@@ -144,16 +294,40 @@
     "archivo": "svg/inicio.svg"
   },
   {
+    "nombre": "invitacion",
+    "categoria": "tipos-evento",
+    "dibujadoOriginal": true,
+    "archivo": "svg/invitacion.svg"
+  },
+  {
+    "nombre": "invitados",
+    "categoria": "rsvp",
+    "dibujadoOriginal": false,
+    "archivo": "svg/invitados.svg"
+  },
+  {
     "nombre": "itinerario",
     "categoria": "secciones",
     "dibujadoOriginal": false,
     "archivo": "svg/itinerario.svg"
   },
   {
+    "nombre": "lugar",
+    "categoria": "secciones",
+    "dibujadoOriginal": true,
+    "archivo": "svg/lugar.svg"
+  },
+  {
     "nombre": "menu",
     "categoria": "navegacion",
     "dibujadoOriginal": false,
     "archivo": "svg/menu.svg"
+  },
+  {
+    "nombre": "mesa",
+    "categoria": "rsvp",
+    "dibujadoOriginal": false,
+    "archivo": "svg/mesa.svg"
   },
   {
     "nombre": "mesa-de-regalos",
@@ -168,16 +342,46 @@
     "archivo": "svg/movil.svg"
   },
   {
+    "nombre": "ninos",
+    "categoria": "rsvp",
+    "dibujadoOriginal": false,
+    "archivo": "svg/ninos.svg"
+  },
+  {
+    "nombre": "nota",
+    "categoria": "rsvp",
+    "dibujadoOriginal": false,
+    "archivo": "svg/nota.svg"
+  },
+  {
     "nombre": "ocultar",
     "categoria": "edicion",
     "dibujadoOriginal": false,
     "archivo": "svg/ocultar.svg"
   },
   {
+    "nombre": "pago",
+    "categoria": "cuenta",
+    "dibujadoOriginal": false,
+    "archivo": "svg/pago.svg"
+  },
+  {
     "nombre": "paleta",
     "categoria": "edicion",
     "dibujadoOriginal": false,
     "archivo": "svg/paleta.svg"
+  },
+  {
+    "nombre": "pie",
+    "categoria": "secciones",
+    "dibujadoOriginal": false,
+    "archivo": "svg/pie.svg"
+  },
+  {
+    "nombre": "plan",
+    "categoria": "cuenta",
+    "dibujadoOriginal": false,
+    "archivo": "svg/plan.svg"
   },
   {
     "nombre": "portada",
@@ -192,10 +396,22 @@
     "archivo": "svg/punto-focal.svg"
   },
   {
+    "nombre": "qr",
+    "categoria": "compartir",
+    "dibujadoOriginal": false,
+    "archivo": "svg/qr.svg"
+  },
+  {
     "nombre": "quitar",
     "categoria": "edicion",
     "dibujadoOriginal": false,
     "archivo": "svg/quitar.svg"
+  },
+  {
+    "nombre": "rechazar",
+    "categoria": "rsvp",
+    "dibujadoOriginal": false,
+    "archivo": "svg/rechazar.svg"
   },
   {
     "nombre": "recortar",
@@ -210,10 +426,22 @@
     "archivo": "svg/rehacer.svg"
   },
   {
+    "nombre": "reloj",
+    "categoria": "secciones",
+    "dibujadoOriginal": false,
+    "archivo": "svg/reloj.svg"
+  },
+  {
     "nombre": "rsvp-confirmado",
     "categoria": "secciones",
     "dibujadoOriginal": true,
     "archivo": "svg/rsvp-confirmado.svg"
+  },
+  {
+    "nombre": "salir",
+    "categoria": "cuenta",
+    "dibujadoOriginal": false,
+    "archivo": "svg/salir.svg"
   },
   {
     "nombre": "subir",
@@ -228,6 +456,12 @@
     "archivo": "svg/sugerencias.svg"
   },
   {
+    "nombre": "telefono",
+    "categoria": "compartir",
+    "dibujadoOriginal": false,
+    "archivo": "svg/telefono.svg"
+  },
+  {
     "nombre": "tipografia",
     "categoria": "edicion",
     "dibujadoOriginal": false,
@@ -240,9 +474,21 @@
     "archivo": "svg/ver.svg"
   },
   {
+    "nombre": "vestimenta",
+    "categoria": "secciones",
+    "dibujadoOriginal": true,
+    "archivo": "svg/vestimenta.svg"
+  },
+  {
     "nombre": "vista-previa",
     "categoria": "edicion",
     "dibujadoOriginal": false,
     "archivo": "svg/vista-previa.svg"
+  },
+  {
+    "nombre": "xv-anos",
+    "categoria": "tipos-evento",
+    "dibujadoOriginal": true,
+    "archivo": "svg/xv-anos.svg"
   }
 ]
