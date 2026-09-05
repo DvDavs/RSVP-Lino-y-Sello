@@ -131,7 +131,7 @@
             "es-MX": "Foto"
           },
           "constraints": {
-            "aspect": "portrait",
+            "aspect": "square",
             "maxBytes": 8388608
           }
         },
@@ -603,10 +603,24 @@
   ],
   "assets": [
     {
+      "id": "as_01J8YQYX1HD63EACDQ55S8368N",
+      "path": "assets/cover.webp",
+      "sha256": "9f7a852eb1da1701376340c0dc6b8899ec7e1fc4d7388efc024ae5f8fc899c39",
+      "contentType": "image/webp",
+      "bytes": 39664
+    },
+    {
       "path": "assets/divider.webp",
       "sha256": "6079e415349dba6fa192cc15d8b06fd36966a346fea4ed90e814c2964c0358c4",
       "contentType": "image/webp",
       "bytes": 25714
+    },
+    {
+      "id": "as_01J8R6MAHKEW2GFM9QG29Z4N21",
+      "path": "assets/portrait-a.webp",
+      "sha256": "6614ef5f504ebf6b75831df7e63dd48d24f3c650987c5d55a6c7081b9f64366a",
+      "contentType": "image/webp",
+      "bytes": 35438
     },
     {
       "path": "assets/preview.webp",

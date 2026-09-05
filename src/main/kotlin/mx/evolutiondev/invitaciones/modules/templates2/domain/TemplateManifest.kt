@@ -15,6 +15,13 @@ data class SectionSpec(
 
 /** Espejo de `manifest.ts` `AssetEntry`. */
 data class AssetEntry(
+    /**
+     * ALIAS opcional que el paquete declara para este archivo (I-09, ADR-3B-I09-01). Espejo de
+     * `manifest.ts` `AssetEntry.id`. **No** es el `tpl_asset.public_id`, que lo sigue acuñando el
+     * servidor: el alias solo se añade al `AssetIndex` en memoria
+     * (`EditorDocumentService.filasIndexadas`) y jamás pisa a un asset real de la invitación.
+     */
+    val id: AssetId? = null,
     val path: String,
     val sha256: String,
     val contentType: AssetContentType,

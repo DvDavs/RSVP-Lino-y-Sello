@@ -1,6 +1,6 @@
 // packages/schema/src/manifest.ts — paquete de plantilla: template.json, theme.json, defaults.json, migrations/*.json
 import { z } from "zod";
-import { BlockId, EventKind, HexColor, Ident, Locale, LocalizedText, SectionKey, Semver, TemplateSlug } from "./common.ts";
+import { AssetId, BlockId, EventKind, HexColor, Ident, Locale, LocalizedText, SectionKey, Semver, TemplateSlug } from "./common.ts";
 import { BlockSpec, BlockValue } from "./blocks.ts";
 
 /** Tipos de sección (catálogo cerrado, 12): cubre las 13 claves de los 9 default_visual_*.json (J §3). */
@@ -43,6 +43,17 @@ export const ThemeSpec = z.strictObject({
 });
 
 export const AssetEntry = z.strictObject({
+  /**
+   * ALIAS que el PAQUETE declara para este archivo (I-09, ADR-3B-I09-01). Opcional y aditivo: un
+   * paquete que no lo declare se comporta exactamente como antes. Sirve para que `defaults.json`
+   * pueda referenciar las imágenes de demostración del propio paquete —incluido el único camino
+   * posible para un bloque `source: "fixed"`—, porque el `assetId` real lo acuña el servidor en el
+   * registro (`TemplateRegistrationService.kt`, `"as_" + ulid`) y por tanto no se puede escribir a
+   * mano en `defaults.json`. NO es el `tpl_asset.public_id`: la base sigue guardando el ULID del
+   * servidor y el alias solo existe en el `AssetIndex` en memoria, donde NUNCA pisa a un asset real
+   * de la invitación. `ImageValue.assetId` sigue siendo un `AssetId` opaco (ADR-021).
+   */
+  id: AssetId.optional(),
   path: z.string().regex(/^assets\/[a-z0-9][a-z0-9._-]{0,99}$/),
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
   contentType: z.enum(["image/webp", "image/png", "image/jpeg", "image/svg+xml", "audio/mpeg", "font/woff2"]),

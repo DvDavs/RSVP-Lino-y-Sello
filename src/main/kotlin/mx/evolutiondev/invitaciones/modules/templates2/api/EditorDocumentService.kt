@@ -707,15 +707,43 @@ class EditorDocumentService(
     private fun almacenados(
         invitationId: Long,
         version: LoadedTemplateVersion,
-    ): Map<AssetId, AssetUrlResolver.StoredAsset> {
-        val salida = LinkedHashMap<AssetId, AssetUrlResolver.StoredAsset>()
-        for (a in filasDeAssets(invitationId, version)) {
-            // `almacenado` comprueba en voz alta que la fila vive en el bucket que este módulo
-            // direcciona (ADV-10): una fila en otro bucket daría una URL rota dentro del `composed`
-            // que se congela en `tpl_release`, y ahí ya no la detecta nadie.
-            salida[AssetId(a.publicId)] =
-                AssetUrlResolver.almacenado(bucket, a.publicId, a.bucket, a.s3Key, a.width, a.height)
+    ): Map<AssetId, AssetUrlResolver.StoredAsset> =
+        // `almacenado` comprueba en voz alta que la fila vive en el bucket que este módulo
+        // direcciona (ADV-10): una fila en otro bucket daría una URL rota dentro del `composed`
+        // que se congela en `tpl_release`, y ahí ya no la detecta nadie.
+        filasIndexadas(invitationId, version).mapValues { (_, a) ->
+            AssetUrlResolver.almacenado(bucket, a.publicId, a.bucket, a.s3Key, a.width, a.height)
         }
+
+    /**
+     * `assetId → fila de tpl_asset`, con **dos** clases de clave y en este orden, que importa:
+     *
+     * 1. el `public_id` REAL de cada fila (assets de la invitación y de la versión de plantilla);
+     * 2. los **ALIAS** que el manifiesto declara en `AssetEntry.id` (I-09, ADR-3B-I09-01), casados
+     *    con su fila por `sha256` y **solo** entre las filas de la versión de plantilla.
+     *
+     * El alias existe porque el `publicId` lo acuña el servidor en el registro
+     * (`TemplateRegistrationService`, `"as_" + ulid`) y por tanto un paquete no puede escribirlo en
+     * su `defaults.json`: sin esto, `cover.image` salía `provenance:"empty"` y `rsvp.background`
+     * —que es `source:"fixed"`— quedaba inalcanzable por cualquier vía (`bitacora/3-2d.md §5`).
+     *
+     * **El alias NUNCA pisa a un asset real**: se añade con `putIfAbsent` después de todas las
+     * filas, así que si un `id` del manifiesto coincidiera con el `public_id` de un asset de la
+     * invitación, gana el asset real y el alias se descarta. La base no cambia: `tpl_asset.public_id`
+     * sigue siendo el ULID del servidor y el alias solo vive en este mapa.
+     */
+    private fun filasIndexadas(
+        invitationId: Long,
+        version: LoadedTemplateVersion,
+    ): Map<AssetId, TplAssetEntity> {
+        val filas = filasDeAssets(invitationId, version)
+        val salida = LinkedHashMap<AssetId, TplAssetEntity>()
+        for (a in filas) salida[AssetId(a.publicId)] = a
+        val declarados = version.pkg.manifest.assets.mapNotNull { e -> e.id?.let { it to e.sha256.lowercase() } }
+        if (declarados.isEmpty()) return salida
+        val porSha = filas.filter { it.templateVersionId == version.templateVersionId }
+            .associateBy { it.sha256.lowercase() }
+        for ((alias, sha) in declarados) porSha[sha]?.let { salida.putIfAbsent(alias, it) }
         return salida
     }
 
@@ -725,13 +753,12 @@ class EditorDocumentService(
      * que no pertenece ni a la invitación ni a la plantilla vigente → el reductor devuelve
      * `TPL_ASSET_NOT_OWNED` (ADR-030).
      */
-    fun metadatosDeAssets(invitationId: Long, version: LoadedTemplateVersion): Map<AssetId, AssetMeta> {
-        val salida = LinkedHashMap<AssetId, AssetMeta>()
-        for (a in filasDeAssets(invitationId, version)) {
-            salida[AssetId(a.publicId)] = AssetMeta(a.bytes, a.width, a.height, a.contentType)
+    fun metadatosDeAssets(invitationId: Long, version: LoadedTemplateVersion): Map<AssetId, AssetMeta> =
+        // Los mismos alias que el `AssetIndex` (I-09): si no, `image.aspect` se quedaría sin
+        // validador para el alias y el reductor lo rechazaría con `TPL_ASSET_NOT_OWNED`.
+        filasIndexadas(invitationId, version).mapValues { (_, a) ->
+            AssetMeta(a.bytes, a.width, a.height, a.contentType)
         }
-        return salida
-    }
 
     private fun filasDeAssets(invitationId: Long, version: LoadedTemplateVersion): List<TplAssetEntity> =
         assets.findByInvitationId(invitationId) + assets.findByTemplateVersionId(version.templateVersionId)

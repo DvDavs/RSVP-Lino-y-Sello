@@ -4258,6 +4258,10 @@
           "items": {
             "type": "object",
             "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^as_[0-9A-HJKMNP-TV-Z]{26}$"
+              },
               "path": {
                 "type": "string",
                 "pattern": "^assets\\/[a-z0-9][a-z0-9._-]{0,99}$"
