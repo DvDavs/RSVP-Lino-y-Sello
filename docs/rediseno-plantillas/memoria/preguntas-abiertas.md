@@ -987,3 +987,31 @@ Todo lo de abajo se tomó como **supuesto** para no bloquear; la elección recom
 - [Fase 3-C · 3c-0] **Prueba social en la landing** («12 400 invitaciones enviadas»). Es un hueco: solo se muestra con un dato real. ¿Existe una cifra real que se pueda publicar?
 - [Fase 3-C · 3c-0] **Hallazgo:** `lib/i18n.ts` `publicar.yaSeVe` lleva un emoji (palomita verde, U+2705) en la interfaz, contra `10 §1.2`. No se toca en este bloque (no modifica `frontend/`); queda para el bloque 1 con el texto «Tu invitación ya se puede ver en internet.».
 - [Fase 3-C · 3c-0] **Peso de las capturas.** Las 17 capturas a 2× pesan 18 MB en `evidencia/`. **Supuesto:** se dejan a 2× para juzgar tipografía y trazo con fidelidad; si el dueño prefiere aligerar el repositorio, `deviceScaleFactor: 1` en `capturar.mjs` las deja en torno a 5 MB.
+
+## Fase 3-C · 3c-1 — tokens y galería (5)
+
+Supuestos que tomé para no bloquear el bloque. Evidencia para decidir: `/design/tokens` en el propio
+producto (conmutador claro/oscuro) y `evidencia/fase-3c/bloque-1/*.png`.
+
+- [Fase 3-C · 3c-1] **Bandera `DESIGN_GALLERY`.** `11 §8.1` pide que la galería quede fuera de
+  producción tras una bandera; el orquestador la aplazó. **Supuesto:** `/design` se construye siempre
+  (dos rutas estáticas, no toca ninguna otra) y solo lleva `robots: noindex` en sus metadatos. ¿Se
+  quiere además una variable de entorno que la haga devolver 404 en producción, o basta con `noindex`
+  y que sea documentación viva accesible para el equipo?
+- [Fase 3-C · 3c-1] **Puntos de corte de marca.** `11` no los fija. **Supuesto (ADR-3C-1-03):**
+  `sm 480 · md 768 · lg 1024 · xl 1280` como DATO (`--ui-bp-*`), sin publicarlos como variantes de
+  Tailwind para no tener dos escalas (`md:` y `ui-md:`) en el mismo código; `lg` = 1024 es además la
+  anchura de referencia de la escala tipográfica. ¿De acuerdo, o se quiere una escala propia
+  sustituyendo a la de Tailwind cuando el bloque 3 migre el chrome?
+- [Fase 3-C · 3c-1] **Capas (z-index).** Tampoco estaban escritas. **Supuesto:** `base 0 · elevado 10 ·
+  pegajoso 20 · hoja 30 · dialogo 40 · toast 50`, con el aviso por encima del diálogo. ¿Hay algún caso
+  del producto (el lienzo del editor, un panel flotante) que necesite otra capa?
+- [Fase 3-C · 3c-1] **Radio de tarjeta.** `11 §5` dice «14-24» sin elegir. **Supuesto (ADR-3C-1-03):**
+  `card` = 14 y `media`/bloques grandes = 24, para que una rejilla de tarjetas no se vea blanda. Se
+  juzga en `/design/tokens`, sección «Espacio y forma».
+- [Fase 3-C · 3c-1] **Sombra de color: 6 px o 8 px.** `moodboard/styles.css` usa `6px 6px`, mientras
+  `11 §3.1` y `handoffs/3c-0.md §4` dicen `8px 8px`. **Supuesto:** 8 px (las dos fuentes normativas).
+  Si el dueño prefiere el boceto, es un número en `espacio.ts` y regenerar.
+
+Sin resolver, heredado y NO tocado por este bloque: el emoji de `lib/i18n.ts` (`publicar.yaSeVe`) y
+`lucide-react` en el chrome siguen ahí; `handoffs/3c-0.md` los asigna al agente de iconos.

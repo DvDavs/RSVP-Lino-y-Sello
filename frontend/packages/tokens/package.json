@@ -11,7 +11,10 @@
     "./tailwind.css": "./generated/tailwind.css"
   },
   "scripts": {
-    "build": "tsc --noEmit",
+    "emit:css": "node scripts/emit-css.ts",
+    "verify-contrast": "node scripts/verify-contrast.ts",
+    "escalas": "node scripts/generar-escalas.ts",
+    "build": "node scripts/verify-contrast.ts && node scripts/emit-css.ts && tsc --noEmit",
     "test": "vitest run --coverage",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"

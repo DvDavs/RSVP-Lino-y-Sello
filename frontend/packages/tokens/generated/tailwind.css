@@ -1,0 +1,145 @@
+/* GENERADO por `pnpm run emit:css` (scripts/emit-css.ts) desde src/*.ts — NO EDITAR A MANO.
+
+   Preset de Tailwind 4 (CSS-first). Se importa DESPUÉS de `@import "tailwindcss"` y de
+   `@invitaciones/tokens/tokens.css`:
+
+     @import "tailwindcss";
+     @import "@invitaciones/tokens/tokens.css";
+     @import "@invitaciones/tokens/tailwind.css";
+
+   SOLO tokens semánticos. Los pasos de escala (--ui-primary-600) NO son utilidades a propósito
+   (11 §8.2): existen como variable para las formas y la galería, y así ningún componente elige
+   un paso a mano. Las duraciones tampoco: Tailwind 4 no tiene espacio de nombres `--duration-*`,
+   se usan como `duration-[var(--ui-dur-2)]` o desde CSS. */
+
+@theme inline {
+  /* Color: los 46 roles de 11 §1.3. */
+  --color-ui-surface: var(--ui-surface);
+  --color-ui-surface-raised: var(--ui-surface-raised);
+  --color-ui-surface-alt: var(--ui-surface-alt);
+  --color-ui-ink: var(--ui-ink);
+  --color-ui-ink-muted: var(--ui-ink-muted);
+  --color-ui-ink-placeholder: var(--ui-ink-placeholder);
+  --color-ui-border: var(--ui-border);
+  --color-ui-divider: var(--ui-divider);
+  --color-ui-primary: var(--ui-primary);
+  --color-ui-on-primary: var(--ui-on-primary);
+  --color-ui-primary-hover: var(--ui-primary-hover);
+  --color-ui-primary-soft: var(--ui-primary-soft);
+  --color-ui-on-primary-soft: var(--ui-on-primary-soft);
+  --color-ui-primary-bright: var(--ui-primary-bright);
+  --color-ui-link: var(--ui-link);
+  --color-ui-accent: var(--ui-accent);
+  --color-ui-on-accent: var(--ui-on-accent);
+  --color-ui-accent-soft: var(--ui-accent-soft);
+  --color-ui-on-accent-soft: var(--ui-on-accent-soft);
+  --color-ui-success: var(--ui-success);
+  --color-ui-on-success: var(--ui-on-success);
+  --color-ui-success-text: var(--ui-success-text);
+  --color-ui-success-soft: var(--ui-success-soft);
+  --color-ui-on-success-soft: var(--ui-on-success-soft);
+  --color-ui-danger: var(--ui-danger);
+  --color-ui-on-danger: var(--ui-on-danger);
+  --color-ui-danger-text: var(--ui-danger-text);
+  --color-ui-danger-soft: var(--ui-danger-soft);
+  --color-ui-on-danger-soft: var(--ui-on-danger-soft);
+  --color-ui-warning: var(--ui-warning);
+  --color-ui-on-warning: var(--ui-on-warning);
+  --color-ui-warning-text: var(--ui-warning-text);
+  --color-ui-warning-soft: var(--ui-warning-soft);
+  --color-ui-on-warning-soft: var(--ui-on-warning-soft);
+  --color-ui-info: var(--ui-info);
+  --color-ui-on-info: var(--ui-on-info);
+  --color-ui-info-text: var(--ui-info-text);
+  --color-ui-info-soft: var(--ui-info-soft);
+  --color-ui-on-info-soft: var(--ui-on-info-soft);
+  --color-ui-focus: var(--ui-focus);
+  --color-ui-support-1: var(--ui-support-1);
+  --color-ui-support-1-soft: var(--ui-support-1-soft);
+  --color-ui-support-1-deep: var(--ui-support-1-deep);
+  --color-ui-support-2: var(--ui-support-2);
+  --color-ui-support-2-soft: var(--ui-support-2-soft);
+  --color-ui-support-2-deep: var(--ui-support-2-deep);
+
+  /* Forma. */
+  --radius-ui-control: var(--ui-radius-control);
+  --radius-ui-card: var(--ui-radius-card);
+  --radius-ui-media: var(--ui-radius-media);
+  --radius-ui-hero: var(--ui-radius-hero);
+  --radius-ui-pill: var(--ui-radius-pill);
+  --shadow-ui-1: var(--ui-shadow-1);
+  --shadow-ui-2: var(--ui-shadow-2);
+  --shadow-ui-color: var(--ui-shadow-color);
+  --container-ui-page: var(--ui-container-max);
+
+  /* Tipografía: familia por voz y escala con su interlineado, tracking y peso. */
+  --font-ui-display: var(--ui-font-display);
+  --font-ui-text: var(--ui-font-text);
+  --font-ui-label: var(--ui-font-label);
+  --text-ui-display-2xl: var(--ui-text-display-2xl);
+  --text-ui-display-2xl--line-height: var(--ui-leading-display-2xl);
+  --text-ui-display-2xl--letter-spacing: var(--ui-tracking-display-2xl);
+  --text-ui-display-2xl--font-weight: var(--ui-weight-display-2xl);
+  --text-ui-display-xl: var(--ui-text-display-xl);
+  --text-ui-display-xl--line-height: var(--ui-leading-display-xl);
+  --text-ui-display-xl--letter-spacing: var(--ui-tracking-display-xl);
+  --text-ui-display-xl--font-weight: var(--ui-weight-display-xl);
+  --text-ui-display-lg: var(--ui-text-display-lg);
+  --text-ui-display-lg--line-height: var(--ui-leading-display-lg);
+  --text-ui-display-lg--letter-spacing: var(--ui-tracking-display-lg);
+  --text-ui-display-lg--font-weight: var(--ui-weight-display-lg);
+  --text-ui-display-md: var(--ui-text-display-md);
+  --text-ui-display-md--line-height: var(--ui-leading-display-md);
+  --text-ui-display-md--letter-spacing: var(--ui-tracking-display-md);
+  --text-ui-display-md--font-weight: var(--ui-weight-display-md);
+  --text-ui-display-sm: var(--ui-text-display-sm);
+  --text-ui-display-sm--line-height: var(--ui-leading-display-sm);
+  --text-ui-display-sm--letter-spacing: var(--ui-tracking-display-sm);
+  --text-ui-display-sm--font-weight: var(--ui-weight-display-sm);
+  --text-ui-heading-lg: var(--ui-text-heading-lg);
+  --text-ui-heading-lg--line-height: var(--ui-leading-heading-lg);
+  --text-ui-heading-lg--letter-spacing: var(--ui-tracking-heading-lg);
+  --text-ui-heading-lg--font-weight: var(--ui-weight-heading-lg);
+  --text-ui-heading-md: var(--ui-text-heading-md);
+  --text-ui-heading-md--line-height: var(--ui-leading-heading-md);
+  --text-ui-heading-md--letter-spacing: var(--ui-tracking-heading-md);
+  --text-ui-heading-md--font-weight: var(--ui-weight-heading-md);
+  --text-ui-heading-sm: var(--ui-text-heading-sm);
+  --text-ui-heading-sm--line-height: var(--ui-leading-heading-sm);
+  --text-ui-heading-sm--letter-spacing: var(--ui-tracking-heading-sm);
+  --text-ui-heading-sm--font-weight: var(--ui-weight-heading-sm);
+  --text-ui-text-lg: var(--ui-text-text-lg);
+  --text-ui-text-lg--line-height: var(--ui-leading-text-lg);
+  --text-ui-text-lg--letter-spacing: var(--ui-tracking-text-lg);
+  --text-ui-text-lg--font-weight: var(--ui-weight-text-lg);
+  --text-ui-text-md: var(--ui-text-text-md);
+  --text-ui-text-md--line-height: var(--ui-leading-text-md);
+  --text-ui-text-md--letter-spacing: var(--ui-tracking-text-md);
+  --text-ui-text-md--font-weight: var(--ui-weight-text-md);
+  --text-ui-text-sm: var(--ui-text-text-sm);
+  --text-ui-text-sm--line-height: var(--ui-leading-text-sm);
+  --text-ui-text-sm--letter-spacing: var(--ui-tracking-text-sm);
+  --text-ui-text-sm--font-weight: var(--ui-weight-text-sm);
+  --text-ui-text-xs: var(--ui-text-text-xs);
+  --text-ui-text-xs--line-height: var(--ui-leading-text-xs);
+  --text-ui-text-xs--letter-spacing: var(--ui-tracking-text-xs);
+  --text-ui-text-xs--font-weight: var(--ui-weight-text-xs);
+  --text-ui-label-lg: var(--ui-text-label-lg);
+  --text-ui-label-lg--line-height: var(--ui-leading-label-lg);
+  --text-ui-label-lg--letter-spacing: var(--ui-tracking-label-lg);
+  --text-ui-label-lg--font-weight: var(--ui-weight-label-lg);
+  --text-ui-label-md: var(--ui-text-label-md);
+  --text-ui-label-md--line-height: var(--ui-leading-label-md);
+  --text-ui-label-md--letter-spacing: var(--ui-tracking-label-md);
+  --text-ui-label-md--font-weight: var(--ui-weight-label-md);
+  --text-ui-label-sm: var(--ui-text-label-sm);
+  --text-ui-label-sm--line-height: var(--ui-leading-label-sm);
+  --text-ui-label-sm--letter-spacing: var(--ui-tracking-label-sm);
+  --text-ui-label-sm--font-weight: var(--ui-weight-label-sm);
+
+  /* Movimiento: curvas con nombre. */
+  --ease-ui-out: var(--ui-ease-out);
+  --ease-ui-in-out: var(--ui-ease-in-out);
+  --ease-ui-spring: var(--ui-ease-spring);
+  --ease-ui-linear: var(--ui-ease-linear);
+}
