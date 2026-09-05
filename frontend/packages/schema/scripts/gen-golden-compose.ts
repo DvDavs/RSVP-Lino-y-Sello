@@ -21,6 +21,7 @@ import {
   textSpec, richTextSpec, listTextSpec, imageSpec, audioSpec, dateSpec, timeSpec, dateTimeRangeSpec,
   linkSpec, locationSpec, choiceSpec, booleanSpec, personSpec, groupSpec, sectionSpec,
   themeFixture, manifestFixture, defaultsFixture, documentFixture, loc,
+  richTextValueMarcado,
   textValue, richTextValue, listTextValue, imageValue, audioValue, dateValue, timeValue,
   dateTimeRangeValue, linkValue, locationValue, choiceValue, booleanValue, personValue,
   groupItem, groupValue, ulid, assetId,
@@ -363,6 +364,53 @@ caso("kinds-los-trece-escalares",
       "k.boolean": booleanValue(true),
       "k.person": personValue("Ana Ruiz", "madrina"),
       "k.personSinNota": personValue("Luis Paz"),
+    },
+  }),
+  NEGOCIO_BASE, ASSETS, "es-MX");
+
+// ---------------------------------------------------------------------------------------------
+// H-ADV-01 — `richText` CON MARCAS. Hasta esta revisión `marks` sólo aparecía en
+// `golden/blocks/richText.cases.json`, que es un fichero de casos de ESQUEMA: se valida con Zod y
+// con el JSON Schema, y **nunca pasa por `DomainJson.encode`**. Ningún golden de documento —los dos
+// de `golden/templates/`, los 17 de `golden/compose/`, los 51 de `golden/operations/`— llevaba una
+// sola marca, así que el codificador Kotlin de `RichSpan` podía estar roto (lo estaba: `500
+// TPL_INTERNAL` al teclear negrita) con las 2 390 pruebas en verde. Este caso cierra el lado
+// «documento compuesto»; `gen-golden-operations.ts` cierra el lado «reductor».
+// ---------------------------------------------------------------------------------------------
+const mMarcas = manifestFixture([
+  sectionSpec("story", "story", [
+    richTextSpec("story.body", "storyBody"),
+    richTextSpec("story.porDefecto", "sectionIntro"),
+  ]),
+]);
+const pkgMarcas: TemplatePackage = {
+  manifest: mMarcas, theme: temaR1,
+  defaults: defaultsFixture(mMarcas, {
+    // También en el escalón `default` (R2): el codificador recorre igual los valores que no puso
+    // la usuaria, así que el defecto era alcanzable sin que nadie editara nada.
+    "story.porDefecto": richTextValueMarcado([[{ text: "Nos casamos" }, { text: " por fin", marks: ["italic"] }]]),
+  }),
+};
+
+caso("richtext-marcas-negrita-cursiva-y-enlace",
+  "H-ADV-01: `RichSpan` con `marks:[\"bold\"]`, `marks:[\"italic\"]`, las dos marcas a la vez y un span con `href` — exactamente lo que emite `apps/web/lib/rich-text.ts` al teclear `**negrita**`, `_cursiva_` y `[texto](url)`. Recorre el codificador de documento por los dos escalones (usuario y default) y por los dos lados (TypeScript y Kotlin)",
+  pkgMarcas,
+  documentFixture(mMarcas, temaR1, {
+    content: {
+      "story.body": richTextValueMarcado([
+        [
+          { text: "Te queremos " },
+          { text: "muchísimo", marks: ["bold"] },
+          { text: " de " },
+          { text: "verdad", marks: ["italic"] },
+          { text: "." },
+        ],
+        [
+          { text: "gritándolo", marks: ["bold", "italic"] },
+          { text: " y con " },
+          { text: "un enlace", href: "https://ejemplo.mx/mapa" },
+        ],
+      ]),
     },
   }),
   NEGOCIO_BASE, ASSETS, "es-MX");

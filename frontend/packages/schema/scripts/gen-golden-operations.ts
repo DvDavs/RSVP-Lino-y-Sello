@@ -20,8 +20,9 @@ import type { TemplatePackage } from "../src/compose.ts";
 import { applyBatch, applyOperation, type AssetMeta, type ReducerContext } from "../src/operations-reducer.ts";
 import { validateOperations } from "../src/operations-validate.ts";
 import {
-  textSpec, imageSpec, audioSpec, groupSpec, sectionSpec, themeFixture, manifestFixture,
-  defaultsFixture, documentFixture, textValue, imageValue, audioValue, groupItem, groupValue, ulid, assetId,
+  textSpec, richTextSpec, imageSpec, audioSpec, groupSpec, sectionSpec, themeFixture, manifestFixture,
+  defaultsFixture, documentFixture, textValue, richTextValueMarcado, imageValue, audioValue,
+  groupItem, groupValue, ulid, assetId,
 } from "./fixtures.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
@@ -41,6 +42,9 @@ const manifest: TemplateManifest = manifestFixture([
     imageSpec("cover.image", "coverImage", { aspect: "square", maxBytes: 100_000 }),
     textSpec("cover.fixed", "coverSubtitle", { source: "fixed" }),
     audioSpec("cover.music", "backgroundMusic", { maxBytes: 100_000 }),
+    // H-ADV-01: sin un bloque `richText` en el fixture no había forma de meter `marks` por el
+    // reductor, que es el camino real del editor (`POST …/document/operations`).
+    richTextSpec("cover.story", "storyBody"),
   ], { variants: ["default", "alt"], required: true }),
   sectionSpec("event", "event", [
     groupSpec("event.cards", "eventCards", [
@@ -144,6 +148,26 @@ const files: Record<string, () => OpCase[]> = {
     ocase("asset correcto: pasa las tres comprobaciones", "valid-shape", { op: "setBlock", blockId: "cover.image", value: imageValue(ASSET_OK) }, true),
     ocase("asset que excede audio.maxBytes (X-06)", "invalid-manifest", { op: "setBlock", blockId: "cover.music", value: audioValue(ASSET_SONIDO_GRANDE) }, true),
     ocase("asset de audio dentro de audio.maxBytes", "valid-shape", { op: "setBlock", blockId: "cover.music", value: audioValue(ASSET_SONIDO) }, true),
+    // H-ADV-01 de `bitacora/3-adv.md`: `marks` sólo vivía en `golden/blocks/richText.cases.json`,
+    // un fichero de casos de ESQUEMA que nunca pasa por el codificador de documento. Este caso mete
+    // negrita, cursiva, las dos juntas y un `href` por el reductor, así que el `doc` resultante de
+    // `reducerResult` obliga a los dos lados a codificar un `RichSpan` con marcas.
+    ocase("richText con marks: negrita, cursiva y enlace (H-ADV-01)", "valid-shape", {
+      op: "setBlock", blockId: "cover.story",
+      value: richTextValueMarcado([
+        [
+          { text: "Te queremos " },
+          { text: "muchísimo", marks: ["bold"] },
+          { text: " de " },
+          { text: "verdad", marks: ["italic"] },
+        ],
+        [
+          { text: "gritándolo", marks: ["bold", "italic"] },
+          { text: " y con " },
+          { text: "un enlace", href: "https://ejemplo.mx/mapa" },
+        ],
+      ]),
+    }, true),
   ],
   clearBlock: () => [
     ocase("forma válida", "valid-shape", { op: "clearBlock", blockId: "cover.title" }, true),

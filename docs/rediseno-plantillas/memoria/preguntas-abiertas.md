@@ -300,6 +300,15 @@ decidir, para que el dueño no tenga que leerlas todas para encontrar las suyas.
    cuarentena documentada (`// QUARANTINE`, `06 §8.2.6`) en la propia prueba, que verifica lo que sí
    se controla (cabeceras, cero violaciones de estilo) y avisa con `console.warn` en cada corrida sin
    ponerse en rojo. ¿Quién depura el *bundle* sin minificar para confirmar la causa exacta?
+   > **CERRADA en 3-10 (H-ADV-03, ADR-3-10-02).** Se depuró: la causa NO era una segunda copia de
+   > `zod` ni una instancia de módulo separada. Turbopack **funde** `packages/schema/src/common.ts`
+   > con el grupo de módulos de Zod y lo evalúa **al cargar el chunk**, antes de que corra el cuerpo
+   > de `canvas-protocol.ts`; `LocalizedText` (el primer `z.object` del paquete) se construía con
+   > `jitless` sin poner. Medido con la pila real en Chromium envolviendo `Function` con un `Proxy`
+   > en un `addInitScript`: `module evaluation → Module.object → new ZodObject → get value →
+   > new Function`, en el chunk de Zod. Arreglo: `common.ts` —la raíz del grafo del paquete—
+   > importa `./canvas-runtime.ts` como su primera dependencia. Medido después: `window.__cspViolations
+   > = []` y **cero** llamadas a `Function`. La CSP no se tocó.
 4. **`noUncheckedIndexedAccess: true` (04 §2 lo pide para `tsconfig.base.json`) rompe el typecheck de
    `packages/schema`** — verificado: `tsc` desde `apps/web` (que consume `.ts` fuente de
    `@invitaciones/schema`, no `.d.ts` compilados) hereda el *flag* y produce errores nuevos en

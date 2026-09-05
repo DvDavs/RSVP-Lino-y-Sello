@@ -262,12 +262,15 @@ describe("canvas-protocol · ADR-005 y §3: el archivo no contamina el contrato 
     expect(fuente).not.toMatch(/\.(refine|superRefine|transform)\s*\(/);
   });
 
+  // `canvas-runtime.ts` SÍ entra en el grafo del índice desde 3-10 (`common.ts` lo importa el
+  // primero, H-ADV-03/ADR-3-10-02): son dos líneas de configuración de Zod, no protocolo, y no
+  // exportan ningún esquema — el contrato con Kotlin lo fija `canvas-protocol.ts`, que sigue fuera.
   it("index.ts NO reexporta canvas-protocol y emit-json-schema.ts no lo importa", async () => {
     const fs = await import("node:fs");
     const index = fs.readFileSync(new URL("../src/index.ts", import.meta.url), "utf8");
     const emisor = fs.readFileSync(new URL("../scripts/emit-json-schema.ts", import.meta.url), "utf8");
-    expect(index).not.toMatch(/canvas-protocol|canvas-runtime/);
-    expect(emisor).not.toMatch(/canvas-protocol|canvas-runtime/);
+    expect(index).not.toMatch(/canvas-protocol/);
+    expect(emisor).not.toMatch(/canvas-protocol/);
   });
 
   it("package.json expone el entrypoint separado `./canvas`", async () => {

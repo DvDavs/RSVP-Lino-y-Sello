@@ -94,6 +94,21 @@
             "constraints": {
               "maxBytes": 100000
             }
+          },
+          {
+            "id": "cover.story",
+            "role": "storyBody",
+            "label": {
+              "es-MX": "cover.story"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "richText",
+            "constraints": {
+              "maxLength": 8000
+            }
           }
         ]
       },

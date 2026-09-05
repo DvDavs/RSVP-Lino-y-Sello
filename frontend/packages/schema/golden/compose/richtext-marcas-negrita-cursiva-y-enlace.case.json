@@ -1,0 +1,410 @@
+{
+  "name": "richtext-marcas-negrita-cursiva-y-enlace",
+  "descripcion": "H-ADV-01: `RichSpan` con `marks:[\"bold\"]`, `marks:[\"italic\"]`, las dos marcas a la vez y un span con `href` — exactamente lo que emite `apps/web/lib/rich-text.ts` al teclear `**negrita**`, `_cursiva_` y `[texto](url)`. Recorre el codificador de documento por los dos escalones (usuario y default) y por los dos lados (TypeScript y Kotlin)",
+  "manifest": {
+    "manifestVersion": 1,
+    "slug": "fixture-tpl",
+    "version": "1.0.0",
+    "name": {
+      "es-MX": "Plantilla de prueba"
+    },
+    "eventKinds": [
+      "generic"
+    ],
+    "minPlanTier": 1,
+    "locales": [
+      "es-MX"
+    ],
+    "capabilities": [],
+    "sections": [
+      {
+        "key": "story",
+        "type": "story",
+        "title": {
+          "es-MX": "story"
+        },
+        "variants": [
+          "default"
+        ],
+        "defaultVariant": "default",
+        "required": false,
+        "defaultVisible": true,
+        "blocks": [
+          {
+            "id": "story.body",
+            "role": "storyBody",
+            "label": {
+              "es-MX": "story.body"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "richText",
+            "constraints": {
+              "maxLength": 8000
+            }
+          },
+          {
+            "id": "story.porDefecto",
+            "role": "sectionIntro",
+            "label": {
+              "es-MX": "story.porDefecto"
+            },
+            "required": false,
+            "editable": true,
+            "source": "user",
+            "aiEditable": true,
+            "type": "richText",
+            "constraints": {
+              "maxLength": 8000
+            }
+          }
+        ]
+      }
+    ],
+    "assets": [],
+    "migrationsFrom": []
+  },
+  "theme": {
+    "palettes": [
+      {
+        "id": "olive",
+        "name": {
+          "es-MX": "Olivo"
+        },
+        "tokens": {
+          "bg": "#FFFFFF",
+          "surface": "#F5F5F0",
+          "ink": "#222222",
+          "accent": "#556B2F",
+          "accentInk": "#FFFFFF",
+          "muted": "#999999"
+        }
+      }
+    ],
+    "fontSets": [
+      {
+        "id": "clasica",
+        "name": {
+          "es-MX": "Clásica"
+        },
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    ],
+    "defaultPaletteId": "olive",
+    "defaultFontSetId": "clasica"
+  },
+  "defaults": {
+    "templateSlug": "fixture-tpl",
+    "templateVersion": "1.0.0",
+    "content": {
+      "story.porDefecto": {
+        "kind": "richText",
+        "doc": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Nos casamos"
+                },
+                {
+                  "type": "text",
+                  "text": " por fin",
+                  "marks": [
+                    "italic"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "documento": {
+    "schemaVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica"
+    },
+    "structure": {
+      "sections": [
+        {
+          "key": "story",
+          "variant": "default",
+          "visible": true
+        }
+      ]
+    },
+    "content": {
+      "story.body": {
+        "kind": "richText",
+        "doc": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Te queremos "
+                },
+                {
+                  "type": "text",
+                  "text": "muchísimo",
+                  "marks": [
+                    "bold"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " de "
+                },
+                {
+                  "type": "text",
+                  "text": "verdad",
+                  "marks": [
+                    "italic"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": "."
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "gritándolo",
+                  "marks": [
+                    "bold",
+                    "italic"
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " y con "
+                },
+                {
+                  "type": "text",
+                  "text": "un enlace",
+                  "href": "https://ejemplo.mx/mapa"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "attic": {},
+    "meta": {
+      "locale": "es-MX"
+    }
+  },
+  "business": {
+    "invitationId": 7001,
+    "date": "2027-03-08",
+    "time": "19:05",
+    "hashtag": "#AnaYLuis",
+    "coverPhotoUrl": "https://cdn.invitaciones.evolutiondev.mx/legacy/portada.jpg",
+    "childrenAllowed": false,
+    "youngAllowed": true,
+    "eventKind": "wedding",
+    "planTier": 2,
+    "timezone": "America/Mexico_City"
+  },
+  "assets": {
+    "as_01J8PHATA1AAAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/uno.webp",
+      "width": 1200,
+      "height": 800
+    },
+    "as_01J8PHATA2AAAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/dos.webp"
+    },
+    "as_01J8SANADA1AAAAAAAAAAAAAAA": {
+      "url": "https://cdn.invitaciones.evolutiondev.mx/a/tres.mp3"
+    }
+  },
+  "locale": "es-MX",
+  "compuesto": {
+    "composedVersion": 1,
+    "template": {
+      "slug": "fixture-tpl",
+      "version": "1.0.0"
+    },
+    "locale": "es-MX",
+    "theme": {
+      "paletteId": "olive",
+      "fontSetId": "clasica",
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#F5F5F0",
+        "ink": "#222222",
+        "accent": "#556B2F",
+        "accentInk": "#FFFFFF",
+        "muted": "#999999"
+      },
+      "fonts": {
+        "heading": {
+          "family": "Playfair Display",
+          "weights": [
+            400,
+            700
+          ],
+          "source": "bundled"
+        },
+        "body": {
+          "family": "Lora",
+          "weights": [
+            400
+          ],
+          "source": "bundled"
+        }
+      }
+    },
+    "sections": [
+      {
+        "key": "story",
+        "type": "story",
+        "variant": "default",
+        "visible": true,
+        "title": "story",
+        "blocks": [
+          {
+            "id": "story.body",
+            "role": "storyBody",
+            "type": "richText",
+            "label": "story.body",
+            "provenance": "user",
+            "value": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Te queremos "
+                      },
+                      {
+                        "type": "text",
+                        "text": "muchísimo",
+                        "marks": [
+                          "bold"
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " de "
+                      },
+                      {
+                        "type": "text",
+                        "text": "verdad",
+                        "marks": [
+                          "italic"
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": "."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "gritándolo",
+                        "marks": [
+                          "bold",
+                          "italic"
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "text": " y con "
+                      },
+                      {
+                        "type": "text",
+                        "text": "un enlace",
+                        "href": "https://ejemplo.mx/mapa"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "id": "story.porDefecto",
+            "role": "sectionIntro",
+            "type": "richText",
+            "label": "story.porDefecto",
+            "provenance": "default",
+            "value": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Nos casamos"
+                      },
+                      {
+                        "type": "text",
+                        "text": " por fin",
+                        "marks": [
+                          "italic"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "reporte": {
+    "missingRequired": [],
+    "stillDefault": [],
+    "orphanContent": [],
+    "orphanSections": [],
+    "invalidValues": [],
+    "themeFallback": null
+  }
+}
