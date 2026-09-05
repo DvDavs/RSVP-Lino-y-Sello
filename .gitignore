@@ -86,3 +86,5 @@ frontend/apps/web/e2e/.auth-cache.json
 
 # Caché/daemon de turbo (fase 3-C: aparece en la raíz al ejecutar turbo desde worktrees)
 .turbo/
+# Fase 3-C (3C-2): los .woff2 de apps/web/public/fonts los copia packages/ui en su build (scripts/copiar-fuentes-publicas.ts)
+frontend/apps/web/public/fonts/

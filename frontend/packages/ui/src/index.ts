@@ -3,3 +3,6 @@ export const PAQUETE = "@invitaciones/ui" as const;
 
 // Biblioteca de formas (3C-4). Ver `src/shapes/index.ts`.
 export * from "./shapes/index.ts";
+// Fuentes autoalojadas (3C-2, `11 §2.1-2.4`): manifiesto y rutas de precarga de la display. El CSS
+// (`@font-face`, utilidades tipográficas) se consume aparte, vía `@invitaciones/ui/estilos.css`.
+export * from "./fonts/preload.ts";

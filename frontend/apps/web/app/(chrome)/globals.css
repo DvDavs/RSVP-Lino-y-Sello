@@ -21,6 +21,16 @@
 @import "@fontsource-variable/bricolage-grotesque/wght.css";
 @import "@fontsource-variable/outfit/wght.css";
 
+/* Sistema de diseño nuevo (fase 3-C, bloque 1, 3C-2): Fraunces + Onest + Red Hat Mono autoalojadas,
+   tokens `--ui-*` y utilidades `display-*`/`heading-*`/`text-*`/`label-*`/`.prose`
+   (`@invitaciones/ui/estilos.css` → `fonts/fonts.css` + `styles/typography.css`,
+   `11 §2.2`). Aditivo a propósito: los tres `@import` de arriba (inter/bricolage/outfit) NO se
+   quitan aquí — los retira el bloque 3 cuando migre el chrome entero a esta tipografía; hasta
+   entonces conviven porque nada de este bloque toca las utilidades `text-ui-*`/`font-ui-*` de
+   `arte-chrome.md` que ya consume el resto del chrome. Ver `/design/tipografia` para la escala.
+   `--color-ui-*` (más abajo) es el chrome VIEJO — nunca `--ui-*` sin `color-`, el prefijo nuevo. */
+@import "@invitaciones/ui/estilos.css";
+
 @theme {
   /* 1. Color — arte-chrome.md §1 y "Tokens propuestos" (valores ya corregidos para AA) */
   --color-ui-bg: #ffffff;
