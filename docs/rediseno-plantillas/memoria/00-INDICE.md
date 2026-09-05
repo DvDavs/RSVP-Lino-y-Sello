@@ -39,6 +39,12 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
   `modules/auth`, área que el dueño acotó a I-02 con un «NO tocar nada más», así que **necesita su
   autorización expresa**; el arreglo propuesto es de una línea y está en `preguntas-abiertas.md`.
   Rama: `claude/fase-3b-cierre-orquestacion-z0pd4g`.
+- **Fase 3-C — sistema de diseño e identidad visual del producto: EN CURSO (2026-09-05).** Prompt en
+  `prompts/fase-3c-identidad-visual.md`. Rama de trabajo impuesta por el entorno:
+  `claude/fase-3c-identidad-visual-wqg0d2`, creada desde `claude/fase-3b-cierre-orquestacion-z0pd4g`
+  en `62e3c84` (fase 3 cerrada en `82128f5` + reglas de identidad visual y el prompt 3-C). Empieza por
+  el bloque -1 (N-01 autorizada por el dueño y N-02) y sigue con la dirección de arte (bloque 0),
+  cimientos, componentes, producto y cierre. Estado por bloque en `tablero.md`.
 - **Fase siguiente: 4 — kit de autor de plantillas.** Arranca leyendo `handoffs/3-para-fase-4.md`,
   y antes de nada resuelve N-01 con el dueño.
 - **Rama de la fase 2: `claude/fase-2-backend-orchestration-ksyuzi`**, creada desde `claude/agent-network-invitation-41nx5y` en `88238b2` (fase 1 cerrada en `4681b2c` + el prompt de la fase 2). El entorno de esta sesión obliga a trabajar sobre una rama propia por fase; `contratos.md §1` y `brief-comun.md` siguen nombrando la rama de la fase 1, que es la base, no la de trabajo actual.
