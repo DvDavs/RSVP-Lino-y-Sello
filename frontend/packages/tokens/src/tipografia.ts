@@ -11,13 +11,18 @@ export type Voz = (typeof VOCES)[number];
 
 /**
  * Familias con su pila de respaldo. El primer nombre es el que registra Fontsource para la fuente
- * variable; el segundo, el estático por si algún día se sirve así; después, respaldo del sistema
- * (solo respaldo: la identidad la ponen Fraunces, Onest y Red Hat Mono, `11 §2.5`).
+ * variable; el segundo, el estático por si algún día se sirve así (es el nombre real que declara
+ * `packages/ui/src/fonts/fonts.css`); justo detrás, la familia de RESPALDO con metric override
+ * (`ascent-override`/`descent-override`/`line-gap-override`/`size-adjust` calculados en
+ * `packages/ui/scripts/metric-override.ts`, `11 §2.4`, `ADR-3C-0-02`) para que el `swap` de
+ * `font-display` no salte el layout (CLS) mientras carga la fuente real; por último, respaldo del
+ * sistema sin ajustar (por si el navegador tampoco tiene Georgia/Arial/Courier New instalada: solo
+ * respaldo, la identidad la ponen Fraunces, Onest y Red Hat Mono, `11 §2.5`).
  */
 export const FAMILIAS: Readonly<Record<Voz, string>> = {
-  display: '"Fraunces Variable", "Fraunces", Georgia, "Times New Roman", serif',
-  text: '"Onest Variable", "Onest", system-ui, -apple-system, "Segoe UI", sans-serif',
-  label: '"Red Hat Mono Variable", "Red Hat Mono", ui-monospace, "SFMono-Regular", monospace',
+  display: '"Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif',
+  text: '"Onest Variable", "Onest", "Onest Fallback", system-ui, -apple-system, "Segoe UI", sans-serif',
+  label: '"Red Hat Mono Variable", "Red Hat Mono", "Red Hat Mono Fallback", ui-monospace, "SFMono-Regular", monospace',
 } as const;
 
 /** Pesos con nombre. El cuerpo va a 450 (no 400): a 400 Onest queda fina sobre hueso (`11 §2.2`). */

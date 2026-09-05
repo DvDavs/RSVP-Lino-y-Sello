@@ -103,9 +103,9 @@
   --ui-neutral-950: #150e07;
 
   /* Tipografía: tres voces y escala modular (11 §2.2). Las fuentes las instala packages/ui. */
-  --ui-font-display: "Fraunces Variable", "Fraunces", Georgia, "Times New Roman", serif;
-  --ui-font-text: "Onest Variable", "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --ui-font-label: "Red Hat Mono Variable", "Red Hat Mono", ui-monospace, "SFMono-Regular", monospace;
+  --ui-font-display: "Fraunces Variable", "Fraunces", "Fraunces Fallback", Georgia, "Times New Roman", serif;
+  --ui-font-text: "Onest Variable", "Onest", "Onest Fallback", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ui-font-label: "Red Hat Mono Variable", "Red Hat Mono", "Red Hat Mono Fallback", ui-monospace, "SFMono-Regular", monospace;
   --ui-weight-texto: 450;
   --ui-weight-texto-fuerte: 650;
   --ui-weight-etiqueta: 500;

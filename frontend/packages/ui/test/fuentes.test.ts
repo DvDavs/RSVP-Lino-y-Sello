@@ -61,14 +61,25 @@ describe("fuentes autoalojadas — existencia y peso real (11 §2.3/§2.4)", () 
     expect(enCss, "un @font-face que no está en el manifiesto no se copia a public/fonts: 404").toEqual(enManifiesto);
   });
 
-  it("los seis @font-face de fonts.css llevan font-display: swap y unicode-range", () => {
+  it("los seis @font-face autoalojados (con url()) llevan font-display: swap y unicode-range", () => {
+    // Desde 3c-2b, fonts.css también trae 3 @font-face de RESPALDO (metric override, `11 §2.4`,
+    // `ADR-3C-0-02`): esos son `local()`, no descargan nada, así que no necesitan `swap` ni
+    // `unicode-range` (los cubre `test/metric-override.test.ts`). Aquí solo los 6 con `url()`.
     const css = readFileSync(path.join(RAIZ_UI, "src/fonts/fonts.css"), "utf8");
-    const reglas = [...css.matchAll(/@font-face\s*\{[^}]*\}/g)].map((m) => m[0]);
+    const reglas = [...css.matchAll(/@font-face\s*\{[^}]*\}/g)].map((m) => m[0]).filter((r) => /url\(/.test(r));
     expect(reglas).toHaveLength(FUENTES_AUTOALOJADAS.length);
     for (const regla of reglas) {
       expect(regla, `sin font-display: swap → texto invisible mientras carga:\n${regla}`).toMatch(/font-display:\s*swap/);
       expect(regla, `sin unicode-range → el navegador descarga subconjuntos que no usa:\n${regla}`).toMatch(/unicode-range:\s*U\+/);
     }
+  });
+
+  it("las 3 fuentes de respaldo (metric override) son local(), nunca cuentan como descarga", () => {
+    const css = readFileSync(path.join(RAIZ_UI, "src/fonts/fonts.css"), "utf8");
+    const reglas = [...css.matchAll(/@font-face\s*\{[^}]*\}/g)].map((m) => m[0]);
+    const respaldo = reglas.filter((r) => /Fallback/.test(r));
+    expect(respaldo).toHaveLength(3);
+    for (const regla of respaldo) expect(regla).not.toMatch(/url\(/);
   });
 
   it("cada ruta de RUTAS_PRECARGA corresponde a un fichero de origen existente", () => {

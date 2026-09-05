@@ -13,7 +13,8 @@
     "./fonts/fonts.css": "./src/fonts/fonts.css"
   },
   "scripts": {
-    "build": "node scripts/copiar-fuentes-publicas.ts && tsc --noEmit",
+    "build": "node scripts/copiar-fuentes-publicas.ts && node scripts/metric-override.ts && tsc --noEmit",
+    "metric-override": "node scripts/metric-override.ts",
     "test": "vitest run --coverage",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
@@ -29,6 +30,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@capsizecss/metrics": "4.2.0",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.7",

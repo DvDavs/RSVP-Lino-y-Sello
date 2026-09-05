@@ -342,6 +342,9 @@ importers:
         specifier: workspace:*
         version: link:../tokens
     devDependencies:
+      '@capsizecss/metrics':
+        specifier: 4.2.0
+        version: 4.2.0
       '@testing-library/jest-dom':
         specifier: 6.9.1
         version: 6.9.1
@@ -492,6 +495,9 @@ packages:
   '@bramus/specificity@2.4.2':
     resolution: {integrity: sha512-ctxtJ/eA+t+6q2++vj5j7FYX3nRu311q1wfYH3xjlLOsczhlhxAg2FWNUXhpGvAw3BWo1xBcvOV6/YLc2r5FJw==}
     hasBin: true
+
+  '@capsizecss/metrics@4.2.0':
+    resolution: {integrity: sha512-BkLX2NonSAVuHrStmxlRG/PVUxq4uQWeQGPY/G/4pi7GRQt/4A+7RzMWR8m85+0Tv7BsuBpR7JoniMS9QwuVRw==}
 
   '@csstools/color-helpers@6.1.1':
     resolution: {integrity: sha512-gLNsunvwf3mCi5u5o46/Z/JcJMnhbHSaZ69rkgPzNM3J4s8hWwpPUQB6/tt0EDFyCiWzxANlx+2LJwpYj4zS1w==}
@@ -5275,6 +5281,8 @@ snapshots:
   '@bramus/specificity@2.4.2':
     dependencies:
       css-tree: 3.2.1
+
+  '@capsizecss/metrics@4.2.0': {}
 
   '@csstools/color-helpers@6.1.1': {}
 
