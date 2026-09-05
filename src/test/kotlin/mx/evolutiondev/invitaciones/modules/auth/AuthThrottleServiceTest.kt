@@ -21,7 +21,10 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 
 /**
  * I-02 (H-ADV-05): límite de intentos y hash señuelo de `POST /auth/token`.
@@ -237,5 +240,59 @@ class AuthThrottleServiceTest {
         assertEquals("Las credenciales no coinciden con nuestros registros", inexistente.message)
         assertEquals(inexistente.message, existente.message)
         assertEquals(inexistente.message, apagado.message)
+    }
+
+    /**
+     * Hallazgo N-03 de la revisión adversarial de la fase 3-B: el límite por IP se saltaba entero
+     * rotando `X-Forwarded-For`, una cabecera que pone el CLIENTE. Medido contra el backend real:
+     * 25 intentos fallidos con la cabecera rotando dieron 25 `401` y **ningún** `429`; sin rotarla,
+     * el `429` llegaba en el 21.º. Con esto, el límite por IP que pidió el dueño no limitaba nada.
+     */
+    @Test
+    @DisplayName("N-03 · rotar X-Forwarded-For NO salta el límite por IP: la cabecera no se cree por defecto")
+    fun xffNoSeCree() {
+        val peticion = MockHttpServletRequest()
+        peticion.remoteAddr = "203.0.113.7"
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(peticion))
+        try {
+            val limitador = limitador()
+            // Veinte fallos, cada uno afirmando venir de una IP distinta. Antes del arreglo cada uno
+            // estrenaba contador; ahora los veinte caen en la dirección real del socket.
+            repeat(20) { i ->
+                peticion.addHeader("X-Forwarded-For", "198.51.100.$i")
+                limitador.registrarFallo("cuenta$i@example.test")
+            }
+            val bloqueo = assertFailsWith<DemasiadosIntentosException> {
+                limitador.comprobar("otra.cuenta@example.test")
+            }
+            assertEquals("Demasiados intentos. Espera unos minutos e inténtalo de nuevo.", bloqueo.message)
+        } finally {
+            RequestContextHolder.resetRequestAttributes()
+        }
+    }
+
+    /** Con un proxy de confianza declarado, la cabecera SÍ se usa: es el caso para el que existe. */
+    @Test
+    @DisplayName("N-03 · con confiar-en-x-forwarded-for=true la cabecera vuelve a mandar")
+    fun xffSeCreeSiSeDeclara() {
+        val peticion = MockHttpServletRequest()
+        peticion.remoteAddr = "203.0.113.7"
+        peticion.addHeader("X-Forwarded-For", "198.51.100.42")
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(peticion))
+        try {
+            val limitador = AuthThrottleService(
+                    passwordEncoder = encoder,
+                    maxFallosPorCuenta = 5,
+                    maxFallosPorIp = 2,
+                    ventanaMinutos = 15,
+                    maxEntradas = 50_000,
+                    confiarEnXff = true
+            )
+            limitador.registrarFallo("a@example.test")
+            limitador.registrarFallo("b@example.test")
+            assertFailsWith<DemasiadosIntentosException> { limitador.comprobar("c@example.test") }
+        } finally {
+            RequestContextHolder.resetRequestAttributes()
+        }
     }
 }

@@ -76,7 +76,16 @@ class AuthThrottleService(
         @Value("\${auth.token.throttle.max-fallos-por-cuenta:5}") private val maxFallosPorCuenta: Int = 5,
         @Value("\${auth.token.throttle.max-fallos-por-ip:20}") private val maxFallosPorIp: Int = 20,
         @Value("\${auth.token.throttle.ventana-minutos:15}") private val ventanaMinutos: Long = 15,
-        @Value("\${auth.token.throttle.max-entradas:50000}") private val maxEntradas: Int = 50_000
+        @Value("\${auth.token.throttle.max-entradas:50000}") private val maxEntradas: Int = 50_000,
+        /**
+         * ¿Se puede creer la cabecera `X-Forwarded-For`? **Por defecto NO**, y no es paranoia: la
+         * cabecera la pone el cliente, así que confiar en ella sin un proxy delante convierte el
+         * límite por IP en decoración —basta rotar el valor en cada intento— y además deja pegar a
+         * IP ajenas para bloquearlas. Sólo debe activarse cuando delante hay un proxy de confianza
+         * que la reescribe. Medido en la revisión adversarial de la fase 3-B: con la cabecera
+         * rotando, 25 intentos fallidos seguidos dieron 25 `401` y ningún `429`.
+         */
+        @Value("\${auth.token.throttle.confiar-en-x-forwarded-for:false}") private val confiarEnXff: Boolean = false
 ) {
 
     private val log = LoggerFactory.getLogger(AuthThrottleService::class.java)
@@ -193,10 +202,15 @@ class AuthThrottleService(
         val atributos = RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
                 ?: return "sin-peticion"
         val peticion = atributos.request
-        val reenviada = peticion.getHeader("X-Forwarded-For")
-        if (!reenviada.isNullOrBlank()) {
-            val primera = reenviada.substringBefore(',').trim()
-            if (primera.isNotEmpty()) return primera.take(64)
+        // La cabecera sólo se mira si alguien ha declarado que hay un proxy de confianza delante.
+        // Con `confiarEnXff = false` (el defecto) el contador va SIEMPRE contra la dirección real del
+        // socket, que el cliente no puede falsificar.
+        if (confiarEnXff) {
+            val reenviada = peticion.getHeader("X-Forwarded-For")
+            if (!reenviada.isNullOrBlank()) {
+                val primera = reenviada.substringBefore(',').trim()
+                if (primera.isNotEmpty()) return primera.take(64)
+            }
         }
         return (peticion.remoteAddr ?: "desconocida").take(64)
     }
