@@ -83,3 +83,6 @@ frontend/apps/web/e2e/.auth-cache.json
 # son artefactos contractuales (ADR-1R-D-08/D-09), no build output descartable.
 ### worktrees de sub-agentes (efímeros, no versionar) ###
 .claude/worktrees/
+
+# Caché/daemon de turbo (fase 3-C: aparece en la raíz al ejecutar turbo desde worktrees)
+.turbo/
