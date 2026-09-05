@@ -22,11 +22,11 @@ export const IconoNinos = forwardRef<SVGSVGElement, IconProps>(function IconoNin
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <rect x="5" y="7" width="14" height="12" rx="2.5" fill="var(--tono)"/><rect x="5" y="7" width="14" height="12" rx="2.5"/><path fill="currentColor" stroke="none" d="M12 9.3 L13 12 L15.8 12 L13.5 13.8 L14.3 16.6 L12 14.9 L9.7 16.6 L10.5 13.8 L8.2 12 L11 12 Z"/>
+      <path fill="var(--tono)" d="M12 3.2 C15.6 3.2 17.8 6 17.8 9.3 C17.8 12.7 15 15.5 12 15.5 C9 15.5 6.2 12.7 6.2 9.3 C6.2 6 8.4 3.2 12 3.2 Z"/><path d="M10.8 15.4 L12 17 L13.2 15.4"/><path d="M12 17 C12 18.5 10.2 18.7 10.2 20.2 C10.2 20.9 10.8 21.1 11.4 20.9"/>
     </svg>
   );
 });

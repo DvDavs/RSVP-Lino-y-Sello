@@ -22,11 +22,11 @@ export const IconoCopiar = forwardRef<SVGSVGElement, IconProps>(function IconoCo
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <rect x="8.5" y="8.5" width="12" height="12" rx="2.5" fill="var(--tono)"/><rect x="8.5" y="8.5" width="12" height="12" rx="2.5"/><rect x="3.5" y="3.5" width="12" height="12" rx="2.5"/>
+      <path fill="var(--tono)" stroke="none" d="M4.5 7.5 A2.5 2.5 0 0 1 7 5 H17 A2.5 2.5 0 0 1 19.5 7.5 V18 A2.5 2.5 0 0 1 17 20.5 H7 A2.5 2.5 0 0 1 4.5 18 Z"/><path d="M9 5 H7 A2.5 2.5 0 0 0 4.5 7.5 V18 A2.5 2.5 0 0 0 7 20.5 H17 A2.5 2.5 0 0 0 19.5 18 V7.5 A2.5 2.5 0 0 0 17 5 H15"/><path d="M9.5 5.5 A1.4 1.4 0 0 1 10.9 3.5 H13.1 A1.4 1.4 0 0 1 14.5 5.5 V6.4 H9.5 Z" fill="var(--ui-surface-raised)"/><path d="M8.5 11.5 H15.5 M8.5 15 H13"/>
     </svg>
   );
 });

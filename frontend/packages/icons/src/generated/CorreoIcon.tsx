@@ -22,11 +22,11 @@ export const IconoCorreo = forwardRef<SVGSVGElement, IconProps>(function IconoCo
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <path fill="var(--tono)" stroke="none" d="M3 8.5 L12 14 L21 8.5 V7.5 a2.5 2.5 0 0 0-2.5-2.5 H5.5 A2.5 2.5 0 0 0 3 7.5 Z"/><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 8.5 L12 14 L21 8.5"/>
+      <path fill="var(--tono)" stroke="none" d="M3 10 L12 4 L21 10 V18 A2 2 0 0 1 19 20 H5 A2 2 0 0 1 3 18 Z"/><path d="M3 10 L12 4 L21 10 V18 A2 2 0 0 1 19 20 H5 A2 2 0 0 1 3 18 Z"/><path d="M3 10 L11.2 15.6 A1.4 1.4 0 0 0 12.8 15.6 L21 10"/>
     </svg>
   );
 });

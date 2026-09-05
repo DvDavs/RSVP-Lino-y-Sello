@@ -22,7 +22,7 @@ export const IconoBuscar = forwardRef<SVGSVGElement, IconProps>(function IconoBu
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}

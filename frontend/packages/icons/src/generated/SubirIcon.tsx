@@ -22,7 +22,7 @@ export const IconoSubir = forwardRef<SVGSVGElement, IconProps>(function IconoSub
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}

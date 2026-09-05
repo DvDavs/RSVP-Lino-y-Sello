@@ -22,11 +22,11 @@ export const IconoCargando = forwardRef<SVGSVGElement, IconProps>(function Icono
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <path d="M12 3.5 A8.5 8.5 0 1 1 4.4 8.1"/><circle cx="12" cy="3.5" r="1.3" fill="var(--tono)" stroke="none"/>
+      <path d="M12 3.8 A8.2 8.2 0 1 1 4.7 8.26"/><circle cx="12" cy="3.8" r="1.3" fill="var(--tono)"/>
     </svg>
   );
 });

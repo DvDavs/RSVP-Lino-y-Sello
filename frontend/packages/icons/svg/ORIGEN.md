@@ -66,3 +66,19 @@ una fotografía llena).
 plantilla del moodboard no corre fuera de esa página. `sin-fotos.svg` y `error-generico.svg` son
 composiciones nuevas con la misma gramática (mismo sello de fondo, misma tarjeta de 84×68, misma
 sombra desplazada 7/7, mismo acento `chispa` en la esquina) descrita en `11 §4.3`.
+
+# Revisión de coherencia entre mitades (3c-rev-3, sobre la rama de fase ya integrada)
+
+Al comparar las dos mitades en `/design/iconos` (captura a 1440 y medida de tinta por icono en
+Chromium) se redibujaron 13 SVG. Detalle y cifras en `memoria/bitacora/3c-rev-3.md`.
+
+- `rsvp-confirmado.svg` **deja de ser copia literal del moodboard**: el original venía dentro de un
+  `<g transform="translate(12 12) scale(0.205) translate(-50 -50)">` con
+  `vector-effect="non-scaling-stroke"`, así que el trazo NO escalaba con el icono (a 48 px se veía a
+  la mitad de grosor que el resto, contra `11 §4.1`). Se horneó la transformación en las
+  coordenadas del `d` (factor 0,19 en vez de 0,205 para que el trazo real de 1,75 quepa en el margen
+  de 1,5) y se quitaron el `<g>` y el `vector-effect`. El dibujo del sello es el mismo; solo cambian
+  la escala y el sistema de coordenadas.
+- Redibujados de la mitad B por incoherencia óptica o de gramática: `pie`, `comunion`, `bautizo`,
+  `cargando`, `entrar`, `confirmar`, `rechazar`, `nota`, `aviso`, `ninos`, `copiar`, `correo`.
+  Ninguno de ellos estaba en la lista de copias literales del moodboard.

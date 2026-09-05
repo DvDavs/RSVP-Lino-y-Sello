@@ -22,11 +22,11 @@ export const IconoRechazar = forwardRef<SVGSVGElement, IconProps>(function Icono
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <rect x="4" y="4" width="3" height="9" rx="1.2" fill="var(--tono)"/><rect x="4" y="4" width="3" height="9" rx="1.2"/><path d="M7 13 L10.3 19.4 A1.6 1.6 0 0 0 13.3 18.4 L12.3 14 H18 A2 2 0 0 0 19.9 11.4 L18.2 5.4 A2 2 0 0 0 16.3 4 H7 Z"/>
+      <rect x="4" y="4" width="3" height="9" rx="1.2"/><path fill="var(--tono)" d="M7 13 L10.3 19.4 A1.6 1.6 0 0 0 13.3 18.4 L12.3 14 H18 A2 2 0 0 0 19.9 11.4 L18.2 5.4 A2 2 0 0 0 16.3 4 H7 Z"/>
     </svg>
   );
 });

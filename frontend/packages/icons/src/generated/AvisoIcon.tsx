@@ -22,11 +22,11 @@ export const IconoAviso = forwardRef<SVGSVGElement, IconProps>(function IconoAvi
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <path fill="var(--tono)" stroke="none" d="M12 3.8c.35 0 .68.2.86.52l8.4 14.9c.35.63-.1 1.4-.82 1.4H4.56c-.72 0-1.17-.77-.82-1.4l8.4-14.9c.18-.32.51-.52.86-.52Z"/><path d="M12 3.8c.35 0 .68.2.86.52l8.4 14.9c.35.63-.1 1.4-.82 1.4H4.56c-.72 0-1.17-.77-.82-1.4l8.4-14.9c.18-.32.51-.52.86-.52Z"/><path d="M12 9.3 V13.6"/><circle cx="12" cy="16.6" r="1" fill="currentColor" stroke="none"/>
+      <path fill="var(--tono)" stroke="none" d="M12 3.9 A1.6 1.6 0 0 1 13.35 4.68 L20.9 18.6 A1.6 1.6 0 0 1 19.5 21 H4.5 A1.6 1.6 0 0 1 3.1 18.6 L10.65 4.68 A1.6 1.6 0 0 1 12 3.9 Z"/><path d="M12 3.9 A1.6 1.6 0 0 1 13.35 4.68 L20.9 18.6 A1.6 1.6 0 0 1 19.5 21 H4.5 A1.6 1.6 0 0 1 3.1 18.6 L10.65 4.68 A1.6 1.6 0 0 1 12 3.9 Z"/><path d="M12 10 V14.3"/><circle cx="12" cy="17.3" r="1" fill="currentColor" stroke="none"/>
     </svg>
   );
 });

@@ -152,6 +152,10 @@ export function extraerHijos(contenidoSvg: string): string {
 }
 
 // ─── Generación del componente ──────────────────────────────────────────────────────────────────
+// El `--tono` calculado se escribe ANTES que el `style` recibido por props para que un consumidor
+// pueda sobrescribirlo (`style={{ "--tono": "var(--ui-accent-soft)" }}`), que es la vía soportada por
+// ADR-3C-3-01 para el «un color por categoría» de 11 §4.1. Revisión de coherencia 3c-rev-3: el
+// generador integrado tenía el orden invertido y anulaba esa vía.
 export function generarComponente(nombreKebab: string, contenidoSvg: string): string {
   const pascal = aPascalCase(nombreKebab);
   const hijos = aAtributosJsx(extraerHijos(contenidoSvg));
@@ -179,7 +183,7 @@ export const Icono${pascal} = forwardRef<SVGSVGElement, IconProps>(function Icon
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}

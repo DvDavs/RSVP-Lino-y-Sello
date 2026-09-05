@@ -22,11 +22,11 @@ export const IconoComunion = forwardRef<SVGSVGElement, IconProps>(function Icono
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <circle cx="12" cy="6.5" r="3" fill="var(--tono)"/><circle cx="12" cy="6.5" r="3"/><path d="M12 5 V8 M10.5 6.5 H13.5"/><path fill="var(--tono)" stroke="none" d="M7.5 11 H16.5 L15 17.5 A3 3 0 0 1 12 20 A3 3 0 0 1 9 17.5 Z"/><path d="M7.5 11 H16.5 L15 17.5 A3 3 0 0 1 12 20 A3 3 0 0 1 9 17.5 Z"/><path d="M9.5 11 V9.5 A2.5 2.5 0 0 1 12 7 A2.5 2.5 0 0 1 14.5 9.5 V11"/>
+      <circle cx="12" cy="5.9" r="3.2" fill="var(--tono)"/><path d="M4.5 10.5 H19.5 A7.5 7.5 0 0 1 4.5 10.5 Z" fill="var(--tono)"/><path d="M12 18 V19.8"/><path d="M8 20.8 H16"/>
     </svg>
   );
 });

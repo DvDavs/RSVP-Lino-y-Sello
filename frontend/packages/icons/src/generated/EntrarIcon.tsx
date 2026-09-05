@@ -22,11 +22,11 @@ export const IconoEntrar = forwardRef<SVGSVGElement, IconProps>(function IconoEn
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <path fill="var(--tono)" stroke="none" d="M15 4.5 H18.5 A1.5 1.5 0 0 1 20 6 V18 A1.5 1.5 0 0 1 18.5 19.5 H15 V4.5 Z"/><path d="M15 4.5 H18.5 A1.5 1.5 0 0 1 20 6 V18 A1.5 1.5 0 0 1 18.5 19.5 H15"/><path d="M13 12 H4 M7.5 8.5 L4 12 L7.5 15.5"/>
+      <path fill="var(--tono)" stroke="none" d="M15 4.5 H18.5 A1.5 1.5 0 0 1 20 6 V18 A1.5 1.5 0 0 1 18.5 19.5 H15 V4.5 Z"/><path d="M15 4.5 H18.5 A1.5 1.5 0 0 1 20 6 V18 A1.5 1.5 0 0 1 18.5 19.5 H15"/><path d="M4 12 H13 M9.5 8.5 L13 12 L9.5 15.5"/>
     </svg>
   );
 });

@@ -22,11 +22,11 @@ export const IconoNota = forwardRef<SVGSVGElement, IconProps>(function IconoNota
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <path fill="var(--tono)" stroke="none" d="M5.5 4 H14.5 L18.5 8 V18.5 A1.5 1.5 0 0 1 17 20 H5.5 A1.5 1.5 0 0 1 4 18.5 V5.5 A1.5 1.5 0 0 1 5.5 4 Z"/><path d="M5.5 4 H14.5 L18.5 8 V18.5 A1.5 1.5 0 0 1 17 20 H5.5 A1.5 1.5 0 0 1 4 18.5 V5.5 A1.5 1.5 0 0 1 5.5 4 Z"/><path d="M14.5 4 V6.5 A1.5 1.5 0 0 0 16 8 H18.5"/><path d="M7.5 12 H15 M7.5 15.5 H12.5"/>
+      <path fill="var(--tono)" stroke="none" d="M6.25 4 H15.25 L19.25 8 V18.5 A1.5 1.5 0 0 1 17.75 20 H6.25 A1.5 1.5 0 0 1 4.75 18.5 V5.5 A1.5 1.5 0 0 1 6.25 4 Z"/><path d="M6.25 4 H15.25 L19.25 8 V18.5 A1.5 1.5 0 0 1 17.75 20 H6.25 A1.5 1.5 0 0 1 4.75 18.5 V5.5 A1.5 1.5 0 0 1 6.25 4 Z"/><path d="M15.25 4 V6.5 A1.5 1.5 0 0 0 16.75 8 H19.25"/><path d="M8.25 12 H15.75 M8.25 15.5 H13.25"/>
     </svg>
   );
 });

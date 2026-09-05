@@ -22,11 +22,11 @@ export const IconoConfirmar = forwardRef<SVGSVGElement, IconProps>(function Icon
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
-      style={{ ...(style ?? {}), "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor" } as CSSProperties}
+      style={{ "--tono": tone === "duo" ? "var(--ui-primary-soft)" : "currentColor", ...(style ?? {}) } as CSSProperties}
       {...resto}
     >
       {title ? <title>{title}</title> : null}
-      <rect x="4" y="11" width="3" height="9" rx="1.2" fill="var(--tono)"/><rect x="4" y="11" width="3" height="9" rx="1.2"/><path d="M7 11 L10.3 4.6 A1.6 1.6 0 0 1 13.3 5.6 L12.3 10 H18 A2 2 0 0 1 19.9 12.6 L18.2 18.6 A2 2 0 0 1 16.3 20 H7 Z"/>
+      <rect x="4" y="11" width="3" height="9" rx="1.2"/><path fill="var(--tono)" d="M7 11 L10.3 4.6 A1.6 1.6 0 0 1 13.3 5.6 L12.3 10 H18 A2 2 0 0 1 19.9 12.6 L18.2 18.6 A2 2 0 0 1 16.3 20 H7 Z"/>
     </svg>
   );
 });
