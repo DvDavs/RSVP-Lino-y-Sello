@@ -857,3 +857,42 @@ una se tomó la opción conservadora y se siguió.
 - [Fase 3-B · 3b-i05b] **El bloque de texto de la portada ahora se ve como una zona de papel más clara sobre la lámina, y en móvil su halo alcanza el filete.** Medido: el móvil conserva el 93,4 % de la tinta del arte y el escritorio el 100 %; el filete no se corta en ninguna fila pero su contraste local en móvil baja de 7,34 a 5,50, y la banda del divisor central queda un 8 % más suave. **Supuesto tomado:** es aceptable, porque el papel cae sobre la zona que el ilustrador declara vacía (`scenes.mjs`, `[0.12, 0.09, 0.88, 0.55]`) y porque la alternativa —cualquier cosa que no sea opaca— no garantiza nada. ¿Prefiere el dueño (i) esto, (ii) un papel sin halo (conserva el 95,8 % del arte pero se le ve el canto), o (iii) que el papel sólo aparezca cuando hay fotografía de cliente y no sobre la lámina del paquete —lo que exigiría que la sección sepa distinguir una de otra, cosa que hoy el contrato no le dice?
 - [Fase 3-B · 3b-i05b] **`.dateRow` de la portada es la fila más ajustada de toda la invitación: `muted/bg` da 4,59-4,63:1, un 2 % por encima del mínimo.** Está en verde y hay prueba que la vigila en las cinco paletas, pero cualquier retoque futuro de `muted` o de `bg` la tumba, y es la fecha de la boda en la primera pantalla. ¿Se le sube a `ink` (perdería la jerarquía de "dato secundario" que `04 §17.1` le da) o se acepta el margen justo con la prueba como red?
 - [Fase 3-B · 3b-i05b] **En móvil (390 px) el bloque de texto ocupa el 84 % del ancho de la lámina**, porque el nombre de los novios a `--inv-text-4xl` casi no cabe. Con un nombre más largo que «Ana Sofía & Diego» el papel llegará al filete. Es el mismo problema de arte que `P-3-3b-4` («el escritorio queda más liso que el móvil») visto desde el otro lado. ¿Entra en el kit de autor de la fase 4 una lámina por proporción (retrato para móvil, apaisada para escritorio) con la zona segura declarada para cada una?
+
+## Fase 3-B · cierre — DOS ALTAS ABIERTAS que la fase NO cierra (2)
+
+- [Fase 3-B · **N-01 · CRÍTICA · BLOQUEA EL CIERRE**] **`POST /auth/request-password-reset` devuelve
+  el token de recuperación en el cuerpo de la respuesta, sin autenticar y para cualquier correo.**
+  `ResetPasswordService.kt:52-55` construye `RecoveryPasswordSentResponse(message, resetToken = …)` y
+  `/auth/**` es `permitAll` (`SecurityConfig.kt:35`). Con ese token, `POST /auth/reset-password`
+  cambia la contraseña: **dos peticiones y la cuenta es tuya**, incluida una MASTER. Reproducido por
+  el orquestador contra el backend real:
+  ```
+  POST /auth/request-password-reset {"email":"demo.master@example.com"}
+  → {"message":"Se ha enviado un correo de recuperación a tu cuenta","resetToken":"Q7An2AL9lCrZ…"}
+  ```
+  Además ese extremo **enumera cuentas** (`400` si el correo no existe, `200` si existe) y **no pasa
+  por el limitador** de I-02, que sólo cubre `/auth/token`.
+  **Arreglo propuesto, una línea**: quitar `resetToken` de `RecoveryPasswordSentResponse` — el token
+  ya viaja por correo (`ResetPasswordService.kt:47` lo mete en el `resetUrl`), así que devolverlo en
+  el cuerpo no le sirve a nadie salvo a quien ataca. Después: responder siempre `200` con el mismo
+  mensaje exista o no la cuenta, y meter el extremo en el limitador.
+  **POR QUÉ NO SE ARREGLÓ AQUÍ:** el dueño acotó la excepción sobre `modules/auth` a I-02 con un
+  «NO tocar nada más de `auth`». Esto es más de `auth`, así que **necesita su autorización expresa**.
+  El orquestador se ha limitado a completar I-02 (el salto de `X-Forwarded-For`, que sí estaba dentro
+  del encargo). **Supuesto tomado:** se registra y no se toca. Es lo primero que debería resolver la
+  fase 4, antes que cualquier funcionalidad.
+
+- [Fase 3-B · **N-02 · ALTA**] **El origen del sitio y la CSP del lienzo se hornean en el build.** El
+  mismo artefacto servido en otro puerto rechaza el `<iframe>` del lienzo (`Refused to frame …
+  frame-ancestors`, vista previa muerta) y reparte enlaces públicos al puerto del build, no al que
+  navega la clienta. `ADR-3-8-03` mandó construir el enlace con el origen del sitio y fallar el
+  arranque si es local; lo que no está resuelto es que ese origen sea **de despliegue** y no de
+  compilación. **Supuesto:** no se toca en 3-B (sería rehacer cómo se parametriza el build, y nadie
+  lo pidió); queda como requisito de despliegue de la fase 4. Afecta también a U-6.
+
+- [Fase 3-B · entorno] **`./gradlew clean` borra el almacén local de assets** (`build/templates2-assets`)
+  mientras la base sigue apuntando a esos ficheros: el render responde `200` y ninguna imagen carga.
+  Contaminó una pasada entera de e2e (10 fallos que no eran del código). Documentado con reproducción
+  y salida en `evidencia/fase-3/trampa-gradle-clean.md`. **Arreglo de fondo sugerido:** sacar
+  `TEMPLATES2_ASSETS_LOCAL_DIR` de `build/` (p. ej. a `.dev/`). No se hace aquí por disciplina de
+  alcance.
