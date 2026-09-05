@@ -1,5 +1,6 @@
 package mx.evolutiondev.invitaciones.modules.templates2.composition
 
+import mx.evolutiondev.invitaciones.modules.templates2.domain.AssetEntry
 import mx.evolutiondev.invitaciones.modules.templates2.domain.AudioConstraints
 import mx.evolutiondev.invitaciones.modules.templates2.domain.AudioSpec
 import mx.evolutiondev.invitaciones.modules.templates2.domain.BlockId
@@ -109,11 +110,13 @@ object Fx {
     fun manifiesto(
         secciones: List<SectionSpec>, slug: String = "fixture-tpl", version: String = "1.0.0",
         locales: List<Locale> = listOf(Locale.ES_MX),
+        /** I-09: los `AssetEntry` del paquete, con o sin alias (`AssetEntry.id`). */
+        assets: List<AssetEntry> = emptyList(),
     ) = TemplateManifest(
         manifestVersion = 1, slug = TemplateSlug(slug), version = SemverVersion.parse(version),
         name = l("Plantilla"), description = null, eventKinds = listOf(EventKind.GENERIC),
         minPlanTier = 1, locales = locales, capabilities = emptyList(), previewImage = null,
-        sections = secciones, assets = emptyList(), migrationsFrom = emptyList(),
+        sections = secciones, assets = assets, migrationsFrom = emptyList(),
     )
 
     fun tema(

@@ -266,6 +266,17 @@ class TemplatePackageParser(private val validator: JsonSchemaValidatorService) {
             "el manifiesto declara dos veces el mismo asset: ${duplicados.sorted().joinToString(", ")}",
             mapOf("duplicated" to duplicados.sorted()),
         )
+        // I-09 (ADR-3B-I09-01) — el alias tiene que ser único DENTRO del manifiesto, por el mismo
+        // motivo que la ruta: el `AssetIndex` es un mapa y con dos entradas iguales una de las dos
+        // imágenes desaparecería en silencio, que es lo que P1 prohíbe. Entre VERSIONES distintas no
+        // hay colisión posible: el índice se construye con el manifiesto de la versión que usa el
+        // documento, y solo con ese.
+        val aliasDuplicados = m.assets.mapNotNull { it.id?.value }
+            .groupingBy { it }.eachCount().filterValues { it > 1 }.keys
+        if (aliasDuplicados.isNotEmpty()) throw PackageAssetMismatchException(
+            "el manifiesto declara dos assets con el mismo id: ${aliasDuplicados.sorted().joinToString(", ")}",
+            mapOf("duplicatedId" to aliasDuplicados.sorted()),
+        )
         val faltan = declarados.keys - subidos
         if (faltan.isNotEmpty()) throw PackageAssetMismatchException(
             "el manifiesto declara assets que no vienen en el paquete: ${faltan.sorted().joinToString(", ")}",

@@ -755,3 +755,47 @@ una se tomó la opción conservadora y se siguió.
   `stop()`, que hace `pkill -f InvitationsApplicationKt` y `pg-ephemeral.sh stop` — es decir, un
   arranque fallido de UN agente puede matar los backends y borrar los clústeres de TODOS.
   ¿Se corrige el script (`export SERVER_PORT="$PUERTO"` y que `stop` sólo mate su propio PID)?
+
+- [Fase 3-B · I-09] **Un `id` del manifiesto es ahora parte del contrato público del paquete**
+  (ADR-3B-I09-01). Si una versión nueva de una plantilla renombra el `id` de un archivo, todos los
+  `defaults.json` que lo referencien dejan de resolver y los bloques vuelven a salir
+  `provenance:"empty"`. Hoy sólo lo detectan la compuerta de `build-packages.mjs` y la prueba
+  `manifest-asset-id.contract.test.ts`, que se ejecutan en el repositorio, **no en el registro**.
+  ¿Debe el registro rechazar también un paquete cuyo `defaults.json` referencie un `assetId` que
+  ningún `AssetEntry.id` declara (un `TPL_PACKAGE_DEFAULT_ASSET_UNKNOWN` nuevo)? **Supuesto
+  tomado:** no por ahora — sería una invariante nueva (I-32) con espejo Kotlin obligatorio, y el
+  encargo de I-09 era el parche mínimo. La compuerta del generador cubre el único camino por el que
+  hoy se construyen paquetes.
+
+- [Fase 3-B · I-09] **El arte de demostración que el paquete publica es el de la paleta POR
+  DEFECTO.** Si la clienta elige `navy` u `olive` en `boda-clasica`, la portada y los retratos que
+  trae el paquete siguen tintados de `blush` hasta que ella suba los suyos — es el mismo defecto
+  `O-07` que 3-9 corrigió para el sembrador, que sí sube el juego de la paleta elegida. **Supuesto
+  tomado:** aceptable, porque es contenido de demostración destinado a ser sustituido y el
+  preflight impide publicar con él (`TPL_PUBLISH_BLOCKED_DEFAULT_CONTENT` incluye ahora
+  `cover.image`). Arreglarlo de verdad exigiría un juego de assets por paleta dentro del paquete y
+  un `defaults.json` que dependiera de la paleta, que hoy no es expresable.
+
+- [Fase 3-B · I-09] **`xv-jardin` declaraba `honoree.photo` con `aspect: "portrait"` y el arte de
+  retrato que genera `build-art.mjs` es cuadrado (1000 × 1000).** ADR-3B-I09-02 cambia el manifiesto
+  a `square`, que es lo que `boda-clasica` usa para sus celebrantes. ¿Prefiere el dueño lo
+  contrario: dibujar una lámina de retrato vertical y dejar el manifiesto en `portrait`? **Supuesto
+  tomado:** `square`, porque cambiar una palabra del manifiesto es reversible y regenerar arte no
+  entra en el encargo de I-09 (además, las dependencias nativas del generador no están instaladas
+  en este entorno).
+
+- [Fase 3-B · I-09] **El paquete de `boda-clasica@1.0.0` cambió de bytes** (9 assets en vez de 3, y
+  `id` en 7 de ellos), así que registrarlo sobre una base donde ya está el paquete anterior devuelve
+  `409 TPL_VERSION_HASH_MISMATCH` (H-09, correcto). Para ver el arreglo por HTTP hace falta una base
+  **sin** esa versión registrada. ¿Se prefiere que I-09 bombee la versión a `1.0.1` con su
+  `MigrationPlan` para poder desplegar sobre una base existente? **Supuesto tomado:** no — la fase 3
+  no tiene invitaciones de clientes reales sobre `templates2`, y bombear la versión obligaría a
+  tocar `defaults.json`, el ejemplo de diseño y el golden por un motivo de despliegue, no de
+  producto. Queda escrito en `bitacora/3b-i09.md §6`.
+
+- [Fase 3-B · I-09] **`family.godparents[].photo` y los demás bloques de imagen dentro de grupos
+  siguen sin imagen de demostración** en `boda-clasica` (sí la tienen `gallery.photos` y
+  `story.milestones`, que son los que `defaults.json` referenciaba). No es una regresión: nunca la
+  tuvieron. ¿Se quiere que todas las imágenes de los ítems por defecto traigan lámina? **Supuesto
+  tomado:** no, para no engordar el paquete con arte que la clienta va a sustituir; el criterio
+  aplicado es «el paquete trae exactamente lo que su `defaults.json` referencia».

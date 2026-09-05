@@ -498,6 +498,8 @@ object DomainJson {
     private fun assetEntry(node: JsonNode, path: String): AssetEntry {
         val o = Obj(node, path)
         val a = AssetEntry(
+            // I-09: opcional y aditivo — un manifiesto sin `id` decodifica igual que antes.
+            id = o.textoOpcional("id")?.let { AssetId(it) },
             path = o.texto("path"),
             sha256 = o.texto("sha256"),
             contentType = wire(
@@ -526,8 +528,10 @@ object DomainJson {
         o.set<ArrayNode>("sections", secciones)
         val assets = nuevoArray()
         m.assets.forEach { a ->
+            val entrada = nuevoObjeto()
+            a.id?.let { entrada.put("id", it.value) }
             assets.add(
-                nuevoObjeto().put("path", a.path).put("sha256", a.sha256)
+                entrada.put("path", a.path).put("sha256", a.sha256)
                     .put("contentType", a.contentType.wire).put("bytes", a.bytes),
             )
         }

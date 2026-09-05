@@ -153,7 +153,7 @@
           "aiEditable": true,
           "type": "image",
           "constraints": {
-            "aspect": "portrait",
+            "aspect": "square",
             "maxBytes": 8388608
           }
         },

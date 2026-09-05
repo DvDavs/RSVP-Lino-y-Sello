@@ -26,7 +26,7 @@
       "blocks": [
         { "id": "honoree.heading", "type": "text", "role": "celebrantsHeading", "label": { "es-MX": "Encabezado" }, "constraints": { "minLength": 0, "maxLength": 60, "multiline": false } },
         { "id": "honoree.person", "type": "person", "role": "honoree", "label": { "es-MX": "Quinceañera" }, "required": true },
-        { "id": "honoree.photo", "type": "image", "role": "honoreePhoto", "label": { "es-MX": "Foto" }, "constraints": { "aspect": "portrait", "maxBytes": 8388608 } },
+        { "id": "honoree.photo", "type": "image", "role": "honoreePhoto", "label": { "es-MX": "Foto" }, "constraints": { "aspect": "square", "maxBytes": 8388608 } },
         { "id": "honoree.message", "type": "richText", "role": "honoreeMessage", "label": { "es-MX": "Mensaje" }, "constraints": { "maxLength": 600 } }
       ]
     },

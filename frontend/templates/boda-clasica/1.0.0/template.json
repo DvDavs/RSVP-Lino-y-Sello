@@ -1101,10 +1101,45 @@
   ],
   "assets": [
     {
+      "id": "as_01J8DEM000000000000000C0V1",
+      "path": "assets/cover.webp",
+      "sha256": "ebaf89d6cc6943faabb18501d29d9cd00fb3d7b50962e8db24f8cab42808cd55",
+      "contentType": "image/webp",
+      "bytes": 46544
+    },
+    {
       "path": "assets/divider.webp",
       "sha256": "3960f97e40e54783bb851ca34e4afc78c8d8ff540a486aa6451a96db87e1f1ec",
       "contentType": "image/webp",
       "bytes": 31002
+    },
+    {
+      "id": "as_01J8DEM0000000000000000GA1",
+      "path": "assets/gallery-1.webp",
+      "sha256": "6ec126113ff8abc3ea549face3dfccddc72de1c03eece5302e83ce50c8eacded",
+      "contentType": "image/webp",
+      "bytes": 34620
+    },
+    {
+      "id": "as_01J8DEM0000000000000000GA2",
+      "path": "assets/gallery-2.webp",
+      "sha256": "f7fe272e3c1001458fceb0ea7585e9687939410e9c5e9ce5d5ea92046e330a0b",
+      "contentType": "image/webp",
+      "bytes": 39670
+    },
+    {
+      "id": "as_01J8DEM000000000000000N0V1",
+      "path": "assets/portrait-a.webp",
+      "sha256": "5b6c30d9d1ae3cfac67db369f48310907bb7cbd15beab5070834750d16809fe7",
+      "contentType": "image/webp",
+      "bytes": 42822
+    },
+    {
+      "id": "as_01J8DEM000000000000000N0V2",
+      "path": "assets/portrait-b.webp",
+      "sha256": "3d4dc174847a383140472d5326cc1c18deadb4a7555bf6a0fa3295889142e51b",
+      "contentType": "image/webp",
+      "bytes": 41268
     },
     {
       "path": "assets/preview.webp",
@@ -1113,10 +1148,18 @@
       "bytes": 70120
     },
     {
+      "id": "as_01J8DEM000000000000000RSV1",
       "path": "assets/rsvp-bg.webp",
       "sha256": "2f62262e765cef18fe523a57a4a46b2633e029c668d981d8fbf5644eefd9777e",
       "contentType": "image/webp",
       "bytes": 43340
+    },
+    {
+      "id": "as_01J8DEM000000000000000H1S1",
+      "path": "assets/story-1.webp",
+      "sha256": "7dd2bf5a62fade3a67c49f21cc146bbf9274f425fb6be7df4387e640d6d30909",
+      "contentType": "image/webp",
+      "bytes": 37046
     }
   ],
   "migrationsFrom": []

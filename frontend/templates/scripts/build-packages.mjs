@@ -46,10 +46,56 @@ const TIPOS = {
   '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.woff2': 'font/woff2',
 };
 
+// I-09 (ADR-3B-I09-01) — ALIAS DE ASSET Y ARTE DE DEMOSTRACIÓN DENTRO DEL PAQUETE.
+//
+// `defaults.json` referencia sus imágenes por `assetId`, pero el `assetId` real lo acuña el servidor
+// en el registro (`TemplateRegistrationService.kt`, `"as_" + ulid`), así que un literal escrito a
+// mano no resolvía: `cover.image` salía `provenance:"empty"` y `rsvp.background`, que es
+// `source:"fixed"`, quedaba inalcanzable por cualquier vía. Desde I-09 el manifiesto puede DECLARAR
+// el alias de cada archivo (`AssetEntry.id`) y el backend lo añade al `AssetIndex` apuntando a la
+// misma fila de `tpl_asset`. Aquí se cosen las dos mitades:
+//
+//   · `demo` — las láminas de `demo/<paleta por defecto>/` que el paquete PUBLICA como suyas, para
+//     que la invitación recién creada no salga sin una sola foto. Se copian a `assets/` tal cual las
+//     dejó `build-art.mjs` (mismo escenario, misma paleta, mismos bytes): este script no dibuja.
+//   · `alias` — `assets/<archivo> → assetId`, y ES EL MISMO literal que usa `defaults.json` del
+//     ejemplo. La comprobación de abajo falla si alguno se descuelga.
 const PLANTILLAS = [
-  { ejemplo: 'boda-clasica-1.0.0', slug: 'boda-clasica', version: '1.0.0', previewImage: 'assets/preview.webp' },
-  { ejemplo: 'xv-jardin-1.0.0', slug: 'xv-jardin', version: '1.0.0', previewImage: 'assets/preview.webp' },
+  {
+    ejemplo: 'boda-clasica-1.0.0', slug: 'boda-clasica', version: '1.0.0', previewImage: 'assets/preview.webp',
+    demo: ['cover.webp', 'portrait-a.webp', 'portrait-b.webp', 'gallery-1.webp', 'gallery-2.webp', 'story-1.webp'],
+    alias: {
+      'assets/cover.webp': 'as_01J8DEM000000000000000C0V1',      // cover.image     (aspect portrait)
+      'assets/portrait-a.webp': 'as_01J8DEM000000000000000N0V1', // couple.groomPhoto (square)
+      'assets/portrait-b.webp': 'as_01J8DEM000000000000000N0V2', // couple.bridePhoto (square)
+      'assets/gallery-1.webp': 'as_01J8DEM0000000000000000GA1',  // gallery.photos[0] (free)
+      'assets/gallery-2.webp': 'as_01J8DEM0000000000000000GA2',  // gallery.photos[1] (free)
+      'assets/story-1.webp': 'as_01J8DEM000000000000000H1S1',    // story.milestones[0] (landscape)
+      'assets/rsvp-bg.webp': 'as_01J8DEM000000000000000RSV1',    // rsvp.background   (fixed, wide)
+    },
+  },
+  {
+    ejemplo: 'xv-jardin-1.0.0', slug: 'xv-jardin', version: '1.0.0', previewImage: 'assets/preview.webp',
+    demo: ['cover.webp', 'portrait-a.webp'],
+    alias: {
+      'assets/cover.webp': 'as_01J8YQYX1HD63EACDQ55S8368N',      // cover.image    (aspect portrait)
+      'assets/portrait-a.webp': 'as_01J8R6MAHKEW2GFM9QG29Z4N21', // honoree.photo  (square)
+    },
+  },
 ];
+
+/** Todos los `assetId` que aparecen en un `defaults.json`, a cualquier profundidad. */
+function assetIdsDe(raiz) {
+  const ids = new Set();
+  const walk = (n) => {
+    if (Array.isArray(n)) { n.forEach(walk); return; }
+    if (n === null || typeof n !== 'object') return;
+    if (typeof n.assetId === 'string') ids.add(n.assetId);
+    Object.values(n).forEach(walk);
+  };
+  walk(raiz);
+  return [...ids].sort();
+}
 
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 let deriva = 0;
@@ -81,6 +127,19 @@ for (const t of PLANTILLAS) {
     process.exit(2);
   }
 
+  // I-09 — el arte de demostración que el paquete publica como suyo. Los bytes son EXACTAMENTE los
+  // que `build-art.mjs` dejó en `demo/<paleta por defecto>/`: aquí solo se copian, para que el
+  // paquete pueda referenciarlos desde `defaults.json` por su alias.
+  const dirDemo = path.join(DESTINO, t.slug, 'demo', paletaId);
+  for (const nombre of t.demo ?? []) {
+    const origen = path.join(dirDemo, nombre);
+    if (!fs.existsSync(origen)) {
+      console.error(`   FALTA ${path.relative(RAIZ, origen)}: ejecuta antes \`node frontend/templates/scripts/build-art.mjs\``);
+      process.exit(2);
+    }
+    escribir(path.join(dirAssets, nombre), fs.readFileSync(origen));
+  }
+
   // `assets[]` sale de la carpeta REAL, en orden alfabético para que el manifiesto sea estable.
   // Cualquier archivo que esté aquí y no se declare haría fallar el registro con
   // `TPL_PACKAGE_UNEXPECTED_FILE` (`01 §2.1`), así que se declaran todos, sin excepción.
@@ -93,8 +152,11 @@ for (const t of PLANTILLAS) {
       process.exit(2);
     }
     const bytes = fs.readFileSync(path.join(dirAssets, nombre));
-    entradas.push({ path: `assets/${nombre}`, sha256: sha256(bytes), contentType, bytes: bytes.length });
-    console.log(`   assets/${nombre.padEnd(16)} ${String(bytes.length).padStart(8)} B  ${contentType.padEnd(11)} sha256:${sha256(bytes).slice(0, 16)}…`);
+    const ruta = `assets/${nombre}`;
+    const alias = (t.alias ?? {})[ruta];
+    // `id` va PRIMERO y solo si existe: un paquete sin alias emite el mismo objeto de siempre.
+    entradas.push({ ...(alias ? { id: alias } : {}), path: ruta, sha256: sha256(bytes), contentType, bytes: bytes.length });
+    console.log(`   ${ruta.padEnd(23)} ${String(bytes.length).padStart(8)} B  ${contentType.padEnd(11)} sha256:${sha256(bytes).slice(0, 16)}…  ${alias ?? '(sin alias)'}`);
   }
   if (!entradas.some((e) => e.path === t.previewImage)) {
     console.error(`   previewImage "${t.previewImage}" no está entre los assets del paquete (I-08)`);
@@ -107,6 +169,18 @@ for (const t of PLANTILLAS) {
   escribir(path.join(dir, 'template.json'), JSON.stringify(manifiesto, null, 2) + '\n');
   escribir(path.join(dir, 'theme.json'), JSON.stringify(theme, null, 2) + '\n');
   const defaults = JSON.parse(fs.readFileSync(path.join(origen, 'defaults.json'), 'utf8'));
+  // I-09 — la compuerta: un `assetId` de `defaults.json` que ningún `AssetEntry.id` declare NO
+  // resuelve, y el bloque sale `provenance:"empty"` sin que nadie se entere. Aquí se entera.
+  const declarados = entradas.map((e) => e.id).filter(Boolean);
+  const huerfanos = assetIdsDe(defaults.content).filter((id) => !declarados.includes(id));
+  if (huerfanos.length > 0) {
+    console.error(`   defaults.json referencia assetId que el manifiesto no declara: ${huerfanos.join(', ')}`);
+    process.exit(2);
+  }
+  if (declarados.length !== new Set(declarados).size) {
+    console.error(`   dos assets del manifiesto declaran el mismo id`);
+    process.exit(2);
+  }
   escribir(path.join(dir, 'defaults.json'), JSON.stringify(defaults, null, 2) + '\n');
   console.log(`   template.json / theme.json / defaults.json  →  ${path.relative(RAIZ, dir)}`);
   if ((manifiesto.migrationsFrom ?? []).length > 0) {
