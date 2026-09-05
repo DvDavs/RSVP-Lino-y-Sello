@@ -1004,3 +1004,29 @@ Supuestos que tomé para no bloquear. Ninguno cambia el catálogo ni la API acor
 - **`apps/web/public/fonts/` como artefacto acoplado a `packages/ui`.** Las rutas de precarga (`RUTAS_PRECARGA`) y los `@font-face` de `fonts.css` sirven las fuentes en `/fonts/*`, ficheros que copia `packages/ui/scripts/copiar-fuentes-publicas.ts` (parte de su `build`) desde `node_modules/@fontsource-variable/*` hasta `apps/web/public/fonts/` — un acoplamiento explícito de un paquete de UI escribiendo en la carpeta pública de una app concreta, documentado en `ADR-3C-2-01`. Es deliberado (evita depender del hash que el pipeline de CSS asigna a los `url()` importados, necesario para que el `<link rel="preload">` apunte a algo real) pero no es el patrón habitual de un paquete de componentes. ¿Lo acepta el dueño como definitivo, o prefiere que `apps/web` posea el script de copia (invirtiendo la dependencia)?
 - **`.gitignore` de `apps/web/public/fonts/`.** No se añadió una entrada porque no hay convención previa de `public/` en el repo (la carpeta no existía) ni de "generated" fuera de `frontend/**/dist/`. El contenido es 100 % derivado (copia bit a bit de `node_modules`), así que en principio no debería versionarse, pero se deja sin decidir para no tocar `.gitignore` sin que el dueño lo confirme. ¿Se ignora, o se versiona para que un `git clone` sin `pnpm install`/`pnpm run build` previo sirva las fuentes igual?
 - **`ss01` y otras `font-feature-settings` de las tres familias.** El brief menciona `ss01` como ejemplo de ajuste posible; no se verificó (sin `fonttools`/`ttx` disponible en el entorno para inspeccionar qué OpenType features declara cada `.woff2`) así que no se aplicó para no afirmar un soporte no comprobado. Sí se aplicó `tabular-nums`/`"tnum" 1` (estándar CSS, no depende de una feature específica del fichero) en `label-*` y en la utilidad `.numeros-tabulares`. Si el dueño confirma que las tres fuentes traen `ss01`, es una línea más en `typography.css`.
+## Fase 3-C · 3c-3a (bloque 1, iconos mitad A)
+
+- **Supuesto:** el reparto de la mitad A/B es "los primeros/segundos 41 nombres en el orden
+  literal del inventario de 82" (ajuste del orquestador en el prompt de sesión), no la lista de
+  categorías del brief `3c-3-iconos.md` §"Reparto" (que agrupa "navegación, edición, cuenta,
+  estados y acciones genéricas" para A). Con el reparto por categorías, `chispa`, `compartir`,
+  `enlace`, `boda`, `xv-anos`, `cumpleanos`, `graduacion`, `invitacion` (estados/compartir/tipos de
+  evento, ya dibujados en el moodboard) habrían caído en A; con el reparto estricto por orden caen
+  en B. Se siguió el ajuste del orquestador (más específico y sin ambigüedad de qué nombre cae en
+  qué mitad), pero si el dueño prefería el reparto por categorías, faltan 8 SVG ya resueltos en el
+  moodboard que habría que mover de mitad.
+- **Supuesto:** `tone="duo"` es el valor por defecto de cada icono generado (no lo fija el doc 11
+  ni el brief). Alternativa descartada: sin valor por defecto (prop obligatoria) — se prefirió un
+  valor por defecto porque casi todo uso del sistema es "dos tonos" y obligar a pasar la prop en
+  cada uso habría sido ruido. Ver `ADR-3C-3-01`.
+- **Pendiente de otro bloque, no bloquea:** `apps/web/app/(chrome)/design/iconos/iconos.module.css`
+  fija tokens `--ui-*` con los valores verificados de la Paleta A (claro) como *fallback local*
+  porque `packages/tokens` no publica aún `generated/tokens.css` en este worktree y el chrome
+  todavía no lo importa. En cuanto ese paquete y el chrome lo hagan, revisar que el `:root` real
+  gane sobre `.pagina` (mismo nombre de variable, mayor alcance debería bastar) y, si no, borrar el
+  bloque de variables local.
+- **Pendiente de otro bloque, no bloquea:** tras fusionar `packages/icons/svg/*.svg` de la mitad B,
+  alguien debe volver a ejecutar `node --experimental-strip-types scripts/generar.ts` desde
+  `packages/icons/` para que `src/generated/`, `src/index.ts` e `inventario.json` reflejen los 82
+  nombres (cada mitad solo generó y commiteó los suyos; el merge de esos tres artefactos por Git
+  no basta sin una regeneración).

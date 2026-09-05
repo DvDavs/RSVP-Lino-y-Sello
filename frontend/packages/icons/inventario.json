@@ -1,0 +1,248 @@
+[
+  {
+    "nombre": "adelante",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/adelante.svg"
+  },
+  {
+    "nombre": "agregar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/agregar.svg"
+  },
+  {
+    "nombre": "ajustes",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/ajustes.svg"
+  },
+  {
+    "nombre": "arrastrar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/arrastrar.svg"
+  },
+  {
+    "nombre": "atras",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/atras.svg"
+  },
+  {
+    "nombre": "ayuda",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/ayuda.svg"
+  },
+  {
+    "nombre": "bajar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/bajar.svg"
+  },
+  {
+    "nombre": "borrar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/borrar.svg"
+  },
+  {
+    "nombre": "buscar",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/buscar.svg"
+  },
+  {
+    "nombre": "celebrantes",
+    "categoria": "secciones",
+    "dibujadoOriginal": false,
+    "archivo": "svg/celebrantes.svg"
+  },
+  {
+    "nombre": "cerrar",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/cerrar.svg"
+  },
+  {
+    "nombre": "chevron-abajo",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/chevron-abajo.svg"
+  },
+  {
+    "nombre": "chevron-derecha",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/chevron-derecha.svg"
+  },
+  {
+    "nombre": "comodidades",
+    "categoria": "secciones",
+    "dibujadoOriginal": false,
+    "archivo": "svg/comodidades.svg"
+  },
+  {
+    "nombre": "deshacer",
+    "categoria": "edicion",
+    "dibujadoOriginal": true,
+    "archivo": "svg/deshacer.svg"
+  },
+  {
+    "nombre": "duplicar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/duplicar.svg"
+  },
+  {
+    "nombre": "editar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/editar.svg"
+  },
+  {
+    "nombre": "escritorio",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/escritorio.svg"
+  },
+  {
+    "nombre": "evento-fecha",
+    "categoria": "secciones",
+    "dibujadoOriginal": true,
+    "archivo": "svg/evento-fecha.svg"
+  },
+  {
+    "nombre": "externo",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/externo.svg"
+  },
+  {
+    "nombre": "familia",
+    "categoria": "secciones",
+    "dibujadoOriginal": false,
+    "archivo": "svg/familia.svg"
+  },
+  {
+    "nombre": "galeria",
+    "categoria": "secciones",
+    "dibujadoOriginal": true,
+    "archivo": "svg/galeria.svg"
+  },
+  {
+    "nombre": "guardar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/guardar.svg"
+  },
+  {
+    "nombre": "inicio",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/inicio.svg"
+  },
+  {
+    "nombre": "itinerario",
+    "categoria": "secciones",
+    "dibujadoOriginal": false,
+    "archivo": "svg/itinerario.svg"
+  },
+  {
+    "nombre": "menu",
+    "categoria": "navegacion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/menu.svg"
+  },
+  {
+    "nombre": "mesa-de-regalos",
+    "categoria": "secciones",
+    "dibujadoOriginal": true,
+    "archivo": "svg/mesa-de-regalos.svg"
+  },
+  {
+    "nombre": "movil",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/movil.svg"
+  },
+  {
+    "nombre": "ocultar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/ocultar.svg"
+  },
+  {
+    "nombre": "paleta",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/paleta.svg"
+  },
+  {
+    "nombre": "portada",
+    "categoria": "secciones",
+    "dibujadoOriginal": false,
+    "archivo": "svg/portada.svg"
+  },
+  {
+    "nombre": "punto-focal",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/punto-focal.svg"
+  },
+  {
+    "nombre": "quitar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/quitar.svg"
+  },
+  {
+    "nombre": "recortar",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/recortar.svg"
+  },
+  {
+    "nombre": "rehacer",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/rehacer.svg"
+  },
+  {
+    "nombre": "rsvp-confirmado",
+    "categoria": "secciones",
+    "dibujadoOriginal": true,
+    "archivo": "svg/rsvp-confirmado.svg"
+  },
+  {
+    "nombre": "subir",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/subir.svg"
+  },
+  {
+    "nombre": "sugerencias",
+    "categoria": "secciones",
+    "dibujadoOriginal": false,
+    "archivo": "svg/sugerencias.svg"
+  },
+  {
+    "nombre": "tipografia",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/tipografia.svg"
+  },
+  {
+    "nombre": "ver",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/ver.svg"
+  },
+  {
+    "nombre": "vista-previa",
+    "categoria": "edicion",
+    "dibujadoOriginal": false,
+    "archivo": "svg/vista-previa.svg"
+  }
+]
