@@ -125,3 +125,63 @@ Fuente: `diseno/07-extension-ia.md`. No entra en la fase 1 ni en la 2; `03 §5` 
 - **Estado verificado al cierre**: `./gradlew clean check jacocoTestCoverageVerification` en verde con **1 184 pruebas Kotlin, 0 fallos, 0 omitidas**; `pnpm --filter @invitaciones/schema test` con **458 pruebas, 0 fallos**. Cobertura de `templates2`: BUNDLE 94,62 % líneas / 81,22 % ramas; `composition` 99,19/88,13; `migration` 99,67/87,42; `schema` 97,53/87,14; `api` 93,94/75,39; `persistence` 91,08/71,76; `catalog` 88,65/70,14; `domain` 94,77/100.
 - **Cero presentación en el backend (P3)**: verificado con siete búsquedas mecánicas (colores hex, `rgb(`, unidades CSS, tipografías, iconos, HTML/CSS) sobre `templates2/**` → **0 resultados**. La única cadena visible es el catálogo de meses y `am`/`pm` de `DateFormatting.kt`, que `01 §5.2` R6 exige.
 - **Riesgo abierto y AJENO al módulo** (ADR-2-ORQ-02): `InvitationGuestEntity` mapea `invitation_guest.graduates_name`, columna que **ninguna migración crea**, con `ddl-auto: validate`. Una base construida sólo con Flyway **no arranca la aplicación**, así que las 19 rutas **nunca se han visto responder sobre un Tomcat real**. No se corrigió por estar en área prohibida (invitados). Lo desbloquea `ALTER TABLE invitation_guest ADD COLUMN graduates_name varchar(255)`; falta asignarle número de migración (no `V38`/`V39`, reservadas) y dueño.
+
+## 12. Cierre de la fase 3 — frontend (2026-09-05, fase 3-B)
+
+**I-01…I-12 CERRADAS**, cada una con prueba ejecutada y verificada por el orquestador (en la mayoría,
+saboteando el arreglo para ver la compuerta en rojo antes de aceptarla). **La fase NO queda
+formalmente cerrada**: la revisión adversarial repetida dejó **dos altas nuevas**, una de ellas
+crítica y en área prohibida (`handoffs/3b-adv.md`, `preguntas-abiertas.md`). 69 ADR resueltas: 68
+aceptadas —cinco con matiz— y **una rechazada** (`ADR-3-8-06`, premisa caída).
+
+### 12.1 La compuerta del lienzo (A1-A8) ahora está medida sobre el PRODUCTO
+`ADR-3-0b-01` declaró «A4 = 8/8» midiendo sobre `spikes/canvas-gate`. En `apps/web` **era 7/8** y
+nadie lo veía: la única aserción sobre `script-src` era un `console.warn`. Queda enmendada por
+`ADR-3B-I03-02`. Hoy `e2e/lienzo-csp.spec.ts` afirma **cero violaciones de cualquier directiva** por
+igualdad (`TOLERADAS = []`), más una prueba que inyecta un `<script>` bloqueado para demostrar que el
+recolector no es decorativo, más una tercera que mide A4 **con el lienzo realmente pintado**.
+La causa del `eval` de Zod era de orden de evaluación —Turbopack funde `common.ts` con el chunk de
+Zod—, y se cierra **sin tocar la CSP** (`ADR-3B-I03-01`).
+
+### 12.2 Presupuestos, medidos y con su margen real
+- **JS de primera carga de `/i/[publicToken]`: 144,2 KB gz** de 150 → **5,8 KB de margen**.
+- **LCP: mediana 2.241 ms**, rango 2.185–2.255, **N=9, 0 descartadas**, máquina tranquila
+  (`scripts/measure-lcp.sh`, `ADR-3B-I11-01`). El protocolo es ahora parte del contrato: comprobar
+  que el puerto es propio (falla con código 3 si no lo es), N=9, descartar `NO_LCP`, reportar
+  **mediana y rango**. Una medición sin rango no es citable.
+- Kotlin **1.256** pruebas · 0 fallos · 0 omitidas · cobertura 93,60 % líneas / 80,21 % ramas.
+- TypeScript **1.535** (527 esquema · 653 secciones · 355 web). e2e **50/50**. `smoke.sh` **19/19**.
+
+### 12.3 Ruta nueva
+**`PUT /editor/invitations/{invitationId}/event`** con cuerpo `{date, time}` (`ADR-3B-I06-01`).
+Autoriza con `HierarchyValidationService.validateInvitationAccess`, escribe **sólo** `invitation.date`
+y `invitation.time` por SQL nativo (sin `InvitationEntity`, sin tocar el módulo antiguo), valida
+`YYYY-MM-DD` / `HH:mm` —el formato que impone `DateFormatting`, porque el módulo antiguo **no valida
+nada**— y **no invalida el release**: lo marca desactualizado y la clienta republica.
+
+### 12.4 WCAG se mide sobre lo RENDERIZADO, no sobre parejas de tokens
+`axe` devuelve **exactamente lo mismo** sobre un producto que cumple y uno que no cuando hay
+degradados: `violaciones=0 · incompletas=[color-contrast]`. Su `incomplete` no es un aprobado, y tres
+de las cinco altas de la adversarial original vivían en ese hueco. `contraste-plantillas.test.ts`
+compone ahora la pila real —fotografía → velo → papel, leyendo las paradas del `.module.css`— y
+**deriva el umbral del `clamp` de `tokens.css`** (4,5:1 texto normal, 3,0 sólo donde el `px` computado
+lo justifica). Prohibido bajar un umbral para que pase: se corrige el diseño.
+La portada resuelve la legibilidad **por separación** (papel opaco bajo el texto), no lavando la
+imagen: `ADR-3-i05b-01`.
+
+### 12.5 Excepciones autorizadas por el dueño en esta fase
+1. Exponer `manifest` + `theme` en `GET .../document` (fase 3, `ADR-3-4b-01`).
+2. **`modules/templates2`** para I-01, I-06 y I-09.
+3. **`modules/auth`**, acotada a I-02 (`ADR-3B-I02-01`): límite de intentos y hash señuelo en
+   `POST /auth/token`. **Sólo eso.** La toma de cuenta por `/auth/request-password-reset` (N-01)
+   quedó SIN arreglar por respetar ese límite.
+
+### 12.6 Trampas del entorno que cuestan una medición si no se saben
+- **`./gradlew clean` borra `build/`, que es el almacén local de assets.** La base sigue apuntando a
+  esos ficheros: el render responde `200` y **ninguna imagen carga**. Contaminó una pasada entera de
+  e2e (10 fallos ajenos al código). `evidencia/fase-3/trampa-gradle-clean.md`.
+- **`e2e/preparar.ts` cae por defecto a `invitaciones_dev`**: si el backend sirve otra base, los
+  ayudantes crean invitaciones donde nadie las lee. Exporta siempre `TPL_DEV_DB`.
+- **Un paquete que cambia de bytes** da `409 TPL_VERSION_HASH_MISMATCH` al re-registrarse, y **es el
+  comportamiento correcto**: una versión publicada nunca se pisa. Para producción hay que subir la
+  versión del paquete.
