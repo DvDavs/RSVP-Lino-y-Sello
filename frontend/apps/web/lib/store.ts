@@ -62,6 +62,8 @@ import {
 } from "./undo.ts";
 import {
   applyOperationOptimistic,
+  applyOperationToRawDocument,
+  applyIdMapToRawDocument,
   resolverTema,
   findBlock,
   findGroup,
@@ -582,10 +584,15 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
         const revert = invertOperation(op, ctx);
         if (revert.length === 0) return false; // no-op: no había nada que cambiar ni que deshacer.
 
-        // (2) Parche optimista.
+        // (2) Parche optimista sobre LOS DOS árboles que el store mantiene en paralelo, no solo
+        // sobre el compuesto (3-7 D1, ADR-3-7-01). El documento CRUDO alimenta el `assetId` de los
+        // campos `image` del panel (`ScalarBlockField.tsx:74`) y el cálculo de la INVERSA de undo
+        // (`ctxBloque`/`ctxItemBlock`), y el servidor no lo reenvía en `OperationBatchResponse`:
+        // si no se parchea aquí, no se parchea en ningún sitio hasta recargar la página.
         let entries: PatchEntry[] = [];
         let structural = false;
         set((s) => {
+          if (s.document) applyOperationToRawDocument(s.document as InvitationDocument, op);
           if (!s.composed) return;
           const r = applyOperationOptimistic(s.composed as ComposedDocument, op, s.themeSpec);
           entries = r.entries;
@@ -766,6 +773,12 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           set((s) => {
             // (1) Reescritura `tempId → ULID` (§12.3, U-11), ANTES de tocar nada más.
             if (Object.keys(res.idMap).length > 0) {
+              // El documento CRUDO también guarda `itemId`, y desde 3-7 D1 lo escribe el parche
+              // optimista con el `tempId`. Si no se reescribiera aquí, el árbol crudo se quedaría
+              // con `tmp:…` mientras el resto del store ya usa el ULID, y `ctxItemBlock` dejaría de
+              // encontrar el ítem: la inversa de un `setItemBlock` posterior saldría `clearItemBlock`
+              // cuando tocaba `setItemBlock(valorPrevio)`.
+              if (s.document) applyIdMapToRawDocument(s.document as InvitationDocument, res.idMap);
               applyIdMapToOperations(s.draft, res.idMap);
               for (const b of s.queue) applyIdMapToOperations(b.ops, res.idMap);
               if (s.inFlight) applyIdMapToOperations(s.inFlight.ops, res.idMap);
@@ -843,7 +856,16 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           // reenvía lo aplicable como lote NUEVO con `baseRevision` fresca.
           set((s) => {
             s.revision = conflicto.currentRevision;
-            if (conflicto.currentDocument) s.document = conflicto.currentDocument;
+            if (conflicto.currentDocument) {
+              // El documento crudo pasa a ser el del servidor MÁS lo que se va a reenviar: es el
+              // mismo invariante que mantiene `aplicarOperacion` («servidor en `revision` + lo que
+              // sigue pendiente»), del que dependen las inversas de undo de las ediciones que
+              // vengan DESPUÉS del rebase (3-7 D1). Sobre una COPIA: `conflicto.currentDocument`
+              // ya es estado congelado por Immer y no se puede mutar en sitio.
+              const rebasado = structuredClone(conflicto.currentDocument) as InvitationDocument;
+              for (const op of aplicables) applyOperationToRawDocument(rebasado, op);
+              s.document = rebasado;
+            }
             if (conflicto.currentComposed) s.composed = conflicto.currentComposed;
             if (conflicto.currentReport) s.report = conflicto.currentReport;
             s.queue = [];
@@ -1070,6 +1092,8 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           let entries: PatchEntry[] = [];
           let structural = false;
           set((s) => {
+            // Los dos árboles, igual que en `aplicarOperacion` (3-7 D1).
+            if (s.document) for (const op of entry.revert) applyOperationToRawDocument(s.document as InvitationDocument, op);
             if (!s.composed) return;
             for (const op of entry.revert) {
               const r = applyOperationOptimistic(s.composed as ComposedDocument, op, s.themeSpec);
@@ -1102,6 +1126,8 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           let entries: PatchEntry[] = [];
           let structural = false;
           set((s) => {
+            // Los dos árboles, igual que en `aplicarOperacion` (3-7 D1).
+            if (s.document) for (const op of entry.apply) applyOperationToRawDocument(s.document as InvitationDocument, op);
             if (!s.composed) return;
             for (const op of entry.apply) {
               const r = applyOperationOptimistic(s.composed as ComposedDocument, op, s.themeSpec);
