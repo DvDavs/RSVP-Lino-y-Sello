@@ -799,3 +799,23 @@ una se tomó la opción conservadora y se siguió.
   tuvieron. ¿Se quiere que todas las imágenes de los ítems por defecto traigan lámina? **Supuesto
   tomado:** no, para no engordar el paquete con arte que la clienta va a sustituir; el criterio
   aplicado es «el paquete trae exactamente lo que su `defaults.json` referencia».
+
+- [Fase 3-B · I-11] **`scripts/measure-lcp.sh` mide con N=9 por defecto; la compuerta de CI
+  (`lighthouserc.cjs`, ADR-3-7-03) sigue en N=5.** Son dos usos distintos (disputa puntual vs. gate
+  de cada PR) y no tienen por qué compartir N, pero es una asimetría que alguien podría querer
+  cerrar. **Supuesto tomado:** no igualar los dos números sin que el dueño lo pida — subir la
+  compuerta de CI a 9 alarga cada PR (cada corrida con `throttlingMethod: devtools` tarda más que
+  con `simulate`, ADR-3-7-03), y no es una decisión de I-11 (`ADR-3B-I11-01`).
+
+- [Fase 3-B · I-11] **La corrida real de verificación (N=9, `boda-clasica-1.0.0`, `bitacora/3b-i11
+  .md §4`) dio mediana 2 405,4 ms y rango 2 195,8-2 794,6 ms — CUMPLE con solo ~95 ms de margen**,
+  frente a los ~450-490 ms de margen que sugería la medición previa de 3-7 (mediana 2 010-2 067
+  ms). No se ha tocado código de la ruta pública entre una medición y otra; la explicación más
+  simple es la carga de la máquina compartida (otra sesión de agente compilando al mismo tiempo,
+  verificado por `ps aux`), no una regresión. ¿Vale la pena una medición de referencia "sin ruido",
+  tomada con la máquina en exclusiva (fuera de este entorno multi-agente), para tener una cifra de
+  producto que no dependa de cuánta CPU le quede libre a Chrome en cada corrida? **Supuesto
+  tomado:** no se repite la medición en esta issue —no es su encargo arreglar ni perseguir
+  rendimiento, solo dejar el procedimiento en pie— pero se deja escrito que ninguna cifra de LCP
+  publicada hasta ahora en la memoria (incluida la propia de este bloque) debería tratarse como "el
+  LCP del producto" sin decir también en qué máquina y con qué carga se tomó.

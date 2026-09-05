@@ -1330,22 +1330,71 @@ const LIMITES = { "/i/[publicToken]": 150 * 1024, "/editor/[invitationId]": 600 
 ```
 Se ejecuta con `pnpm --filter web run budget` como paso obligatorio. Complemento de diagnóstico (no compuerta): `ANALYZE=1 pnpm --filter web build` con `@next/bundle-analyzer@16.3.4` para ver **qué** creció.
 
-**(b) LCP y el resto de Core Web Vitals — Lighthouse CI.** `@lhci/cli@0.15.1` con `lhci autorun` sobre la app construida y una invitación de siembra (la de `boda-clasica-1.0.0`), preajuste `mobile`, **3 corridas y mediana** para amortiguar el ruido:
+**(b) LCP y el resto de Core Web Vitals — Lighthouse CI.** `@lhci/cli@0.15.1` con `lhci autorun` (`pnpm --filter web run lhci`) sobre la app construida y la invitación **publicada** que deja `scripts/seed-demo.sh`, perfil **móvil por defecto** (Moto G Power + 4G lento; en Lighthouse 12 no existe un preajuste llamado `"mobile"` — es el `formFactor` de fábrica, no un `preset`), **5 corridas y mediana**:
 
 ```jsonc
-// lighthouserc.json
-{ "ci": { "collect": { "numberOfRuns": 3, "settings": { "preset": "desktop" } },
-          "assert": { "assertions": {
-            "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
-            "cumulative-layout-shift":  ["error", { "maxNumericValue": 0.1 }],
-            "total-blocking-time":      ["warn",  { "maxNumericValue": 200 }],
-            "categories:accessibility": ["error", { "minScore": 1 }] } } } }
+// frontend/apps/web/lighthouserc.cjs (resumen; el archivo real resuelve el puerto y el token en vivo)
+{ ci: { collect: { numberOfRuns: 5,
+                    startServerCommand: `PORT=${PORT} pnpm run start`,
+                    settings: { formFactor: "mobile", throttlingMethod: "devtools",
+                                screenEmulation: { mobile: true, width: 412, height: 823, deviceScaleFactor: 1.75 } } },
+        assert: { assertions: {
+          "largest-contentful-paint": ["error", { maxNumericValue: 2500 }],
+          "cumulative-layout-shift":  ["error", { maxNumericValue: 0.1 }],
+          "total-blocking-time":      ["warn",  { maxNumericValue: 200 }],
+          "categories:accessibility": ["error", { minScore: 1 }] } } } }
 ```
-(El preajuste real es `mobile`; se deja explícito en el archivo de fase 3.)
+
+**Corregido por I-11/ADR-3-7-03** — el ejemplo que llevaba aquí este documento nunca coincidió con lo que de verdad se ejecutaba, y esa discrepancia documental es parte de por qué la memoria llegó a sostener dos cifras de LCP contradictorias:
+1. `throttlingMethod` es **`"devtools"`**, no el valor de fábrica de Lighthouse (`"simulate"`, un *modelo* de Lantern, no una medición). Con `simulate` la métrica resultó **bimodal**: 15 corridas del mismo build, misma URL, mismo servidor, dieron 11 valores en 2,0-2,3 s y 4 en 3,2-3,3 s, sin nada que distinguiera a los dos grupos (mismo TTFB, mismo JS, mismo elemento LCP). Es la causa verificada de que un bloque midiera 2 314 ms (CUMPLE) y otro midiera 3 191-3 544 ms (NO CUMPLE) sobre el mismo código: la mediana caía en un cúmulo u otro por azar según en cuál aterrizaran las pocas corridas de esa ronda. `devtools` estrangula CPU y red DE VERDAD y publica el LCP observado, no simulado.
+2. El puerto **es propio**: `startServerCommand` usa `LHCI_PORT` (configurable; nunca un 3000 fijo) y la configuración **rompe con un mensaje explícito** si ese puerto ya está ocupado — antes, si el 3000 lo tenía tomado el `next start` de otra sesión en esta máquina compartida, ese `next start` moría con `EADDRINUSE` y `@lhci/cli` avisaba y seguía, midiendo la aplicación ajena.
+3. El `preset: "desktop"` que aparecía aquí nunca estuvo en la configuración real (era un error de transcripción); se retira para que el documento deje de poder confundir a quien lo lea.
 
 **Qué se hace si se excede.** La compuerta (a) **rompe el PR**, no avisa: un presupuesto que solo avisa se ignora. Orden de actuación fijado de antemano, para que fase 3 no improvise: 1) comprobar si algo del chrome se coló en la ruta pública (causa nº 1, la detecta la regla de lint de §19.4); 2) mover la isla de RSVP a carga diferida por interacción; 3) reducir pesos tipográficos (de 4 a 2); 4) subconjunto de fuentes más estrecho; 5) si nada basta, **subir el presupuesto exige una ADR**, nunca un cambio silencioso de la constante.
 
 La compuerta (b) es de tipo `error` para LCP y CLS; si el ruido del runner la vuelve inestable se sube `numberOfRuns`, no se baja el umbral.
+
+### 16.3 Protocolo reproducible de medición manual del LCP — `scripts/measure-lcp.sh` (I-11)
+
+**Por qué existe además de la compuerta (b).** `pnpm --filter web run lhci` (arriba) es el gate rápido de CI: corre dentro del job `frontend`/`e2e`, con 5 corridas, y su trabajo es fallar el PR cuando algo empeoró. No es la herramienta para **dirimir una disputa entre dos medidas contradictorias del mismo build** — que es justo lo que I-11 (`issues-fase-3.md`) tuvo que cerrar: un bloque midió mediana 2 314 ms, otro 3 191-3 544 ms sobre el mismo código, y una ronda posterior confirmó con 15 corridas que `simulate` es bimodal. Para dirimir eso hace falta una corrida deliberada, con más muestra y un reporte que enseñe el rango, no un solo número. `scripts/measure-lcp.sh` es esa herramienta: se invoca a mano antes de cerrar un cambio que toque el rendimiento de la ruta pública, o cuando dos medidas no cuadran. **No sustituye** a la compuerta de CI.
+
+```
+scripts/measure-lcp.sh [--port 3033] [--runs 9] [--budget 2500] [--url http://…]
+```
+
+Reutiliza tal cual la configuración de `lighthouserc.cjs` (mismo `throttlingMethod: "devtools"`, mismo perfil móvil, mismo mecanismo de arranque del servidor) y añade lo que un protocolo *reproducible* necesita y la compuerta de CI no:
+
+1. **Comprueba el puerto ANTES de arrancar nada**, a nivel de shell (no solo dentro de la configuración de `lhci`, como defensa adicional), y falla con un mensaje de una línea si no es suyo — código de salida `3`, no mide y no miente. El puerto es un argumento (`--port`/`LHCI_PORT`), nunca una constante: en esta máquina conviven varias sesiones de agente, cada una con su propio `next start`.
+2. **N = 9 corridas por defecto** (`--runs`, mínimo 3). Impar, para que la mediana sea siempre un valor observado y no el promedio de dos corridas del medio que nadie midió realmente. Mayor que las 5 de la compuerta de CI porque este script se invoca pocas veces —para resolver una duda puntual, no en cada PR— y el coste de 4 corridas más (con `devtools` cada corrida tarda más que con `simulate`, ADR-3-7-03) es pequeño frente al de publicar otra cifra que nadie pueda reproducir.
+3. **Descarta las corridas `NO_LCP`** — aquellas en las que Lighthouse no llega a registrar un elemento LCP (`audits["largest-contentful-paint"].score === null`, sin `numericValue`; `lighthouse@12.6.1`, `core/audits/audit.js:401-407`, `generateErrorAuditResult`) — y **dice cuántas descartó**, en vez de dejarlas contar como si fueran una corrida válida más. I-11 registra que estas corridas sesgaban la mediana a la baja cuando se contaban (ADR-3-7-03/ADR-3-7-04: mientras `cover-rise` animaba `opacity` desde 0, el verdadero elemento LCP quedaba invisible y sin candidato durante parte del recorrido). Si **todas** las corridas resultan `NO_LCP` el script falla con código `3`: sin corridas válidas no hay mediana honesta que reportar.
+4. **Reporta mediana Y rango** (mínimo–máximo de las corridas válidas), nunca solo la mediana: una mediana sola no distingue una medición estable (±40 ms) de una bimodal (±700 ms) que por azar cayó del lado bueno. El reporte imprime también el N efectivo junto al N solicitado.
+5. **Sale con código distinto de 0 si la mediana supera el presupuesto** de `contratos.md §8` (2 500 ms): código `1` para "es una medida real, pero incumple"; código `3` para "no se pudo medir de verdad" (puerto ajeno, build inexistente, servidor que no arrancó, o cero corridas válidas). Queda listo para usarse como compuerta si algún flujo lo necesitara.
+
+**Corrida real (2026-09-05, N=9, invitación publicada `boda-clasica-1.0.0`, puerto propio 3033; máquina compartida con otras sesiones de agente activas — `uptime` al arrancar la corrida: `load average: 0.90, 1.35, 1.74` sobre 4 CPU):**
+
+```
+corridas por número:
+  #1  LCP = 2213.6 ms
+  #2  LCP = 2195.8 ms
+  #3  LCP = 2405.4 ms
+  #4  LCP = 2278.7 ms
+  #5  LCP = 2224.7 ms
+  #6  LCP = 2574.3 ms
+  #7  LCP = 2794.6 ms
+  #8  LCP = 2460.4 ms
+  #9  LCP = 2503.4 ms
+
+N solicitado ........... 9
+N efectivo (válidas) .... 9
+Descartadas (NO_LCP) .... 0
+Mediana ................. 2405.4 ms
+Rango .................... 2195.8 – 2794.6 ms
+Presupuesto .............. 2500 ms
+
+RESULTADO: CUMPLE — la mediana (2405.4 ms) está dentro del presupuesto (2500 ms).
+```
+
+**Lectura de esta corrida — corrige la cifra que quedaba en pie.** Cero corridas `NO_LCP` (el arreglo de ADR-3-7-04, sin `opacity` en `cover-rise`, sigue sosteniéndose). La mediana **cumple** el presupuesto, pero con **~95 ms de margen sobre 2 500**, no con los ~450-490 ms de margen que sugería la medición previa (mediana 2 010-2 067 ms). El **rango** — 2 195,8-2 794,6 ms, casi 600 ms de dispersión — es la evidencia de que, incluso con estrangulamiento real y sin `NO_LCP`, una máquina compartida con otras sesiones de agente metiendo carga variable produce varianza suficiente para que una sola corrida (la #7, 2 794,6 ms) hubiera incumplido el presupuesto por sí sola. Ninguna cifra de LCP debería volver a citarse en esta memoria sin decir también su rango, su N efectivo y la carga de la máquina al medir — es precisamente lo que faltaba para que dos bloques dejaran de contradecirse por el mismo build. Diseño del script, alternativas descartadas y la carga completa de la máquina: `memoria/bitacora/3b-i11.md`.
 
 ---
 
