@@ -45,7 +45,7 @@ export const TIPOS_DE_EVENTO: readonly TipoDeEvento[] = [
   { kind: "wedding", nombre: "Boda", Icono: IconoBoda, imagenId: "asistente/tipo-boda", imagenSrc: "/imagenes/asistente/tipo-boda.webp" },
   { kind: "quince", nombre: "XV años", Icono: IconoXvAnos, imagenId: "asistente/tipo-xv-anos", imagenSrc: "/imagenes/asistente/tipo-xv-anos.webp" },
   { kind: "baptism", nombre: "Bautizo", Icono: IconoBautizo, imagenId: "asistente/tipo-bautizo", imagenSrc: "/imagenes/asistente/tipo-bautizo.webp" },
-  { kind: "communion", nombre: "Primera comunión", Icono: IconoComunion, imagenId: "asistente/tipo-comunion" },
+  { kind: "communion", nombre: "Primera comunión", Icono: IconoComunion, imagenId: "asistente/tipo-comunion", imagenSrc: "/imagenes/asistente/tipo-comunion.webp" },
   { kind: "confirmation", nombre: "Confirmación", Icono: IconoComunion, imagenId: "asistente/tipo-confirmacion" },
   { kind: "birthday", nombre: "Cumpleaños", Icono: IconoCumpleanos, imagenId: "asistente/tipo-cumpleanos" },
   { kind: "graduation", nombre: "Graduación", Icono: IconoGraduacion, imagenId: "asistente/tipo-graduacion" },
