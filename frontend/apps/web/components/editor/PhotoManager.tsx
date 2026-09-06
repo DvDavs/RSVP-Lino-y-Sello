@@ -125,7 +125,10 @@ export function PhotoManager({ invitationId, spec, groupId, group, maxItemBytes 
         onDragEnd={alTerminarArrastre}
       >
         <SortableContext items={claves} strategy={rectSortingStrategy}>
-          <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+          {/* Tres columnas SIEMPRE (antes cuatro en el panel de escritorio): con cuatro, la miniatura
+              medía ~85 px y los tres controles de 36 px que van encima la tapaban entera y se salían
+              por la derecha (revisión de calidad visual del cierre de 3-C). */}
+          <ul className="grid grid-cols-3 gap-2.5">
             {items.map((item, i) => {
               const bloqueImagen = imageBlockId ? item.blocks.find((b) => b.id === imageBlockId) : undefined;
               const url = bloqueImagen?.value?.kind === "image" ? bloqueImagen.value.url : null;
@@ -258,20 +261,20 @@ function PhotoTile({
       )}
       {/* Los tres controles van sobre PAPEL OPACO, nunca sobre la foto (`11 §3.4` R5): una pastilla
           `surface-raised` con sombra 1, no un velo ni un degradado. */}
-      <div className="absolute inset-x-1 top-1 flex items-center justify-between gap-1">
+      <div className="absolute inset-x-1 top-1 flex items-center justify-between gap-0.5">
         <button
           type="button"
           {...attributes}
           {...listeners}
           aria-label={es_MX.editor.fotos.reordenarFoto(posicion)}
-          className="inline-flex size-9 items-center justify-center rounded-ui-pill bg-ui-surface-raised text-ui-ink-muted shadow-ui-1 transition-colors duration-100 ease-ui-out hover:text-ui-ink active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-alt"
+          className="inline-flex size-8 items-center justify-center rounded-ui-pill bg-ui-surface-raised text-ui-ink-muted shadow-ui-1 transition-colors duration-100 ease-ui-out hover:text-ui-ink active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-alt"
         >
           <IconoArrastrar size={16} tone="mono" />
         </button>
-        <span className="flex gap-1">
+        <span className="flex gap-0.5">
           <MenuDeFila
             etiqueta={es_MX.editor.fotos.masOpcionesFoto(posicion)}
-            className="size-9 bg-ui-surface-raised shadow-ui-1"
+            className="size-8 bg-ui-surface-raised shadow-ui-1"
             opciones={opcionesDeReordenar({
               esPrimera,
               esUltima,
@@ -286,7 +289,7 @@ function PhotoTile({
             type="button"
             aria-label={es_MX.editor.fotos.quitarFoto(posicion)}
             onClick={onQuitar}
-            className="inline-flex size-9 items-center justify-center rounded-ui-pill bg-ui-surface-raised text-ui-danger-text shadow-ui-1 transition-colors duration-100 ease-ui-out hover:bg-ui-danger-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-alt"
+            className="inline-flex size-8 items-center justify-center rounded-ui-pill bg-ui-surface-raised text-ui-danger-text shadow-ui-1 transition-colors duration-100 ease-ui-out hover:bg-ui-danger-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-alt"
           >
             <IconoBorrar size={16} tone="mono" />
           </button>

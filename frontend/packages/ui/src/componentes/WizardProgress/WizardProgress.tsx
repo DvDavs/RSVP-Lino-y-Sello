@@ -69,8 +69,24 @@ export function WizardProgress({ pasos, className }: WizardProgressProps): JSX.E
           );
 
           return (
-            <li key={paso.id} className="flex flex-1 flex-col items-center gap-1.5 text-center last:flex-none">
-              <div className="flex w-full items-center">
+            // Columnas de ancho IGUAL (`flex-1` también en la última) y círculo centrado en la
+            // suya: así la etiqueta cae exactamente DEBAJO de su propio círculo. Antes la fila era
+            // `[círculo][línea]` dentro del `li` y la etiqueta se centraba sobre las dos, así que
+            // cada una aparecía media línea a la derecha de su paso (revisión de calidad visual del
+            // cierre de 3-C, capturas `cierre/visual/04-acceso-crear-cuenta-{768,1440}.png`). La
+            // línea ya no ocupa sitio en el flujo: va absoluta, del centro de este círculo al del
+            // siguiente.
+            <li key={paso.id} className="relative flex flex-1 flex-col items-center gap-1.5 px-1 text-center">
+              {esUltimo ? null : (
+                <span
+                  aria-hidden="true"
+                  className={twMerge(
+                    "absolute left-1/2 top-[13.5px] h-[3px] w-full rounded-full",
+                    paso.estado === "hecho" ? "bg-ui-primary" : "bg-ui-divider",
+                  )}
+                />
+              )}
+              <div className="relative z-10 flex items-center">
                 {paso.estado === "hecho" && paso.href !== undefined ? (
                   <a
                     href={paso.href}
@@ -82,22 +98,16 @@ export function WizardProgress({ pasos, className }: WizardProgressProps): JSX.E
                 ) : (
                   circulo
                 )}
-                {esUltimo ? null : (
-                  <span
-                    aria-hidden="true"
-                    className={twMerge("mx-1 h-[3px] flex-1 rounded-full", paso.estado === "hecho" ? "bg-ui-primary" : "bg-ui-divider")}
-                  />
-                )}
               </div>
               <span
                 aria-current={paso.estado === "actual" ? "step" : undefined}
                 className={twMerge(
-                  // `w-full` + `break-words`: `max-w-[76px]` solo era un TECHO — cuando la
-                  // columna del paso es más estrecha que 76 px (cuatro pasos en 300 px), la
-                  // etiqueta se salía y chocaba con la de al lado («EVENTOPLANTILLADATOSEDITOR»,
-                  // medido en la revisión del bloque 2). Ahora se ajusta a su columna y parte
-                  // palabra si hace falta.
-                  "label-sm hidden w-full max-w-[76px] break-words sm:block",
+                  // La etiqueta ocupa su columna (`w-full`, ya sin el techo de 76 px que la
+                  // estrechaba de más) y NUNCA parte una palabra: `break-words` cortaba
+                  // «CONTRASEÑA» en «CONTRASEÑ / A». Con `break-normal` el salto solo ocurre en los
+                  // espacios; por debajo de `sm` la etiqueta no se pinta (`11 §5`: en móvil, solo
+                  // números y línea), que es el caso en el que la columna es demasiado estrecha.
+                  "label-sm hidden w-full break-normal sm:block",
                   paso.estado === "actual" ? "text-ui-ink" : "text-ui-ink-muted",
                 )}
               >

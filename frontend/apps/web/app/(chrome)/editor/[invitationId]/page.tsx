@@ -199,8 +199,12 @@ export default function PaginaEditorInvitacion() {
       );
     }
     return (
-      <div role="alert" className="m-8 rounded-ui-card bg-ui-surface-raised p-6 shadow-ui-1">
-        <p className="text-md text-ui-ink">{loadError ?? es_MX.errores.generico}</p>
+      // `11 §7` (fila «Estados»): la frase de siempre arriba y el detalle técnico APARTE y
+      // secundario. Antes el detalle era el único texto, así que un fallo de red pintaba «Failed to
+      // fetch» en inglés como titular (revisión de calidad visual del cierre de 3-C).
+      <div role="alert" className="m-8 flex max-w-prose flex-col items-start rounded-ui-card bg-ui-surface-raised p-6 shadow-ui-1">
+        <p className="text-md text-ui-ink">{es_MX.errores.generico}</p>
+        {loadError ? <p className="mt-1 text-sm text-ui-ink-muted">{loadError}</p> : null}
         <Button className="mt-4" onClick={() => void useEditorStore.getState().load(invitationId)}>
           {es_MX.comun.reintentar}
         </Button>
@@ -381,7 +385,7 @@ export default function PaginaEditorInvitacion() {
           `critical`/`serious`). El panel y el lienzo SON el contenido del editor; la cabecera fija,
           la barra de pestañas y los avisos quedan fuera a propósito (no son el contenido, son
           chrome de la página). Mismas clases: `<main>` es de bloque por defecto, igual que `<div>`. */}
-      <main className={esMovil ? "flex min-h-0 flex-1 flex-col" : "grid min-h-0 flex-1 grid-cols-[minmax(280px,340px)_1fr]"}>
+      <main className={esMovil ? "flex min-h-0 flex-1 flex-col" : "grid min-h-0 flex-1 grid-cols-[minmax(300px,400px)_1fr]"}>
         <aside
           ref={panelRef}
           id="panel-editar"
