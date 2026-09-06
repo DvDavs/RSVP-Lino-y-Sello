@@ -1403,3 +1403,34 @@ Supuestos que tomé al corregir, para que el dueño los confirme o los cambie:
   preciso «No hay conexión…» de `errores.sinRed`: no metí `lib/i18n.ts` dentro de `lib/store.ts`
   para no meter texto de interfaz en el estado. Si se prefiere el mensaje preciso, el camino limpio
   es que el store guarde un código (`"red"`) y la pantalla lo traduzca.
+## Fase 3-C · 3c-adv (revisión adversarial del cierre)
+
+- **`apps/web` depende ahora de una ruta de fichero de `packages/ui`** (`../../packages/ui/scripts/
+  copiar-fuentes-publicas.ts` en su `build`/`dev`). **Supuesto:** es preferible un acoplo explícito
+  y visible al implícito de antes (que solo funcionaba entrando por turbo y dejaba el producto sin
+  tipografía en los tres caminos que de verdad lo sirven, `bitacora/3c-adv.md §1`). Alternativa si
+  el dueño prefiere otra cosa: mover el copiador a `apps/web/scripts/` y que `packages/ui` exporte
+  solo el manifiesto. `ADR-3C-ADV-01`.
+- **La compuerta de 24 px se aplica ahora al producto SIN la excepción «inline» de WCAG 2.2 2.5.8**
+  (`e2e/a11y-producto.spec.ts::objetivosDeAlMenos24px`). **Supuesto:** ninguno de los objetivos de
+  landing/acceso/ayuda/editor vive dentro de una frase, así que la excepción no aplica y admitirla
+  volvería la compuerta discutible. Sí se excluyen los elementos recortados (`sr-only`), que no son
+  objetivos hasta que reciben el foco; el enlace de salto se mide aparte, ya enfocado.
+- **`e2e/util/contraste.ts` no ve las capas hermanas** (`Composition` pone la forma en un `<div>`
+  absoluto detrás del contenido). Medido por píxel: bajo el `<h1>` de `/ayuda` hay **40 colores de
+  fondo distintos** y la compuerta mide **uno**; hoy el peor real es 13,47:1 contra un umbral de
+  4,5, así que no hay defecto, pero sí un hueco de método. **Pregunta al dueño:** ¿se amplía el
+  algoritmo (muestreo por píxel del rectángulo del texto, ~1 s por pantalla) o se acepta el hueco
+  con la regla de composición «ninguna forma por debajo de un texto» como control humano?
+- **`e2e/a11y-publico.spec.ts` sigue flakeando bajo paralelismo** pese al `document.fonts.ready`
+  que la fase 3-6 le puso: 1 roja de 2 pasadas completas con `--workers=2`, 3 de 3 verdes en
+  solitario, y `axe` sobre la misma URL da 0 violaciones. **Pregunta:** ¿se estabiliza (por ejemplo
+  esperando también a `requestAnimationFrame` doble tras `fonts.ready`) o se acepta y se documenta?
+  Tal como está, la compuerta de accesibilidad de la ruta pública puede dar rojo falso —y por el
+  mismo mecanismo, verde falso.
+- **`CDN_ORIGIN` por omisión es el puerto fijo `6003`** (`proxy.ts::origenDelCdn`), igual que
+  `remotePatterns` de `next.config.ts`. Con el protocolo de puertos propios que usan todas las
+  sesiones, el lienzo no pinta si nadie exporta esa variable en el proceso del servidor: medido,
+  5 pruebas del editor en rojo con `--workers=2`. **Pregunta:** ¿se deriva de
+  `NEXT_PUBLIC_API_BASE_URL` cuando `CDN_ORIGIN` no está, o se deja como está y se documenta en el
+  protocolo de arranque?

@@ -1,0 +1,45 @@
+== measure-lcp: protocolo de LCP (I-11) ==========================================
+puerto propio ......... 3141
+corridas objetivo ...... 9
+presupuesto ............ 2500 ms
+carga de la máquina ....  09:33:57 up  2:14,  0 user,  load average: 7.87, 8.88, 6.55
+====================================================================================
+puerto 3141: libre — confirmado antes de medir.
+
+-- lhci collect (9 corridas, throttlingMethod: devtools, puerto 3141) -----------
+(node:1412) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Started a web server with "PORT=3141 pnpm run start"...
+Running Lighthouse 9 time(s) on http://127.0.0.1:3141/i/pub_KPPNVC6CQ697HWWKZ7J43FP2EQ
+Run #1...done.
+Run #2...done.
+Run #3...done.
+Run #4...done.
+Run #5...done.
+Run #6...done.
+Run #7...done.
+Run #8...done.
+Run #9...done.
+Done running Lighthouse!
+
+corridas por número:
+  #1  LCP = 2205.9 ms
+  #2  LCP = 2027.3 ms
+  #3  LCP = 2168.2 ms
+  #4  LCP = 2145.0 ms
+  #5  LCP = 2789.3 ms
+  #6  LCP = 2116.1 ms
+  #7  LCP = 2536.4 ms
+  #8  LCP = 2450.3 ms
+  #9  LCP = 2201.8 ms
+
+N solicitado ........... 9
+N efectivo (válidas) .... 9
+Descartadas (NO_LCP) .... 0
+Mediana ................. 2201.8 ms
+Rango .................... 2027.3 – 2789.3 ms
+Presupuesto .............. 2500 ms
+
+RESULTADO: CUMPLE — la mediana (2201.8 ms) está dentro del presupuesto (2500 ms).
+====================================================================================
+LHR crudos conservados en: /home/user/wt-3c/adv/frontend/apps/web/.lighthouseci (uno por corrida, incluidas las descartadas).
