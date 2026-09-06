@@ -87,11 +87,11 @@ describe("componente <Icon /> — accesibilidad (11 §4.1)", () => {
     expect(screen.queryByRole("img")).toBeNull();
   });
 
-  it("tone=duo (por defecto) fija --tono a var(--ui-primary-soft); tone=mono a currentColor", () => {
+  it("tone=duo (por defecto) fija --tono a var(--ui-primary-soft); tone=mono a transparent", () => {
     const { container: conDuo } = render(createElement(Icon, { name: "inicio" }));
     const { container: conMono } = render(createElement(Icon, { name: "inicio", tone: "mono" }));
     expect(conDuo.querySelector("svg")?.style.getPropertyValue("--tono")).toBe("var(--ui-primary-soft)");
-    expect(conMono.querySelector("svg")?.style.getPropertyValue("--tono")).toBe("currentColor");
+    expect(conMono.querySelector("svg")?.style.getPropertyValue("--tono")).toBe("transparent");
   });
 
   it("size controla width/height (24 por defecto)", () => {

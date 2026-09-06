@@ -703,7 +703,13 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
             }
             set((s) => {
               s.loadState = "error";
-              s.loadError = error instanceof Error ? error.message : String(error);
+              // U-9 otra vez (revisión de calidad visual del cierre de 3-C): un fallo de red es un
+              // `TypeError` cuyo `message` es «Failed to fetch», en inglés y sin arreglo posible por
+              // parte de quien lo lee. La pantalla del editor lo enseñaba tal cual como ÚNICO texto.
+              // Aquí ya se traduce, igual que en `PublishDialog`, `AsistenteAcceso` y
+              // `traducir-errores.ts`; el resto de errores conservan su mensaje del backend, que
+              // viene en es-MX.
+              s.loadError = error instanceof TypeError ? null : error instanceof Error ? error.message : String(error);
             });
           }
         },

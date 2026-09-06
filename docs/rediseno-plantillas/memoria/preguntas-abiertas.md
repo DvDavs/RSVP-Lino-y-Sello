@@ -1348,3 +1348,28 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   (`/acceso`, `/editor`) a `@invitaciones/ui` directo. Borrados el shim, la carpeta `components/ui/`
   entera y la constante — sin preguntar, porque ya no tenían NINGÚN importador (cambio local,
   seguro, mecánico) y así lo pedía el propio brief de este bloque.
+
+## Fase 3-C · 3c-cv (revisión de calidad visual del cierre)
+
+Supuestos que tomé al corregir, para que el dueño los confirme o los cambie:
+
+- **P-3C-CV-1 · `tone="mono"` ahora es dibujo de línea, no silueta.** `ADR-3C-3-01` no dice para qué
+  se quería una silueta maciza; supuse que no se quería (produce iconos ilegibles en 30 de 82 casos)
+  y que «un solo tono» significa «sin segundo tono». Si algún sitio sí necesitaba la silueta,
+  se pide a mano con `style={{ "--tono": "currentColor" }}`. No encontré ninguno.
+- **P-3C-CV-2 · Ancho del panel de secciones.** Lo subí a `minmax(300px,400px)` porque a 340 px el
+  nombre de las secciones fijas se truncaba a una letra. La alternativa era acortar la insignia
+  «SIEMPRE VISIBLE» (125 px de una fila de ~290), que es texto de producto y no me toca decidir. Si
+  se prefiere una insignia más corta, el panel puede volver a 340 y el lienzo recupera 60 px.
+- **P-3C-CV-3 · Tema oscuro del producto.** `10 §1` pr. 3 pide «versión oscura del chrome como token,
+  no como excepción» y los tokens existen, pero `app/(chrome)/layout.tsx:42` fija `light` a propósito
+  y no hay conmutador. Supuse que es una decisión firme y no un pendiente; si no lo es, hace falta
+  una tarea (conmutador, persistencia, y las capturas oscuras de todas las pantallas).
+- **P-3C-CV-4 · Las cinco MEDIA de composición (M-3 a M-7 del handoff)** no las toqué porque
+  rediseñar `/acceso`, `/ayuda`, el paso 1 del asistente y el ritmo vertical de tres pantallas no es
+  una corrección de revisión. Falta decidir si entran en 3-C o pasan a la fase siguiente.
+- **P-3C-CV-5 · `errores.sinRed` en el editor.** Al cortar el mensaje crudo del `TypeError`, la
+  tarjeta de error del editor cae en «Algo salió mal. Inténtalo de nuevo.» en vez de en el más
+  preciso «No hay conexión…» de `errores.sinRed`: no metí `lib/i18n.ts` dentro de `lib/store.ts`
+  para no meter texto de interfaz en el estado. Si se prefiere el mensaje preciso, el camino limpio
+  es que el store guarde un código (`"red"`) y la pantalla lo traduzca.

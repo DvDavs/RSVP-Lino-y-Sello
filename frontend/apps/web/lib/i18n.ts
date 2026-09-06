@@ -538,7 +538,7 @@ export const es_MX = {
       enlaceNoCopiado: "No pudimos copiar el enlace. Selecciónalo y cópialo a mano.",
       tuEnlace: "El enlace de tus invitados",
       cerrar: "Cerrar",
-      descripcionExito: "Tu invitación ya está en línea.",
+      descripcionExito: "Copia el enlace y mándalo a tus invitados por WhatsApp.",
       noSePuedePublicar: "Todavía no se puede publicar: resuelve lo que está marcado arriba.",
       noPudimosDespublicar: "No pudimos despublicar tu invitación.",
       noPudimosRotar: "No pudimos generar un enlace nuevo.",
