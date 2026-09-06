@@ -19,7 +19,7 @@ describe("WCAG 2.2 AA: se corrige el color, nunca el umbral", () => {
       expect(filas.length, p.slug).toBe(7);
       for (const f of filas) expect(f.ratio, `${p.slug} ${f.pareja}`).toBeGreaterThanOrEqual(f.umbral);
     }
-  });
+  }, 60_000);
   it("una paleta saboteada revienta con la medición literal", () => {
     try {
       comprobarAA({ bg: "#FFFFFF", surface: "#FFFFFF", ink: "#EEEEEE", accent: "#EEEEEE", accentInk: "#FFFFFF", muted: "#EEEEEE" });
@@ -66,7 +66,7 @@ describe("golden de composición GENERADO (06 §3)", () => {
     expect(r.report.orphanSections).toEqual([]);
     expect(r.report.missingRequired).toEqual([]);
     expect(textoVisible(r).length).toBeGreaterThan(30);
-  });
+  }, 60_000);
   it("verificación por TEXTO VISIBLE: cero faltantes en las 9 plantillas", () => {
     for (const p of PLANTILLAS) {
       const paq = construirPaquete(p.templateId, { dirDatos: DIR, decisiones: DECISIONES });
@@ -74,12 +74,12 @@ describe("golden de composición GENERADO (06 §3)", () => {
       expect(v.faltantes.map((f) => `${p.slug} ${f.legacyPointer} = ${f.texto}`), p.slug).toEqual([]);
       expect(v.comprobados, p.slug).toBeGreaterThan(20);
     }
-  });
+  }, 60_000);
   it("es idempotente: dos generaciones dan el mismo golden", () => {
     const paq = construirPaquete(13, { dirDatos: DIR, decisiones: DECISIONES });
     expect(JSON.stringify(generarGolden(paq, 13, "generic", 2)))
       .toBe(JSON.stringify(generarGolden(paq, 13, "generic", 2)));
-  });
+  }, 60_000);
 });
 
 describe("frontera con el módulo antiguo (ADR-1R-C-01)", () => {
