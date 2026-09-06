@@ -1485,3 +1485,23 @@ muerto. Detalle en `bitacora/3c-ux-c.md`.
   dice sin rodeos «los planes se contratan con nuestro equipo, no en línea» y «todavía no se puede
   pagar desde la página». Si la respuesta es que sí debe haber compra en línea, esa frase y el flujo
   de `ContactoParaContratar` quedan obsoletos el día que exista un checkout.
+
+
+## Fase 3-C · cierre — lo que el dueño decide (resumen del orquestador)
+Las secciones «Fase 3-C · …» de arriba conservan cada supuesto con su contexto; esto es el índice de
+las que exigen decisión tuya, en orden de impacto:
+1. **Contacto para contratar** (UX-C, G-01): hoy el sitio no puede decir cómo comprar. Declara
+   `NEXT_PUBLIC_CONTACTO_WHATSAPP` (E.164) y/o `NEXT_PUBLIC_CONTACTO_CORREO`; sin ellas se muestra un
+   texto honesto de «se publicará aquí». ¿Habrá compra en línea o venta asistida?
+2. **Nombre de marca y logotipo**: se usa «Invitaciones» como wordmark de trabajo en Fraunces 800.
+3. **Imágenes reales**: 11 pendientes con prompt en `imagenes-pendientes.md` (hero, tipos de evento,
+   testimonios, pasos, ayuda); hasta entonces placeholders del sistema.
+4. **Publicar con contenido de ejemplo opcional** (UX-B, G-05): hoy se avisa y se ofrece ocultar la
+   sección; ¿debe bloquear también?
+5. **Tema oscuro**: existe como tokens y en la galería; el producto va en claro salvo ajuste explícito.
+6. **Galería `/design` en producción**: hoy con `noindex`; ¿bandera para excluirla del build?
+7. **Presupuesto de la portada**: 148,2 KB gz de 150; cualquier dependencia nueva lo rompe. El vendor
+   compartido (`tailwind-merge` + `react-slot`) se atribuye a todas las rutas.
+8. **Bloqueo de cuenta como denegación de servicio** (auth, heredado de 3-B): fuera de alcance.
+9. **`CDN_ORIGIN`/`NEXT_PUBLIC_CDN_ORIGIN` fijo al 6003 por omisión** (N-02 ya deja declararlo en
+   servidor; falta que `images.remotePatterns` de `next.config.ts` lo lea de la variable).

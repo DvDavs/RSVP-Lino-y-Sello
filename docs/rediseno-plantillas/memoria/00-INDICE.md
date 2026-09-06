@@ -39,14 +39,23 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
   `modules/auth`, área que el dueño acotó a I-02 con un «NO tocar nada más», así que **necesita su
   autorización expresa**; el arreglo propuesto es de una línea y está en `preguntas-abiertas.md`.
   Rama: `claude/fase-3b-cierre-orquestacion-z0pd4g`.
-- **Fase 3-C — sistema de diseño e identidad visual del producto: EN CURSO (2026-09-05).** Prompt en
-  `prompts/fase-3c-identidad-visual.md`. Rama de trabajo impuesta por el entorno:
-  `claude/fase-3c-identidad-visual-wqg0d2`, creada desde `claude/fase-3b-cierre-orquestacion-z0pd4g`
-  en `62e3c84` (fase 3 cerrada en `82128f5` + reglas de identidad visual y el prompt 3-C). Empieza por
-  el bloque -1 (N-01 autorizada por el dueño y N-02) y sigue con la dirección de arte (bloque 0),
-  cimientos, componentes, producto y cierre. Estado por bloque en `tablero.md`.
-- **Fase siguiente: 4 — kit de autor de plantillas.** Arranca leyendo `handoffs/3-para-fase-4.md`,
-  y antes de nada resuelve N-01 con el dueño.
+- **Fase 3-C — sistema de diseño e identidad visual del producto: CERRADA el 2026-09-06.**
+  Rama `claude/fase-3c-identidad-visual-wqg0d2` (desde `claude/fase-3b-cierre-orquestacion-z0pd4g` en
+  `62e3c84`). Bloque -1: N-01 y N-02 heredadas cerradas (`85ce3b6`). Bloque 0: dirección de arte
+  (`diseno/11-sistema-de-diseno.md`, moodboard con tres paletas y tres parejas tipográficas; elegidas
+  Bugambilia y Fraunces + Onest + Red Hat Mono). Bloque 1: `@invitaciones/tokens` (252 parejas AA
+  verificadas por script, 0 fallos), tipografía autoalojada, `@invitaciones/icons` (82) y formas (14).
+  Bloque 2: 25 componentes en `@invitaciones/ui` y galería `/design` con regresión visual, contraste
+  sobre la pila renderizada y axe (279 pruebas sin backend). Bloque 3: portada, acceso, ayuda, 404,
+  asistente de creación en cuatro pasos y chrome del editor sobre el sistema; e2e 70/70 contra
+  backend real, presupuestos `/i` 142 KB y `/` 148 KB gz, LCP bajo 2,5 s. Cierre: revisión visual
+  (CUMPLE tras 4 altas corregidas), adversarial (CERRABLE tras A-01/A-02) y recorrido de UX sin
+  instrucciones (NO al llegar, seis graves; corregidas por UX-A/B/C, ver `handoffs/3c-ux.md`).
+  Guía de 15 minutos en `guias/identidad-visual.md`; contrato en `contratos.md §13`. 24 ADR-3C
+  aceptadas. Regla nueva del dueño: contexto por agente ≤ 300k con handoff parcial y relevo.
+  Estado por bloque en `tablero.md`; arranque de la siguiente fase en `handoffs/3c-para-siguiente.md`.
+- **Fase siguiente: 4 — kit de autor de plantillas.** Arranca leyendo `handoffs/3-para-fase-4.md` y
+  `handoffs/3c-para-siguiente.md` (N-01 y N-02 ya están resueltas en la 3-C).
 - **Rama de la fase 2: `claude/fase-2-backend-orchestration-ksyuzi`**, creada desde `claude/agent-network-invitation-41nx5y` en `88238b2` (fase 1 cerrada en `4681b2c` + el prompt de la fase 2). El entorno de esta sesión obliga a trabajar sobre una rama propia por fase; `contratos.md §1` y `brief-comun.md` siguen nombrando la rama de la fase 1, que es la base, no la de trabajo actual.
 - Fases: 0 Preparación (cerrada) · 1 Diseño (cerrada) · 2 Backend (**cerrada**) · **3 Frontend (siguiente)** · 4 Plantillas y kit · 5 Migración · 6 Calidad y entrega.
 - Nota de entorno: en este entorno los sub-agentes **no** pueden lanzar sub-agentes. El orquestador de cada fase lanza todos los agentes directamente (red de un solo nivel).
