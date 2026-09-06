@@ -345,26 +345,25 @@ jobs:
       # supplied». Medido: 46 de 77 pruebas en rojo por esto en la corrida 34051529623, todas con el
       # mismo error. Se arregla con entorno, sin tocar una línea de `frontend/**`.
       #
-      # DIVERGENCIA runner/local nº 9 (ADR-CI-01): `playwright.config.ts` fija `workers: CI ? 4 :
-      # undefined`. El «79/79» del cierre de la fase 3-C se midió **en local**, donde `undefined`
-      # significa la mitad de los núcleos: **2 workers**. El runner tiene los mismos 4 vCPU que el
-      # contenedor de desarrollo, pero ahí encima corren la JVM del backend, el `next start` de
-      # producción y el contenedor de Postgres: con 4 workers, las pruebas que esperan a que el
-      # LIENZO PINTE de verdad (`editor-nucleo` E-N2/E-N3/E-N4, `paleta-preview`, `lienzo-csp`) se
-      # comen los 20 s del `toBeVisible` y los 30 s del test — 5 fallos y 2 flaky en la corrida
-      # 34052024407, con el caso de manual: `teclado-editor` E-10a falló en 23,5 s y pasó en el
-      # reintento en 5,2 s, ya sin carga. `--workers=2` reproduce las condiciones EXACTAS en las que
-      # se midió el 79/79; `--timeout` da holgura de reloj, no de aserciones. No se salta ni una
-      # prueba: siguen las 77 + 2, y `--fail-on-flaky-tests` sigue rompiendo el job por un flaky.
-      - name: e2e + a11y (2 workers, todos los specs menos a11y-publico)
-        run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=2 --timeout=60000 '^(?!.*a11y-publico\.spec\.ts).*$'
-        env:
-          TPL_DEV_DB: templates2_e2e
-          TPL_TEST_STATE_DIR: /tmp/templates2-pg
-          PGPASSWORD: postgres
-
-      - name: a11y del render público con un solo worker (I-CI-01)
-        run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=1 --timeout=60000 a11y-publico.spec.ts
+      # DIVERGENCIA runner/local nº 9 (ADR-CI-01) — UNA sola invocación con UN solo worker.
+      # `playwright.config.ts` fija `workers: CI ? 4 : undefined`, pero el «e2e 79/79» del cierre de
+      # la fase 3-C se midió EN LOCAL, donde `undefined` es la mitad de los núcleos: 2 workers.
+      # Nadie había medido nunca esta suite con 4. Medido aquí, en el runner, sobre el mismo commit:
+      #   · 4 workers → 5 fallos + 2 flaky (corrida 34052024407)
+      #   · 2 workers → 1 fallo  + 1 flaky (corrida 34052672869)
+      # Y el fallo que sobrevive NO es reloj: `editor-3c-evidencia.spec.ts` abre
+      # `invitacionSembrada()` —LA invitación compartida por ocho ficheros de pruebas— **sin**
+      # `conLockDeInvitacionSembrada`, el mutex entre procesos que `e2e/preparar.ts:110` creó
+      # justamente para eso. Dos pruebas del mismo fichero entran a la vez en la misma invitación y
+      # la segunda se queda sin lienzo. Es, palabra por palabra, el «fallo de aislamiento» que
+      # `06 §8.2` punto 4 describe; arreglarlo es trabajo de `frontend/**`, fuera de esta tarea.
+      # Mientras tanto el CI serializa: `--workers=1` hace imposible la interferencia entre procesos
+      # y de paso cubre `a11y-publico.spec.ts` (I-CI-01), que ya flakeaba con dos. Una sola
+      # invocación en vez de dos ahorra además un `next build` y un arranque de servidor enteros.
+      # NO se salta, omite ni pone en cuarentena ninguna prueba: corren las 79, y
+      # `--fail-on-flaky-tests` sigue rompiendo el job si alguna pasa solo en el reintento.
+      - name: e2e + a11y (las 79, un solo worker — ADR-CI-01, I-CI-01)
+        run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=1 --timeout=60000
         env:
           TPL_DEV_DB: templates2_e2e
           TPL_TEST_STATE_DIR: /tmp/templates2-pg

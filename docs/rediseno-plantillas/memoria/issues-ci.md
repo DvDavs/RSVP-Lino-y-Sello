@@ -4,24 +4,28 @@ Formato: `I-CI-nn` · qué se observa · dónde · qué se hizo · qué falta de
 Ninguna de estas issues justifica saltarse una prueba: la política anti-flake (`contratos.md §6`,
 ADR-1R-C-11) prohíbe la cuarentena sin issue, y aquí no hay ninguna prueba en cuarentena.
 
-## I-CI-01 · `a11y-publico.spec.ts` flakea con más de un worker — abierta
+## I-CI-01 · La suite e2e no está aislada: la invitación sembrada es compartida — abierta
 
-- **Qué se observa.** Con `fullyParallel: true` y dos o más workers, `e2e/a11y-publico.spec.ts`
-  falla de forma intermitente. Detectado en la fase 3-C y anotado como trampa en
-  `handoffs/3c-para-siguiente.md` §1 (*«`a11y-publico.spec.ts` flakea con dos workers»*).
-- **Dónde.** `frontend/apps/web/e2e/a11y-publico.spec.ts`; configuración
-  `frontend/apps/web/playwright.config.ts` (`workers: process.env.CI ? 4 : undefined`).
-- **Qué se hizo en el CI.** El job `e2e` invoca Playwright **dos veces**: la primera excluye ese
-  fichero y conserva los 4 workers; la segunda corre **solo ese fichero con `--workers=1`**. Las dos
-  llevan `--fail-on-flaky-tests`, así que el spec **se ejecuta y su fallo rompe el job igual que
-  cualquier otro**. No es `test.skip`, no es `test.fixme`, no hay cuarentena: es aislamiento de
-  concurrencia, declarado aquí y comentado en el propio `ci.yml`.
-- **Qué falta.** La causa raíz. `06 §8.2` punto 4 es explícito: *«si una prueba solo pasa con
-  `workers: 1`, es un fallo de aislamiento, no una excepción a conceder»*. El candidato es que este
-  spec navegue al render público de **la invitación sembrada por `seed-demo.sh`** (compartida entre
-  pruebas) en vez de crear la suya con el endpoint de fixture. Arreglarlo es trabajo de producto
-  (`frontend/**`), fuera del alcance de la tarea de CI; queda para la fase 4/6, que debe quitar el
-  segundo paso del workflow en cuanto el spec quede aislado.
+- **Qué se observa.** Con `fullyParallel: true` y más de un worker, la suite falla de forma no
+  determinista. Medido en el runner sobre el MISMO commit (`f9dcfe6` y `0932c81`): **4 workers → 5
+  fallos + 2 flaky** ([34052024407](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34052024407));
+  **2 workers → 1 fallo + 1 flaky** ([34052672869](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34052672869)).
+- **Causa raíz, verificada en el código.** `e2e/preparar.ts:68` `invitacionSembrada()` devuelve
+  **LA MISMA** invitación de la demostración a ocho ficheros de pruebas. El bloque 3-6 ya lo
+  documentó y añadió un mutex real entre procesos, `conLockDeInvitacionSembrada`
+  (`e2e/preparar.ts:110`), pero **`editor-3c-evidencia.spec.ts` no lo usa**: su `abrirEditor()`
+  llama a `invitacionSembrada()` a pelo, y sus dos pruebas entran a la vez en la misma invitación —
+  la segunda se queda sin `.lienzo-raiz` y agota los 30 s. `a11y-publico.spec.ts` es el caso
+  hermano que ya venía anotado como flaky con dos workers (`handoffs/3c-para-siguiente.md` §1).
+- **Qué se hizo en el CI.** El job invoca Playwright **una vez con `--workers=1`** (ADR-CI-01): sin
+  concurrencia entre procesos la interferencia es imposible. Ninguna prueba se salta: corren las 79
+  y `--fail-on-flaky-tests` sigue rompiendo el job. No hay `test.skip` ni `test.fixme` en el árbol.
+- **Qué falta, y es de `frontend/**`.** `06 §8.2` punto 4 no admite `workers: 1` como solución:
+  *«si una prueba solo pasa con `workers: 1`, es un fallo de aislamiento, no una excepción a
+  conceder»*. Lo mínimo: envolver `abrirEditor()` de `editor-3c-evidencia.spec.ts` (y el tramo
+  equivalente de `a11y-publico.spec.ts`) en `conLockDeInvitacionSembrada`. Lo correcto: que cada
+  prueba cree su propia invitación en vez de compartir la sembrada. Hecho eso, el CI puede volver a
+  subir los workers y esta issue se cierra.
 
 ## I-CI-02 · Las capturas de referencia atan el CI a Chromium 1194 — abierta
 

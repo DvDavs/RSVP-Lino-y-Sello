@@ -1775,7 +1775,7 @@ Todas con estado **propuesta**; solo el orquestador cambia el estado. Fecha 2026
 
 ---
 
-## ADR-CI-01 — En CI, el job `e2e` corre con 2 workers y 60 s de tope por prueba
+## ADR-CI-01 — En CI, el job `e2e` corre con UN worker y 60 s de tope por prueba
 - Fecha: 2026-09-06 · Estado: propuesta · Autor: tarea «CI real en GitHub Actions»
 - Contexto: `contratos.md §6` remite a `06 §8.2` (ADR-1R-C-11), que fija `fullyParallel: true` con
   **`workers: 4` en CI** y `timeout: 30_000`. Al ejecutar por primera vez el job `e2e` en un runner
@@ -1789,8 +1789,15 @@ Todas con estado **propuesta**; solo el orquestador cambia el estado. Fecha 2026
   2 workers**. El runner tiene los mismos 4 vCPU que el contenedor de desarrollo, pero encima de
   ellos corren además la JVM del backend, el `next start` de producción y el contenedor de Postgres.
   Nunca se había medido esta suite con 4 workers en ninguna parte.
-- Decisión: el workflow invoca Playwright con `--workers=2 --timeout=60000` (y `--workers=1` para
-  `a11y-publico.spec.ts`, I-CI-01). **No se toca `playwright.config.ts`**: la decisión vive en el CI,
+- Enmienda medida el mismo día: con `--workers=2` la corrida
+  [34052672869](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34052672869) bajó a **1
+  fallo + 1 flaky**, y el fallo que sobrevive **no es reloj**: `editor-3c-evidencia.spec.ts` abre
+  `invitacionSembrada()` —la invitación COMPARTIDA por ocho ficheros— sin el mutex entre procesos
+  `conLockDeInvitacionSembrada` que `e2e/preparar.ts:110` creó para eso, y sus dos pruebas se pisan.
+  Es un fallo de aislamiento real (issue **I-CI-01**), no una diferencia de máquina.
+- Decisión: el workflow invoca Playwright **una sola vez** con `--workers=1 --timeout=60000`. Con un
+  único proceso la interferencia entre pruebas es imposible, y de paso queda cubierto
+  `a11y-publico.spec.ts`. **No se toca `playwright.config.ts`**: la decisión vive en el CI,
   que es donde está la diferencia de máquina. `--fail-on-flaky-tests` se mantiene en las dos
   invocaciones y no se salta, omite ni pone en cuarentena ninguna prueba: siguen siendo 77 + 2.
 - Alternativas descartadas y por qué: (a) dejar 4 workers y aceptar los fallos — es rojo por la
@@ -1799,7 +1806,9 @@ Todas con estado **propuesta**; solo el orquestador cambia el estado. Fecha 2026
   bajar los workers — trata el síntoma y alarga el job sin quitar la contención; (d) tocar
   `playwright.config.ts` — está fuera del alcance de esta tarea (`frontend/**`) y cambiaría también
   el comportamiento local, que hoy es el bueno.
-- Consecuencias: el paso de e2e tarda más reloj (dos workers en vez de cuatro) dentro del objetivo
-  de < 25 min del workflow. La orden contractual de `06 §8.2` queda enmendada **solo para CI**: el
+- Consecuencias: el paso de e2e tarda más reloj (un worker en vez de cuatro), compensado en parte
+  porque una sola invocación ahorra un `next build` y un arranque de servidor enteros; sigue dentro
+  del objetivo de < 25 min del workflow. La orden contractual de `06 §8.2` queda enmendada **solo para CI**: el
   presupuesto de 30 s por prueba sigue vigente como criterio de diseño en local. Si la fase 6 mueve
-  el CI a un runner mayor, esta ADR debe revisarse: con más núcleos, 4 workers vuelve a ser correcto.
+  el CI a un runner mayor, esta ADR debe revisarse — pero subir los workers **exige antes cerrar
+  I-CI-01**: con la invitación sembrada compartida sin mutex, más paralelismo vuelve a romper.

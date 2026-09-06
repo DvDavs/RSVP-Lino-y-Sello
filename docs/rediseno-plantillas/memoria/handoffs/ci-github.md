@@ -32,7 +32,10 @@ corrida tras corrida, sin que nadie leyera el log. Ninguna e2e se ejecutó jamá
    backend arranca en 94 s. 9. **`workers: 4` nunca se había medido**: el «79/79» de la fase 3-C se
    midió en local, donde `workers: CI ? 4 : undefined` da **2**. Con 4, y con la JVM y Postgres en
    los mismos 4 vCPU, las 5 pruebas que esperan a que el lienzo PINTE agotan el reloj (E-10a falló en
-   23,5 s y pasó en el reintento en 5,2 s). → `--workers=2 --timeout=60000`, **ADR-CI-01**.
+   23,5 s y pasó en el reintento en 5,2 s). Con 2 workers quedó **1 fallo + 1 flaky**, y ese fallo no
+   es reloj: `editor-3c-evidencia.spec.ts` abre la invitación SEMBRADA COMPARTIDA sin el mutex
+   `conLockDeInvitacionSembrada` (`preparar.ts:110`) y sus dos pruebas se pisan — aislamiento, no
+   máquina. → una sola invocación con `--workers=1 --timeout=60000`: **ADR-CI-01**, issue I-CI-01.
 
 ## 2. Estructura, tiempos y anti-flake
 Los jobs corrían en cadena (`e2e` con `needs: [backend, frontend]`) y la galería era un paso de `e2e`.
