@@ -42,6 +42,9 @@ export default defineConfig({
         "app/(public)/_componentes/composed-lectura.ts",
         // Bloque 3-5: los 14 campos del panel de contenido y sus pruebas (U-17 y una por tipo de bloque).
         "components/fields/**/*.{ts,tsx}",
+        // Fase 3-C, 3C-6: el asistente de creación de `/editor` (pasos, catálogo filtrado por tipo
+        // de evento y datos básicos). La PÁGINA de la ruta sigue fuera: es el armazón de Suspense.
+        "components/asistente/**/*.{ts,tsx}",
       ],
       exclude: ["**/*.test.{ts,tsx}", "**/*.d.ts"],
       thresholds: { lines: 60, functions: 65, branches: 50, statements: 60 },

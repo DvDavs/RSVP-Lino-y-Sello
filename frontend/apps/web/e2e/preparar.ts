@@ -136,6 +136,16 @@ export async function conLockDeInvitacionSembrada<T>(fn: () => Promise<T>): Prom
 }
 
 /**
+ * Filas de `invitation_template` del catálogo sembrado (`V1__initial_schema.sql`,
+ * `V24__…`), verificadas por SQL en este árbol. `template_id` decide DOS cosas que el asistente de
+ * `/editor` lee: el tipo de evento (`event_type`) y el nivel de plan (`invitation_plan.is_premium`,
+ * 1 o 2). Por eso hacen falta tres: el camino feliz, el filtro por tipo y el bloqueo por plan.
+ */
+export const TEMPLATE_BODA_BASICO = 4;
+export const TEMPLATE_BODA_PREMIUM = 5;
+export const TEMPLATE_QUINCE_PREMIUM = 6;
+
+/**
  * Invitación NUEVA con `uses_templates2=true` y **sin documento**: el estado inicial real del
  * producto, en el que `GET .../document` responde `404 TPL_DOCUMENT_NOT_STARTED` y el editor tiene
  * que llamar antes a `:choose-template` (contratos §4, ADR-1R-X-03).
@@ -144,13 +154,13 @@ export async function conLockDeInvitacionSembrada<T>(fn: () => Promise<T>): Prom
  * pero `InvitationEntity` las mapea a primitivos de Kotlin y un NULL convierte cualquier ruta del
  * editor en `500 TPL_INTERNAL` (defecto preexistente y ajeno, `handoffs/3-0a.md` §3).
  */
-export function invitacionSinDocumento(): number {
+export function invitacionSinDocumento(templateId = TEMPLATE_BODA_PREMIUM): number {
   const cliente = customerIdDemo();
   const id = sql(`INSERT INTO invitation (customer_id, template_id, is_enabled, is_paid, is_finished,
       all_events_same_location, uses_templates2, date, time, hashtag, cover_photo_url,
       children_allowed, young_allowed, has_music, has_gallery, has_extra_modules, total_amount,
       created_at, updated_at)
-    VALUES (${cliente}, 5, true, true, false, false, true, '2027-04-18', '17:00', '#PruebaE2E', '',
+    VALUES (${cliente}, ${templateId}, true, true, false, false, true, '2027-04-18', '17:00', '#PruebaE2E', '',
       false, true, true, true, true, 0, now(), now()) RETURNING id;`);
   return Number(id);
 }
