@@ -1848,3 +1848,26 @@ Ver `memoria/decisiones-dueno.md` (D-01…D-08): sin migración; marca Lino & Se
   kit↔backend de los 12 `package_hash`, y el catálogo con su filtro por `eventKind` se verificaron
   contra el backend real sin discrepancia alguna. Detalle en `memoria/handoffs/4-7.md` y
   `evidencia/fase-4/4-7/LEEME.md`.
+
+## Bloque 4-3 (guía «cómo agregar una plantilla» + checklist + `frontend/templates/README.md`)
+- **`doctor` no detecta que falta `pnpm install` en el resto del monorepo.** Sobre un worktree recién
+  clonado, `pnpm plantilla doctor` (y cualquier otro comando) sale con `sh: 1: tsx: not found` /
+  `spawn ENOENT` en vez de un mensaje del propio kit — `doctor` sólo comprueba que
+  `packages/template-kit/node_modules` EXISTE, no que las dependencias de `tsx` (parte del árbol de
+  arriba) estén resueltas. Lo hice `pnpm install` por costumbre, no porque `doctor` me lo dijera.
+  **No lo arreglé** (fuera de mi encargo: `frontend/**` sólo se toca en `templates/README.md`).
+  Reproducible: en un worktree recién clonado, `pnpm plantilla doctor` antes de `pnpm install`.
+- **El alias `AssetEntry.id` exige la forma exacta `as_` + 26 caracteres Crockford-base32
+  (`/^as_[0-9A-HJKMNP-TV-Z]{26}$/`, sin I/L/O/U), y nada en el kit ni en su ayuda lo dice.** Lo
+  descubrí por prueba y error (`TPL_MANIFEST_INVALID`/`TPL_DEFAULTS_INVALID` con
+  `Invalid string: must match pattern …`, sin sugerencia de qué escribir en su lugar — a diferencia
+  de casi todos los demás errores del kit, que sí dan un valor concreto que sí cumple). Para alguien
+  que no programa, "inventa un alias con esta forma exacta" es el punto más flojo de todo el
+  recorrido de imágenes. **Pregunta:** ¿el kit debería generar el alias por ti (por ejemplo al añadir
+  el archivo a `assets/`) en vez de dejar que el autor teclee algo con forma de ULID a mano?
+  Documenté el paso en la guía tal como funciona hoy. Reproducible: poner cualquier `id`/`assetId`
+  que no cumpla el patrón y correr `pnpm plantilla check <dir>`.
+- Heredado de `4-1b.md` (no reproducido de nuevo, confirmado que sigue el mismo estado por ser área
+  prohibida): `packages/icons` y `packages/ui` no compilan, y `apps/web` tiene 4 pruebas rojas por
+  `bautizo-elegante@1.0.0` (declara Great Vibes/Poppins, no importadas en `publico.css`). Sigue fuera
+  de mi área.
