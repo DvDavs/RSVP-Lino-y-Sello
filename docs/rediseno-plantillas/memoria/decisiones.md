@@ -1772,3 +1772,34 @@ Todas con estado **propuesta**; solo el orquestador cambia el estado. Fecha 2026
 - Decisión: el copiador se ejecuta también desde `apps/web` (`"build": "node ../../packages/ui/scripts/copiar-fuentes-publicas.ts && next build"`, e igual en `dev`). Es idempotente (seis `copyFileSync`) y no cambia nada cuando ya se entró por turbo. Y se añade una **compuerta que mide sobre HTTP, no sobre el disco** (`e2e/landing.spec.ts`): los tres `.woff2` responden 200 con más de 10 KB y el navegador reporta `Fraunces` y `Onest` como `loaded` con el `<h1>` pidiendo `Fraunces`.
 - Alternativas descartadas y por qué: (a) **Versionar `apps/web/public/fonts/*.woff2`**: 328 KB de binarios en el repositorio que hay que re-sincronizar a mano cada vez que suba `@fontsource-variable/*`, justo lo que `preload.ts` quiso evitar con un manifiesto único. (b) **Cambiar el `webServer` de Playwright y el job de CI a `pnpm run build` de turbo**: arregla las pruebas pero NO el producto — un despliegue que haga `next build` en `apps/web` seguiría sirviendo 404. (c) **Dejarlo como estaba y documentarlo mejor**: ya estaba documentado (el comentario de `preload.ts` avisa del acoplo para «otra app que consumiera `@invitaciones/ui`») y aun así nadie vio que la app afectada era ésta; una regla que sólo vive en un comentario no es una compuerta. (d) **Un `prepare`/`postinstall` en `packages/ui`**: pnpm no ejecuta pre/post scripts de paquetes del workspace por omisión y el efecto dependería de una opción de configuración del cliente.
 - Consecuencias: `apps/web` pasa a depender explícitamente de una ruta de fichero de `packages/ui` (`../../packages/ui/scripts/...`). Es un acoplo real y visible, preferible al implícito de antes. Si el paquete cambia la ruta del script hay que tocar aquí; la compuerta de `landing.spec.ts` lo hará evidente en la primera corrida. Prueba negativa hecha: con `public/fonts/` vacío, la regresión visual de la galería da **124 fallos**; con las fuentes servidas, **168/168 en verde**.
+
+---
+
+## ADR-CI-01 — En CI, el job `e2e` corre con 2 workers y 60 s de tope por prueba
+- Fecha: 2026-09-06 · Estado: propuesta · Autor: tarea «CI real en GitHub Actions»
+- Contexto: `contratos.md §6` remite a `06 §8.2` (ADR-1R-C-11), que fija `fullyParallel: true` con
+  **`workers: 4` en CI** y `timeout: 30_000`. Al ejecutar por primera vez el job `e2e` en un runner
+  de GitHub (corrida [34052024407](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34052024407))
+  quedaron **5 fallos y 2 flaky de 79**, todos en las pruebas que esperan a que el LIENZO PINTE
+  (`editor-nucleo` E-N2/E-N3/E-N4, `paleta-preview`, `lienzo-csp`): agotan los 20 s del
+  `toBeVisible` del iframe y los 30 s del test. El caso de manual es `teclado-editor` E-10a: **falló
+  en 23,5 s y pasó en el reintento en 5,2 s**, ya sin carga — es reloj, no comportamiento.
+  Dato que lo explica: el «e2e 79/79» del cierre de la fase 3-C se midió **en local**, donde
+  `workers: process.env.CI ? 4 : undefined` resuelve a `undefined`, o sea **la mitad de los núcleos:
+  2 workers**. El runner tiene los mismos 4 vCPU que el contenedor de desarrollo, pero encima de
+  ellos corren además la JVM del backend, el `next start` de producción y el contenedor de Postgres.
+  Nunca se había medido esta suite con 4 workers en ninguna parte.
+- Decisión: el workflow invoca Playwright con `--workers=2 --timeout=60000` (y `--workers=1` para
+  `a11y-publico.spec.ts`, I-CI-01). **No se toca `playwright.config.ts`**: la decisión vive en el CI,
+  que es donde está la diferencia de máquina. `--fail-on-flaky-tests` se mantiene en las dos
+  invocaciones y no se salta, omite ni pone en cuarentena ninguna prueba: siguen siendo 77 + 2.
+- Alternativas descartadas y por qué: (a) dejar 4 workers y aceptar los fallos — es rojo por la
+  máquina, no por el producto, y enseñaría a ignorar el CI; (b) marcar las cinco pruebas como
+  flaky/cuarentena — prohibido por ADR-1R-C-11 y por el encargo; (c) subir solo el `timeout` sin
+  bajar los workers — trata el síntoma y alarga el job sin quitar la contención; (d) tocar
+  `playwright.config.ts` — está fuera del alcance de esta tarea (`frontend/**`) y cambiaría también
+  el comportamiento local, que hoy es el bueno.
+- Consecuencias: el paso de e2e tarda más reloj (dos workers en vez de cuatro) dentro del objetivo
+  de < 25 min del workflow. La orden contractual de `06 §8.2` queda enmendada **solo para CI**: el
+  presupuesto de 30 s por prueba sigue vigente como criterio de diseño en local. Si la fase 6 mueve
+  el CI a un runner mayor, esta ADR debe revisarse: con más núcleos, 4 workers vuelve a ser correcto.

@@ -14,6 +14,8 @@ producto, pruebas, `build.gradle.kts` o `frontend/**`.
 
 | [21](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34051529623) | `e897684` | `backend` ✅ · `frontend` ✅ · `design` ✅ 279/279 en 4 m 59 s · `e2e` ❌ 31/77 | el Chromium 1194 iguala el runner al entorno local: la galería pasa entera a la primera. El `e2e` cae por un fallo NUEVO y real: `e2e/preparar.ts` abre `psql` sin contraseña contra el servicio `postgres:16` (46 pruebas, el mismo error en todas). Backend arriba en 94 s, siembra en 4 s |
 
+| [22](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34052024407) | `0932c81` | `e2e` ❌ **70 pasan, 5 fallan, 2 flaky** en 4,9 min | el entorno de Postgres arregla 39 de las 46. Lo que queda es reloj: las 5 son las que esperan a que el LIENZO PINTE, y `teclado-editor` E-10a falló en 23,5 s y pasó en el reintento en 5,2 s. Causa: `workers: 4` en CI contra los 2 con los que se midió el 79/79 en local → ADR-CI-01 |
+
 (la tabla se completa abajo con las corridas de esta rama)
 
 ## Decisiones tomadas

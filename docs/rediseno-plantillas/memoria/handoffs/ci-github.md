@@ -28,8 +28,11 @@ corrida tras corrida, sin que nadie leyera el log. Ninguna e2e se ejecutó jamá
    `invitation` no tiene ruta HTTP, ADR-2-4-02) con `TPL_DEV_DB` —defecto `invitaciones_dev`, que en
    CI no existe— y sin contraseña. El clúster local usa `trust`; el servicio `postgres:16` no.
    **46 de 77 pruebas en rojo por esto.** → `TPL_DEV_DB`, `TPL_TEST_STATE_DIR` y `PGPASSWORD` en el paso.
-8. **Sin caché de Gradle en `e2e`**: el mismo `gradle/actions/setup-gradle@v4` que el job `backend`.
-   Con caché, el backend arranca en 94 s.
+8. **Sin caché de Gradle en `e2e`**: el mismo `setup-gradle@v4` del job `backend`; con caché el
+   backend arranca en 94 s. 9. **`workers: 4` nunca se había medido**: el «79/79» de la fase 3-C se
+   midió en local, donde `workers: CI ? 4 : undefined` da **2**. Con 4, y con la JVM y Postgres en
+   los mismos 4 vCPU, las 5 pruebas que esperan a que el lienzo PINTE agotan el reloj (E-10a falló en
+   23,5 s y pasó en el reintento en 5,2 s). → `--workers=2 --timeout=60000`, **ADR-CI-01**.
 
 ## 2. Estructura, tiempos y anti-flake
 Los jobs corrían en cadena (`e2e` con `needs: [backend, frontend]`) y la galería era un paso de `e2e`.
