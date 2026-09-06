@@ -1335,3 +1335,62 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   workspace pnpm a propósito (ADR-3-2d-01) y no puede importar `@invitaciones/schema`. **Supuesto
   tomado:** copiar seis líneas es preferible a romper ese aislamiento. ¿Se acepta, o el kit de autor
   de la fase 4 debe entrar en el workspace pnpm y consumir el esquema de verdad?
+
+## Fase 4 · bloque 0C (deuda de contraste AA de `diseno/ejemplos/` y `packages/schema/golden/`)
+
+- **[ALTA] `I-31_PALETTE_CONTRAST_BELOW_AA` sigue DECLARADA y NO IMPLEMENTADA: el registro de una
+  plantilla que incumple AA se acepta sin un solo aviso.** Estado exacto, verificado: la invariante
+  está reservada por nombre y nada más — `frontend/packages/schema/src/invariants.ts:25` («queda
+  RESERVADO para ADR-1R-F-06») y `src/main/kotlin/.../schema/InvariantCode.kt:7` («está **reservado**
+  … y **no se declara**»); el catálogo exigible es `I-01`…`I-30` (`contratos.md §3`) y `ADR-1R-F-06`
+  sigue *aceptada con enmienda* pero con la implementación aplazada «a la fase 3/4». Hueco que queda
+  abierto tras este bloque: hay ya TRES compuertas mecánicas —`themeAA` en
+  `frontend/templates/scripts/art/paleta-aa.mjs` (construcción de los paquetes del repositorio),
+  `packages/sections/test/theme/contraste-plantillas.test.ts` (los `theme.json` reales) y la nueva
+  `packages/schema/test/paleta-contraste.contract.test.ts` (los dos árboles de referencia)— y las
+  tres corren **en CI, sobre lo que está en el repositorio**. Ninguna corre en
+  `POST /master/templates2/versions`: una plantilla registrada desde fuera de este repositorio entra
+  con la paleta que quiera. **No se implementa aquí**: es backend, prohibido en esta fase salvo ADR
+  con revisor. Coste estimado de cerrarlo, por analogía con `I-29` (la última invariante añadida):
+  ~1 día de un agente — (a) `InvariantCode.kt` gana `I_31_PALETTE_CONTRAST_BELOW_AA` y
+  `Invariants.kt` una función de ~25 líneas (luminancia sRGB + las nueve parejas), (b) el espejo TS
+  en `packages/schema/src/invariants.ts` y su fichero de casos en `golden/invariants/` (regenerado,
+  no escrito), (c) engancharla en `validateManifest`/`TemplatePackageParser` con rechazo
+  `422 TPL_MANIFEST_INVALID`, (d) enmendar `04 §17.1` y el propio texto de `ADR-1R-F-06` para que la
+  invariante exija las NUEVE parejas de `ADR-3-3b-03` y no las cinco originales — si se implementa
+  con las cinco, el backend seguirá admitiendo paletas que el render público no puede usar, que es
+  literalmente la consecuencia que `ADR-3-3b-03` dejó anotada. **Pregunta al dueño:** ¿lo cubre el
+  kit de autor de la fase 4 por su lado (comprobación en la herramienta, que no es compuerta porque
+  se puede registrar sin pasar por ella), o se abre el bloque de backend para cerrar `I-31` de
+  verdad? Supuesto tomado mientras tanto: se deja sin implementar y se documenta.
+
+- **[MEDIA] Dos copias a mano de la paleta `blush` VIEJA sobreviven en ficheros que no son míos.**
+  (a) `docs/rediseno-plantillas/diseno/01-dominio-y-esquema.md:196` enseña el `theme.json` de ejemplo
+  con `"accent": "#C98B8B", "muted": "#9A8A86"` — los valores que incumplen AA, en el documento de
+  dominio que un autor de plantillas lee primero. (b) `frontend/packages/sections/test/fixtures.ts:194-196`
+  tiene la misma copia. Mi alcance de ficheros llega a `diseno/ejemplos/**`, no al resto de `diseno/`,
+  y `packages/sections` lo trabaja otra sesión viva. **Supuesto tomado:** no se tocan; ninguna prueba
+  falla por ello (653 de `sections` en verde) porque esa fixture no se mide contra AA. ¿Quién los
+  actualiza a `#B05555`/`#7B6E6B`?
+
+- **[MEDIA] Los casos de `golden/compose/**` y `golden/fixtures/operations-base.json` siguen
+  llevando `muted #999999` (2,85:1 sobre `bg`, 2,60:1 sobre `surface`).** Salen de `themeFixture()`
+  (`packages/schema/scripts/fixtures.ts:121`), cuya paleta por defecto está espejada **a mano** en el
+  lado Kotlin: `src/test/kotlin/.../composition/Fx.kt:127`, `InvariantPathTest.kt:126` y
+  `ManifestNormalizacionTest.kt:125`. Corregir la fixture regenera 18 casos de `golden/compose/` y
+  deja los tres ficheros Kotlin desincronizados, y el backend es territorio prohibido en esta fase.
+  **Supuesto tomado:** se corrige sólo la paleta del golden que ES un `theme.json`
+  (`golden/templates/richtext-marcas-1.0.0`, vía `PALETA_MARCAS_AA` en `gen-golden-templates.ts`) y
+  se deja la fixture genérica como está; la compuerta nueva cubre `theme.json`, no los `.case.json`.
+  Coste de cerrarlo: ~1 hora (un hexadecimal en `fixtures.ts`, tres en Kotlin, `pnpm gen:golden` y
+  `./gradlew test`), pero exige permiso sobre `src/test/kotlin/**`. ¿Se autoriza?
+
+- **[BAJA] La compuerta nueva importa la fórmula de contraste de otro paquete por ruta relativa.**
+  `packages/schema/test/paleta-contraste.contract.test.ts` hace
+  `import … from "../../sections/src/theme/contrast.ts"`. No puede declararlo como dependencia
+  (`sections` ya depende de `schema`) y la alternativa era una **cuarta** copia de la misma fórmula
+  en el repositorio (hoy están en `sections/src/theme/contrast.ts`, `tokens/src/contraste.ts`,
+  `templates/scripts/art/color.mjs` y `apps/web/e2e/design-contraste.spec.ts`). **Supuesto tomado:**
+  se prefiere el import feo a la cuarta copia; si `contrast.ts` se mueve, la prueba deja de compilar
+  (ruidoso, no silencioso). ¿Merece la fórmula un paquete propio —o un módulo de `packages/schema`,
+  que es quien tiene el espejo Kotlin— del que beban las cuatro?

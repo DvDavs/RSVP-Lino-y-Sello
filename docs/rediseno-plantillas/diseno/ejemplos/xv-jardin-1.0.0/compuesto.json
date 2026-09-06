@@ -12,9 +12,9 @@
       "bg": "#F8F6FB",
       "surface": "#FFFFFF",
       "ink": "#372C43",
-      "accent": "#9B7FC0",
+      "accent": "#835FB0",
       "accentInk": "#FFFFFF",
-      "muted": "#A797B8"
+      "muted": "#7D6798"
     },
     "fonts": {
       "heading": {

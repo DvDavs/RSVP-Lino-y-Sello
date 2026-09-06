@@ -1,0 +1,50 @@
+== pasada 1 ==
+== golden/templates ==
+  boda-clasica-1.0.0: OK (coincide con diseno/ejemplos)
+  xv-jardin-1.0.0: OK (coincide con diseno/ejemplos)
+  richtext-marcas-1.0.0: OK (sintetizado: richText con marks, I-01)
+== golden/compose ==
+golden/compose: 18 casos de las reglas R1-R9 (O-10 cerrada como paridad, no como cobertura TS)
+== golden/invariants ==
+golden/invariants: 30 ficheros, 102 casos totales
+== golden/blocks ==
+golden/blocks: 14 ficheros (14 tipos de bloque)
+== golden/operations ==
+golden/operations: 11 ficheros, 54 casos con reducerResult REAL (O-01 cerrada); golden/fixtures/operations-base.json y operations-batches.json (5 lotes) emitidos
+== golden/migrations ==
+golden/migrations: op-shapes.cases.json (22 casos), errors.cases.json (5 casos), 2 pares antes/después (fixture-tpl/1.0.0-to-2.0.0 con las 11 operaciones, fixture-tpl/1.0.0-to-1.1.0 sin contenido que mover) y 1 caso de switchTemplate (switch/plantilla-a-to-plantilla-b)
+gen:golden — listo.
+sha256 del árbol golden/: eabaf85bb3a798f4c1d257edef920798b3ddbd33cf11dbbedf0929747c09e2d0  -
+
+== pasada 2 ==
+== golden/templates ==
+  boda-clasica-1.0.0: OK (coincide con diseno/ejemplos)
+  xv-jardin-1.0.0: OK (coincide con diseno/ejemplos)
+  richtext-marcas-1.0.0: OK (sintetizado: richText con marks, I-01)
+== golden/compose ==
+golden/compose: 18 casos de las reglas R1-R9 (O-10 cerrada como paridad, no como cobertura TS)
+== golden/invariants ==
+golden/invariants: 30 ficheros, 102 casos totales
+== golden/blocks ==
+golden/blocks: 14 ficheros (14 tipos de bloque)
+== golden/operations ==
+golden/operations: 11 ficheros, 54 casos con reducerResult REAL (O-01 cerrada); golden/fixtures/operations-base.json y operations-batches.json (5 lotes) emitidos
+== golden/migrations ==
+golden/migrations: op-shapes.cases.json (22 casos), errors.cases.json (5 casos), 2 pares antes/después (fixture-tpl/1.0.0-to-2.0.0 con las 11 operaciones, fixture-tpl/1.0.0-to-1.1.0 sin contenido que mover) y 1 caso de switchTemplate (switch/plantilla-a-to-plantilla-b)
+gen:golden — listo.
+sha256 del árbol golden/: eabaf85bb3a798f4c1d257edef920798b3ddbd33cf11dbbedf0929747c09e2d0  -
+
+== git status del árbol golden/ tras las dos pasadas (sólo los ficheros de esta corrección) ==
+ M frontend/packages/schema/golden/templates/boda-clasica-1.0.0/compuesto.json
+ M frontend/packages/schema/golden/templates/boda-clasica-1.0.0/theme.json
+ M frontend/packages/schema/golden/templates/richtext-marcas-1.0.0/compuesto.json
+ M frontend/packages/schema/golden/templates/richtext-marcas-1.0.0/theme.json
+ M frontend/packages/schema/golden/templates/xv-jardin-1.0.0/compuesto.json
+ M frontend/packages/schema/golden/templates/xv-jardin-1.0.0/theme.json
+
+== regeneración de la referencia de diseno/ejemplos, idempotente ==
+diseno/ejemplos/boda-clasica-1.0.0/compuesto.json: sin cambios
+diseno/ejemplos/xv-jardin-1.0.0/compuesto.json: sin cambios
+golden/templates/boda-clasica-1.0.0: coincide byte a byte con diseno/ejemplos
+golden/templates/xv-jardin-1.0.0: coincide byte a byte con diseno/ejemplos
+golden/templates/richtext-marcas-1.0.0: sintetizado (richText con marks, I-01)
