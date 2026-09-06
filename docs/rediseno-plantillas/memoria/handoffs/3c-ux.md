@@ -96,3 +96,13 @@ mal»; en «Crear cuenta» se pinta el mensaje del propio servidor (`@StrongPass
 `check-budget` en presupuesto (`/` 148,2/150 KB gz), e2e 14/14 contra backend propio. Detalle y las
 dos trampas de arranque encontradas en `bitacora/3c-ux-c.md`. Pendiente de decisión del dueño: el
 WhatsApp/correo reales y si hay compra en línea (`preguntas-abiertas.md § Fase 3-C · UX-C`).
+## Correcciones UX-B
+G-04, G-05 y G-06 quedaron cerradas con pruebas (`PublishDialog.test.tsx`, `coherencia-fechas.ts`,
+`contenido-de-ejemplo.ts` nuevo) y verificadas contra backend real: 533/533 unitarias, typecheck
+limpio, 11/11 en `publicar.spec.ts` + `cambiar-fecha.spec.ts` + `editor-nucleo.spec.ts`. Además del
+relevo, un bug real (no solo de test): con el aviso de fechas (G-04) y la lista de ejemplo (G-05) a
+la vez, el `Dialog` (`packages/ui`, sin `max-height` ni `overflow`) deja el botón «Publicar» fuera
+del viewport e inalcanzable — cualquier clienta con bastante contenido de ejemplo se habría topado
+con lo mismo. Corregido acotando el contenido del diálogo (`max-h-[60vh] overflow-y-auto`,
+`PublishDialog.tsx`), mismo patrón que `ConflictDialog.tsx`. Detalle: `bitacora/3c-ux-b.md`.
+P-3C-UXB-1 (¿bloquear el contenido de ejemplo opcional?) sigue abierta en `preguntas-abiertas.md`.

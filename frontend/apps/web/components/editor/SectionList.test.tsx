@@ -127,6 +127,8 @@ describe("SectionList", () => {
     });
     render(<SectionList manifest={null} />);
     expect(screen.queryByTestId("section-visible-story")).toBeNull();
-    expect(screen.getByText("Siempre visible")).toBeTruthy();
+    // M-11 (`bitacora/3c-ux.md §4`): debajo de `sm` el candado lleva el mismo texto para lectores de
+    // pantalla y a partir de `sm` la insignia — ambos viven en el DOM a la vez.
+    expect(screen.getAllByText("Siempre visible").length).toBeGreaterThan(0);
   });
 });

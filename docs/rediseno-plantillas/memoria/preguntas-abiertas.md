@@ -1505,3 +1505,42 @@ las que exigen decisión tuya, en orden de impacto:
 8. **Bloqueo de cuenta como denegación de servicio** (auth, heredado de 3-B): fuera de alcance.
 9. **`CDN_ORIGIN`/`NEXT_PUBLIC_CDN_ORIGIN` fijo al 6003 por omisión** (N-02 ya deja declararlo en
    servidor; falta que `images.remotePatterns` de `next.config.ts` lo lea de la variable).
+
+## Fase 3-C · UX-B (correcciones graves del editor y la publicación)
+
+- **P-3C-UXB-1 · ¿el contenido de ejemplo OPCIONAL debe bloquear la publicación, o solo avisar?**
+  Decisión de producto pendiente, y es la única que queda abierta de G-05. Lo implementado respeta el
+  contrato vigente (`03 §6`, `contratos.md §12.3`): **solo bloquean los obligatorios** (`required` +
+  `default`); todo lo demás —«Nombre de la mamá», el itinerario de muestra, una sección entera de
+  ejemplo— se enumera en la revisión previa, sección por sección y con el texto entre comillas, con
+  «Editar» por fila y «Ocultar sección» cuando la sección entera es de muestra, y el botón deja de
+  decir «Publicar» a secas para decir «Publicar de todos modos» mientras haya avisos. **Pregunta:**
+  ¿basta con verlo, o una invitación con secciones enteras de ejemplo no debería poder publicarse?
+  Si la respuesta es «bloquear», el cambio es del backend (`ReleaseService.bloqueos`), no del
+  cliente: aquí solo habría que cambiar el tono de la fila.
+- **P-3C-UXB-2 · «Usar la fecha del evento en el itinerario» no se puede ofrecer sobre un itinerario
+  de EJEMPLO, y es justo el caso de G-04.** Un ítem que solo vive en los *defaults* no es
+  direccionable (`TPL_ITEM_UNKNOWN`, la misma raíz que G-03) y materializarlo con `addItem`
+  promovería contenido de demostración a contenido de la clienta: eso desactiva el bloqueo de
+  publicación de `03 §6` y es exactamente lo que prohíbe la objeción O-08 de
+  `packages/schema/src/operations.ts`. Por eso el atajo de un toque aparece solo cuando el itinerario
+  ya es suyo, y con el de ejemplo la acción es «Revisar» (que lleva al itinerario) más la fila de
+  G-05 que dice que sigue siendo de muestra. **Pregunta:** si se resuelve G-03 materializando los
+  grupos de los *defaults* al crear el documento, este caso desaparece solo. ¿Se resuelve por ahí?
+- **P-3C-UXB-3 · el aviso de fechas sigue sin bloquear** (se mantiene P-3-8-4). La regla nueva es:
+  hay incoherencia cuando **ningún** momento visible del itinerario cae el día del evento; si alguno
+  cae ese día, los demás son legítimos (civil la víspera, brunch al día siguiente). Con esa regla el
+  falso positivo que se temía en el bloque 3-8 no existe, y por eso ya se comparan también los
+  *defaults*. **Supuesto:** que ninguna plantilla tiene un `dateTimeRange` que NO sea del itinerario
+  del evento (verificado en `boda-clasica@1.0.0` y `xv-jardin@1.0.0`: solo `event.cards[when]`).
+- **Supuse que `activeRelease.documentRevision` está en la respuesta de `GET .../document`** aunque
+  `contratos.md §12.3` no lo nombra: verificado contra el backend real en esta sesión (`invitationId`
+  3 del clúster 6114 devuelve `{releaseId, publishedAt, contentHash, documentRevision, stale,
+  staleReason}`). Es lo que permite decir «cambios sin publicar» sin volver a preguntar al servidor
+  en cada tecla. Si algún día deja de venir, el estado degrada a `activeRelease.stale` a secas.
+- **M-10 no lo pude reproducir leyendo el código** («subir una foto borra el texto alternativo ya
+  escrito»): `ImageField.confirmarRecorte` conserva el alt (`getValues("alt")`,
+  `components/fields/ImageField.tsx:141`). Queda abierta con esa nota; hace falta reproducirla en
+  navegador para saber por qué puerta se pierde.
+- **B-13 (objetivos táctiles de 36 px) no es mío**: sale del tamaño `sm` de `Button` en
+  `@invitaciones/ui`, no del editor. Sigue en pie tal y como la dejó 3C-UX.
