@@ -1,0 +1,24 @@
+# Cobertura de hojas de F1 — salida literal de `pnpm --filter @invitaciones/migration-legacy run cobertura-hojas`
+# Generado el 2026-09-06T16:16Z por el sub-agente 4-2. Node v22.22.2.
+
+default_visual_boda_basico.json     hojas= 5003 mapeadas= 164 presentacion= 4822 descartadas= 15 bloqueantes=  2 SIN MAPEAR=   0
+default_content_boda_basico.json    hojas=   75 mapeadas=  64 presentacion=    1 descartadas= 10 bloqueantes=  0 SIN MAPEAR=   0
+default_visual_boda_premium.json    hojas= 6623 mapeadas= 232 presentacion= 6336 descartadas= 53 bloqueantes=  2 SIN MAPEAR=   0
+default_content_boda_premium.json   hojas=   58 mapeadas=  47 presentacion=    1 descartadas= 10 bloqueantes=  0 SIN MAPEAR=   0
+default_visual_xv_premium.json      hojas= 4793 mapeadas= 179 presentacion= 4553 descartadas= 59 bloqueantes=  2 SIN MAPEAR=   0
+default_content_xv_premium.json     hojas=  120 mapeadas= 104 presentacion=    8 descartadas=  8 bloqueantes=  0 SIN MAPEAR=   0
+default_visual_bautizo.json         hojas= 3830 mapeadas= 139 presentacion= 3660 descartadas= 29 bloqueantes=  2 SIN MAPEAR=   0
+default_content_bautizo.json        hojas=  106 mapeadas=  85 presentacion=    8 descartadas= 13 bloqueantes=  0 SIN MAPEAR=   0
+default_visual_comunion.json        hojas= 3830 mapeadas= 139 presentacion= 3660 descartadas= 29 bloqueantes=  2 SIN MAPEAR=   0
+default_content_comunion.json       hojas=  104 mapeadas=  83 presentacion=    8 descartadas= 13 bloqueantes=  0 SIN MAPEAR=   0
+default_visual_confirmacion.json    hojas= 3830 mapeadas= 139 presentacion= 3660 descartadas= 29 bloqueantes=  2 SIN MAPEAR=   0
+default_content_confirmacion.json   hojas=  104 mapeadas=  83 presentacion=    8 descartadas= 13 bloqueantes=  0 SIN MAPEAR=   0
+default_visual_cumpleanos.json      hojas= 3830 mapeadas= 139 presentacion= 3660 descartadas= 29 bloqueantes=  2 SIN MAPEAR=   0
+default_content_cumpleanos.json     hojas=  123 mapeadas= 104 presentacion=   10 descartadas=  9 bloqueantes=  0 SIN MAPEAR=   0
+default_visual_boda_premium_2.json  hojas= 5500 mapeadas= 190 presentacion= 5130 descartadas=178 bloqueantes=  2 SIN MAPEAR=   0
+default_content_boda_premium_2.json hojas=   69 mapeadas=  59 presentacion=    0 descartadas= 10 bloqueantes=  0 SIN MAPEAR=   0
+default_visual_evento.json          hojas= 3671 mapeadas= 133 presentacion= 3510 descartadas= 26 bloqueantes=  2 SIN MAPEAR=   0
+default_content_evento.json         hojas=  112 mapeadas=  81 presentacion=    8 descartadas= 23 bloqueantes=  0 SIN MAPEAR=   0
+
+TOTAL de patrones de hoja SIN MAPEAR en los 9 pares: 0  (el gate de ADR-1R-C-01 exige 0)
+Reglas que no casaron ninguna hoja: 13 (V-COUPLE-HONOREE-NULO-NB, V-COUPLE-HONOREE-B, V-COUPLE-HONOREE-PHOTO-NULO-NB, V-COUPLE-HONOREE-PHOTO-B, V-COUPLE-GROOM-NB, V-COUPLE-BRIDE-NB, V-FAM-INTRO-OBJ, V-GEN-ICON-CONTENT, V-GEN-CONTENT, C-CELEBRANT-B, C-TXT-COUPLEMSG-B, C-PHR-CELEBRATED-B, C-PHR-PAREJA)

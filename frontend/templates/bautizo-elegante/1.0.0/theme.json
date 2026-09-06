@@ -1,0 +1,44 @@
+{
+  "palettes": [
+    {
+      "id": "violeta",
+      "name": {
+        "es-MX": "Violeta"
+      },
+      "tokens": {
+        "bg": "#F8F9FA",
+        "surface": "#FFFFFF",
+        "ink": "#2B2B2B",
+        "accent": "#9400D3",
+        "accentInk": "#FFFFFF",
+        "muted": "#9746B9"
+      }
+    }
+  ],
+  "fontSets": [
+    {
+      "id": "great-vibes-poppins",
+      "name": {
+        "es-MX": "Great Vibes y Poppins"
+      },
+      "heading": {
+        "family": "Great Vibes",
+        "weights": [
+          400,
+          700
+        ],
+        "source": "google"
+      },
+      "body": {
+        "family": "Poppins",
+        "weights": [
+          400,
+          600
+        ],
+        "source": "google"
+      }
+    }
+  ],
+  "defaultPaletteId": "violeta",
+  "defaultFontSetId": "great-vibes-poppins"
+}
