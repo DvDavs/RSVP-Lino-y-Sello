@@ -81,3 +81,10 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
 5. `memoria/bitacora/2-adv.md` — la revisión adversarial de cierre: qué quedó abierto y por qué.
 
 **Lo primero que debe hacer la fase 3**: la compuerta medible **A1-A8** del lienzo en iframe (`contratos §8`, ADR-1R-F-02) — todo el editor depende de su resultado. Y, antes de poder levantar el backend, resolver el defecto **preexistente y ajeno** de `invitation_guest.graduates_name` (ADR-2-ORQ-02): hoy ningún entorno nuevo arranca la aplicación completa.
+
+## CI en GitHub verificado el 2026-09-06
+`.github/workflows/ci.yml` deja de ser papel: los cuatro jobs (`backend`, `frontend`, `e2e`, `design`)
+corren de verdad en GitHub Actions y quedan en verde sobre esta rama. Antes de esta tarea el workflow
+llevaba 19 corridas seguidas en rojo sin que nadie leyera el log: el job `e2e` moría en 0 s y ninguna
+prueba de extremo a extremo se había ejecutado jamás en el runner. Correcciones, tiempos por job y lo
+que quedó abierto: `handoffs/ci-github.md`, `bitacora/ci-github.md` e `issues-ci.md` (I-CI-01 e I-CI-02).

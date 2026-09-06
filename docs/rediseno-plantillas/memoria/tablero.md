@@ -135,3 +135,10 @@ suite completa tras cada merge; commit y push por bloque.
 | Cierre · revisión de calidad visual (3 viewports, 18 pantallas, 51 capturas) | 3c-cv | Opus | **CUMPLE** tras 4 altas corregidas (`1b978ba`) | iconos `mono` macizos (82 regenerados), panel de secciones, `WizardProgress`, error en inglés; galería 279/279 con referencias regeneradas; e2e 70/70 |
 | Cierre · recorrido de UX sin instrucciones (móvil y escritorio, 64 capturas) | 3c-ux → UX-A/B/C | Opus → Opus + relevos Sonnet | **NO al llegar** (6 graves) → corregidas | G-01 contacto configurable (UX-C, `70e58ca`), G-02/G-03/G-06b asistente (UX-A, `b27297b`), G-04/G-05/G-06a editor (UX-B, `a330081`); relevos Sonnet con encargos mínimos tras el límite de uso y el corte de contexto; cierre en `0f68f4d`: e2e 79/79, galería 279/279 |
 | Cierre · adversarial de a11y y rendimiento | 3c-adv | Opus | **CERRABLE** tras A-01/A-02 (`ece4069`) | fuentes daban 404 en los tres caminos (ahora copiadas en el build de `web` con compuerta HTTP); objetivos < 24 px en marca, salto y volver; contraste 0 fallos en 9 pantallas con sabotaje; 2 585 pruebas, e2e 71/71 |
+
+## CI en GitHub verificado el 2026-09-06
+`.github/workflows/ci.yml` deja de ser papel: los cuatro jobs (`backend`, `frontend`, `e2e`, `design`)
+corren de verdad en GitHub Actions y quedan en verde sobre esta rama. Antes de esta tarea el workflow
+llevaba 19 corridas seguidas en rojo sin que nadie leyera el log: el job `e2e` moría en 0 s y ninguna
+prueba de extremo a extremo se había ejecutado jamás en el runner. Correcciones, tiempos por job y lo
+que quedó abierto: `handoffs/ci-github.md`, `bitacora/ci-github.md` e `issues-ci.md` (I-CI-01 e I-CI-02).
