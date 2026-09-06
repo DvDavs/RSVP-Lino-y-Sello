@@ -36,7 +36,7 @@
           "id": "cover.title",
           "role": "coverTitle",
           "label": {
-            "es-MX": "Nombre o título principal de la portada"
+            "es-MX": "Título de portada"
           },
           "type": "text",
           "required": true
@@ -45,7 +45,7 @@
           "id": "cover.date",
           "role": "coverDate",
           "label": {
-            "es-MX": "Fecha del evento tal como se ve en la portada"
+            "es-MX": "Fecha del evento"
           },
           "type": "date"
         },
@@ -61,7 +61,7 @@
           "id": "cover.image",
           "role": "coverImage",
           "label": {
-            "es-MX": "Fotografía principal de la portada"
+            "es-MX": "Foto de portada"
           },
           "type": "image",
           "required": true
@@ -87,7 +87,7 @@
           "id": "celebrant.title",
           "role": "celebrantsHeading",
           "label": {
-            "es-MX": "Encabezado de la sección de celebrantes"
+            "es-MX": "Encabezado"
           },
           "type": "text"
         },
@@ -95,7 +95,7 @@
           "id": "celebrant.honoree",
           "role": "honoree",
           "label": {
-            "es-MX": "Persona homenajeada cuando el evento gira en torno a una sola (XV, bautizo)"
+            "es-MX": "Persona homenajeada"
           },
           "type": "person",
           "required": true
@@ -104,7 +104,7 @@
           "id": "celebrant.message",
           "role": "honoreeMessage",
           "label": {
-            "es-MX": "Mensaje de la persona homenajeada"
+            "es-MX": "Mensaje"
           },
           "type": "richText"
         }
@@ -147,7 +147,7 @@
               "id": "name",
               "role": "personName",
               "label": {
-                "es-MX": "Nombre de una persona dentro de una lista de familia"
+                "es-MX": "Nombre"
               },
               "type": "person",
               "required": true
@@ -156,7 +156,7 @@
               "id": "label",
               "role": "personLabel",
               "label": {
-                "es-MX": "Papel de esa persona en el evento (madre, padrino, testigo)"
+                "es-MX": "Parentesco"
               },
               "type": "text"
             }
@@ -194,7 +194,7 @@
           "id": "event.cards",
           "role": "eventCards",
           "label": {
-            "es-MX": "Lista repetible de momentos del evento (misa, recepción, fiesta)"
+            "es-MX": "Momentos"
           },
           "type": "group",
           "itemLabel": {
@@ -205,7 +205,7 @@
               "id": "title",
               "role": "eventTitle",
               "label": {
-                "es-MX": "Nombre de un momento del evento"
+                "es-MX": "Nombre del momento"
               },
               "type": "text",
               "required": true
@@ -214,7 +214,7 @@
               "id": "when",
               "role": "eventWhen",
               "label": {
-                "es-MX": "Intervalo de fecha y hora de un momento del evento"
+                "es-MX": "Cuándo"
               },
               "type": "dateTimeRange"
             },
@@ -222,7 +222,7 @@
               "id": "place",
               "role": "eventPlace",
               "label": {
-                "es-MX": "Lugar de un momento del evento, con dirección y mapa"
+                "es-MX": "Dónde"
               },
               "type": "location"
             }
@@ -261,7 +261,7 @@
           "id": "gallery.photos",
           "role": "galleryPhotos",
           "label": {
-            "es-MX": "Lista repetible de fotografías de la galería"
+            "es-MX": "Fotos"
           },
           "type": "group",
           "itemLabel": {
@@ -272,7 +272,7 @@
               "id": "photo",
               "role": "galleryPhoto",
               "label": {
-                "es-MX": "Una fotografía de la galería"
+                "es-MX": "Foto"
               },
               "type": "image",
               "required": true
@@ -310,7 +310,7 @@
           "id": "dressCode.rules",
           "role": "dressCodeRules",
           "label": {
-            "es-MX": "Lista repetible de reglas de vestimenta"
+            "es-MX": "Reglas"
           },
           "type": "group",
           "itemLabel": {
@@ -321,7 +321,7 @@
               "id": "title",
               "role": "dressCodeTitle",
               "label": {
-                "es-MX": "Nombre de la regla de vestimenta (etiqueta, formal, playa)"
+                "es-MX": "Nombre de la regla"
               },
               "type": "text",
               "required": true
@@ -330,7 +330,7 @@
               "id": "detail",
               "role": "dressCodeDetail",
               "label": {
-                "es-MX": "Explicación de la regla de vestimenta"
+                "es-MX": "Descripción"
               },
               "type": "text"
             }
@@ -367,7 +367,7 @@
           "id": "rsvp.note",
           "role": "rsvpNote",
           "label": {
-            "es-MX": "Mensaje principal de la sección de confirmación"
+            "es-MX": "Nota"
           },
           "type": "text"
         }
@@ -390,7 +390,7 @@
           "id": "footer.note",
           "role": "footerNote",
           "label": {
-            "es-MX": "Nota de cierre al pie de la invitación"
+            "es-MX": "Nota de cierre"
           },
           "type": "text"
         }

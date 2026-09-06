@@ -1,0 +1,17 @@
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/1c/frontend/packages/template-kit
+> node bin/plantilla.mjs -- doctor
+
+OK    Node: v22.22.2 (el monorepo exige >= 22.22)
+OK    pnpm: pnpm 10.33.0
+OK    Dependencias instaladas: 5 rutas del workspace instaladas (raíz, kit, tsx, schema, sections)
+OK    Backend: http://127.0.0.1:6081 responde (HTTP 200 a /public/i/sonda/exists)
+OK    TPL_DEV_PORT: TPL_DEV_PORT=6081
+OK    TPL_DEV_DB: TPL_DEV_DB=invitaciones_f4_1c
+OK    TPL_TEST_STATE_DIR: TPL_TEST_STATE_DIR=/tmp/templates2-pg-f4-1c
+AVISO Cuenta MASTER: se usará demo.master@example.com
+      El ayudante de registro crea y promueve `demo.master@example.com` si no existe (registrar-http.sh); si quieres otra cuenta, exporta TPL_MASTER_EMAIL y TPL_MASTER_PASS.
+AVISO Base sembrada: no se puede comprobar desde aquí sin consultar la base
+      `scripts/smoke.sh` da 4/19 sobre un clúster recién creado y 19/19 sólo DESPUÉS de `scripts/seed-demo.sh` (handoffs/4-0a.md §3.1). Si el smoke falla en la ruta 2, es esto.
+OK    Chromium (Playwright): PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
+
+10 comprobación(es) · 0 sin resolver · 2 aviso(s)

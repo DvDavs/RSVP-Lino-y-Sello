@@ -70,11 +70,25 @@ export function diagnosticar(e: EntornoDoctor): readonly Diagnostico[] {
     : { nombre: "pnpm", estado: "falta", detalle: "no está en el PATH",
         arreglo: "`corepack enable && corepack prepare pnpm@10.33.0 --activate` (la versión la fija `packageManager` en frontend/package.json)." });
 
-  const kit = join(e.raiz, "frontend/packages/template-kit/node_modules");
-  d.push(e.existe(kit)
-    ? { nombre: "Dependencias instaladas", estado: "ok", detalle: "frontend/packages/template-kit/node_modules existe", arreglo: "" }
-    : { nombre: "Dependencias instaladas", estado: "falta", detalle: "falta node_modules del kit",
-        arreglo: "`cd frontend && pnpm install` (instala todo el workspace; el kit necesita @invitaciones/schema y @invitaciones/sections)." });
+  // Un `pnpm install` a medias no es teórico: la bitácora 4-5 §1 empezó la prueba con `tsx: not
+  // found` porque el worktree no tenía node_modules. Se comprueba TODO lo que el kit necesita en
+  // tiempo de ejecución, no sólo su propio directorio: la raíz del monorepo, los dos paquetes que
+  // importa y el binario de `tsx`. (El caso extremo —ni siquiera `tsx`— lo atrapa antes
+  // `bin/plantilla.mjs`, que no necesita nada instalado para poder decirlo.)
+  const dependencias = [
+    ["frontend/node_modules", "la raíz del monorepo"],
+    ["frontend/packages/template-kit/node_modules", "el kit"],
+    ["frontend/packages/template-kit/node_modules/.bin/tsx", "el runner de TypeScript (`tsx`)"],
+    ["frontend/packages/schema/node_modules", "@invitaciones/schema"],
+    ["frontend/packages/sections/node_modules", "@invitaciones/sections"],
+  ] as const;
+  const ausentes = dependencias.filter(([r]) => !e.existe(join(e.raiz, r)));
+  d.push(ausentes.length === 0
+    ? { nombre: "Dependencias instaladas", estado: "ok",
+        detalle: `${dependencias.length} rutas del workspace instaladas (raíz, kit, tsx, schema, sections)`, arreglo: "" }
+    : { nombre: "Dependencias instaladas", estado: "falta",
+        detalle: `falta ${ausentes.map(([r, q]) => `${q} (${r})`).join(", ")}`,
+        arreglo: "`cd frontend && pnpm install` (instala TODO el workspace, no sólo el kit: `plantilla` importa @invitaciones/schema y @invitaciones/sections y arranca con tsx). Sin eso, `pnpm plantilla` no llega ni a ejecutarse." });
 
   const base = e.env["TPL_DEV_BASE"];
   if (!base) {

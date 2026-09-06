@@ -6,6 +6,8 @@ antes de pedir revisión) y para quien la revisa (repite el comando, no te fíes
 Guía completa, con cada comando y sus errores: `guias/como-agregar-una-plantilla.md`.
 
 ## Entorno
+- [ ] `cd frontend && pnpm install` hecho en esta copia del repositorio (sin él `pnpm plantilla` no
+      arranca; el propio comando te lo dice con `FALTA Dependencias instaladas`).
 - [ ] `pnpm plantilla doctor` no imprime ningún `FALTA` (los `AVISO` de cuenta MASTER y base
       sembrada son normales si ya sembraste antes).
 
@@ -18,6 +20,12 @@ Guía completa, con cada comando y sus errores: `guias/como-agregar-una-plantill
       llegó a terminar de validar y hay que mirar el error de arriba.
 - [ ] Ningún texto de `defaults.json` es el de relleno que trae el andamio (frases del tipo "Nombre
       o título principal de la portada"): todos son textos reales del ejemplo.
+- [ ] `check` no reportó ningún `AVISO TPL_LABEL_DE_ANDAMIO`: ningún `label` de `template.json` se
+      quedó con la frase con la que el catálogo describe el hueco. Repásalos igualmente uno por uno
+      leyendo `template.json` — en las secciones de familia el `label` se PUBLICA (título del grupo,
+      parentesco bajo cada nombre), así que ahí es texto de cara al invitado, no un rótulo interno.
+- [ ] Cada hueco que no sea un texto suelto (`richText`, `location`, `date`, grupos) se rellenó con
+      la forma que da `pnpm plantilla bloque <tipo>`, no a ojo.
 - [ ] Toda imagen obligatoria (las que `pnpm plantilla secciones <tipo>` marca `obligatorio`) tiene
       un archivo real en `assets/` y una entrada en `defaults.json` — no un hueco vacío.
 
@@ -26,6 +34,8 @@ Guía completa, con cada comando y sus errores: `guias/como-agregar-una-plantill
       paquete no pasa `check`, `preview` enseña el mismo diagnóstico de tres líneas, no una página
       en blanco — si ves eso, vuelve al punto de `check`).
 - [ ] Revisada en los dos marcos a la vez (390 y 1280 px) — no sólo el de escritorio.
+- [ ] En la captura no aparece ningún texto que suene a instrucción para quien edita («Lista
+      repetible de…», «Título de la sección») en un sitio donde lo vería un invitado.
 - [ ] `pnpm plantilla capturas <dir>` produce 3 PNG (390/768/1280) **fuera** de `<dir>`, en
       `<slug>/capturas/` — ábrelos y compáralos con el previsualizador.
 - [ ] Ninguna captura muestra texto sobre foto sin separación (papel, banda, tarjeta) ni un

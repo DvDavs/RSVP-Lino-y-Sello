@@ -10,6 +10,7 @@ pnpm plantilla nueva mi-boda --evento wedding
 pnpm plantilla check templates/mi-boda/1.0.0
 pnpm plantilla registrar templates/mi-boda/1.0.0
 pnpm plantilla doctor
+pnpm plantilla bloque richText        # qué se escribe dentro de un bloque de ese tipo
 ```
 
 ## Comandos
@@ -21,6 +22,7 @@ pnpm plantilla doctor
 | `registrar <dir> [--raiz <dir>] [--sin-check]` | `check` y, si pasa, `POST /master/templates2/versions` con token MASTER. |
 | `doctor` | Comprueba el entorno y dice cómo arreglar cada cosa que falte. |
 | `secciones [<tipo>]` | Imprime el catálogo: variantes, huecos, roles y qué escribe el andamio. |
+| `bloque [<tipo>]` | La forma de un tipo de bloque: qué se escribe en `defaults.json` (el valor, con ejemplo mínimo copiable) y qué en `template.json`. Sin `<tipo>`, los 14. |
 | `preview <dir> [--puerto <n>] [--paleta <id>] [--fuentes <id>] [--sin-marcadores]` | Levanta el previsualizador local y **se queda escuchando**: la plantilla con sus defaults, en móvil y escritorio a la vez, y se repinta al guardar cualquiera de los tres `.json`. |
 | `capturas <dir> [--destino <dir>] [--anchos 390,768,1280] [--paleta <id>] [--seccion <clave>]` | Fotografía la plantilla con Chromium en tres anchos y escribe los PNG **fuera** del directorio de la versión. |
 

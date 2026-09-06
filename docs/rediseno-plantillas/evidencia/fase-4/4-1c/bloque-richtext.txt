@@ -1,0 +1,35 @@
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/1c/frontend/packages/template-kit
+> node bin/plantilla.mjs -- bloque richText
+
+richText — Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre.
+
+  EL VALOR, en defaults.json bajo "<blockId>" (campos obligatorios: kind, doc):
+    {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Hola"
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+  EL BLOQUE, en template.json dentro de `sections[].blocks` (campos obligatorios: id, role, label, type):
+    {
+      "id": "seccion.relato",
+      "type": "richText",
+      "role": "sectionIntro",
+      "label": {
+        "es-MX": "Introducción"
+      }
+    }
+
+  Roles que admiten este tipo: celebrantAText, celebrantBText, honoreeMessage, familyIntro, galleryIntro, giftOptionDetail, storyBody, rsvpNote, footerNote, sectionIntro, celebrantsMessage.

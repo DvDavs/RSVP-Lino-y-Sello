@@ -4,6 +4,7 @@
 // y una librería más es una superficie más que mantener. Todo lo que imprime sale de los módulos de
 // `src/`, que son los que las pruebas ejercitan; aquí sólo hay parseo y despacho.
 import { isAbsolute, resolve } from "node:path";
+import { fichaDeBloque, listaDeBloques } from "./bloques.ts";
 import { check } from "./check.ts";
 import { diagnosticar, entornoReal, formatearDoctor } from "./doctor.ts";
 import { formatearHallazgos, resumen } from "./formato.ts";
@@ -59,6 +60,8 @@ export const AYUDA = `plantilla — kit de autor de plantillas (fase 4)
       --evento     uno de: ${TIPOS_DE_EVENTO.join(", ")}
       --secciones  lista separada por comas (por omisión ${SECCIONES_POR_DEFECTO.join(",")});
                    tipos: ${TIPOS_DE_SECCION.join(", ")}
+      --destino    dónde cuelga el paquete: escribe <destino>/<slug>/<version>/, así que el slug
+                   NO va en la ruta (con --destino /tmp/taller sale /tmp/taller/<slug>/1.0.0)
 
   pnpm plantilla check <dir> [--no-escribir] [--estricto] [--silencioso]
       Valida el paquete y explica cada fallo con su puntero, el problema y la sugerencia.
@@ -76,6 +79,10 @@ export const AYUDA = `plantilla — kit de autor de plantillas (fase 4)
 
   pnpm plantilla secciones [<tipo>]
       Imprime el catálogo de secciones: variantes, huecos, roles y cuáles escribe el andamio.
+
+  pnpm plantilla bloque [<tipo>]
+      La FORMA de un tipo de bloque, sin abrir código: qué se escribe en defaults.json (el valor,
+      con su ejemplo mínimo copiable) y qué en template.json (el bloque). Sin <tipo>, los 14.
 
   pnpm plantilla preview <dir> [--puerto <n>] [--paleta <id>] [--fuentes <id>] [--sin-marcadores]
       Levanta el previsualizador local (Vite + packages/sections) y lo deja escuchando: la
@@ -113,6 +120,7 @@ export function ejecutar(argv: readonly string[]): ResultadoCli {
       return { codigo: informe.includes("FALTA") ? 1 : 0, salida: informe };
     }
     case "secciones": return cmdSecciones(posicionales[1]);
+    case "bloque": case "bloques": return cmdBloque(posicionales[1]);
     case "preview": case "capturas":
       // Los dos son asíncronos (levantan un servidor y, `capturas`, un navegador). `ejecutar` es
       // síncrona y lo seguirá siendo: las pruebas de los otros cinco comandos comparan cadenas sin
@@ -230,7 +238,19 @@ function cmdSecciones(tipo?: string): ResultadoCli {
     }
     lineas.push("");
   }
+  lineas.push("Cada hueco dice de qué TIPO es. Para ver qué se escribe dentro de un tipo:");
+  lineas.push("  pnpm plantilla bloque <tipo>   (por ejemplo `pnpm plantilla bloque richText`)");
   return { codigo: 0, salida: lineas.join("\n").trimEnd() };
+}
+
+function cmdBloque(tipo?: string): ResultadoCli {
+  if (tipo === undefined) return { codigo: 0, salida: listaDeBloques() };
+  try {
+    return { codigo: 0, salida: fichaDeBloque(tipo) };
+  } catch (e) {
+    // `describeBlockType` ya lanza con la sugerencia por cercanía (handoffs/4-0b.md).
+    return { codigo: 2, salida: (e as Error).message };
+  }
 }
 
 /**

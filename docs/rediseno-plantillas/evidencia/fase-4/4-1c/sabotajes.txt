@@ -1,0 +1,46 @@
+### S1 — sin el ejemplo del valor en TPL_DEFAULTS_INVALID (se restaura la sugerencia genérica de antes)
+     → expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+     → expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+     → expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  test/usabilidad-4-1c.test.ts > 1. defaults.json de un tipo que el autor no conoce (bitácora 4-5 §4) > un `richText` escrito como si fuera un `text` explica la forma entera, con ejemplo copiable
+AssertionError: expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+ FAIL  test/usabilidad-4-1c.test.ts > 1. defaults.json de un tipo que el autor no conoce (bitácora 4-5 §4) > dentro de una ficha de grupo, el mensaje resuelve el tipo del bloque de la ficha
+AssertionError: expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+[32m-   Sugerencia: [7mEl bloque "event.cards → place" es de tipo `location`: Un lugar con nombre, dirección opcional y enlace opcional al mapa. Campos obligatorios del valor: kind, name. Ejemplo mínimo, copiable tal cual en defaults.json: {"kind":"location","name":"Jardín Las Rosas"}. La forma de cualquier tipo de bloque, sin abrir código: `pnpm plantilla bloque location`[27m.[39m
+ FAIL  test/usabilidad-4-1c.test.ts > 3. itemId y alias de asset (bitácora 4-5 §5, bitácora 4-3 §4) > un `itemId` con una letra prohibida dice cuál es el alfabeto y da uno válido
+AssertionError: expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+      Tests  3 failed | 16 passed (19)
+
+### S2 — el andamio vuelve a poner el `purpose` del catálogo como `label`
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  test/usabilidad-4-1c.test.ts > 1. defaults.json de un tipo que el autor no conoce (bitácora 4-5 §4) > el ejemplo que da el mensaje, pegado tal cual, deja el paquete en verde (no hay que adivinar)
+AssertionError: expected [ { severidad: 'AVISO', …(4) }, …(4) ] to deeply equal []
+ FAIL  test/usabilidad-4-1c.test.ts > 2. etiquetas del andamio que se publican (bitácora 4-5 §6) > un andamio de las 12 secciones pasa `check` con 0 errores y 0 avisos
+AssertionError: expected [ { severidad: 'AVISO', …(4) }, …(31) ] to deeply equal []
+ FAIL  test/usabilidad-4-1c.test.ts > 2. etiquetas del andamio que se publican (bitácora 4-5 §6) > una etiqueta dejada tal como la escribía el andamio viejo es un AVISO con el rótulo sugerido
+AssertionError: expected 'AVISO TPL_LABEL_DE_ANDAMIO  template.…' to be 'AVISO TPL_LABEL_DE_ANDAMIO  template.…' // Object.is equality
+ FAIL  test/usabilidad-4-1c.test.ts > 2. etiquetas del andamio que se publican (bitácora 4-5 §6) > una etiqueta escrita por el autor no dispara nada, ni siquiera si es corta
+AssertionError: expected [ { severidad: 'AVISO', …(4) }, …(4) ] to deeply equal []
+ FAIL  test/usabilidad-4-1c.test.ts > 3. itemId y alias de asset (bitácora 4-5 §5, bitácora 4-3 §4) > el `itemId` de ejemplo que propone el mensaje es válido de verdad
+
+### S3 — sin la rama de `itemId` en la sugerencia de defaults
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  test/usabilidad-4-1c.test.ts > 3. itemId y alias de asset (bitácora 4-5 §5, bitácora 4-3 §4) > un `itemId` con una letra prohibida dice cuál es el alfabeto y da uno válido
+AssertionError: expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+      Tests  1 failed | 18 passed (19)
+
+### S4 — `doctor` vuelve a mirar sólo el node_modules del kit
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  test/usabilidad-4-1c.test.ts > 4. un `pnpm install` a medias (bitácora 4-5 §1) > doctor mira TODO el workspace, no sólo el node_modules del kit
+AssertionError: expected 'ok' to be 'falta' // Object.is equality
+ FAIL  test/usabilidad-4-1c.test.ts > 4. un `pnpm install` a medias (bitácora 4-5 §1) > con todo instalado, la comprobación pasa y nombra las cinco rutas
+AssertionError: expected 'frontend/packages/template-kit/node_m…' to be '5 rutas del workspace instaladas (raí…' // Object.is equality
+      Tests  2 failed | 17 passed (19)
+
+### S5 — el lanzador deja de comprobar los requisitos (vuelve el `tsx: not found`)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  test/usabilidad-4-1c.test.ts > 4. un `pnpm install` a medias (bitácora 4-5 §1) > sin node_modules, `plantilla` imprime el diagnóstico en vez de `tsx: not found`
+AssertionError: expected '' to be 'FALTA Dependencias instaladas: el mon…' // Object.is equality
+      Tests  1 failed | 18 passed (19)
+
