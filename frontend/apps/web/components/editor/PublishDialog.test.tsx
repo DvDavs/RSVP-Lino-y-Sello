@@ -111,6 +111,23 @@ describe("PublishDialog", () => {
     expect(await screen.findByRole("button", { name: /reintentar/i })).toBeTruthy();
   });
 
+  // E-10c (`bitacora/3c-ux-b.md`): Escape cierra el diálogo y Radix devuelve el foco a quien lo
+  // abrió — pero SOLO si ese botón es el `trigger` real del `Dialog` (`context.triggerRef`), no un
+  // hermano suelto con su propio `onClick`. Sin `trigger`, el foco caía al `<body>`.
+  it("E-10c · Escape cierra el diálogo y devuelve el foco a «abrir-publicar»", async () => {
+    const usuario = userEvent.setup();
+    vi.spyOn(apiClient, "getPreflight").mockResolvedValue(preflightLimpio());
+    render(<PublishDialog invitationId={3} />);
+    const abrir = screen.getByTestId("abrir-publicar");
+    abrir.focus();
+    await usuario.click(abrir);
+    await waitFor(() => expect(screen.getByTestId("publish-dialog")).toBeTruthy());
+
+    await usuario.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByTestId("publish-dialog")).toBeNull());
+    await waitFor(() => expect(document.activeElement).toBe(abrir));
+  });
+
   // ─────────────────────────────────────────────────────────────────────────────────────────────
   // Cierre de la fase 3-C · las tres graves del recorrido de UX (`bitacora/3c-ux.md §4`)
   // ─────────────────────────────────────────────────────────────────────────────────────────────

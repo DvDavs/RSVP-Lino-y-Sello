@@ -23,6 +23,10 @@
 //   · G-06 · el enlace público solo existía dentro del diálogo que acababa de publicar; al cerrarlo
 //     desaparecía del producto entero. Ahora la barra lleva el estado «Publicada» y «Compartir»
 //     siempre visibles, y el diálogo se abre en la vista de publicada.
+//
+// CIERRE E-10c (`bitacora/3c-ux-b.md`): «abrir-publicar» era un botón SUELTO al lado del `Dialog`,
+// no su `trigger` — Radix solo devuelve el foco a `context.triggerRef` al cerrar con Escape, así que
+// sin `Trigger` el foco caía al principio del documento. Ahora el botón ES el `trigger` del `Dialog`.
 import { useState } from "react";
 import type { ComposedDocument, TemplateManifest } from "@invitaciones/schema";
 import { Badge, Button, Dialog, DialogClose, toast } from "@invitaciones/ui";
@@ -307,22 +311,29 @@ export function PublishDialog({ invitationId, manifest: manifestExterno }: { inv
           {es_MX.editor.publicar.compartir}
         </Button>
       ) : null}
-      <Button size="sm" disabled={!puedePublicar} onClick={() => void abrirRevision()} data-testid="abrir-publicar">
-        {publicada ? (
-          <>
-            <span className="ed:hidden">{es_MX.editor.publicar.volverAPublicarCorto}</span>
-            <span className="hidden ed:inline">{es_MX.editor.publicar.volverAPublicar}</span>
-          </>
-        ) : (
-          es_MX.editor.publicar.abrir
-        )}
-      </Button>
 
       <Dialog
         open={vista !== "cerrado"}
         onOpenChange={(abierto) => {
           if (!abierto) setVista("cerrado");
         }}
+        // E-10c (`handoffs/3c-b2-f2.md`): el retorno de foco de `Dialog` al cerrar con Escape lo hace
+        // RADIX, y solo sabe a dónde devolverlo si el botón que lo abre es el `trigger` de verdad
+        // (`@radix-ui/react-dialog`, `DialogContentModal.onCloseAutoFocus` → `context.triggerRef`).
+        // Antes este botón era un hermano suelto del `Dialog` con su propio `onClick`: sin `Trigger`,
+        // `triggerRef.current` quedaba `null` y el foco, al cerrar, caía al principio del documento.
+        trigger={
+          <Button size="sm" disabled={!puedePublicar} onClick={() => void abrirRevision()} data-testid="abrir-publicar">
+            {publicada ? (
+              <>
+                <span className="ed:hidden">{es_MX.editor.publicar.volverAPublicarCorto}</span>
+                <span className="hidden ed:inline">{es_MX.editor.publicar.volverAPublicar}</span>
+              </>
+            ) : (
+              es_MX.editor.publicar.abrir
+            )}
+          </Button>
+        }
         busy={estado === "publicando"}
         title={enPublicado ? es_MX.editor.publicar.exitoTitulo : es_MX.editor.publicar.titulo}
         description={enPublicado ? es_MX.editor.publicar.descripcionExito : es_MX.editor.publicar.antesDePublicar}

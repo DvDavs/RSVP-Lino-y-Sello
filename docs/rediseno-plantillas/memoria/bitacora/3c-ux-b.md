@@ -53,3 +53,31 @@ anterior — «ahora las pruebas de G-04/05/06» —, ya estaban). También ya e
 Todo lo que no aparece en el punto 2. La decisión de producto pendiente (P-3C-UXB-1: ¿el contenido
 de ejemplo opcional debería bloquear, no solo avisar?) la dejó registrada el agente anterior en
 `preguntas-abiertas.md` y la conservo tal cual — no es mía de resolver.
+
+## 5. Cierre: E-01 y E-10c
+
+La corrida e2e completa sobre el HEAD final dio 77/79; los dos rojos eran consecuencia directa de
+las correcciones UX-B de este mismo documento, no regresiones nuevas.
+
+- **E-01 (`flujo-principal.spec.ts:205`).** El spec seguía afirmando `/todo listo para publicar/i`,
+  pero la invitación de la prueba solo tiene cuatro bloques editados (título, subtítulo, foto,
+  novios) — el resto de las secciones sigue con contenido de ejemplo, así que desde G-05 la revisión
+  YA NO dice «Todo listo». Corregido el **spec**, no el producto: ahora afirma que ese texto NO
+  aparece, que `lista-ejemplos` está visible, que `resumen-avisos` dice "…sin terminar" y que
+  `confirmar-publicar` sigue habilitado con el texto "…de todos modos" — el mismo patrón que ya usa
+  `publicar.spec.ts` ("G-04 + G-05").
+- **E-10c (`teclado-editor.spec.ts:164`), bug real, no de test.** Tras cerrar el diálogo con Escape
+  el foco no volvía a «abrir-publicar»: caía al `<body>`. Causa: `PublishDialog.tsx` renderizaba ese
+  botón como un HERMANO SUELTO del `Dialog`, con su propio `onClick`, en vez de como su `trigger`.
+  `@radix-ui/react-dialog` (`DialogContentModal.onCloseAutoFocus`) solo devuelve el foco a
+  `context.triggerRef.current` — sin `Trigger` real ese ref queda `null` y el intento de devolver el
+  foco es un no-op. Corregido moviendo el botón al prop `trigger` de `<Dialog>` (que ya existía para
+  esto, `packages/ui/.../Dialog.tsx:20-21`); su `onClick` (`abrirRevision`) se sigue ejecutando junto
+  con el `onOpenToggle` interno de Radix, sin conflicto porque `onOpenChange` ya ignora las aperturas
+  y solo actúa al cerrar. Añadida una prueba unitaria barata en `PublishDialog.test.tsx` (Escape →
+  `document.activeElement` es el botón) para que esto no vuelva a romperse en silencio.
+- **Verificación:** `pnpm --filter web run test` → **567/567** (66 archivos); `typecheck` limpio.
+  Contra el backend real en `127.0.0.1:6120`: `flujo-principal.spec.ts` + `teclado-editor.spec.ts` +
+  `publicar.spec.ts` → **9/9** en un solo intento (~29 s). Evidencia ajena que el e2e reescribió en
+  `evidencia/fase-3/flujo/` revertida con `git checkout --`; no quedó ningún `next-server` de
+  Playwright vivo (se cerró solo al terminar la corrida).
