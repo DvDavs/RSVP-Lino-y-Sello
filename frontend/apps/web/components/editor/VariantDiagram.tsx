@@ -8,7 +8,7 @@
 import type { ReactNode } from "react";
 
 const TRAZO = "var(--color-ui-ink-muted)";
-const RELLENO = "var(--color-ui-accent-soft)";
+const RELLENO = "var(--color-ui-primary-soft)";
 
 function Marco({ children }: { children: ReactNode }) {
   return (

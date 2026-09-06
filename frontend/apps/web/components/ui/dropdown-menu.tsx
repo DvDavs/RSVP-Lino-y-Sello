@@ -48,7 +48,7 @@ export function DropdownMenuItem({ className, ...resto }: MenuPrimitive.Dropdown
   return (
     <MenuPrimitive.Item
       className={twMerge(
-        "flex min-h-9 cursor-pointer items-center rounded-[6px] px-2.5 text-ui-aux text-ui-ink outline-none data-[highlighted]:bg-ui-accent-soft data-[highlighted]:text-ui-accent-soft-ink",
+        "flex min-h-9 cursor-pointer items-center rounded-[6px] px-2.5 text-ui-aux text-ui-ink outline-none data-[highlighted]:bg-ui-primary-soft data-[highlighted]:text-ui-on-primary-soft",
         className,
       )}
       {...resto}

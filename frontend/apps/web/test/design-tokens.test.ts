@@ -29,7 +29,11 @@ describe("tokens del sistema de diseño en el chrome", () => {
     // `inline`) o resucitó los `@import` de fuente vieja.
     expect(globals).not.toContain("@theme {");
     expect(globals).toContain("@theme inline {");
-    expect(globals).toContain("--color-ui-accent: var(--ui-primary);");
+    // La familia `accent` SALIÓ de la capa de compatibilidad en la revisión del bloque 2
+    // (ADR-3C-B2REV-01): secuestraba la mitad de una pareja AA del sistema nuevo
+    // (`bg-ui-accent` + `text-ui-on-accent`). El chrome viejo usa ya los nombres `primary`.
+    expect(globals).not.toContain("--color-ui-accent:");
+    expect(globals).not.toContain("--color-ui-accent-soft:");
     expect(globals).toContain("--ui-content-max: 1330px;");
     for (const fuente of ["inter", "bricolage-grotesque", "outfit"]) {
       expect(globals).not.toContain(`@import "@fontsource-variable/${fuente}/wght.css";`);

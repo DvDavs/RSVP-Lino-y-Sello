@@ -57,11 +57,11 @@ export function ThemePicker({ theme }: { theme: ThemeSpec | null }) {
                 onFocus={() => useEditorStore.getState().previewTheme(paleta.id, null)}
                 onBlur={() => useEditorStore.getState().previewTheme(null, null)}
                 onClick={() => useEditorStore.getState().setTheme({ paletteId: paleta.id })}
-                className={`flex items-center gap-2 rounded-ui-control border px-2.5 py-1.5 transition-colors ${activa ? "border-ui-accent bg-ui-accent-soft" : "border-ui-border-field hover:border-ui-accent hover:bg-ui-bg-alt"}`}
+                className={`flex items-center gap-2 rounded-ui-control border px-2.5 py-1.5 transition-colors ${activa ? "border-ui-primary bg-ui-primary-soft" : "border-ui-border-field hover:border-ui-primary hover:bg-ui-bg-alt"}`}
               >
                 <PastillaPaleta tokens={paleta.tokens} />
                 <span className="text-ui-eyebrow text-ui-ink">{paleta.name["es-MX"]}</span>
-                {activa ? <Check aria-hidden="true" className="size-3.5 text-ui-accent" /> : null}
+                {activa ? <Check aria-hidden="true" className="size-3.5 text-ui-primary" /> : null}
               </button>
             );
           })}
@@ -85,13 +85,13 @@ export function ThemePicker({ theme }: { theme: ThemeSpec | null }) {
                 onFocus={() => useEditorStore.getState().previewTheme(null, fontSet.id)}
                 onBlur={() => useEditorStore.getState().previewTheme(null, null)}
                 onClick={() => useEditorStore.getState().setTheme({ fontSetId: fontSet.id })}
-                className={`flex items-center gap-1.5 rounded-ui-control border px-2.5 py-1.5 transition-colors ${activa ? "border-ui-accent bg-ui-accent-soft" : "border-ui-border-field hover:border-ui-accent hover:bg-ui-bg-alt"}`}
+                className={`flex items-center gap-1.5 rounded-ui-control border px-2.5 py-1.5 transition-colors ${activa ? "border-ui-primary bg-ui-primary-soft" : "border-ui-border-field hover:border-ui-primary hover:bg-ui-bg-alt"}`}
               >
                 <span style={{ fontFamily: fontSet.heading.family }} className="text-ui-body">
                   Aa
                 </span>
                 <span className="text-ui-eyebrow text-ui-ink">{fontSet.name["es-MX"]}</span>
-                {activa ? <Check aria-hidden="true" className="size-3.5 text-ui-accent" /> : null}
+                {activa ? <Check aria-hidden="true" className="size-3.5 text-ui-primary" /> : null}
               </button>
             );
           })}

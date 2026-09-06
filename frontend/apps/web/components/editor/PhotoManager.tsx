@@ -117,7 +117,7 @@ export function PhotoManager({ invitationId, spec, groupId, group, maxItemBytes 
           type="button"
           disabled={!puedeAgregar}
           onClick={() => inputRef.current?.click()}
-          className="flex h-9 items-center gap-1.5 rounded-ui-pill bg-ui-accent px-3.5 text-ui-aux font-semibold text-ui-accent-ink disabled:opacity-40"
+          className="flex h-9 items-center gap-1.5 rounded-ui-pill bg-ui-primary px-3.5 text-ui-aux font-semibold text-ui-on-primary disabled:opacity-40"
         >
           <ImagePlus aria-hidden="true" className="size-4" /> Agregar
         </button>
@@ -164,7 +164,7 @@ export function PhotoManager({ invitationId, spec, groupId, group, maxItemBytes 
       >
         <p className="text-ui-aux text-ui-ink">
           Arrastra fotos aquí o{" "}
-          <button type="button" onClick={() => inputRef.current?.click()} className="font-semibold text-ui-accent underline">
+          <button type="button" onClick={() => inputRef.current?.click()} className="font-semibold text-ui-primary underline">
             selecciona archivos
           </button>
         </p>

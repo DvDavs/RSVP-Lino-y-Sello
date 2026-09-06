@@ -20,12 +20,12 @@ export const estilosBoton = cva(
   {
     variants: {
       variant: {
-        // arte-chrome.md §6: primario sólido #4e027c / blanco, hover → --color-ui-accent-hover
-        primary: "bg-ui-accent text-ui-accent-ink hover:bg-ui-accent-hover",
+        // arte-chrome.md §6: primario sólido #4e027c / blanco, hover → --color-ui-primary-hover
+        primary: "bg-ui-primary text-ui-on-primary hover:bg-ui-primary-hover",
         // Contorneado: transparente + aro 1px del color de hover del acento
-        secondary: "bg-transparent text-ui-accent shadow-[inset_0_0_0_1px_var(--color-ui-accent-hover)] hover:bg-ui-accent-soft",
+        secondary: "bg-transparent text-ui-primary shadow-[inset_0_0_0_1px_var(--color-ui-primary-hover)] hover:bg-ui-primary-soft",
         // Fantasma/enlace: transparente, hover al link corregido para AA
-        ghost: "bg-transparent text-ui-accent hover:text-ui-accent-link",
+        ghost: "bg-transparent text-ui-primary hover:text-ui-link",
       },
       size: {
         md: "h-11 px-4", // 44px, dentro del rango 41-49 medido; ≥ 24px de objetivo táctil (2.5.8)

@@ -92,7 +92,12 @@ export function WizardProgress({ pasos, className }: WizardProgressProps): JSX.E
               <span
                 aria-current={paso.estado === "actual" ? "step" : undefined}
                 className={twMerge(
-                  "label-sm hidden max-w-[76px] sm:block",
+                  // `w-full` + `break-words`: `max-w-[76px]` solo era un TECHO — cuando la
+                  // columna del paso es más estrecha que 76 px (cuatro pasos en 300 px), la
+                  // etiqueta se salía y chocaba con la de al lado («EVENTOPLANTILLADATOSEDITOR»,
+                  // medido en la revisión del bloque 2). Ahora se ajusta a su columna y parte
+                  // palabra si hace falta.
+                  "label-sm hidden w-full max-w-[76px] break-words sm:block",
                   paso.estado === "actual" ? "text-ui-ink" : "text-ui-ink-muted",
                 )}
               >

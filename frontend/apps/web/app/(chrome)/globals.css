@@ -28,6 +28,15 @@
    Ver `/design/tipografia` para la escala. */
 @import "@invitaciones/ui/estilos.css";
 
+/* Tailwind 4 descubre las clases mirando el árbol del proyecto y NUNCA `node_modules`; los paquetes
+   del monorepo entran por ahí (symlink de pnpm), así que sus clases no se descubren solas. Sin esta
+   línea, cada utilidad que use SOLO `@invitaciones/ui` y no `apps/web` se queda sin generar y el
+   componente sale a medio pintar, en silencio: medido en la revisión del bloque 2, 28 de las 51
+   utilidades `*-ui-*` del paquete faltaban en el CSS construido (`bg-ui-danger-soft`,
+   `text-ui-on-accent`, `bg-ui-success`, `ring-ui-surface`…). La compuerta que lo vigila es
+   `test/utilidades-del-paquete-ui.test.ts`. */
+@source "../../../../packages/ui/src";
+
 /* ── COMPATIBILIDAD FASE 3 (la retira el bloque 3) ──────────────────────────────────────────────
    El chrome de la fase 3 (arte-chrome.md) sigue vivo en las pantallas que el bloque 3 no ha migrado
    todavía (`/acceso`, `/ayuda`, editor, 404…) y usa nombres — `bg-ui-surface`, `text-ui-ink-heading`,
@@ -46,12 +55,18 @@
    gana el valor nuevo directamente, sin puente. Es la migración de color y tipografía de facto que
    el bloque 3 solo tiene que confirmar visualmente, no construir.
 
-   Excepción deliberada, la familia `accent`: `--color-ui-accent` SÍ existe ya en el preset nuevo,
-   pero ahí significa "mango" decorativo (11 §1.3, nunca botón); en el chrome viejo `bg-ui-accent`
-   es el botón primario (`components/ui/button.tsx`, variant "primary"). Redefinirla aquí sobre
-   `--ui-primary` (el CTA del sistema nuevo) conserva el ROL — no el nombre — hasta que el bloque 3
-   repinte los botones; dejar ganar el mango habría vuelto decorativo cada botón primario del chrome
-   de un día para otro, y eso sí es "romper el chrome actual". */
+   YA NO HAY EXCEPCIÓN PARA `accent` (revisión del bloque 2, ADR-3C-B2REV-01). 3C-1b redefinía aquí
+   `--color-ui-accent`/`--color-ui-accent-soft` sobre `--ui-primary`/`--ui-primary-soft` para que el
+   botón primario del chrome viejo no se volviera mango de un día para otro. Con el bloque 2 en el
+   árbol eso pasó a ser un choque de nombres real: `@invitaciones/ui` usa `bg-ui-accent` +
+   `text-ui-on-accent` (Button/Chip «acento») y `bg-ui-accent-soft` + `text-ui-on-accent-soft`
+   (Card/Badge «accent») como PAREJA garantizada AA; con la mitad de la pareja secuestrada el botón
+   de acento medía 2,57 (claro) y 1,75 (oscuro) sobre la pila renderizada. La familia vieja se migró
+   a los nombres del sistema nuevo con el MISMO valor que ya tenía por este puente
+   (`bg-ui-accent`→`bg-ui-primary`, `text-ui-accent-ink`→`text-ui-on-primary`,
+   `*-accent-hover`→`*-primary-hover`, `*-accent-soft`→`*-primary-soft`,
+   `*-accent-soft-ink`→`*-on-primary-soft`, `*-accent-link`→`text-ui-link`): cero cambio de píxel en
+   el chrome, y `accent` vuelve a significar mango en todo el árbol. */
 @theme inline {
   /* Superficie y tinta que el chrome viejo nombra distinto al preset nuevo. */
   --color-ui-bg: var(--ui-surface);
@@ -59,17 +74,6 @@
   --color-ui-border-field: var(--ui-border);
   --color-ui-ink-heading: var(--ui-ink);
   --color-ui-ink-strong: var(--ui-ink);
-
-  /* Familia `accent` (botón primario del chrome viejo) → rol equivalente del sistema nuevo:
-     `primary`. `--color-ui-accent` y `--color-ui-accent-soft` ya existen en el preset con otro
-     significado (mango decorativo); se redefinen aquí a propósito, ver nota de arriba. */
-  --color-ui-accent: var(--ui-primary);
-  --color-ui-accent-ink: var(--ui-on-primary);
-  --color-ui-accent-hover: var(--ui-primary-hover);
-  --color-ui-accent-soft: var(--ui-primary-soft);
-  --color-ui-accent-soft-ink: var(--ui-on-primary-soft);
-  --color-ui-accent-brand: var(--ui-primary-bright); /* decorativo: héroes y bandas, nunca botón */
-  --color-ui-accent-link: var(--ui-link);
 
   /* Tipografía: el chrome viejo solo tiene voz "sans", sin distinguir texto/etiqueta/display. */
   --font-ui-sans: var(--ui-font-text);

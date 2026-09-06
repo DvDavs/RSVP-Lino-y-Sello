@@ -280,7 +280,7 @@ export default function PaginaEditorInvitacion() {
                 }
               }}
               className={`h-11 flex-1 rounded-ui-pill px-3 text-ui-aux font-semibold ${
-                pestana === clave ? "bg-ui-accent-soft text-ui-accent-soft-ink" : "text-ui-ink-muted"
+                pestana === clave ? "bg-ui-primary-soft text-ui-on-primary-soft" : "text-ui-ink-muted"
               }`}
             >
               {etiqueta}
@@ -290,11 +290,11 @@ export default function PaginaEditorInvitacion() {
       ) : null}
 
       {tabRole === "readonly" ? (
-        <div role="alert" className="flex items-center justify-between gap-4 bg-ui-accent-soft px-4 py-2 text-ui-aux text-ui-accent-soft-ink">
+        <div role="alert" className="flex items-center justify-between gap-4 bg-ui-primary-soft px-4 py-2 text-ui-aux text-ui-on-primary-soft">
           <span>Esta invitación ya está abierta en otra pestaña.</span>
           <button
             type="button"
-            className="rounded-ui-pill bg-ui-accent px-3 py-1.5 font-semibold text-ui-accent-ink"
+            className="rounded-ui-pill bg-ui-primary px-3 py-1.5 font-semibold text-ui-on-primary"
             onClick={() => {
               candadoRef.current?.takeover();
               useEditorStore.getState().setTabRole("editor");
@@ -315,7 +315,7 @@ export default function PaginaEditorInvitacion() {
           <span className="flex gap-2">
             <button
               type="button"
-              className="rounded-ui-pill bg-ui-accent px-3 py-1.5 font-semibold text-ui-accent-ink"
+              className="rounded-ui-pill bg-ui-primary px-3 py-1.5 font-semibold text-ui-on-primary"
               onClick={() => useEditorStore.getState().restoreRecovered(true)}
             >
               Aplicarlos

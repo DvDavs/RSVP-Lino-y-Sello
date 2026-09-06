@@ -12,7 +12,29 @@ import { useFoco } from "../../utilidades/foco.ts";
 import { sombraControl } from "../../utilidades/controlSombra.ts";
 
 const ALTO_CONTROL = 44;
-const ALTO_OPCION = 44;
+
+/**
+ * Alto de fila del panel (`11 §5`: objetivo táctil de 44 px también dentro de la lista).
+ * Exportado porque la galería expone el panel abierto como MAQUETA estática (ver más abajo).
+ */
+export const ALTO_OPCION_SELECT = 44;
+
+/**
+ * Clases del panel y de la fila, exportadas a propósito.
+ *
+ * El panel de Radix Select solo existe mientras el selector está abierto, y abierto se comporta
+ * como una capa modal: marca el resto de la página `aria-hidden` y le pone
+ * `pointer-events: none` (`@radix-ui/react-select` fija `disableOutsidePointerEvents: true`, sin
+ * forma de desactivarlo — a diferencia de `Dialog`, que sí acepta `modal={false}`). En la galería
+ * eso deja la página inutilizable: `axe` canta «aria-hidden-focus» y el conmutador de tema no se
+ * puede pulsar. Así que `/design/componentes/select` enseña el panel como maqueta estática con
+ * ESTAS MISMAS clases, y `Select.test.tsx` comprueba que el panel real las sigue llevando: la
+ * maqueta no puede desviarse del componente sin poner una prueba en rojo.
+ */
+export const CLASES_PANEL_SELECT =
+  "z-[var(--ui-z-hoja)] max-h-[320px] overflow-hidden rounded-ui-card bg-ui-surface-raised p-1.5 shadow-ui-2";
+export const CLASES_OPCION_SELECT =
+  "relative flex cursor-pointer select-none items-center gap-2 rounded-[10px] px-3 text-[15px] text-ui-ink outline-none data-[highlighted]:bg-ui-primary-soft data-[highlighted]:text-ui-on-primary-soft data-[disabled]:cursor-not-allowed data-[disabled]:text-ui-ink-muted data-[disabled]:opacity-70";
 
 export interface OpcionSelect {
   readonly value: string;
@@ -83,7 +105,7 @@ export const Select = forwardRef<HTMLButtonElement, PropsSelect>(function Select
         <SelectPrimitivo.Content
           position="popper"
           sideOffset={6}
-          className="z-[var(--ui-z-hoja)] max-h-[320px] w-[var(--radix-select-trigger-width)] overflow-hidden rounded-ui-card bg-ui-surface-raised p-1.5 shadow-ui-2"
+          className={cn(CLASES_PANEL_SELECT, "w-[var(--radix-select-trigger-width)]")}
         >
           <SelectPrimitivo.Viewport>
             {opciones.map((opcion) => (
@@ -91,11 +113,19 @@ export const Select = forwardRef<HTMLButtonElement, PropsSelect>(function Select
                 key={opcion.value}
                 value={opcion.value}
                 disabled={opcion.disabled}
-                className="relative flex cursor-pointer select-none items-center gap-2 rounded-[10px] px-3 text-[15px] text-ui-ink outline-none data-[highlighted]:bg-ui-primary-soft data-[highlighted]:text-ui-on-primary-soft data-[disabled]:cursor-not-allowed data-[disabled]:text-ui-ink-muted data-[disabled]:opacity-70"
-                style={{ height: ALTO_OPCION }}
+                className={CLASES_OPCION_SELECT}
+                style={{ height: ALTO_OPCION_SELECT }}
               >
-                <SelectPrimitivo.ItemText>{opcion.label}</SelectPrimitivo.ItemText>
-                {opcion.motivo ? <span className="ml-auto text-[13px] text-ui-ink-muted">{opcion.motivo}</span> : null}
+                {/* `min-w-0 truncate` + `shrink-0` en el motivo: sin esto, en un panel estrecho
+                    (el panel copia el ancho del disparador) el motivo se parte en dos renglones y se
+                    SUPERPONE al nombre de la opción — medido en la revisión del bloque 2 con
+                    «Corporativo · Requiere el plan 2» en una ficha de 301 px. */}
+                <span className="min-w-0 flex-1 truncate">
+                  <SelectPrimitivo.ItemText>{opcion.label}</SelectPrimitivo.ItemText>
+                </span>
+                {opcion.motivo ? (
+                  <span className="ml-auto shrink-0 whitespace-nowrap text-[13px] text-ui-ink-muted">{opcion.motivo}</span>
+                ) : null}
                 <SelectPrimitivo.ItemIndicator className="ml-auto text-ui-primary">
                   <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <path d="M5 12.5 L10 17 L19 7.5" />

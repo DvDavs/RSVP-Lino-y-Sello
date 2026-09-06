@@ -54,7 +54,7 @@ export function SectionRow({
       data-testid={`section-row-${fila.key}`}
       className={`flex items-center gap-1 rounded-ui-control border-l-3 py-1 pr-1.5 transition-colors ${
         isDragging ? "z-10 bg-ui-surface shadow-ui-2" : ""
-      } ${seleccionada ? "border-ui-accent bg-ui-accent-soft" : "border-transparent hover:bg-ui-bg-alt"}`}
+      } ${seleccionada ? "border-ui-primary bg-ui-primary-soft" : "border-transparent hover:bg-ui-bg-alt"}`}
     >
       <button
         type="button"

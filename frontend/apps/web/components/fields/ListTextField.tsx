@@ -103,7 +103,7 @@ export function ListTextField({ id, spec, value, esContenidoDeEjemplo, onCommit 
         type="button"
         disabled={items.length >= maxItems}
         onClick={() => commit([...items, ""])}
-        className="flex h-9 items-center gap-1.5 self-start rounded-ui-control border border-dashed border-ui-border-field px-3 text-ui-aux font-semibold text-ui-accent disabled:opacity-40"
+        className="flex h-9 items-center gap-1.5 self-start rounded-ui-control border border-dashed border-ui-border-field px-3 text-ui-aux font-semibold text-ui-primary disabled:opacity-40"
       >
         <Plus aria-hidden="true" className="size-4" /> Agregar
       </button>

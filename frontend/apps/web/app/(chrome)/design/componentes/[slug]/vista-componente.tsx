@@ -18,9 +18,23 @@ import type { Variante } from "@invitaciones/ui/historias";
 
 function Ficha({ variante }: { variante: Variante }) {
   return (
-    <article className="grid gap-3 rounded-ui-card bg-ui-surface-raised p-5 shadow-ui-1">
+    <article
+      className={`grid gap-3 rounded-ui-card bg-ui-surface-raised p-5 shadow-ui-1${
+        variante.ancho === "completo" ? " sm:col-span-2 lg:col-span-3" : ""
+      }`}
+    >
       <h3 className="font-ui-text text-ui-text-sm font-semibold text-ui-ink">{variante.nombre}</h3>
-      <div className="grid min-h-24 place-items-center rounded-ui-media bg-ui-surface-alt p-6">
+      {/* `grid-cols-[minmax(0,1fr)]` + `[&>*]:max-w-full`: con la rejilla implícita (`auto`) la
+          COLUMNA se dimensiona a `max-content`, así que un `max-width: 100%` del hijo se mide
+          contra la propia columna desbordada y no acota nada (el clásico «grid blowout»): medido
+          con Skeleton «Texto · 3 líneas» y con la lista de Tabs a 1440, que se salían de la ficha
+          por la derecha aun teniendo `max-w-full`/`overflow-x-auto`. Con la columna fijada a
+          `minmax(0,1fr)` el hijo se acota de verdad y lo ancho scrollea DENTRO de su componente.
+          Antes: con `place-items-center` un hijo se dimensiona a `max-content` y se
+          sale de la ficha por los dos lados si es más ancho que ella (medido en la revisión del
+          bloque 2 con la variante «Tamaños» de Button a 1440). El hijo se acota aquí; envolver o
+          apilar es cosa de cada historia — recortar, nunca. */}
+      <div className="grid min-h-24 grid-cols-[minmax(0,1fr)] place-items-center rounded-ui-media bg-ui-surface-alt p-6 [&>*]:max-w-full">
         {variante.render()}
       </div>
       {variante.nota ? <p className="font-ui-text text-ui-text-xs text-ui-ink-muted">{variante.nota}</p> : null}

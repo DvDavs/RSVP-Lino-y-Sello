@@ -47,7 +47,7 @@ export function UndoRedoBar() {
         disabled={!canUndo}
         title={undo ? `Deshacer: ${undo}` : "No hay nada que deshacer"}
         aria-label={undo ? `Deshacer: ${undo}` : "No hay nada que deshacer"}
-        className="inline-flex size-11 items-center justify-center rounded-ui-control text-ui-ink transition-colors hover:bg-ui-accent-soft disabled:pointer-events-none disabled:opacity-40"
+        className="inline-flex size-11 items-center justify-center rounded-ui-control text-ui-ink transition-colors hover:bg-ui-primary-soft disabled:pointer-events-none disabled:opacity-40"
       >
         <Undo2 className="size-5" aria-hidden="true" />
       </button>
@@ -58,7 +58,7 @@ export function UndoRedoBar() {
         disabled={!canRedo}
         title={redo ? `Rehacer: ${redo}` : "No hay nada que rehacer"}
         aria-label={redo ? `Rehacer: ${redo}` : "No hay nada que rehacer"}
-        className="inline-flex size-11 items-center justify-center rounded-ui-control text-ui-ink transition-colors hover:bg-ui-accent-soft disabled:pointer-events-none disabled:opacity-40"
+        className="inline-flex size-11 items-center justify-center rounded-ui-control text-ui-ink transition-colors hover:bg-ui-primary-soft disabled:pointer-events-none disabled:opacity-40"
       >
         <Redo2 className="size-5" aria-hidden="true" />
       </button>

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { Select } from "./Select.tsx";
+import { ALTO_OPCION_SELECT, CLASES_OPCION_SELECT, CLASES_PANEL_SELECT, Select } from "./Select.tsx";
 
 const user = userEvent.setup();
 
@@ -79,5 +79,21 @@ describe("Select", () => {
     await screen.findByRole("listbox");
     const resultados = await axe(container);
     expect(resultados).toHaveNoViolations();
+  });
+  // La galería no puede exponer un `Select` abierto de verdad (Radix Select, abierto, marca el
+  // resto de la página `aria-hidden` y le pone `pointer-events: none`, sin `modal={false}` que
+  // valga), así que `/design/componentes/select` enseña una MAQUETA con estas constantes. Esta
+  // prueba es el contrato que impide que la maqueta y el panel real se separen.
+  it("el panel real lleva las clases que exporta para la galería", async () => {
+    render(<Select aria-label="Tipo de evento" opciones={[...OPCIONES]} defaultOpen />);
+    const listbox = await screen.findByRole("listbox");
+    for (const clase of CLASES_PANEL_SELECT.split(" ")) {
+      expect(listbox.className, clase).toContain(clase);
+    }
+    const opcion = within(listbox).getByRole("option", { name: "Boda" });
+    for (const clase of CLASES_OPCION_SELECT.split(" ")) {
+      expect(opcion.className, clase).toContain(clase);
+    }
+    expect(opcion).toHaveStyle({ height: `${ALTO_OPCION_SELECT}px` });
   });
 });

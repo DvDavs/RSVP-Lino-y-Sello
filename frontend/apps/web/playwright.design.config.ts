@@ -14,7 +14,8 @@ import { defineConfig, devices } from "@playwright/test";
 //     `NEXT_PUBLIC_API_BASE_URL`, `REVALIDATE_SECRET` ni el resto de variables que la config
 //     principal pasa para el editor/render público, porque `/design/**` no las lee.
 //
-// Ejecuta SOLO `design.spec.ts`, `design-contraste.spec.ts` y `design-axe.spec.ts`
+// Ejecuta SOLO `design.spec.ts`, `design-contraste.spec.ts`, `design-axe.spec.ts` y
+// `design-objetivos.spec.ts` (tamaño de objetivo y foco visible, revisión del bloque 2)
 // (`testMatch` más abajo); el resto de `e2e/*.spec.ts` los sigue corriendo `playwright.config.ts`.
 const RUTA_CHROMIUM_LOCAL = process.env.PW_CHROMIUM_PATH ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const executablePath = existsSync(RUTA_CHROMIUM_LOCAL) ? RUTA_CHROMIUM_LOCAL : undefined;
@@ -24,7 +25,7 @@ const ORIGEN = `http://127.0.0.1:${PUERTO}`;
 
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: ["design.spec.ts", "design-contraste.spec.ts", "design-axe.spec.ts"],
+  testMatch: ["design.spec.ts", "design-contraste.spec.ts", "design-axe.spec.ts", "design-objetivos.spec.ts"],
   fullyParallel: true,
   workers: process.env.CI ? 4 : undefined,
   retries: process.env.CI ? 1 : 0,

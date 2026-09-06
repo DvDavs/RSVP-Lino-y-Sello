@@ -10,6 +10,7 @@ export const historias: Historia = {
   variantes: [
     {
       nombre: "Ruta de tres tramos",
+      ancho: "completo",
       render: () => (
         <Breadcrumb
           items={[

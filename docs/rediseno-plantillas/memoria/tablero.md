@@ -123,6 +123,9 @@ suite completa tras cada merge; commit y push por bloque.
 | 1 · 3C-2 tipografía autoalojada y utilidades | 3c-2 → rev-2 | Sonnet → Opus | **aceptada** (`146b148`, `cb5f5a9`) | revisor: 6 `@font-face` con swap y `unicode-range`, preload en el `<head>`, 177 188 B, sabotajes en rojo; corrigió `.prose` y el contraste de los especímenes en oscuro; 3C-2b unifica la escala y añade metric override |
 | 1 · 3C-3 iconos (dos mitades) | 3c-3a, 3c-3b → rev-3 | Sonnet ×2 → Opus | **aceptada** (`abe0e7d`, `e75b1f7`, `329684a`) | 82/82 nombres = `11 §4.2`; revisor de coherencia midió tinta y centrado en Chromium y redibujó 14 iconos; 179/179 pruebas |
 | 1 · 3C-4 formas (`packages/ui/shapes`) | 3c-4 | Opus | **aceptada** (`46d40f4`) | 111 pruebas, 100 % líneas; `blob(7)` idéntico al moodboard; galería `/design/formas` |
-| 2 componentes `packages/ui` + galería `/design` + regresión visual | | | pendiente | |
+| 2 · F1 formularios (Button, Field, Input, Textarea, Select, Combobox, RadioGroup, Checkbox, Switch, Chip) | b2-f1 | Sonnet | **aceptada** (`9a90095`) | 525 pruebas; se cortó una vez por límite de uso y se relanzó |
+| 2 · F2 superficies y navegación (Card, Tabs, Dialog, Sheet, Tooltip, Toast, Badge, Avatar, Breadcrumb, WizardProgress, Stepper, ProgressRing) | b2-f2 | Sonnet | **aceptada** (`4ea8d00`) | 465 pruebas; el merge dejó el build rojo por el registro en el barril raíz, corregido en `8f37f2a` |
+| 2 · F3 galería `/design/componentes`, EmptyState, Skeleton, Image, regresión visual/contraste/axe sin backend | b2-f3 | Sonnet | **aceptada** (`f128a74`) | registro reconstruido con 26 historias y `metadatos.ts` generado desde el registro evaluado |
+| 2 · revisión de coherencia y a11y | b2-rev | Opus | **ACEPTAR** con correcciones | 15 fallos → 0: Tailwind sin `@source` de `packages/ui` (28 de 51 utilidades no se generaban), `accent` secuestrada (2,57:1 → 7,6:1), historias de superposición; `design` 279/279 dos veces y re-ejecutado por el orquestador |
 | 3 producto: 3C-5 web pública/acceso · 3C-6 catálogo/asistente · 3C-7 chrome · 3C-8 e2e/presupuestos | | | pendiente | |
 | Cierre: revisiones, guía, memoria, handoff | | | pendiente | |

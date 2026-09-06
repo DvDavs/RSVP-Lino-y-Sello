@@ -78,4 +78,44 @@ describe("Sheet", () => {
     await usuario.click(screen.getByRole("button", { name: "Elegir plantilla" }));
     expect(screen.getByRole("dialog")).toContainElement(screen.getByRole("button", { name: "Confirmar" }));
   });
+  // `modal={false}` + `container`: lo que necesita una VITRINA (galería `/design/componentes`).
+  // Sin capa modal no debe quedar NI `aria-modal`, NI foco atrapado, NI la marca `aria-hidden` que
+  // Radix pone sobre el resto de la página cuando el diálogo sí es modal.
+  it("modal={false} no oculta el resto de la página ni fija aria-modal, y el portal va al contenedor", () => {
+    const caja = document.createElement("div");
+    caja.id = "vitrina";
+    document.body.append(caja);
+    const vecino = document.createElement("div");
+    vecino.innerHTML = '<button type="button">Fuera</button>';
+    document.body.append(vecino);
+
+    render(
+      <Sheet
+        open
+        modal={false}
+        container={caja}
+        title="Expuesto"
+        description="Panel expuesto en una vitrina."
+      >
+        <p>Cuerpo</p>
+      </Sheet>,
+    );
+
+    const panel = screen.getByRole("dialog");
+    expect(panel).not.toHaveAttribute("aria-modal");
+    expect(caja.contains(panel)).toBe(true);
+    expect(vecino).not.toHaveAttribute("aria-hidden");
+
+    caja.remove();
+    vecino.remove();
+  });
+
+  it("por defecto sigue siendo modal (aria-modal presente)", () => {
+    render(
+      <Sheet open title="Modal" description="Diálogo modal de verdad.">
+        <p>Cuerpo</p>
+      </Sheet>,
+    );
+    expect(screen.getByRole("dialog")).toHaveAttribute("aria-modal", "true");
+  });
 });

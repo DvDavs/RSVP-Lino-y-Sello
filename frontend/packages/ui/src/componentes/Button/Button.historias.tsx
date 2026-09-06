@@ -28,7 +28,7 @@ export const historias: readonly Historia[] = [
       {
         nombre: "Tamaños",
         render: () => (
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 12, alignItems: "center" }}>
             <Button size="sm">Guardar</Button>
             <Button size="md">Guardar</Button>
             <Button size="lg">Empezar mi invitación</Button>

@@ -7,6 +7,9 @@
  * actual no se mueve —, pero DENTRO de la galería esos mismos nombres tienen que enseñar el sistema
  * nuevo y seguir a `data-theme`. Se remapean aquí, en un solo sitio, y solo para este subárbol.
  *
+ * `--color-ui-accent` YA NO se puente aquí: desde la revisión del bloque 2 el chrome viejo dejó
+ * de secuestrar ese nombre (ADR-3C-B2REV-01) y `bg-ui-accent` vuelve a ser el mango del sistema.
+ *
  * Los nombres que NO existen en el chrome antiguo (`--color-ui-primary`, `--text-ui-display-xl`,
  * `--ease-ui-spring`…) no necesitan puente: el preset los inlinea ya como `var(--ui-*)`. */
 .raiz {
@@ -16,7 +19,6 @@
   --color-ui-ink-placeholder: var(--ui-ink-placeholder);
   --color-ui-border: var(--ui-border);
   --color-ui-focus: var(--ui-focus);
-  --color-ui-accent: var(--ui-accent);
   --color-ui-success: var(--ui-success);
   --color-ui-danger: var(--ui-danger);
   --color-ui-warning: var(--ui-warning);

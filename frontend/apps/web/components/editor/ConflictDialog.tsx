@@ -95,7 +95,7 @@ export function ConflictDialog() {
                 setOcupado(true);
                 void resolver(rebase === null ? eleccion : "rebase").finally(() => setOcupado(false));
               }}
-              className="inline-flex h-11 items-center rounded-ui-pill bg-ui-accent px-5 text-ui-aux font-semibold text-ui-accent-ink disabled:opacity-50"
+              className="inline-flex h-11 items-center rounded-ui-pill bg-ui-primary px-5 text-ui-aux font-semibold text-ui-on-primary disabled:opacity-50"
             >
               {rebase === null ? "Continuar" : "Aplicar los que se puedan"}
             </button>
@@ -120,14 +120,14 @@ function Opcion({
   detalle?: string;
 }) {
   return (
-    <label className="flex cursor-pointer gap-3 rounded-ui-control border border-ui-border p-3 has-[:checked]:border-ui-accent has-[:checked]:bg-ui-accent-soft">
+    <label className="flex cursor-pointer gap-3 rounded-ui-control border border-ui-border p-3 has-[:checked]:border-ui-primary has-[:checked]:bg-ui-primary-soft">
       <input
         type="radio"
         name="conflicto"
         value={valor}
         checked={actual === valor}
         onChange={() => onChange(valor)}
-        className="mt-1 size-4 shrink-0 accent-[var(--color-ui-accent)]"
+        className="mt-1 size-4 shrink-0 accent-[var(--color-ui-primary)]"
       />
       <span>
         <span className="block text-ui-body font-semibold text-ui-ink-strong">{titulo}</span>

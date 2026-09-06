@@ -250,7 +250,7 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
                           useEditorStore.getState().scrollToSection(discrepancia.sectionKey);
                           setEstado("cerrado");
                         }}
-                        className="shrink-0 whitespace-nowrap text-ui-aux font-semibold text-ui-accent underline"
+                        className="shrink-0 whitespace-nowrap text-ui-aux font-semibold text-ui-primary underline"
                       >
                         {es_MX.editor.publicar.revisarFechas}
                       </button>
@@ -267,7 +267,7 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
                       <button
                         type="button"
                         onClick={() => irAlBloque(b)}
-                        className="shrink-0 whitespace-nowrap text-ui-aux font-semibold text-ui-accent underline"
+                        className="shrink-0 whitespace-nowrap text-ui-aux font-semibold text-ui-primary underline"
                       >
                         {es_MX.editor.publicar.completar}
                       </button>
@@ -284,7 +284,7 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
                       <button
                         type="button"
                         onClick={() => irAlBloque(w)}
-                        className="shrink-0 whitespace-nowrap text-ui-aux font-semibold text-ui-accent underline"
+                        className="shrink-0 whitespace-nowrap text-ui-aux font-semibold text-ui-primary underline"
                       >
                         {es_MX.editor.publicar.editar}
                       </button>
@@ -341,7 +341,7 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
                   href={enlace}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-11 items-center rounded-ui-pill px-4 text-ui-aux font-semibold text-ui-accent shadow-[inset_0_0_0_1px_var(--color-ui-accent-hover)] hover:bg-ui-accent-soft"
+                  className="inline-flex h-11 items-center rounded-ui-pill px-4 text-ui-aux font-semibold text-ui-primary shadow-[inset_0_0_0_1px_var(--color-ui-primary-hover)] hover:bg-ui-primary-soft"
                 >
                   {es_MX.editor.publicar.verComoInvitado} ↗
                 </a>
@@ -349,7 +349,7 @@ export function PublishDialog({ invitationId }: { invitationId: number }) {
                   href={`https://wa.me/?text=${encodeURIComponent(enlace)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-11 items-center rounded-ui-pill px-4 text-ui-aux font-semibold text-ui-accent hover:text-ui-accent-link"
+                  className="inline-flex h-11 items-center rounded-ui-pill px-4 text-ui-aux font-semibold text-ui-primary hover:text-ui-link"
                 >
                   {es_MX.editor.publicar.compartirWhatsapp} ↗
                 </a>

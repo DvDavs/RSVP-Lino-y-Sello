@@ -107,7 +107,7 @@ export function SoloLectura({
               href={dondeSeCambia.href}
               target="_blank"
               rel="noreferrer"
-              className="font-semibold text-ui-accent underline"
+              className="font-semibold text-ui-primary underline"
             >
               {dondeSeCambia.etiqueta} ↗
             </a>

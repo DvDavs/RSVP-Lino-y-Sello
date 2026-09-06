@@ -36,13 +36,13 @@ export function EncabezadoSitio({ volverA }: { volverA?: string }) {
         Invitaciones
       </Link>
       <nav aria-label="Cuenta y ayuda" className="flex items-center gap-1 text-ui-aux text-ui-ink">
-        <Link href="/ayuda" className="rounded-ui-control px-2 py-1 font-semibold text-ui-accent hover:bg-ui-accent-soft">
+        <Link href="/ayuda" className="rounded-ui-control px-2 py-1 font-semibold text-ui-primary hover:bg-ui-primary-soft">
           {es_MX.comun.ayuda}
         </Link>
         {conSesion === null ? null : conSesion ? (
           <button
             type="button"
-            className="rounded-ui-control px-2 py-1 font-semibold text-ui-accent hover:bg-ui-accent-soft"
+            className="rounded-ui-control px-2 py-1 font-semibold text-ui-primary hover:bg-ui-primary-soft"
             onClick={() => {
               clearAuthToken();
               setConSesion(false);
@@ -53,7 +53,7 @@ export function EncabezadoSitio({ volverA }: { volverA?: string }) {
             {es_MX.comun.cerrarSesion}
           </button>
         ) : (
-          <Link href={destinoAcceso} className="rounded-ui-control px-2 py-1 font-semibold text-ui-accent hover:bg-ui-accent-soft">
+          <Link href={destinoAcceso} className="rounded-ui-control px-2 py-1 font-semibold text-ui-primary hover:bg-ui-primary-soft">
             {es_MX.comun.iniciarSesion}
           </Link>
         )}

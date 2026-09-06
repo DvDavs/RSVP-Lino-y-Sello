@@ -40,7 +40,7 @@ export function BlockForm({ invitationId, manifest, manifestStatus }: { invitati
       <button
         type="button"
         onClick={volver}
-        className="flex h-9 items-center gap-1 self-start rounded-ui-control px-1 text-ui-aux font-semibold text-ui-accent hover:bg-ui-accent-soft"
+        className="flex h-9 items-center gap-1 self-start rounded-ui-control px-1 text-ui-aux font-semibold text-ui-primary hover:bg-ui-primary-soft"
       >
         <ChevronLeft aria-hidden="true" className="size-4" /> Volver a secciones
       </button>
@@ -55,7 +55,7 @@ export function BlockForm({ invitationId, manifest, manifestStatus }: { invitati
           <p>Por ahora no podemos mostrar las opciones de esta sección para editarlas aquí.</p>
           <p className="mt-1 text-ui-ink-muted">
             Puedes seguir mostrándola u ocultándola y reordenándola desde la lista; para el contenido, usa{" "}
-            <a href={`/preview/${invitationId}`} target="_blank" rel="noreferrer" className="font-semibold text-ui-accent underline">
+            <a href={`/preview/${invitationId}`} target="_blank" rel="noreferrer" className="font-semibold text-ui-primary underline">
               la vista previa
             </a>{" "}
             mientras tanto.
@@ -74,7 +74,7 @@ export function BlockForm({ invitationId, manifest, manifestStatus }: { invitati
                 {spec.variants.map((variante) => (
                   <label
                     key={variante}
-                    className="flex cursor-pointer flex-col items-center gap-1 rounded-ui-control border border-ui-border-field p-1.5 has-[[data-state=checked]]:border-ui-accent has-[[data-state=checked]]:bg-ui-accent-soft"
+                    className="flex cursor-pointer flex-col items-center gap-1 rounded-ui-control border border-ui-border-field p-1.5 has-[[data-state=checked]]:border-ui-primary has-[[data-state=checked]]:bg-ui-primary-soft"
                   >
                     <VariantDiagram variant={variante} />
                     <span className="flex items-center gap-1 text-ui-eyebrow text-ui-ink">

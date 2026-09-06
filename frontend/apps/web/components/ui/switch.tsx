@@ -34,7 +34,7 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(function Switch
       onClick={() => onCheckedChange(!checked)}
       className={twMerge(
         "relative inline-flex h-6 w-11 shrink-0 items-center rounded-ui-pill transition-colors duration-[var(--ui-duration)] ease-[var(--ui-ease)] disabled:pointer-events-none disabled:opacity-50",
-        checked ? "bg-ui-accent" : "bg-ui-border-field",
+        checked ? "bg-ui-primary" : "bg-ui-border-field",
         className,
       )}
       {...aria}

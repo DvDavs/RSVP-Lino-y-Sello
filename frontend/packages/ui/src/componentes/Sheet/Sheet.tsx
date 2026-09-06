@@ -25,6 +25,21 @@ export interface SheetProps {
   /** Acción primaria pegada abajo (`11 §5`: "botón primario pegado abajo"). */
   readonly footer?: ReactNode;
   readonly children?: ReactNode;
+  /**
+   * Capa modal (por defecto `true`): foco atrapado, `Esc`/clic fuera activos, velo, scroll
+   * bloqueado y el RESTO de la página marcada `aria-hidden` + `pointer-events: none` por Radix.
+   * `false` deja el mismo panel sin ninguna de esas cuatro cosas: es lo que necesita una VITRINA
+   * (la galería `/design/componentes` lo muestra abierto de forma permanente dentro de su ficha, y
+   * un modal de verdad ahí dejaría la página entera oculta para lectores de pantalla e
+   * inaccesible al ratón). En producto, un diálogo se abre `modal`. */
+  readonly modal?: boolean;
+  /**
+   * Nodo donde se monta el portal. Con `modal={false}` y un contenedor que sea BLOQUE CONTENEDOR
+   * (`contain: paint`, `transform`…), el `position: fixed` del panel se resuelve contra ese
+   * contenedor y no contra la ventana: así la vitrina encierra al diálogo en su ficha. */
+  readonly container?: HTMLElement | null;
+  /** Foco automático al abrir. `event.preventDefault()` lo desactiva (vitrina). */
+  readonly onOpenAutoFocus?: (evento: Event) => void;
   readonly className?: string;
 }
 
@@ -40,15 +55,19 @@ export function Sheet({
   footer,
   children,
   className,
+  modal = true,
+  container,
+  onOpenAutoFocus,
 }: SheetProps): JSX.Element {
   return (
-    <DialogPrimitive.Root open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
+    <DialogPrimitive.Root open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange} modal={modal}>
       {trigger ? <DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger> : null}
-      <DialogPrimitive.Portal>
+      <DialogPrimitive.Portal container={container ?? undefined}>
         <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-ui-ink/40" />
         {/* Ver `Dialog.tsx`: `@radix-ui/react-dialog` 1.1.x no fija `aria-modal` por sí solo. */}
         <DialogPrimitive.Content
-          aria-modal="true"
+          aria-modal={modal ? "true" : undefined}
+          onOpenAutoFocus={onOpenAutoFocus}
           aria-busy={busy || undefined}
           onEscapeKeyDown={(evento) => {
             if (busy) evento.preventDefault();

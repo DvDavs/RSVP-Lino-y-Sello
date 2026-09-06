@@ -132,7 +132,7 @@ function TarjetaPlantilla({ item, accion }: { item: CatalogItem; accion: AccionT
         />
       </div>
       <div className="flex flex-1 flex-col gap-4 p-6">
-        <h3 className="text-ui-card font-bold leading-[var(--text-ui-card--line-height)] text-ui-ink-heading transition-colors duration-[var(--ui-duration)] ease-[var(--ui-ease)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden group-hover:text-ui-accent-hover">
+        <h3 className="text-ui-card font-bold leading-[var(--text-ui-card--line-height)] text-ui-ink-heading transition-colors duration-[var(--ui-duration)] ease-[var(--ui-ease)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden group-hover:text-ui-primary-hover">
           {item.name["es-MX"]}
         </h3>
         <ul className="flex flex-col gap-2">
@@ -140,11 +140,11 @@ function TarjetaPlantilla({ item, accion }: { item: CatalogItem; accion: AccionT
               mapeo de "ciudad → categoría → precio" de la referencia; aquí no hay precio, no se
               inventa uno). */}
           <li className="flex min-w-0 items-center gap-2 text-ui-aux text-ui-ink">
-            <PartyPopper className="size-4 shrink-0 text-ui-accent-hover" aria-hidden="true" />
+            <PartyPopper className="size-4 shrink-0 text-ui-primary-hover" aria-hidden="true" />
             <span className="truncate">{item.eventKinds.map((k) => ETIQUETA_EVENTO[k] ?? k).join(", ")}</span>
           </li>
           <li className="flex min-w-0 items-center gap-2 text-ui-aux text-ui-ink">
-            <Sparkles className="size-4 shrink-0 text-ui-accent-hover" aria-hidden="true" />
+            <Sparkles className="size-4 shrink-0 text-ui-primary-hover" aria-hidden="true" />
             <span className="truncate">
               {item.minPlanTier > 1 ? `Requiere el plan ${item.minPlanTier} o superior` : "Incluida en todos los planes"}
             </span>

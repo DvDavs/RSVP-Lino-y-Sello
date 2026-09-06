@@ -173,7 +173,7 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
               type="button"
               onClick={() => void confirmarRecorte()}
               disabled={fase !== "recortando"}
-              className="h-10 rounded-ui-pill bg-ui-accent px-4 text-ui-aux font-semibold text-ui-accent-ink"
+              className="h-10 rounded-ui-pill bg-ui-primary px-4 text-ui-aux font-semibold text-ui-on-primary"
             >
               Usar esta foto
             </button>

@@ -31,7 +31,7 @@ export function ViewportToggle() {
             data-testid={`viewport-${valor}`}
             onClick={() => setViewport(valor)}
             className={`inline-flex h-10 min-w-11 items-center gap-1.5 rounded-ui-pill px-3 text-ui-aux font-semibold transition-colors ${
-              activo ? "bg-ui-surface text-ui-accent shadow-ui-1" : "text-ui-ink-muted hover:text-ui-ink"
+              activo ? "bg-ui-surface text-ui-primary shadow-ui-1" : "text-ui-ink-muted hover:text-ui-ink"
             }`}
           >
             <Icono className="size-4" aria-hidden="true" />

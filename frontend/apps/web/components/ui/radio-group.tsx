@@ -20,13 +20,13 @@ export function RadioGroupItem({
       value={value}
       id={id}
       className={twMerge(
-        "flex size-5 shrink-0 items-center justify-center rounded-full border border-ui-border-field bg-white data-[state=checked]:border-ui-accent",
+        "flex size-5 shrink-0 items-center justify-center rounded-full border border-ui-border-field bg-white data-[state=checked]:border-ui-primary",
         className,
       )}
       {...resto}
     >
       <RadioGroupPrimitive.Indicator asChild>
-        <span className="size-2.5 rounded-full bg-ui-accent" />
+        <span className="size-2.5 rounded-full bg-ui-primary" />
       </RadioGroupPrimitive.Indicator>
       {children}
     </RadioGroupPrimitive.Item>

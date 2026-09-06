@@ -19,7 +19,7 @@ const DUDAS: Array<{ id: string; pregunta: string; respuesta: React.ReactNode }>
       <>
         <p>
           Tu invitación se crea cuando contratas un plan. En cuanto existe, aparece en{" "}
-          <Link href="/editor" className="font-semibold text-ui-accent underline">
+          <Link href="/editor" className="font-semibold text-ui-primary underline">
             Mis invitaciones
           </Link>
           . Ahí eliges la plantilla —el punto de partida del diseño— y ya puedes cambiar textos,
@@ -113,7 +113,7 @@ export default function PaginaAyuda() {
         </div>
 
         <p className="mt-10">
-          <Link href="/editor" className="font-semibold text-ui-accent underline">
+          <Link href="/editor" className="font-semibold text-ui-primary underline">
             ← {es_MX.ayuda.volverAlEditor}
           </Link>
         </p>

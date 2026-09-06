@@ -1172,3 +1172,27 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   `Skeleton` es "algo se está cargando", no "38 % completado". ¿De acuerdo, o se prefiere que
   `Skeleton` acepte un `aria-live` explícito por si algún consumidor quiere silenciarlo (p. ej.
   dentro de una lista con muchos skeletons a la vez, para no saturar el lector de pantalla)?
+
+## Fase 3-C · b2-rev (revisión de coherencia y accesibilidad del bloque 2)
+- **`@source` en el CSS de la app, no en el paquete.** Tailwind 4 no mira `node_modules`, así que
+  las clases de `@invitaciones/ui` no se descubrían (28 de 51 utilidades sin generar). **Supuesto:**
+  declarar `@source "../../../../packages/ui/src"` en `apps/web/app/(chrome)/globals.css`, con ruta
+  relativa al directorio real del monorepo, en vez de dentro de `packages/ui/src/estilos.css`
+  (que se resuelve a través del symlink de pnpm y podría caer en las reglas de exclusión de
+  `node_modules`). ¿Se prefiere que el paquete lo declare y así cualquier consumidor futuro lo
+  herede sin acordarse?
+- **La galería expone `Select` como maqueta estática, no como panel real.** Radix Select, abierto,
+  deja la página `aria-hidden` y sin eventos de puntero, sin forma de desactivarlo. **Supuesto:**
+  una maqueta que reutiliza las clases exportadas por el componente, más una prueba que impide la
+  deriva, es preferible a no enseñar el panel. ¿Se aprueba invertir en la vitrina en `<iframe>`
+  (patrón Storybook), que resolvería de una vez `Select`, `Toast` y `Tooltip` y devolvería el panel
+  real a la galería?
+- **`Dialog`/`Sheet` ganan `modal`, `container` y `onOpenAutoFocus` en su API pública.** Son props
+  de Radix legítimas y útiles fuera de la galería (un diálogo no modal, un portal a un contenedor
+  concreto). **Supuesto:** es preferible exponer la API real a inventar una prop «modo galería».
+  ¿De acuerdo, o se quiere marcar `modal={false}` como uso exclusivo de documentación?
+- **La familia `accent` del chrome viejo se migró a `primary` (ADR-3C-B2REV-01) sin poder ejecutar
+  el e2e del editor** (necesita backend). **Supuesto:** la equivalencia literal de valores
+  (`--color-ui-accent` ya resolvía a `var(--ui-primary)`) más build/typecheck/lint/pruebas basta
+  como garantía de «cero píxeles de cambio». ¿Se quiere una pasada visual del editor antes de
+  integrar?

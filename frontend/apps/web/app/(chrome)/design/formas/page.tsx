@@ -142,7 +142,8 @@ const ESTILOS = `
 .gf-pagina input[type="range"] {
   appearance: none;
   width: 100%;
-  height: 22px;
+  /* 28, no 22: WCAG 2.2 AA 2.5.8 pide 24 px de objetivo y el pulgar tenía 20 (revisión bloque 2). */
+  height: 28px;
   background: transparent;
   cursor: pointer;
 }
@@ -158,17 +159,17 @@ const ESTILOS = `
 }
 .gf-pagina input[type="range"]::-webkit-slider-thumb {
   appearance: none;
-  width: 20px;
-  height: 20px;
-  margin-top: -7px;
+  width: 24px;
+  height: 24px;
+  margin-top: -9px;
   border-radius: 50%;
   background: var(--ui-primary);
   border: 3px solid var(--ui-surface-raised);
-  box-shadow: 0 1px 3px rgb(41 32 24 / 0.3);
+  box-shadow: var(--ui-shadow-1);
 }
 .gf-pagina input[type="range"]::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--ui-primary);
   border: 3px solid var(--ui-surface-raised);

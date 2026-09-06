@@ -104,7 +104,7 @@ export function CanvasFrame({ invitationId }: CanvasFrameProps) {
             <div className="flex gap-3">
               <button
                 type="button"
-                className="min-h-11 rounded-ui-pill bg-ui-accent px-5 text-ui-aux font-semibold text-ui-accent-ink"
+                className="min-h-11 rounded-ui-pill bg-ui-primary px-5 text-ui-aux font-semibold text-ui-on-primary"
                 onClick={() => {
                   useEditorStore.setState((s) => ({ canvas: { ...s.canvas, status: "loading", attempts: 0 } }));
                   setRecarga((n) => n + 1);

@@ -22,7 +22,7 @@ export function Progress({ value, label, className }: ProgressProps) {
         aria-label={label}
       >
         <ProgressPrimitive.Indicator
-          className="h-full bg-ui-accent transition-transform duration-[var(--ui-duration)] ease-[var(--ui-ease)]"
+          className="h-full bg-ui-primary transition-transform duration-[var(--ui-duration)] ease-[var(--ui-ease)]"
           style={{ transform: `translateX(-${100 - clamp}%)` }}
         />
       </ProgressPrimitive.Root>

@@ -13,6 +13,13 @@ export interface Variante {
   readonly render: () => ReactNode;
   /** Nota breve para la galería (cuándo se usa, qué comprobar). */
   readonly nota?: string;
+  /**
+   * Ancho de la ficha en la rejilla de la galería. `"completo"` la hace ocupar la fila entera:
+   * para lo que solo se entiende a su ancho real (un diálogo, una hoja inferior), donde una
+   * columna de 300 px parte el título en seis renglones y enseña algo que el producto nunca
+   * enseña. Por defecto, `"normal"` (una columna).
+   */
+  readonly ancho?: "normal" | "completo";
 }
 
 export interface Historia {
