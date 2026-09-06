@@ -14,6 +14,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@invitaciones/ui";
+import { IconoAyuda, IconoEntrar, IconoSalir } from "@invitaciones/icons";
 import { clearAuthToken, getAuthToken } from "@/lib/api-client";
 import { es_MX } from "@/lib/i18n";
 
@@ -31,18 +33,24 @@ export function EncabezadoSitio({ volverA }: { volverA?: string }) {
   const destinoAcceso = `/acceso${volverA ? `?volver=${encodeURIComponent(volverA)}` : ""}`;
 
   return (
-    <header className="static flex min-h-24 flex-wrap items-center justify-between gap-x-4 gap-y-2 bg-ui-bg px-6 py-4">
-      <Link href="/editor" className="rounded-ui-control font-ui-display text-ui-title font-semibold text-ui-ink-heading">
+    <header className="static flex min-h-24 flex-wrap items-center justify-between gap-x-4 gap-y-2 bg-ui-surface px-6 py-4">
+      <Link
+        href="/editor"
+        className="rounded-ui-control heading-md text-ui-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface"
+      >
         Invitaciones
       </Link>
-      <nav aria-label="Cuenta y ayuda" className="flex items-center gap-1 text-ui-aux text-ui-ink">
-        <Link href="/ayuda" className="rounded-ui-control px-2 py-1 font-semibold text-ui-primary hover:bg-ui-primary-soft">
-          {es_MX.comun.ayuda}
-        </Link>
+      <nav aria-label="Cuenta y ayuda" className="flex items-center gap-1">
+        <Button asChild variant="terciario" size="sm">
+          <Link href="/ayuda">
+            <IconoAyuda size={18} tone="mono" />
+            {es_MX.comun.ayuda}
+          </Link>
+        </Button>
         {conSesion === null ? null : conSesion ? (
-          <button
-            type="button"
-            className="rounded-ui-control px-2 py-1 font-semibold text-ui-primary hover:bg-ui-primary-soft"
+          <Button
+            variant="terciario"
+            size="sm"
             onClick={() => {
               clearAuthToken();
               setConSesion(false);
@@ -50,12 +58,16 @@ export function EncabezadoSitio({ volverA }: { volverA?: string }) {
               router.refresh();
             }}
           >
+            <IconoSalir size={18} tone="mono" />
             {es_MX.comun.cerrarSesion}
-          </button>
+          </Button>
         ) : (
-          <Link href={destinoAcceso} className="rounded-ui-control px-2 py-1 font-semibold text-ui-primary hover:bg-ui-primary-soft">
-            {es_MX.comun.iniciarSesion}
-          </Link>
+          <Button asChild variant="terciario" size="sm">
+            <Link href={destinoAcceso}>
+              <IconoEntrar size={18} tone="mono" />
+              {es_MX.comun.iniciarSesion}
+            </Link>
+          </Button>
         )}
       </nav>
     </header>

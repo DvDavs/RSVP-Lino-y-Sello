@@ -4,8 +4,9 @@
 // su valor YA es `YYYY-MM-DD` (`esquema/common.ts` `IsoDate`), así que no hace falta re-validar el
 // formato — el propio control del navegador lo impide.
 import { useEffect, useState } from "react";
+import { Input } from "@invitaciones/ui";
 import type { DateSpec, DateValue } from "@/lib/block-types.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { FieldShell, describedByPara } from "./FieldShell.tsx";
 
 export interface DateFieldProps {
   id: string;
@@ -22,12 +23,11 @@ export function DateField({ id, spec, value, esContenidoDeEjemplo, onCommit }: D
 
   return (
     <FieldShell id={id} label={spec.label["es-MX"]} help={spec.help?.["es-MX"]} required={spec.required} esContenidoDeEjemplo={esContenidoDeEjemplo}>
-      <input
+      <Input
         id={id}
         type="date"
         value={local}
         aria-describedby={describedBy}
-        className={CLASES_CONTROL}
         onChange={(e) => {
           setLocal(e.target.value);
           if (e.target.value) onCommit({ kind: "date", value: e.target.value });

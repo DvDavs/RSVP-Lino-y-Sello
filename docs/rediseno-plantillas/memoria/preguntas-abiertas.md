@@ -1196,3 +1196,32 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   (`--color-ui-accent` ya resolvía a `var(--ui-primary)`) más build/typecheck/lint/pruebas basta
   como garantía de «cero píxeles de cambio». ¿Se quiere una pasada visual del editor antes de
   integrar?
+
+## Fase 3-C · 3c-7 (chrome del editor y publicación)
+- **`@invitaciones/ui` no tiene componente de MENÚ** y `04 §14.4` exige el `⋮` como alternativa sin
+  arrastre (AA 2.5.7). **Supuesto:** vivir en `apps/web/components/editor/MenuDeFila.tsx` (Radix
+  DropdownMenu + tokens e iconos del sistema) es preferible a abrir `packages/ui`, cerrado en el
+  bloque 2 y escrito en paralelo por otras tareas. ¿Se sube al paquete como `Menu`?
+- **`Dialog` no reenvía `data-*` al panel**, así que `data-testid` solo puede marcar el CONTENIDO;
+  el título y el aspa (donde aterriza el foco atrapado) quedan fuera. Por eso `conflicto.spec.ts` y
+  `teclado-editor.spec.ts` pasan a `getByRole("dialog", { name: … })`. **Supuesto:** el selector por
+  rol y nombre accesible es el bueno y no hace falta tocar el paquete. ¿O se le añade `...resto`?
+- **`ConflictDialog` usa `busy` permanente** para bloquear Esc y el clic fuera (`04 §12.6`), lo que
+  deja `aria-busy="true"` en un diálogo que en realidad espera una decisión humana. **Supuesto:** es
+  aceptable porque el editor SÍ está detenido (`saveState="conflict"`, `pump()` no envía nada) y la
+  explicación visible acompaña al estado. ¿Se prefiere una prop `noCerrable` en `Dialog`?
+- **El preset no emite utilidades de duración** (`11 §6.1` fija 120/200/320 ms, y
+  `packages/tokens` las deja solo como variable). En `components/editor|fields` no se puede escribir
+  `duration-[var(--ui-dur-2)]` porque `test/tokens-no-leak.test.ts` prohíbe la cadena `--ui-` fuera
+  de `app/(chrome)/**` y `components/ui/**`. **Supuesto:** usar `duration-100/200/300` de Tailwind
+  (≈ dur-1/2/3) es una aproximación aceptable. ¿Se añaden `duration-ui-*` al preset?
+- **`<Toaster />` se monta en `app/(chrome)/editor/[invitationId]/page.tsx`** y no en el layout del
+  chrome, que es de otra tarea del mismo bloque. **Supuesto:** 3C-5 lo sube al layout y esa línea
+  desaparece. ¿Correcto?
+- **`components/ui/button.tsx` (shim traductor) y `CLASES_CONTROL` de `FieldShell` sobreviven** solo
+  porque `app/(chrome)/acceso/page.tsx` y `app/(chrome)/editor/page.tsx` los importan. **Supuesto:**
+  3C-5/3C-6 migran esas dos pantallas a `Button`/`Input` de `@invitaciones/ui` y entonces se borran
+  el shim, la constante y la carpeta `components/ui/` entera. ¿Se confirma quién lo hace?
+- **Axe reporta `aria-hidden-focus` (serious) dentro del lienzo**, en
+  `.RsvpSection-module__…__backdrop` de `packages/sections` (zona prohibida). El spec nuevo excluye
+  el `<iframe>` para medir el CHROME. **Supuesto:** lo arregla quien mantiene `packages/sections`.

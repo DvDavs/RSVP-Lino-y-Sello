@@ -1,11 +1,16 @@
 "use client";
 
 // components/fields/ChoiceField.tsx — campo del tipo de bloque `choice`. Opciones CURADAS (P7): solo
-// las que declara `ChoiceSpec.options`, nunca texto libre. `radiogroup` para ≤ 5 opciones (04 §18);
-// con más, se degrada a `<select>` para no saturar el panel.
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
+// las que declara `ChoiceSpec.options`, nunca texto libre.
+//
+// El corte de las cinco opciones es el de `11 §5`: `RadioGroup` con opción grande hasta cinco (todo
+// visible, sin abrir nada) y `Combobox` con búsqueda a partir de seis (el `Select` del sistema es
+// para listas cortas y fijas). Los dos exponen el patrón ARIA correcto — `radiogroup`/`radio` y
+// `combobox`+`listbox` — y los dos son controles PROPIOS: aquí no queda ningún `<select>` nativo.
+import { Combobox, RadioGroup } from "@invitaciones/ui";
 import type { ChoiceSpec, ChoiceValue } from "@/lib/block-types.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { es_MX } from "@/lib/i18n.ts";
+import { FieldShell, describedByPara } from "./FieldShell.tsx";
 
 export interface ChoiceFieldProps {
   id: string;
@@ -17,46 +22,37 @@ export interface ChoiceFieldProps {
 
 export function ChoiceField({ id, spec, value, esContenidoDeEjemplo, onCommit }: ChoiceFieldProps) {
   const describedBy = describedByPara(id, { help: spec.help?.["es-MX"] });
+  const etiqueta = spec.label["es-MX"];
+  const opciones = spec.options.map((op) => ({ value: op.id, label: op.label["es-MX"] }));
 
-  if (spec.options.length <= 5) {
-    return (
-      <FieldShell id={id} label={spec.label["es-MX"]} help={spec.help?.["es-MX"]} required={spec.required} esContenidoDeEjemplo={esContenidoDeEjemplo}>
+  return (
+    <FieldShell
+      id={id}
+      label={etiqueta}
+      help={spec.help?.["es-MX"]}
+      required={spec.required}
+      esContenidoDeEjemplo={esContenidoDeEjemplo}
+    >
+      {spec.options.length <= 5 ? (
         <RadioGroup
           id={id}
+          aria-label={etiqueta}
           aria-describedby={describedBy}
           value={value ?? undefined}
           onValueChange={(v) => onCommit({ kind: "choice", optionId: v })}
-          className="flex flex-col gap-2"
-        >
-          {spec.options.map((op) => (
-            <label key={op.id} className="flex cursor-pointer items-center gap-2.5 text-ui-body text-ui-ink">
-              <RadioGroupItem value={op.id} id={`${id}-${op.id}`} />
-              {op.label["es-MX"]}
-            </label>
-          ))}
-        </RadioGroup>
-      </FieldShell>
-    );
-  }
-
-  return (
-    <FieldShell id={id} label={spec.label["es-MX"]} help={spec.help?.["es-MX"]} required={spec.required} esContenidoDeEjemplo={esContenidoDeEjemplo}>
-      <select
-        id={id}
-        aria-describedby={describedBy}
-        value={value ?? ""}
-        onChange={(e) => onCommit({ kind: "choice", optionId: e.target.value })}
-        className={CLASES_CONTROL}
-      >
-        <option value="" disabled>
-          Elige una opción…
-        </option>
-        {spec.options.map((op) => (
-          <option key={op.id} value={op.id}>
-            {op.label["es-MX"]}
-          </option>
-        ))}
-      </select>
+          opciones={opciones}
+        />
+      ) : (
+        <Combobox
+          id={id}
+          aria-label={etiqueta}
+          aria-describedby={describedBy}
+          value={value ?? undefined}
+          onValueChange={(v) => onCommit({ kind: "choice", optionId: v })}
+          opciones={opciones}
+          placeholder={es_MX.editor.campo.elegirOpcion}
+        />
+      )}
     </FieldShell>
   );
 }

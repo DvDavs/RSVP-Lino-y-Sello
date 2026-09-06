@@ -20,9 +20,10 @@ import type { ImageSpec, ImageValue } from "@/lib/block-types.ts";
 import { uploadAsset } from "@/lib/api-client.ts";
 import { ApiError } from "@/lib/errors.ts";
 import { cargarImagenDesdeArchivo, proporcionParaAspect, recortarAWebp, recorteCentradoConProporcion, textoFocal, RECORTE_COMPLETO } from "@/lib/crop.ts";
-import { Progress } from "@/components/ui/progress.tsx";
+import { Button, Input, ProgressRing } from "@invitaciones/ui";
+import { IconoError, IconoRecortar, IconoSubir } from "@invitaciones/icons";
 import { es_MX } from "@/lib/i18n.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara, idsAyudaError } from "./FieldShell.tsx";
+import { FieldShell, describedByPara, idsAyudaError } from "./FieldShell.tsx";
 
 const ReactCrop = dynamic(() => import("react-image-crop").then((m) => m.default), { ssr: false });
 
@@ -168,26 +169,22 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
           <ReactCrop crop={crop} onChange={(_px, percent) => setCrop(percent)} aspect={proporcion} ruleOfThirds>
             <img src={archivoOriginal.url} alt="" className="max-h-96 w-auto" />
           </ReactCrop>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => void confirmarRecorte()}
-              disabled={fase !== "recortando"}
-              className="h-10 rounded-ui-pill bg-ui-primary px-4 text-ui-aux font-semibold text-ui-on-primary"
-            >
-              Usar esta foto
-            </button>
-            <button
-              type="button"
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" onClick={() => void confirmarRecorte()} disabled={fase !== "recortando"}>
+              <IconoRecortar size={18} tone="mono" />
+              {es_MX.editor.fotos.usarEstaFoto}
+            </Button>
+            <Button
+              variant="terciario"
+              size="sm"
               onClick={() => {
                 URL.revokeObjectURL(archivoOriginal.url);
                 setArchivoOriginal(null);
                 setFase("reposo");
               }}
-              className="h-10 rounded-ui-pill border border-ui-border-field px-4 text-ui-aux font-semibold text-ui-ink"
             >
-              Cancelar
-            </button>
+              {es_MX.comun.cancelar}
+            </Button>
           </div>
         </div>
       </FieldShell>
@@ -210,17 +207,14 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
           {previewOptimista || value?.url ? (
             <img src={previewOptimista ?? value?.url} alt="" className="size-20 shrink-0 rounded-ui-media object-cover" />
           ) : (
-            <div className="flex size-20 shrink-0 items-center justify-center rounded-ui-media bg-ui-bg-alt text-ui-eyebrow text-ui-ink-muted">
-              Sin foto
+            <div className="flex size-20 shrink-0 items-center justify-center rounded-ui-media bg-ui-surface-alt text-xs text-ui-ink-muted">
+              {es_MX.editor.fotos.sinFoto}
             </div>
           )}
-          <button
-            type="button"
-            onClick={() => inputArchivoRef.current?.click()}
-            className="h-9 rounded-ui-pill border border-ui-border-field px-3.5 text-ui-aux font-semibold text-ui-ink hover:bg-ui-bg-alt"
-          >
-            {value ? "Cambiar foto" : "Elegir foto"}
-          </button>
+          <Button variant="secundario" size="sm" onClick={() => inputArchivoRef.current?.click()}>
+            <IconoSubir size={18} tone="mono" />
+            {value ? es_MX.editor.fotos.cambiarFoto : es_MX.editor.fotos.elegirFoto}
+          </Button>
           <input
             ref={inputArchivoRef}
             type="file"
@@ -238,7 +232,7 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
         {/* U-7 · el mismo pie que la galería ya tenía en su zona de soltar y que a «Cambiar foto» le
             faltaba: la asimetría explicaba la sorpresa (la galería avisa ANTES del límite; esta no
             decía nada de formatos ni de peso). */}
-        <p className="text-ui-eyebrow text-ui-ink-muted">{es_MX.editor.foto.limites(mbMaximos)}</p>
+        <p className="text-xs text-ui-ink-muted">{es_MX.editor.foto.limites(mbMaximos)}</p>
 
         {/* U-7 · el error, pegado al control que falló. */}
         {error ? (
@@ -247,33 +241,41 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
             ref={errorRef}
             tabIndex={-1}
             role="alert"
-            className="rounded-ui-control bg-red-50 p-2.5 text-ui-eyebrow text-ui-danger"
+            className="flex items-start gap-1.5 rounded-ui-control bg-ui-danger-soft p-2.5 text-xs font-semibold text-ui-on-danger-soft"
           >
+            <IconoError size={16} tone="mono" className="mt-px shrink-0" />
             {error}
           </p>
         ) : null}
 
         {fase === "subiendo" || fase === "preparando" ? (
-          <Progress value={progreso} label={fase === "preparando" ? "Preparando la foto" : es_MX.editor.foto.subiendo} />
+          <div className="flex items-center gap-3">
+            <ProgressRing
+              value={progreso}
+              size={56}
+              label={fase === "preparando" ? es_MX.editor.fotos.preparando : es_MX.editor.foto.subiendo}
+            />
+            <span className="text-sm text-ui-ink-muted">
+              {fase === "preparando" ? es_MX.editor.fotos.preparando : es_MX.editor.foto.subiendo}
+            </span>
+          </div>
         ) : null}
 
         {!esDecorativo ? (
           <div>
-            <label htmlFor={`${id}-alt`} className="text-ui-eyebrow font-semibold text-ui-ink">
-              Texto alternativo
+            <label htmlFor={`${id}-alt`} className="text-sm font-semibold text-ui-ink">
+              {es_MX.editor.fotos.textoAlternativo}
             </label>
-            <p className="mb-1 text-ui-eyebrow text-ui-ink-muted">
-              Describe la foto para quien no puede verla, p. ej. «Ana y Luis abrazados frente al mar».
-            </p>
-            <input
+            <p className="mb-1 text-xs text-ui-ink-muted">{es_MX.editor.fotos.ayudaTextoAlternativo}</p>
+            <Input
               id={`${id}-alt`}
               type="text"
-              className={CLASES_CONTROL}
               aria-invalid={Boolean(formState.errors.alt) || undefined}
               {...register("alt", { onChange: () => void alCambiarAlt() })}
             />
             {formState.errors.alt ? (
-              <p role="alert" className="mt-1 text-ui-eyebrow text-ui-danger">
+              <p role="alert" className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-ui-danger-text">
+                <IconoError size={16} tone="mono" className="shrink-0" />
                 {formState.errors.alt.message}
               </p>
             ) : null}
@@ -282,12 +284,10 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
 
         {value ? (
           <div className="flex flex-col gap-2">
-            <span className="text-ui-eyebrow font-semibold text-ui-ink">Punto focal</span>
-            <p className="text-ui-eyebrow text-ui-ink-muted">
-              Qué parte de la foto se conserva siempre visible, aunque el marco cambie de forma.
-            </p>
-            <label className="flex items-center gap-2 text-ui-eyebrow text-ui-ink-muted">
-              Horizontal
+            <span className="text-sm font-semibold text-ui-ink">{es_MX.editor.fotos.puntoFocal}</span>
+            <p className="text-xs text-ui-ink-muted">{es_MX.editor.fotos.ayudaPuntoFocal}</p>
+            <label className="flex items-center gap-2 text-xs text-ui-ink-muted">
+              {es_MX.editor.fotos.horizontal}
               <input
                 type="range"
                 min={0}
@@ -295,11 +295,11 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
                 value={Math.round(value.focal.x * 100)}
                 aria-valuetext={textoFocal(value.focal.x, value.focal.y)}
                 onChange={(e) => alMoverFocal("x", Number(e.target.value) / 100)}
-                className="flex-1"
+                className="h-11 flex-1 accent-ui-primary"
               />
             </label>
-            <label className="flex items-center gap-2 text-ui-eyebrow text-ui-ink-muted">
-              Vertical
+            <label className="flex items-center gap-2 text-xs text-ui-ink-muted">
+              {es_MX.editor.fotos.vertical}
               <input
                 type="range"
                 min={0}
@@ -307,7 +307,7 @@ export function ImageField({ id, invitationId, spec, esDecorativo, value, esCont
                 value={Math.round(value.focal.y * 100)}
                 aria-valuetext={textoFocal(value.focal.x, value.focal.y)}
                 onChange={(e) => alMoverFocal("y", Number(e.target.value) / 100)}
-                className="flex-1"
+                className="h-11 flex-1 accent-ui-primary"
               />
             </label>
           </div>

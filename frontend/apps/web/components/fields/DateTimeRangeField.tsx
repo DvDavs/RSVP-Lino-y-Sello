@@ -5,8 +5,10 @@
 // `IsoLocalDateTime` (`esquema/common.ts`). El fin es opcional (I-01 del servidor exige `end ≥ start`
 // cuando existe; aquí se avisa antes de guardar, no se re-implementa la invariante completa).
 import { useEffect, useState } from "react";
+import { Input } from "@invitaciones/ui";
+import { es_MX } from "@/lib/i18n.ts";
 import type { DateTimeRangeSpec, DateTimeRangeValue } from "@/lib/block-types.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { FieldShell, describedByPara } from "./FieldShell.tsx";
 
 export interface DateTimeRangeFieldProps {
   id: string;
@@ -36,24 +38,22 @@ export function DateTimeRangeField({ id, spec, value, esContenidoDeEjemplo, onCo
   return (
     <FieldShell id={id} label={spec.label["es-MX"]} help={spec.help?.["es-MX"]} required={spec.required} esContenidoDeEjemplo={esContenidoDeEjemplo} error={error}>
       <div className="flex flex-col gap-2 sm:flex-row" id={id} aria-describedby={describedBy}>
-        <label className="flex flex-1 flex-col gap-1 text-ui-eyebrow text-ui-ink-muted">
-          Empieza
-          <input
+        <label className="flex flex-1 flex-col gap-1 text-xs text-ui-ink-muted">
+          {es_MX.editor.campo.empieza}
+          <Input
             type="datetime-local"
             value={start}
-            className={CLASES_CONTROL}
             onChange={(e) => {
               setStart(e.target.value);
               intentarGuardar(e.target.value, end);
             }}
           />
         </label>
-        <label className="flex flex-1 flex-col gap-1 text-ui-eyebrow text-ui-ink-muted">
-          Termina (opcional)
-          <input
+        <label className="flex flex-1 flex-col gap-1 text-xs text-ui-ink-muted">
+          {es_MX.editor.campo.termina}
+          <Input
             type="datetime-local"
             value={end}
-            className={CLASES_CONTROL}
             onChange={(e) => {
               setEnd(e.target.value);
               intentarGuardar(start, e.target.value);

@@ -12,8 +12,9 @@
 //   U-6 · el enlace que se copiaba y se mandaba por WhatsApp era `http://localhost/i/…`: no le
 //         abría a ningún invitado, ni a la propia novia («Ver como invitado» →
 //         `ERR_CONNECTION_REFUSED`).
-//   U-5 · el diálogo decía «✅ Tu invitación ya se puede ver en internet» **sin haber invalidado
-//         nada**, y el enlace servía la versión anterior durante ~5 minutos.
+//   U-5 · el diálogo decía «Tu invitación ya se puede ver en internet» (con una palomita de emoji,
+//         retirada en la fase 3-C) **sin haber invalidado nada**, y el enlace servía la versión
+//         anterior durante ~5 minutos.
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

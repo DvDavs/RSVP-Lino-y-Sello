@@ -9,9 +9,18 @@
 // `manifest`, ver `lib/manifest.ts`): sin él no hay catálogo de presets que mostrar, así que este
 // componente EXPLICA la degradación (P1) en vez de inventar opciones — pregunta ALTA en
 // `preguntas-abiertas.md`.
-import { Check } from "lucide-react";
+//
+// FRONTERA (fase 3-C, `04 §19.4`): la MUESTRA de cada preset se pinta con los colores y la fuente
+// del PAQUETE DE PLANTILLA (`palette.tokens`, `fontSet.heading.family`), nunca con los tokens
+// `--ui-*` del chrome; el marco, el foco y el texto alrededor son chrome. Por eso los colores de la
+// muestra van por `style` en línea: son datos de la plantilla, no una decisión de diseño de aquí.
 import type { ThemeSpec } from "@invitaciones/schema";
+import { IconoExito, IconoPaleta, IconoTipografia } from "@invitaciones/icons";
+import { es_MX } from "@/lib/i18n.ts";
 import { useEditorStore } from "@/lib/store.ts";
+
+const CLASES_OPCION =
+  "flex min-h-11 items-center gap-2 rounded-ui-control px-2.5 py-1.5 text-sm text-ui-ink transition-colors duration-200 ease-ui-out focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface";
 
 export function ThemePicker({ theme }: { theme: ThemeSpec | null }) {
   const themeActual = useEditorStore((s) => s.composed?.theme ?? null);
@@ -21,15 +30,15 @@ export function ThemePicker({ theme }: { theme: ThemeSpec | null }) {
   if (!theme) {
     return (
       <div className="flex flex-col gap-2">
-        <h3 className="text-ui-eyebrow font-semibold uppercase tracking-[1.2px] text-ui-ink-muted">Apariencia</h3>
+        <Titulo />
         <div className="flex items-center gap-2.5">
-          <PastillaPaleta tokens={themeActual.tokens} />
+          <MuestraPaleta tokens={themeActual.tokens} />
           <div className="min-w-0">
-            <p className="truncate text-ui-aux font-semibold text-ui-ink">{themeActual.fonts.heading.family}</p>
-            <p className="text-ui-eyebrow text-ui-ink-muted">Paleta y tipografía actuales</p>
+            <p className="truncate text-sm font-semibold text-ui-ink">{themeActual.fonts.heading.family}</p>
+            <p className="text-xs text-ui-ink-muted">Paleta y tipografía actuales</p>
           </div>
         </div>
-        <p className="text-ui-eyebrow text-ui-ink-muted">
+        <p className="text-xs text-ui-ink-muted">
           Las demás combinaciones de esta plantilla todavía no están disponibles aquí para elegir.
         </p>
       </div>
@@ -37,12 +46,15 @@ export function ThemePicker({ theme }: { theme: ThemeSpec | null }) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-ui-eyebrow font-semibold uppercase tracking-[1.2px] text-ui-ink-muted">Apariencia</h3>
+    <div className="flex flex-col gap-4">
+      <Titulo />
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-ui-aux font-semibold text-ui-ink">Paleta</span>
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Paleta de colores">
+        <span className="flex items-center gap-1.5 text-sm font-semibold text-ui-ink">
+          <IconoPaleta size={18} />
+          Paleta
+        </span>
+        <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Paleta de colores">
           {theme.palettes.map((paleta) => {
             const activa = paleta.id === themeActual.paletteId;
             return (
@@ -57,11 +69,11 @@ export function ThemePicker({ theme }: { theme: ThemeSpec | null }) {
                 onFocus={() => useEditorStore.getState().previewTheme(paleta.id, null)}
                 onBlur={() => useEditorStore.getState().previewTheme(null, null)}
                 onClick={() => useEditorStore.getState().setTheme({ paletteId: paleta.id })}
-                className={`flex items-center gap-2 rounded-ui-control border px-2.5 py-1.5 transition-colors ${activa ? "border-ui-primary bg-ui-primary-soft" : "border-ui-border-field hover:border-ui-primary hover:bg-ui-bg-alt"}`}
+                className={`${CLASES_OPCION} border-[1.5px] ${activa ? "border-ui-primary bg-ui-primary-soft text-ui-on-primary-soft" : "border-ui-border hover:bg-ui-surface-alt"}`}
               >
-                <PastillaPaleta tokens={paleta.tokens} />
-                <span className="text-ui-eyebrow text-ui-ink">{paleta.name["es-MX"]}</span>
-                {activa ? <Check aria-hidden="true" className="size-3.5 text-ui-primary" /> : null}
+                <MuestraPaleta tokens={paleta.tokens} />
+                <span>{paleta.name["es-MX"]}</span>
+                {activa ? <IconoExito size={16} tone="mono" className="shrink-0" /> : null}
               </button>
             );
           })}
@@ -69,8 +81,11 @@ export function ThemePicker({ theme }: { theme: ThemeSpec | null }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-ui-aux font-semibold text-ui-ink">Tipografía</span>
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Combinación de tipografías">
+        <span className="flex items-center gap-1.5 text-sm font-semibold text-ui-ink">
+          <IconoTipografia size={18} />
+          Tipografía
+        </span>
+        <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Combinación de tipografías">
           {theme.fontSets.map((fontSet) => {
             const activa = fontSet.id === themeActual.fontSetId;
             return (
@@ -85,13 +100,18 @@ export function ThemePicker({ theme }: { theme: ThemeSpec | null }) {
                 onFocus={() => useEditorStore.getState().previewTheme(null, fontSet.id)}
                 onBlur={() => useEditorStore.getState().previewTheme(null, null)}
                 onClick={() => useEditorStore.getState().setTheme({ fontSetId: fontSet.id })}
-                className={`flex items-center gap-1.5 rounded-ui-control border px-2.5 py-1.5 transition-colors ${activa ? "border-ui-primary bg-ui-primary-soft" : "border-ui-border-field hover:border-ui-primary hover:bg-ui-bg-alt"}`}
+                className={`${CLASES_OPCION} border-[1.5px] ${activa ? "border-ui-primary bg-ui-primary-soft text-ui-on-primary-soft" : "border-ui-border hover:bg-ui-surface-alt"}`}
               >
-                <span style={{ fontFamily: fontSet.heading.family }} className="text-ui-body">
+                {/* La muestra usa la fuente DEL PAQUETE de plantilla, no la del chrome. */}
+                <span
+                  aria-hidden="true"
+                  className="inline-flex size-8 shrink-0 items-center justify-center rounded-ui-control bg-ui-surface-alt"
+                  style={{ fontFamily: fontSet.heading.family, fontSize: 18 }}
+                >
                   Aa
                 </span>
-                <span className="text-ui-eyebrow text-ui-ink">{fontSet.name["es-MX"]}</span>
-                {activa ? <Check aria-hidden="true" className="size-3.5 text-ui-primary" /> : null}
+                <span>{fontSet.name["es-MX"]}</span>
+                {activa ? <IconoExito size={16} tone="mono" className="shrink-0" /> : null}
               </button>
             );
           })}
@@ -101,12 +121,22 @@ export function ThemePicker({ theme }: { theme: ThemeSpec | null }) {
   );
 }
 
-function PastillaPaleta({ tokens }: { tokens: Record<string, string> }) {
+function Titulo() {
+  return <h3 className="label-md text-ui-ink-muted">{es_MX.editor.panel.apariencia}</h3>;
+}
+
+/**
+ * Miniatura de una paleta DE LA PLANTILLA: papel, acento y tinta del preset, con una «Aa» encima
+ * para que se vea la pareja fondo/tinta real. `aria-hidden`: el nombre del preset ya está al lado.
+ */
+function MuestraPaleta({ tokens }: { tokens: Record<string, string> }) {
   return (
-    <span aria-hidden="true" className="flex size-6 shrink-0 overflow-hidden rounded-full border border-ui-border">
-      <span className="w-1/3" style={{ background: tokens.bg }} />
-      <span className="w-1/3" style={{ background: tokens.accent }} />
-      <span className="w-1/3" style={{ background: tokens.ink }} />
+    <span
+      aria-hidden="true"
+      className="inline-flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-ui-control"
+      style={{ background: tokens.bg, color: tokens.ink, boxShadow: `inset 0 0 0 3px ${tokens.accent}` }}
+    >
+      <span style={{ fontSize: 12, fontWeight: 700 }}>Aa</span>
     </span>
   );
 }

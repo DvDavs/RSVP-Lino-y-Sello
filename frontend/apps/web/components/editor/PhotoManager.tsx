@@ -15,13 +15,14 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, sortableKeyboardCoordinates, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, ImagePlus, Trash2 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
+import { Button, ProgressRing } from "@invitaciones/ui";
+import { IconoAgregar, IconoArrastrar, IconoBorrar, IconoError } from "@invitaciones/icons";
 import type { ComposedGroup, ImageSpec } from "@/lib/block-types.ts";
-import { DropdownMenu, DropdownMenuButton, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu.tsx";
-import { Progress } from "@/components/ui/progress.tsx";
+import { MenuDeFila, opcionesDeReordenar } from "./MenuDeFila.tsx";
 import { uploadAsset } from "@/lib/api-client.ts";
 import { crearAnuncios, INSTRUCCIONES_TECLADO } from "@/lib/dnd-announcements.ts";
+import { es_MX } from "@/lib/i18n.ts";
 import { mensajeDeErrorDeAsset } from "@/components/fields/ImageField.tsx";
 import type { GroupSpec } from "@/lib/manifest.ts";
 import { useEditorStore } from "@/lib/store.ts";
@@ -78,12 +79,12 @@ export function PhotoManager({ invitationId, spec, groupId, group, maxItemBytes 
       const clave = `${archivo.name}-${archivo.size}-${Date.now()}`;
       setSubidas((s) => [...s, { clave, nombre: archivo.name, progreso: 0, error: null }]);
       if (!(TIPOS_ACEPTADOS as readonly string[]).includes(archivo.type)) {
-        setSubidas((s) => s.map((u) => (u.clave === clave ? { ...u, error: "Formato no admitido. Usa JPG, PNG o WebP." } : u)));
+        setSubidas((s) => s.map((u) => (u.clave === clave ? { ...u, error: es_MX.editor.fotos.formatoNoAdmitido } : u)));
         continue;
       }
       if (archivo.size > maxItemBytes) {
         const mb = (maxItemBytes / (1024 * 1024)).toFixed(0);
-        setSubidas((s) => s.map((u) => (u.clave === clave ? { ...u, error: `Pesa más de ${mb} MB.` } : u)));
+        setSubidas((s) => s.map((u) => (u.clave === clave ? { ...u, error: es_MX.editor.fotos.pesaMasDe(mb) } : u)));
         continue;
       }
       const tempId = useEditorStore.getState().addItem(groupId, {});
@@ -109,18 +110,12 @@ export function PhotoManager({ invitationId, spec, groupId, group, maxItemBytes 
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-baseline justify-between">
-        <h3 className="text-ui-aux font-semibold text-ui-ink">
-          Galería — {items.length} de {spec.max} fotos
-        </h3>
-        <button
-          type="button"
-          disabled={!puedeAgregar}
-          onClick={() => inputRef.current?.click()}
-          className="flex h-9 items-center gap-1.5 rounded-ui-pill bg-ui-primary px-3.5 text-ui-aux font-semibold text-ui-on-primary disabled:opacity-40"
-        >
-          <ImagePlus aria-hidden="true" className="size-4" /> Agregar
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-ui-ink">{es_MX.editor.fotos.titulo(items.length, spec.max)}</h3>
+        <Button size="sm" disabled={!puedeAgregar} onClick={() => inputRef.current?.click()}>
+          <IconoAgregar size={18} tone="mono" />
+          {es_MX.editor.fotos.agregar}
+        </Button>
       </div>
 
       <DndContext
@@ -155,21 +150,25 @@ export function PhotoManager({ invitationId, spec, groupId, group, maxItemBytes 
       </DndContext>
 
       <div
-        className="flex flex-col items-center gap-1.5 rounded-ui-control border-2 border-dashed border-ui-border-field p-4 text-center"
+        className="flex flex-col items-center gap-1.5 rounded-ui-media border-2 border-dashed border-ui-border bg-ui-surface-alt p-5 text-center"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
           if (e.dataTransfer.files.length > 0) void subirArchivos(e.dataTransfer.files);
         }}
       >
-        <p className="text-ui-aux text-ui-ink">
-          Arrastra fotos aquí o{" "}
-          <button type="button" onClick={() => inputRef.current?.click()} className="font-semibold text-ui-primary underline">
-            selecciona archivos
+        <p className="text-sm text-ui-ink">
+          {es_MX.editor.fotos.soltarAqui}{" "}
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="rounded-ui-control font-semibold text-ui-link underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-alt"
+          >
+            {es_MX.editor.fotos.seleccionaArchivos}
           </button>
         </p>
-        <p className="text-ui-eyebrow text-ui-ink-muted">
-          JPG, PNG o WebP · hasta {(maxItemBytes / (1024 * 1024)).toFixed(0)} MB · máximo {spec.max} fotos
+        <p className="text-xs text-ui-ink-muted">
+          {es_MX.editor.fotos.limites(Number((maxItemBytes / (1024 * 1024)).toFixed(0)), spec.max)}
         </p>
       </div>
       <input
@@ -178,7 +177,7 @@ export function PhotoManager({ invitationId, spec, groupId, group, maxItemBytes 
         accept={TIPOS_ACEPTADOS.join(",")}
         multiple
         className="sr-only"
-        aria-label="Elegir fotos para la galería"
+        aria-label={es_MX.editor.fotos.elegirParaGaleria}
         onChange={(e) => {
           if (e.target.files) void subirArchivos(e.target.files);
           e.target.value = "";
@@ -188,19 +187,25 @@ export function PhotoManager({ invitationId, spec, groupId, group, maxItemBytes 
       {subidas.length > 0 ? (
         <div className="flex flex-col gap-2" role="status">
           {subidas.length > 1 ? (
-            <p className="text-ui-eyebrow text-ui-ink-muted">
-              Subiendo {subidas.filter((s) => !s.error).length} de {subidas.length}
+            <p className="text-xs text-ui-ink-muted">
+              {es_MX.editor.fotos.subiendoN(subidas.filter((s) => !s.error).length, subidas.length)}
             </p>
           ) : null}
           {subidas.map((u) => (
-            <div key={u.clave} className="flex flex-col gap-1">
-              <span className="truncate text-ui-eyebrow text-ui-ink-muted">{u.nombre}</span>
+            <div key={u.clave} className="flex items-center gap-3">
               {u.error ? (
-                <p role="alert" className="text-ui-eyebrow text-ui-danger">
-                  {u.error}
+                <p role="alert" className="flex items-start gap-1.5 text-xs font-semibold text-ui-danger-text">
+                  <IconoError size={16} tone="mono" className="mt-px shrink-0" />
+                  <span>
+                    <span className="block text-ui-ink-muted">{u.nombre}</span>
+                    {u.error}
+                  </span>
                 </p>
               ) : (
-                <Progress value={u.progreso} label={`Subiendo ${u.nombre}`} />
+                <>
+                  <ProgressRing value={u.progreso} size={56} label={`Subiendo ${u.nombre}`} />
+                  <span className="min-w-0 flex-1 truncate text-xs text-ui-ink-muted">{u.nombre}</span>
+                </>
               )}
             </div>
           ))}
@@ -208,8 +213,8 @@ export function PhotoManager({ invitationId, spec, groupId, group, maxItemBytes 
       ) : null}
 
       {!imageBlockId ? (
-        <p role="alert" className="text-ui-eyebrow text-ui-danger">
-          Esta plantilla no declaró un bloque de foto dentro de la galería — avísanos para revisarlo.
+        <p role="alert" className="text-xs font-semibold text-ui-danger-text">
+          {es_MX.editor.fotos.sinBloqueDeFoto}
         </p>
       ) : null}
     </div>
@@ -244,48 +249,48 @@ function PhotoTile({
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`relative aspect-square overflow-hidden rounded-ui-media bg-ui-bg-alt ${isDragging ? "z-10 shadow-ui-2" : ""}`}
+      className={`relative aspect-square overflow-hidden rounded-ui-media bg-ui-surface-alt ${isDragging ? "z-10 shadow-ui-2" : ""}`}
     >
       {url ? (
         <img src={url} alt="" className="size-full object-cover" />
       ) : (
-        <div className="flex size-full items-center justify-center text-ui-eyebrow text-ui-ink-muted">Foto {posicion}</div>
+        <div className="flex size-full items-center justify-center text-xs text-ui-ink-muted">{es_MX.editor.fotos.foto(posicion)}</div>
       )}
-      <button
-        type="button"
-        {...attributes}
-        {...listeners}
-        aria-label={`Reordenar foto ${posicion}`}
-        className="absolute left-1 top-1 flex size-7 items-center justify-center rounded-ui-control bg-white/90 text-ui-ink-muted shadow-ui-1 active:cursor-grabbing"
-      >
-        <GripVertical aria-hidden="true" className="size-3.5" />
-      </button>
-      <div className="absolute right-1 top-1 flex gap-1">
-        <DropdownMenu>
-          <DropdownMenuButton label={`Más opciones de la foto ${posicion}`} className="bg-white/90 shadow-ui-1" />
-          <DropdownMenuContent>
-            <DropdownMenuItem disabled={esPrimera} onSelect={onSubir}>
-              Subir
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled={esUltima} onSelect={onBajar}>
-              Bajar
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled={esPrimera} onSelect={onMoverAlPrincipio}>
-              Mover al principio
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled={esUltima} onSelect={onMoverAlFinal}>
-              Mover al final
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* Los tres controles van sobre PAPEL OPACO, nunca sobre la foto (`11 §3.4` R5): una pastilla
+          `surface-raised` con sombra 1, no un velo ni un degradado. */}
+      <div className="absolute inset-x-1 top-1 flex items-center justify-between gap-1">
         <button
           type="button"
-          aria-label={`Quitar foto ${posicion}`}
-          onClick={onQuitar}
-          className="flex size-7 items-center justify-center rounded-ui-control bg-white/90 text-ui-danger shadow-ui-1"
+          {...attributes}
+          {...listeners}
+          aria-label={es_MX.editor.fotos.reordenarFoto(posicion)}
+          className="inline-flex size-9 items-center justify-center rounded-ui-pill bg-ui-surface-raised text-ui-ink-muted shadow-ui-1 transition-colors duration-100 ease-ui-out hover:text-ui-ink active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-alt"
         >
-          <Trash2 aria-hidden="true" className="size-3.5" />
+          <IconoArrastrar size={16} tone="mono" />
         </button>
+        <span className="flex gap-1">
+          <MenuDeFila
+            etiqueta={es_MX.editor.fotos.masOpcionesFoto(posicion)}
+            className="size-9 bg-ui-surface-raised shadow-ui-1"
+            opciones={opcionesDeReordenar({
+              esPrimera,
+              esUltima,
+              onSubir,
+              onBajar,
+              onMoverAlPrincipio,
+              onMoverAlFinal,
+              textos: es_MX.editor.seccion,
+            })}
+          />
+          <button
+            type="button"
+            aria-label={es_MX.editor.fotos.quitarFoto(posicion)}
+            onClick={onQuitar}
+            className="inline-flex size-9 items-center justify-center rounded-ui-pill bg-ui-surface-raised text-ui-danger-text shadow-ui-1 transition-colors duration-100 ease-ui-out hover:bg-ui-danger-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-alt"
+          >
+            <IconoBorrar size={16} tone="mono" />
+          </button>
+        </span>
       </div>
     </li>
   );

@@ -6,8 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Input } from "@invitaciones/ui";
 import type { LocationSpec, LocationValue } from "@/lib/block-types.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { FieldShell, describedByPara } from "./FieldShell.tsx";
 
 export interface LocationFieldProps {
   id: string;
@@ -57,13 +58,12 @@ export function LocationField({ id, spec, value, esContenidoDeEjemplo, onCommit 
   return (
     <FieldShell id={id} label={spec.label["es-MX"]} help={spec.help?.["es-MX"]} required={spec.required} esContenidoDeEjemplo={esContenidoDeEjemplo} error={error}>
       <div className="flex flex-col gap-2">
-        <input
+        <Input
           id={id}
           type="text"
           placeholder="Nombre del lugar"
           aria-invalid={Boolean(formState.errors.name) || undefined}
           aria-describedby={describedBy}
-          className={CLASES_CONTROL}
           {...nameRegistrados}
           onChange={(e) => {
             void nameOnChange(e);
@@ -74,22 +74,20 @@ export function LocationField({ id, spec, value, esContenidoDeEjemplo, onCommit 
             nameRef.current = el;
           }}
         />
-        <input
+        <Input
           type="text"
           placeholder="Dirección (opcional)"
           aria-label={`Dirección de ${spec.label["es-MX"]}`}
-          className={CLASES_CONTROL}
           {...registroDireccion}
           onChange={(e) => {
             void registroDireccion.onChange(e);
             void alCambiar();
           }}
         />
-        <input
+        <Input
           type="url"
           placeholder="Enlace al mapa (opcional)"
           aria-label={`Enlace al mapa de ${spec.label["es-MX"]}`}
-          className={CLASES_CONTROL}
           {...registroMapa}
           onChange={(e) => {
             void registroMapa.onChange(e);

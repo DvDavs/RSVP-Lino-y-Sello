@@ -9,8 +9,15 @@
 // Los atajos de teclado se registran aquí para el foco DENTRO del chrome; con el foco dentro del
 // LIENZO los captura el documento del iframe y llegan como `KEY_COMMAND` (04 §7.2). Sin esos dos
 // caminos, Ctrl+Z deja de funcionar en cuanto el cliente hace clic en la vista previa.
-import { Redo2, Undo2 } from "lucide-react";
+//
+// Fase 3-C: `Button variant="icono"` del sistema (44 px, anillo de foco propio) con
+// `IconoDeshacer`/`IconoRehacer` del inventario (`11 §4.2`, «Edición»), y `Tooltip` para que quien
+// usa ratón vea también QUÉ se deshace. El tooltip NUNCA es el único portador: el `aria-label` dice
+// lo mismo (`11 §5`).
 import { useEffect } from "react";
+import { Button, Tooltip } from "@invitaciones/ui";
+import { IconoDeshacer, IconoRehacer } from "@invitaciones/icons";
+import { es_MX } from "@/lib/i18n";
 import { useEditorStore, useUndoRedoLabels } from "@/lib/store";
 
 export function UndoRedoBar() {
@@ -38,30 +45,21 @@ export function UndoRedoBar() {
     return () => window.removeEventListener("keydown", alPulsar);
   }, [undoOnce, redoOnce, flushNow]);
 
+  const etiquetaDeshacer = undo ? es_MX.editor.barra.deshacer(undo) : es_MX.editor.barra.nadaQueDeshacer;
+  const etiquetaRehacer = redo ? es_MX.editor.barra.rehacer(redo) : es_MX.editor.barra.nadaQueRehacer;
+
   return (
-    <div className="flex items-center gap-1" role="group" aria-label="Deshacer y rehacer">
-      <button
-        type="button"
-        data-testid="undo"
-        onClick={undoOnce}
-        disabled={!canUndo}
-        title={undo ? `Deshacer: ${undo}` : "No hay nada que deshacer"}
-        aria-label={undo ? `Deshacer: ${undo}` : "No hay nada que deshacer"}
-        className="inline-flex size-11 items-center justify-center rounded-ui-control text-ui-ink transition-colors hover:bg-ui-primary-soft disabled:pointer-events-none disabled:opacity-40"
-      >
-        <Undo2 className="size-5" aria-hidden="true" />
-      </button>
-      <button
-        type="button"
-        data-testid="redo"
-        onClick={redoOnce}
-        disabled={!canRedo}
-        title={redo ? `Rehacer: ${redo}` : "No hay nada que rehacer"}
-        aria-label={redo ? `Rehacer: ${redo}` : "No hay nada que rehacer"}
-        className="inline-flex size-11 items-center justify-center rounded-ui-control text-ui-ink transition-colors hover:bg-ui-primary-soft disabled:pointer-events-none disabled:opacity-40"
-      >
-        <Redo2 className="size-5" aria-hidden="true" />
-      </button>
+    <div className="flex items-center gap-1" role="group" aria-label={es_MX.editor.barra.deshacerRehacer}>
+      <Tooltip content={etiquetaDeshacer}>
+        <Button variant="icono" data-testid="undo" onClick={undoOnce} disabled={!canUndo} aria-label={etiquetaDeshacer}>
+          <IconoDeshacer size={20} tone="mono" />
+        </Button>
+      </Tooltip>
+      <Tooltip content={etiquetaRehacer}>
+        <Button variant="icono" data-testid="redo" onClick={redoOnce} disabled={!canRedo} aria-label={etiquetaRehacer}>
+          <IconoRehacer size={20} tone="mono" />
+        </Button>
+      </Tooltip>
     </div>
   );
 }

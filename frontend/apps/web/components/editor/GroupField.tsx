@@ -16,12 +16,14 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { useMemo, type ReactNode } from "react";
+import { Button } from "@invitaciones/ui";
+import { IconoAgregar, IconoArrastrar, IconoBorrar } from "@invitaciones/icons";
 import type { GroupValue } from "@invitaciones/schema";
 import type { ComposedGroup } from "@/lib/block-types.ts";
-import { DropdownMenu, DropdownMenuButton, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu.tsx";
+import { MenuDeFila, opcionesDeReordenar } from "./MenuDeFila.tsx";
 import { crearAnuncios, INSTRUCCIONES_TECLADO } from "@/lib/dnd-announcements.ts";
+import { es_MX } from "@/lib/i18n.ts";
 import type { GroupSpec } from "@/lib/manifest.ts";
 import { etiqueta } from "@/lib/manifest.ts";
 import { useEditorStore } from "@/lib/store.ts";
@@ -68,8 +70,8 @@ export function GroupField({ invitationId, spec, groupId, group }: GroupFieldPro
   return (
     <div className="flex flex-col gap-3">
       {spec.min > 0 && items.length < spec.min ? (
-        <p role="alert" className="text-ui-eyebrow text-ui-danger">
-          Agrega al menos {spec.min} {spec.min === 1 ? "elemento" : "elementos"}.
+        <p role="alert" className="text-xs font-semibold text-ui-danger-text">
+          {es_MX.editor.seccion.alMinimo(spec.min)}
         </p>
       ) : null}
       <DndContext
@@ -116,15 +118,17 @@ export function GroupField({ invitationId, spec, groupId, group }: GroupFieldPro
           </ul>
         </SortableContext>
       </DndContext>
-      <button
-        type="button"
+      <Button
+        variant="secundario"
+        size="sm"
         disabled={!puedeAgregar}
         onClick={() => useEditorStore.getState().addItem(groupId, {})}
-        className="flex h-10 items-center gap-1.5 self-start rounded-ui-control border border-dashed border-ui-border-field px-3.5 text-ui-aux font-semibold text-ui-primary disabled:opacity-40"
+        className="self-start"
       >
-        <Plus aria-hidden="true" className="size-4" /> Agregar {etiqueta(spec.itemLabel).toLowerCase()}
-      </button>
-      {!puedeAgregar ? <p className="text-ui-eyebrow text-ui-ink-muted">Alcanzaste el máximo de {spec.max}.</p> : null}
+        <IconoAgregar size={18} tone="mono" />
+        {es_MX.editor.seccion.agregar(etiqueta(spec.itemLabel).toLowerCase())}
+      </Button>
+      {!puedeAgregar ? <p className="text-xs text-ui-ink-muted">{es_MX.editor.seccion.alMaximo(spec.max)}</p> : null}
     </div>
   );
 }
@@ -159,45 +163,41 @@ function GroupItemCard({
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`rounded-ui-card border border-ui-border bg-white p-3.5 ${isDragging ? "z-10 shadow-ui-2" : ""}`}
+      className={`rounded-ui-card bg-ui-surface-raised p-3.5 shadow-ui-1 ${isDragging ? "z-10 shadow-ui-2" : ""}`}
     >
       <div className="mb-2.5 flex items-center gap-1.5">
         <button
           type="button"
           {...attributes}
           {...listeners}
-          aria-label={`Reordenar ${titulo}`}
-          className="flex size-8 shrink-0 cursor-grab items-center justify-center rounded-ui-control text-ui-ink-muted hover:bg-ui-bg-alt active:cursor-grabbing"
+          aria-label={es_MX.editor.seccion.reordenar(titulo)}
+          className="inline-flex size-11 shrink-0 cursor-grab items-center justify-center rounded-ui-pill text-ui-ink-muted transition-colors duration-100 ease-ui-out hover:bg-ui-surface-alt hover:text-ui-ink active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-raised"
         >
-          <GripVertical aria-hidden="true" className="size-4" />
+          <IconoArrastrar size={18} tone="mono" />
         </button>
-        <span className="flex-1 text-ui-aux font-semibold text-ui-ink">{titulo}</span>
-        <DropdownMenu>
-          <DropdownMenuButton label={`Más opciones de ${titulo}`} />
-          <DropdownMenuContent>
-            <DropdownMenuItem disabled={esPrimera} onSelect={onSubir}>
-              Subir
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled={esUltima} onSelect={onBajar}>
-              Bajar
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled={esPrimera} onSelect={onMoverAlPrincipio}>
-              Mover al principio
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled={esUltima} onSelect={onMoverAlFinal}>
-              Mover al final
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <button
-          type="button"
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ui-ink">{titulo}</span>
+        <MenuDeFila
+          etiqueta={es_MX.editor.seccion.masOpciones(titulo)}
+          opciones={opcionesDeReordenar({
+            esPrimera,
+            esUltima,
+            onSubir,
+            onBajar,
+            onMoverAlPrincipio,
+            onMoverAlFinal,
+            textos: es_MX.editor.seccion,
+          })}
+        />
+        <Button
+          variant="icono"
+          size="sm"
           disabled={!puedeQuitar}
-          aria-label={`Quitar ${titulo}`}
+          aria-label={es_MX.editor.seccion.quitar(titulo)}
           onClick={onQuitar}
-          className="flex size-8 shrink-0 items-center justify-center rounded-ui-control text-ui-danger hover:bg-red-50 disabled:opacity-30"
+          className="text-ui-danger-text hover:bg-ui-danger-soft"
         >
-          <Trash2 aria-hidden="true" className="size-4" />
-        </button>
+          <IconoBorrar size={18} tone="mono" />
+        </Button>
       </div>
       {children}
     </li>

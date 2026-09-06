@@ -2,8 +2,9 @@
 
 // components/fields/BooleanField.tsx — campo del tipo de bloque `boolean` (p. ej. "reproducir música
 // al abrir"). Interruptor, no casilla: consistente con `Switch` de mostrar/ocultar sección (04 §18).
-import { Switch } from "@/components/ui/switch.tsx";
+import { Switch } from "@invitaciones/ui";
 import type { BooleanSpec, BooleanValue } from "@/lib/block-types.ts";
+import { es_MX } from "@/lib/i18n.ts";
 import { FieldShell, describedByPara } from "./FieldShell.tsx";
 
 export interface BooleanFieldProps {
@@ -26,7 +27,7 @@ export function BooleanField({ id, spec, value, esContenidoDeEjemplo, onCommit }
           aria-describedby={describedBy}
           aria-label={spec.label["es-MX"]}
         />
-        <span className="text-ui-body text-ui-ink">{value ? "Activado" : "Desactivado"}</span>
+        <span className="text-md text-ui-ink">{value ? es_MX.editor.campo.activado : es_MX.editor.campo.desactivado}</span>
       </div>
     </FieldShell>
   );

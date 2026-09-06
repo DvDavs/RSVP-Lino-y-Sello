@@ -1,15 +1,17 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { EmptyState } from "@invitaciones/ui";
 import { es_MX } from "@/lib/i18n";
 
 export default function ErrorEditor({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
-    <main className="p-8" role="alert">
-      <p className="text-ui-ink">{es_MX.errores.generico}</p>
-      <Button className="mt-4" onClick={reset}>
-        {es_MX.comun.reintentar}
-      </Button>
+    <main className="grid min-h-[60vh] place-items-center p-8" role="alert">
+      <EmptyState
+        ilustracion="error-generico"
+        titulo={es_MX.errores.generico}
+        texto={es_MX.editor.estados.noPudimosAbrir}
+        accion={{ etiqueta: es_MX.comun.reintentar, onSelect: reset }}
+      />
     </main>
   );
 }

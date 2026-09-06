@@ -9,7 +9,7 @@
 // POR QUÉ AVISA Y NO BLOQUEA (decisión, `preguntas-abiertas.md` § P-3-8-4): una invitación puede
 // tener, legítimamente, un momento del itinerario en otro día — una boda de dos días, un civil la
 // víspera, un brunch al día siguiente. Bloquear la publicación por una heurística de cliente
-// dejaría a esas clientas sin poder publicar y sin entender por qué. El aviso ⚠ de `04 §6.5` es
+// dejaría a esas clientas sin poder publicar y sin entender por qué. El aviso (no bloqueante) de `04 §6.5` es
 // exactamente la categoría prevista para esto: «opcional, no bloquea», con su `[Editar]` al lado.
 //
 // QUÉ SE COMPARA, y por qué así:
@@ -51,7 +51,7 @@ function formatearDia(isoDia: string): string {
   return new Date(a, m - 1, d).toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
 }
 
-/** Ids de los bloques cuya fecha es la del negocio (la que sale con 🔒). */
+/** Ids de los bloques cuya fecha es la del negocio (la que sale de solo lectura, con candado). */
 function idsDeFechaDeNegocio(manifest: Manifiesto): Set<string> {
   const ids = new Set<string>();
   for (const seccion of manifest.sections) {
