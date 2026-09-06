@@ -74,3 +74,16 @@ Pruebas ajustadas: `PasoTipoEvento.test.tsx:48`, `AsistenteDeCreacion.test.tsx:2
 ## 6. Qué falta
 Foto de más de 8 MB y RSVP del invitado: no probados, se acabó el presupuesto de contexto. Todo lo
 demás del encargo está recorrido en móvil y en escritorio.
+
+## Correcciones UX-C
+Cierra G-01 y M-12 de este handoff. `ContactoParaContratar` (nuevo, `lib/contacto.ts` +
+`components/sitio/ContactoParaContratar.tsx`) puesto en `Planes.tsx` y `ayuda/page.tsx`: dos
+variables de entorno opcionales (`NEXT_PUBLIC_CONTACTO_WHATSAPP`, `NEXT_PUBLIC_CONTACTO_CORREO`);
+sin configurar, la frase es honesta y no hay botón muerto. El ancla real de `/ayuda#planes` ahora
+responde «¿Cuánto cuesta y cómo contrato un plan?» (antes era la duda de cambiar de plan).
+M-12: contraseña que no cumple la política en «Entrar» → mensaje de credenciales, no «Algo salió
+mal»; en «Crear cuenta» se pinta el mensaje del propio servidor (`@StrongPassword`), saneado por
+`soloTexto()`. Verificado con salida real: `test` 536/536, `typecheck` limpio, `build` verde,
+`check-budget` en presupuesto (`/` 148,2/150 KB gz), e2e 14/14 contra backend propio. Detalle y las
+dos trampas de arranque encontradas en `bitacora/3c-ux-c.md`. Pendiente de decisión del dueño: el
+WhatsApp/correo reales y si hay compra en línea (`preguntas-abiertas.md § Fase 3-C · UX-C`).

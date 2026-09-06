@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { BuscadorAyuda } from "./BuscadorAyuda.tsx";
 import { PantallaError } from "./PantallaError.tsx";
-import { DUDAS } from "./dudas-ayuda.ts";
+import { DUDAS, filtrarDudas } from "./dudas-ayuda.ts";
 import { es_MX } from "@/lib/i18n";
 
 describe("ayuda", () => {
@@ -19,6 +19,31 @@ describe("ayuda", () => {
   it("cada duda conserva su ancla: `/ayuda#fecha` sigue llevando a la de la fecha", () => {
     render(<BuscadorAyuda />);
     expect(document.querySelector("#fecha")).not.toBeNull();
+  });
+
+  // G-01: `components/asistente/MisInvitaciones.tsx` manda a `/ayuda#planes` a quien no tiene
+  // ninguna invitación. Llegaba a un renglón PLEGADO, así que la respuesta que había venido a
+  // buscar seguía escondida detrás de un chevron.
+  it("`/ayuda#planes` llega con esa duda ABIERTA, no plegada como el resto", () => {
+    window.location.hash = "#planes";
+    try {
+      render(<BuscadorAyuda />);
+      const abierta = document.querySelector<HTMLDetailsElement>("#planes");
+      expect(abierta?.open).toBe(true);
+      expect(document.querySelector<HTMLDetailsElement>("#fecha")?.open).toBe(false);
+    } finally {
+      window.location.hash = "";
+    }
+  });
+
+  it("y esa duda contesta lo que la clienta pregunta: cuánto cuesta y con quién se contrata", () => {
+    render(<BuscadorAyuda />);
+    const planes = DUDAS.find((duda) => duda.id === "planes");
+    expect(planes?.pregunta).toContain("Cuánto cuesta");
+    expect(planes?.parrafos.join(" ")).toContain("precios");
+    // La pregunta de precios se encuentra buscando por la palabra que se teclea.
+    expect(filtrarDudas(DUDAS, "precio").map((duda) => duda.id)).toContain("planes");
+    expect(filtrarDudas(DUDAS, "cuanto cuesta").map((duda) => duda.id)).toContain("planes");
   });
 
   it("el buscador filtra por lo que hay dentro de la respuesta", async () => {

@@ -7,6 +7,12 @@
 //  3. `axe` AA sin violaciones críticas ni serias, en los dos anchos.
 //  4. El presupuesto de JS de primera carga de la ruta (`contratos §8`), medido sobre el `.next`
 //     que acaba de construir el `webServer`, con la MISMA compuerta que usa CI.
+//  5. Cierre 3-C (G-01): que el camino que EMPIEZA en esta pantalla —«Empezar mi invitación» y
+//     «Planes»— tenga salida. El recorrido de uso sin instrucciones midió un anillo de cuatro
+//     toques que terminaba en `/ayuda#planes` sin precio y sin contacto, así que las dos puntas del
+//     anillo se vigilan aquí aunque una de ellas viva en `/ayuda`: es la misma pregunta de la misma
+//     clienta («¿cuánto cuesta y con quién lo contrato?») y romper cualquiera de las dos la deja
+//     otra vez sin respuesta.
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -78,6 +84,30 @@ test("los testimonios van marcados como ejemplo (no son clientas reales todavía
   await page.goto("/");
   await expect(page.getByText("Ejemplo")).toHaveCount(3);
   await expect(page.getByText("Textos de muestra mientras reunimos testimonios reales de clientas.")).toBeVisible();
+});
+
+test("la sección de planes ofrece un camino para contratar, y no uno inventado", async ({ page }) => {
+  await page.goto("/");
+  const planes = page.locator("#planes");
+  await expect(planes.getByRole("heading", { level: 3, name: "¿Cómo se contrata?" })).toBeVisible();
+
+  // Este build NO trae `NEXT_PUBLIC_CONTACTO_WHATSAPP` ni `NEXT_PUBLIC_CONTACTO_CORREO`, así que lo
+  // correcto es decir la verdad: ni un botón que no lleve a nadie, ni un número inventado.
+  await expect(planes.getByText(/el contacto se publicará aquí en cuanto esté configurado/)).toBeVisible();
+  await expect(planes.getByRole("link", { name: "Escribir por WhatsApp" })).toHaveCount(0);
+  await expect(planes.getByRole("link", { name: "Escribir por correo" })).toHaveCount(0);
+});
+
+test("el final del circuito (`/ayuda#planes`) contesta la pregunta que lo abrió: cuánto cuesta", async ({ page }) => {
+  // Es a donde manda «Ver planes» del asistente cuando la cuenta no tiene ninguna invitación.
+  await page.goto("/ayuda#planes");
+  const duda = page.locator("details#planes");
+  await expect(duda).toHaveAttribute("open", "");
+  await expect(duda.getByRole("heading", { level: 2 })).toHaveText("¿Cuánto cuesta y cómo contrato un plan?");
+  await expect(duda).toContainText("Los precios todavía no están publicados");
+  // Y la caja de contacto está al final de la misma página, no en «el medio por el que contrataste».
+  await expect(page.getByRole("heading", { name: "¿No está tu duda aquí?" })).toBeVisible();
+  await expect(page.getByText(/el contacto se publicará aquí en cuanto esté configurado/)).toBeVisible();
 });
 
 test("axe AA: 0 violaciones críticas o serias, en teléfono y en escritorio", async ({ page }) => {

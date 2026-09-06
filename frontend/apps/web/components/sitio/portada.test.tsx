@@ -85,10 +85,15 @@ describe("testimonios", () => {
 });
 
 describe("planes y cierre", () => {
-  it("planes no inventa precios y manda a la cuenta, que es donde el plan se ve de verdad", () => {
+  it("planes no inventa precios, ofrece contacto y deja «entrar» como salida secundaria", () => {
     render(<Planes />);
     expect(screen.getByText(es_MX.sitio.planesSeccion.nota)).not.toBeNull();
     expect(screen.getByRole("link", { name: es_MX.sitio.planesSeccion.accion }).getAttribute("href")).toBe("/acceso");
+    // G-01: la sección ya no termina en el anillo `/acceso` → «contrata un plan» → `/ayuda#planes`.
+    // Sin variables de entorno en las pruebas, el bloque enseña la frase honesta y NINGÚN botón.
+    expect(screen.getByRole("heading", { level: 3 }).textContent).toBe(es_MX.sitio.contactar.titulo);
+    expect(screen.getByText(es_MX.sitio.contactar.sinContacto)).not.toBeNull();
+    expect(screen.queryByRole("link", { name: es_MX.sitio.contactar.whatsapp })).toBeNull();
   });
 
   it("el cierre tiene UNA acción y va al asistente", () => {

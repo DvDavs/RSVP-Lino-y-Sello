@@ -10,7 +10,7 @@
 // del paquete en el handoff.
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "@invitaciones/ui/componentes/EmptyState.tsx";
 import { Field } from "@invitaciones/ui/componentes/Field/index.ts";
 import { Input } from "@invitaciones/ui/componentes/Input/index.ts";
@@ -37,9 +37,41 @@ function FilaDuda({ duda }: { readonly duda: Duda }) {
   );
 }
 
+/**
+ * `/ayuda#planes` llegaba PLEGADO. El botón «Ver planes» del asistente
+ * (`components/asistente/MisInvitaciones.tsx`) manda a ese ancla, y el navegador solo hace
+ * desplazamiento: el `<details>` sigue cerrado, así que la clienta que venía preguntando por los
+ * planes aterrizaba sobre un renglón con un chevron. Aquí se abre el que nombra el fragmento —y se
+ * vuelve a hacer al cambiar el `hash`, para que un enlace interno al mismo destino también valga—.
+ * Se manipula el `open` del elemento por referencia y no por `props`: el resto del acordeón sigue
+ * siendo del navegador (teclado, `aria-expanded`, buscar en la página), que es la razón de usarlo.
+ */
+function useAbrirLaDelAncla(): void {
+  useEffect(() => {
+    function abrir(): void {
+      const id = window.location.hash.slice(1);
+      if (id.length === 0) return;
+      if (!DUDAS.some((duda) => duda.id === id)) return;
+      const elemento = document.getElementById(id);
+      if (!(elemento instanceof HTMLDetailsElement)) return;
+      elemento.open = true;
+      // El navegador ya se desplazó al ancla ANTES de abrirla, así que la respuesta recién
+      // desplegada puede quedar fuera de la pantalla; se recoloca. (`typeof` porque jsdom no
+      // implementa `scrollIntoView` y este efecto también corre en las pruebas de unidad.)
+      if (typeof elemento.scrollIntoView === "function") {
+        elemento.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+    }
+    abrir();
+    window.addEventListener("hashchange", abrir);
+    return () => window.removeEventListener("hashchange", abrir);
+  }, []);
+}
+
 export function BuscadorAyuda() {
   const [consulta, setConsulta] = useState("");
   const visibles = useMemo(() => filtrarDudas(DUDAS, consulta), [consulta]);
+  useAbrirLaDelAncla();
 
   return (
     <>
