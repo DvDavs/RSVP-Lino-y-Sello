@@ -10,7 +10,8 @@
 //   1. **Sin sesión**: no llama a `sesionDemo()`; empieza con `sessionStorage` vacío, como quien
 //      abre el sitio por primera vez.
 //   2. **Sin URLs internas**: la única dirección que teclea es `/editor`. A `/acceso` y a
-//      `/editor/{id}` llega NAVEGANDO, pulsando lo que ve.
+//      `/editor/{id}` llega NAVEGANDO, pulsando lo que ve (desde la fase 3-C, `/editor` la lleva
+//      sola a `/acceso` cuando no hay sesión, y de vuelta al asistente al entrar).
 //   3. **Sin `data-testid`**: todo se localiza por su nombre accesible visible
 //      (`getByRole`/`getByLabel`), que es lo único que una persona puede leer.
 //
@@ -50,39 +51,51 @@ test("una persona sin sesión entra, elige plantilla, escribe, publica y su enla
 
   try {
     // ── 1. Llega al sitio SIN sesión ────────────────────────────────────────────────────────
+    //     FASE 3-C (3C-6): `/editor` es ahora el ASISTENTE DE CREACIÓN y sin sesión no hay nada
+    //     que enseñar en él (ni catálogo ni invitaciones), así que lleva derecho a `/acceso` con el
+    //     retorno puesto — en vez de pintar una pantalla que no se puede usar. El muro U-1 sigue
+    //     medido: se comprueba que se llega a una salida REAL y que ni un enlace va a «#».
     await page.goto("/editor");
-    await expect(page.getByRole("heading", { name: "Elige una plantilla" })).toBeVisible({ timeout: 20_000 });
+    await expect(page).toHaveURL(/\/acceso\?volver=%2Feditor$/, { timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: "Entra a tu cuenta" })).toBeVisible();
 
-    // U-1: el aviso ya no es un callejón sin salida. Ni un enlace de la página va a «#».
     const muertos = await page.locator('a[href="#"]').count();
     expect(muertos, "un enlace que no lleva a nada es peor que no tenerlo (U-1)").toBe(0);
     await page.screenshot({ path: `${EVIDENCIA}01-sin-sesion-hay-salida.png` });
 
-    // ── 2. Entra a su cuenta pulsando lo que ve ─────────────────────────────────────────────
-    await page.getByRole("link", { name: "Iniciar sesión" }).first().click();
-    await expect(page.getByRole("heading", { name: "Entra a tu cuenta" })).toBeVisible();
+    // ── 2. Entra a su cuenta ────────────────────────────────────────────────────────────────
     await page.getByLabel("Correo electrónico").fill(DEMO_EMAIL);
     await page.getByLabel("Contraseña").fill(DEMO_PASS);
     await page.screenshot({ path: `${EVIDENCIA}02-pantalla-de-acceso.png` });
     await page.getByRole("button", { name: "Iniciar sesión" }).click();
 
-    // ── 3. Vuelve al catálogo, ya identificada, y ve SUS invitaciones ───────────────────────
+    // ── 3. Vuelve al asistente, ya identificada, y ve SUS invitaciones ──────────────────────
+    await expect(page.getByRole("heading", { name: "¿Qué vamos a celebrar?", level: 1 })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole("heading", { name: "Mis invitaciones" })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("heading", { name: "Plantillas disponibles" })).toBeVisible();
-    // La captura se toma con la lista YA resuelta, no con el «Cargando…» en pantalla.
+    // La captura se toma con la lista YA resuelta, no con el «Preparando…» en pantalla.
     await expect(page.getByRole("link", { name: /Seguir editando|Elegir plantilla/ }).first()).toBeVisible({ timeout: 20_000 });
     await page.screenshot({ path: `${EVIDENCIA}03-mis-invitaciones.png`, fullPage: true });
 
     // Si tiene varias invitaciones por empezar, dice a cuál. Con una sola, el selector no existe:
-    // la página no pregunta lo que ya sabe.
-    const selector = page.getByLabel("¿En cuál invitación?");
+    // la pantalla no pregunta lo que ya sabe.
+    const selector = page.getByRole("combobox", { name: "¿Para cuál invitación?" });
     if ((await selector.count()) > 0) {
-      await selector.selectOption(String(invitationId));
+      await selector.click();
+      await page.getByRole("option", { name: new RegExp(`n\\.º ${invitationId}$`) }).click();
     }
 
-    // ── 4. Elige plantilla desde el CATÁLOGO (U-2: aquí es donde no pasaba nada) ────────────
+    // ── 4. Elige plantilla con el ASISTENTE (U-2: aquí es donde no pasaba nada) ─────────────
+    //     Paso 1 (tipo de evento, ya preseleccionado con el de su invitación) → paso 2 (solo las
+    //     plantillas que le van) → paso 3 (datos básicos, opcionales) → paso 4 (abrir el editor).
+    await page.getByRole("button", { name: "Continuar con Boda" }).click();
+    await expect(page.getByRole("heading", { name: "Elige el punto de partida", level: 1 })).toBeVisible();
     const tarjeta = page.getByRole("listitem").filter({ hasText: "Boda clásica" });
-    await tarjeta.getByRole("button", { name: "Elegir esta plantilla" }).click();
+    await tarjeta.getByRole("button", { name: "Usar esta plantilla" }).click();
+
+    await expect(page.getByRole("heading", { name: "Los datos básicos", level: 1 })).toBeVisible({ timeout: 30_000 });
+    await page.getByRole("button", { name: "Lo lleno después" }).click();
+    await expect(page.getByRole("heading", { name: "Tu invitación ya tiene diseño", level: 1 })).toBeVisible({ timeout: 20_000 });
+    await page.getByRole("link", { name: "Abrir mi invitación" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/editor/${invitationId}$`), { timeout: 30_000 });
     await expect(page.getByRole("radiogroup", { name: "Ver la invitación en" })).toBeVisible({ timeout: 30_000 });

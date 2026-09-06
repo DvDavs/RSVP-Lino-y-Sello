@@ -46,6 +46,9 @@ export default defineConfig({
         // (que siguen fuera de cobertura), así que `components/sitio/**` sí entra: portada,
         // cabecera y pie, asistente de acceso, buscador de ayuda y los dos estados de error.
         "components/sitio/**/*.{ts,tsx}",
+        // Fase 3-C, 3C-6: el asistente de creación de `/editor` (pasos, catálogo filtrado por tipo
+        // de evento y datos básicos). La PÁGINA de la ruta sigue fuera: es el armazón de Suspense.
+        "components/asistente/**/*.{ts,tsx}",
       ],
       exclude: ["**/*.test.{ts,tsx}", "**/*.d.ts"],
       thresholds: { lines: 60, functions: 65, branches: 50, statements: 60 },

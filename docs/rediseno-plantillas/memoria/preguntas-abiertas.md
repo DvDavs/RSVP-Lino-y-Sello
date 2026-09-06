@@ -1274,3 +1274,29 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
 - **Axe reporta `aria-hidden-focus` (serious) dentro del lienzo**, en
   `.RsvpSection-module__…__backdrop` de `packages/sections` (zona prohibida). El spec nuevo excluye
   el `<iframe>` para medir el CHROME. **Supuesto:** lo arregla quien mantiene `packages/sections`.
+## Fase 3-C · 3C-6 (asistente de creación de `/editor`)
+- **Filtros de estilo y color: no existen los datos.** `11 §7` pide filtros «Todas · 12» /
+  «Incluidas en mi plan» y el brief del bloque añadía «estilo/color». El catálogo (`03 §3.1`) solo
+  publica `eventKinds`, `minPlanTier`, `capabilities` (cinco valores cerrados) y `previewUrl`:
+  ningún metadato de estilo ni de paleta. **Supuesto:** se ofrecen chips por plan y por capacidad
+  (datos reales) y NO se inventan etiquetas de estilo. ¿Se quiere añadir `style`/`palette` al
+  manifiesto (`packages/schema` + Kotlin + registro de plantillas) para poder filtrar por eso?
+- **Sin sesión, `/editor` redirige a `/acceso`** en vez de pintar el asistente con un aviso. Es lo
+  que pide `04 §7.1` paso 1 y el brief, pero cambia dos e2e ajenas (ya adaptadas). **Supuesto:** la
+  redirección con `?volver=%2Feditor` es preferible a una pantalla que no se puede usar.
+- **`confirmation` y `generic` reutilizan icono.** El inventario de `11 §4.2` dibuja ocho «tipos de
+  evento» que NO coinciden con los ocho `EventKind`: hay `corporativo` (que no es un `EventKind`) y
+  falta `confirmacion`. **Supuesto:** `confirmation` usa `IconoComunion` y `generic` usa
+  `IconoInvitacion`. ¿Se dibuja un icono `confirmacion` propio y se deja `corporativo` sin uso?
+- **El estado vacío «no hay plantillas de este tipo» reutiliza la ilustración `sin-invitaciones`.**
+  `11 §4.3` lista «sin plantillas» como ilustración propia y el bloque 2 solo entregó tres
+  (`sin-invitaciones`, `sin-fotos`, `error-generico`). **Supuesto:** reutilizar es mejor que dejar
+  el estado sin ilustración. ¿Se dibuja `sin-plantillas`?
+- **Paso 3: qué se escribe y qué no.** Los nombres van al bloque con rol `celebrantA`/`celebrantB`
+  (o `honoree`, o `coverTitle`) y el lugar al primer `eventPlace` — que en las plantillas reales
+  vive DENTRO del grupo `event.cards`, así que se escribe con `setItemBlock` sobre su primer ítem y
+  solo el `name` (dirección y mapa quedan para el editor). **Supuesto:** es la lectura correcta de
+  «¿Dónde?» de `11 §7`. ¿O el paso 3 debería limitarse a nombres y fecha?
+- **`/editor` no está en `scripts/check-budget.mjs`.** Medido a mano: 326,4 KB gz de primera carga
+  (era 311,8 KB). **Supuesto:** le aplica el presupuesto del editor (600 KB), no el de la landing.
+  ¿Se añade la ruta a la compuerta (fichero fuera del área de este agente)?

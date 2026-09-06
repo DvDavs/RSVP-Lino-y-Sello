@@ -204,6 +204,107 @@ export const es_MX = {
       texto: "Escríbenos por el mismo medio por el que contrataste tu invitación y te contestamos.",
     },
   },
+  /**
+   * Asistente de creación de `/editor` (fase 3-C, 3C-6; `11 §7` fila «Asistente de creación»).
+   * Cuatro pasos: tipo de evento → plantilla → datos básicos → confirmación. Los textos son los
+   * del doc 11 cuando existen; el resto sigue su tono (segunda persona, verbos concretos, sin
+   * jerga y sin códigos: los códigos de error viven en `errores.codigo`).
+   */
+  asistente: {
+    navegacion: "Progreso del asistente",
+    atras: "Atrás",
+    continuar: "Continuar",
+    continuarCon: (nombre: string) => `Continuar con ${nombre}`,
+    pasos: {
+      evento: "Tipo de evento",
+      plantilla: "Plantilla",
+      datos: "Datos básicos",
+      listo: "Listo",
+    },
+    /** Sin sesión: se va a `/acceso` con retorno; el aviso existe por si la redirección tarda. */
+    sesion: {
+      titulo: "Entra a tu cuenta para empezar",
+      texto: "Te llevamos a la pantalla de acceso. En cuanto entres, vuelves justo aquí.",
+    },
+    cargando: "Preparando el asistente…",
+    errorRed: "No pudimos cargar esto. Revisa tu conexión y vuelve a intentarlo.",
+    evento: {
+      titulo: "¿Qué vamos a celebrar?",
+      ayuda: "Elige uno; te mostramos solo las plantillas que le van.",
+      grupo: "Tipo de evento",
+      plantillas: (n: number) => (n === 1 ? "1 plantilla" : `${n} plantillas`),
+      sinPlantillas: "Todavía no hay plantillas",
+      tuTipo: "El de tu invitación",
+      distintoDelRegistrado: (registrado: string) =>
+        `Tu invitación está registrada como ${registrado}. Puedes mirar otros tipos, pero las plantillas de ${registrado} son las que encajan con sus secciones.`,
+      paraCual: "¿Para cuál invitación?",
+      paraCualAyuda: "La plantilla se aplicará a la invitación que elijas aquí.",
+    },
+    plantilla: {
+      titulo: "Elige el punto de partida",
+      ayuda: (tipo: string) =>
+        `Solo plantillas de ${tipo}. Los colores y la tipografía los cambias después, dentro del editor.`,
+      filtros: "Filtrar plantillas",
+      todas: (n: number) => `Todas · ${n}`,
+      enMiPlan: "Incluidas en mi plan",
+      vistaPreviaDe: (nombre: string) => `Vista previa de la plantilla ${nombre}`,
+      incluida: "Incluida en tu plan",
+      requierePlan: (nivel: number) => `Requiere el plan ${nivel}`,
+      verQueIncluye: (nivel: number) => `Ver qué incluye el plan ${nivel}`,
+      usar: "Usar esta plantilla",
+      usando: "Preparando tu invitación…",
+      elegida: "Elegida",
+      /** Capacidades reales del manifiesto (`packages/schema` `Capability`), no etiquetas de estilo. */
+      capacidad: {
+        singlePlace: "Un solo lugar",
+        story: "Nuestra historia",
+        hashtags: "Hashtag",
+        music: "Música",
+        countdown: "Cuenta regresiva",
+      },
+      vacioTitulo: "Todavía no hay plantillas para este tipo",
+      vacioTexto:
+        "Estamos preparando más diseños. Mientras tanto puedes mirar los de otro tipo de evento.",
+      vacioAccion: "Elegir otro tipo",
+      sinResultadosTitulo: "Ningún diseño cumple ese filtro",
+      sinResultadosTexto: "Prueba con otro filtro o quítalos para ver todas las plantillas de este tipo.",
+      quitarFiltros: "Quitar los filtros",
+      errorPlanTier: (nombre: string) =>
+        `«${nombre}» es de un plan superior al de tu invitación. Elige otra o pide el cambio de plan.`,
+      errorNoDisponible: "Esta plantilla ya no está disponible. Actualizamos la lista.",
+      errorMigracion: "No podemos preparar esta plantilla ahora mismo. Avísanos y lo revisamos.",
+    },
+    datos: {
+      titulo: "Los datos básicos",
+      ayuda: "Puedes cambiarlos después, dentro del editor.",
+      quienes: "¿Quiénes celebran?",
+      cuando: "¿Cuándo?",
+      donde: "¿Dónde?",
+      fecha: "Fecha del evento",
+      fechaAyuda: "Es la fecha que verán tus invitados en la portada.",
+      hora: "Hora de inicio",
+      lugar: "Nombre del lugar",
+      lugarAyuda: "La dirección y el mapa se completan dentro del editor.",
+      fechaInvalida: "Escribe la fecha como día, mes y año. Por ejemplo: 18 de abril de 2027.",
+      guardando: "Guardando tus datos…",
+      errorGuardar:
+        "No pudimos guardar estos datos. Puedes continuar: los escribes dentro del editor y no se pierde nada.",
+      omitir: "Lo lleno después",
+    },
+    listo: {
+      titulo: "Tu invitación ya tiene diseño",
+      resumen: (tipo: string, plantilla: string) => `${tipo} · plantilla «${plantilla}»`,
+      queSigue:
+        "Dentro del editor cambias textos, fotos y colores, y publicas cuando esté lista. Nada se ve en internet hasta que tú lo publiques.",
+      abrir: "Abrir mi invitación",
+    },
+    sinInvitaciones: {
+      titulo: "Todavía no tienes invitaciones",
+      texto:
+        "Tu invitación se crea cuando contratas un plan. En cuanto exista, aparece aquí y podrás elegirle una plantilla.",
+      accion: "Ver planes",
+    },
+  },
   editor: {
     catalogo: {
       titulo: "Elige una plantilla",
@@ -222,6 +323,14 @@ export const es_MX = {
       errorInvitaciones: "No pudimos cargar tus invitaciones.",
       errorCatalogo: "No pudimos cargar las plantillas.",
       fechaDeLaInvitacion: (fecha: string) => `Fecha del evento: ${fecha}`,
+      /** Fase 3-C, 3C-6: la lista de «Mis invitaciones» vive ahora en el paso 1 del asistente. */
+      sinFecha: "Sin fecha registrada",
+      sinAcceso: "No disponible",
+      numero: (id: number) => `Invitación n.º ${id}`,
+      todasConPlantilla:
+        "Todas tus invitaciones ya tienen plantilla. Ábrelas para seguir editándolas; el diseño se cambia desde dentro.",
+      unaConPlantilla:
+        "Tu invitación ya tiene plantilla. Ábrela para seguir editándola; el diseño se cambia desde dentro.",
     },
     /** Barra superior del editor (`11 §7`, fila «Chrome del editor»). */
     barra: {
