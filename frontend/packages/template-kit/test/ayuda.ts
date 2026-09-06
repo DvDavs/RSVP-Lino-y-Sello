@@ -30,6 +30,12 @@ export function leerTema(dir: string): Record<string, unknown> {
 export function escribirTema(dir: string, t: unknown): void {
   writeFileSync(join(dir, "theme.json"), JSON.stringify(t, null, 2) + "\n", "utf8");
 }
+export function leerDefaults(dir: string): Record<string, unknown> {
+  return JSON.parse(readFileSync(join(dir, "defaults.json"), "utf8")) as Record<string, unknown>;
+}
+export function escribirDefaults(dir: string, d: unknown): void {
+  writeFileSync(join(dir, "defaults.json"), JSON.stringify(d, null, 2) + "\n", "utf8");
+}
 
 /** El primer hallazgo con ese código, ya formateado con las tres líneas del contrato. */
 export function mensajeDe(dir: string, codigo: string, escribir = true): string {

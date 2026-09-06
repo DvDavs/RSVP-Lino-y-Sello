@@ -1,0 +1,13 @@
+$ pnpm plantilla check /tmp/sabotaje-marca-ev/xv-jardin-1.0.0 --no-escribir
+(paquete real xv-jardin/1.0.0, con footer.note saboteado de vuelta al texto de Agape)
+
+plantilla check /tmp/sabotaje-marca-ev/xv-jardin-1.0.0
+
+ERROR TPL_THIRD_PARTY_BRAND  defaults.json#/content/footer.note/value
+  El contenido de demostración del bloque "footer.note" menciona el proveedor del catálogo antiguo («Invitaciones Digitales Agape»): "Invitaciones Digitales Agape. Todos los derechos reservados.".
+  Sugerencia: Lino & Sello es la marca del producto (D-02): quita la mención al proveedor anterior. Para un pie de invitación, escribe un texto neutro que no anuncie a nadie, por ejemplo "Todos los derechos reservados".
+
+package_hash = sha256:d805fc53656b58b7a29650b5aecfa75e24e14d6d51479dfe8690ad14f442b5ee
+
+1 error(es) · 0 aviso(s) · 0 corregido(s)
+salida: 1

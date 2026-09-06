@@ -1920,3 +1920,30 @@ de bloque que la guía cubre con ejemplos concretos; en cuanto aparece un tipo q
   distinto (`/home/user/wt/45`): el primer `pnpm plantilla doctor` no llega ni a imprimir su
   diagnóstico, falla con `tsx: not found` antes de eso. La guía nunca menciona `pnpm install` como
   paso de "Antes de empezar".
+
+## 4-8 (retirar la marca ajena del contenido de demostración)
+- **`frontend/packages/schema/golden/{xv-jardin,boda-clasica}-1.0.0/{defaults,compuesto}.json` y
+  `frontend/packages/migration-legacy/golden/*.golden.json` (8 ficheros) siguen con «Invitaciones
+  Digitales Agape…».** Están fuera de mi territorio (prohibido tocar `packages/schema`; el brief
+  de `migration-legacy` sólo autoriza `src/**`, no `golden/`) y sus propias suites siguen en verde
+  porque comparan contra sí mismos (schema 609/609, migration-legacy 89/89) — pero ya no son un
+  espejo fiel de las 11 plantillas publicadas, que ya dicen «Todos los derechos reservados».
+  **Supuesto tomado:** lo dejo como hallazgo, sin regenerar (`gen:golden` en cada paquete lo
+  arregla, pero es una decisión del dueño del territorio de `schema`/`migration-legacy`, no mía).
+  **Pregunta:** ¿regenera esos golden alguien con permiso sobre `packages/schema`, o se deja así
+  hasta que D-01 retire `migration-legacy` del todo?
+- **Restos de datos de terceros ajenos a la marca, sin tocar (fuera del alcance «marca ajena»,
+  ver inventario completo en `evidencia/fase-4/4-8/inventario-marca-ajena.txt`):** un perfil de
+  Facebook de una persona real (`facebook.com/marck.luga.39`, en ~10 plantillas como enlace de
+  ejemplo de un salón de belleza) y enlaces reales a Liverpool/City Express/Sección Amarilla
+  (mesa de regalos, hotel, directorio) repetidos igual en varias plantillas. No son un
+  competidor de invitaciones digitales — el criterio con el que trabajé aquí — pero SÍ son datos
+  de personas/negocios reales viajando como contenido de ejemplo. **Supuesto tomado:** no los toco
+  (no es el defecto que se me encargó y tocar `content` fuera del pie no estaba en mi alcance).
+  **Pregunta:** ¿se sustituyen por placeholders genéricos (sin negocio real) en un encargo aparte?
+- **La compuerta `TPL_THIRD_PARTY_BRAND` sólo conoce dos patrones** (`/agape/i`,
+  `/invitacionesdigitales/i`), los únicos rastros de la marca ajena que aparecieron en el
+  inventario. **Supuesto tomado:** lista cerrada y corta a propósito — una lista larga de
+  competidores hipotéticos sin evidencia de que aparezcan es ruido, no protección real; se amplía
+  el día que aparezca un rastro nuevo. **Pregunta:** ¿el dueño conoce otro nombre/dominio del
+  proveedor anterior (razón social, RFC, otro dominio) que convenga añadir ya a la lista?

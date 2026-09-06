@@ -14,7 +14,8 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { check } from "../src/check.ts";
 import {
-  copiarPaquete, escribirManifiesto, escribirTema, leerManifiesto, leerTema, mensajeDe,
+  copiarPaquete, escribirDefaults, escribirManifiesto, escribirTema, leerDefaults, leerManifiesto,
+  leerTema, mensajeDe,
 } from "./ayuda.ts";
 
 type J = Record<string, any>;
@@ -25,7 +26,7 @@ describe("check: un paquete correcto roto de cinco maneras", () => {
     const r = check({ dir, escribir: false });
     expect(r.hallazgos).toEqual([]);
     expect(r.ok).toBe(true);
-    expect(r.packageHash).toBe("sha256:d805fc53656b58b7a29650b5aecfa75e24e14d6d51479dfe8690ad14f442b5ee");
+    expect(r.packageHash).toBe("sha256:128c63473c87b7f7efac12b17301bf31fdb64558c0a0b7bfc39fa0681e9bf688");
   });
 
   it("1) rol inventado — el primer fallo medido de I-08", () => {
@@ -85,7 +86,7 @@ describe("check: un paquete correcto roto de cinco maneras", () => {
     // Y tras corregirlo, el paquete vuelve a estar en verde y recupera su package_hash publicado.
     const r = check({ dir, escribir: false });
     expect(r.ok).toBe(true);
-    expect(r.packageHash).toBe("sha256:d805fc53656b58b7a29650b5aecfa75e24e14d6d51479dfe8690ad14f442b5ee");
+    expect(r.packageHash).toBe("sha256:128c63473c87b7f7efac12b17301bf31fdb64558c0a0b7bfc39fa0681e9bf688");
   });
 
   it("4) un archivo que el paquete no declara (P1: nada se ignora en silencio)", () => {
@@ -117,6 +118,28 @@ describe("check: un paquete correcto roto de cinco maneras", () => {
     );
     // Las cifras 2.90 y 2.74 son EXACTAMENTE las que midió ADR-3-2d-04 para `garden`
     // («accentInk/accent 2.89:1 · accent/bg 2.74:1»): la fórmula es la misma, no una copia.
+  });
+
+  it("6) marca ajena en el contenido de demostración (ADR-4-8-01): el texto que xv-jardin llevaba de fábrica", () => {
+    const dir = copiarPaquete("xv-jardin/1.0.0");
+    const d = leerDefaults(dir) as J;
+    (d["content"] as J)["footer.note"].value = "Invitaciones Digitales Agape. Todos los derechos reservados.";
+    escribirDefaults(dir, d);
+    expect(mensajeDe(dir, "TPL_THIRD_PARTY_BRAND")).toBe(
+      'ERROR TPL_THIRD_PARTY_BRAND  defaults.json#/content/footer.note/value\n' +
+      '  El contenido de demostración del bloque "footer.note" menciona el proveedor del catálogo ' +
+      'antiguo («Invitaciones Digitales Agape»): "Invitaciones Digitales Agape. Todos los derechos ' +
+      'reservados.".\n' +
+      '  Sugerencia: Lino & Sello es la marca del producto (D-02): quita la mención al proveedor ' +
+      'anterior. Para un pie de invitación, escribe un texto neutro que no anuncie a nadie, por ' +
+      'ejemplo "Todos los derechos reservados".',
+    );
+    // Y una vez restaurado el texto de fábrica (ya saneado), el paquete vuelve a estar en verde.
+    const restaurado = leerDefaults(dir) as J;
+    (restaurado["content"] as J)["footer.note"].value = "Todos los derechos reservados";
+    escribirDefaults(dir, restaurado);
+    const r = check({ dir, escribir: false });
+    expect(r.hallazgos.filter(h => h.codigo === "TPL_THIRD_PARTY_BRAND")).toEqual([]);
   });
 });
 

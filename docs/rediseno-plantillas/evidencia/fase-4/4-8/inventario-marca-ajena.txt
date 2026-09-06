@@ -1,0 +1,105 @@
+Inventario de marca ajena y otros rastros de terceros (búsqueda 2026-09-06)
+============================================================================
+
+1) frontend/templates/**  (footer.note — el defecto reportado)
+----------------------------------------------------------------
+10 de 11 plantillas llevaban "Invitaciones Digitales Agape" en footer.note; evento-elegante
+ya tenía un texto neutro ("Todos los derechos reservados", sin marca):
+
+frontend/templates/bautizo-elegante/1.0.0/defaults.json:205:      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+frontend/templates/boda-basica/1.0.0/defaults.json:335:      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+frontend/templates/boda-clasica/1.0.0/defaults.json:447:      "value": "Invitaciones Digitales Agape. Todos los derechos reservados."
+frontend/templates/boda-clasica/1.0.1/defaults.json:447:      "value": "Invitaciones Digitales Agape. Todos los derechos reservados."
+frontend/templates/boda-premium/1.0.0/defaults.json:387:      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+frontend/templates/boda-premium-2/1.0.0/defaults.json:313:      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+frontend/templates/comunion-elegante/1.0.0/defaults.json:205:      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+frontend/templates/confirmacion-elegante/1.0.0/defaults.json:205:      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+frontend/templates/cumpleanos-elegante/1.0.0/defaults.json:275:      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+frontend/templates/xv-elegance/1.0.0/defaults.json:248:      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+frontend/templates/xv-jardin/1.0.0/defaults.json:142:      "value": "Invitaciones Digitales Agape. Todos los derechos reservados."
+frontend/templates/evento-elegante/1.0.0/defaults.json:205:      "value": "Todos los derechos reservados"   <- ya limpio, no se tocó
+
+TODAS corregidas a "Todos los derechos reservados" (sin punto final, para igualar a evento-elegante,
+la única que ya estaba limpia). Verificado tras el cambio: 0 coincidencias de /agape/i en
+frontend/templates/**.
+
+2) Otros rastros de terceros en frontend/templates/** (NO corregidos: fuera del alcance de esta
+   tarea — el defecto reportado es el pie de copyright, no el contenido de ejemplo en general.
+   Se reportan para que el dueño decida; ver preguntas-abiertas.md).
+----------------------------------------------------------------------------------------------
+- Perfil de Facebook de una PERSONA REAL, repetido en casi todas las plantillas como enlace de
+  ejemplo de un "amenities" (salón de belleza "Marck Luga"):
+    frontend/templates/{bautizo-elegante,boda-basica,boda-clasica/1.0.0,boda-clasica/1.0.1,
+    boda-premium,comunion-elegante,confirmacion-elegante,cumpleanos-elegante,evento-elegante,
+    xv-elegance}/1.0.0/defaults.json:23  "href": "https://www.facebook.com/marck.luga.39"
+  Es un dato personal de un tercero ajeno al producto, no una marca competidora, pero tampoco es
+  contenido nuestro: no debería viajar en el contenido de demostración de una invitación real.
+
+- Negocios reales de México usados como ejemplos de "mesa de regalos" / hotel / directorio, en
+  casi todas las plantillas (Liverpool, City Express, Sección Amarilla). No son competidores de
+  invitaciones digitales; son ejemplos de servicios que SÍ tendría una boda real, pero enlazan a
+  cuentas/páginas reales de terceros (mismo enlace "50355602" de lista de regalos en varias
+  plantillas, no genérico):
+    .../defaults.json: "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602"
+    .../defaults.json: "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+    .../defaults.json: "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1"
+
+- Hashtags de pareja de ejemplo con nombres de personas reales de plantillas heredadas
+  (rebecaYsantiago, antonioYcamila, Sarah&Alan) enlazando a facebook.com/instagram.com reales:
+  contenido de demostración normal para una invitación (nombre de la pareja + hashtag), no marca
+  ajena; no se tocó.
+
+- CLABE/tarjeta de ejemplo "014610606106246881" / "60610624688" repetida en 8 plantillas: parece
+  un dato bancario de ejemplo (probablemente ficticio o de una cuenta real de la migración
+  legada); no es "marca ajena" en el sentido del encargo, se reporta por si el dueño quiere un
+  marcador de posición distinto.
+
+- No se encontraron correos electrónicos de terceros en frontend/templates/**.
+- No se encontró ningún año de copyright ajeno a 2021 en frontend/templates/** aparte del ya
+  corregido "2021" del pie Agape.
+
+3) docs/rediseno-plantillas/diseno/ejemplos/**  (SOLO REPORTE, no se tocó — fuera del alcance)
+------------------------------------------------------------------------------------------------
+docs/rediseno-plantillas/diseno/ejemplos/xv-jardin-1.0.0/defaults.json:29
+docs/rediseno-plantillas/diseno/ejemplos/xv-jardin-1.0.0/compuesto.json:504
+docs/rediseno-plantillas/diseno/ejemplos/boda-clasica-1.0.0/defaults.json:61
+docs/rediseno-plantillas/diseno/ejemplos/boda-clasica-1.0.0/compuesto.json:1077
+  Los cuatro con: "Invitaciones Digitales Agape. Todos los derechos reservados."
+  Éstos son los ejemplos de diseño de fase 1/3 de los que boda-clasica y xv-jardin (escritas a
+  mano en fase 3) copiaron el pie: es el origen documental del arrastre (ver §5 más abajo).
+
+4) frontend/packages/schema/golden/**  (SOLO REPORTE, no se tocó — el brief lo prohíbe)
+------------------------------------------------------------------------------------------------
+frontend/packages/schema/golden/templates/xv-jardin-1.0.0/defaults.json:142
+frontend/packages/schema/golden/templates/xv-jardin-1.0.0/compuesto.json:504
+frontend/packages/schema/golden/templates/boda-clasica-1.0.0/defaults.json:447
+frontend/packages/schema/golden/templates/boda-clasica-1.0.0/compuesto.json:1077
+  Los cuatro con: "Invitaciones Digitales Agape. Todos los derechos reservados."
+  Estos golden files están CONTAMINADOS y quedan desincronizados de las plantillas reales
+  (que ya no llevan "Agape") hasta que alguien regenere el golden con `pnpm gen:golden` en
+  packages/schema — fuera de mi territorio (prohibido tocar packages/schema).
+  Las suites de `schema` (609/609) y `migration-legacy` (89/89) siguen en verde porque comparan
+  contra ESTE golden, no contra frontend/templates/: no hay regresión, pero el golden ya no
+  es un espejo fiel de lo publicado.
+
+5) Origen confirmado del arrastre (no es sólo conversión del catálogo antiguo)
+------------------------------------------------------------------------------------------------
+- Dato crudo original, en la raíz del repo (módulo antiguo, NO se toca):
+    dataBautizoPremium.ts:2771, dataComunionPremium.ts:2771, dataConfirmacionPremium.ts:2771,
+    dataCumplePremium.ts:3182, dataXVPremium.ts:2867
+    content: "Invitaciones Digitales Agape 2021. All Rights Reserved.",
+- Regla de conversión que lo copia TAL CUAL a `footer.note` (clase "mapeada", no "descartada"):
+    frontend/packages/migration-legacy/src/reglas-contenido.ts:368-370
+      { id: "C-FOOTER-TEXT", patron: "/footer/text", clase: "mapeada", prioridad: 2,
+        destino: { tipo: "bloque", ref: "footer.note", rol: "footerNote" },
+        motivo: "→ `text` rol `footerNote`, `source:\"fixed\"`.", evidencia: E_01 },
+  El comentario en reglas-visual.ts:521 SÍ descarta el LOGO del proveedor por ser "del proveedor,
+  no del cliente" — pero nadie aplicó el mismo criterio al TEXTO del pie, que es la misma marca
+  ajena en forma de texto. Ésa es la fuga: se filtró el logo pero no el texto equivalente.
+- golden de migration-legacy (fixtures de esa herramienta, no se tocan) reproducen el mismo
+  texto contaminado, confirmando que es la salida esperada de la conversión tal y como está hoy:
+    frontend/packages/migration-legacy/golden/{boda-premium,boda-basica,confirmacion-elegante,
+    comunion-elegante,xv-elegance,boda-premium-2,bautizo-elegante,cumpleanos-elegante}-1.0.0.golden.json
+- boda-clasica y xv-jardin (fase 3, escritas a mano) NO pasaron por migration-legacy: su footer.note
+  vino de copiar el ejemplo de diseño de docs/rediseno-plantillas/diseno/ejemplos/ (ver §3), que ya
+  llevaba el texto de Agape. Mismo defecto, origen distinto (documental, no herramienta).
