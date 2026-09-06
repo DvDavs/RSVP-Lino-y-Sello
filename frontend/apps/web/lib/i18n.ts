@@ -237,7 +237,11 @@ export const es_MX = {
       grupo: "Tipo de evento",
       plantillas: (n: number) => (n === 1 ? "1 plantilla" : `${n} plantillas`),
       sinPlantillas: "Todavía no hay plantillas",
-      tuTipo: "El de tu invitación",
+      // 3C-UX F-04: «El de tu invitación» son 19 caracteres en la mono de la insignia, que por
+      // contrato de diseño (`11 §5`) no parte línea: medía 165 px dentro de una columna de tarjeta
+      // de 97 px a 390 px de ancho y arrastraba TODA la página a 421 px de desplazamiento
+      // horizontal. «Tu evento» cabe en la columna y dice lo mismo junto al nombre del tipo.
+      tuTipo: "Tu evento",
       distintoDelRegistrado: (registrado: string) =>
         `Tu invitación está registrada como ${registrado}. Puedes mirar otros tipos, pero las plantillas de ${registrado} son las que encajan con sus secciones.`,
       paraCual: "¿Para cuál invitación?",
@@ -538,7 +542,10 @@ export const es_MX = {
       enlaceNoCopiado: "No pudimos copiar el enlace. Selecciónalo y cópialo a mano.",
       tuEnlace: "El enlace de tus invitados",
       cerrar: "Cerrar",
-      descripcionExito: "Tu invitación ya está en línea.",
+      // 3C-UX F-09: decía «Tu invitación ya está en línea.», la tercera frase seguida que afirma lo
+      // mismo que el título («Tu invitación está en vivo») y que `yaSeVe`. Aquí se contesta lo que
+      // la clienta sí se pregunta al publicar: si puede seguir editando después.
+      descripcionExito: "Comparte el enlace con tus invitados. Puedes seguir editando y volver a publicar cuando quieras.",
       noSePuedePublicar: "Todavía no se puede publicar: resuelve lo que está marcado arriba.",
       noPudimosDespublicar: "No pudimos despublicar tu invitación.",
       noPudimosRotar: "No pudimos generar un enlace nuevo.",

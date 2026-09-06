@@ -45,7 +45,7 @@ describe("paso 1 — ¿Qué vamos a celebrar?", () => {
 
   it("marca cuál es el tipo con el que se registró la invitación", () => {
     pintar({ tipoDeLaInvitacion: "quince", seleccionado: "quince" });
-    expect(screen.getByRole("radio", { name: /XV años.*El de tu invitación/s })).toBeTruthy();
+    expect(screen.getByRole("radio", { name: /XV años.*Tu evento/s })).toBeTruthy();
   });
 
   it("al pulsar una tarjeta se elige ese tipo", async () => {

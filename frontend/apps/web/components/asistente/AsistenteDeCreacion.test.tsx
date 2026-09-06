@@ -254,7 +254,7 @@ describe("paso 4 — listo", () => {
     parametros = new URLSearchParams("paso=listo&tipo=wedding&inv=7&plantilla=boda-clasica");
     render(<AsistenteDeCreacion />);
     expect(await screen.findByRole("heading", { name: "Tu invitación ya tiene diseño", level: 1 })).toBeTruthy();
-    expect(screen.getByText("Boda · plantilla «boda-clasica»")).toBeTruthy();
+    expect(await screen.findByText("Boda · plantilla «Boda clásica»")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Abrir mi invitación" }).getAttribute("href")).toBe("/editor/7");
   });
 });
