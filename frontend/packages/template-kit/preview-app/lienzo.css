@@ -1,0 +1,53 @@
+/* preview-app/lienzo.css — la hoja del LIENZO (lo que se ve dentro de cada marco y lo que
+ * fotografía `plantilla capturas`).
+ *
+ * Hace exactamente lo mismo que `apps/web/app/(public)/publico.css` y por los mismos motivos:
+ *   1. Carga los valores de reserva de los `--inv-*`, que `packages/sections` NO se autoimporta
+ *      ("lo importa apps/web una sola vez", `tokens.css:13`). Ruta relativa al archivo dentro del
+ *      paquete porque su `exports` sólo publica `"."` y ese paquete es de SÓLO LECTURA aquí.
+ *   2. Un reset mínimo de documento.
+ * Las tipografías las trae `/__preview/fuentes.css` (un `<link>` de `index.html`), generado por el
+ * servidor a partir del `theme.json` del paquete: aquí no se puede saber qué familias pedirá.
+ *
+ * Lo que NO hay: ni un color, ni un tamaño, ni una fuente propios del kit. El chrome del
+ * previsualizador vive en `consola.css`, en OTRO documento (el que contiene los marcos). */
+
+@import "../../sections/src/theme/tokens.css";
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--inv-color-bg);
+}
+
+body[data-papel="lienzo"] {
+  margin: 0;
+  background: var(--inv-color-bg);
+  color: var(--inv-color-ink);
+  font-family: var(--inv-font-body);
+  /* Un scroll lateral de 3 px se percibe como "está rota" (mismo criterio que `publico.css`). */
+  overflow-x: hidden;
+}
+
+.kit-cargando {
+  margin: 0;
+  padding: var(--inv-space-4, 1rem);
+  color: var(--inv-color-muted);
+  font-family: var(--inv-font-body);
+}
+
+.kit-lienzo-roto {
+  min-height: 100svh;
+  background: var(--inv-color-bg);
+}
+
+/* 04 §17.5 / WCAG 1.4.2: nada se mueve si el sistema pide movimiento reducido. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

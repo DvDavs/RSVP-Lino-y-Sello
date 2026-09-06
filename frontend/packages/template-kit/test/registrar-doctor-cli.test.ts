@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { AYUDA, ejecutar, parsear, resolverDir } from "../src/cli.ts";
+import { AYUDA, ejecutar, ejecutarAsync, parsear, resolverDir } from "../src/cli.ts";
 import { diagnosticar, formatearDoctor, type EntornoDoctor } from "../src/doctor.ts";
 import { explicar, interpretar, registrar } from "../src/registrar.ts";
 import { copiarPaquete, escribirManifiesto, leerManifiesto, RAIZ_REPO } from "./ayuda.ts";
@@ -191,11 +191,14 @@ describe("cli", () => {
     expect(parsear(["--", "doctor"]).posicionales).toEqual(["doctor"]);
   });
 
-  it("la ayuda lista los cinco comandos y los dos huecos de 4-1B", () => {
+  it("la ayuda lista los siete comandos, con las opciones de preview y capturas", () => {
     for (const c of ["nueva", "check", "registrar", "doctor", "secciones", "preview", "capturas"]) {
       expect(AYUDA).toContain(`plantilla ${c}`);
     }
-    expect(AYUDA).toContain("lo entrega el bloque 4-1B");
+    // Los dos huecos de 4-1A ya no son huecos: la ayuda documenta sus opciones (bloque 4-1B).
+    expect(AYUDA).not.toContain("lo entrega el bloque 4-1B");
+    expect(AYUDA).toContain("--sin-marcadores");
+    expect(AYUDA).toContain("TPL_PACKAGE_UNEXPECTED_FILE");
     expect(ejecutar([]).salida).toBe(AYUDA);
     expect(ejecutar(["--help"]).codigo).toBe(0);
   });
@@ -258,13 +261,36 @@ describe("cli", () => {
     expect(ejecutar(["secciones", "portada"]).codigo).toBe(2);
   });
 
-  it("`preview` y `capturas` dicen que los entrega 4-1B, con código 2", () => {
+  it("`preview` y `capturas` no pasan por `ejecutar` (son asíncronos): hay que usar `ejecutarAsync`", () => {
     for (const c of ["preview", "capturas"]) {
       const r = ejecutar([c, "un/directorio"]);
       expect(r.codigo).toBe(2);
-      expect(r.salida).toContain("lo entrega el bloque 4-1B");
-      expect(r.salida).toContain("un/directorio");
+      expect(r.salida).toBe(`\`plantilla ${c}\` es asíncrono: usa \`ejecutarAsync\` (lo hace el propio CLI).`);
     }
+  });
+
+  it("`ejecutarAsync` delega los otros cinco comandos en `ejecutar`, sin cambiar ni un byte", async () => {
+    for (const argv of [[], ["--help"], ["secciones", "event"], ["check"], ["inventado"]]) {
+      const s = ejecutar(argv);
+      const a = await ejecutarAsync(argv);
+      expect(a.codigo).toBe(s.codigo);
+      expect(a.salida).toBe(s.salida);
+    }
+  });
+
+  it("`preview` y `capturas` sin directorio devuelven 2 y la ayuda", async () => {
+    for (const c of ["preview", "capturas"]) {
+      const r = await ejecutarAsync([c]);
+      expect(r.codigo).toBe(2);
+      expect(r.salida).toContain("Falta el directorio del paquete.");
+    }
+  });
+
+  it("`preview` sobre un directorio que no existe explica cómo se escribe la ruta", async () => {
+    const r = await ejecutarAsync(["preview", "/tmp/no-existe-este-paquete-4-1b"]);
+    expect(r.codigo).toBe(1);
+    expect(r.salida).toContain("No he podido levantar el previsualizador:");
+    expect(r.salida).toContain("pnpm plantilla preview frontend/templates/<slug>/<version>");
   });
 
   it("`nueva` sobre un destino imposible informa del error en vez de reventar", () => {

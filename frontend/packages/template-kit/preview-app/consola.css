@@ -1,0 +1,193 @@
+/* preview-app/consola.css — el CHROME del previsualizador (barra, conmutador de anchos, marcos).
+ *
+ * Identidad visual: color sólo desde los tokens `--ui-*` del producto (parejas fondo/texto ya
+ * verificadas AA por `packages/tokens`), tipografías del sistema autoalojadas por Fontsource, cero
+ * emojis y cero controles nativos sin vestir. Aquí NO aparece ni una custom property `--inv-*`: los
+ * tokens de la plantilla viven dentro de los `<iframe>`, en otro documento — la separación estricta
+ * entre chrome del producto y tokens de invitación se cumple por construcción, no por disciplina. */
+
+@import "@invitaciones/tokens/tokens.css";
+@import "@fontsource-variable/fraunces";
+@import "@fontsource-variable/onest";
+@import "@fontsource-variable/red-hat-mono";
+
+body[data-papel="consola"] {
+  margin: 0;
+  background: var(--ui-surface-alt);
+  color: var(--ui-ink);
+  font-family: var(--ui-font-text);
+  font-size: var(--ui-text-text-sm);
+  line-height: var(--ui-leading-text-sm);
+}
+
+.kit {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------------------------------------------------------------ barra */
+
+.kit__barra {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ui-space-4);
+  padding: var(--ui-space-3) var(--ui-space-5);
+  background: var(--ui-surface);
+  border-block-end: 1px solid var(--ui-border);
+  box-shadow: var(--ui-shadow-1);
+}
+
+.kit__identidad {
+  min-width: 14rem;
+  margin-inline-end: auto;
+}
+
+.kit__marca {
+  display: block;
+  font-family: var(--ui-font-label);
+  font-size: var(--ui-text-label-sm);
+  letter-spacing: var(--ui-tracking-label-sm, 0);
+  text-transform: lowercase;
+  color: var(--ui-primary);
+}
+
+.kit__titulo {
+  margin: 0;
+  font-family: var(--ui-font-display);
+  font-size: var(--ui-text-heading-md);
+  line-height: var(--ui-leading-heading-md);
+}
+
+.kit__ruta {
+  margin: 0;
+  font-family: var(--ui-font-label);
+  font-size: var(--ui-text-label-sm);
+  color: var(--ui-ink-muted);
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------- conmutador de anchos y tema */
+
+.kit__grupo {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--ui-surface-alt);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-pill);
+}
+
+.kit__boton {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--ui-space-1);
+  padding: var(--ui-space-2) var(--ui-space-4);
+  border-radius: var(--ui-radius-pill);
+  background: transparent;
+  color: var(--ui-ink-muted);
+  font-family: var(--ui-font-label);
+  font-size: var(--ui-text-label-md);
+  line-height: var(--ui-leading-label-md);
+  transition: background-color var(--ui-dur-1) var(--ui-ease-out), color var(--ui-dur-1) var(--ui-ease-out);
+}
+
+.kit__boton:hover {
+  color: var(--ui-ink);
+  background: var(--ui-surface-raised);
+}
+
+.kit__boton:focus-visible {
+  outline: 2px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+
+.kit__boton[aria-pressed="true"] {
+  background: var(--ui-primary);
+  color: var(--ui-on-primary);
+}
+
+.kit__boton-nota {
+  font-size: var(--ui-text-label-sm);
+  opacity: 0.75;
+}
+
+.kit__estado {
+  margin: 0;
+  padding: var(--ui-space-2) var(--ui-space-4);
+  border-radius: var(--ui-radius-pill);
+  font-family: var(--ui-font-label);
+  font-size: var(--ui-text-label-md);
+  background: var(--ui-danger-soft);
+  color: var(--ui-on-danger-soft);
+}
+
+.kit__estado[data-ok="true"] {
+  background: var(--ui-success-soft);
+  color: var(--ui-on-success-soft);
+}
+
+/* --------------------------------------------------------------------------- paneles y notas */
+
+.kit__panel {
+  border-block-end: 1px solid var(--ui-border);
+}
+
+.kit__notas {
+  margin: 0;
+  padding: var(--ui-space-3) var(--ui-space-5) var(--ui-space-3) calc(var(--ui-space-5) + var(--ui-space-4));
+  background: var(--ui-info-soft);
+  color: var(--ui-on-info-soft);
+  border-block-end: 1px solid var(--ui-border);
+  font-size: var(--ui-text-text-xs);
+  line-height: var(--ui-leading-text-xs);
+}
+
+/* --------------------------------------------------------------------------------- los marcos */
+
+.kit__marcos {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ui-space-6);
+  padding: var(--ui-space-6) var(--ui-space-5);
+  overflow-x: auto;
+}
+
+.kit__marco {
+  margin: 0;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+.kit__marco-titulo {
+  font-family: var(--ui-font-label);
+  font-size: var(--ui-text-label-sm);
+  color: var(--ui-ink-muted);
+}
+
+/* El marco es la "máscara" de la fotografía: radio grande y sombra de color, nunca un rectángulo
+ * duro sobre color plano (regla de identidad visual sobre imágenes). */
+.kit__iframe {
+  display: block;
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-card);
+  background: var(--ui-surface);
+  box-shadow: var(--ui-shadow-2);
+  color-scheme: light;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kit__boton {
+    transition: none;
+  }
+}

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Kit de autor del modulo de plantillas (fase 4): CLI `plantilla` con nueva / check / registrar / doctor. Solo Node: no importa React ni CSS.",
+  "description": "Kit de autor del modulo de plantillas (fase 4): CLI `plantilla` con nueva / check / registrar / doctor / secciones / preview / capturas. El nucleo (check, nueva, registrar) es solo Node; `preview` y `capturas` cargan Vite, React y Playwright por import() perezoso.",
   "license": "UNLICENSED",
   "exports": {
     ".": "./src/index.ts"
@@ -15,11 +15,24 @@
     "lint": "echo 'lint: el paquete no tiene reglas propias todavia'"
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "5.3.0",
+    "@fontsource-variable/onest": "5.3.1",
+    "@fontsource-variable/red-hat-mono": "5.3.0",
+    "@fontsource/great-vibes": "5.3.0",
+    "@fontsource/poppins": "5.3.0",
     "@invitaciones/schema": "workspace:*",
-    "@invitaciones/sections": "workspace:*"
+    "@invitaciones/sections": "workspace:*",
+    "@invitaciones/tokens": "workspace:*",
+    "@vitejs/plugin-react": "6.1.1",
+    "playwright": "1.62.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "vite": "8.2.2"
   },
   "devDependencies": {
     "@types/node": "22.20.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
     "@vitest/coverage-v8": "3.2.4",
     "tsx": "4.23.13",
     "typescript": "5.9.3",
