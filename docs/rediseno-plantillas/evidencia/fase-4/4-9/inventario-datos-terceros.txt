@@ -1,0 +1,151 @@
+Inventario de datos reales de terceros en el contenido de demostración de frontend/templates/**
+=================================================================================================
+(4-9, sobre el árbol de 13 defaults.json: bautizo-elegante, boda-basica, boda-clasica/1.0.0,
+boda-clasica/1.0.1, boda-premium, boda-premium-2, comunion-elegante, confirmacion-elegante,
+cumpleanos-elegante, evento-elegante, toga-y-sello, xv-elegance, xv-jardin.
+Búsqueda: grep -rn sobre TODO frontend/templates/**/defaults.json, no sólo la lista heredada de
+evidencia/fase-4/4-8/inventario-marca-ajena.txt. toga-y-sello y xv-jardin no aparecen en ninguna
+categoría de abajo: ya estaban limpios.)
+
+1) PERFIL PERSONAL DE FACEBOOK DE UNA PERSONA REAL (prioridad máxima)
+----------------------------------------------------------------------------------------------
+blockId "amenities.items", detalle "Salón de belleza" → "Marck Luga" → href
+"https://www.facebook.com/marck.luga.39", en 10 ficheros:
+  bautizo-elegante/1.0.0:23 · boda-basica/1.0.0:23 · boda-clasica/1.0.0:387 ·
+  boda-clasica/1.0.1:387 · boda-premium/1.0.0:23 · comunion-elegante/1.0.0:23 ·
+  confirmacion-elegante/1.0.0:23 · cumpleanos-elegante/1.0.0:23 · evento-elegante/1.0.0:23 ·
+  xv-elegance/1.0.0:23
+Verificado: perfil real y activo (marca de fábrica del catálogo antiguo, distinto del proveedor
+"Agape" de 4-8). CORREGIDO → ver §A.
+
+2) DATOS BANCARIOS DE EJEMPLO CON PINTA DE REALES (prioridad máxima)
+----------------------------------------------------------------------------------------------
+blockId "gifts.options", detalle listText con Banco/Titular/CLABE/Tarjeta, en 10 ficheros
+(idéntico en los 10: banco Santander, titular con nombre de persona, CLABE de 18 dígitos con
+prefijo de banco 014 = Santander, número de "tarjeta" de 11 dígitos):
+  bautizo-elegante/1.0.0:259-262 · boda-basica/1.0.0:401-404 · boda-clasica/1.0.0:304-306 ·
+  boda-clasica/1.0.1:304-306 · boda-premium/1.0.0:453-456 · boda-premium-2/1.0.0:390-393 ·
+  comunion-elegante/1.0.0:259-262 · confirmacion-elegante/1.0.0:259-262 ·
+  cumpleanos-elegante/1.0.0:325-328 · xv-elegance/1.0.0:314-317
+    "Banco: SANTANDER" / "Titular: KARLA ZARATE CRUZ" / "Cuenta CLABE: 014610606106246881" /
+    "Número de tarjeta: 60610624688" (falta en boda-clasica, que sólo lleva Banco/Titular/CLABE).
+Inferido: nombre y CLABE probablemente de una cuenta real (la migración legada copia contenido sin
+sanear, ver §5 de evidencia/fase-4/4-8 y el hallazgo del §5 de este documento); tratado como real
+por el criterio conservador del brief. CORREGIDO → ver §A.
+evento-elegante/1.0.0:254-262 ya llevaba una versión menos identificable ("Titular: Juan Perez",
+CLABE secuencial 0123…) pero SIN decir "ejemplo" en el texto — homogeneizado igual por consistencia
+con el criterio explícito de ADR-4-9-01 (ver §A).
+
+3) ENLACES A NEGOCIOS REALES DE MÉXICO (prioridad alta)
+----------------------------------------------------------------------------------------------
+3a) Liverpool (mesa de regalos), mismo número de evento "50355602" en todos:
+  bautizo-elegante/1.0.0:286 · boda-basica/1.0.0:418-428 · boda-clasica/1.0.0:320-330 ·
+  boda-clasica/1.0.1:320-330 · boda-premium/1.0.0:470,504-509 (sin enlace, sólo texto,
+  3 apariciones) · boda-premium-2/1.0.0:407 (sólo texto "MESA LIVERPOOL", sin enlace) ·
+  comunion-elegante/1.0.0:286 · confirmacion-elegante/1.0.0:286 · cumpleanos-elegante/1.0.0:352 ·
+  evento-elegante/1.0.0:276-286 · xv-elegance/1.0.0:331-341,369-374
+  href "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602" (8 ficheros con enlace
+  completo, 1 con "https://mesaderegalos.liverpool.com..." truncado en evento-elegante).
+
+3b) City Express (hotel), mismo enlace en 10 ficheros:
+  bautizo-elegante/1.0.0:321-326 · boda-basica/1.0.0:562-567 · boda-clasica/1.0.0:349-359 ·
+  boda-clasica/1.0.1:349-359 · boda-premium/1.0.0:645-650 · comunion-elegante/1.0.0:321-326 ·
+  confirmacion-elegante/1.0.0:321-326 · cumpleanos-elegante/1.0.0:387-392 ·
+  evento-elegante/1.0.0:352-357 · xv-elegance/1.0.0:411-416
+    "City Express Oaxaca" → "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+  (boda-premium-2 no tiene este bloque: su "suggestions.items" ya era genérico.)
+
+3c) Sección Amarilla (sitio de taxis), mismo enlace en 8 ficheros:
+  bautizo-elegante/1.0.0:345 · boda-basica/1.0.0:586 · boda-premium/1.0.0:669 ·
+  comunion-elegante/1.0.0:345 · confirmacion-elegante/1.0.0:345 · cumpleanos-elegante/1.0.0:411 ·
+  evento-elegante/1.0.0:376 · xv-elegance/1.0.0:435
+    "Sitio Antequera" → "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1"
+
+3d) Renta de autos: DIRECCIÓN POSTAL REAL ("Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca
+    de Juárez, Oax.") + enlace de mapa acortado real, en los mismos 8 ficheros que 3c:
+      bautizo-elegante/1.0.0:361-364 · boda-basica/1.0.0:602-605 · boda-premium/1.0.0:685-688 ·
+      comunion-elegante/1.0.0:361-364 · confirmacion-elegante/1.0.0:361-364 ·
+      cumpleanos-elegante/1.0.0:427-430 · evento-elegante/1.0.0:392-395 ·
+      xv-elegance/1.0.0:451-454
+    href "https://goo.gl/maps/iEfDN2DXwF3FcpEc8". No estaba en el inventario de 4-8 (no es una
+    URL de "marca"; se encontró al recorrer el bloque "suggestions.items" completo).
+CORREGIDO → ver §A.
+
+4) ENLACES DE PAREJA A REDES SOCIALES CONCRETAS (facebook.com/instagram.com reales)
+----------------------------------------------------------------------------------------------
+blockId "gallery.hashtag" o similar (hashtag de la pareja), 8 apariciones en 4 ficheros:
+  boda-basica/1.0.0:349,366 (rebecaYsantiago × fb+ig) · boda-premium/1.0.0:401,418
+  (antonioYcamila × fb+ig) · boda-premium-2/1.0.0:327,344 (Sarah&Alan × fb+ig) ·
+  xv-elegance/1.0.0:262,279 (rebecaYsantiago × fb+ig)
+No identifican a una persona real (una página de hashtag de Facebook/Instagram no pertenece a
+nadie), pero SÍ son "enlaces a redes sociales concretas" (dominio real, contenido no controlado:
+podría mostrar publicaciones de cualquiera). Tratado como dato de tercero por el criterio explícito
+del encargo (§3 del brief: "enlaces a redes sociales concretas"). CORREGIDO → ver §A.
+evento-elegante/1.0.0:219 ya llevaba "https://instagram.com/..." (placeholder truncado, pero
+segía siendo el dominio real instagram.com): homogeneizado igual.
+
+5) ENLACES DE MAPA (Google Maps) A UNA UBICACIÓN NO VERIFICABLE
+----------------------------------------------------------------------------------------------
+blockId "event.cards" (ceremonia/fiesta), campo "place.mapHref", 24 apariciones en 11 ficheros:
+  22× "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6" (bautizo-elegante, boda-basica ×5, boda-clasica
+  ×2 (0.0 y 0.1) ×2 cada uno, boda-premium ×6, boda-premium-2 ×2, comunion-elegante,
+  confirmacion-elegante, cumpleanos-elegante ×3, xv-elegance) · 2×
+  "https://maps.google.com/..." (evento-elegante).
+El nombre asociado ("Templo de Santo Domingo de Guzmán", p. ej.) es un monumento público muy
+conocido de Oaxaca, no un tercero identificable — pero el enlace acortado en sí NO se pudo
+resolver: el proxy de red bloquea maps.app.goo.gl y WebFetch (verificado: 403 Forbidden por curl,
+"EGRESS_BLOCKED" por WebFetch). No determinado a qué apunta exactamente. Tratado como dato de
+tercero por el criterio conservador del brief y por ser el MISMO enlace reutilizado en todas las
+plantillas (nunca cambia con el lugar, señal de que era relleno, no un dato del cliente).
+CORREGIDO → ver §A. (xv-jardin y toga-y-sello, las dos plantillas escritas a mano en fase 3-4, ya
+no llevan `mapHref` en absoluto: sólo `name`. Es el patrón limpio que se sigue.)
+
+6) NO ENCONTRADO (verificado, no sólo no buscado)
+----------------------------------------------------------------------------------------------
+- Correos electrónicos de terceros: ninguno (`grep -nE "@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"` sin
+  resultados salvo el propio `example.com` ya corregido y falsos positivos de `assetId`/`itemId`).
+- Teléfonos: ninguno con formato reconocible de teléfono mexicano.
+- Nombres propios de pareja/padrinos/madrinas (Antonio/Camila, Martín Barrita, María Rocha Luis,
+  Raúl Estrada Santiago, Teresa López, Roberto Cruz, Carolina Aquino, Rebeca Santana, Santiago
+  Hernández, Vanessa Jiménez, Pedro Estrada, Luz Elena, Georgina, Valentina Reyes Cordero…):
+  NO se tocaron. Es un elenco ficticio reutilizado a propósito entre plantillas (mismos apellidos
+  repetidos en combinaciones distintas: Estrada, Barrita, Rocha, Cruz, Aquino aparecen una y otra
+  vez como padres/padrinos de parejas DISTINTAS) — el patrón de un elenco de demostración, no
+  personas reales filtradas por accidente (a diferencia de "Marck Luga" o "Karla Zárate Cruz", que
+  aparecen UNA sola vez, ligadas a un dato verificable — un perfil de Facebook, una CLABE — no
+  reutilizadas como "familia"). Criterio explícito del brief: "un «Antonio & Camila» inventado no
+  es un problema". Ver preguntas-abiertas.md por si el dueño no está de acuerdo con esta distinción.
+
+A) QUÉ SE PUSO EN SU LUGAR (todas las sustituciones, literales, aplicadas con un script que contó
+   cada ocurrencia y comprobó el total contra lo esperado antes de escribir — ver
+   scripts/fix_defaults.py en la bitácora)
+----------------------------------------------------------------------------------------------
+"Marck Luga"                                                          → "Salón Bella Luna"
+"https://www.facebook.com/marck.luga.39"                              → "https://www.example.com/salon-bella-luna"
+"Banco: SANTANDER" / "Banco: Santander"                                → "Banco: Banco de Ejemplo"
+"Titular: KARLA ZARATE CRUZ" / "Titular: Juan Perez"                   → "Titular: Nombre Apellido (cuenta de ejemplo)"
+"Cuenta CLABE: 014610606106246881" / "CLABE: 012345678901234567"      → "Cuenta CLABE: 000000000000000000 (ejemplo, sustitúyela por la tuya)"
+"Número de tarjeta: 60610624688"                                       → "Número de tarjeta: 0000000000000000 (ejemplo)"
+"Cuenta: 1234567890"                                                   → "Cuenta: 0000000000 (ejemplo)"
+"https://mesaderegalos.liverpool.com(.mx/...|...)"                     → "https://www.example.com/mesa-de-regalos"
+"Liverpool" / "Mesa Liverpool" / "MESA LIVERPOOL" / "Mesa de liverpool" → "Tienda departamental" / "Mesa de regalos" / "MESA DE REGALOS"
+"visita liverpool"                                                     → "visita la tienda"
+"Mesa Liverpool - Número de evento 50355602" / "Número de evento 50355602" → "… Número de evento 000000 (ejemplo)"
+"City Express Oaxaca"                                                  → "Hotel Los Encinos"
+"https://www.cityexpress.com/…/oaxaca"                                 → "https://www.example.com/hotel-los-encinos"
+"Sitio Antequera"                                                      → "Sitio de taxis del centro"
+"https://www.seccionamarilla.com.mx/…/1"                               → "https://www.example.com/sitio-de-taxis"
+"Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax." → "Av. Ejemplo 102, Centro, 68000 Oaxaca de Juárez, Oax. (dirección de ejemplo)"
+"https://goo.gl/maps/iEfDN2DXwF3FcpEc8"                                 → "https://www.example.com/mapa-renta-de-autos"
+"https://maps.app.goo.gl/Q84SBQZJ36owN2uz6" / "https://maps.google.com/..." → "https://www.example.com/mapa-ubicacion"
+"https://www.facebook.com/hashtag/<hashtag>"                           → "https://www.example.com/hashtag/<hashtag>"
+"https://www.instagram.com/explore/tags/<hashtag>"                     → "https://www.example.com/tags/<hashtag>"
+"https://instagram.com/..."                                            → "https://www.example.com/hashtag-pareja"
+
+Criterio (ADR-4-9-01, ver decisiones.md): (a) ningún texto ni enlace resuelve a una persona o
+negocio real — todo enlace HTTP en defaults.json apunta hoy a example.com, verificado con
+`grep -rhoE 'https?://…' frontend/templates --include=defaults.json` → sólo dominios example.com;
+(b) el hueco sigue enseñando para qué sirve ("Salón de belleza: Salón Bella Luna", "Renta de
+Autos: Av. Ejemplo 102…", "Depósito o transferencia: Banco de Ejemplo…"); (c) el dato bancario dice
+"(ejemplo)" en el propio texto, no basta con que sea ficticio por casualidad — es el criterio que
+aplica también la compuerta nueva (TPL_THIRD_PARTY_BANK_DATA).

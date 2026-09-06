@@ -1,0 +1,56 @@
+
+> @invitaciones/template-kit@0.0.0 test /home/user/wt/49/frontend/packages/template-kit
+> vitest run --coverage -- --run
+
+
+ RUN  v3.2.4 /home/user/wt/49/frontend/packages/template-kit
+      Coverage enabled with v8
+
+ ✓ test/check.test.ts (35 tests) 212ms
+ ✓ test/componer-recursos.test.ts (25 tests) 164ms
+ ✓ test/check-sabotajes.test.ts (10 tests) 163ms
+stdout | test/nueva.test.ts > nueva → check: extremo a extremo, sin tocar nada a mano > mide el coste del andamio frente a la medición de I-08 (5 secciones, 106 líneas a mano)
+[andamio] secciones=5 bloques=10 líneas=219 intentos=1
+
+ ✓ test/nueva.test.ts (20 tests) 129ms
+ ✓ test/registrar-doctor-cli.test.ts (30 tests) 87ms
+ ✓ test/formato-y-paquete.test.ts (14 tests) 27ms
+ ✓ test/cli-preview-capturas.test.ts (8 tests) 5742ms
+   ✓ pnpm plantilla capturas, con sus opciones > `--anchos` y `--destino` mandan, y la salida imprime las rutas escritas  5255ms
+ ✓ test/preview-capturas.test.ts (12 tests) 11843ms
+   ✓ plantilla preview > arranca, dice su URL y cómo salir, y sirve el documento compuesto  322ms
+   ✓ plantilla preview > el NAVEGADOR refleja el texto guardado SIN recargar la página  2446ms
+   ✓ plantilla capturas > produce TRES ficheros no vacíos con las dimensiones de los tres anchos  4059ms
+   ✓ plantilla capturas > con `--escala 2` el PNG sale al doble de píxeles (pantalla densa)  2038ms
+   ✓ plantilla capturas > `--seccion` recorta a una sección, y una clave inventada explica cuáles hay  2342ms
+
+ Test Files  8 passed (8)
+      Tests  154 passed (154)
+   Start at  18:47:04
+   Duration  12.92s (transform 696ms, setup 0ms, collect 2.46s, tests 18.37s, environment 2ms, prepare 919ms)
+
+ % Coverage report from v8
+--------------|---------|----------|---------|---------|------------------------
+File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s      
+--------------|---------|----------|---------|---------|------------------------
+All files     |   96.06 |    86.27 |   98.21 |   96.06 |                        
+ capturas.ts  |     100 |    83.33 |     100 |     100 | ...175,186-187,198,217 
+ check.ts     |   96.53 |     89.3 |     100 |   96.53 | ...537,571-577,712-713 
+ cli.ts       |   94.85 |    86.89 |     100 |   94.85 | ...166,200-202,302-306 
+ componer.ts  |     100 |    84.61 |     100 |     100 | 105,152,222,243-267    
+ contraste.ts |     100 |      100 |     100 |     100 |                        
+ doctor.ts    |    83.8 |    97.56 |      75 |    83.8 | 37-53                  
+ formato.ts   |     100 |      100 |     100 |     100 |                        
+ nueva.ts     |   92.52 |       75 |     100 |   92.52 | ...156-159,221,301-305 
+ paquete.ts   |     100 |    93.75 |     100 |     100 | 51,120                 
+ preview.ts   |   96.81 |    80.48 |     100 |   96.81 | 148-149,287,292-295    
+ recursos.ts  |   98.48 |    82.75 |     100 |   98.48 | 119                    
+ registrar.ts |    95.6 |    78.18 |      75 |    95.6 | 50-52,125              
+--------------|---------|----------|---------|---------|------------------------
+
+=============================== Coverage summary ===============================
+Statements   : 96.06% ( 2028/2111 )
+Branches     : 86.27% ( 811/940 )
+Functions    : 98.21% ( 110/112 )
+Lines        : 96.06% ( 2028/2111 )
+================================================================================

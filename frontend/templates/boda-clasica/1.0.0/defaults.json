@@ -149,7 +149,7 @@
             "place": {
               "kind": "location",
               "name": "Templo de Santo Domingo de Guzmán",
-              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+              "mapHref": "https://www.example.com/mapa-ubicacion"
             }
           }
         },
@@ -167,7 +167,7 @@
             "place": {
               "kind": "location",
               "name": "Zorba el Griego",
-              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+              "mapHref": "https://www.example.com/mapa-ubicacion"
             }
           }
         },
@@ -301,9 +301,9 @@
             "detail": {
               "kind": "listText",
               "items": [
-                "Banco: SANTANDER",
-                "Titular: KARLA ZARATE CRUZ",
-                "Cuenta CLABE: 014610606106246881"
+                "Banco: Banco de Ejemplo",
+                "Titular: Nombre Apellido (cuenta de ejemplo)",
+                "Cuenta CLABE: 000000000000000000 (ejemplo, sustitúyela por la tuya)"
               ]
             }
           }
@@ -317,17 +317,17 @@
             },
             "title": {
               "kind": "text",
-              "value": "Liverpool"
+              "value": "Tienda departamental"
             },
             "detail": {
               "kind": "listText",
               "items": [
-                "Número de evento 50355602"
+                "Número de evento 000000 (ejemplo)"
               ]
             },
             "link": {
               "kind": "link",
-              "href": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602",
+              "href": "https://www.example.com/mesa-de-regalos",
               "label": "Ver mesa"
             }
           }
@@ -346,7 +346,7 @@
           "values": {
             "name": {
               "kind": "text",
-              "value": "City Express Oaxaca"
+              "value": "Hotel Los Encinos"
             },
             "detail": {
               "kind": "listText",
@@ -356,7 +356,7 @@
             },
             "link": {
               "kind": "link",
-              "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+              "href": "https://www.example.com/hotel-los-encinos"
             }
           }
         }
@@ -374,7 +374,7 @@
           "values": {
             "name": {
               "kind": "text",
-              "value": "Marck Luga"
+              "value": "Salón Bella Luna"
             },
             "detail": {
               "kind": "listText",
@@ -384,7 +384,7 @@
             },
             "link": {
               "kind": "link",
-              "href": "https://www.facebook.com/marck.luga.39"
+              "href": "https://www.example.com/salon-bella-luna"
             }
           }
         }

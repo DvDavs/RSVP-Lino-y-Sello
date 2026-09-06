@@ -131,8 +131,8 @@ describe("check: un paquete correcto roto de cinco maneras", () => {
       'antiguo («Invitaciones Digitales Agape»): "Invitaciones Digitales Agape. Todos los derechos ' +
       'reservados.".\n' +
       '  Sugerencia: Lino & Sello es la marca del producto (D-02): quita la mención al proveedor ' +
-      'anterior. Para un pie de invitación, escribe un texto neutro que no anuncie a nadie, por ' +
-      'ejemplo "Todos los derechos reservados".',
+      'anterior o al negocio/persona real. Escribe un texto neutro y ficticio verosímil, por ejemplo ' +
+      '"Todos los derechos reservados" en un pie, o "Hotel Los Encinos" en una recomendación.',
     );
     // Y una vez restaurado el texto de fábrica (ya saneado), el paquete vuelve a estar en verde.
     const restaurado = leerDefaults(dir) as J;
@@ -140,6 +140,62 @@ describe("check: un paquete correcto roto de cinco maneras", () => {
     escribirDefaults(dir, restaurado);
     const r = check({ dir, escribir: false });
     expect(r.hallazgos.filter(h => h.codigo === "TPL_THIRD_PARTY_BRAND")).toEqual([]);
+  });
+
+  it("7) enlace a un dominio ajeno en el contenido de demostración (ADR-4-9-01): el Facebook personal que llevaban 10 plantillas", () => {
+    const dir = copiarPaquete("xv-jardin/1.0.0");
+    const d = leerDefaults(dir) as J;
+    (d["content"] as J)["celebrant.socialLink"] = { kind: "link", href: "https://www.facebook.com/marck.luga.39" };
+    escribirDefaults(dir, d);
+    expect(mensajeDe(dir, "TPL_THIRD_PARTY_LINK")).toBe(
+      'ERROR TPL_THIRD_PARTY_LINK  defaults.json#/content/celebrant.socialLink/href\n' +
+      '  El contenido de demostración del bloque "celebrant.socialLink" enlaza a "www.facebook.com", ' +
+      'un dominio ajeno al producto: "https://www.facebook.com/marck.luga.39".\n' +
+      '  Sugerencia: Un enlace real puede llevar al perfil, cuenta o negocio de un tercero que no dio ' +
+      'su consentimiento para aparecer en una invitación de demostración. Usa un enlace que no ' +
+      'resuelva a nadie, con dominio example.com (por ejemplo ' +
+      '"https://www.example.com/celebrant-sociallink"): el cliente lo sustituye por el suyo al ' +
+      'personalizar la invitación.',
+    );
+    // Y una vez quitado el bloque de sabotaje (no estaba en el paquete de fábrica), vuelve a verde.
+    const restaurado = leerDefaults(dir) as J;
+    delete (restaurado["content"] as J)["celebrant.socialLink"];
+    escribirDefaults(dir, restaurado);
+    const r = check({ dir, escribir: false });
+    expect(r.hallazgos.filter(h => h.codigo === "TPL_THIRD_PARTY_LINK")).toEqual([]);
+  });
+
+  it("8) dato bancario sin marcar como ejemplo (ADR-4-9-01): la CLABE y el titular que llevaban 10 plantillas", () => {
+    const dir = copiarPaquete("xv-jardin/1.0.0");
+    const d = leerDefaults(dir) as J;
+    (d["content"] as J)["gifts.bank"] = {
+      kind: "listText",
+      items: ["Banco: SANTANDER", "Titular: KARLA ZARATE CRUZ", "Cuenta CLABE: 014610606106246881"],
+    };
+    escribirDefaults(dir, d);
+    expect(mensajeDe(dir, "TPL_THIRD_PARTY_BANK_DATA")).toBe(
+      'ERROR TPL_THIRD_PARTY_BANK_DATA  defaults.json#/content/gifts.bank/items/2\n' +
+      '  El contenido de demostración del bloque "gifts.bank" lleva un número largo sin marcar como ' +
+      'ejemplo, con pinta de CLABE, cuenta o tarjeta real: "Cuenta CLABE: 014610606106246881".\n' +
+      '  Sugerencia: Usa una cifra evidentemente ficticia (ceros o una secuencia 0123…) y dilo en el ' +
+      'propio texto, por ejemplo "Cuenta CLABE: 000000000000000000 (ejemplo, sustitúyela por la ' +
+      'tuya)". Nunca repitas un CLABE, cuenta o tarjeta reales, aunque vengan de la migración legada.',
+    );
+    // Un mismo número de ejemplo, EXPLÍCITAMENTE marcado como tal, no dispara el hallazgo (criterio
+    // de ADR-4-9-01: no basta con que sea ficticio, el texto tiene que decirlo).
+    const marcado = leerDefaults(dir) as J;
+    (marcado["content"] as J)["gifts.bank"] = {
+      kind: "listText",
+      items: ["Cuenta CLABE: 000000000000000000 (ejemplo, sustitúyela por la tuya)"],
+    };
+    escribirDefaults(dir, marcado);
+    expect(check({ dir, escribir: false }).hallazgos.filter(h => h.codigo === "TPL_THIRD_PARTY_BANK_DATA")).toEqual([]);
+    // Y una vez quitado el bloque de sabotaje (no estaba en el paquete de fábrica), vuelve a verde.
+    const restaurado = leerDefaults(dir) as J;
+    delete (restaurado["content"] as J)["gifts.bank"];
+    escribirDefaults(dir, restaurado);
+    const r = check({ dir, escribir: false });
+    expect(r.hallazgos.filter(h => h.codigo === "TPL_THIRD_PARTY_BANK_DATA")).toEqual([]);
   });
 });
 

@@ -1,0 +1,41 @@
+=== template-kit 154/154 ===
+ Test Files  8 passed (8)
+      Tests  154 passed (154)
+   Start at  18:51:18
+   Duration  12.53s (transform 558ms, setup 0ms, collect 2.36s, tests 19.65s, environment 3ms, prepare 965ms)
+
+ % Coverage report from v8
+--------------|---------|----------|---------|---------|------------------------
+--
+=============================== Coverage summary ===============================
+Statements   : 96.06% ( 2028/2111 )
+Branches     : 86.27% ( 811/940 )
+Functions    : 98.21% ( 110/112 )
+Lines        : 96.06% ( 2028/2111 )
+================================================================================
+
+=== schema 609/609 ===
+ Test Files  18 passed (18)
+      Tests  609 passed (609)
+
+=== sections 943/943 ===
+ Test Files  36 passed (36)
+      Tests  943 passed (943)
+
+=== migration-legacy 89/89 ===
+ Test Files  5 passed (5)
+      Tests  89 passed (89)
+
+=== web 615/615 ===
+ Test Files  66 passed (66)
+      Tests  615 passed (615)
+
+=== pnpm -r typecheck ===
+packages/tokens typecheck: Done
+packages/icons typecheck: Done
+packages/schema typecheck: Done
+packages/sections typecheck: Done
+packages/ui typecheck: Done
+packages/template-kit typecheck: Done
+apps/web typecheck: Done
+packages/migration-legacy typecheck: Done
