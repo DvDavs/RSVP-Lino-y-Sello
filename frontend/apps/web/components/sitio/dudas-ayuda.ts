@@ -16,6 +16,20 @@ export const DUDAS: readonly Duda[] = [
     pregunta: "¿Cómo empiezo mi invitación?",
     parrafos: [
       "Tu invitación se crea cuando contratas un plan. En cuanto existe, aparece en «Mis invitaciones». Ahí eliges la plantilla —el punto de partida del diseño— y ya puedes cambiar textos, fotos y colores.",
+      "Si todavía no has contratado nada, escríbenos: abajo, en «¿No está tu duda aquí?», está el contacto para pedir precios y que te dejemos la cuenta lista.",
+    ],
+  },
+  // G-01 / medias del cierre 3-C. `components/asistente/MisInvitaciones.tsx` manda aquí con
+  // `/ayuda#planes` a quien no tiene ninguna invitación: el ancla `planes` TIENE que ser la duda de
+  // cómo se contrata y cuánto cuesta, no la de cambiar de plan. Antes era esta última y la clienta
+  // leía la misma frase que la había traído («contrata un plan»), sin decirle dónde ni con quién.
+  {
+    id: "planes",
+    pregunta: "¿Cuánto cuesta y cómo contrato un plan?",
+    parrafos: [
+      "Los precios todavía no están publicados en el sitio: dependen del plan —cuántas plantillas y cuántos invitados incluye— y te los pasamos por escrito en cuanto nos preguntes.",
+      "Los planes se contratan con nuestro equipo, no en línea. Escríbenos por el contacto que aparece al final de esta página, en «¿No está tu duda aquí?»: te decimos el precio, qué plan te conviene y te dejamos la cuenta creada para que solo entres y elijas el diseño.",
+      "Todavía no se puede pagar desde la página. Cuando exista, aparecerá aquí.",
     ],
   },
   {
@@ -50,10 +64,10 @@ export const DUDAS: readonly Duda[] = [
     ],
   },
   {
-    id: "planes",
+    id: "cambiar-plan",
     pregunta: "Una plantilla dice que necesita otro plan",
     parrafos: [
-      "Algunas plantillas están incluidas solo en los planes superiores. Puedes usar cualquiera de las que no lo indican; para las demás, pide el cambio de plan por el mismo medio por el que contrataste tu invitación.",
+      "Algunas plantillas están incluidas solo en los planes superiores. Puedes usar cualquiera de las que no lo indican; para las demás, pídenos el cambio de plan por el contacto del final de esta página y te decimos la diferencia.",
     ],
   },
   {

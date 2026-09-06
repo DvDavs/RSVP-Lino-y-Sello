@@ -31,10 +31,13 @@ export const es_MX = {
     conflictoRevision: "Alguien más guardó cambios antes que tú. Recarga para verlos.",
     cuerpoDemasiadoGrande: "Ese cambio es demasiado grande para enviarlo de una vez.",
     codigo: (codigo: string) => `Código: ${codigo}`,
-    /** 404 y error de la web pública (11 §7, fila «Estados»): título, frase y UNA salida. */
+    /** 404 y error de la web pública (11 §7, fila «Estados»): título, frase, UNA acción primaria
+     *  («Ir a la portada») y una salida secundaria hacia `/ayuda` (mismo patrón que
+     *  `errores.algoSalioMal`: nunca dos botones primarios, `11 §5`). */
     noExiste: {
       titulo: "Esta página no existe",
       cuerpo: "El enlace que abriste no existe o cambió de dirección. Desde la portada llegas a todo lo demás.",
+      verAyuda: "Ver la ayuda",
     },
     algoSalioMal: {
       titulo: "Algo salió mal",
@@ -48,7 +51,10 @@ export const es_MX = {
    */
   acceso: {
     titulo: "Entra a tu cuenta",
-    intro: "Usa el mismo correo y la misma contraseña con los que contrataste tu invitación.",
+    // B-17 (`bitacora/3c-ux.md §4`): la frase anterior («…con los que contrataste tu invitación»)
+    // le hablaba solo a quien ya compró, y a esta pantalla se llega desde «Empezar mi invitación»,
+    // que es el botón de quien NO ha comprado. Ahora sirve a los dos y señala la otra pestaña.
+    intro: "Escribe el correo y la contraseña de tu cuenta. Si todavía no tienes una, créala en la pestaña de al lado.",
     correo: "Correo electrónico",
     contrasena: "Contraseña",
     entrar: "Iniciar sesión",
@@ -81,7 +87,8 @@ export const es_MX = {
     // Registro en tres pasos (11 §7: «paso 2 Elige una contraseña · paso 3 ¿Cómo te llamamos?»).
     registro: {
       titulo: "Crea tu cuenta",
-      intro: "Tres datos y ya. Después eliges el tipo de evento.",
+      // B-16: decía «Tres datos y ya» y pedía cuatro campos. Se cuenta lo que la persona ve: pasos.
+      intro: "Tres pasos y ya. Después eliges el tipo de evento.",
       pasoCorreo: "Tu correo",
       pasoContrasena: "Elige una contraseña",
       pasoNombre: "¿Cómo te llamamos?",
@@ -173,9 +180,30 @@ export const es_MX = {
     planesSeccion: {
       titulo: "Elige tu plan",
       cuerpo:
-        "Tu invitación nace cuando contratas un plan: ahí se define cuántas plantillas y cuántos invitados incluye. Entra a tu cuenta para ver el tuyo o pedir un cambio.",
-      accion: "Entrar a mi cuenta",
-      nota: "Los precios se acuerdan con quien te atendió; todavía no se publican aquí.",
+        "Tu invitación nace cuando contratas un plan: ahí se define cuántas plantillas y cuántos invitados incluye. Escríbenos y te decimos precios y qué plan te conviene.",
+      accion: "Ya tengo cuenta: entrar",
+      nota: "Los precios todavía no se publican aquí: te los pasamos en cuanto nos escribas.",
+    },
+    /**
+     * G-01 (`bitacora/3c-ux.md §4`): el sitio no tenía ni un canal para comprar ni para preguntar,
+     * así que «Empezar mi invitación» terminaba en un circuito cerrado de cuatro toques. Estos son
+     * los textos del bloque de contacto, que sale en la portada y en `/ayuda`. El número y el
+     * correo NO están aquí: vienen del entorno (`lib/contacto.ts`), porque cuáles son es una
+     * decisión de producto y un dato inventado sería peor que la ausencia.
+     */
+    contactar: {
+      titulo: "¿Cómo se contrata?",
+      intro:
+        "Los planes se contratan con nuestro equipo: nos escribes, te decimos precios y te dejamos la cuenta lista para empezar.",
+      whatsapp: "Escribir por WhatsApp",
+      correo: "Escribir por correo",
+      /** Va dentro del `?text=` de `wa.me`: quien lo recibe sabe de dónde sale sin preguntar. */
+      mensaje:
+        "Hola, quiero una invitación digital con confirmación de asistencia. ¿Me pasan precios y cómo la contrato?",
+      asunto: "Quiero contratar una invitación digital",
+      /** Sin ningún canal configurado se dice la verdad: nunca un botón que no lleva a nadie. */
+      sinContacto:
+        "Los planes se contratan con nuestro equipo; el contacto se publicará aquí en cuanto esté configurado. Si alguien ya te atendió, escríbele por ese mismo medio.",
     },
     ctaFinal: {
       titulo: "¿Empezamos?",
@@ -201,7 +229,10 @@ export const es_MX = {
     },
     contacto: {
       titulo: "¿No está tu duda aquí?",
-      texto: "Escríbenos por el mismo medio por el que contrataste tu invitación y te contestamos.",
+      // G-01: el texto anterior («escríbenos por el mismo medio por el que contrataste tu
+      // invitación») dejaba fuera justo a quien todavía no ha contratado nada, que es quien más
+      // necesita esta caja. Ahora la caja ES el contacto (`ContactoParaContratar`).
+      texto: "Escríbenos y te contestamos nosotros, hayas contratado ya o estés todavía preguntando precios.",
     },
   },
   /**
@@ -234,7 +265,11 @@ export const es_MX = {
       grupo: "Tipo de evento",
       plantillas: (n: number) => (n === 1 ? "1 plantilla" : `${n} plantillas`),
       sinPlantillas: "Todavía no hay plantillas",
-      tuTipo: "El de tu invitación",
+      // 3C-UX F-04: «El de tu invitación» son 19 caracteres en la mono de la insignia, que por
+      // contrato de diseño (`11 §5`) no parte línea: medía 165 px dentro de una columna de tarjeta
+      // de 97 px a 390 px de ancho y arrastraba TODA la página a 421 px de desplazamiento
+      // horizontal. «Tu evento» cabe en la columna y dice lo mismo junto al nombre del tipo.
+      tuTipo: "Tu evento",
       distintoDelRegistrado: (registrado: string) =>
         `Tu invitación está registrada como ${registrado}. Puedes mirar otros tipos, pero las plantillas de ${registrado} son las que encajan con sus secciones.`,
       paraCual: "¿Para cuál invitación?",
@@ -287,8 +322,14 @@ export const es_MX = {
       lugarAyuda: "La dirección y el mapa se completan dentro del editor.",
       fechaInvalida: "Escribe la fecha como día, mes y año. Por ejemplo: 18 de abril de 2027.",
       guardando: "Guardando tus datos…",
+      // 3C-UX G-03: el aviso decía «Puedes continuar» y «Continuar» NO continuaba. Ahora el texto
+      // ofrece exactamente los dos botones que salen debajo, ni uno más.
       errorGuardar:
-        "No pudimos guardar estos datos. Puedes continuar: los escribes dentro del editor y no se pierde nada.",
+        "No pudimos guardar estos datos. Vuelve a intentarlo, o sigue sin guardar: los escribes dentro del editor y no se pierde nada.",
+      errorGuardarSinRed:
+        "No hay conexión, así que no pudimos guardar estos datos. Vuelve a intentarlo, o sigue sin guardar: los escribes dentro del editor y no se pierde nada.",
+      reintentar: "Volver a guardar",
+      seguirSinGuardar: "Seguir sin guardar",
       omitir: "Lo lleno después",
     },
     listo: {
@@ -303,6 +344,22 @@ export const es_MX = {
       texto:
         "Tu invitación se crea cuando contratas un plan. En cuanto exista, aparece aquí y podrás elegirle una plantilla.",
       accion: "Ver planes",
+      /** Título de la PÁGINA en ese caso: el del estado vacío es su propio encabezado (h2). */
+      tituloDePagina: "Tus invitaciones",
+    },
+    /**
+     * 3C-UX G-02: con todas las invitaciones ya diseñadas, el paso 1 era una pregunta sin
+     * respuestas y un «Continuar» inhabilitado para siempre. Deja de fingir que es el paso 1: dice
+     * en una frase por qué y enseña «Mis invitaciones», que es la salida real.
+     */
+    sinLibres: {
+      titulo: "Todas tus invitaciones ya tienen diseño",
+      texto:
+        "El diseño se cambia desde dentro de cada invitación. Ábrela para seguir editándola o comparte su enlace.",
+      /** Con una sola invitación, el plural sería mentira. */
+      tituloUna: "Tu invitación ya tiene diseño",
+      textoUna:
+        "El diseño se cambia desde dentro de la invitación. Ábrela para seguir editándola o comparte su enlace.",
     },
   },
   editor: {
@@ -318,8 +375,17 @@ export const es_MX = {
       sinInvitaciones:
         "Todavía no tienes ninguna invitación. Tu invitación se crea cuando contratas un plan; en cuanto esté, aparecerá aquí y podrás elegirle una plantilla.",
       misInvitaciones: "Mis invitaciones",
-      seguirEditando: "Seguir editando",
+      // 3C-UX G-06: la fila dice también QUÉ es cada invitación y en qué estado está, y cuando está
+      // publicada enseña el enlace de las invitadas sin obligar a volver a publicar para verlo.
+      seguirEditando: "Abrir en el editor",
       empezar: "Elegir plantilla",
+      estadoEnEdicion: "En edición",
+      estadoPublicada: "Publicada",
+      enlaceDeInvitadas: "Enlace de tus invitadas",
+      copiarEnlace: "Copiar",
+      enlaceCopiado: "Enlace copiado",
+      enlaceNoCopiado: "No pudimos copiar el enlace. Selecciónalo y cópialo a mano.",
+      verComoInvitada: "Ver como invitada",
       errorInvitaciones: "No pudimos cargar tus invitaciones.",
       errorCatalogo: "No pudimos cargar las plantillas.",
       fechaDeLaInvitacion: (fecha: string) => `Fecha del evento: ${fecha}`,
@@ -327,10 +393,7 @@ export const es_MX = {
       sinFecha: "Sin fecha registrada",
       sinAcceso: "No disponible",
       numero: (id: number) => `Invitación n.º ${id}`,
-      todasConPlantilla:
-        "Todas tus invitaciones ya tienen plantilla. Ábrelas para seguir editándolas; el diseño se cambia desde dentro.",
-      unaConPlantilla:
-        "Tu invitación ya tiene plantilla. Ábrela para seguir editándola; el diseño se cambia desde dentro.",
+
     },
     /** Barra superior del editor (`11 §7`, fila «Chrome del editor»). */
     barra: {
@@ -525,17 +588,53 @@ export const es_MX = {
       yaSeVe: "Tu invitación ya se puede ver en internet.",
       tardaUnosMinutos:
         "Tu invitación quedó publicada. El enlace de tus invitados puede tardar unos minutos en mostrar esta versión.",
-      // U-4: dos fechas distintas en la misma invitación.
-      avisoFechasDistintas: (portada: string, itinerario: string) =>
-        `La portada dice ${portada} y el primer momento del itinerario dice ${itinerario}. Tus invitados leerán la portada.`,
+      // U-4 / G-04: dos fechas distintas en la misma invitación. Desde 3C-UX-B el aviso mira TAMBIÉN
+      // el itinerario de ejemplo, que es el que se publicó con dos fechas distintas y un «Todo listo».
+      avisoFechasDistintas: (evento: string, itinerario: string) =>
+        `Tu evento es el ${evento}, pero el itinerario que verán tus invitados dice ${itinerario}.`,
+      avisoFechasDeEjemplo: (evento: string, itinerario: string) =>
+        `Tu evento es el ${evento}, pero el itinerario sigue con el horario de ejemplo (${itinerario}) y es el que verán tus invitados.`,
+      usarLaFechaDelEvento: "Usar la fecha del evento en el itinerario",
+      aplicandoFechas: "Aplicando…",
+      fechasAplicadas: "El itinerario ya usa la fecha de tu evento.",
+      noPudimosAplicarFechas: "No pudimos cambiar la fecha del itinerario. Ábrelo y cámbiala ahí.",
       revisarFechas: "Revisar",
+      // G-05: TODO lo que sigue en contenido de ejemplo y la invitada va a leer, no solo lo obligatorio.
+      tituloEjemplos: "Contenido de ejemplo que verán tus invitados",
+      ejemploDeBloque: (etiqueta: string, muestra: string) => (muestra ? `${etiqueta}: «${muestra}»` : etiqueta),
+      ejemploDeGrupo: (etiqueta: string, muestra: string, cuantos: number) =>
+        muestra
+          ? `${etiqueta}: ${cuantos === 1 ? "1 ficha de ejemplo" : `${cuantos} fichas de ejemplo`}, empezando por «${muestra}»`
+          : `${etiqueta}: ${cuantos === 1 ? "1 ficha de ejemplo" : `${cuantos} fichas de ejemplo`}`,
+      seccionEnteraDeEjemplo: "Esta sección es de ejemplo entera.",
+      ocultarSeccion: "Ocultar sección",
+      seccionOcultada: (titulo: string) => `«${titulo}» ya no se verá en tu invitación.`,
+      yMasEjemplos: (cuantos: number) => (cuantos === 1 ? "y 1 más" : `y ${cuantos} más`),
+      hayAvisos: (cuantos: number) =>
+        cuantos === 1
+          ? "Puedes publicar, pero hay 1 cosa que tus invitados verían sin terminar."
+          : `Puedes publicar, pero hay ${cuantos} cosas que tus invitados verían sin terminar.`,
+      publicarDeTodosModos: "Publicar de todos modos",
+      // G-06: el estado «publicada» y el enlace dejan de vivir dentro del diálogo que acaba de publicar.
+      estadoPublicada: "Publicada",
+      estadoConCambios: "Cambios sin publicar",
+      etiquetaEstadoPublicada: "Tu invitación está publicada",
+      etiquetaEstadoConCambios: "Tu invitación está publicada, con cambios que aún no ven tus invitados",
+      compartir: "Compartir",
+      volverAPublicar: "Volver a publicar",
+      volverAPublicarCorto: "Publicar",
+      yaEstaPublicada: "Tu invitación ya está publicada. Vuelve a publicar para que tus invitados vean los cambios.",
+      alDiaConLoPublicado: "Tus invitados ya ven esta versión.",
       copiarEnlace: "Copiar enlace",
       enlaceCopiado: "¡Enlace copiado!",
       enlaceCopiadoToast: "Enlace copiado. Ya puedes pegarlo en WhatsApp.",
       enlaceNoCopiado: "No pudimos copiar el enlace. Selecciónalo y cópialo a mano.",
       tuEnlace: "El enlace de tus invitados",
       cerrar: "Cerrar",
-      descripcionExito: "Tu invitación ya está en línea.",
+      // 3C-UX F-09: decía «Tu invitación ya está en línea.», la tercera frase seguida que afirma lo
+      // mismo que el título («Tu invitación está en vivo») y que `yaSeVe`. Aquí se contesta lo que
+      // la clienta sí se pregunta al publicar: si puede seguir editando después.
+      descripcionExito: "Comparte el enlace con tus invitados. Puedes seguir editando y volver a publicar cuando quieras.",
       noSePuedePublicar: "Todavía no se puede publicar: resuelve lo que está marcado arriba.",
       noPudimosDespublicar: "No pudimos despublicar tu invitación.",
       noPudimosRotar: "No pudimos generar un enlace nuevo.",
@@ -560,16 +659,10 @@ export const es_MX = {
   preview: {
     titulo: "Vista previa",
   },
-  publico: {
-    noDisponible: {
-      titulo: "Esta invitación ya no está disponible",
-      cuerpo: "El enlace pudo haber expirado, cambiado o el anfitrión retiró la invitación.",
-    },
-    error: {
-      titulo: "No pudimos abrir esta invitación",
-      cuerpo: "Ocurrió un problema al cargar el contenido. Inténtalo de nuevo en un momento.",
-    },
-  },
+  // `publico.*` se retiró de aquí en 3C-8: vivía solo para `/i/[publicToken]/{error,not-found}.tsx`,
+  // y como `es_MX` es un único objeto exportado, importar una sola clave suya bundlea el árbol
+  // ENTERO — sacaba la ruta pública de presupuesto (163,1 de 150 KB gz). Mismo texto, ahora en
+  // `app/(public)/i/[publicToken]/textos.ts` (`textosPublicos.error` / `.noDisponible`).
   revalidate: {
     noAutorizado: "Token de revalidación inválido.",
     cuerpoInvalido: "Cuerpo de la petición inválido.",

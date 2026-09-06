@@ -154,8 +154,8 @@ export const TEMPLATE_QUINCE_PREMIUM = 6;
  * pero `InvitationEntity` las mapea a primitivos de Kotlin y un NULL convierte cualquier ruta del
  * editor en `500 TPL_INTERNAL` (defecto preexistente y ajeno, `handoffs/3-0a.md` §3).
  */
-export function invitacionSinDocumento(templateId = TEMPLATE_BODA_PREMIUM): number {
-  const cliente = customerIdDemo();
+export function invitacionSinDocumento(templateId = TEMPLATE_BODA_PREMIUM, customerId?: number): number {
+  const cliente = customerId ?? customerIdDemo();
   const id = sql(`INSERT INTO invitation (customer_id, template_id, is_enabled, is_paid, is_finished,
       all_events_same_location, uses_templates2, date, time, hashtag, cover_photo_url,
       children_allowed, young_allowed, has_music, has_gallery, has_extra_modules, total_amount,
@@ -177,6 +177,53 @@ export function borrarInvitacion(id: number): void {
   } catch {
     /* la puede referenciar un release: no es fatal para la prueba */
   }
+}
+
+/**
+ * Cuenta NUEVA de cliente, por la ruta real (`POST /auth/signup` + `POST /auth/token`). La usan las
+ * pruebas que necesitan una cartera de invitaciones ENTERA y conocida —«todas mis invitaciones ya
+ * tienen diseño» (3C-UX G-02)—, algo imposible sobre la cuenta de demostración compartida: otra
+ * prueba en paralelo puede tener una invitación suya sin plantilla en ese mismo instante.
+ *
+ * Cada llamada crea un correo distinto, así que dos pruebas concurrentes nunca hacen login sobre la
+ * MISMA cuenta (el 500 de `RefreshTokenService.kt:20`, `contratos.md` §6, es por cuenta).
+ */
+export async function cuentaNueva(): Promise<{ email: string; token: string; customerId: number }> {
+  const email = `uxa.${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}@example.com`;
+  const alta = await fetch(`${API_BASE}/auth/signup`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: "Prueba", lastName: "UX", email, password: DEMO_PASS }),
+  });
+  if (!alta.ok) throw new Error(`POST /auth/signup → ${alta.status}: ${await alta.text()}`);
+  const sesion = await fetch(`${API_BASE}/auth/token`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ email, password: DEMO_PASS }),
+  });
+  if (!sesion.ok) throw new Error(`POST /auth/token → ${sesion.status}`);
+  const { accessToken } = (await sesion.json()) as { accessToken: string };
+  return { email, token: accessToken, customerId: Number(sql(`SELECT id FROM customer WHERE email = '${email}';`)) };
+}
+
+/**
+ * Invitación que YA tiene plantilla aplicada: se crea la fila (SQL, no hay ruta) y se le aplica el
+ * documento por la RUTA REAL `:choose-template`, que es la única que lo crea (ADR-1R-X-03).
+ */
+export async function invitacionConDocumento(
+  token: string,
+  customerId: number,
+  templateId = TEMPLATE_BODA_PREMIUM,
+  templateSlug = "boda-clasica",
+): Promise<number> {
+  const id = invitacionSinDocumento(templateId, customerId);
+  const r = await fetch(`${API_BASE}/editor/invitations/${id}/document:choose-template`, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+    body: JSON.stringify({ templateSlug, templateVersion: "1.0.0" }),
+  });
+  if (!r.ok) throw new Error(`:choose-template → ${r.status}: ${await r.text()}`);
+  return id;
 }
 
 /** Lee la revisión actual del documento por la ruta real (no por SQL). */

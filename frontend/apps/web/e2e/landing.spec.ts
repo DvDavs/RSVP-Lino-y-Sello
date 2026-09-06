@@ -7,6 +7,12 @@
 //  3. `axe` AA sin violaciones críticas ni serias, en los dos anchos.
 //  4. El presupuesto de JS de primera carga de la ruta (`contratos §8`), medido sobre el `.next`
 //     que acaba de construir el `webServer`, con la MISMA compuerta que usa CI.
+//  5. Cierre 3-C (G-01): que el camino que EMPIEZA en esta pantalla —«Empezar mi invitación» y
+//     «Planes»— tenga salida. El recorrido de uso sin instrucciones midió un anillo de cuatro
+//     toques que terminaba en `/ayuda#planes` sin precio y sin contacto, así que las dos puntas del
+//     anillo se vigilan aquí aunque una de ellas viva en `/ayuda`: es la misma pregunta de la misma
+//     clienta («¿cuánto cuesta y con quién lo contrato?») y romper cualquiera de las dos la deja
+//     otra vez sin respuesta.
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -80,6 +86,30 @@ test("los testimonios van marcados como ejemplo (no son clientas reales todavía
   await expect(page.getByText("Textos de muestra mientras reunimos testimonios reales de clientas.")).toBeVisible();
 });
 
+test("la sección de planes ofrece un camino para contratar, y no uno inventado", async ({ page }) => {
+  await page.goto("/");
+  const planes = page.locator("#planes");
+  await expect(planes.getByRole("heading", { level: 3, name: "¿Cómo se contrata?" })).toBeVisible();
+
+  // Este build NO trae `NEXT_PUBLIC_CONTACTO_WHATSAPP` ni `NEXT_PUBLIC_CONTACTO_CORREO`, así que lo
+  // correcto es decir la verdad: ni un botón que no lleve a nadie, ni un número inventado.
+  await expect(planes.getByText(/el contacto se publicará aquí en cuanto esté configurado/)).toBeVisible();
+  await expect(planes.getByRole("link", { name: "Escribir por WhatsApp" })).toHaveCount(0);
+  await expect(planes.getByRole("link", { name: "Escribir por correo" })).toHaveCount(0);
+});
+
+test("el final del circuito (`/ayuda#planes`) contesta la pregunta que lo abrió: cuánto cuesta", async ({ page }) => {
+  // Es a donde manda «Ver planes» del asistente cuando la cuenta no tiene ninguna invitación.
+  await page.goto("/ayuda#planes");
+  const duda = page.locator("details#planes");
+  await expect(duda).toHaveAttribute("open", "");
+  await expect(duda.getByRole("heading", { level: 2 })).toHaveText("¿Cuánto cuesta y cómo contrato un plan?");
+  await expect(duda).toContainText("Los precios todavía no están publicados");
+  // Y la caja de contacto está al final de la misma página, no en «el medio por el que contrataste».
+  await expect(page.getByRole("heading", { name: "¿No está tu duda aquí?" })).toBeVisible();
+  await expect(page.getByText(/el contacto se publicará aquí en cuanto esté configurado/)).toBeVisible();
+});
+
 test("axe AA: 0 violaciones críticas o serias, en teléfono y en escritorio", async ({ page }) => {
   await page.setViewportSize(MOVIL);
   await page.goto("/");
@@ -113,4 +143,56 @@ test("el JS de primera carga de la portada cabe en el presupuesto de 150 KB gz",
   expect(limpia, "la portada tiene que estar EN la compuerta, no fuera de ella").toMatch(
     /^\/: [\d.]+ KB gz de primera carga/m,
   );
+});
+
+// ── 3C-ADV · las tres voces del sistema se DESCARGAN de verdad ───────────────────────────────────
+// Defecto medido en la revisión adversarial del cierre: `/fonts/*.woff2` respondía **404** en todo
+// build hecho con `next build` a secas —es decir, en `pnpm --filter web run build` (el comando que
+// prescribe `handoffs/3c-8.md` para medir el LCP), en el `webServer` de las dos configuraciones de
+// Playwright (`pnpm run build && pnpm run start`) y en el job `e2e` de CI, que solo hace
+// `pnpm install`—. Los ficheros los copia `packages/ui/scripts/copiar-fuentes-publicas.ts`, que
+// colgaba EXCLUSIVAMENTE del `build` de `@invitaciones/ui`; ese `build` solo se ejecuta cuando se
+// entra por turbo (`pnpm run build` desde `frontend/`, tarea `build` con `dependsOn: ["^build"]`).
+// Resultado medido en el navegador: `document.fonts` daba `Fraunces|unloaded`, `Onest|unloaded`,
+// `Red Hat Mono|unloaded` y el `<h1>` de la portada se pintaba con «Fraunces Fallback» → Georgia.
+// Es decir, el producto servía TIPOGRAFÍA GENÉRICA, que es una de las reglas que no se negocian
+// (`10 §1.2`, `brief-comun.md`), y ninguna compuerta lo veía: las pruebas de fuentes
+// (`packages/ui/test/fuentes.test.ts`, `apps/web/test/tipografia-chrome.test.ts`) comprueban el
+// fichero de ORIGEN en `node_modules`, nunca el que se SIRVE.
+// Arreglo: `apps/web`'s `build`/`dev` ejecutan el copiador antes de Next (idempotente, 6 ficheros).
+// Esta prueba es la compuerta que impide que vuelva a pasar: mide sobre HTTP, no sobre el disco.
+test("las tres voces autoalojadas se sirven y el navegador las carga (nada de tipografía genérica)", async ({
+  page,
+  request,
+}) => {
+  const RUTAS = [
+    "/fonts/fraunces-latin-full-normal.woff2",
+    "/fonts/onest-latin-wght-normal.woff2",
+    "/fonts/red-hat-mono-latin-wght-normal.woff2",
+  ];
+  for (const ruta of RUTAS) {
+    const respuesta = await request.get(ruta);
+    expect(respuesta.status(), `${ruta} no se sirve: el chrome caería a la fuente de respaldo`).toBe(200);
+    expect((await respuesta.body()).byteLength, `${ruta} se sirve vacío`).toBeGreaterThan(10_000);
+  }
+
+  await page.setViewportSize(ESCRITORIO);
+  await page.goto("/");
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+  const estado = await page.evaluate(() => {
+    const familias = ["Fraunces", "Onest"];
+    const cargadas = [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family);
+    return {
+      sinCargar: familias.filter((f) => !cargadas.includes(f)),
+      h1: getComputedStyle(document.querySelector("h1") as Element).fontFamily,
+    };
+  });
+  // `Red Hat Mono` (voz etiqueta) puede no llegar a usarse en la portada, así que no se exige
+  // cargada aquí; su fichero sí se comprueba arriba por HTTP.
+  expect(estado.sinCargar, `familias declaradas que el navegador NO llegó a cargar: ${estado.sinCargar.join(", ")}`).toEqual(
+    [],
+  );
+  expect(estado.h1, "el titular tiene que pedir la voz display del sistema, no un respaldo").toContain("Fraunces");
 });

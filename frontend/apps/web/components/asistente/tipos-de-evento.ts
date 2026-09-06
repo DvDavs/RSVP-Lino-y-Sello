@@ -100,3 +100,55 @@ export function eventKindDeNombre(nombre: string | null | undefined): EventKind 
   if (!nombre) return "generic";
   return NOMBRE_A_KIND.get(normalizar(nombre)) ?? "generic";
 }
+
+// ── `?tipo=` de la URL ─────────────────────────────────────────────────────────────────────────
+//
+// La portada enlaza `/editor?tipo=<slug en español>` (`components/sitio/TiposDeEvento.tsx`:
+// `boda`, `xv-anos`, `bautizo`, `comunion`, `cumpleanos`, `graduacion`, `corporativo`) y ninguno de
+// esos siete valores es un `EventKind`, así que el asistente los descartaba TODOS en silencio
+// (3C-UX G-02: «`?tipo=xv-anos` de la portada se ignora»). Esta tabla es el puente, y va aquí y no
+// en la portada porque el asistente es quien LEE el parámetro: el enlace de la portada no cambia.
+//
+// También se escribe el slug en español al navegar entre pasos (3C-UX B-19: `?tipo=quince` y
+// `?tipo=baptism` eran identificadores internos a la vista); el lector sigue aceptando los ocho
+// `EventKind` crudos, que es lo que teclean las pruebas y lo que quedó en enlaces ya compartidos.
+const SLUG_A_KIND: ReadonlyMap<string, EventKind> = new Map([
+  ["boda", "wedding" as const],
+  ["xv-anos", "quince" as const],
+  ["xv", "quince" as const],
+  ["quince-anos", "quince" as const],
+  ["bautizo", "baptism" as const],
+  ["comunion", "communion" as const],
+  ["primera-comunion", "communion" as const],
+  ["confirmacion", "confirmation" as const],
+  ["cumpleanos", "birthday" as const],
+  ["graduacion", "graduation" as const],
+  // `corporativo` es el octavo cuadro de la portada y NO es un `EventKind` (`11 §4.2`): cae en
+  // `generic` («Otra celebración»), que es su sitio en el catálogo cerrado del dominio.
+  ["corporativo", "generic" as const],
+  ["otra", "generic" as const],
+]);
+
+const KIND_A_SLUG: ReadonlyMap<EventKind, string> = new Map([
+  ["wedding", "boda"],
+  ["quince", "xv-anos"],
+  ["baptism", "bautizo"],
+  ["communion", "comunion"],
+  ["confirmation", "confirmacion"],
+  ["birthday", "cumpleanos"],
+  ["graduation", "graduacion"],
+  ["generic", "otra"],
+]);
+
+/** `?tipo=` → `EventKind`. Acepta el slug en español de la portada y el `EventKind` crudo. */
+export function eventKindDeParametro(valor: string | null | undefined): EventKind | null {
+  if (valor === null || valor === undefined) return null;
+  const limpio = normalizar(valor).replace(/\s+/g, "-");
+  if (esEventKind(limpio)) return limpio;
+  return SLUG_A_KIND.get(limpio) ?? null;
+}
+
+/** `EventKind` → el slug en español que viaja en `?tipo=` (el mismo que enlaza la portada). */
+export function slugDeTipo(kind: EventKind): string {
+  return KIND_A_SLUG.get(kind) ?? "otra";
+}

@@ -1593,3 +1593,252 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   resolverlo yo (es memoria de otros bloques y sólo el orquestador acepta ADR). ¿Lo resuelve el
   orquestador antes de cerrar la fase? Tal cual está, las ADR de los dos lados se leen, pero el
   archivo no es válido como registro.
+
+  ¿Se añade la ruta a la compuerta (fichero fuera del área de este agente)? **Resuelto en 3C-8**:
+  ya estaba en `check-budget.mjs` (`LIMITES_BASE` trae las tres rutas) cuando este agente empezó —
+  no hizo falta añadirla.
+
+## Fase 3-C · 3C-8 (e2e, axe, presupuestos y LCP — cierre del bloque 3)
+- **`/i/[publicToken]` y `/` siguen sobre presupuesto (156,2 y 153,4 KB gz de 150) tras el recorte
+  real que sí pude hacer** (el `es_MX` monolítico de `lib/i18n.ts` metía el árbol de textos del
+  editor/asistente en la ruta pública por dos frases; movidas a `textos.ts`, −6,9 KB en `/i`). Lo
+  que queda: `tailwind-merge` + `@radix-ui/react-slot` (~17,8 KB gz) aparecen como "JS propio" de
+  LAS TRES rutas por igual —incluida `/i/[publicToken]`, que no importa `@invitaciones/ui` en
+  ninguna parte de su código (`grep` confirmado)— porque Turbopack agrupa ese vendor compartido
+  entre 2+ rutas y `check-budget.mjs` no distingue eso de código genuinamente propio de la ruta.
+  **No es nuevo de este bloque**: ya estaba implícito en la medida de 3C-5 (146,0/148,1 KB), que no
+  lo desglosó. **Supuesto:** no me correspondía ni tocar la partición de chunks de Turbopack (riesgo
+  alto, fuera del alcance de "verificar y medir") ni subir el límite sin autorización. **Pregunta al
+  dueño:** ¿ADR para reconocer ~15-20 KB de vendor compartido del chrome como coste inevitable de
+  CUALQUIER ruta que use `@invitaciones/ui` (subiendo `/` y `/i` a, digamos, 160-165 KB con el
+  margen citado), o se abre una tarea dedicada a partición de chunks de Turbopack antes de tocar el
+  número? Mientras tanto, `e2e/landing.spec.ts:93` y `e2e/presupuesto.spec.ts:32` quedan en rojo
+  con la cifra real (deliberado: `contratos.md §6`, "sin pruebas en verde con salida real no hay
+  integración").
+
+  **Respuesta medida (3C-8b):** no era vendor compartido de `@invitaciones/ui` en general — era
+  `app/not-found.tsx` (RAÍZ), que por ser el límite de árbol de TODAS las rutas (`04 §19`) colgaba
+  su JS de CADA una. Montaba `MarcoSitio` → `CabeceraSitio` → `Button` (cliente, con
+  `tailwind-merge` + `@radix-ui/react-slot` detrás) solo para pintar un 404; `/i/[publicToken]` no
+  importa nada de `@invitaciones/ui` en su propio código pero pagaba esos ~17,8 KB gz igual, por
+  colgar del mismo `not-found` raíz. Reescrito como Server Component puro (sin `"use client"`, sin
+  `components/sitio/**`, sin `Button`; markup propio sobre las clases de `EmptyState`,
+  `ErrorGenerico` importado directo como ya hacía `PantallaError.tsx`): `/i/[publicToken]`
+  156,2→**142,0 KB** gz, `/` 153,4→**148,2 KB** gz (límite 150 KB), los dos DENTRO de presupuesto
+  sin subir el límite ni tocar la partición de chunks de Turbopack. La versión rica sigue en
+  `app/(chrome)/not-found.tsx` para el `notFound()` del chrome. No hizo falta el ADR planteado
+  arriba: no era coste estructural de `@invitaciones/ui`, era un límite de árbol con un import de
+  más. Margen en `/` queda ajustado (1,8 KB): una foto o icono nuevo en la portada puede volver a
+  sacarla de presupuesto; detalle en `handoffs/3c-8.md` §3C-8b.
+- **`aria-hidden-focus` (incomplete) tolerado en `e2e/a11y-producto.spec.ts` para el diálogo de
+  publicar**, sobre los centinelas `[data-radix-focus-guard]` y el resto del chrome que Radix marca
+  `aria-hidden` mientras el `Dialog` está abierto (`hideOthers`). **Supuesto:** es un patrón
+  ESPERADO de cualquier `Dialog` modal de Radix (mismo mecanismo que `bitacora/3c-b2-f3.md` ya
+  documentó para la galería), no un defecto — y que de verdad el foco no escapa ya está PROBADO por
+  `e2e/teclado-editor.spec.ts:124` (Tab dentro del diálogo abierto). Si el dueño no lo comparte, la
+  tolerancia vive en un único `Set` (`REGLAS_INCOMPLETAS_TOLERADAS_CON_DIALOGO_MODAL`) fácil de
+  retirar.
+- **Shim `components/ui/button.tsx` y `CLASES_CONTROL` de `FieldShell`** (pregunta abierta de 3C-7):
+  confirmado con `grep` que 3C-5/3C-6 ya habían migrado las dos pantallas que los importaban
+  (`/acceso`, `/editor`) a `@invitaciones/ui` directo. Borrados el shim, la carpeta `components/ui/`
+  entera y la constante — sin preguntar, porque ya no tenían NINGÚN importador (cambio local,
+  seguro, mecánico) y así lo pedía el propio brief de este bloque.
+
+## Fase 3-C · UX (recorrido sin instrucciones, cierre)
+
+Supuestos con los que trabajé, todos verificables en `bitacora/3c-ux.md`:
+
+- **Supuse que «no hay ruta HTTP para crear una invitación» sigue siendo la decisión vigente**
+  (ADR-2-4-02, y `scripts/seed-demo.sh` lo documenta). Por eso NO clasifiqué como defecto de código
+  que el paso 1 del asistente no ofrezca «crear una invitación nueva». Lo que sí clasifiqué como
+  fricción grave (G-01) es que el botón principal de la portada —«Empezar mi invitación»— lleve en
+  cuatro toques a un circuito cerrado sin precio, sin contacto y sin salida: la portada promete
+  autoservicio y el producto es de venta asistida. **Pregunta al dueño:** ¿la portada debe dejar de
+  prometer autoservicio, o el asistente debe poder originar la invitación? Mientras no se decida, lo
+  mínimo es un medio de contacto real en `/ayuda` y en la sección «Elige tu plan».
+- **Supuse que insertar la fila de `invitation` por SQL (lo mismo que hace `seed-demo.sh`) es la
+  única manera de llegar al asistente**, y así lo hice para poder evaluar el resto. Todo lo que
+  evalúo a partir de §1.5 de la bitácora lo evalúo con esa llave maestra.
+- **Supuse que el `itemId` que devuelve el documento compuesto debía ser direccionable por
+  `setItemBlock`.** No lo es en un documento recién creado (G-03: `422 TPL_ITEM_UNKNOWN` sobre
+  `event.cards[<itemId de defaults>]`). No decidí yo el arreglo porque toca el contrato de
+  operaciones: o el `:choose-template` materializa los grupos de los *defaults*, o `setItemBlock`
+  crea el ítem, o el asistente usa `addItem`. **Pregunta:** ¿cuál de las tres?
+- **Supuse que la comprobación previa de publicación debe mirar lo que verá el invitado, no solo el
+  `content` del documento.** Con ese criterio, G-04 (dos fechas distintas publicadas sin aviso, con
+  el guardián U-4 en su sitio) y G-05 («Nombre de la mamá» publicado) son defectos y no decisiones.
+  Si el criterio es el contrario —la revisión solo mira lo que la clienta escribió—, entonces hay que
+  decir que los *defaults* de la plantilla son contenido publicable y quitarles el aire de ejemplo.
+- **Supuse que el mínimo táctil es 44 px** (B-13). El doc 11 fija tamaños de control pero no un
+  mínimo táctil explícito; si el sistema quiere quedarse en 36 px para acciones secundarias, que se
+  escriba en el doc y dejo de contarlo como fricción.
+- **No abrí ADR**: los tres cambios que hice son de texto y de origen de dato, ninguno toca paleta,
+  tipografía, forma ni componente base.
+## Fase 3-C · 3c-cv (revisión de calidad visual del cierre)
+
+Supuestos que tomé al corregir, para que el dueño los confirme o los cambie:
+
+- **P-3C-CV-1 · `tone="mono"` ahora es dibujo de línea, no silueta.** `ADR-3C-3-01` no dice para qué
+  se quería una silueta maciza; supuse que no se quería (produce iconos ilegibles en 30 de 82 casos)
+  y que «un solo tono» significa «sin segundo tono». Si algún sitio sí necesitaba la silueta,
+  se pide a mano con `style={{ "--tono": "currentColor" }}`. No encontré ninguno.
+- **P-3C-CV-2 · Ancho del panel de secciones.** Lo subí a `minmax(300px,400px)` porque a 340 px el
+  nombre de las secciones fijas se truncaba a una letra. La alternativa era acortar la insignia
+  «SIEMPRE VISIBLE» (125 px de una fila de ~290), que es texto de producto y no me toca decidir. Si
+  se prefiere una insignia más corta, el panel puede volver a 340 y el lienzo recupera 60 px.
+- **P-3C-CV-3 · Tema oscuro del producto.** `10 §1` pr. 3 pide «versión oscura del chrome como token,
+  no como excepción» y los tokens existen, pero `app/(chrome)/layout.tsx:42` fija `light` a propósito
+  y no hay conmutador. Supuse que es una decisión firme y no un pendiente; si no lo es, hace falta
+  una tarea (conmutador, persistencia, y las capturas oscuras de todas las pantallas).
+- **P-3C-CV-4 · Las cinco MEDIA de composición (M-3 a M-7 del handoff)** no las toqué porque
+  rediseñar `/acceso`, `/ayuda`, el paso 1 del asistente y el ritmo vertical de tres pantallas no es
+  una corrección de revisión. Falta decidir si entran en 3-C o pasan a la fase siguiente.
+- **P-3C-CV-5 · `errores.sinRed` en el editor.** Al cortar el mensaje crudo del `TypeError`, la
+  tarjeta de error del editor cae en «Algo salió mal. Inténtalo de nuevo.» en vez de en el más
+  preciso «No hay conexión…» de `errores.sinRed`: no metí `lib/i18n.ts` dentro de `lib/store.ts`
+  para no meter texto de interfaz en el estado. Si se prefiere el mensaje preciso, el camino limpio
+  es que el store guarde un código (`"red"`) y la pantalla lo traduzca.
+## Fase 3-C · 3c-adv (revisión adversarial del cierre)
+
+- **`apps/web` depende ahora de una ruta de fichero de `packages/ui`** (`../../packages/ui/scripts/
+  copiar-fuentes-publicas.ts` en su `build`/`dev`). **Supuesto:** es preferible un acoplo explícito
+  y visible al implícito de antes (que solo funcionaba entrando por turbo y dejaba el producto sin
+  tipografía en los tres caminos que de verdad lo sirven, `bitacora/3c-adv.md §1`). Alternativa si
+  el dueño prefiere otra cosa: mover el copiador a `apps/web/scripts/` y que `packages/ui` exporte
+  solo el manifiesto. `ADR-3C-ADV-01`.
+- **La compuerta de 24 px se aplica ahora al producto SIN la excepción «inline» de WCAG 2.2 2.5.8**
+  (`e2e/a11y-producto.spec.ts::objetivosDeAlMenos24px`). **Supuesto:** ninguno de los objetivos de
+  landing/acceso/ayuda/editor vive dentro de una frase, así que la excepción no aplica y admitirla
+  volvería la compuerta discutible. Sí se excluyen los elementos recortados (`sr-only`), que no son
+  objetivos hasta que reciben el foco; el enlace de salto se mide aparte, ya enfocado.
+- **`e2e/util/contraste.ts` no ve las capas hermanas** (`Composition` pone la forma en un `<div>`
+  absoluto detrás del contenido). Medido por píxel: bajo el `<h1>` de `/ayuda` hay **40 colores de
+  fondo distintos** y la compuerta mide **uno**; hoy el peor real es 13,47:1 contra un umbral de
+  4,5, así que no hay defecto, pero sí un hueco de método. **Pregunta al dueño:** ¿se amplía el
+  algoritmo (muestreo por píxel del rectángulo del texto, ~1 s por pantalla) o se acepta el hueco
+  con la regla de composición «ninguna forma por debajo de un texto» como control humano?
+- **`e2e/a11y-publico.spec.ts` sigue flakeando bajo paralelismo** pese al `document.fonts.ready`
+  que la fase 3-6 le puso: 1 roja de 2 pasadas completas con `--workers=2`, 3 de 3 verdes en
+  solitario, y `axe` sobre la misma URL da 0 violaciones. **Pregunta:** ¿se estabiliza (por ejemplo
+  esperando también a `requestAnimationFrame` doble tras `fonts.ready`) o se acepta y se documenta?
+  Tal como está, la compuerta de accesibilidad de la ruta pública puede dar rojo falso —y por el
+  mismo mecanismo, verde falso.
+- **`CDN_ORIGIN` por omisión es el puerto fijo `6003`** (`proxy.ts::origenDelCdn`), igual que
+  `remotePatterns` de `next.config.ts`. Con el protocolo de puertos propios que usan todas las
+  sesiones, el lienzo no pinta si nadie exporta esa variable en el proceso del servidor: medido,
+  5 pruebas del editor en rojo con `--workers=2`. **Pregunta:** ¿se deriva de
+  `NEXT_PUBLIC_API_BASE_URL` cuando `CDN_ORIGIN` no está, o se deja como está y se documenta en el
+  protocolo de arranque?
+
+## Fase 3-C · UX-A (correcciones graves del asistente de creación)
+
+- **Decidí la tercera de las tres opciones que dejó abiertas 3C-UX para G-03: el asistente usa
+  `addItem`.** Escribir el lugar en un grupo que todavía vive en los *defaults* solo tiene un camino
+  legal con el contrato vigente, porque `itemsDe(doc, groupId)` es `[]` mientras `content[groupId]`
+  no exista (`OperationReducer.kt:347` y su espejo `operations-reducer.ts:187`, con el comentario
+  normativo «los `defaults` NO se copian: el escalón de default opera a nivel de bloque de grupo
+  completo»). El asistente **materializa el grupo entero**: reenvía cada ítem de ejemplo con un
+  `addItem` —los valores salen del compuesto, rehidratados a `ScalarValue`— y mete en el primero el
+  lugar que escribió la clienta. Un solo lote, atómico. **Pregunta para el dueño del contrato:** ¿se
+  queda así, o se prefiere que `:choose-template` materialice los grupos al crear el documento (lo
+  que arreglaría también el mismo defecto latente en el editor, ver abajo) o que `setItemBlock`
+  cree el ítem? Mientras no se decida, lo de aquí no cambia ningún contrato: solo usa operaciones
+  que ya existen.
+- **Supuse que promover el itinerario de ejemplo a contenido de usuario es aceptable en ese caso.**
+  Materializar hace que `event.cards` pase de `provenance: "default"` a `"user"`. Verificado que
+  **no** afecta a la compuerta de publicación: `stillDefault` solo recoge bloques `required`
+  (`DefaultComposer.kt:132`) y `event.cards` no lo es en ninguna de las dos plantillas del
+  repositorio. Si mañana una plantilla marca su grupo de momentos como `required`, esta decisión le
+  quitaría el aviso de «sigue con el contenido de ejemplo» y habría que revisarla.
+- **Dejo declarado el mismo defecto, sin corregir, en el editor**: `components/editor/GroupField.tsx`
+  llama a `setItemBlock(groupId, item.itemId, …)` con el `itemId` del compuesto, y `lib/store.ts`
+  no materializa nada, así que **editar cualquier campo de un grupo que sigue en los defaults
+  devuelve el mismo `422 TPL_ITEM_UNKNOWN`**. No lo toqué porque `components/editor/**` es de otro
+  agente en esta misma fase. Reproducción exacta y su arreglo: `bitacora/3c-ux-a.md` §3.
+- **Supuse que `?tipo=` de la portada debe leerse por su slug en español.** La portada enlaza
+  `/editor?tipo=boda|xv-anos|bautizo|comunion|cumpleanos|graduacion|corporativo` y ninguno de los
+  siete es un `EventKind`, así que el asistente los descartaba TODOS. La tabla de equivalencia vive
+  en el asistente (`tipos-de-evento.ts`), no en la portada, porque quien lee el parámetro es el
+  asistente; `corporativo` cae en `generic`. Si se prefiere que la portada enlace el `EventKind`
+  crudo, la tabla sobra y el enlace cambia; el lector seguiría aceptando las dos formas.
+- **No abrí ADR**: nada de lo que toqué cambia paleta, tipografía, forma ni componente base.
+
+## Fase 3-C · UX-C (correcciones del sitio: contacto para contratar y mensaje de contraseña)
+
+Cierra G-01 (arriba) y M-12 con código: `ContactoParaContratar` (`lib/contacto.ts` +
+`components/sitio/ContactoParaContratar.tsx`) pone un canal de verdad en `Planes.tsx` y
+`ayuda/page.tsx`, configurable por dos variables de entorno opcionales
+(`NEXT_PUBLIC_CONTACTO_WHATSAPP`, `NEXT_PUBLIC_CONTACTO_CORREO`) — mientras no estén puestas, el
+sitio dice que el contacto se publicará en cuanto exista, nunca un número inventado ni un botón
+muerto. Detalle en `bitacora/3c-ux-c.md`.
+
+- **Pregunta al dueño (sin responder): ¿cuál es el WhatsApp y el correo reales de venta?** El
+  código ya sabe pintarlos; falta el dato, que es de producto y este agente no puede inventar.
+- **Pregunta al dueño (sin responder): ¿el producto quiere compra en línea, o venta asistida (el
+  camino que se construyó) es la decisión definitiva?** La duda «¿Cuánto cuesta y cómo contrato un
+  plan?» (`components/sitio/dudas-ayuda.ts`, `id: "planes"`, el ancla real de `/ayuda#planes`) hoy
+  dice sin rodeos «los planes se contratan con nuestro equipo, no en línea» y «todavía no se puede
+  pagar desde la página». Si la respuesta es que sí debe haber compra en línea, esa frase y el flujo
+  de `ContactoParaContratar` quedan obsoletos el día que exista un checkout.
+
+
+## Fase 3-C · cierre — lo que el dueño decide (resumen del orquestador)
+Las secciones «Fase 3-C · …» de arriba conservan cada supuesto con su contexto; esto es el índice de
+las que exigen decisión tuya, en orden de impacto:
+1. **Contacto para contratar** (UX-C, G-01): hoy el sitio no puede decir cómo comprar. Declara
+   `NEXT_PUBLIC_CONTACTO_WHATSAPP` (E.164) y/o `NEXT_PUBLIC_CONTACTO_CORREO`; sin ellas se muestra un
+   texto honesto de «se publicará aquí». ¿Habrá compra en línea o venta asistida?
+2. **Nombre de marca y logotipo**: se usa «Invitaciones» como wordmark de trabajo en Fraunces 800.
+3. **Imágenes reales**: 11 pendientes con prompt en `imagenes-pendientes.md` (hero, tipos de evento,
+   testimonios, pasos, ayuda); hasta entonces placeholders del sistema.
+4. **Publicar con contenido de ejemplo opcional** (UX-B, G-05): hoy se avisa y se ofrece ocultar la
+   sección; ¿debe bloquear también?
+5. **Tema oscuro**: existe como tokens y en la galería; el producto va en claro salvo ajuste explícito.
+6. **Galería `/design` en producción**: hoy con `noindex`; ¿bandera para excluirla del build?
+7. **Presupuesto de la portada**: 148,2 KB gz de 150; cualquier dependencia nueva lo rompe. El vendor
+   compartido (`tailwind-merge` + `react-slot`) se atribuye a todas las rutas.
+8. **Bloqueo de cuenta como denegación de servicio** (auth, heredado de 3-B): fuera de alcance.
+9. **`CDN_ORIGIN`/`NEXT_PUBLIC_CDN_ORIGIN` fijo al 6003 por omisión** (N-02 ya deja declararlo en
+   servidor; falta que `images.remotePatterns` de `next.config.ts` lo lea de la variable).
+
+## Fase 3-C · UX-B (correcciones graves del editor y la publicación)
+
+- **P-3C-UXB-1 · ¿el contenido de ejemplo OPCIONAL debe bloquear la publicación, o solo avisar?**
+  Decisión de producto pendiente, y es la única que queda abierta de G-05. Lo implementado respeta el
+  contrato vigente (`03 §6`, `contratos.md §12.3`): **solo bloquean los obligatorios** (`required` +
+  `default`); todo lo demás —«Nombre de la mamá», el itinerario de muestra, una sección entera de
+  ejemplo— se enumera en la revisión previa, sección por sección y con el texto entre comillas, con
+  «Editar» por fila y «Ocultar sección» cuando la sección entera es de muestra, y el botón deja de
+  decir «Publicar» a secas para decir «Publicar de todos modos» mientras haya avisos. **Pregunta:**
+  ¿basta con verlo, o una invitación con secciones enteras de ejemplo no debería poder publicarse?
+  Si la respuesta es «bloquear», el cambio es del backend (`ReleaseService.bloqueos`), no del
+  cliente: aquí solo habría que cambiar el tono de la fila.
+- **P-3C-UXB-2 · «Usar la fecha del evento en el itinerario» no se puede ofrecer sobre un itinerario
+  de EJEMPLO, y es justo el caso de G-04.** Un ítem que solo vive en los *defaults* no es
+  direccionable (`TPL_ITEM_UNKNOWN`, la misma raíz que G-03) y materializarlo con `addItem`
+  promovería contenido de demostración a contenido de la clienta: eso desactiva el bloqueo de
+  publicación de `03 §6` y es exactamente lo que prohíbe la objeción O-08 de
+  `packages/schema/src/operations.ts`. Por eso el atajo de un toque aparece solo cuando el itinerario
+  ya es suyo, y con el de ejemplo la acción es «Revisar» (que lleva al itinerario) más la fila de
+  G-05 que dice que sigue siendo de muestra. **Pregunta:** si se resuelve G-03 materializando los
+  grupos de los *defaults* al crear el documento, este caso desaparece solo. ¿Se resuelve por ahí?
+- **P-3C-UXB-3 · el aviso de fechas sigue sin bloquear** (se mantiene P-3-8-4). La regla nueva es:
+  hay incoherencia cuando **ningún** momento visible del itinerario cae el día del evento; si alguno
+  cae ese día, los demás son legítimos (civil la víspera, brunch al día siguiente). Con esa regla el
+  falso positivo que se temía en el bloque 3-8 no existe, y por eso ya se comparan también los
+  *defaults*. **Supuesto:** que ninguna plantilla tiene un `dateTimeRange` que NO sea del itinerario
+  del evento (verificado en `boda-clasica@1.0.0` y `xv-jardin@1.0.0`: solo `event.cards[when]`).
+- **Supuse que `activeRelease.documentRevision` está en la respuesta de `GET .../document`** aunque
+  `contratos.md §12.3` no lo nombra: verificado contra el backend real en esta sesión (`invitationId`
+  3 del clúster 6114 devuelve `{releaseId, publishedAt, contentHash, documentRevision, stale,
+  staleReason}`). Es lo que permite decir «cambios sin publicar» sin volver a preguntar al servidor
+  en cada tecla. Si algún día deja de venir, el estado degrada a `activeRelease.stale` a secas.
+- **M-10 no lo pude reproducir leyendo el código** («subir una foto borra el texto alternativo ya
+  escrito»): `ImageField.confirmarRecorte` conserva el alt (`getValues("alt")`,
+  `components/fields/ImageField.tsx:141`). Queda abierta con esa nota; hace falta reproducirla en
+  navegador para saber por qué puerta se pierde.
+- **B-13 (objetivos táctiles de 36 px) no es mío**: sale del tamaño `sm` de `Button` en
+  `@invitaciones/ui`, no del editor. Sigue en pie tal y como la dejó 3C-UX.
+
+## Respuestas del dueño (2026-09-06)
+Ver `memoria/decisiones-dueno.md` (D-01…D-08): sin migración; marca Lino & Sello / linoysello.com; correos hola@, soporte@, no-responder@; WhatsApp +52 951 470 9685 solo contacto; Stripe; imágenes por IA; tema oscuro en segundo plano; producto completo antes de publicar.

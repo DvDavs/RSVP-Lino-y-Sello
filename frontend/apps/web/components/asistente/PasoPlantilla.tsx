@@ -162,7 +162,12 @@ function TarjetaDePlantilla({ item, disponible, ocupada, otraOcupada, elegida, a
           className="w-full"
         />
         <div className="flex flex-1 flex-col gap-3">
-          <h3 className="heading-sm text-ui-ink">{nombre}</h3>
+          {/* 3C-8: era `<h3>` sin ningún `<h2>` entre el `<h1>` del paso ("Elige el punto de
+              partida", `AsistenteDeCreacion.tsx`) y esta tarjeta — axe `heading-order` (moderate),
+              detectado por `e2e/a11y-producto.spec.ts` (más estricto que `sinViolacionesGraves`,
+              que solo mira `critical`/`serious`). Mismo tamaño visual (`heading-sm`): el nivel es
+              semántico, no de estilo. */}
+          <h2 className="heading-sm text-ui-ink">{nombre}</h2>
           <ul className="flex flex-wrap gap-1.5">
             <li>
               {disponible ? (

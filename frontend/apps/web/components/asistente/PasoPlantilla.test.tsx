@@ -49,7 +49,7 @@ function pintar(parcial: Partial<Parameters<typeof PasoPlantilla>[0]> = {}) {
 describe("paso 2 — Elige el punto de partida", () => {
   it("pinta una tarjeta por plantilla, con su vista previa y su nombre", () => {
     pintar();
-    expect(screen.getByRole("heading", { name: "Boda clásica", level: 3 })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Boda clásica", level: 2 })).toBeTruthy();
     expect(screen.getByRole("img", { name: "Vista previa de la plantilla Boda clásica" })).toBeTruthy();
     expect(screen.getByText("2 resultados")).toBeTruthy();
   });
@@ -117,6 +117,6 @@ describe("paso 2 — Elige el punto de partida", () => {
   it("mientras carga pinta esqueletos, no una pantalla en blanco", () => {
     const { container } = pintar({ items: null });
     expect(container.querySelectorAll("[aria-busy='true']").length).toBeGreaterThan(0);
-    expect(screen.queryByRole("heading", { level: 3 })).toBeNull();
+    expect(screen.queryByRole("heading", { level: 2 })).toBeNull();
   });
 });

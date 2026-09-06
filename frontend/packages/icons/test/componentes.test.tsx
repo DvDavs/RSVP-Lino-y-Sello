@@ -27,9 +27,9 @@ describe("componentes generados", () => {
     expect(svg).toHaveAttribute("height", "48");
   });
 
-  it("tone=mono iguala --tono a currentColor (un solo trazo); duo (por defecto) usa el token suave", () => {
+  it("tone=mono deja --tono en transparent (dibujo de línea, sin segundo tono); duo usa el token suave", () => {
     const mono = render(<IconoCumpleanos tone="mono" />).container.querySelector("svg")!;
-    expect(mono.style.getPropertyValue("--tono")).toBe("currentColor");
+    expect(mono.style.getPropertyValue("--tono")).toBe("transparent");
     const duo = render(<IconoCumpleanos />).container.querySelector("svg")!;
     expect(duo.style.getPropertyValue("--tono")).toBe("var(--ui-primary-soft)");
   });

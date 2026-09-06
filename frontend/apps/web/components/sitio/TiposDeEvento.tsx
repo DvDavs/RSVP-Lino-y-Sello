@@ -5,8 +5,10 @@
 // parámetro se ignora sin daño si el asistente todavía no lo lee (`preguntas-abiertas.md`).
 //
 // Color por categoría (`11 §4.1`): cuadro de fondo `-soft` y trazo del `on-*-soft` de la MISMA
-// pareja verificada AA, con el icono en `tone="mono"` para que herede ese color exacto en vez del
-// relleno de dos tonos fijo del sistema.
+// pareja verificada AA, con el icono en `tone="mono"` para que el dibujo herede ese color exacto en
+// vez del relleno rosa fijo de `duo`. `mono` deja `--tono` en `transparent` (dibujo de línea): el
+// trazo es lo único que cambia de color, que es literalmente lo que pide `11 §4.1` («el dibujo y el
+// trazo no cambian»).
 import Link from "next/link";
 import {
   IconoBautizo,

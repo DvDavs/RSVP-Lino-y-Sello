@@ -136,20 +136,45 @@ describe("paso 1 → paso 2 (el cierre de UX-N-02)", () => {
     expect(screen.getByRole("radio", { name: /XV años/ }).getAttribute("aria-checked")).toBe("true");
   });
 
+  it("3C-UX G-02: `?tipo=xv-anos` — el slug REAL de la portada — deja de ignorarse", async () => {
+    // La portada enlaza `/editor?tipo=xv-anos` (`components/sitio/TiposDeEvento.tsx`); ninguno de
+    // sus siete slugs es un `EventKind`, así que el asistente los descartaba todos en silencio.
+    parametros = new URLSearchParams("tipo=xv-anos");
+    render(<AsistenteDeCreacion />);
+    await screen.findByRole("radiogroup", { name: "¿Qué vamos a celebrar?" });
+    expect(screen.getByRole("radio", { name: /XV años/ }).getAttribute("aria-checked")).toBe("true");
+  });
+
+  it("3C-UX G-02: con dos invitaciones libres, `?tipo=` elige la registrada con ESE tipo", async () => {
+    listarInvitaciones.mockResolvedValue([
+      INVITACION_SIN_PLANTILLA,
+      { id: 9, status: "paid", event: "XV años", plan: "Premium", date: "2027-09-01", time: "18:00" },
+    ]);
+    parametros = new URLSearchParams("tipo=xv-anos");
+    render(<AsistenteDeCreacion />);
+    await screen.findByRole("radiogroup", { name: "¿Qué vamos a celebrar?" });
+    await userEvent.click(screen.getByTestId("asistente-continuar"));
+    expect(push).toHaveBeenCalledWith(expect.stringContaining("inv=9"));
+    // Y no hay aviso de «está registrada como …»: la invitación y el tipo pedido coinciden.
+    expect(screen.queryByText(/está registrada como/)).toBeNull();
+  });
+
   it("al continuar, el catálogo se pide CON `eventKind` — el parámetro que faltaba (UX-N-02)", async () => {
     parametros = new URLSearchParams("tipo=quince");
     render(<AsistenteDeCreacion />);
     await screen.findByRole("radiogroup", { name: "¿Qué vamos a celebrar?" });
     await userEvent.click(screen.getByTestId("asistente-continuar"));
     expect(push).toHaveBeenCalledWith(expect.stringContaining("paso=plantilla"));
-    expect(push).toHaveBeenCalledWith(expect.stringContaining("tipo=quince"));
+    // 3C-UX B-19: en la URL viaja el slug en español, el MISMO que enlaza la portada, no el
+    // identificador interno `quince`. El lector sigue aceptando los dos.
+    expect(push).toHaveBeenCalledWith(expect.stringContaining("tipo=xv-anos"));
     expect(push).toHaveBeenCalledWith(expect.stringContaining("inv=7"));
 
     // Y el paso 2, con esa URL, solo trae las plantillas de ese tipo.
     render(<AsistenteDeCreacion />);
     await waitFor(() => expect(getCatalog).toHaveBeenCalledWith({ eventKind: "quince" }));
-    expect(await screen.findByRole("heading", { name: "XV Jardín", level: 3 })).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: "Boda clásica", level: 3 })).toBeNull();
+    expect(await screen.findByRole("heading", { name: "XV Jardín", level: 2 })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Boda clásica", level: 2 })).toBeNull();
   });
 
   it("si el tipo elegido no es el registrado, se avisa en vez de dejarlo pasar en silencio", async () => {
@@ -242,9 +267,23 @@ describe("paso 3 — los datos básicos", () => {
     render(<AsistenteDeCreacion />);
     await userEvent.type(await screen.findByLabelText("Novio"), "Luis");
     await userEvent.click(screen.getByTestId("asistente-continuar"));
-    expect((await screen.findByRole("alert")).textContent).toContain("Puedes continuar");
-    await userEvent.click(screen.getByRole("button", { name: "Lo lleno después" }));
+    // 3C-UX G-03: el aviso decía «Puedes continuar» y «Continuar» no continuaba. Ahora ofrece
+    // exactamente los dos botones que salen debajo.
+    expect((await screen.findByRole("alert")).textContent).toContain("sigue sin guardar");
+    expect(screen.getByRole("button", { name: "Volver a guardar" })).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: "Seguir sin guardar" }));
     expect(push).toHaveBeenCalledWith(expect.stringContaining("paso=listo"));
+  });
+
+  it("3C-UX G-03: un fallo de red lo dice y «Volver a guardar» reintenta de verdad", async () => {
+    postOperations.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+    render(<AsistenteDeCreacion />);
+    await userEvent.type(await screen.findByLabelText("Novio"), "Luis");
+    await userEvent.click(screen.getByTestId("asistente-continuar"));
+    expect((await screen.findByRole("alert")).textContent).toContain("No hay conexión");
+    await userEvent.click(screen.getByRole("button", { name: "Volver a guardar" }));
+    await waitFor(() => expect(push).toHaveBeenCalledWith(expect.stringContaining("paso=listo")));
+    expect(postOperations).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -254,7 +293,7 @@ describe("paso 4 — listo", () => {
     parametros = new URLSearchParams("paso=listo&tipo=wedding&inv=7&plantilla=boda-clasica");
     render(<AsistenteDeCreacion />);
     expect(await screen.findByRole("heading", { name: "Tu invitación ya tiene diseño", level: 1 })).toBeTruthy();
-    expect(screen.getByText("Boda · plantilla «boda-clasica»")).toBeTruthy();
+    expect(await screen.findByText("Boda · plantilla «Boda clásica»")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Abrir mi invitación" }).getAttribute("href")).toBe("/editor/7");
   });
 });
@@ -266,6 +305,28 @@ describe("estados sin salida", () => {
     expect(await screen.findByRole("heading", { name: "Todavía no tienes invitaciones" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Ver planes" }).getAttribute("href")).toBe("/ayuda#planes");
     expect(screen.queryByRole("radiogroup")).toBeNull();
+  });
+
+  it("3C-UX G-02: con TODAS las invitaciones ya diseñadas, el paso 1 explica y ofrece la salida", async () => {
+    listarInvitaciones.mockResolvedValue([INVITACION_SIN_PLANTILLA]);
+    getDocument.mockResolvedValue({
+      revision: 3,
+      composed: COMPUESTO,
+      publicToken: "pub_x",
+      publicUrl: "https://invitaciones.mx/i/pub_x",
+      activeRelease: { releaseId: 1, publishedAt: "2026-09-01T10:00:00Z", contentHash: "sha256:x", stale: false, staleReason: [] },
+    });
+    render(<AsistenteDeCreacion />);
+    // Ni la pregunta sin respuestas, ni el «Continuar» inhabilitado para siempre, ni el paso 1 de 4.
+    expect(await screen.findByRole("heading", { name: "Tu invitación ya tiene diseño", level: 1 })).toBeTruthy();
+    expect(screen.queryByRole("radiogroup")).toBeNull();
+    expect(screen.queryByTestId("asistente-continuar")).toBeNull();
+    expect(screen.queryByText("Paso 1 de 4")).toBeNull();
+    // Y la salida real: la invitación, su estado y su enlace público.
+    expect(screen.getByRole("link", { name: "Abrir en el editor" }).getAttribute("href")).toBe("/editor/7");
+    expect(screen.getByText("Publicada")).toBeTruthy();
+    expect(screen.getByText(/\/i\/pub_x$/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Ver como invitada" }).getAttribute("href")).toMatch(/\/i\/pub_x$/);
   });
 
   it("con el catálogo caído se avisa y se puede reintentar", async () => {

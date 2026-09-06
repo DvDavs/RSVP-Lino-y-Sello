@@ -35,3 +35,36 @@
 - **Cohorte de migración**: conjunto de plantillas legadas que comparten origen y tratamiento. Son cuatro, no una: reproducibles desde el repositorio, reconstruibles desde los `payload-template-*`, sin fila Flyway, y no reproducibles.
 - **Texto visible**: todo el texto que un invitado ve renderizado, de demostración incluido. Es la unidad de comparación de la verificación de migración: se compara íntegro y con igualdad exacta tras normalizar, sin umbrales difusos.
 - **Compuerta A1-A8**: las ocho comprobaciones que la fase 3 debe pasar antes de construir el editor, para confirmar que el lienzo en iframe sin `allow-same-origin` es viable (fuentes, imágenes, CSP, selección, medición, captura). Si falla, se activa la contingencia ya aprobada del origen dedicado.
+
+## Añadido en la fase 3-C (sistema de diseño e identidad visual)
+
+- **Token semántico**: variable CSS `--ui-<rol>` (`primary`, `surface`, `ink-muted`, `focus`…) que
+  resuelve a un color por su FUNCIÓN, no por su matiz — el mismo nombre cambia de hex entre paleta y
+  entre tema claro/oscuro, y ningún componente sabe cuál es. Se consume solo por la utilidad de
+  Tailwind del preset (`bg-ui-primary`, `text-ui-on-primary`…), nunca por un paso de escala
+  (`primary-600`) ni por un hex literal: un token sin rol es exactamente el hueco por donde se cuela
+  una identidad inconsistente (`contratos.md §13.2`, `diseno/11-sistema-de-diseno.md §1.3`).
+- **Voz tipográfica**: una de las tres familias del sistema con un papel fijo — `display` (Fraunces,
+  títulos y encabezados, nunca el cuerpo), `text` (Onest, cuerpo de lectura) y `label` (Red Hat Mono,
+  etiquetas en mayúsculas con tracking). Cada rol de tamaño (`display-2xl`…`label-sm`) pertenece a una
+  sola voz; mezclar la voz de cuerpo en un título es la regla que nunca se rompe (`11 §2.2`).
+- **Historia**: el objeto (`slug`, `nombre`, `familia`, `descripcion`, `variantes`, `estados?`) con el
+  que un componente de `@invitaciones/ui` se declara ante la galería `/design/componentes/[slug]`.
+  Vive junto al componente (`<Nombre>.historias.tsx`), se suma a mano al registro
+  (`packages/ui/src/historias/registro.ts`) y es lo que la regresión visual del proyecto Playwright
+  `design` captura, en claro y oscuro, a 390 y 1440 px (`contratos.md §13.4`).
+- **Vitrina**: contenedor de historia (`EscaparateSuperposicion`,
+  `packages/ui/src/historias/escaparate.tsx`) para un componente de superposición (`Dialog`, `Sheet`)
+  que la galería necesita mostrar ABIERTO. Monta el panel `modal={false}` dentro de una caja con
+  `contain: paint`, para que el `position: fixed` del panel se resuelva contra la ficha y no contra la
+  ventana, sin secuestrar el foco ni el `aria-hidden` de toda la página.
+- **Forma protagonista**: la única forma decorativa (`Rays`, `Blob`, `Seal`…) con papel principal en
+  un bloque o tarjeta; una segunda forma solo se admite en un tono `-soft`, con menos del 30 % del
+  área y sin tocar a la primera (`11 §3.4` R1). Es la regla que impide que la composición se vea
+  recargada al combinar la biblioteca de formas.
+- **Capa de compatibilidad**: bloque de `app/(chrome)/globals.css` (`@theme inline`, sección
+  «COMPATIBILIDAD FASE 3») que traduce nombres de utilidad viejos del chrome de la fase 3
+  (`bg-ui-bg`, `text-ui-ink-heading`, `font-ui-sans`, `text-ui-eyebrow`…) al valor real de un token
+  nuevo, para las pantallas que la fase 3-C todavía no había migrado. Es deuda intencional y
+  retirable, no un segundo sistema: un componente nuevo nunca escribe un nombre de esta lista
+  (`contratos.md §13.1`, antipatrón en `guias/identidad-visual.md §9`).

@@ -28,7 +28,7 @@ import {
   restoreRevision,
   setEvent,
 } from "./api-client.ts";
-import type { OperationBatchResponse, SetEventResponse } from "./api-types.ts";
+import type { ActiveReleaseSummary, OperationBatchResponse, SetEventResponse } from "./api-types.ts";
 import {
   classifySaveError,
   clearPending,
@@ -121,6 +121,20 @@ export interface EditorState {
   loadState: LoadState;
   loadError: string | null;
   publicToken: string | null;
+  /** `publicUrl` tal y como lo devuelve el servidor. El enlace que se comparte lo arma `lib/enlace-publico.ts`. */
+  publicUrl: string | null;
+  /**
+   * Release ACTIVO de la invitación, tal y como llega en `GET .../document` (`ActiveReleaseSummary`).
+   * G-06: sin esto el editor no sabía si la invitación estaba publicada, así que el enlace público
+   * solo existía dentro del diálogo que acababa de publicarla y desaparecía al cerrarlo.
+   */
+  activeRelease: ActiveReleaseSummary | null;
+  /**
+   * Revisión del documento en el momento en que se publicó (o en el que se cargó, si el servidor
+   * dice que el release está al día). Sirve para saber si hay cambios SIN publicar sin volver a
+   * preguntar al servidor en cada tecla.
+   */
+  revisionPublicada: number | null;
 
   // documento
   document: InvitationDocument | null;
@@ -184,6 +198,8 @@ export interface EditorActions {
   flushNow: () => void;
   resolveConflict: (mode: ConflictChoice) => Promise<void>;
   restoreRecovered: (aplicar: boolean) => void;
+  /** G-06 · lo que acaba de hacer `PublishDialog` (publicar, despublicar, rotar el enlace). */
+  setActiveRelease: (release: ActiveReleaseSummary | null, revisionPublicada?: number | null, publicToken?: string) => void;
   reset: () => void;
   /**
    * U-3 / I-06 — la clienta cambia la fecha de SU evento. No es una operación del documento: la
@@ -246,6 +262,9 @@ const ESTADO_INICIAL: EditorState = {
   loadState: "idle",
   loadError: null,
   publicToken: null,
+  publicUrl: null,
+  activeRelease: null,
+  revisionPublicada: null,
   document: null,
   revision: 0,
   composed: null,
@@ -680,6 +699,11 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
               s.themeSpec = leerThemeSpec(doc);
               s.templateVersion = { slug: doc.templateVersion.slug, version: doc.templateVersion.version };
               s.publicToken = doc.publicToken;
+              s.publicUrl = doc.publicUrl;
+              // El backend OMITE `activeRelease` cuando no hay release (no manda `null`): sin este
+              // `?? null` el estado guarda `undefined` y todo lo que compara contra `null` se equivoca.
+              s.activeRelease = doc.activeRelease ?? null;
+              s.revisionPublicada = doc.activeRelease?.documentRevision ?? null;
               s.loadState = "ready";
             });
             // §7.5 / §12.7: ¿había cambios sin confirmar de una sesión anterior?
@@ -703,7 +727,13 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
             }
             set((s) => {
               s.loadState = "error";
-              s.loadError = error instanceof Error ? error.message : String(error);
+              // U-9 otra vez (revisión de calidad visual del cierre de 3-C): un fallo de red es un
+              // `TypeError` cuyo `message` es «Failed to fetch», en inglés y sin arreglo posible por
+              // parte de quien lo lee. La pantalla del editor lo enseñaba tal cual como ÚNICO texto.
+              // Aquí ya se traduce, igual que en `PublishDialog`, `AsistenteAcceso` y
+              // `traducir-errores.ts`; el resto de errores conservan su mensaje del backend, que
+              // viene en es-MX.
+              s.loadError = error instanceof TypeError ? null : error instanceof Error ? error.message : String(error);
             });
           }
         },
@@ -730,6 +760,10 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
               s.themeSpec = leerThemeSpec(res);
               s.templateVersion = { slug, version };
               s.publicToken = res.publicToken;
+              s.publicUrl = res.publicUrl;
+              // `:choose-template` no habla de releases: lo que hubiera publicado deja de ser cierto.
+              s.activeRelease = null;
+              s.revisionPublicada = null;
               s.loadState = "ready";
               // §7.3: un cambio de plantilla VACÍA ambas pilas — las inversas apuntan a `blockId`
               // que la plantilla nueva no declara y darían `422 TPL_BLOCK_UNKNOWN` en bloque.
@@ -781,6 +815,14 @@ export function createEditorStore(depsParciales: Partial<StoreDeps> = {}) {
           } catch (error: unknown) {
             aviso("error", error instanceof Error ? error.message : "No pudimos restaurar esa versión.");
           }
+        },
+
+        setActiveRelease(release, revisionPublicada, publicToken): void {
+          set((s) => {
+            s.activeRelease = release;
+            if (revisionPublicada !== undefined) s.revisionPublicada = revisionPublicada;
+            if (publicToken !== undefined) s.publicToken = publicToken;
+          });
         },
 
         async cambiarFechaDelEvento(date: string): Promise<SetEventResponse> {

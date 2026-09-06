@@ -185,3 +185,122 @@ imagen: `ADR-3-i05b-01`.
 - **Un paquete que cambia de bytes** da `409 TPL_VERSION_HASH_MISMATCH` al re-registrarse, y **es el
   comportamiento correcto**: una versión publicada nunca se pisa. Para producción hay que subir la
   versión del paquete.
+
+## 13. Sistema de diseño (fase 3-C)
+
+Fuente: `diseno/11-sistema-de-diseno.md` (especificación a grado de implementación) y la guía de uso
+`guias/identidad-visual.md`. Ámbito: el **producto** (chrome del editor, web pública, acceso,
+catálogo, publicación, y cualquier módulo futuro). **Nunca** las plantillas de invitación
+(`packages/sections`, tokens `--inv-*`), que conservan su propio sistema. Paleta elegida:
+**Bugambilia** (ADR-3C-0-01..06, `propuesta`); tipografía: **Fraunces + Onest + Red Hat Mono**
+(mismas ADR). El cierre formal de estas ADR y del resto de la fase (aceptar/rechazar en este
+archivo) lo hace el orquestador, no este bloque.
+
+### 13.1 Paquetes y sus puntos de entrada
+- **`@invitaciones/tokens`**: `.` (barril TS: `paletas.ts`, `semantica.ts`, `contraste.ts`,
+  `tipografia.ts`, `espacio.ts`, `movimiento.ts`, `css.ts`, `oklch.ts`), `/tokens.css` →
+  `generated/tokens.css` (`:root {--ui-*}` y `[data-theme="dark"] {--ui-*}`, byte a byte lo que emite
+  `scripts/emit-css.ts` desde el TS — `test/css-generado.test.ts` lo compara, editar el CSS a mano se
+  pone rojo), `/tailwind.css` → `generated/tailwind.css` (`@theme inline`, **solo** roles semánticos:
+  `bg-ui-primary`, `text-ui-on-primary`, `ring-ui-focus`, `font-ui-display`, `text-ui-display-xl`…;
+  nunca un paso de escala como utilidad, `11 §8.2`). `pnpm run verify-contrast` rompe con **código 1**
+  si una de las 42 parejas baja de su umbral; engancha a `build`/`prepack`.
+- **`@invitaciones/ui`**: `.` (componentes + formas + ilustraciones + fuentes + metadatos de
+  historias, seguro para Server Components), `/shapes` (`Rays`, `Stripes`, `WaveDivider`, `Blob`,
+  `Triangle`, `RotatedSquare`, `Pill`, `Seal`, `ColorShadow`, `Image`, `Placeholder`, `Composition` +
+  la geometría determinista `blob()`/`sello()`/`rayos()`), `/historias` (registro completo con
+  `render()` — **solo** desde componentes cliente, ver antipatrón en `guias/identidad-visual.md §9`),
+  `/estilos.css` (fuentes autoalojadas + utilidades tipográficas + `shapes.css` +
+  `componentes.css`), `/componentes`, `/componentes/*`, `/fonts/preload.ts`, `/ilustraciones/*`.
+  Base accesible Radix; aspecto propio con `class-variance-authority`.
+- **`@invitaciones/icons`**: `.` (barril generado: 82 componentes `IconoNombre` PascalCase + `Icon`
+  genérico por `name`/`IconName` + `iconNames`). Fuente en `svg/*.svg` (retícula 24, margen 1,5,
+  trazo 1,75 redondeado, `fill="none"` en el trazo, segundo tono por `var(--tono)`); `scripts/
+  generar.ts` (sin `@svgr/core`, ADR-3C-3-01) valida y regenera `src/generated/*.tsx`, `src/index.ts`
+  e `inventario.json` — nunca a mano.
+- **Consumo en `apps/web`**: `app/(chrome)/globals.css` importa, en orden, `tailwindcss` →
+  `@invitaciones/tokens/tokens.css` → `@invitaciones/tokens/tailwind.css` →
+  `@invitaciones/ui/estilos.css`, más `@source "../../../../packages/ui/src"` (Tailwind 4 no mira
+  `node_modules`; sin esto, 28 de 51 utilidades `*-ui-*` del paquete no se generaban, hallazgo de la
+  revisión del bloque 2). **Capa de compatibilidad, en el mismo fichero, retirable**: puente de
+  nombres viejos (`bg-ui-bg`, `text-ui-ink-heading`, `font-ui-sans`, `text-ui-eyebrow`/`aux`/`body`/
+  `card`/`title`/`section`/`display`…) para las pantallas que la fase 3 no había migrado; los nombres
+  que ya existen en el preset nuevo con el mismo significado NO se redefinen ahí, ganan directo.
+
+### 13.2 Tokens semánticos — los 46 roles de color (`--ui-*`, `packages/tokens/src/semantica.ts` `ROLES_COLOR`)
+`surface`, `surface-raised`, `surface-alt` · `ink`, `ink-muted`, `ink-placeholder` · `border`,
+`divider` · `primary`, `on-primary`, `primary-hover`, `primary-soft`, `on-primary-soft`,
+`primary-bright`, `link` · `accent`, `on-accent`, `accent-soft`, `on-accent-soft` · `success`,
+`on-success`, `success-text`, `success-soft`, `on-success-soft` · `danger`, `on-danger`,
+`danger-text`, `danger-soft`, `on-danger-soft` · `warning`, `on-warning`, `warning-text`,
+`warning-soft`, `on-warning-soft` · `info`, `on-info`, `info-text`, `info-soft`, `on-info-soft` ·
+`focus` · `support-1`, `support-1-soft`, `support-1-deep` · `support-2`, `support-2-soft`,
+`support-2-deep`. Cada uno resuelve a un paso de escala distinto en claro y en oscuro (`11 §1.3`); el
+tema es un mapa completo (`data-theme="dark"` en `<html>` o cualquier ancestro), ningún componente
+sabe en qué tema está. Tokens no cromáticos: radios `control`/`card`/`media`/`hero`/`pill` (8/14/24/
+36/pill), sombras `1`/`2`/`color` (tintadas de cacao; la de color es `8px 8px 0 0 var(--ui-support-2)`
+y va una por vista, nunca mezclada con difusa), contenedor `--container-ui-page` (1200 px), tres voces
+tipográficas `font-ui-{display,text,label}` con 15 roles de tamaño (`display-2xl`…`label-sm`, cada
+uno con `line-height`/`letter-spacing`/`font-weight` como modificadores propios), duraciones y curvas
+con nombre (`--ui-dur-{1,2,3,4,respira}`, `--ease-ui-{out,in-out,spring,linear}`).
+
+### 13.3 Reglas duras y sus compuertas mecánicas
+| regla | compuerta |
+|---|---|
+| Cero emojis en interfaz/textos/iconos/docs de usuario | grep por code point de emoji sobre `frontend/**` (sin script dedicado; comando verificado en `guias/identidad-visual.md §8`) |
+| Cero hex sueltos fuera de `tokens/src/paletas.ts` | `grep -rn "#[0-9a-f]\{6\}"` sobre cada paquete |
+| `--ui-` nunca fuera de `app/(chrome)/**`; `--inv-` nunca dentro | `apps/web/test/tokens-no-leak.test.ts` (grep de cadenas); su gemelo en el sentido inverso, `packages/tokens/test/frontera.test.ts` |
+| 42 parejas de color con su umbral (4,5 texto normal · 3,0 gráfico: borde, foco, icono de acción) | `packages/tokens/scripts/verify-contrast.ts` — 3 paletas × 2 temas × 42 parejas = 252 filas, 240 con umbral, 0 fallos (`11 §1.6`, re-verificado por `3c-1`); rompe `build`/`prepack` con código 1; el anillo de foco nunca se mide contra `primary` porque lleva halo de 2 px de `surface`, así que esa pareja no existe por diseño |
+| Contraste sobre la **pila renderizada**, no sobre tokens | `apps/web/e2e/design-contraste.spec.ts` (galería) y `e2e/util/contraste.ts` reutilizado en `e2e/a11y-producto.spec.ts` (landing/acceso/editor reales); `axe` NO es compuerta de contraste (su `incomplete` no es un aprobado) |
+| a11y del producto | `e2e/design-axe.spec.ts` (galería) y `e2e/a11y-producto.spec.ts` (violations vacío de cualquier impacto sobre pantallas reales) |
+| Objetivo de toque ≥ 24 px, foco no obstruido | `e2e/design-objetivos.spec.ts` |
+| CSS generado, nunca editado a mano | `packages/tokens/test/css-generado.test.ts` (comparación byte a byte) |
+| Movimiento apagado con `prefers-reduced-motion` | utilidades de movimiento emitidas solo dentro de `@media (prefers-reduced-motion: no-preference)` |
+
+### 13.4 Galería `/design` y regresión visual en CI
+`apps/web/app/(chrome)/design/**`: índice, `/design/tokens` (paletas/semántica/tipografía/espacio/
+movimiento, conmutador claro-oscuro), `/design/tipografia`, `/design/formas`, `/design/iconos`
+(inventario con buscador), `/design/componentes/[slug]` (todas las variantes y estados de cada
+componente, con controles). Config Playwright aparte (`playwright.design.config.ts`, proyecto
+`design`, puerto 3133, **sin backend**: `next build && next start` puro) corre cuatro specs —
+`design.spec.ts` (regresión visual, `toHaveScreenshot` con `maxDiffPixelRatio: 0.001`, 390 y 1440,
+claro y oscuro, más medición de desborde de ficha y de recorte de vitrina de superposición),
+`design-contraste.spec.ts`, `design-axe.spec.ts`, `design-objetivos.spec.ts`. Referencias committeadas
+en `e2e/design.spec.ts-snapshots/`; se regeneran con `pnpm --filter web exec playwright test
+--config=playwright.design.config.ts --project=design --update-snapshots` (`handoffs/3c-b2-f3.md`).
+Un `Dialog`/`Sheet` de historia se expone dentro de `EscaparateSuperposicion`
+(`packages/ui/src/historias/escaparate.tsx`, `modal={false}`), nunca abierto suelto: modal real rompe
+`aria-hidden`, bloquea el conmutador de tema y tapa la página con `position: fixed`.
+
+### 13.5 Cifras finales del cierre (bloque 3, re-ejecutadas al final con el código ya arreglado)
+- **Web**: `pnpm run test`/`typecheck`/`lint`/`build`, 10/10 tareas cada gate — **517/517** pruebas
+  (64 ficheros, 77,16 % sentencias), `lint` 0 errores (1 aviso preexistente ajeno), `build` 39 páginas
+  (`handoffs/3c-8.md §1`, re-ejecutado sin cambio en `3c-8.md §3C-8b`).
+- **e2e** (`playwright test --project=chromium`, backend real): **70/70** en verde, incluidos los dos
+  presupuestos que habían quedado rojos (`handoffs/3c-8.md §3C-8b`; el estado intermedio, ya
+  superado, era 68/70 — `§1`).
+- **Galería `/design`** (proyecto Playwright `design`): **279/279** (`handoffs/3c-8.md §1`;
+  coincide con la doble corrida de la revisión del bloque 2, `tablero.md` fase 3-C fila b2-rev).
+- **`scripts/smoke.sh`**: **19/19 OK** (`handoffs/3c-8.md §1`).
+- **`e2e/a11y-producto.spec.ts`**: 0 violaciones de cualquier impacto (`handoffs/3c-8.md §2.4`).
+- **Presupuesto de JS** (`check-budget.mjs`, límite 150 KB gz salvo el editor): `/i/[publicToken]`
+  **142,0 KB** (margen 8,0) · `/` **148,2 KB** (margen 1,8 — ajustado, una foto o icono nuevo en la
+  portada puede volver a excederlo) · `/editor/[invitationId]` **419,3 KB** de 600 (margen ~181)
+  (`handoffs/3c-8.md §3C-8b`).
+- **LCP** (`measure-lcp.sh`, `devtools`, N=9, 0 descartadas): `/i/[publicToken]` mediana **1 998,4 ms**
+  (rango 1 975,4–2 013,7) → CUMPLE (< 2 500) · `/` mediana **1 761,9 ms** (rango 1 723,9–1 813,5) →
+  CUMPLE (`handoffs/3c-8.md §1`).
+- **Grep de cierre** (`frontend/**` emojis por code point; `apps/web` `lucide-react` y
+  `components/ui/`): **0, 0, 0** (`handoffs/3c-8.md §1`; `bitacora/3c-8.md` línea 135).
+- Cifras de bloque, para contexto (`tablero.md` fase 3-C): `verify-contrast` 252 filas/0 fallos
+  (3c-1) · iconos 179/179 pruebas, 82/82 nombres (3c-3a/b) · formas 111 pruebas, 100 % líneas (3c-4) ·
+  componentes F1 525 · F2 465 · F3 26 historias registradas (b2-f1/f2/f3) · web pública 435 pruebas,
+  `/` 148,1 KB gz antes del ajuste de 3C-8b (3c-5) · editor 388 pruebas, e2e propio 28/28 (3c-7) ·
+  catálogo/asistente 473 pruebas, e2e propio 32/32, `/editor` 326 KB gz (3c-6).
+
+### 13.6 Revisiones del cierre
+`**Calidad visual (`handoffs/3c-cv.md`): NO CUMPLÍA como llegó (4 altas de ejecución: iconos `mono` macizos, nombres truncados en el panel de secciones, `WizardProgress` partiendo palabras, error en inglés) y CUMPLE tras corregirlas en `1b978ba`; 51 capturas en tres viewports en `evidencia/fase-3c/cierre/visual/`; medias de composición listadas sin tocar.**` `**Verificación final sobre el HEAD del cierre (`0f68f4d`): e2e 79/79 contra backend real, galería 279/279, suite 10/10 (web 567), 51 capturas finales en `evidencia/fase-3c/cierre/final/`.** **Recorrido de UX sin instrucciones (`handoffs/3c-ux.md`): NO al llegar (dos muros antes del editor y seis graves) y corregido en el cierre por UX-A (asistente: paso 1 siempre con salida, guardado del lugar sin 422, `?tipo=` respetado; e2e 8/8), UX-B (editor: revisión previa con fechas coherentes y contenido de ejemplo visible, estado Publicada con Compartir, diálogo con scroll; e2e 11/11) y UX-C (sitio: contacto para contratar configurable por `NEXT_PUBLIC_CONTACTO_WHATSAPP`/`_CORREO`, mensajes reales de contraseña; e2e 14/14, portada 148,2 KB). Queda para el dueño el contacto real y si el contenido de ejemplo opcional debe bloquear la publicación.**` `**Adversarial de a11y y rendimiento (`handoffs/3c-adv.md`): CERRABLE tras A-01 (las fuentes daban 404 en los tres caminos de servicio; ahora se copian en el build de `web` con compuerta por HTTP) y A-02 (objetivos < 24 px en marca, enlace de salto y «Volver»); contraste 0 fallos en 9 pantallas con sabotaje que tumba la compuerta; LCP `/i` mediana 2 202 ms y `/` 1 845 ms bajo carga; e2e 71/71, galería 279/279, 2 585 pruebas; medias sin arreglar: foco en «Cómo llegar» (zona de plantillas), `contraste.ts` no ve capas hermanas, `CDN_ORIGIN` fijo al 6003.**` — al escribir esta sección
+(2026-09-06) los handoffs `memoria/handoffs/3c-cv.md`, `3c-ux.md` y `3c-adv.md` **no existen todavía**
+(`tablero.md` fase 3-C, fila «Cierre: revisiones, guía, memoria, handoff» = **pendiente**). El
+orquestador rellena este párrafo con sus hallazgos y cifras (contraste visual/UX, adversarial) citando
+el fichero de cada uno cuando los lance y cierre.

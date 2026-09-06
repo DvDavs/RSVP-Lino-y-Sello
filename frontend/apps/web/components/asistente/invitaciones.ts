@@ -20,6 +20,19 @@ export interface FilaInvitacion extends InvitacionDelCliente {
   readonly nombre: string | null;
   readonly eventKind: EventKind;
   readonly nivel: NivelDePlan;
+  /**
+   * ¿Está publicada AHORA MISMO? Es `activeRelease !== null` de `GET …/document` (contratos §4),
+   * la misma fuente que mira el diálogo de publicar: no se infiere del `status` del módulo antiguo.
+   */
+  readonly publicada: boolean;
+  /**
+   * `publicToken` y `publicUrl` de `GET …/document`, para armar el enlace de las invitadas con
+   * `lib/enlace-publico.ts` (el mismo que usa el diálogo de publicar: el servidor devuelve
+   * `http://localhost/i/…` en desarrollo y ese ayudante lo corrige con el origen real). Son `null`
+   * mientras no haya documento: sin documento no hay `public_token` que enseñar.
+   */
+  readonly publicToken: string | null;
+  readonly publicUrl: string | null;
 }
 
 export const MAX_INVITACIONES_CONSULTADAS = 12;
@@ -32,10 +45,27 @@ export async function cargarInvitaciones(): Promise<readonly FilaInvitacion[]> {
 }
 
 async function filaDe(inv: InvitacionDelCliente): Promise<FilaInvitacion> {
-  const comun = { ...inv, eventKind: eventKindDeNombre(inv.event), nivel: nivelDePlan(inv.plan) };
+  const comun = {
+    ...inv,
+    eventKind: eventKindDeNombre(inv.event),
+    nivel: nivelDePlan(inv.plan),
+    publicada: false,
+    publicToken: null,
+    publicUrl: null,
+  };
   try {
     const doc = await getDocument(inv.id);
-    return { ...comun, estado: "con-plantilla", nombre: doc.composed ? tituloDe(doc.composed) : null };
+    return {
+      ...comun,
+      estado: "con-plantilla",
+      nombre: doc.composed ? tituloDe(doc.composed) : null,
+      // 3C-UX G-06: el enlace público desaparecía al cerrar el panel de publicar y no había forma
+      // de recuperarlo sin volver a publicar. Ya viene en ESTA respuesta, que además es la que el
+      // asistente ya pedía para saber si la invitación tiene documento: cero peticiones nuevas.
+      publicada: doc.activeRelease !== null && doc.activeRelease !== undefined,
+      publicToken: doc.publicToken ?? null,
+      publicUrl: doc.publicUrl ?? null,
+    };
   } catch (error: unknown) {
     if (error instanceof ApiError && error.code === "TPL_DOCUMENT_NOT_STARTED") {
       return { ...comun, estado: "sin-plantilla", nombre: null };
@@ -58,6 +88,10 @@ export function sinPlantilla(filas: readonly FilaInvitacion[]): readonly FilaInv
  * A cuál se le aplica la plantilla: la que venga por la URL si sigue siendo válida, si no la
  * primera sin plantilla. `null` cuando no hay ninguna disponible.
  *
+ * `tipoPreferido` es el `?tipo=` de la portada (3C-UX G-02, punto 3): si hay una invitación libre
+ * registrada con ESE tipo, es la que se usa; si no la hay, se sigue con la primera libre y la
+ * pantalla lo explica con «Tu invitación está registrada como …» en vez de ignorar el parámetro.
+ *
  * `incluirConPlantilla` es el caso de los pasos 3 y 4: en cuanto el asistente aplica la plantilla,
  * ESA invitación deja de estar «sin plantilla» — pero sigue siendo la del asistente. Sin esta
  * puerta, recargar el paso 3 dejaba la pantalla sin invitación objetivo y el guardado se caía en
@@ -68,6 +102,7 @@ export function invitacionObjetivo(
   filas: readonly FilaInvitacion[],
   preferida: number | null,
   incluirConPlantilla = false,
+  tipoPreferido: EventKind | null = null,
 ): FilaInvitacion | null {
   const disponibles = sinPlantilla(filas);
   if (preferida !== null) {
@@ -77,6 +112,10 @@ export function invitacionObjetivo(
       const yaEmpezada = filas.find((f) => f.id === preferida && f.estado === "con-plantilla");
       if (yaEmpezada) return yaEmpezada;
     }
+  }
+  if (tipoPreferido !== null) {
+    const delTipo = disponibles.find((f) => f.eventKind === tipoPreferido);
+    if (delTipo) return delTipo;
   }
   return disponibles[0] ?? null;
 }

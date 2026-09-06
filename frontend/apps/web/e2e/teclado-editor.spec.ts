@@ -62,7 +62,12 @@ test("E-10a · Tab hacia adelante por el editor: nunca se pierde ni se atasca el
   const visitados = new Set<string>();
   let anterior: string | null = null;
   let repeticionesSeguidas = 0;
-  const PULSACIONES = 60; // de sobra para agotar el *chrome*: cabecera + 12 filas + apariencia.
+  // 90, no 60: desde la fase 3-C cada fila de sección tiene cuatro paradas (nombre, reordenar,
+  // mostrar/ocultar y más opciones: ADR-3C-7-01) y, con la invitación ya publicada (estado que E-01
+  // deja en la misma siembra), la barra suma «Compartir» y «Volver a publicar». Con 60 el recorrido
+  // se quedaba a dos pulsaciones del lienzo sin ninguna trampa: la comprobación de foco atascado de
+  // abajo es la que vigila las trampas, y sigue igual.
+  const PULSACIONES = 90;
   let llegoAlLienzo = false;
   for (let i = 0; i < PULSACIONES; i++) {
     await page.keyboard.press("Tab");

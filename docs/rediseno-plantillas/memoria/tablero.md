@@ -127,11 +127,14 @@ suite completa tras cada merge; commit y push por bloque.
 | 2 · F2 superficies y navegación (Card, Tabs, Dialog, Sheet, Tooltip, Toast, Badge, Avatar, Breadcrumb, WizardProgress, Stepper, ProgressRing) | b2-f2 | Sonnet | **aceptada** (`4ea8d00`) | 465 pruebas; el merge dejó el build rojo por el registro en el barril raíz, corregido en `8f37f2a` |
 | 2 · F3 galería `/design/componentes`, EmptyState, Skeleton, Image, regresión visual/contraste/axe sin backend | b2-f3 | Sonnet | **aceptada** (`f128a74`) | registro reconstruido con 26 historias y `metadatos.ts` generado desde el registro evaluado |
 | 2 · revisión de coherencia y a11y | b2-rev | Opus | **ACEPTAR** con correcciones | 15 fallos → 0: Tailwind sin `@source` de `packages/ui` (28 de 51 utilidades no se generaban), `accent` secuestrada (2,57:1 → 7,6:1), historias de superposición; `design` 279/279 dos veces y re-ejecutado por el orquestador |
-| 3 · 3C-5 web pública y acceso (`/`, `/acceso` en tres pasos, `/ayuda`, 404, errores, `components/sitio`) | 3c-5 | Opus | integrada (`5152f37`), pendiente e2e de 3C-8 | 435 pruebas web, build, `check-budget` `/` 148,1 KB gz, galería 279/279 intacta; capturas enviadas al dueño. Se cortó por límite de uso y cerró con handoff parcial; no hizo falta relevo |
-| 3 · 3C-7 chrome del editor y publicación | 3c-7 | Opus | integrada (`3c510f7`), pendiente e2e de 3C-8 | web 388/388, e2e del editor 28/28 contra backend real en su worktree, editor 395,8 KB gz; shadcn antiguos borrados salvo el shim de `button.tsx` |
-| 3 · 3C-6 catálogo y asistente de creación | 3c-6 → relevo | Opus | en curso (handoff parcial por contexto > 300k) | |
-| 3 · 3C-8 e2e, axe, presupuestos y LCP | | Sonnet + revisor | pendiente | |
-| Cierre: revisiones, guía, memoria, handoff | | | pendiente | |
+| 3 · 3C-5 web pública y acceso (`/`, `/acceso` en tres pasos, `/ayuda`, 404, errores, `components/sitio`) | 3c-5 | Opus | **aceptada** (`5152f37`) | 435 pruebas web, build, `check-budget` `/` 148,1 KB gz, galería 279/279 intacta; capturas enviadas al dueño. Se cortó por límite de uso y cerró con handoff parcial; no hizo falta relevo |
+| 3 · 3C-7 chrome del editor y publicación | 3c-7 | Opus | **aceptada** (`3c510f7`) | web 388/388, e2e del editor 28/28 contra backend real en su worktree, editor 395,8 KB gz; shadcn antiguos borrados salvo el shim de `button.tsx` |
+| 3 · 3C-6 catálogo y asistente de creación (`/editor` en 4 pasos, filtro por `eventKind`, cierra UX-N-02) | 3c-6 | Opus | integrada (`563d42e`) | 473 pruebas web, Playwright 32/32 contra backend real en su worktree, `/editor` 326 KB gz; terminó completo pese al corte por límite de uso |
+| 3 · 3C-8 e2e, axe, presupuestos y LCP (+ 3C-8b 404 raíz sin JS de cliente) | 3c-8, 3c-8b | Sonnet | **aceptada** | pasada completa sobre la rama integrada: e2e 70/70, galería 279/279, smoke 19/19, `a11y-producto` 0 violaciones, LCP N=9 `/i` mediana 1 998 ms (1 975–2 014) y `/` 1 762 ms (1 724–1 814), presupuestos `/i` 142,0 KB · `/` 148,2 KB · editor 419 KB gz; greps emoji/lucide/shadcn 0/0/0 |
+| Cierre · guía de 15 minutos, `imagenes-pendientes.md`, `contratos §13`, glosario | 3c-guia | Sonnet | **aceptada** (`a61053b`) | ejemplos de código verificados con typecheck sobre un fichero temporal; 0 emojis |
+| Cierre · revisión de calidad visual (3 viewports, 18 pantallas, 51 capturas) | 3c-cv | Opus | **CUMPLE** tras 4 altas corregidas (`1b978ba`) | iconos `mono` macizos (82 regenerados), panel de secciones, `WizardProgress`, error en inglés; galería 279/279 con referencias regeneradas; e2e 70/70 |
+| Cierre · recorrido de UX sin instrucciones (móvil y escritorio, 64 capturas) | 3c-ux → UX-A/B/C | Opus → Opus + relevos Sonnet | **NO al llegar** (6 graves) → corregidas | G-01 contacto configurable (UX-C, `70e58ca`), G-02/G-03/G-06b asistente (UX-A, `b27297b`), G-04/G-05/G-06a editor (UX-B, `a330081`); relevos Sonnet con encargos mínimos tras el límite de uso y el corte de contexto; cierre en `0f68f4d`: e2e 79/79, galería 279/279 |
+| Cierre · adversarial de a11y y rendimiento | 3c-adv | Opus | **CERRABLE** tras A-01/A-02 (`ece4069`) | fuentes daban 404 en los tres caminos (ahora copiadas en el build de `web` con compuerta HTTP); objetivos < 24 px en marca, salto y volver; contraste 0 fallos en 9 pantallas con sabotaje; 2 585 pruebas, e2e 71/71 |
 
 ## Fase 4 — plantillas y kit de autor (2026-09-06, en curso)
 
@@ -159,3 +162,20 @@ esqueleto, el kit y las plantillas convertidas correctas, limpias y accesibles.
 | 2 · 4-4 conversión de las 9 plantillas legadas (3 cohortes) | | Sonnet ×3 + revisor Opus | pendiente | |
 | 2 · 4-5 plantilla nueva sólo con el kit, cronometrada | | Sonnet ajeno al kit | pendiente | |
 | Cierre: revisión adversarial, merge de 3-C, suite completa, memoria | | Opus | pendiente | |
+
+### Decisión del dueño D-01 recibida a mitad de la fase (2026-09-06)
+
+`memoria/decisiones-dueno.md`: **no hay clientes ni plantillas existentes que migrar**. La **fase 5
+de migración queda cancelada** y la conversión de las 9 plantillas legadas pierde su motivo de
+negocio. Cuando llegó la decisión, **4-2 y 4-4 ya estaban terminados, verificados e integrados y en
+verde**: cancelarlos no ahorraba trabajo, lo deshacía. El dueño, con ese dato delante, decidió
+**dejarlas y resolver al cerrar la fase**; la revisión adversarial y el registro las cubren mientras
+tanto. Del resto de decisiones (marca **Lino & Sello**, correos, WhatsApp, Stripe, imágenes por IA,
+tema oscuro aplazado, hoja de ruta nueva y el levantamiento de las prohibiciones sobre `auth`,
+`guests`, `admin` y pagos) esta fase **sólo toma nota**: son de la siguiente.
+
+| Bloque | Agente | Modelo | Estado | Verificación del orquestador |
+|---|---|---|---|---|
+| 1 · 4-1B kit: `preview` (Vite, dos anchos, recarga al guardar) y `capturas` (3 viewports) | 4-1b | Opus | **aceptada** | capturas reales de una convertida y de un andamio, enviadas al dueño; 143 pruebas, 95,58 % líneas. Encontró dos rojos ajenos a su trabajo, uno de ellos serio |
+| 1 · 4-6 tipografías: las 9 convertidas declaraban familias que el producto no autoaloja | 4-6 | Opus | **aceptada** | regresión que introdujeron nuestras conversiones: `fuentes-autoalojadas` 34 rojas de 60 → **564/564**. Remapeo a las 4 autoalojadas con criterio escrito; `check` gana `TPL_FONT_NOT_SELF_HOSTED` con la lista **derivada** de `publico.css`. Me cazó unos marcadores de conflicto que dejé sin resolver en `decisiones.md` |
+

@@ -202,10 +202,17 @@ test("E-01 · elegir plantilla → editar textos y fotos → cambiar paleta → 
     await expect(page.getByTestId("abrir-publicar")).toBeEnabled({ timeout: 10_000 });
     await page.getByTestId("abrir-publicar").click();
     await expect(page.getByTestId("publish-dialog")).toBeVisible();
-    await expect(page.getByText(/todo listo para publicar/i)).toBeVisible({ timeout: 10_000 });
+    // 3C-UX-B (G-04/G-05, `publicar.spec.ts` "G-04 + G-05"): esta invitación solo tuvo cuatro
+    // bloques editados (título, subtítulo, foto, novios) — el resto de las secciones sigue con
+    // contenido de ejemplo, así que la revisión YA NO dice «Todo listo para publicar»: enumera los
+    // avisos (no bloqueantes) y el botón sigue habilitado porque ninguno de ellos bloquea (`03 §6`).
+    await expect(page.getByText(/todo listo para publicar/i)).toHaveCount(0);
+    await expect(page.getByTestId("lista-ejemplos")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId("resumen-avisos")).toContainText(/sin terminar/i);
     await page.screenshot({ path: `${EVIDENCIA}06-publicar.png` });
 
     await expect(page.getByTestId("confirmar-publicar")).toBeEnabled();
+    await expect(page.getByTestId("confirmar-publicar")).toHaveText(/de todos modos/i);
     await page.getByTestId("confirmar-publicar").click();
     await expect(page.getByTestId("enlace-publicado")).toBeVisible({ timeout: 15_000 });
     const enlace = await page.getByTestId("enlace-publicado").textContent();

@@ -1,0 +1,10 @@
+=== grep emoji por code point (frontend/**, excluye node_modules/.next/generated/.turbo/coverage) ===
+(coincidencias: 0)
+
+=== grep lucide-react en apps/web (código) ===
+(coincidencias: 0)
+=== grep lucide en apps/web/package.json ===
+(coincidencias: 0)
+
+=== grep components/ui/ (antiguos) en apps/web ===
+(coincidencias: 0)
