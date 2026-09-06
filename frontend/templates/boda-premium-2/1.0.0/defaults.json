@@ -1,0 +1,630 @@
+{
+  "templateSlug": "boda-premium-2",
+  "templateVersion": "1.0.0",
+  "content": {
+    "amenities.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "F8P62FZZT1VYT0ZPC49XP7QZRP",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "MERCH"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Algo espectacular con familia y amigos."
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "C8WVWDV02TNKZ2224RQJ1DSKX2",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "SHOW"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Algo espectacular con familia y amigos."
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "SRRWSDFJVSXZY6BD7PRMDPW6XV",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "CABINA DE FOTOS"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Algo espectacular con familia y amigos."
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "9SX3MDR4REB4RB7HPHQNB2EWGN",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "TATOO BAR"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Algo espectacular con familia y amigos."
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "amenities.title": {
+      "kind": "text",
+      "value": "AMENIDADES"
+    },
+    "couple.bride": {
+      "kind": "person",
+      "name": "Camila Estrada"
+    },
+    "couple.brideText": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Mi amor, no encuentro las palabras adecuadas para expresar el gran amor que siento por ti."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "couple.groom": {
+      "kind": "person",
+      "name": "Antonio Barrita"
+    },
+    "couple.groomText": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Ante Dios y ante todos nuestros amigos y familiares, deseo que el mundo se entere que te tomo como esposa, para amarte, cuidarte y respetarte por siempre."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "couple.heading": {
+      "kind": "text",
+      "value": "RESERVA LA FECHA"
+    },
+    "couple.message": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Mi amor, no encuentro las palabras adecuadas..."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "cover.buttonLabel": {
+      "kind": "text",
+      "value": "Save the date"
+    },
+    "cover.title": {
+      "kind": "text",
+      "value": "Sarah & Alan"
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "RX41ZJ90JQ8SNKH8ZQEX4EJX49",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "EllOS"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje formal Camisa manga larga Corbata o corbatín Zapatos"
+            }
+          }
+        },
+        {
+          "itemId": "TTB53MY9YMAETFQ9DHJKB4A9FV",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "EllAS"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo Bolso pequeño Accesorios brillantes Tacones."
+            }
+          }
+        },
+        {
+          "itemId": "GRY9AJHHPQX4CKVHDNKRR3H2B2",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "ELLAS"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo Bolso pequeño Accesorios brillantes Tacones."
+            }
+          }
+        },
+        {
+          "itemId": "BQYVPNM58TM9Z6CR6EJC3AKT0F",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "ELLOS"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje formal Camisa manga larga Corbata o corbatín Zapatos."
+            }
+          }
+        }
+      ]
+    },
+    "dressCode.title": {
+      "kind": "text",
+      "value": "CÓDIGO DE VESTIMENTA"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "W4CVAG2MBA1BQGQRVSW30PJHH0",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "CEREMONIA RELIGIOSA"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-12-17T16:30",
+              "end": "2026-12-17T17:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "TEMPLO SANTO DOMINGO DE GUZMÁN",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "8877JN4H2D1EGGDDT0T6XP9CSY",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "BRINDIS DE RECEPCIÓN"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-12-17T19:00",
+              "end": "2026-12-17T19:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "TEMPLO SANTO DOMINGO DE GUZMÁN",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        }
+      ]
+    },
+    "event.locationNote": {
+      "kind": "text",
+      "value": "Templo Santo Domingo de Guzmán"
+    },
+    "event.title": {
+      "kind": "text",
+      "value": "NUESTRO ITINERARIO"
+    },
+    "family.intro": {
+      "kind": "listText",
+      "items": [
+        "Hay días en la vida que son especiales por sí solos. Compartirlos con las personas que quieres lo convierte en inolvidables.",
+        "Gracias por sus consejos y amor incondicional que nos han permitido llegar a este momento de nuestras vidas y poder honrarlos de esta manera."
+      ]
+    },
+    "family.people": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "BWHKTZ6XSTPXZ1FB0B5WERCNGC",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Martín Barrita y María Rocha Luis"
+            },
+            "label": {
+              "kind": "text",
+              "value": "PADRES DEL NOVIO"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "5V06AJF5Q4MVBS4QPE28B8AY0G",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Raul Estrada Santiago y Teresa Lopez"
+            },
+            "label": {
+              "kind": "text",
+              "value": "PADRES DE LA NOVIA"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.title": {
+      "kind": "text",
+      "value": "TE ESPERAMOS"
+    },
+    "footer.musicEnabled": {
+      "kind": "boolean",
+      "value": true
+    },
+    "footer.note": {
+      "kind": "text",
+      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+    },
+    "gallery.hashtags": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "PWD0SJQKMZANWQRX102GN90ZVQ",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#Sarah&Alan"
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.facebook.com/hashtag/Sarah&Alan"
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "facebook"
+            }
+          }
+        },
+        {
+          "itemId": "HGQH7PS6SZZ7QFJWXJPJ20K76W",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#Sarah&Alan"
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.instagram.com/explore/tags/Sarah&Alan"
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "instagram"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.intro": {
+      "kind": "text",
+      "value": "NO TE OLVIDES DE LAS FOTOS"
+    },
+    "gallery.title": {
+      "kind": "text",
+      "value": "GALERÍA DE FOTOS"
+    },
+    "gifts.options": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "GFP7W1WDGYAAXPC9ZKC6J3W592",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "LLUVIAS DE SOBRES"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "para quienes deseen sumar un gesto de amor."
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "WX1FS176YJ42VH3KSYV7ACSHW3",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "DEPÓSITO O TRANSFERENCIA"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Banco: SANTANDER",
+                "Titular: KARLA ZARATE CRUZ",
+                "Cuenta CLABE: 014610606106246881",
+                "Número de tarjeta: 60610624688"
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "VKY61EVQC7M4K9NHY04BVYJDKD",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "digital"
+            },
+            "title": {
+              "kind": "text",
+              "value": "MESA LIVERPOOL"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Número de evento 50355602"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "gifts.title": {
+      "kind": "text",
+      "value": "MESA DE REGALOS"
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Boda sin niños, agradecemos su comprensión."
+    },
+    "rsvp.title": {
+      "kind": "text",
+      "value": "CONFIRMA TU ASISTENCIA"
+    },
+    "story.milestones": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "X9AYW9NF7EV3CEW7W83H5GGNRG",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "NOVIAZGO"
+            },
+            "date": {
+              "kind": "date",
+              "value": "2020-05-10"
+            },
+            "body": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Todo comenzó con una mirada que se sintió como hogar. Sin buscarlo, se encontraron y desde entonces, el tiempo tuvo otro ritmo."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "itemId": "C2Q8VJR4W4F4T47ZTXKA1XCWPE",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "PROPUESTA DE MATRIMONIO"
+            },
+            "date": {
+              "kind": "date",
+              "value": "2022-02-14"
+            },
+            "body": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Llegó el momento más esperado. Con el corazón en la mano y los ojos llenos de amor, le pidió que fuera suya para siempre."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "itemId": "WEM44Y8TDJSQKV312CXKK78KZF",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "PEDIDA DE MANO"
+            },
+            "date": {
+              "kind": "date",
+              "value": "2023-06-01"
+            },
+            "body": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Rodeados de familia y amigos, sellaron su promesa de amor ante todos, dando inicio a una nueva etapa llena de ilusión."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "itemId": "QCHT7QKKV72FG7C7EG2DQJ2X79",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "PROPUESTA DE MATRIMONIO"
+            },
+            "date": {
+              "kind": "date",
+              "value": "2022-02-14"
+            },
+            "body": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Llegó el momento más esperado. Con el corazón en la mano y los ojos llenos de amor, le pidió que fuera suya para siempre."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "story.title": {
+      "kind": "text",
+      "value": "NUESTRA HISTORIA"
+    },
+    "suggestions.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "H2Y18RXH206VDK5N0N6FR4WRHQ",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "TAXIS"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Te sugerimos esta estación de taxis."
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "XJT62EY7K8YM73VWSDY47HZKCD",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "SALÓN DE BELLEZA"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "El salón con la mejor recomendación."
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "CKH3A5P85JNFRWZJ12DRWTWX1E",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "HOTEL"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Hospedate con tranquilidad y seguridad."
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "N2XSBNY683P378PNXRYJ8044XG",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "RENTA DE AUTOS"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Mejora el traslado."
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "suggestions.title": {
+      "kind": "text",
+      "value": "RECOMENDACIONES"
+    }
+  }
+}

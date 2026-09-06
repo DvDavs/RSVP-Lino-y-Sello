@@ -1,0 +1,44 @@
+{
+  "palettes": [
+    {
+      "id": "verde",
+      "name": {
+        "es-MX": "Verde"
+      },
+      "tokens": {
+        "bg": "#FFFFFF",
+        "surface": "#FFFFFF",
+        "ink": "#2B2B2B",
+        "accent": "#737764",
+        "accentInk": "#FFFFFF",
+        "muted": "#74766D"
+      }
+    }
+  ],
+  "fontSets": [
+    {
+      "id": "playfair-display-poppins",
+      "name": {
+        "es-MX": "Playfair Display y Poppins"
+      },
+      "heading": {
+        "family": "Playfair Display",
+        "weights": [
+          400,
+          700
+        ],
+        "source": "google"
+      },
+      "body": {
+        "family": "Poppins",
+        "weights": [
+          400,
+          600
+        ],
+        "source": "google"
+      }
+    }
+  ],
+  "defaultPaletteId": "verde",
+  "defaultFontSetId": "playfair-display-poppins"
+}
