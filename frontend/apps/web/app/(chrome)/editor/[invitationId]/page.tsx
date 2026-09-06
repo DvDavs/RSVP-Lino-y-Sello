@@ -18,7 +18,7 @@ import { IconoAtras, IconoAviso, IconoCerrar, IconoError, IconoInfo, IconoVistaP
 import { BlockForm } from "@/components/editor/BlockForm";
 import { CanvasFrame } from "@/components/editor/CanvasFrame";
 import { ConflictDialog } from "@/components/editor/ConflictDialog";
-import { PublishDialog } from "@/components/editor/PublishDialog";
+import { InsigniaDePublicacion, PublishDialog } from "@/components/editor/PublishDialog";
 import { SaveIndicator } from "@/components/editor/SaveIndicator";
 import { SectionList } from "@/components/editor/SectionList";
 import { ThemePicker } from "@/components/editor/ThemePicker";
@@ -161,6 +161,16 @@ export default function PaginaEditorInvitacion() {
     };
   }, []);
 
+  /**
+   * M-09 (`bitacora/3c-ux.md §4`) · en el teléfono, «Completar» / «Editar» de la revisión previa a
+   * publicar abrían el panel del bloque… con la pestaña todavía en «Vista previa», así que para la
+   * clienta el botón «no hacía nada». Cualquier apertura de panel que NO sea la lista de secciones
+   * trae de vuelta la pestaña de edición, que es donde está lo que se acaba de abrir.
+   */
+  useEffect(() => {
+    if (panel !== "sections") setPestana("editar");
+  }, [panel, selection]);
+
   if (loadState === "loading" || loadState === "idle") {
     return (
       <p role="status" aria-live="polite" className="p-8 text-md text-ui-ink-muted">
@@ -253,9 +263,13 @@ export default function PaginaEditorInvitacion() {
               {es_MX.editor.lienzo.irAPreview}
             </a>
           </Button>
-          <PublishDialog invitationId={invitationId} />
+          <PublishDialog invitationId={invitationId} manifest={manifest} />
         </div>
         <div className="order-3 flex w-full min-w-0 flex-wrap items-center gap-3 ed:order-2 ed:w-auto ed:flex-nowrap">
+          {/* G-06 · en el teléfono la insignia «Publicada» baja a la segunda fila: a 390 px no caben
+              junto al nombre de la invitación la insignia y los dos botones de publicación. Es texto,
+              no un control: la instancia de escritorio y esta no duplican ningún diálogo. */}
+          <InsigniaDePublicacion className="shrink-0 ed:hidden" />
           <UndoRedoBar />
           {/* El conmutador «Escritorio / Móvil» solo cambia el ancho del `<iframe>` de la vista
               previa: en un teléfono de 390 px no significa nada y roba sitio. */}

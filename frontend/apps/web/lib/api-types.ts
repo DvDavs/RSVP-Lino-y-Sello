@@ -64,6 +64,8 @@ export interface ChooseTemplateResponse extends DocumentEnvelope {
 export interface ActiveReleaseSummary {
   releaseId: number;
   publishedAt: string;
+  /** Revisión del documento con la que se publicó (verificado contra el backend real en 3C-UX-B). */
+  documentRevision: number;
   contentHash: string;
   stale: boolean;
   staleReason: string[];

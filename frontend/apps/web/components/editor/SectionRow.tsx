@@ -15,7 +15,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { ComponentType } from "react";
 import { Badge, Switch } from "@invitaciones/ui";
-import { IconoArrastrar, type IconProps } from "@invitaciones/icons";
+import { IconoArrastrar, IconoCandado, type IconProps } from "@invitaciones/icons";
 import { MenuDeFila, opcionesDeReordenar } from "./MenuDeFila.tsx";
 import { es_MX } from "@/lib/i18n.ts";
 
@@ -112,9 +112,19 @@ export function SectionRow({
       ) : null}
 
       {fila.required ? (
-        <Badge tone="neutro" className="pointer-events-none relative z-10 shrink-0">
-          {es_MX.editor.seccion.siempreVisible}
-        </Badge>
+        /* M-11 (`bitacora/3c-ux.md §4`) · a 390 px la insignia «Siempre visible» se quedaba el sitio
+           del nombre y las secciones salían truncadas («La quinc…», «Confirma…»). Debajo de `sm` el
+           estado lo lleva el candado —el mismo glifo que marca los campos de solo lectura— con su
+           texto para lectores de pantalla; a partir de `sm` vuelve la insignia entera. */
+        <>
+          <span className="pointer-events-none relative z-10 shrink-0 text-ui-ink-muted sm:hidden">
+            <IconoCandado size={18} tone="mono" />
+            <span className="sr-only">{es_MX.editor.seccion.siempreVisible}</span>
+          </span>
+          <Badge tone="neutro" className="pointer-events-none relative z-10 hidden shrink-0 sm:inline-flex">
+            {es_MX.editor.seccion.siempreVisible}
+          </Badge>
+        </>
       ) : (
         <Switch
           checked={fila.visible}

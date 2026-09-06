@@ -74,3 +74,14 @@ Pruebas ajustadas: `PasoTipoEvento.test.tsx:48`, `AsistenteDeCreacion.test.tsx:2
 ## 6. Qué falta
 Foto de más de 8 MB y RSVP del invitado: no probados, se acabó el presupuesto de contexto. Todo lo
 demás del encargo está recorrido en móvil y en escritorio.
+
+## Correcciones UX-B
+G-04, G-05 y G-06 quedaron cerradas con pruebas (`PublishDialog.test.tsx`, `coherencia-fechas.ts`,
+`contenido-de-ejemplo.ts` nuevo) y verificadas contra backend real: 533/533 unitarias, typecheck
+limpio, 11/11 en `publicar.spec.ts` + `cambiar-fecha.spec.ts` + `editor-nucleo.spec.ts`. Además del
+relevo, un bug real (no solo de test): con el aviso de fechas (G-04) y la lista de ejemplo (G-05) a
+la vez, el `Dialog` (`packages/ui`, sin `max-height` ni `overflow`) deja el botón «Publicar» fuera
+del viewport e inalcanzable — cualquier clienta con bastante contenido de ejemplo se habría topado
+con lo mismo. Corregido acotando el contenido del diálogo (`max-h-[60vh] overflow-y-auto`,
+`PublishDialog.tsx`), mismo patrón que `ConflictDialog.tsx`. Detalle: `bitacora/3c-ux-b.md`.
+P-3C-UXB-1 (¿bloquear el contenido de ejemplo opcional?) sigue abierta en `preguntas-abiertas.md`.

@@ -532,10 +532,43 @@ export const es_MX = {
       yaSeVe: "Tu invitación ya se puede ver en internet.",
       tardaUnosMinutos:
         "Tu invitación quedó publicada. El enlace de tus invitados puede tardar unos minutos en mostrar esta versión.",
-      // U-4: dos fechas distintas en la misma invitación.
-      avisoFechasDistintas: (portada: string, itinerario: string) =>
-        `La portada dice ${portada} y el primer momento del itinerario dice ${itinerario}. Tus invitados leerán la portada.`,
+      // U-4 / G-04: dos fechas distintas en la misma invitación. Desde 3C-UX-B el aviso mira TAMBIÉN
+      // el itinerario de ejemplo, que es el que se publicó con dos fechas distintas y un «Todo listo».
+      avisoFechasDistintas: (evento: string, itinerario: string) =>
+        `Tu evento es el ${evento}, pero el itinerario que verán tus invitados dice ${itinerario}.`,
+      avisoFechasDeEjemplo: (evento: string, itinerario: string) =>
+        `Tu evento es el ${evento}, pero el itinerario sigue con el horario de ejemplo (${itinerario}) y es el que verán tus invitados.`,
+      usarLaFechaDelEvento: "Usar la fecha del evento en el itinerario",
+      aplicandoFechas: "Aplicando…",
+      fechasAplicadas: "El itinerario ya usa la fecha de tu evento.",
+      noPudimosAplicarFechas: "No pudimos cambiar la fecha del itinerario. Ábrelo y cámbiala ahí.",
       revisarFechas: "Revisar",
+      // G-05: TODO lo que sigue en contenido de ejemplo y la invitada va a leer, no solo lo obligatorio.
+      tituloEjemplos: "Contenido de ejemplo que verán tus invitados",
+      ejemploDeBloque: (etiqueta: string, muestra: string) => (muestra ? `${etiqueta}: «${muestra}»` : etiqueta),
+      ejemploDeGrupo: (etiqueta: string, muestra: string, cuantos: number) =>
+        muestra
+          ? `${etiqueta}: ${cuantos === 1 ? "1 ficha de ejemplo" : `${cuantos} fichas de ejemplo`}, empezando por «${muestra}»`
+          : `${etiqueta}: ${cuantos === 1 ? "1 ficha de ejemplo" : `${cuantos} fichas de ejemplo`}`,
+      seccionEnteraDeEjemplo: "Esta sección es de ejemplo entera.",
+      ocultarSeccion: "Ocultar sección",
+      seccionOcultada: (titulo: string) => `«${titulo}» ya no se verá en tu invitación.`,
+      yMasEjemplos: (cuantos: number) => (cuantos === 1 ? "y 1 más" : `y ${cuantos} más`),
+      hayAvisos: (cuantos: number) =>
+        cuantos === 1
+          ? "Puedes publicar, pero hay 1 cosa que tus invitados verían sin terminar."
+          : `Puedes publicar, pero hay ${cuantos} cosas que tus invitados verían sin terminar.`,
+      publicarDeTodosModos: "Publicar de todos modos",
+      // G-06: el estado «publicada» y el enlace dejan de vivir dentro del diálogo que acaba de publicar.
+      estadoPublicada: "Publicada",
+      estadoConCambios: "Cambios sin publicar",
+      etiquetaEstadoPublicada: "Tu invitación está publicada",
+      etiquetaEstadoConCambios: "Tu invitación está publicada, con cambios que aún no ven tus invitados",
+      compartir: "Compartir",
+      volverAPublicar: "Volver a publicar",
+      volverAPublicarCorto: "Publicar",
+      yaEstaPublicada: "Tu invitación ya está publicada. Vuelve a publicar para que tus invitados vean los cambios.",
+      alDiaConLoPublicado: "Tus invitados ya ven esta versión.",
       copiarEnlace: "Copiar enlace",
       enlaceCopiado: "¡Enlace copiado!",
       enlaceCopiadoToast: "Enlace copiado. Ya puedes pegarlo en WhatsApp.",

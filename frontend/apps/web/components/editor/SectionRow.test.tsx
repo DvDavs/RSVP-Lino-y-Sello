@@ -44,7 +44,10 @@ describe("SectionRow — U-18", () => {
   it("una sección required:true NO tiene interruptor y dice «siempre visible»", () => {
     envolver({ fila: { key: "cover", title: "Portada", visible: true, required: true } });
     expect(screen.queryByRole("switch")).toBeNull();
-    expect(screen.getByText(/siempre visible/i)).toBeTruthy();
+    // M-11 (`bitacora/3c-ux.md §4`): debajo de `sm` el mismo texto lo lleva el candado (para
+    // lectores de pantalla) y a partir de `sm` la insignia — los dos viven en el DOM a la vez, el
+    // tamaño de pantalla solo decide cuál se ve, así que hay dos coincidencias, no una.
+    expect(screen.getAllByText(/siempre visible/i).length).toBeGreaterThan(0);
   });
 
   it("el menú ⋮ ofrece Subir/Bajar/Mover al principio/Mover al final (alternativa sin arrastre, 2.5.7)", async () => {

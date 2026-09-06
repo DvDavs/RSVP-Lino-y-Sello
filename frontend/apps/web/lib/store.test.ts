@@ -815,3 +815,32 @@ describe("cambiarFechaDelEvento (bloque `business`, no operación del documento)
     await expect(ctx.store.getState().cambiarFechaDelEvento("18/04/2027")).rejects.toBeInstanceOf(ApiError);
   });
 });
+
+describe("estado de publicación en el store (G-06)", () => {
+  it("un documento SIN release deja `activeRelease` en null, no en undefined", async () => {
+    // MEDIDO en 3C-UX-B contra el backend real: `GET .../document` OMITE el campo cuando la
+    // invitación no está publicada, no manda `null`. Sin normalizarlo, `activeRelease !== null` daba
+    // `true` sobre `undefined` y la barra del editor reventaba con «Cannot read properties of
+    // undefined (reading 'stale')» — el editor entero caía en su frontera de error.
+    const sinRelease = { ...respuestaDocumento() } as Record<string, unknown>;
+    delete sinRelease.activeRelease;
+    const { store } = nuevoStore({ getDocument: vi.fn(async () => sinRelease as unknown as GetDocumentResponse) });
+    await store.getState().load(7);
+    expect(store.getState().activeRelease).toBeNull();
+    expect(store.getState().revisionPublicada).toBeNull();
+  });
+
+  it("con release al día guarda la revisión publicada, que es lo que distingue «hay cambios»", async () => {
+    const conRelease = {
+      ...respuestaDocumento(),
+      activeRelease: { releaseId: 1, publishedAt: "2026-09-06T10:00:00Z", contentHash: "sha256:x", documentRevision: 3, stale: false, staleReason: [] },
+    };
+    const { store } = nuevoStore({ getDocument: vi.fn(async () => conRelease) });
+    await store.getState().load(7);
+    expect(store.getState().activeRelease?.releaseId).toBe(1);
+    expect(store.getState().revisionPublicada).toBe(3);
+    store.getState().setActiveRelease(null, null);
+    expect(store.getState().activeRelease).toBeNull();
+  });
+});
+
