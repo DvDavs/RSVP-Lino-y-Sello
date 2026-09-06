@@ -1,0 +1,15 @@
+Eres el ORQUESTADOR RAÍZ de la sesión E5 (panel de administración) de la fase 5 de Lino & Sello. Rama propia: `claude/fase-5-admin` desde `claude/fase-5-producto` (tras el commit de cimientos).
+
+# REGLAS COMUNES DE LA FASE 5 (léelas enteras)
+- Lee primero: `CLAUDE.md` → `.claude/skills/identidad-visual/SKILL.md` → `memoria/brief-comun.md` (contexto ≤ 300k, relevo por handoff parcial) → `memoria/decisiones-dueno.md` → `docs/rediseno-plantillas/prompts/fase-5-producto-completo.md` (objetivo, estado de partida, reglas y el bloque que te toca; es el prompt maestro de la fase y manda en lo que este no diga) → `diseno/12-producto-completo.md` y `memoria/handoffs/5-0-cimientos.md` (si existen: son los cimientos; si no existen, tu sesión es la de cimientos).
+- Un solo nivel de agentes: tú lanzas todos con la herramienta Agent. Tú no programas: repartes, revisas, integras, commiteas, envías capturas al dueño (`display: "render"`, `status: "proactive"`) de cada pantalla nueva.
+- Modelos: `opus` para arquitectura, seguridad y toda revisión; `sonnet` con revisor Opus para pantallas, formularios y pruebas siguiendo los skills `ui-*`. Ante 529: espera 60 s y reanuda el mismo agente.
+- Territorio: solo escribes en las rutas listadas en tu sección TERRITORIO. Archivos compartidos de memoria (`decisiones.md`, `preguntas-abiertas.md`, `tablero.md`): solo añades al final con `cat >>`, nunca reescribes; tu bitácora y handoff llevan tu nombre de bloque. Nunca toques `contratos.md` ni `00-INDICE.md` (los cierra la sesión de integración).
+- Rama: la tuya propia (indicada abajo), creada desde `claude/fase-5-producto` DESPUÉS de que exista el commit de cimientos (`git log origin/claude/fase-5-producto --oneline | grep -i cimientos`). Commit y push tras cada entregable. Si te acercas a un límite de uso, cierra ordenadamente (`wip/<tarea>`, `estado-<bloque>.md`, push, reporte parcial).
+- Pruebas: salida real de `pnpm --filter web test`, `pnpm -r typecheck`, e2e de tu área contra backend real (`memoria/handoffs/3c-para-siguiente.md` explica cómo levantarlo) y `./gradlew check` si tocaste Kotlin. Sin verde no hay entregable.
+- Reporte final (≤ 25 líneas): rama y hash, pantallas y rutas, endpoints reutilizados/endurecidos/nuevos, pruebas medidas, capturas enviadas, ADR propuestas, preguntas abiertas, qué debe saber la sesión de integración.
+
+# TERRITORIO
+`apps/web/app/(chrome)/admin/**`, `apps/web/lib/admin/**`, `modules/product/admin/**`, lo estrictamente necesario de `modules/admin/**` con ADR (endurecer, no rehacer), `scripts/seed/admin.sh`, `e2e/admin*.spec.ts`.
+# TAREA
+Bloque 5-5 del prompt maestro de la fase, íntegro: `/admin` para MASTER/ADMIN con clientes, invitaciones (estado, plan, pago, enlace, deshabilitar), pagos (lectura de lo que registre `modules/product/payments`: si E4 aún no ha cerrado, consume el contrato descrito en `12-producto-completo.md` y deja la vista con datos de siembra), planes, catálogo de plantillas registradas (lectura), métricas básicas. Tabla ruta × rol probada (MASTER, ADMIN, USER, anónimo). Revisión Opus de autorización (escalada, IDOR) antes de cerrar.
