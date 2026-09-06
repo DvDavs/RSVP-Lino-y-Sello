@@ -84,7 +84,10 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
 
 ## CI en GitHub verificado el 2026-09-06
 `.github/workflows/ci.yml` deja de ser papel: los cuatro jobs (`backend`, `frontend`, `e2e`, `design`)
-corren de verdad en GitHub Actions y quedan en verde sobre esta rama. Antes de esta tarea el workflow
+corren de verdad en GitHub Actions y quedan en verde sobre esta rama: corrida
+[34053300447](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34053300447) (`c835654`),
+**10 min 15 s** de reloj — `backend` 5 m 57 s · `frontend` 6 m 04 s · `design` 6 m 09 s (279/279) ·
+`e2e` 10 m 11 s (79/79 contra el backend real + LHCI). Antes de esta tarea el workflow
 llevaba 19 corridas seguidas en rojo sin que nadie leyera el log: el job `e2e` moría en 0 s y ninguna
 prueba de extremo a extremo se había ejecutado jamás en el runner. Correcciones, tiempos por job y lo
 que quedó abierto: `handoffs/ci-github.md`, `bitacora/ci-github.md` e `issues-ci.md` (I-CI-01 e I-CI-02).

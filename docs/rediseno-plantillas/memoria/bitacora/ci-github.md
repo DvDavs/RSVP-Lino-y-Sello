@@ -16,7 +16,22 @@ producto, pruebas, `build.gradle.kts` o `frontend/**`.
 
 | [22](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34052024407) | `0932c81` | `e2e` ❌ **70 pasan, 5 fallan, 2 flaky** en 4,9 min | el entorno de Postgres arregla 39 de las 46. Lo que queda es reloj: las 5 son las que esperan a que el LIENZO PINTE, y `teclado-editor` E-10a falló en 23,5 s y pasó en el reintento en 5,2 s. Causa: `workers: 4` en CI contra los 2 con los que se midió el 79/79 en local → ADR-CI-01 |
 
-(la tabla se completa abajo con las corridas de esta rama)
+| [24](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34052672869) | `f9dcfe6` | `e2e` ❌ **75 pasan, 1 falla, 1 flaky** en 4,1 min | bajar a 2 workers quita 4 de los 5 fallos. El que queda **no es reloj**: `editor-3c-evidencia.spec.ts` abre `invitacionSembrada()` sin `conLockDeInvitacionSembrada` y sus dos pruebas se pisan → aislamiento (I-CI-01) |
+| **[25](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34053300447)** | `c835654` | **VERDE — los cuatro jobs** | ver los tiempos abajo |
+
+## La corrida verde
+**<https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34053300447>** · commit `c835654` ·
+2026-09-06 18:56:36 → 19:06:51 UTC · **10 min 15 s de reloj** (objetivo del encargo: < 25 min).
+
+| Job | Tiempo | Lo que hace dentro |
+|---|---|---|
+| `backend` | **5 m 57 s** | `check jacocoTestReport jacocoTestCoverageVerification` contra Postgres 16 (3 m 36 s), incluida la compuerta `verifyJsonSchemaEmitted` |
+| `frontend` | **6 m 04 s** | deriva del JSON Schema y de los golden, lint, tipos, Vitest con cobertura (4 m 15 s), inventario de golden |
+| `design` | **6 m 09 s** | **279/279** de la galería: regresión visual, contraste y axe (5 m 06 s) |
+| `e2e` | **10 m 11 s** | backend arriba en **1 m 56 s**, siembra en **5 s**, **79/79** Playwright contra el backend real en 3 m 50 s, LHCI 5 corridas en 2 m 22 s |
+
+Artefactos subidos en esa corrida: `backend-reports` (JaCoCo + JUnit), `frontend-coverage`,
+`playwright-report`, `design-report`, `backend-e2e-log`, `lhci-reports`.
 
 ## Decisiones tomadas
 - **Los cuatro jobs corren en paralelo.** El `needs: [backend, frontend]` del job `e2e` solo servía
