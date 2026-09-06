@@ -2014,3 +2014,27 @@ de bloque que la guía cubre con ejemplos concretos; en cuanto aparece un tipo q
   **Supuesto tomado:** no se tocan (cambiarlos por textos «bonitos» inventados haría más difícil
   distinguir lo que falta por escribir). **Pregunta:** ¿se prefiere que el andamio traiga contenido
   de ejemplo creíble («Madrina de velación») en vez de la descripción del hueco?
+
+## 4-9b (datos reales de terceros en el generador de la invitación de demostración,
+`frontend/templates/scripts/demo-content.mjs` y `build-art.mjs`)
+- **El `preview.webp` ya generado de `boda-clasica/1.0.0` sigue mostrando el nombre real de la
+  hacienda** ("Hacienda de San Gabriel · Morelos") horneado en los píxeles, aunque ya corregí la
+  fuente en `build-art.mjs:71` (→ "Hacienda Los Naranjos · Morelos"). Regenerarlo exige escribir en
+  `frontend/templates/boda-clasica/1.0.0/assets/`, que cae en `frontend/templates/*/1.0.*/` —
+  territorio prohibido por mi brief ("los paquetes ya los arregló 4-9"). **Supuesto tomado:** dejo
+  el fichero fuente corregido y sin regenerar el asset; documentado aquí para que quien tenga
+  permiso sobre esa ruta corra `node frontend/templates/scripts/build-art.mjs` (sin `--check`, para
+  que escriba) y vuelva a registrar el paquete. **Pregunta:** ¿quién tiene ese permiso — otro
+  sub-agente de esta fase, o se deja para el cierre de la fase 4?
+- **`Posada Los Amates`** (`demo-content.mjs:181`, ya sustituida por "Posada del Jardín") no se
+  pudo verificar si es un negocio real: sin acceso a red en este entorno (mismo bloqueo de proxy
+  que documentó 4-9 para `maps.app.goo.gl`). **Supuesto tomado:** tratada como real por el criterio
+  conservador del brief, sustituida igual que las demás. **Pregunta:** si el dueño puede confirmar
+  que era ficticia, no cambia nada (la sustitución ya está hecha y es coherente igualmente).
+- **Ninguna compuerta automática cubre `demo-content.mjs`**: `TPL_THIRD_PARTY_LINK` y
+  `TPL_THIRD_PARTY_BANK_DATA` (ADR-4-9-01) corren sólo sobre `defaults.json` vía `check.ts`. Un
+  dato de tercero nuevo en el generador de la demostración no lo cazaría nada automático.
+  **Supuesto tomado:** fuera de mi alcance extender `check.ts` a un fichero que no es un paquete de
+  plantilla (mi brief prohíbe tocar `frontend/packages/**`, donde vive `check.ts`). **Pregunta:**
+  ¿conviene una revisión manual periódica de `frontend/templates/scripts/demo-content.mjs`, o un
+  lint aparte, ya que el contrato de compuertas no lo alcanza?

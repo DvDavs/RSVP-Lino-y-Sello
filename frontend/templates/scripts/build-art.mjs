@@ -68,7 +68,7 @@ const PLANTILLAS = [
     slug: 'boda-clasica', familia: 'boda',
     // `floral` no es un token del tema: es un color derivado del acento, para las flores de XV.
     // En `boda-clasica` no hay flores rellenas, así que no se usa.
-    muestra: { titulo: 'Ana & Diego', subtitulo: 'NUESTRA BODA', fecha: '18 · IV · 2027', lugar: 'Hacienda de San Gabriel · Morelos' },
+    muestra: { titulo: 'Ana & Diego', subtitulo: 'NUESTRA BODA', fecha: '18 · IV · 2027', lugar: 'Hacienda Los Naranjos · Morelos' },
     inicialA: 'D', inicialB: 'A',
   },
   {
