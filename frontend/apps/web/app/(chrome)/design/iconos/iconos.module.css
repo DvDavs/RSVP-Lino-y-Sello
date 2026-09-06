@@ -1,38 +1,19 @@
 /* app/(chrome)/design/iconos/iconos.module.css — galería de @invitaciones/icons.
    Solo `--ui-` (permitido bajo app/(chrome)/**, test/tokens-no-leak.test.ts), cero hex fuera de
-   este bloque de variables.
+   `@invitaciones/tokens`.
 
-   `--ui-*` locales TEMPORALES (registrado en preguntas-abiertas.md «Fase 3-C · 3c-3a»): el brief
-   pide que esta página renderice igual sin `packages/tokens` ni el layout de `/design` (ambos los
-   crea otro bloque en paralelo, en otro worktree). Los valores son los verificados de la Paleta A
-   — Bugambilia, tema claro (`diseno/11-sistema-de-diseno.md` §1.2/§1.3, `verificar-paletas.salida.txt`),
-   no inventados. Cuando `@invitaciones/tokens` publique `generated/tokens.css` y el chrome lo
-   importe, ese `:root` (mayor alcance, cargado después) debe ganar sobre este `.pagina`; si algún
-   día no fuera así, quien lo integre borra este bloque de variables y dead-code el comentario. */
+   Integración (bloque 2, F3): esta página ya no define su propio bloque `--ui-*` local. Ese bloque
+   era TEMPORAL (`preguntas-abiertas.md` «Fase 3-C · 3c-3a»): existía porque, en el worktree de
+   3c-3a, ni `packages/tokens` ni el layout de `/design` existían todavía. Los dos existen ahora —
+   `app/(chrome)/layout.tsx` importa `globals.css`, que a su vez importa
+   `@invitaciones/tokens/tokens.css` (`:root` y `[data-theme="dark"]`) — así que los mismos nombres
+   de variable de aquí abajo resuelven ya a los valores REALES y siguen el tema (claro/oscuro) del
+   `MarcoDeTema` de la galería, cosa que el bloque local (fijo en claro) no podía hacer. */
 .pagina {
-  --ui-surface: #fdf9f6;
-  --ui-surface-raised: #ffffff;
-  --ui-surface-alt: #fff3f8;
-  --ui-ink: #292018;
-  --ui-ink-muted: #554b42;
-  --ui-border: #988d84;
-  --ui-divider: #ece5de;
-  --ui-primary: #bb0076;
-  --ui-on-primary: #ffffff;
-  --ui-primary-hover: #95005d;
-  --ui-primary-soft: #ffe5ef;
-  --ui-on-primary-soft: #710045;
-  --ui-link: #95005d;
-  --ui-focus: #457cfd;
-  --ui-accent-soft: #ffeaca;
-  --ui-on-accent-soft: #523700;
-
   min-height: 100dvh;
   background: var(--ui-surface);
   color: var(--ui-ink);
-  font-family: system-ui, sans-serif; /* 04 §19: esta página de inventario no es "producto" con
-    voces tipográficas propias; las tres voces (`display`/`text`/`label`) las trae `packages/ui`
-    cuando exista — ver preguntas-abiertas.md. */
+  font-family: var(--ui-font-text);
   padding: 32px clamp(16px, 4vw, 48px) 96px;
 }
 

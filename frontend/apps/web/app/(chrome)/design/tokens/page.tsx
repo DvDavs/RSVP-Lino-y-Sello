@@ -95,7 +95,17 @@ function Escala({ nombre, matiz, pasos, valores }: { nombre: string; matiz: stri
       </p>
       <div className={`${estilos.pasos} overflow-x-auto`}>
         {pasos.map((paso) => (
-          <div key={paso} className={estilos.paso} style={{ background: valores[paso], color: tintaSobre(valores[paso]) }}>
+          <div
+            key={paso}
+            className={estilos.paso}
+            style={{ background: valores[paso], color: tintaSobre(valores[paso]) }}
+            // Referencia del paso crudo de la escala, no una pareja verificada: `11 §1.5` regla 2
+            // ("el 500 es decorativo, nunca texto") deja el 400/500 de algunos matices por debajo de
+            // 4,5:1 aquí a propósito — es la misma marca que ya usa la tabla de "Parejas
+            // garantizadas" de abajo para las dos filas informativas, y la que lee
+            // `e2e/design-contraste.spec.ts` para no confundir una escala con un texto de producto.
+            data-umbral="informativa"
+          >
             <span className="font-ui-label text-ui-label-sm">{paso}</span>
             <span className="font-ui-label text-ui-label-sm opacity-80">{valores[paso].slice(1)}</span>
           </div>

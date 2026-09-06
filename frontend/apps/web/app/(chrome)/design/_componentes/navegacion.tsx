@@ -9,7 +9,7 @@ const PAGINAS = [
   { href: "/design/tipografia", etiqueta: "Tipografía", estado: "disponible" },
   { href: "/design/iconos", etiqueta: "Iconos", estado: "disponible" },
   { href: "/design/formas", etiqueta: "Formas", estado: "disponible" },
-  { href: "/design/componentes", etiqueta: "Componentes", estado: "bloque 2" },
+  { href: "/design/componentes", etiqueta: "Componentes", estado: "disponible" },
 ] as const;
 
 /** Navegación de la galería. Marca la página actual con `aria-current`, no solo con color. */

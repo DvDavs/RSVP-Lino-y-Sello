@@ -1,9 +1,15 @@
 "use client";
 // app/(chrome)/design/iconos/page.tsx — galería de `@invitaciones/icons` (brief 3C-3 §"Entregables"
 // 4). Combina `mitad-a.tsx` (navegación, edición, y las secciones que caen en los primeros 41
-// nombres) y `mitad-b.tsx` (los nombres 42 a 82, integrados desde 3C-3B). No depende
-// de `app/(chrome)/design/layout.tsx` ni de un índice `/design` (los crea otro bloque en paralelo,
-// en otro worktree): esta ruta funciona sola, con `app/(chrome)/layout.tsx` como único ancestro.
+// nombres) y `mitad-b.tsx` (los nombres 42 a 82, integrados desde 3C-3B). Escrita para funcionar
+// sola, con `app/(chrome)/layout.tsx` como único ancestro (así nació en 3c-3a, cuando ni
+// `app/(chrome)/design/layout.tsx` ni el índice `/design` existían); ahora que el bloque 1 los
+// integró, Next la anida también bajo `design/layout.tsx` (todo archivo dentro de `design/**` hereda
+// ese layout) — la navegación de la galería y el conmutador de tema la envuelven gratis. Un solo
+// ajuste sí hizo falta (hallazgo de `@axe-core/playwright`, `design-axe.spec.ts`,
+// `landmark-no-duplicate-main`): el `<main>` propio de esta página quedaba anidado DENTRO del
+// `<main>` de `design/layout.tsx`, dos landmarks principales en el mismo documento. Pasa a `<div>`;
+// el `<main>` real es el del layout.
 //
 // Componente de cliente porque el buscador filtra en el propio navegador (sin ida y vuelta al
 // servidor): no hay `export const metadata` aquí por esa razón (Next lo prohíbe en un Client
@@ -31,7 +37,7 @@ export default function PaginaIconos() {
   }, [busqueda]);
 
   return (
-    <main className={styles.pagina}>
+    <div className={styles.pagina}>
       <header className={styles.cabecera}>
         <p className={styles.etiqueta}>Sistema de diseño · @invitaciones/icons</p>
         <h1 className={styles.titulo}>Iconos</h1>
@@ -80,6 +86,6 @@ export default function PaginaIconos() {
           ))}
         </ul>
       )}
-    </main>
+    </div>
   );
 }

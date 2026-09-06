@@ -1138,3 +1138,37 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   el número por un check al llegar a 100 %; se siguió ese boceto (el `aria-valuetext` sigue diciendo
   «100 %» para quien usa lector de pantalla). ¿Se prefiere mantener el «100 %» visible también en ese
   estado, en vez del check?
+## Fase 3-C · 3c-b2-f3 (bloque 2, F3 — galería, estados y regresión visual)
+
+- **`Image` de producto como componente aparte de `shapes/Image`, no una prop nueva en la forma.**
+  `11 §5` lista «Image» con los mismos campos que la forma (`§3.1`) MÁS tres estados que exigen
+  `onLoad`/`onError` de un `<img>` real — es decir, estado de React y una frontera de cliente.
+  **Supuesto:** en vez de añadir `"use client"` a `shapes/Image.tsx` (rompería el motivo por el que
+  ADR-3C-4-01 la mantiene sin hooks: sigue siendo usable desde Server Components como la portada),
+  se creó `componentes/Image.tsx` (cliente) que ENVUELVE la forma vía su prop `children`. Ambas se
+  llaman `Image`; la colisión en `@invitaciones/ui` se resuelve con un re-export explícito que gana
+  sobre los dos `export *` (ver `src/index.ts` y bitácora §1). ¿De acuerdo con dos componentes de
+  mismo nombre en módulos distintos, o se prefiere renombrar uno cuando se audite el paquete
+  completo (F1+F2+F3 fusionados)?
+- **`congelarEnEstado` en `Image`: prop pública, pero solo para historia/pruebas.** Sin forma de
+  fijar el estado, "cargando" no se puede capturar de forma determinista (compite con la carga real
+  de la imagen). **Supuesto:** documentar en el propio tipo que nadie debe pasarla en producto, en
+  vez de esconder el mecanismo detrás de una prop interna no exportada (que habría obligado a la
+  historia a vivir dentro de `packages/ui` con acceso a internals, más frágil). ¿Vale la pena mover
+  esto a un mecanismo de historias más general (p. ej. un `contexto` de "modo galería") cuando F1/F2
+  necesiten lo mismo para sus propios componentes con estado asíncrono?
+- **Exclusión de contraste vía `data-umbral`, no una lista de selectores en el test.** `11 §1.4`
+  declara parejas "gráficas" (umbral 3,0) e "informativas" (sin umbral) que no siguen la regla
+  general por tamaño computado. **Supuesto:** en vez de mantener una lista de excepciones dentro de
+  `design-contraste.spec.ts` (se desincroniza sola de la página), el propio elemento declara su
+  umbral con `data-umbral` (ya lo hacía `/design/tokens` para las "Aa" de parejas garantizadas; se
+  añadió el mismo atributo a los pasos crudos de escala, que no lo llevaban y fallaban de verdad —
+  bitácora §3). ¿Se adopta esta convención (`data-umbral="<n>"` / `"informativa"`) como parte del
+  contrato de `11 §8.3`, para que futuras páginas de `/design` la usen sin que cada agente reinvente
+  su propia lista de exclusiones?
+- **`role="status"` en `Skeleton`, no `role="progressbar"`.** `11 §5` no fija el rol; solo pide
+  `aria-busy` en el contenedor. **Supuesto:** `status` porque no hay un valor numérico que anunciar
+  (a diferencia del «Progreso anular» de la misma tabla, que sí es `role="progressbar"`); un
+  `Skeleton` es "algo se está cargando", no "38 % completado". ¿De acuerdo, o se prefiere que
+  `Skeleton` acepte un `aria-live` explícito por si algún consumidor quiere silenciarlo (p. ej.
+  dentro de una lista con muchos skeletons a la vez, para no saturar el lector de pantalla)?

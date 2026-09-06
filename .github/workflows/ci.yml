@@ -330,6 +330,13 @@ jobs:
       - name: e2e + a11y
         run: pnpm --filter web exec playwright test --fail-on-flaky-tests
 
+      # Fase 3-C, bloque 2 (F3): galería de diseño (`/design`), aparte de las pruebas de arriba
+      # porque no toca el backend en absoluto (ni Postgres ni `scripts/seed-demo.sh`) — tiene su
+      # propia config sin `globalSetup`, con su propio `webServer` en el puerto 3133
+      # (`playwright.design.config.ts`, brief 3c-b2-f3 §4/§5). Mismo Chromium, cacheado arriba.
+      - name: e2e de la galería de diseño (regresión visual, contraste y axe)
+        run: pnpm --filter web exec playwright test --config=playwright.design.config.ts --fail-on-flaky-tests
+
       - if: always()
         uses: actions/upload-artifact@v4
         with:

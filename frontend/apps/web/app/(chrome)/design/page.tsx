@@ -31,7 +31,7 @@ const SECCIONES = [
     href: "/design/componentes",
     titulo: "Componentes",
     descripcion: "Cada componente con todas sus variantes y estados, como los ve el teclado y el lector de pantalla.",
-    estado: "bloque 2",
+    estado: "disponible",
   },
 ] as const;
 

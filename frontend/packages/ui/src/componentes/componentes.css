@@ -1,0 +1,156 @@
+/* packages/ui/src/componentes/componentes.css — EmptyState, Skeleton e Image de producto (bloque 2,
+   fase 3-C). Se carga desde `@invitaciones/ui/estilos.css` (`@import "./componentes/componentes.css"`).
+
+   Igual que `shapes.css`: cero color literal (todo `--ui-*`), valores de reserva solo para
+   longitudes/tiempos, y el movimiento se emite DENTRO de `@media (prefers-reduced-motion:
+   no-preference)` y se apaga de nuevo, explícito, en `reduce` (`11 §6.2` regla 5). */
+
+/* ────────────────────────────────────────────────────────────── EmptyState ── */
+
+.ui-estado-vacio {
+  display: grid;
+  justify-items: center;
+  gap: var(--ui-space-4, 16px);
+  max-width: 40ch;
+  margin: 0 auto;
+  padding: var(--ui-space-7, 48px) var(--ui-space-4, 16px);
+  text-align: center;
+}
+
+.ui-estado-vacio__ilustracion {
+  display: block;
+}
+
+.ui-estado-vacio__titulo {
+  margin: 0;
+  color: var(--ui-ink);
+  font-family: var(--ui-font-display);
+  font-size: var(--ui-text-display-sm, 24px);
+  font-weight: var(--ui-weight-display-sm, 700);
+  line-height: var(--ui-leading-display-sm, 1.2);
+}
+
+.ui-estado-vacio__texto {
+  margin: 0;
+  color: var(--ui-ink-muted);
+  font-family: var(--ui-font-text);
+  font-size: var(--ui-text-text-md, 15px);
+  line-height: var(--ui-leading-text-md, 1.5);
+}
+
+.ui-estado-vacio__accion {
+  margin-top: var(--ui-space-2, 8px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--ui-space-5, 24px);
+  border: none;
+  border-radius: var(--ui-radius-pill, 999px);
+  background: var(--ui-primary);
+  color: var(--ui-on-primary);
+  font-family: var(--ui-font-text);
+  font-size: var(--ui-text-text-sm, 14px);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--ui-dur-1, 120ms) var(--ui-ease-out, ease-out);
+}
+
+.ui-estado-vacio__accion:hover {
+  background: var(--ui-primary-hover);
+}
+
+.ui-estado-vacio__accion:focus-visible {
+  outline: 3px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+
+/* ──────────────────────────────────────────────────────────────── Skeleton ── */
+
+.ui-skeleton {
+  display: block;
+  border-radius: var(--ui-radius-sm, 8px);
+  background: var(--ui-divider);
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    var(--ui-surface-alt) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+}
+
+.ui-skeleton-bloque-contenedor {
+  display: block;
+  width: 100%;
+}
+
+.ui-skeleton--bloque {
+  width: 100%;
+  height: var(--ui-skeleton-alto, 96px);
+}
+
+.ui-skeleton--linea {
+  height: 0.85em;
+  width: var(--ui-skeleton-ancho, 100%);
+}
+
+.ui-skeleton-texto {
+  display: grid;
+  gap: var(--ui-space-2, 8px);
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-skeleton {
+    animation: ui-skeleton-brillo var(--ui-dur-respira, 1600ms) var(--ui-ease-linear, linear) infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-skeleton {
+    animation: none;
+    background-image: none;
+  }
+}
+
+@keyframes ui-skeleton-brillo {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+/* ───────────────────────────────────────────────────────── Image de producto ── */
+
+.ui-imagen-producto {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-imagen-producto__foto {
+  opacity: 1;
+  transition: opacity var(--ui-dur-2, 200ms) var(--ui-ease-out, ease-out);
+}
+
+.ui-imagen-producto__foto[data-estado="cargando"] {
+  opacity: 0;
+}
+
+.ui-imagen-producto__skeleton {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-imagen-producto__foto {
+    transition: none;
+  }
+}

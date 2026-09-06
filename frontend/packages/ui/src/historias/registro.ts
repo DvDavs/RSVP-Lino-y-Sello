@@ -1,8 +1,9 @@
-// packages/ui/src/historias/registro.ts — ÚNICO punto donde se enumeran las historias. Cada familia
-// del bloque 2 añade UNA línea por componente (orden alfabético por slug) y su import arriba; el
-// orquestador resuelve el merge conservando todas las líneas.
-// Convención tras la integración: F1 exporta `historias: readonly Historia[]` (se expande con `...`);
-// F2 exporta `historias: Historia` (una por componente).
+// packages/ui/src/historias/registro.ts — ÚNICO punto donde se enumeran las historias con sus
+// `render()`. SOLO se importa desde componentes cliente (subpath `@invitaciones/ui/historias`):
+// varias historias son módulos "use client" y, evaluadas desde un Server Component, llegan como
+// referencias cliente sin `slug`. Su gemelo seguro para servidor es `metadatos.ts` (una prueba los
+// compara). Convención: F1 y F3 exportan `historias: readonly Historia[]` (se expanden con `...`);
+// F2 exporta `historias: Historia` (una por componente). Orden final: alfabético por slug.
 import type { Historia } from "./tipos.ts";
 import { historias as avatar } from "../componentes/Avatar/Avatar.historias.tsx";
 import { historias as badge } from "../componentes/Badge/Badge.historias.tsx";
@@ -13,10 +14,13 @@ import { historias as historiasButton } from "../componentes/Button/Button.histo
 import { historias as historiasCheckbox } from "../componentes/Checkbox/Checkbox.historias.tsx";
 import { historias as historiasChip } from "../componentes/Chip/Chip.historias.tsx";
 import { historias as historiasCombobox } from "../componentes/Combobox/Combobox.historias.tsx";
+import { historias as historiasEmptyState } from "../componentes/EmptyState.historias.tsx";
 import { historias as historiasField } from "../componentes/Field/Field.historias.tsx";
+import { historias as historiasImage } from "../componentes/Image.historias.tsx";
 import { historias as historiasInput } from "../componentes/Input/Input.historias.tsx";
 import { historias as historiasRadioGroup } from "../componentes/RadioGroup/RadioGroup.historias.tsx";
 import { historias as historiasSelect } from "../componentes/Select/Select.historias.tsx";
+import { historias as historiasSkeleton } from "../componentes/Skeleton.historias.tsx";
 import { historias as historiasSwitch } from "../componentes/Switch/Switch.historias.tsx";
 import { historias as historiasTextarea } from "../componentes/Textarea/Textarea.historias.tsx";
 import { historias as progressRing } from "../componentes/ProgressRing/ProgressRing.historias.tsx";
@@ -28,18 +32,19 @@ import { historias as tooltip } from "../componentes/Tooltip/Tooltip.historias.t
 import { historias as wizardProgress } from "../componentes/WizardProgress/WizardProgress.historias.tsx";
 
 const ENTRADAS: readonly Historia[] = [
-  // F1 formularios
   ...historiasButton,
   ...historiasCheckbox,
   ...historiasChip,
   ...historiasCombobox,
+  ...historiasEmptyState,
   ...historiasField,
+  ...historiasImage,
   ...historiasInput,
   ...historiasRadioGroup,
   ...historiasSelect,
+  ...historiasSkeleton,
   ...historiasSwitch,
   ...historiasTextarea,
-  // F2 superficies y navegación
   avatar,
   badge,
   breadcrumb,
@@ -52,7 +57,6 @@ const ENTRADAS: readonly Historia[] = [
   toast,
   tooltip,
   wizardProgress,
-  // F3 estados e imagen: se añaden al integrar F3
 ];
 
 /** Ordenado por `slug` para que la galería y las pruebas no dependan del orden de integración. */

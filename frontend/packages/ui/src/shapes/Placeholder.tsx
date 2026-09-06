@@ -6,12 +6,15 @@
 // qué máscara toca. Marca la pieza con `data-imagen-pendiente="<id>"` para que el bloque 3 vuelque
 // la lista a `imagenes-pendientes.md` con un `grep`, sin inventario a mano.
 //
-// TODO(3C-integración): el `<g>` de abajo es una copia LITERAL del icono `galeria` del moodboard
-// (`partes/05-iconos.html`: retícula 24, trazo 1,75 redondeado, dos tonos; mismos `d` sin retocar),
-// centrado en 24 unidades del `viewBox` de 100 (la misma proporción del moodboard) y con el segundo tono resuelto a tokens en vez de a
-// `var(--tono)`. En cuanto `@invitaciones/icons` esté integrado (3C-3A/3C-3B) se sustituye por
-// `<GaleriaIcon />` de ese paquete y este bloque desaparece; la API de `Placeholder` no cambia.
+// (3C-integración, bloque 2/F3): el `<g>` con los `d` a mano que vivía aquí era una copia LITERAL
+// del icono `galeria` del moodboard, a la espera de que `@invitaciones/icons` existiera. Ya existe
+// (3C-3A/3C-3B): se sustituye por `<IconoGaleria />` real del paquete. Mismo dibujo (los `d` del
+// SVG generado son byte a byte los mismos que tenía esta copia), misma posición (`translate(38 38)`
+// sobre el `viewBox` de 100, icono a 24×24 sin escalar) y la API de `Placeholder` no cambia — sigue
+// verde `formas.test.tsx` («Placeholder — imagen pendiente del sistema»): el `<g>` exterior conserva
+// `stroke`/`stroke-width` como tokens explícitos y ningún hex aparece en el HTML resultante.
 import type { JSX } from "react";
+import { IconoGaleria } from "@invitaciones/icons";
 import { clases, color, idEstable, type Tono } from "./base.ts";
 
 export interface PlaceholderPropsBase {
@@ -60,18 +63,19 @@ export function Placeholder({
         </linearGradient>
       </defs>
       <rect width="100" height="100" fill={`url(#${id})`} />
+      {/* `color`: fija `currentColor` para el `stroke="currentColor"` del icono generado sin tocar
+          su fuente (`packages/icons/svg/galeria.svg`, «cópialos sin retocar», `11 §4.2`). `stroke`/
+          `stroke-width` explícitos en el propio `<g>`: es lo que verifica `formas.test.tsx`. */}
       <g
         transform="translate(38 38)"
         fill="none"
+        color={color("primary")}
         stroke={color("primary")}
         strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <rect x="3" y="5" width="18" height="14" rx="3" fill={color("surface-raised")} />
-        <path fill={color("primary-soft")} stroke="none" d="M3.5 18.5 L8.5 12 L12.5 16 L15 13.5 L20.5 18.5 Z" />
-        <path d="M3.5 18 L8.5 12 L12.5 16 L15 13.5 L20.5 18.5" />
-        <circle cx="16.5" cy="9" r="1.75" fill={color("accent")} stroke="none" />
+        <IconoGaleria size={24} />
       </g>
     </svg>
   );
