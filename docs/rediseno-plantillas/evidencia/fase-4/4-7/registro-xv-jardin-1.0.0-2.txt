@@ -1,0 +1,19 @@
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/47/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- registrar templates/xv-jardin/1.0.0
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/47/frontend/packages/template-kit
+> tsx src/cli.ts -- registrar templates/xv-jardin/1.0.0
+
+POST /master/templates2/versions  (/home/user/wt/47/frontend/templates/xv-jardin/1.0.0)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 2,
+  "slug": "xv-jardin",
+  "version": "1.0.0",
+  "packageHash": "sha256:d805fc53656b58b7a29650b5aecfa75e24e14d6d51479dfe8690ad14f442b5ee",
+  "assetsRegistered": 0
+}
+200 noop_same_hash — ya estaba registrada con EXACTAMENTE el mismo `package_hash`, así que no se ha hecho nada. Es el resultado correcto de volver a registrar el mismo paquete (ADR-008), no un fallo.

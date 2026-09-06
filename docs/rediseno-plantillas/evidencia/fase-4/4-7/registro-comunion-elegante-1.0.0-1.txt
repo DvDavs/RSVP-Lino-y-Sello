@@ -1,0 +1,19 @@
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/47/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- registrar templates/comunion-elegante/1.0.0
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/47/frontend/packages/template-kit
+> tsx src/cli.ts -- registrar templates/comunion-elegante/1.0.0
+
+POST /master/templates2/versions  (/home/user/wt/47/frontend/templates/comunion-elegante/1.0.0)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 8,
+  "slug": "comunion-elegante",
+  "version": "1.0.0",
+  "packageHash": "sha256:d49ddee8c5abd96fb30d4279d46d899a42b9964e0da492cee6a7859ec444cb0b",
+  "assetsRegistered": 0
+}
+201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.

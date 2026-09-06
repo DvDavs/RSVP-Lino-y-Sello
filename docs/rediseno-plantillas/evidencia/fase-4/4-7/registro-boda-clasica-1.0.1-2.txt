@@ -1,0 +1,19 @@
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/47/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- registrar templates/boda-clasica/1.0.1
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/47/frontend/packages/template-kit
+> tsx src/cli.ts -- registrar templates/boda-clasica/1.0.1
+
+POST /master/templates2/versions  (/home/user/wt/47/frontend/templates/boda-clasica/1.0.1)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 13,
+  "slug": "boda-clasica",
+  "version": "1.0.1",
+  "packageHash": "sha256:1d99bac4608383204cf3f586edab9240da05c33210b7504bc59c6b40c118cca2",
+  "assetsRegistered": 0
+}
+200 noop_same_hash — ya estaba registrada con EXACTAMENTE el mismo `package_hash`, así que no se ha hecho nada. Es el resultado correcto de volver a registrar el mismo paquete (ADR-008), no un fallo.

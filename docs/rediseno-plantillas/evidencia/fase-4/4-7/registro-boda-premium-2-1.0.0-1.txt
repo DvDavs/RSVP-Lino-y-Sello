@@ -1,0 +1,19 @@
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/47/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- registrar templates/boda-premium-2/1.0.0
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/47/frontend/packages/template-kit
+> tsx src/cli.ts -- registrar templates/boda-premium-2/1.0.0
+
+POST /master/templates2/versions  (/home/user/wt/47/frontend/templates/boda-premium-2/1.0.0)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 7,
+  "slug": "boda-premium-2",
+  "version": "1.0.0",
+  "packageHash": "sha256:76be6c06abe4d6036f47094d36fe78c6b772a7825a8549f64b1043902eef8d01",
+  "assetsRegistered": 0
+}
+201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.

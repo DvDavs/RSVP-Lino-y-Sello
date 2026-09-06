@@ -1,0 +1,199 @@
+{
+  "items": [
+    {
+      "templateVersionId": 4,
+      "slug": "bautizo-elegante",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Bautizo Premium Elegance"
+      },
+      "eventKinds": [
+        "baptism"
+      ],
+      "minPlanTier": 2,
+      "capabilities": [
+        "hashtags",
+        "music"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 5,
+      "slug": "boda-basica",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Boda Básica"
+      },
+      "eventKinds": [
+        "wedding"
+      ],
+      "minPlanTier": 1,
+      "capabilities": [
+        "hashtags",
+        "music",
+        "singlePlace",
+        "story"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 13,
+      "slug": "boda-clasica",
+      "version": "1.0.1",
+      "name": {
+        "es-MX": "Boda clásica"
+      },
+      "eventKinds": [
+        "wedding"
+      ],
+      "minPlanTier": 2,
+      "previewUrl": "http://127.0.0.1:6017/public/templates2-assets/templates2/template/boda-clasica/1.0.1/5edcd64d402752bb66f89236a9f4683376ca457d6fed50d4d5114ac189b28ce5.webp",
+      "capabilities": [
+        "story",
+        "hashtags",
+        "music"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 6,
+      "slug": "boda-premium",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Boda Premium"
+      },
+      "eventKinds": [
+        "wedding"
+      ],
+      "minPlanTier": 2,
+      "capabilities": [
+        "hashtags",
+        "music",
+        "singlePlace",
+        "story"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 7,
+      "slug": "boda-premium-2",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Boda Premium 2"
+      },
+      "eventKinds": [
+        "wedding"
+      ],
+      "minPlanTier": 2,
+      "capabilities": [
+        "hashtags",
+        "music",
+        "story"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 8,
+      "slug": "comunion-elegante",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Comunión Premium Elegance"
+      },
+      "eventKinds": [
+        "communion"
+      ],
+      "minPlanTier": 2,
+      "capabilities": [
+        "hashtags",
+        "music"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 9,
+      "slug": "confirmacion-elegante",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Confirmación Premium Elegance"
+      },
+      "eventKinds": [
+        "confirmation"
+      ],
+      "minPlanTier": 2,
+      "capabilities": [
+        "hashtags",
+        "music"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 10,
+      "slug": "cumpleanos-elegante",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Cumpleaños Premium Elegance"
+      },
+      "eventKinds": [
+        "birthday"
+      ],
+      "minPlanTier": 2,
+      "capabilities": [
+        "hashtags",
+        "music"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 11,
+      "slug": "evento-elegante",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "Evento Premium Elegance"
+      },
+      "eventKinds": [
+        "generic"
+      ],
+      "minPlanTier": 2,
+      "capabilities": [
+        "hashtags",
+        "music",
+        "story"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 12,
+      "slug": "xv-elegance",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "XV Años Elegance Premium"
+      },
+      "eventKinds": [
+        "quince"
+      ],
+      "minPlanTier": 2,
+      "capabilities": [
+        "hashtags",
+        "music"
+      ],
+      "status": "published"
+    },
+    {
+      "templateVersionId": 2,
+      "slug": "xv-jardin",
+      "version": "1.0.0",
+      "name": {
+        "es-MX": "XV Jardín"
+      },
+      "eventKinds": [
+        "quince"
+      ],
+      "minPlanTier": 1,
+      "previewUrl": "http://127.0.0.1:6017/public/templates2-assets/templates2/template/xv-jardin/1.0.0/91672579ac235a56110ec0a9b93887b6c813f3ca31b4aed244042259740947c9.webp",
+      "capabilities": [
+        "hashtags"
+      ],
+      "status": "published"
+    }
+  ]
+}
