@@ -1,0 +1,37 @@
+# evidencia/fase-4/4-1a/doctor.txt — con el backend VIVO y las variables del agente exportadas,
+# y luego con el entorno pelado (sin ninguna variable) para ver los arreglos.
+# Fecha: 2026-09-06T16:30:30Z
+
+$ source build/dev/env… && pnpm plantilla doctor
+OK    Node: v22.22.2 (el monorepo exige >= 22.22)
+OK    pnpm: pnpm 10.33.0
+OK    Dependencias instaladas: frontend/packages/template-kit/node_modules existe
+OK    Backend: http://127.0.0.1:6041 responde (HTTP 200 a /public/i/sonda/exists)
+OK    TPL_DEV_PORT: TPL_DEV_PORT=6041
+OK    TPL_DEV_DB: TPL_DEV_DB=invitaciones_f4_41
+OK    TPL_TEST_STATE_DIR: TPL_TEST_STATE_DIR=/tmp/templates2-pg-f4-41
+AVISO Cuenta MASTER: se usará demo.master@example.com
+      El ayudante de registro crea y promueve `demo.master@example.com` si no existe (registrar-http.sh); si quieres otra cuenta, exporta TPL_MASTER_EMAIL y TPL_MASTER_PASS.
+AVISO Base sembrada: no se puede comprobar desde aquí sin consultar la base
+      `scripts/smoke.sh` da 4/19 sobre un clúster recién creado y 19/19 sólo DESPUÉS de `scripts/seed-demo.sh` (handoffs/4-0a.md §3.1). Si el smoke falla en la ruta 2, es esto.
+OK    Chromium (Playwright): PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
+10 comprobación(es) · 0 sin resolver · 2 aviso(s)
+
+$ env -u TPL_DEV_BASE -u TPL_DEV_PORT -u TPL_DEV_DB -u TPL_TEST_STATE_DIR pnpm plantilla doctor
+OK    Node: v22.22.2 (el monorepo exige >= 22.22)
+OK    pnpm: pnpm 10.33.0
+OK    Dependencias instaladas: frontend/packages/template-kit/node_modules existe
+FALTA TPL_DEV_BASE: sin exportar
+      `export TPL_DEV_BASE=http://127.0.0.1:$TPL_DEV_PORT`. Sin ella, `smoke.sh:16` y `seed-demo.sh:34` caen a :6003 y golpean el backend de OTRO agente (handoffs/4-0a.md §1).
+AVISO TPL_DEV_PORT: sin exportar (se usará el valor por defecto)
+      Exporta TPL_DEV_PORT con un valor tuyo: dos sesiones sin variables propias pelean por el mismo puerto y el mismo clúster (handoffs/4-0a.md §1).
+AVISO TPL_DEV_DB: sin exportar (se usará el valor por defecto)
+      Exporta TPL_DEV_DB con un valor tuyo: dos sesiones sin variables propias pelean por el mismo puerto y el mismo clúster (handoffs/4-0a.md §1).
+AVISO TPL_TEST_STATE_DIR: sin exportar (se usará el valor por defecto)
+      Exporta TPL_TEST_STATE_DIR con un valor tuyo: dos sesiones sin variables propias pelean por el mismo puerto y el mismo clúster (handoffs/4-0a.md §1).
+AVISO Cuenta MASTER: se usará demo.master@example.com
+      El ayudante de registro crea y promueve `demo.master@example.com` si no existe (registrar-http.sh); si quieres otra cuenta, exporta TPL_MASTER_EMAIL y TPL_MASTER_PASS.
+AVISO Base sembrada: no se puede comprobar desde aquí sin consultar la base
+      `scripts/smoke.sh` da 4/19 sobre un clúster recién creado y 19/19 sólo DESPUÉS de `scripts/seed-demo.sh` (handoffs/4-0a.md §3.1). Si el smoke falla en la ruta 2, es esto.
+OK    Chromium (Playwright): PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
+10 comprobación(es) · 1 sin resolver · 5 aviso(s)

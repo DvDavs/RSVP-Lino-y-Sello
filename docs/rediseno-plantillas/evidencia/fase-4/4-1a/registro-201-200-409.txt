@@ -1,0 +1,62 @@
+# evidencia/fase-4/4-1a/registro-201-200-409.txt
+# Salida REAL de `pnpm plantilla registrar` contra el backend vivo del agente 4-1A
+# (TPL_DEV_BASE=http://127.0.0.1:6041, base invitaciones_f4_41, sembrada con scripts/seed-demo.sh).
+# Fecha: 2026-09-06T16:29:31Z
+
+$ pnpm plantilla nueva kit-demo-41b --evento birthday --secciones cover,event,rsvp,footer
+Creado /home/user/wt/41/frontend/templates/kit-demo-41b/1.0.0
+  template.json, theme.json, defaults.json · 4 sección(es) · 8 bloque(s) · 185 líneas de manifiesto
+  check: en verde a la primera (0 errores).
+Siguiente paso: edita los textos de defaults.json y ejecuta
+  pnpm plantilla check /home/user/wt/41/frontend/templates/kit-demo-41b/1.0.0
+
+$ pnpm plantilla registrar templates/kit-demo-41b/1.0.0        # 1a vez
+POST /master/templates2/versions  (/home/user/wt/41/frontend/templates/kit-demo-41b/1.0.0)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 4,
+  "slug": "kit-demo-41b",
+  "version": "1.0.0",
+  "packageHash": "sha256:8fec7a638110d35b27fff420d7e05e1d6a7d9c674aeb15606dc614c8dc82e071",
+  "assetsRegistered": 0
+}
+201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.
+
+$ pnpm plantilla registrar templates/kit-demo-41b/1.0.0        # 2a vez: idempotente (ADR-008)
+POST /master/templates2/versions  (/home/user/wt/41/frontend/templates/kit-demo-41b/1.0.0)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 4,
+  "slug": "kit-demo-41b",
+  "version": "1.0.0",
+  "packageHash": "sha256:8fec7a638110d35b27fff420d7e05e1d6a7d9c674aeb15606dc614c8dc82e071",
+  "assetsRegistered": 0
+}
+200 noop_same_hash — ya estaba registrada con EXACTAMENTE el mismo `package_hash`, así que no se ha hecho nada. Es el resultado correcto de volver a registrar el mismo paquete (ADR-008), no un fallo.
+
+$ # se cambia UN byte del manifiesto (el nombre) y se vuelve a registrar la MISMA version
+$ pnpm plantilla registrar templates/kit-demo-41b/1.0.0
+POST /master/templates2/versions  (/home/user/wt/41/frontend/templates/kit-demo-41b/1.0.0)  →  HTTP 409
+{
+  "timestamp": "06/09/2026 16:29:36",
+  "statusCode": 409,
+  "code": "TPL_VERSION_HASH_MISMATCH",
+  "message": "kit-demo-41b@1.0.0 ya está registrada con otro contenido; una versión publicada nunca se pisa",
+  "details": {
+    "slug": "kit-demo-41b",
+    "version": "1.0.0",
+    "registeredHash": "sha256:8fec7a638110d35b27fff420d7e05e1d6a7d9c674aeb15606dc614c8dc82e071",
+    "requestedHash": "sha256:8b7e5d7a3afd3d2a12aa47ae48bd1a201e2150f59cc23f98c7705a3d314790c5"
+  }
+}
+409 TPL_VERSION_HASH_MISMATCH — ese `slug@version` YA está publicado con otro contenido, y una versión publicada nunca se sobrescribe (ADR-008). Qué hacer: SUBE LA VERSIÓN (por ejemplo 1.0.0 → 1.0.1) en `template.json` y en `defaults.json`, y si has retirado o estrechado algo, añade `migrations/<anterior>-to-<nueva>.json`. No intentes pisar la versión publicada.
+
+$ # y con un paquete que NO pasa check no se sube nada:
+$ pnpm plantilla registrar templates/kit-demo-41b/1.0.0
+No se sube nada: `check` ha encontrado errores en /home/user/wt/41/frontend/templates/kit-demo-41b/1.0.0.
+ERROR TPL_ROLE_UNKNOWN  template.json#/sections/0/blocks/0/role
+  El rol "celebrantName" del bloque "cover.title" no está en el catálogo cerrado de 90 roles.
+  Sugerencia: ¿Quisiste decir "celebrantA", "celebrantsDate", "celebrantAText"? Roles admitidos en una sección "cover" con bloques "text": coverTitle, coverSubtitle, coverButtonLabel, sectionTitle, sectionIntro.
+1 error(es) · 0 aviso(s) · 0 corregido(s)

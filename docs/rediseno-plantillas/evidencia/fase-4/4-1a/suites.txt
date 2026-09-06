@@ -1,0 +1,57 @@
+# evidencia/fase-4/4-1a/suites.txt — pruebas del kit, cobertura, typecheck del monorepo y
+# NO REGRESIÓN de las suites existentes (schema 609, sections 721 antes de este bloque).
+# Fecha: 2026-09-06T16:38:06Z
+
+$ pnpm --filter @invitaciones/template-kit run test    # vitest run --coverage
+ Test Files  5 passed (5)
+      Tests  95 passed (95)
+   Start at  16:38:07
+   Duration  1.42s (transform 412ms, setup 0ms, collect 1.54s, tests 473ms, environment 1ms, prepare 443ms)
+
+ % Coverage report from v8
+--------------|---------|----------|---------|---------|------------------------
+File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s      
+--------------|---------|----------|---------|---------|------------------------
+All files     |   94.09 |       85 |   96.72 |   94.09 |                        
+ capturas.ts  |     100 |      100 |     100 |     100 |                        
+ check.ts     |   95.24 |    87.16 |     100 |   95.24 | ...422,430,527,561-567 
+ cli.ts       |   93.45 |       81 |     100 |   93.45 | ...148,182-184,222-225 
+ contraste.ts |     100 |      100 |     100 |     100 |                        
+ doctor.ts    |    83.8 |    97.56 |      75 |    83.8 | 37-53                  
+ formato.ts   |   96.77 |    93.33 |     100 |   96.77 | 76                     
+ nueva.ts     |   92.52 |       75 |     100 |   92.52 | ...156-159,221,301-305 
+ paquete.ts   |     100 |    93.75 |     100 |     100 | 51,120                 
+ preview.ts   |     100 |      100 |     100 |     100 |                        
+ registrar.ts |    95.6 |    78.18 |      75 |    95.6 | 50-52,125              
+--------------|---------|----------|---------|---------|------------------------
+
+=============================== Coverage summary ===============================
+Statements   : 94.09% ( 1180/1254 )
+Branches     : 85% ( 476/560 )
+Functions    : 96.72% ( 59/61 )
+Lines        : 94.09% ( 1180/1254 )
+================================================================================
+
+$ pnpm --filter @invitaciones/schema run test
+ Test Files  18 passed (18)
+      Tests  609 passed (609)
+$ pnpm --filter @invitaciones/sections run test
+ Test Files  36 passed (36)
+      Tests  721 passed (721)
+
+$ pnpm -r typecheck
+Scope: 7 of 8 workspace projects
+packages/schema typecheck$ tsc --noEmit --strict
+packages/tokens typecheck$ tsc --noEmit
+packages/icons typecheck$ tsc --noEmit
+packages/tokens typecheck: Done
+packages/icons typecheck: Done
+packages/schema typecheck: Done
+packages/sections typecheck$ tsc --noEmit
+packages/ui typecheck$ tsc --noEmit
+packages/sections typecheck: Done
+packages/ui typecheck: Done
+apps/web typecheck$ tsc --noEmit
+packages/template-kit typecheck$ tsc --noEmit --strict
+packages/template-kit typecheck: Done
+apps/web typecheck: Done

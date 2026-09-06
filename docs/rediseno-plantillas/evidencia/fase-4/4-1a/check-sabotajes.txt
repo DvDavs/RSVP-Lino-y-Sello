@@ -1,0 +1,41 @@
+# evidencia/fase-4/4-1a/check-sabotajes.txt
+# Los CINCO sabotajes sobre un paquete correcto (frontend/templates/xv-jardin/1.0.0, copiado a
+# un temporal). Salida literal de `plantilla check`. Las mismas cadenas se comparan enteras en
+# packages/template-kit/test/check-sabotajes.test.ts (toBe, no toContain).
+# Reproducible: cd frontend && pnpm --filter @invitaciones/template-kit exec vitest run test/check-sabotajes.test.ts
+# Fecha: 2026-09-06T16:29:52Z
+
+### 1 TPL_ROLE_UNKNOWN
+ERROR TPL_ROLE_UNKNOWN  template.json#/sections/1/blocks/1/role
+  El rol "celebrantName" del bloque "honoree.person" no está en el catálogo cerrado de 90 roles.
+  Sugerencia: ¿Quisiste decir "celebrantA", "celebrantsDate", "celebrantAText"? Roles admitidos en una sección "celebrant" con bloques "person": celebrantA, celebrantB, honoree.
+
+### 2 TPL_BLOCK_SPEC_INVALID
+ERROR TPL_BLOCK_SPEC_INVALID  template.json#/sections/3/blocks/1
+  El bloque "event.cards" no encaja en la rama `type: "group"` del esquema.
+  Sugerencia: bloque `type: "group"`. Faltan: itemLabel, itemBlocks. No admite: constraints (esta rama admite id, role, label, help, required, editable, source, businessField, aiEditable, type, min, max, reorderable, itemLabel, itemBlocks). Ejemplo mínimo: {"id":"evento.momentos","type":"group","role":"eventCards","label":{"es-MX":"Momentos"},"itemLabel":{"es-MX":"Momento"},"itemBlocks":[{"id":"titulo","type":"text","role":"eventTitle","label":{"es-MX":"Título"}}]}
+
+### 3 TPL_ASSET_DIGEST_MISMATCH (--no-escribir)
+ERROR TPL_ASSET_DIGEST_MISMATCH  template.json#/assets/3
+  El manifiesto declara "assets/preview.webp" con sha256 0000000000000000… y 60648 bytes, pero el archivo real es 91672579ac235a56… y 60648 bytes.
+  Sugerencia: Ejecuta `pnpm plantilla check /tmp/kit-JtCFfF/paquete` sin `--no-escribir` y el kit mide y escribe el digesto correcto; no lo teclees (P5). El registro rechaza el paquete con 422 TPL_PACKAGE_ASSET_MISMATCH.
+
+### 3b TPL_ASSET_DIGEST_MEDIDO (por omisión: se mide y se escribe)
+CORREGIDO TPL_ASSET_DIGEST_MEDIDO  template.json#/assets/3
+  Los datos declarados de "assets/preview.webp" no coincidían con el archivo real y se han medido de nuevo.
+  Sugerencia: Escrito sha256:91672579ac235a56… bytes:60648 contentType:image/webp. Los digestos NUNCA se teclean (P5): los mide `plantilla check`.
+
+### 4 TPL_PACKAGE_UNEXPECTED_FILE
+ERROR TPL_PACKAGE_UNEXPECTED_FILE  notas.md#$
+  El paquete contiene "notas.md", que no está en el árbol permitido de 01 §2.1.
+  Sugerencia: Un paquete sólo admite template.json, theme.json, defaults.json, assets/<archivo> (sin subdirectorios) y migrations/<archivo>.json. Saca ese archivo del directorio de la versión: el registro lo rechaza con TPL_PACKAGE_UNEXPECTED_FILE.
+
+### 5 TPL_PALETTE_CONTRAST_BELOW_AA
+ERROR TPL_PALETTE_CONTRAST_BELOW_AA  theme.json#/palettes/0/tokens
+  La paleta "garden" incumple 4 de las 9 parejas de contraste WCAG 2.2 AA: accentInk/accent #FFFFFF/#7CA35C = 2.90:1 < 4.5:1 (texto sobre botones/insignias de acento); accent/bg #7CA35C/#F6FAF3 = 2.74:1 < 3.0:1 (componentes de interfaz (1.4.11)); accent/bg (1.4.3) #7CA35C/#F6FAF3 = 2.74:1 < 4.5:1 (enlaces y horas en texto normal); accent/surface (1.4.3) #7CA35C/#FFFFFF = 2.90:1 < 4.5:1 (los mismos, sobre tarjetas).
+  Sugerencia: Oscurece la tinta, nunca bajes el umbral (contratos.md §12.4). Valores que sí cumplen, calculados con la misma fórmula: accent: #7CA35C → #5D7A45.
+
+### extra TPL_PREVIEW_IMAGE_NOT_DECLARED
+ERROR TPL_PREVIEW_IMAGE_NOT_DECLARED  template.json#/previewImage
+  previewImage apunta a "assets/portada.webp", que no está entre los 5 assets declarados.
+  Sugerencia: ¿Quisiste decir "assets/portrait-a.webp"? previewImage tiene que ser exactamente el `path` de una entrada de `assets`.

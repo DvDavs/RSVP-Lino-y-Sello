@@ -15,7 +15,8 @@
     "typecheck": "turbo run typecheck",
     "schema:emit": "pnpm --filter @invitaciones/schema run schema:emit",
     "e2e": "pnpm --filter web exec playwright test",
-    "budget": "pnpm --filter web run budget"
+    "budget": "pnpm --filter web run budget",
+    "plantilla": "pnpm --filter @invitaciones/template-kit run plantilla --"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
