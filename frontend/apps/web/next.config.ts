@@ -19,7 +19,16 @@ const nextConfig: NextConfig = {
   // `forbidden()` lanza en tiempo de ejecución y la convención `forbidden.tsx` se ignora.
   // Es aditiva: habilita `forbidden()`/`unauthorized()` y sus dos archivos de convención, y no
   // cambia el comportamiento de ninguna ruta que no los use. ADR-3-3-01.
-  experimental: { authInterrupts: true },
+  experimental: {
+    authInterrupts: true,
+    // Fase 3-C (3C-5), MEDIDO: `@invitaciones/ui` es un barril que reexporta 25 componentes y 11
+    // formas, y la mitad de esos componentes son módulos "use client" (Radix). Importar UN `Button`
+    // desde la raíz del barril metía en la PORTADA todo el lado cliente del paquete: 93,0 KB gz de
+    // JS propio de la ruta para una página cuyo único JavaScript son dos botones. Con el barril
+    // reescrito a importaciones directas por Next, la cifra baja a lo que de verdad usa (ver
+    // `bitacora/3c-5.md`). No cambia ninguna API: es una reescritura de importaciones en build.
+    optimizePackageImports: ["@invitaciones/ui", "@invitaciones/icons"],
+  },
   async headers() {
     return [
       {

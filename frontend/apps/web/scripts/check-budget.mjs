@@ -47,6 +47,11 @@ const DIR_APP = path.join(RAIZ, ".next", "server", "app");
 // enseña la salida en rojo") — nunca se usa en CI.
 const LIMITES_BASE = {
   "/i/[publicToken]": 150 * 1024,
+  // Fase 3-C (3C-5): la PORTADA es pública y de primera impresión, así que entra en la compuerta
+  // con el mismo techo que la ruta del invitado (`contratos.md §8`, brief del bloque 3). Sin esta
+  // línea, la landing podía engordar sin que nadie se enterara — el mismo defecto (A) que este
+  // fichero corrigió para `/i`.
+  "/": 150 * 1024,
   "/editor/[invitationId]": 600 * 1024,
 };
 const LIMITES = process.env.CHECK_BUDGET_OVERRIDE_KB

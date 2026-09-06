@@ -335,3 +335,28 @@ export interface AuthTokenResponse {
   isSurveyAnswered: boolean;
   [key: string]: unknown;
 }
+
+/**
+ * `POST /auth/signup` (`AuthController.kt:56`, DTO `UserRequest.kt`). Solo se tipan los campos que
+ * el registro de `/acceso` manda: el DTO acepta además `birthdate`, `address`, `city`,
+ * `postalCode`, `state` y `howKnow`, todos opcionales, y ninguno se pide en tres pasos (11 §7).
+ */
+export interface AuthSignupRequest {
+  name: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phone?: string;
+}
+
+/**
+ * `POST /auth/request-password-reset` (`AuthController.kt:62`). La respuesta es un mensaje y NADA
+ * más: `RecoveryPasswordSentResponse` ya no lleva el token de recuperación (`ADR-3C-N01-01`), y la
+ * interfaz tampoco lo enseña — muestra siempre la misma frase, exista o no la cuenta.
+ */
+export interface AuthPasswordResetRequest {
+  email: string;
+}
+export interface AuthPasswordResetResponse {
+  message: string;
+}

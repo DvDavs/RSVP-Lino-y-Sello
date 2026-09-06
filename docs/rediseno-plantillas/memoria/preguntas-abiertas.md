@@ -1196,3 +1196,53 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   (`--color-ui-accent` ya resolvía a `var(--ui-primary)`) más build/typecheck/lint/pruebas basta
   como garantía de «cero píxeles de cambio». ¿Se quiere una pasada visual del editor antes de
   integrar?
+
+## Fase 3-C · 3C-5 (bloque 3 — web pública y acceso)
+
+- **P-3C-5-1 · No hay precios porque no hay de dónde sacarlos.** El brief pedía precios «SOLO si
+  existen en la API de planes». Buscado: el único extremo es `GET /master/plans`
+  (`MasterPlansController.kt:33`), del módulo ANTIGUO de administración, no expuesto en
+  `lib/api-client.ts` y sin versión pública. **Supuesto:** la sección «Elige tu plan» dice que el
+  plan se contrata fuera y se consulta desde la cuenta, y manda a `/acceso`; no se inventa ninguna
+  cifra. ¿Se quiere una tabla de precios en la portada? Si sí, hace falta (a) un extremo público de
+  planes con precio y (b) que el dueño fije las cifras: ninguna de las dos cosas es de esta tarea.
+- **P-3C-5-2 · `/editor?tipo=<slug>` es un contrato que todavía no lee nadie.** Los siete cuadros de
+  «Para cada celebración» enlazan a `/editor?tipo=boda|xv-anos|bautizo|comunion|cumpleanos|
+  graduacion|corporativo`, que es el paso 1 del asistente de `11 §7` («¿Qué vamos a celebrar?»).
+  Hoy `/editor` ignora el parámetro sin daño. **Supuesto:** 3C-6, dueño del asistente, lo lee y
+  preselecciona el tipo; los slugs son los del inventario de iconos (`11 §4.2`, kebab-case sin
+  acentos). ¿Se confirman esos siete slugs como el vocabulario del parámetro?
+- **P-3C-5-3 · La portada se queda sin frontera de error propia.** Un `error.tsx` mete su grafo
+  entero en el JS de primera carga de todas las rutas de su segmento: medido, 11,8 KB gz sobre una
+  portada con 1,9 KB de margen (`ADR-3C-5-02`). La frontera diseñada se puso en `/acceso` y
+  `/ayuda`; `/` es estática, no busca datos y se queda con la de Next. **Supuesto:** es aceptable
+  mientras la portada siga siendo estática. ¿Se prefiere subir el presupuesto de `/` y tener la
+  pantalla de error también ahí?
+- **P-3C-5-4 · Se añadieron dos funciones a `lib/api-client.ts`.** El brief decía «NO cambies la API
+  ni el flujo de tokens». No se cambió ninguna función existente ni el almacenamiento del token: se
+  AÑADIERON `authSignup` (`POST /auth/signup`) y `authRequestPasswordReset`
+  (`POST /auth/request-password-reset`), los dos extremos que el backend ya servía y sin los cuales
+  «crear cuenta» y «recuperar contraseña» serían formularios muertos. `authSignup` escribe el token
+  por el mismo `setAuthToken` que `authLogin`, así que P8 sigue siendo cierto («el token vive solo
+  en este archivo») con dos funciones en vez de una. **¿Se ratifica?**
+- **P-3C-5-5 · El `h1` de `/ayuda` cambió y con él un selector de e2e.** `11 §7` fija «¿En qué te
+  ayudamos?»; el `h1` era «Ayuda». Se actualizó la única línea afectada de
+  `e2e/a11y-pantallas-nuevas.spec.ts`. **Supuesto:** el texto del documento manda sobre el selector
+  de la prueba. Ningún otro selector de ningún otro spec cambió.
+- **P-3C-5-6 · La marca sigue siendo la palabra «Invitaciones».** `11 §10` la dejaba como marca de
+  trabajo y no hay logotipo. La cabecera, el pie y el `<title>` la usan tal cual, en Fraunces.
+  **Supuesto:** sigue sin haber nombre comercial. En cuanto lo haya, son tres claves de `i18n`
+  (`comun.marca`, `sitio.pie.lema`, `sitio.pie.derechos`) y ningún componente.
+- **P-3C-5-7 · Los testimonios son textos de muestra marcados como ejemplo.** Van con `Badge`
+  «Ejemplo», aviso en prosa y avatar de iniciales (no retrato). **Supuesto:** es preferible enseñar
+  la maqueta marcada que dejar el hueco. ¿Se retiran hasta tener testimonios reales con permiso?
+- **P-3C-5-8 · «Ver ejemplos» se convirtió en «Ver cómo funciona».** `11 §7` proponía «Ver
+  ejemplos» como acción secundaria del héroe, pero no hay ninguna galería pública de invitaciones de
+  ejemplo a la que llevar (las publicadas son privadas por diseño, `contratos §8`). **Supuesto:**
+  antes que un enlace muerto, la acción secundaria baja a «Cómo funciona». ¿Se quiere una galería
+  pública de ejemplos? Sería una pantalla nueva y hace falta decidir qué invitaciones se enseñan.
+- **P-3C-5-9 · `packages/ui` ganó tres subrutas de exportación.** `"./componentes/*"`,
+  `"./ilustraciones/*"` y `"./fonts/preload.ts"` (aditivas, ninguna entrada existente cambia), sin
+  las cuales la portada no cabe en su presupuesto (`ADR-3C-5-02`). Es el paquete de otro bloque.
+  **Supuesto:** una subruta aditiva no necesita el visto bueno del dueño del paquete. ¿Se ratifica,
+  o se prefiere que `packages/ui` publique subrutas con nombre propio (`@invitaciones/ui/boton`)?
