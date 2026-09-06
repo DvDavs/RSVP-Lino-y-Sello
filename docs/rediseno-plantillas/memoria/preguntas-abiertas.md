@@ -1871,3 +1871,52 @@ Ver `memoria/decisiones-dueno.md` (D-01…D-08): sin migración; marca Lino & Se
   prohibida): `packages/icons` y `packages/ui` no compilan, y `apps/web` tiene 4 pruebas rojas por
   `bautizo-elegante@1.0.0` (declara Great Vibes/Poppins, no importadas en `publico.css`). Sigue fuera
   de mi área.
+
+## 4-5 (prueba cronometrada: crear una plantilla de graduación con `pnpm plantilla`, sin leer código)
+Bitácora completa, con tiempos y texto literal de cada error: `memoria/bitacora/4-5.md`. Plantilla
+resultante: `frontend/templates/toga-y-sello/1.0.0/` (worktree `/home/user/wt/45`). Resumen: el
+recorrido en sí es rápido (6 min 47 s de reloj, sin el entorno) cuando te quedas dentro de los tipos
+de bloque que la guía cubre con ejemplos concretos; en cuanto aparece un tipo que la guía no cubre, el
+"no necesitas saber el esquema" deja de cumplirse.
+
+- **La forma de un bloque `richText` en `defaults.json` no está documentada en ningún sitio permitido
+  (ni la guía, ni el checklist, ni el mensaje de `check`).** Hace falta `{kind:"richText", doc:{type:
+  "doc", content:[{type:"paragraph", content:[{type:"text", text:"…"}]}]}}` — un documento estilo
+  ProseMirror/Tiptap de tres niveles. El mensaje de `check` (`Unrecognized key: "value"` /
+  `expected object, received undefined` en `.../doc`) sólo te dice el NOMBRE del campo que falta
+  (`doc`), nunca su forma; até cabos por dos rondas de tanteo con conocimiento previo de editores de
+  texto enriquecido que un no-programador de verdad no tendría. Es, con diferencia, el bloqueo más
+  serio de toda la prueba. **Pregunta:** ¿debería `pnpm plantilla nueva` incluir SIEMPRE en el andamio
+  un ejemplo mínimo relleno de cada tipo de bloque no trivial que use la sección elegida (aunque el
+  campo sea opcional), en vez de omitirlo cuando es opcional? Con un ejemplo real delante, copiar y
+  adaptar (como ya funciona para `group`) habría bastado.
+- **El alfabeto sin I/L/O/U de los alias (`P-…` de 4-3, arriba, sobre `assetId`) también rige para el
+  `itemId` de CUALQUIER bloque `group`** (los que identifican cada tarjeta de un itinerario, cada
+  miembro de familia, cada foto de galería…), y la guía sólo lo documenta para `assetId`. El mensaje
+  de `check` da el regex crudo (`/^[0-9A-HJKMNP-TV-Z]{26}$/`) sin traducirlo a una frase como sí hace
+  con casi todos los demás errores. Mismo patrón que la pregunta ya abierta en el bloque 4-3: sería
+  mejor que el kit generara el `itemId` por ti (al añadir un elemento a un grupo) en vez de esperar
+  que el autor teclee algo con esa forma exacta a mano.
+- **El `label` de un bloque en `template.json` se pinta como texto público** en un bloque `group` sin
+  `intro`/`lead`/`groupTitle` propio (comprobado con `family.members`: el texto del andamio, "Lista
+  repetible de personas de la familia con su etiqueta", salía literal en la invitación, bajo el título
+  de la sección). Ni la guía ni el checklist avisan de que hay que revisar los `label` heredados del
+  andamio además de los valores de `defaults.json` — el checklist sólo pide repasar
+  "ningún texto de `defaults.json` es el de relleno", y este texto de relleno vive en `template.json`.
+  Lo encontré por casualidad mirando la captura con detalle, no porque algo lo señalara. **Pregunta:**
+  ¿es este el comportamiento previsto de la sección `family` (mostrar el `label` como leyenda cuando
+  falta un `intro`), o es un descuido del componente? Si es previsto, el checklist debería decir
+  explícitamente "revisa también los `label` de cada bloque `group` sin `intro`: se muestran al
+  público".
+- **El ejemplo de `--destino` de la guía no es reproducible tal cual está escrito.** La guía muestra
+  `--destino /tmp/taller/mi-boda` produciendo `/tmp/taller-43/mi-boda/1.0.0` (un solo nivel), pero el
+  comando en realidad añade `<slug>/<version>` debajo de lo que le des en `--destino` — seguido al pie
+  de la letra con un slug distinto, duplica el directorio
+  (`.../toga-y-sello/toga-y-sello/1.0.0` en mi caso). No bloquea nada (el propio `Creado /tmp/…` te
+  dice dónde quedó) pero confunde a quien copia el ejemplo literalmente, que es justo lo que la guía
+  dice que se puede hacer ("Todos los comandos de esta guía están copiados literalmente…").
+- **`doctor` no detecta que falta `pnpm install` en un worktree/checkout recién creado** — mismo
+  hallazgo que ya dejó 4-3 sobre el monorepo en general, confirmado de nuevo aquí en un worktree
+  distinto (`/home/user/wt/45`): el primer `pnpm plantilla doctor` no llega ni a imprimir su
+  diagnóstico, falla con `tsx: not found` antes de eso. La guía nunca menciona `pnpm install` como
+  paso de "Antes de empezar".
