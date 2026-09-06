@@ -50,8 +50,8 @@ describe("paquete: el `package_hash` es el de 01 §2.1, no una cuarta fórmula",
   // `frontend/templates/scripts/build-packages.mjs` y confirmados byte a byte por el backend.
   const PUBLICADOS: ReadonlyArray<[string, string]> = [
     ["xv-jardin/1.0.0", "sha256:128c63473c87b7f7efac12b17301bf31fdb64558c0a0b7bfc39fa0681e9bf688"],
-    ["boda-clasica/1.0.0", "sha256:da89e8813f5f27bd9909359aae72c166ac8f519d0f62d6e1077b38ddd688acce"],
-    ["boda-clasica/1.0.1", "sha256:063dd69869f36bf7ae085d5a78a49565bfe59edd5c881b4bc1116f4ebd0edfaa"],
+    ["boda-clasica/1.0.0", "sha256:cf0120182112711ac8137a465680c2ad0ba7b3196fd1a04e83d050775048e111"],
+    ["boda-clasica/1.0.1", "sha256:78e7a625026cc84695f2040351dd59b1196917c0c0652d6bcc90935583b84fd9"],
   ];
   for (const [relativo, esperado] of PUBLICADOS) {
     it(`${relativo} → ${esperado.slice(0, 22)}…`, () => {

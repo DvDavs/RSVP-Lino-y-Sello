@@ -370,9 +370,12 @@ export function check(opts: OpcionesCheck): ResultadoCheck {
     }
   }
 
-  // 2.45 Marca ajena en el contenido de demostración (ADR-4-8-01): sobre el JSON crudo, no espera
-  // a que el esquema valide, porque para el esquema este texto siempre es válido.
+  // 2.45 Marca ajena y datos reales de terceros en el contenido de demostración (ADR-4-8-01,
+  // ADR-4-9-01): sobre el JSON crudo, no espera a que el esquema valide, porque para el esquema
+  // este contenido siempre es válido.
   hallazgos.push(...revisarMarcaAjena(crudoDefaults));
+  hallazgos.push(...revisarEnlaceTercero(crudoDefaults));
+  hallazgos.push(...revisarDatoBancario(crudoDefaults));
 
   // 2.5 Assets: se MIDEN y se escriben (P5). Nada de digestos tecleados.
   if (manifiesto.success) {
@@ -836,19 +839,28 @@ function revisarFuentes(crudoTema: Json): readonly Hallazgo[] {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 6. Marca ajena en el contenido de demostración (ADR-4-8-01).
+// 6. Marca ajena y datos reales de terceros en el contenido de demostración (ADR-4-8-01, ADR-4-9-01).
 //
 // El esquema no puede saber que un `text` es contenido legítimo: "Invitaciones Digitales Agape
-// 2021. All Rights Reserved." valida perfectamente. Se coló en 10 de 11 plantillas (heredado del
-// catálogo antiguo, `C-FOOTER-TEXT` en migration-legacy/src/reglas-contenido.ts copia el texto del
-// pie sin sanear) y ninguna prueba lo cazaba. Esto SÍ lo caza: nombre del proveedor anterior y su
-// dominio, buscados en cualquier cadena de `defaults.json`, no sólo en el pie.
+// 2021. All Rights Reserved." valida perfectamente, y lo mismo pasa con el Facebook de una persona
+// real o una CLABE con pinta de válida. Nada de esto lo ve `validateManifest`: se busca a mano sobre
+// el JSON crudo, en TRES pasadas independientes (marca conocida por nombre · enlace a un dominio que
+// no sea example.com · número largo sin marcar como ejemplo), cada una con su propio código para que
+// el mensaje diga exactamente cuál de las tres cosas está mal.
 // ---------------------------------------------------------------------------------------------
 interface MarcaAjena { readonly patron: RegExp; readonly etiqueta: string }
 
+// 6a. Nombres conocidos de terceros (proveedor anterior, negocios reales, una persona real). Lista
+// cerrada y por tanto incompleta a propósito (riesgo heredado de ADR-4-8-01: un nombre no visto no
+// se caza aquí) — la red de verdad, genérica y no una lista, es 6b: cualquier enlace que no sea
+// example.com. Ésta es la primera línea de defensa contra la MISMA marca reapareciendo sin enlace.
 const MARCAS_AJENAS: readonly MarcaAjena[] = [
   { patron: /agape/i, etiqueta: "el proveedor del catálogo antiguo («Invitaciones Digitales Agape»)" },
   { patron: /invitacionesdigitales/i, etiqueta: "un dominio del proveedor del catálogo antiguo («invitacionesdigitales…»)" },
+  { patron: /liverpool/i, etiqueta: "un negocio real («Liverpool»)" },
+  { patron: /city\s*express/i, etiqueta: "un negocio real («City Express»)" },
+  { patron: /secci[oó]n\s*amarilla/i, etiqueta: "un directorio de negocios real («Sección Amarilla»)" },
+  { patron: /marck[.\s]?luga/i, etiqueta: "el nombre o usuario de una persona real ajena al producto («Marck Luga»)" },
 ];
 
 /** Recorre cualquier cadena dentro del valor de un bloque de `defaults.json` buscando marca ajena. */
@@ -861,7 +873,7 @@ function buscarMarcaAjena(
       salida.push({
         severidad: "ERROR", codigo: "TPL_THIRD_PARTY_BRAND", puntero: puntero(DEFAULTS, ...camino),
         problema: `El contenido de demostración del bloque "${blockId}" menciona ${marca.etiqueta}: "${nodo}".`,
-        sugerencia: "Lino & Sello es la marca del producto (D-02): quita la mención al proveedor anterior. Para un pie de invitación, escribe un texto neutro que no anuncie a nadie, por ejemplo \"Todos los derechos reservados\".",
+        sugerencia: "Lino & Sello es la marca del producto (D-02): quita la mención al proveedor anterior o al negocio/persona real. Escribe un texto neutro y ficticio verosímil, por ejemplo \"Todos los derechos reservados\" en un pie, o \"Hotel Los Encinos\" en una recomendación.",
       });
     }
     return;
@@ -881,6 +893,109 @@ function revisarMarcaAjena(crudoDefaults: Json): readonly Hallazgo[] {
   if (contenido && typeof contenido === "object") {
     for (const [blockId, valor] of Object.entries(contenido as Json)) {
       buscarMarcaAjena(valor, blockId, ["content", blockId], salida);
+    }
+  }
+  return salida;
+}
+
+// 6b. Cualquier URL http(s) del contenido de demostración cuyo dominio no sea example.com (o un
+// subdominio suyo). Genérica a propósito (ADR-4-9-01): no hace falta conocer el nombre del negocio o
+// de la red social para cazar su enlace — a diferencia de 6a, esto SÍ atrapa un dominio que nadie
+// haya visto antes. `mapHref` (el enlace de mapa de una `location`) entra igual: un pin de Google
+// Maps apunta a un lugar real y no hay forma de saber, sin resolver el enlace acortado, si identifica
+// algo privado; se trata como cualquier otro enlace de un tercero.
+const RE_URL = /https?:\/\/[^\s"]+/g;
+const DOMINIOS_PERMITIDOS_EN_DEMO = ["example.com"];
+
+function dominioPermitido(host: string): boolean {
+  const h = host.toLowerCase();
+  return DOMINIOS_PERMITIDOS_EN_DEMO.some(permitido => h === permitido || h.endsWith(`.${permitido}`));
+}
+
+function buscarEnlaceTercero(
+  nodo: unknown, blockId: string, camino: ReadonlyArray<string | number>, salida: Hallazgo[],
+): void {
+  if (typeof nodo === "string") {
+    for (const cruda of nodo.match(RE_URL) ?? []) {
+      let host: string;
+      try { host = new URL(cruda).hostname; } catch { continue; }
+      if (dominioPermitido(host)) continue;
+      salida.push({
+        severidad: "ERROR", codigo: "TPL_THIRD_PARTY_LINK", puntero: puntero(DEFAULTS, ...camino),
+        problema: `El contenido de demostración del bloque "${blockId}" enlaza a "${host}", un dominio ajeno al producto: "${cruda}".`,
+        sugerencia: `Un enlace real puede llevar al perfil, cuenta o negocio de un tercero que no dio su consentimiento para aparecer en una invitación de demostración. Usa un enlace que no resuelva a nadie, con dominio example.com (por ejemplo "https://www.example.com/${blockId.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}"): el cliente lo sustituye por el suyo al personalizar la invitación.`,
+      });
+    }
+    return;
+  }
+  if (Array.isArray(nodo)) {
+    nodo.forEach((v, i) => buscarEnlaceTercero(v, blockId, [...camino, i], salida));
+    return;
+  }
+  if (nodo && typeof nodo === "object") {
+    for (const [k, v] of Object.entries(nodo as Json)) buscarEnlaceTercero(v, blockId, [...camino, k], salida);
+  }
+}
+
+function revisarEnlaceTercero(crudoDefaults: Json): readonly Hallazgo[] {
+  const salida: Hallazgo[] = [];
+  const contenido = crudoDefaults["content"];
+  if (contenido && typeof contenido === "object") {
+    for (const [blockId, valor] of Object.entries(contenido as Json)) {
+      buscarEnlaceTercero(valor, blockId, ["content", blockId], salida);
+    }
+  }
+  return salida;
+}
+
+// 6c. Números largos con pinta de dato bancario real (CLABE de 18 dígitos, número de cuenta o de
+// tarjeta) en el contenido de demostración, salvo que el propio texto diga "ejemplo": el criterio
+// explícito de ADR-4-9-01 es que un dato bancario de ejemplo tiene que decirlo en el texto, no basta
+// con que sea ficticio por casualidad. `assetId`/`itemId`/`blockId`/`optionId` quedan fuera: son
+// identificadores técnicos del paquete, no contenido — y algunos (`as_01J8DEM000…`) tienen rachas
+// largas de ceros que, si no se excluyen, disparan un falso positivo (medido: boda-clasica/1.0.0).
+const CLAVES_TECNICAS = new Set(["assetId", "itemId", "blockId", "optionId", "templateSlug", "templateVersion"]);
+const RE_NUMERO_LARGO = /\d[\d\s-]*\d/g;
+
+function pareceDatoBancario(texto: string): boolean {
+  if (/ejemplo/i.test(texto)) return false;
+  for (const m of texto.match(RE_NUMERO_LARGO) ?? []) {
+    if (m.replace(/[^\d]/g, "").length >= 10) return true;
+  }
+  return false;
+}
+
+function buscarDatoBancario(
+  nodo: unknown, blockId: string, camino: ReadonlyArray<string | number>, salida: Hallazgo[],
+): void {
+  if (typeof nodo === "string") {
+    if (pareceDatoBancario(nodo)) {
+      salida.push({
+        severidad: "ERROR", codigo: "TPL_THIRD_PARTY_BANK_DATA", puntero: puntero(DEFAULTS, ...camino),
+        problema: `El contenido de demostración del bloque "${blockId}" lleva un número largo sin marcar como ejemplo, con pinta de CLABE, cuenta o tarjeta real: "${nodo}".`,
+        sugerencia: 'Usa una cifra evidentemente ficticia (ceros o una secuencia 0123…) y dilo en el propio texto, por ejemplo "Cuenta CLABE: 000000000000000000 (ejemplo, sustitúyela por la tuya)". Nunca repitas un CLABE, cuenta o tarjeta reales, aunque vengan de la migración legada.',
+      });
+    }
+    return;
+  }
+  if (Array.isArray(nodo)) {
+    nodo.forEach((v, i) => buscarDatoBancario(v, blockId, [...camino, i], salida));
+    return;
+  }
+  if (nodo && typeof nodo === "object") {
+    for (const [k, v] of Object.entries(nodo as Json)) {
+      if (CLAVES_TECNICAS.has(k)) continue;
+      buscarDatoBancario(v, blockId, [...camino, k], salida);
+    }
+  }
+}
+
+function revisarDatoBancario(crudoDefaults: Json): readonly Hallazgo[] {
+  const salida: Hallazgo[] = [];
+  const contenido = crudoDefaults["content"];
+  if (contenido && typeof contenido === "object") {
+    for (const [blockId, valor] of Object.entries(contenido as Json)) {
+      buscarDatoBancario(valor, blockId, ["content", blockId], salida);
     }
   }
   return salida;

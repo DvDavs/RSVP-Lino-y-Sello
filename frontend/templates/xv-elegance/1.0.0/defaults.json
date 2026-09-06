@@ -15,12 +15,12 @@
             "detail": {
               "kind": "listText",
               "items": [
-                "Marck Luga"
+                "Salón Bella Luna"
               ]
             },
             "link": {
               "kind": "link",
-              "href": "https://www.facebook.com/marck.luga.39"
+              "href": "https://www.example.com/salon-bella-luna"
             }
           }
         }
@@ -116,7 +116,7 @@
             "place": {
               "kind": "location",
               "name": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
-              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+              "mapHref": "https://www.example.com/mapa-ubicacion"
             }
           }
         },
@@ -259,7 +259,7 @@
             },
             "link": {
               "kind": "link",
-              "href": "https://www.facebook.com/hashtag/rebecaYsantiago"
+              "href": "https://www.example.com/hashtag/rebecaYsantiago"
             },
             "platform": {
               "kind": "choice",
@@ -276,7 +276,7 @@
             },
             "link": {
               "kind": "link",
-              "href": "https://www.instagram.com/explore/tags/rebecaYsantiago"
+              "href": "https://www.example.com/tags/rebecaYsantiago"
             },
             "platform": {
               "kind": "choice",
@@ -311,10 +311,10 @@
             "detail": {
               "kind": "listText",
               "items": [
-                "Banco: SANTANDER",
-                "Titular: KARLA ZARATE CRUZ",
-                "Cuenta CLABE: 014610606106246881",
-                "Número de tarjeta: 60610624688"
+                "Banco: Banco de Ejemplo",
+                "Titular: Nombre Apellido (cuenta de ejemplo)",
+                "Cuenta CLABE: 000000000000000000 (ejemplo, sustitúyela por la tuya)",
+                "Número de tarjeta: 0000000000000000 (ejemplo)"
               ]
             }
           }
@@ -328,17 +328,17 @@
             },
             "title": {
               "kind": "text",
-              "value": "Mesa Liverpool"
+              "value": "Mesa de regalos"
             },
             "detail": {
               "kind": "listText",
               "items": [
-                "Número de evento 50355602"
+                "Número de evento 000000 (ejemplo)"
               ]
             },
             "link": {
               "kind": "link",
-              "href": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602"
+              "href": "https://www.example.com/mesa-de-regalos"
             }
           }
         },
@@ -366,12 +366,12 @@
             },
             "title": {
               "kind": "text",
-              "value": "Mesa de liverpool"
+              "value": "Mesa de regalos"
             },
             "detail": {
               "kind": "listText",
               "items": [
-                "visita liverpool",
+                "visita la tienda",
                 "compra aqui"
               ]
             }
@@ -408,12 +408,12 @@
             "detail": {
               "kind": "listText",
               "items": [
-                "City Express Oaxaca"
+                "Hotel Los Encinos"
               ]
             },
             "link": {
               "kind": "link",
-              "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+              "href": "https://www.example.com/hotel-los-encinos"
             }
           }
         },
@@ -427,12 +427,12 @@
             "detail": {
               "kind": "listText",
               "items": [
-                "Sitio Antequera"
+                "Sitio de taxis del centro"
               ]
             },
             "link": {
               "kind": "link",
-              "href": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1"
+              "href": "https://www.example.com/sitio-de-taxis"
             }
           }
         },
@@ -446,12 +446,12 @@
             "detail": {
               "kind": "listText",
               "items": [
-                "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax."
+                "Av. Ejemplo 102, Centro, 68000 Oaxaca de Juárez, Oax. (dirección de ejemplo)"
               ]
             },
             "link": {
               "kind": "link",
-              "href": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8"
+              "href": "https://www.example.com/mapa-renta-de-autos"
             }
           }
         },

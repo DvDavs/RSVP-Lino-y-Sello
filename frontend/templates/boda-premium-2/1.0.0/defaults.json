@@ -221,7 +221,7 @@
             "place": {
               "kind": "location",
               "name": "TEMPLO SANTO DOMINGO DE GUZMÁN",
-              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+              "mapHref": "https://www.example.com/mapa-ubicacion"
             }
           }
         },
@@ -240,7 +240,7 @@
             "place": {
               "kind": "location",
               "name": "TEMPLO SANTO DOMINGO DE GUZMÁN",
-              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+              "mapHref": "https://www.example.com/mapa-ubicacion"
             }
           }
         }
@@ -324,7 +324,7 @@
             },
             "link": {
               "kind": "link",
-              "href": "https://www.facebook.com/hashtag/Sarah&Alan"
+              "href": "https://www.example.com/hashtag/SarahYAlan"
             },
             "platform": {
               "kind": "choice",
@@ -341,7 +341,7 @@
             },
             "link": {
               "kind": "link",
-              "href": "https://www.instagram.com/explore/tags/Sarah&Alan"
+              "href": "https://www.example.com/tags/SarahYAlan"
             },
             "platform": {
               "kind": "choice",
@@ -387,10 +387,10 @@
             "detail": {
               "kind": "listText",
               "items": [
-                "Banco: SANTANDER",
-                "Titular: KARLA ZARATE CRUZ",
-                "Cuenta CLABE: 014610606106246881",
-                "Número de tarjeta: 60610624688"
+                "Banco: Banco de Ejemplo",
+                "Titular: Nombre Apellido (cuenta de ejemplo)",
+                "Cuenta CLABE: 000000000000000000 (ejemplo, sustitúyela por la tuya)",
+                "Número de tarjeta: 0000000000000000 (ejemplo)"
               ]
             }
           }
@@ -404,12 +404,12 @@
             },
             "title": {
               "kind": "text",
-              "value": "MESA LIVERPOOL"
+              "value": "MESA DE REGALOS"
             },
             "detail": {
               "kind": "listText",
               "items": [
-                "Número de evento 50355602"
+                "Número de evento 000000 (ejemplo)"
               ]
             }
           }

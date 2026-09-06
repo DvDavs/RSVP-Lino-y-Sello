@@ -1947,3 +1947,44 @@ de bloque que la guía cubre con ejemplos concretos; en cuanto aparece un tipo q
   competidores hipotéticos sin evidencia de que aparezcan es ruido, no protección real; se amplía
   el día que aparezca un rastro nuevo. **Pregunta:** ¿el dueño conoce otro nombre/dominio del
   proveedor anterior (razón social, RFC, otro dominio) que convenga añadir ya a la lista?
+
+## 4-9 (sacar los datos reales de terceros del contenido de demostración de las plantillas)
+- **Resuelve la pregunta que dejó abierta 4-8** ("¿se sustituyen por placeholders genéricos en un
+  encargo aparte?"): sí, ya está hecho — ver ADR-4-9-01. El perfil de Facebook, la CLABE/titular/
+  tarjeta, y los enlaces a Liverpool/City Express/Sección Amarilla ya no aparecen en
+  `frontend/templates/**`.
+- **`frontend/packages/schema/golden/templates/boda-clasica-1.0.0/**` (4 ficheros) y los 8
+  `frontend/packages/migration-legacy/golden/*.golden.json` siguen con el Facebook/Liverpool/CLABE
+  reales** (verificado con `grep -rl` tras el cambio, en `evidencia/fase-4/4-9/`). Misma situación
+  que ya dejó 4-8 con el texto de Agape en esos mismos ficheros: fuera de mi territorio (prohibido
+  tocar `packages/schema`; `migration-legacy` sólo autoriza `src/**`), sus suites siguen en verde
+  porque comparan contra sí mismos. **Supuesto tomado:** lo dejo como hallazgo, no lo regenero.
+  **Pregunta:** ¿alguien con permiso sobre `packages/schema` corre `gen:golden` en los dos paquetes
+  para que golden y plantilla real vuelvan a coincidir, o se deja así hasta que D-01 retire
+  `migration-legacy` del todo?
+- **`frontend/packages/migration-legacy/src/reglas-contenido.ts` (reglas `C-GIF-MSG`, `C-GIF-URL`,
+  `C-REC-TYPE`/`C-REC-*`, líneas ~238-260) tiene el MISMO patrón de fuga que `C-FOOTER-TEXT`**
+  (mapea la forma del campo sin sanear el contenido) — confirmado, no arreglado. **Supuesto
+  tomado:** no lo toco porque `decisiones-dueno.md` (D-01, hoy) dice que `packages/migration-legacy`
+  no se vuelve a construir; arreglar una regla que no se va a ejecutar de nuevo no protege nada
+  hoy. **Pregunta:** si D-01 cambiara (o si alguna plantilla futura SÍ pasara por esta herramienta),
+  ¿quién adopta el mismo criterio de saneado que aquí, en `reglas-contenido.ts`?
+- **24 enlaces `place.mapHref` (`https://maps.app.goo.gl/Q84SBQZJ36owN2uz6` en 22 y
+  `https://maps.google.com/...` en 2) no se pudieron resolver**: el proxy de red bloquea
+  `maps.app.goo.gl` tanto por `curl` (403 Forbidden) como por `WebFetch`
+  (`EGRESS_BLOCKED: maps.app.goo.gl`). El nombre del lugar asociado en el texto ("Templo de Santo
+  Domingo de Guzmán", p. ej.) es un monumento público conocido, no un tercero identificable, pero
+  no hay forma de confirmar a qué apunta el enlace acortado en sí. **Supuesto tomado (conservador):**
+  se sustituyó por un enlace `example.com`, igual que el resto — las dos plantillas limpias
+  (`xv-jardin`, `toga-y-sello`) ni siquiera llevan `mapHref`, así que el patrón "sin enlace de mapa
+  real en la demo" ya tenía precedente. **Pregunta:** ¿el dueño puede confirmar (o resolver él mismo
+  el enlace, sin el proxy de por medio) a qué apuntaba `Q84SBQZJ36owN2uz6`, por si conviene un
+  enlace de ejemplo distinto o no hace falta la cautela?
+- **Los nombres propios de la pareja/padrinos/madrinas repetidos entre plantillas** (Antonio/Camila,
+  Martín Barrita, María Rocha Luis, Raúl Estrada Santiago, Teresa López, Roberto Cruz, Carolina
+  Aquino, Rebeca Santana, Santiago Hernández, Vanessa Jiménez, Pedro Estrada, Luz Elena, Georgina,
+  Valentina Reyes Cordero…) **no se tocaron**: leídos como un elenco ficticio reutilizado a
+  propósito (apellidos combinados de formas distintas en parejas distintas), no como una persona
+  real filtrada por accidente. **Pregunta:** ¿el dueño reconoce alguno de estos nombres como el de
+  una persona real (más allá de "Marck Luga"/"Karla Zárate Cruz", ya corregidos)? Si es así, se
+  trata igual que el resto.
