@@ -334,11 +334,29 @@ jobs:
       # aparte con `--workers=1` y el resto conserva los 4 workers de la config. No es cuarentena:
       # el spec SE EJECUTA y su fallo rompe el job igual que cualquier otro (`--fail-on-flaky-tests`
       # en ambas). Queda anotado como issue en `memoria/issues-ci.md` (I-CI-01).
+      #
+      # DIVERGENCIA runner/local nº 8 (handoffs/ci-github.md): las propias pruebas hablan con
+      # Postgres. `e2e/preparar.ts:32` abre `psql` para insertar la fila de `invitation` que no tiene
+      # ruta HTTP (ADR-2-4-02) y para leer la cuenta de demostración, y toma la base de
+      # `TPL_DEV_DB` (defecto `invitaciones_dev`, que aquí NO existe: la del servicio es
+      # `templates2_e2e`) y el puerto de `TPL_TEST_STATE_DIR/state.env`. Contra el clúster efímero
+      # local eso basta —autenticación `trust`, sin contraseña—; el servicio `postgres:16` SÍ pide
+      # contraseña, así que sin `PGPASSWORD` cada llamada muere con «fe_sendauth: no password
+      # supplied». Medido: 46 de 77 pruebas en rojo por esto en la corrida 34051529623, todas con el
+      # mismo error. Se arregla con entorno, sin tocar una línea de `frontend/**`.
       - name: e2e + a11y (4 workers, todos los specs menos a11y-publico)
         run: pnpm --filter web exec playwright test --fail-on-flaky-tests '^(?!.*a11y-publico\.spec\.ts).*$'
+        env:
+          TPL_DEV_DB: templates2_e2e
+          TPL_TEST_STATE_DIR: /tmp/templates2-pg
+          PGPASSWORD: postgres
 
       - name: a11y del render público con un solo worker (I-CI-01)
         run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=1 a11y-publico.spec.ts
+        env:
+          TPL_DEV_DB: templates2_e2e
+          TPL_TEST_STATE_DIR: /tmp/templates2-pg
+          PGPASSWORD: postgres
 
       - if: always()
         uses: actions/upload-artifact@v4

@@ -30,7 +30,13 @@ corrida tras corrida, sin que nadie leyera el log. Ninguna e2e se había ejecuta
 6. **`psql` del runner está en `/usr/bin`**, no en `/usr/lib/postgresql/16/bin`, que es el defecto de
    `seed-demo.sh` y de `pg-ephemeral.sh`. → se le pasa `TPL_TEST_PGBIN` resuelto por PATH. El script
    no se toca.
-7. **Sin caché de Gradle en `e2e`**: el job compilaba el backend descargando todas las dependencias
+7. **Las propias pruebas hablan con Postgres.** `e2e/preparar.ts:32` abre `psql` (la fila de
+   `invitation` no tiene ruta HTTP, ADR-2-4-02) leyendo la base de `TPL_DEV_DB` —defecto
+   `invitaciones_dev`, que en CI no existe— y el puerto de `TPL_TEST_STATE_DIR/state.env`. Contra el
+   clúster efímero local basta (autenticación `trust`); el servicio `postgres:16` pide contraseña.
+   **46 de 77 pruebas en rojo por esto**, todas con «fe_sendauth: no password supplied». → se pasa
+   `TPL_DEV_DB`, `TPL_TEST_STATE_DIR` y `PGPASSWORD` en el paso. Sin tocar `frontend/**`.
+8. **Sin caché de Gradle en `e2e`**: el job compilaba el backend descargando todas las dependencias
    desde cero. → mismo `gradle/actions/setup-gradle@v4` que el job `backend`.
 
 ## 2. Estructura y tiempos
