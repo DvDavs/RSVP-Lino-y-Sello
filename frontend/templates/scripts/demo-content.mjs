@@ -104,25 +104,25 @@ const lotes = [
       item('event.cards', 'ev-ceremonia', {
         title: T('Ceremonia religiosa'),
         when: RANGO('2027-04-18T17:00', '2027-04-18T18:15'),
-        place: LOC('Parroquia de San Juan Bautista', 'Jardín Centenario 8, Villa Coyoacán, Ciudad de México', 'https://maps.google.com/?q=Parroquia+de+San+Juan+Bautista+Coyoacan'),
+        place: LOC('Parroquia de Nuestra Señora del Rosario', 'Av. Ejemplo 8, Coyoacán, Ciudad de México (dirección de ejemplo)', 'https://www.example.com/mapa-ubicacion'),
         note: T('Te pedimos llegar 20 minutos antes'),
       }),
       item('event.cards', 'ev-coctel', {
         title: T('Cóctel de bienvenida'),
         when: RANGO('2027-04-18T19:30', '2027-04-18T20:30'),
-        place: LOC('Hacienda de San Gabriel de las Palmas', 'Carretera Amacuzac–Cuernavaca km 3, Amacuzac, Morelos', 'https://maps.google.com/?q=Hacienda+San+Gabriel+de+las+Palmas'),
+        place: LOC('Hacienda Los Naranjos', 'Av. Ejemplo 3, Amacuzac, Morelos (dirección de ejemplo)', 'https://www.example.com/mapa-ubicacion'),
         note: T('En los jardines, junto al acueducto'),
       }),
       item('event.cards', 'ev-cena', {
         title: T('Recepción y cena'),
         when: RANGO('2027-04-18T20:30', '2027-04-18T22:30'),
-        place: LOC('Hacienda de San Gabriel de las Palmas', 'Salón principal', 'https://maps.google.com/?q=Hacienda+San+Gabriel+de+las+Palmas'),
+        place: LOC('Hacienda Los Naranjos', 'Salón principal', 'https://www.example.com/mapa-ubicacion'),
         note: T('Menú de tres tiempos; hay opción vegetariana'),
       }),
       item('event.cards', 'ev-baile', {
         title: T('Baile'),
         when: RANGO('2027-04-18T22:30', '2027-04-19T03:00'),
-        place: LOC('Hacienda de San Gabriel de las Palmas', 'Terraza de los arcos'),
+        place: LOC('Hacienda Los Naranjos', 'Terraza de los arcos'),
         note: T('Zapatos cómodos a partir de la medianoche'),
       }),
     ],
@@ -157,14 +157,14 @@ const lotes = [
       set('gifts.title', T('Mesa de regalos')),
       item('gifts.options', 'regalo-tienda', {
         kind: CH('store'),
-        title: T('Liverpool'),
-        detail: L('Evento núm. 51234567', 'A nombre de Ana Sofía Robles y Diego Márquez'),
-        link: LINK('https://mesaderegalos.liverpool.com.mx/milistaderegalos/51234567', 'Ver la mesa en Liverpool'),
+        title: T('Tienda departamental'),
+        detail: L('Número de evento 000000 (ejemplo)', 'A nombre de Ana Sofía Robles y Diego Márquez'),
+        link: LINK('https://www.example.com/mesa-de-regalos', 'Ver la mesa de regalos'),
       }),
       item('gifts.options', 'regalo-banco', {
         kind: CH('bank'),
         title: T('Transferencia'),
-        detail: L('BBVA México', 'Ana Sofía Robles Herrera', 'CLABE 012180001234567895'),
+        detail: L('Banco de Ejemplo', 'Ana Sofía Robles Herrera (cuenta de ejemplo)', 'CLABE 000000000000000000 (ejemplo, sustitúyela por la tuya)'),
       }),
       item('gifts.options', 'regalo-sobres', {
         kind: CH('cash'),
@@ -173,12 +173,12 @@ const lotes = [
       }),
       set('suggestions.title', T('Dónde quedarse')),
       item('suggestions.items', 'hotel-hacienda', {
-        name: T('Hotel Hacienda Vista Hermosa'),
-        detail: L('A 10 minutos de la hacienda', 'Tarifa especial con el código ANAYDIEGO2027', 'Reservaciones al 777 123 4567'),
-        link: LINK('https://maps.google.com/?q=Hotel+Hacienda+Vista+Hermosa+Morelos', 'Cómo llegar'),
+        name: T('Hotel Los Encinos'),
+        detail: L('A 10 minutos de la hacienda', 'Tarifa especial con el código ANAYDIEGO2027', 'Reservaciones al 777 123 4567 (ejemplo)'),
+        link: LINK('https://www.example.com/hotel-los-encinos', 'Cómo llegar'),
       }),
-      item('suggestions.items', 'hotel-amacuzac', {
-        name: T('Posada Los Amates'),
+      item('suggestions.items', 'hotel-posada', {
+        name: T('Posada del Jardín'),
         detail: L('En el centro de Amacuzac', 'Opción económica, ocho habitaciones'),
       }),
       set('amenities.title', T('Para que no te preocupes por nada')),
