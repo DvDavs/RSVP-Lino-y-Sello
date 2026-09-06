@@ -1,0 +1,33 @@
+== filas de tpl_template_version ANTES ==
+1|xv-jardin|1.0.0|sha256:d805fc53656b58b7a29650b5aecfa75e24e14d6d51479dfe8690ad14f442b5ee
+2|xv-jardin|1.0.99|sha256:0967ead1554d102a9cfe2b065c610a92fab19c381effdf19ab49edbb8e3c8d47
+3|boda-clasica|1.0.0|sha256:02a9a294e889ac04e89d30d559cfee07886d1cde27823aa46f6e7962085d1a96
+
+== llamada 1 ==
+POST /master/templates2/versions  (frontend/templates/xv-jardin/1.0.0)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 1,
+  "slug": "xv-jardin",
+  "version": "1.0.0",
+  "packageHash": "sha256:d805fc53656b58b7a29650b5aecfa75e24e14d6d51479dfe8690ad14f442b5ee",
+  "assetsRegistered": 0
+}
+
+== llamada 2 (misma, byte a byte) ==
+POST /master/templates2/versions  (frontend/templates/xv-jardin/1.0.0)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 1,
+  "slug": "xv-jardin",
+  "version": "1.0.0",
+  "packageHash": "sha256:d805fc53656b58b7a29650b5aecfa75e24e14d6d51479dfe8690ad14f442b5ee",
+  "assetsRegistered": 0
+}
+
+== filas de tpl_template_version DESPUÉS ==
+1|xv-jardin|1.0.0|sha256:d805fc53656b58b7a29650b5aecfa75e24e14d6d51479dfe8690ad14f442b5ee
+2|xv-jardin|1.0.99|sha256:0967ead1554d102a9cfe2b065c610a92fab19c381effdf19ab49edbb8e3c8d47
+3|boda-clasica|1.0.0|sha256:02a9a294e889ac04e89d30d559cfee07886d1cde27823aa46f6e7962085d1a96

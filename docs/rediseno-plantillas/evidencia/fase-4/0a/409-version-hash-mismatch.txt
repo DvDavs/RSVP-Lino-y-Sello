@@ -1,0 +1,33 @@
+== qué cambió respecto al paquete publicado ==
+114c114
+<       "value": "Camila & Antonio"
+---
+>       "value": "Nuestra boda (texto cambiado a propósito)"
+
+== registrar boda-clasica@1.0.0 MODIFICADA (misma versión, otros bytes) ==
+POST /master/templates2/versions  (/tmp/tmp.lvS1NRv2j3)  →  HTTP 409
+{
+  "timestamp": "06/09/2026 15:39:48",
+  "statusCode": 409,
+  "code": "TPL_VERSION_HASH_MISMATCH",
+  "message": "boda-clasica@1.0.0 ya está registrada con otro contenido; una versión publicada nunca se pisa",
+  "details": {
+    "slug": "boda-clasica",
+    "version": "1.0.0",
+    "registeredHash": "sha256:02a9a294e889ac04e89d30d559cfee07886d1cde27823aa46f6e7962085d1a96",
+    "requestedHash": "sha256:ac50c7c9324ecac81e7034f1c5b070c17b2a7db83e4afce2743e10d53ae62e18"
+  }
+}
+(código de salida del ayudante: 1)
+
+== y el paquete 1.0.0 SIN modificar sigue siendo noop ==
+POST /master/templates2/versions  (frontend/templates/boda-clasica/1.0.0)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 3,
+  "slug": "boda-clasica",
+  "version": "1.0.0",
+  "packageHash": "sha256:02a9a294e889ac04e89d30d559cfee07886d1cde27823aa46f6e7962085d1a96",
+  "assetsRegistered": 0
+}

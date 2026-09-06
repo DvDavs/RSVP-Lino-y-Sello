@@ -1,0 +1,79 @@
+==============================================================================
+ smoke templates2 — 19 rutas sobre Tomcat real
+ base: http://127.0.0.1:6013   postgres: 127.0.0.1:47463/invitaciones_f4_0a   2026-09-06T15:35:05Z
+==============================================================================
+
+-- Preparación --------------------------------------------------------------
+  customer USER id=14 (JWT por POST /auth/token), customer MASTER promovido por SQL
+  invitación id=3 (template_id=6, uses_templates2=true) creada por SQL
+
+-- Las 19 rutas -------------------------------------------------------------
+  [OK ] 1    GET    /editor/templates2/catalog                                 esperado 200     obtenido 200
+         catálogo = []
+  [AVISO] el catálogo no trae exactamente las dos plantillas registradas
+  [FAIL] 2   POST   /editor/invitations/3/document:choose-template             esperado 201     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_TEMPLATE_VERSION_NOT_FOUND","message":"no existe la versión xv-jardin@1.0.0","details":{"templateSlug":"xv-jardin","templateVersion":"1.0.0"}}
+         revision=null publicToken=null
+  [FAIL] 3   GET    /editor/invitations/3/document                             esperado 200     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+  [FAIL] 7   POST   /editor/invitations/3/assets                               esperado 201|200 obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+         assetId=null previewUrl=null
+  [FAIL] 7b  POST   /editor/invitations/3/assets                               esperado 201|200 obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+  [FAIL] 4   POST   /editor/invitations/3/document/operations                  esperado 200     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+         revision=null applied=null
+  [FAIL] 5   GET    /editor/invitations/3/document/history?limit=10            esperado 200     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+jq: error (at <stdin>:0): Cannot iterate over null (null)
+         revisiones en el historial: 
+  [FAIL] 6   POST   /editor/invitations/3/document/restore                     esperado 200     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+         revision=null (restaurada la null)
+  [FAIL] 8   GET    /editor/invitations/3/assets?limit=10                      esperado 200     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+jq: error (at <stdin>:0): Cannot iterate over null (null)
+         assets = 
+  [FAIL] 10  GET    /editor/invitations/3/release/preflight                    esperado 200     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+         canPublish=null missingRequired=0
+  [FAIL] 11  POST   /editor/invitations/3/release                              esperado 201     obtenido 400
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":400,"code":"TPL_MALFORMED_JSON","message":"body: falta el campo obligatorio 'baseRevision'","details":{"path":"body"}}
+         contentHash=null
+  [FAIL] 15  GET    /public/i/null/render                                      esperado 200     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_RELEASE_NOT_FOUND","message":"no hay ninguna invitación publicada en este enlace","details":{"publicToken":"null"}}
+         ETag: 
+         Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+  [FAIL] el render público no trajo ETag
+  [FAIL] el ETag no tiene la forma "sha256:…"
+  [FAIL] Cache-Control sin max-age=300
+  [FAIL] 15b GET    /public/i/{token}/render (If-None-Match)                   esperado 304     obtenido 404 (cuerpo 180 B)
+  [OK ] 16   GET    /public/i/null/exists                                      esperado 200     obtenido 200
+         cuerpo: {"published":false}
+  [FAIL] 13  GET    /editor/invitations/3/releases?limit=10                    esperado 200     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+  [FAIL] 14  POST   /editor/invitations/3/public-token:rotate                  esperado 200     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+         publicToken null → null
+  [FAIL] 12  DELETE /editor/invitations/3/release                              esperado 204     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_DOCUMENT_NOT_STARTED","message":"la invitación 3 no tiene documento: hay que llamar antes a :choose-template","details":{"invitationId":3}}
+  [FAIL] 9   DELETE /editor/invitations/3/assets/null                          esperado 204     obtenido 404
+         cuerpo: {"timestamp":"06/09/2026 15:35:06","statusCode":404,"code":"TPL_ASSET_NOT_FOUND","message":"la invitación 3 no tiene ningún asset null","details":{"assetId":"null"}}
+  [OK ] 17   POST   /master/templates2/versions                                esperado 200|201 obtenido 201
+         result=created alreadyRegistered=false
+  [OK ] 17b  POST   /master/templates2/versions                                esperado 200|201 obtenido 201
+         xv-jardin@1.0.99 id=2 alreadyRegistered=false
+  [OK ] 18   GET    /master/templates2/versions?limit=20                       esperado 200     obtenido 200
+         versiones = xv-jardin@1.0.99:published, xv-jardin@1.0.0:published
+  [OK ] 19   POST   /master/templates2/versions/2:deprecate                    esperado 200     obtenido 200
+         status=deprecated documentsUsing=0
+curl: (6) Could not resolve host: null
+
+-- Extras -------------------------------------------------------------------
+  previewUrl del asset (null) → HTTP 000
+  [FAIL] la URL del asset no se puede leer
+
+==============================================================================
+ 4/19 OK   ·   20 comprobación(es) fallida(s)
+==============================================================================
