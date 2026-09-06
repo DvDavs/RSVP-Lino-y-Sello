@@ -1,0 +1,58 @@
+{
+  "palettes": [
+    {
+      "id": "pergamino",
+      "name": {
+        "es-MX": "Pergamino"
+      },
+      "tokens": {
+        "bg": "#FAF6EC",
+        "surface": "#FFFFFF",
+        "ink": "#2B2620",
+        "accent": "#1F3A5F",
+        "accentInk": "#FFFFFF",
+        "muted": "#6B5F4E"
+      }
+    },
+    {
+      "id": "toga",
+      "name": {
+        "es-MX": "Toga"
+      },
+      "tokens": {
+        "bg": "#F5F7FA",
+        "surface": "#FFFFFF",
+        "ink": "#232B33",
+        "accent": "#7A1F2B",
+        "accentInk": "#FFFFFF",
+        "muted": "#5A6672"
+      }
+    }
+  ],
+  "fontSets": [
+    {
+      "id": "academica",
+      "name": {
+        "es-MX": "Académica"
+      },
+      "heading": {
+        "family": "Playfair Display",
+        "weights": [
+          400,
+          700
+        ],
+        "source": "bundled"
+      },
+      "body": {
+        "family": "Source Sans 3",
+        "weights": [
+          400,
+          600
+        ],
+        "source": "bundled"
+      }
+    }
+  ],
+  "defaultPaletteId": "pergamino",
+  "defaultFontSetId": "academica"
+}
