@@ -25,7 +25,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@invitaciones/ui/compo
 import { WizardProgress, type EstadoPaso } from "@invitaciones/ui/componentes/WizardProgress/index.ts";
 import { authLogin, authRequestPasswordReset, authSignup } from "@/lib/api-client";
 import { es_MX } from "@/lib/i18n";
-import { destinoSeguro, traducirErrorAcceso, traducirErrorRegistro, type PasoRegistro } from "./traducir-errores.ts";
+import {
+  destinoSeguro,
+  traducirErrorAcceso,
+  traducirErrorRegistro,
+  type CampoRegistro,
+  type PasoRegistro,
+} from "./traducir-errores.ts";
 
 const CLASE_PANEL = "mt-8";
 const CLASE_TITULO = "display-sm text-ui-ink";
@@ -234,6 +240,16 @@ function PanelRecuperar({ correoInicial, onVolver }: { readonly correoInicial: s
 // Crear cuenta — tres pasos (11 §7): correo · contraseña · nombre
 // ───────────────────────────────────────────────────────────────────────────────────────────────
 
+/**
+ * M-12: el error del registro deja de ser una cadena suelta al pie del formulario. Lleva el campo
+ * al que pertenece, y el `Field` de ese campo lo pinta con `aria-invalid` y `aria-describedby`
+ * (los pone el propio componente del sistema). Sin `campo` = error general (red, servidor).
+ */
+interface ErrorDelRegistro {
+  readonly mensaje: string;
+  readonly campo?: CampoRegistro;
+}
+
 function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
   const [paso, setPaso] = useState<PasoRegistro>(1);
   const [correo, setCorreo] = useState("");
@@ -241,7 +257,11 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
   const [nombre, setNombre] = useState("");
   const [apellidos, setApellidos] = useState("");
   const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ErrorDelRegistro | null>(null);
+
+  /** El mensaje de ESTE campo, o `undefined`: es lo que `Field` espera en su prop `error`. */
+  const errorDe = (campo: CampoRegistro): string | undefined =>
+    error?.campo === campo ? error.mensaje : undefined;
 
   const estados = estadosDe(paso);
   const pasos = [
@@ -254,7 +274,7 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
     setError(null);
     if (paso === 1) {
       if (correo.trim().length === 0) {
-        setError(es_MX.acceso.faltaCorreo);
+        setError({ mensaje: es_MX.acceso.faltaCorreo, campo: "email" });
         return;
       }
       setPaso(2);
@@ -262,7 +282,7 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
     }
     if (paso === 2) {
       if (contrasena.length === 0) {
-        setError(es_MX.acceso.faltaContrasena);
+        setError({ mensaje: es_MX.acceso.faltaContrasena, campo: "password" });
         return;
       }
       setPaso(3);
@@ -276,11 +296,11 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
       return;
     }
     if (nombre.trim().length === 0) {
-      setError(es_MX.acceso.registro.faltaNombre);
+      setError({ mensaje: es_MX.acceso.registro.faltaNombre, campo: "name" });
       return;
     }
     if (apellidos.trim().length === 0) {
-      setError(es_MX.acceso.registro.faltaApellidos);
+      setError({ mensaje: es_MX.acceso.registro.faltaApellidos, campo: "lastName" });
       return;
     }
     setEnviando(true);
@@ -296,8 +316,8 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
     } catch (e: unknown) {
       // La validación de forma la hace el servidor (una sola fuente): aquí solo se traduce y se
       // devuelve a la persona AL PASO del campo que falló, para que pueda corregirlo.
-      const { mensaje, paso: destino } = traducirErrorRegistro(e);
-      setError(mensaje);
+      const { mensaje, paso: destino, campo } = traducirErrorRegistro(e);
+      setError(campo ? { mensaje, campo } : { mensaje });
       if (destino) setPaso(destino);
       setEnviando(false);
     }
@@ -314,7 +334,7 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
 
       <form className="mt-6 flex flex-col gap-4" onSubmit={(e) => void crear(e)} noValidate>
         {paso === 1 ? (
-          <Field label={es_MX.acceso.correo} hint={es_MX.acceso.registro.ayudaCorreo}>
+          <Field label={es_MX.acceso.correo} hint={es_MX.acceso.registro.ayudaCorreo} error={errorDe("email")}>
             <Input
               name="email"
               type="email"
@@ -327,7 +347,11 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
         ) : null}
 
         {paso === 2 ? (
-          <Field label={es_MX.acceso.contrasena} hint={es_MX.acceso.registro.ayudaContrasena}>
+          <Field
+            label={es_MX.acceso.contrasena}
+            hint={es_MX.acceso.registro.ayudaContrasena}
+            error={errorDe("password")}
+          >
             <Input
               name="new-password"
               type="password"
@@ -340,10 +364,10 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
 
         {paso === 3 ? (
           <>
-            <Field label={es_MX.acceso.registro.nombre}>
+            <Field label={es_MX.acceso.registro.nombre} error={errorDe("name")}>
               <Input name="name" autoComplete="given-name" value={nombre} onChange={(e) => setNombre(e.target.value)} />
             </Field>
-            <Field label={es_MX.acceso.registro.apellidos}>
+            <Field label={es_MX.acceso.registro.apellidos} error={errorDe("lastName")}>
               <Input
                 name="lastName"
                 autoComplete="family-name"
@@ -354,9 +378,12 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
           </>
         ) : null}
 
-        {error ? (
+        {/* Solo lo que NO pertenece a un campo (red, servidor): lo de los campos lo pinta su
+            `Field`, junto al control y con `aria-describedby`. Dos sitios para el mismo mensaje
+            harían que el lector de pantalla lo leyera dos veces. */}
+        {error && !error.campo ? (
           <p role="alert" className="text-sm font-semibold text-ui-danger-text">
-            {error}
+            {error.mensaje}
           </p>
         ) : null}
 

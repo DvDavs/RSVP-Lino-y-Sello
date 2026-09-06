@@ -1467,3 +1467,21 @@ Supuestos que tomé al corregir, para que el dueño los confirme o los cambie:
   asistente; `corporativo` cae en `generic`. Si se prefiere que la portada enlace el `EventKind`
   crudo, la tabla sobra y el enlace cambia; el lector seguiría aceptando las dos formas.
 - **No abrí ADR**: nada de lo que toqué cambia paleta, tipografía, forma ni componente base.
+
+## Fase 3-C · UX-C (correcciones del sitio: contacto para contratar y mensaje de contraseña)
+
+Cierra G-01 (arriba) y M-12 con código: `ContactoParaContratar` (`lib/contacto.ts` +
+`components/sitio/ContactoParaContratar.tsx`) pone un canal de verdad en `Planes.tsx` y
+`ayuda/page.tsx`, configurable por dos variables de entorno opcionales
+(`NEXT_PUBLIC_CONTACTO_WHATSAPP`, `NEXT_PUBLIC_CONTACTO_CORREO`) — mientras no estén puestas, el
+sitio dice que el contacto se publicará en cuanto exista, nunca un número inventado ni un botón
+muerto. Detalle en `bitacora/3c-ux-c.md`.
+
+- **Pregunta al dueño (sin responder): ¿cuál es el WhatsApp y el correo reales de venta?** El
+  código ya sabe pintarlos; falta el dato, que es de producto y este agente no puede inventar.
+- **Pregunta al dueño (sin responder): ¿el producto quiere compra en línea, o venta asistida (el
+  camino que se construyó) es la decisión definitiva?** La duda «¿Cuánto cuesta y cómo contrato un
+  plan?» (`components/sitio/dudas-ayuda.ts`, `id: "planes"`, el ancla real de `/ayuda#planes`) hoy
+  dice sin rodeos «los planes se contratan con nuestro equipo, no en línea» y «todavía no se puede
+  pagar desde la página». Si la respuesta es que sí debe haber compra en línea, esa frase y el flujo
+  de `ContactoParaContratar` quedan obsoletos el día que exista un checkout.

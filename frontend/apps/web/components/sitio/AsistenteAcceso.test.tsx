@@ -138,11 +138,17 @@ describe("crear cuenta", () => {
     expect(screen.getByRole("alert").textContent).toBe(es_MX.acceso.faltaCorreo);
   });
 
-  it("si el servidor rechaza la contraseña, DEVUELVE al paso 2 para poder corregirla", async () => {
+  // M-12. Antes: el 400 con la política salía como «Algo salió mal» (pestaña Entrar) o como una
+  // paráfrasis nuestra suelta al pie del formulario (pestaña Crear cuenta). Ahora el mensaje del
+  // servidor se pinta EN el campo, con `aria-invalid` y `aria-describedby`, que es lo que hace que
+  // un lector de pantalla lo lea al enfocar la contraseña y no al final de todo.
+  it("si el servidor rechaza la contraseña, DEVUELVE al paso 2 con la política EN el campo", async () => {
     const persona = userEvent.setup();
+    const politica =
+      "Tu contraseña debe contener al menos 8 caracteres, una mayúscula, una minúscula y un caracter especial";
     const { UnknownApiError } = await import("@/lib/api-client");
     authSignup.mockRejectedValue(
-      new UnknownApiError(400, JSON.stringify({ timestamp: "x", statusCode: 400, errors: { password: "débil" } })),
+      new UnknownApiError(400, JSON.stringify({ timestamp: "x", statusCode: 400, errors: { password: politica } })),
     );
     render(<AsistenteAcceso />);
     await abrirRegistro(persona);
@@ -154,8 +160,39 @@ describe("crear cuenta", () => {
     await persona.type(screen.getByLabelText(es_MX.acceso.registro.apellidos), "Torres");
     await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.crear }));
 
-    expect(screen.getByRole("alert").textContent).toBe(es_MX.acceso.registro.contrasenaCorta);
-    expect(screen.getByLabelText(es_MX.acceso.contrasena)).not.toBeNull();
     expect(screen.getByText(/Paso 2 de 3/)).not.toBeNull();
+    expect(screen.getByRole("alert").textContent).toContain(politica);
+    // Nunca «Algo salió mal»: la clienta no leyó una avería, leyó lo que tiene que corregir.
+    expect(screen.queryByText(es_MX.errores.generico)).toBeNull();
+
+    const campo = screen.getByLabelText(es_MX.acceso.contrasena);
+    expect(campo.getAttribute("aria-invalid")).toBe("true");
+    const descrito = campo.getAttribute("aria-describedby");
+    expect(descrito).not.toBeNull();
+    expect(document.getElementById(descrito as string)?.textContent).toContain(politica);
+  });
+
+  it("el error del correo se pinta en el campo del correo, no al pie del formulario", async () => {
+    const persona = userEvent.setup();
+    const { UnknownApiError } = await import("@/lib/api-client");
+    authSignup.mockRejectedValue(
+      new UnknownApiError(
+        400,
+        JSON.stringify({ timestamp: "x", statusCode: 400, errors: { error: "El correo ya está registrado" } }),
+      ),
+    );
+    render(<AsistenteAcceso />);
+    await abrirRegistro(persona);
+    await persona.type(screen.getByLabelText(es_MX.acceso.correo), "ana@correo.mx");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    await persona.type(screen.getByLabelText(es_MX.acceso.contrasena), "Secreta1!");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.nombre), "Ana");
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.apellidos), "Torres");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.crear }));
+
+    const campo = screen.getByLabelText(es_MX.acceso.correo);
+    expect(campo.getAttribute("aria-invalid")).toBe("true");
+    expect(screen.getByRole("alert").textContent).toContain(es_MX.acceso.registro.correoOcupado);
   });
 });

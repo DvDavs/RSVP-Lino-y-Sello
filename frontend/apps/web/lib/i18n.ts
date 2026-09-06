@@ -51,7 +51,10 @@ export const es_MX = {
    */
   acceso: {
     titulo: "Entra a tu cuenta",
-    intro: "Usa el mismo correo y la misma contraseña con los que contrataste tu invitación.",
+    // B-17 (`bitacora/3c-ux.md §4`): la frase anterior («…con los que contrataste tu invitación»)
+    // le hablaba solo a quien ya compró, y a esta pantalla se llega desde «Empezar mi invitación»,
+    // que es el botón de quien NO ha comprado. Ahora sirve a los dos y señala la otra pestaña.
+    intro: "Escribe el correo y la contraseña de tu cuenta. Si todavía no tienes una, créala en la pestaña de al lado.",
     correo: "Correo electrónico",
     contrasena: "Contraseña",
     entrar: "Iniciar sesión",
@@ -84,7 +87,8 @@ export const es_MX = {
     // Registro en tres pasos (11 §7: «paso 2 Elige una contraseña · paso 3 ¿Cómo te llamamos?»).
     registro: {
       titulo: "Crea tu cuenta",
-      intro: "Tres datos y ya. Después eliges el tipo de evento.",
+      // B-16: decía «Tres datos y ya» y pedía cuatro campos. Se cuenta lo que la persona ve: pasos.
+      intro: "Tres pasos y ya. Después eliges el tipo de evento.",
       pasoCorreo: "Tu correo",
       pasoContrasena: "Elige una contraseña",
       pasoNombre: "¿Cómo te llamamos?",
@@ -176,9 +180,30 @@ export const es_MX = {
     planesSeccion: {
       titulo: "Elige tu plan",
       cuerpo:
-        "Tu invitación nace cuando contratas un plan: ahí se define cuántas plantillas y cuántos invitados incluye. Entra a tu cuenta para ver el tuyo o pedir un cambio.",
-      accion: "Entrar a mi cuenta",
-      nota: "Los precios se acuerdan con quien te atendió; todavía no se publican aquí.",
+        "Tu invitación nace cuando contratas un plan: ahí se define cuántas plantillas y cuántos invitados incluye. Escríbenos y te decimos precios y qué plan te conviene.",
+      accion: "Ya tengo cuenta: entrar",
+      nota: "Los precios todavía no se publican aquí: te los pasamos en cuanto nos escribas.",
+    },
+    /**
+     * G-01 (`bitacora/3c-ux.md §4`): el sitio no tenía ni un canal para comprar ni para preguntar,
+     * así que «Empezar mi invitación» terminaba en un circuito cerrado de cuatro toques. Estos son
+     * los textos del bloque de contacto, que sale en la portada y en `/ayuda`. El número y el
+     * correo NO están aquí: vienen del entorno (`lib/contacto.ts`), porque cuáles son es una
+     * decisión de producto y un dato inventado sería peor que la ausencia.
+     */
+    contactar: {
+      titulo: "¿Cómo se contrata?",
+      intro:
+        "Los planes se contratan con nuestro equipo: nos escribes, te decimos precios y te dejamos la cuenta lista para empezar.",
+      whatsapp: "Escribir por WhatsApp",
+      correo: "Escribir por correo",
+      /** Va dentro del `?text=` de `wa.me`: quien lo recibe sabe de dónde sale sin preguntar. */
+      mensaje:
+        "Hola, quiero una invitación digital con confirmación de asistencia. ¿Me pasan precios y cómo la contrato?",
+      asunto: "Quiero contratar una invitación digital",
+      /** Sin ningún canal configurado se dice la verdad: nunca un botón que no lleva a nadie. */
+      sinContacto:
+        "Los planes se contratan con nuestro equipo; el contacto se publicará aquí en cuanto esté configurado. Si alguien ya te atendió, escríbele por ese mismo medio.",
     },
     ctaFinal: {
       titulo: "¿Empezamos?",
@@ -204,7 +229,10 @@ export const es_MX = {
     },
     contacto: {
       titulo: "¿No está tu duda aquí?",
-      texto: "Escríbenos por el mismo medio por el que contrataste tu invitación y te contestamos.",
+      // G-01: el texto anterior («escríbenos por el mismo medio por el que contrataste tu
+      // invitación») dejaba fuera justo a quien todavía no ha contratado nada, que es quien más
+      // necesita esta caja. Ahora la caja ES el contacto (`ContactoParaContratar`).
+      texto: "Escríbenos y te contestamos nosotros, hayas contratado ya o estés todavía preguntando precios.",
     },
   },
   /**

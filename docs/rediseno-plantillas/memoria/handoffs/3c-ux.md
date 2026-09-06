@@ -84,3 +84,15 @@ en los *defaults* en vez de mandar `setItemBlock` contra un `itemId` que el serv
 salida real: `test` 64 ficheros/531 pruebas en verde, `typecheck` 0 errores, e2e reales `:6113`/
 `:3113` `asistente.spec.ts` 7/7 + `clienta-sin-sesion.spec.ts` 1/1. **G-01, G-04, G-05** y la otra
 mitad de G-06 (panel de publicar) siguen abiertos. Sin commit ni push.
+## Correcciones UX-C
+Cierra G-01 y M-12 de este handoff. `ContactoParaContratar` (nuevo, `lib/contacto.ts` +
+`components/sitio/ContactoParaContratar.tsx`) puesto en `Planes.tsx` y `ayuda/page.tsx`: dos
+variables de entorno opcionales (`NEXT_PUBLIC_CONTACTO_WHATSAPP`, `NEXT_PUBLIC_CONTACTO_CORREO`);
+sin configurar, la frase es honesta y no hay botón muerto. El ancla real de `/ayuda#planes` ahora
+responde «¿Cuánto cuesta y cómo contrato un plan?» (antes era la duda de cambiar de plan).
+M-12: contraseña que no cumple la política en «Entrar» → mensaje de credenciales, no «Algo salió
+mal»; en «Crear cuenta» se pinta el mensaje del propio servidor (`@StrongPassword`), saneado por
+`soloTexto()`. Verificado con salida real: `test` 536/536, `typecheck` limpio, `build` verde,
+`check-budget` en presupuesto (`/` 148,2/150 KB gz), e2e 14/14 contra backend propio. Detalle y las
+dos trampas de arranque encontradas en `bitacora/3c-ux-c.md`. Pendiente de decisión del dueño: el
+WhatsApp/correo reales y si hay compra en línea (`preguntas-abiertas.md § Fase 3-C · UX-C`).

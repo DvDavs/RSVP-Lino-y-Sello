@@ -10,6 +10,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Composition, Rays } from "@invitaciones/ui/shapes";
 import { BuscadorAyuda } from "@/components/sitio/BuscadorAyuda";
+import { ContactoParaContratar } from "@/components/sitio/ContactoParaContratar";
 import { es_MX } from "@/lib/i18n";
 
 export const metadata: Metadata = {
@@ -37,12 +38,19 @@ export default function PaginaAyuda() {
 
       <BuscadorAyuda />
 
+      {/* G-01: ESTA caja es el final del circuito. El botón «Ver planes» del asistente
+          (`components/asistente/MisInvitaciones.tsx`) manda aquí a quien todavía no tiene ninguna
+          invitación, y hasta el cierre de la fase 3-C lo único que encontraba era «escríbenos por
+          el mismo medio por el que contrataste» — un medio que nunca ha tenido. Ahora el contacto
+          está aquí, o está dicho por qué todavía no está. */}
       <section aria-labelledby="ayuda-contacto" className="mt-12 rounded-ui-card bg-ui-surface-alt p-6">
         <h2 id="ayuda-contacto" className="heading-sm text-ui-ink">
           {es_MX.ayuda.contacto.titulo}
         </h2>
         <p className="text-md mt-2 max-w-[56ch] text-ui-ink-muted">{es_MX.ayuda.contacto.texto}</p>
-        <p className="mt-4">
+        <ContactoParaContratar className="mt-5 border-t border-ui-divider pt-5" />
+
+        <p className="mt-6">
           {/* `inline-flex items-center py-1`: medía 160,6 x 18 px (3C-ADV), por debajo del mínimo
               de 24 px de 2.5.8. No es un enlace dentro de una frase (está solo en su párrafo), así
               que no le vale la excepción «inline» de ese criterio. */}
