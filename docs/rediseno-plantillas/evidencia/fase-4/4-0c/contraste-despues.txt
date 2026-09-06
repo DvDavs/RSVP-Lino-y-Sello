@@ -1,0 +1,103 @@
+árbol/paleta                                  pareja                  hex               ratio   umbral  estado
+----------------------------------------------------------------------------------------------------------------
+boda-clasica-1.0.0/blush                      ink/bg                  #3A2E2B/#FDF7F5   12.33   4.5     OK
+boda-clasica-1.0.0/blush                      ink/surface             #3A2E2B/#FFFFFF   13.07   4.5     OK
+boda-clasica-1.0.0/blush                      accentInk/accent        #FFFFFF/#B05555   4.91    4.5     OK
+boda-clasica-1.0.0/blush                      muted/bg                #7B6E6B/#FDF7F5   4.62    3.0     OK
+boda-clasica-1.0.0/blush                      accent/bg               #B05555/#FDF7F5   4.62    3.0     OK
+boda-clasica-1.0.0/blush                      muted/bg (1.4.3)        #7B6E6B/#FDF7F5   4.62    4.5     OK
+boda-clasica-1.0.0/blush                      muted/surface (1.4.3)   #7B6E6B/#FFFFFF   4.90    4.5     OK
+boda-clasica-1.0.0/blush                      accent/bg (1.4.3)       #B05555/#FDF7F5   4.62    4.5     OK
+boda-clasica-1.0.0/blush                      accent/surface (1.4.3)  #B05555/#FFFFFF   4.91    4.5     OK
+boda-clasica-1.0.0/olive                      ink/bg                  #2F3A2B/#F7F5EE   10.93   4.5     OK
+boda-clasica-1.0.0/olive                      ink/surface             #2F3A2B/#FFFFFF   11.92   4.5     OK
+boda-clasica-1.0.0/olive                      accentInk/accent        #FFFFFF/#657446   5.07    4.5     OK
+boda-clasica-1.0.0/olive                      muted/bg                #6C715D/#F7F5EE   4.63    3.0     OK
+boda-clasica-1.0.0/olive                      accent/bg               #657446/#F7F5EE   4.64    3.0     OK
+boda-clasica-1.0.0/olive                      muted/bg (1.4.3)        #6C715D/#F7F5EE   4.63    4.5     OK
+boda-clasica-1.0.0/olive                      muted/surface (1.4.3)   #6C715D/#FFFFFF   5.05    4.5     OK
+boda-clasica-1.0.0/olive                      accent/bg (1.4.3)       #657446/#F7F5EE   4.64    4.5     OK
+boda-clasica-1.0.0/olive                      accent/surface (1.4.3)  #657446/#FFFFFF   5.07    4.5     OK
+boda-clasica-1.0.0/navy                       ink/bg                  #1E2A44/#F4F6FA   13.20   4.5     OK
+boda-clasica-1.0.0/navy                       ink/surface             #1E2A44/#FFFFFF   14.28   4.5     OK
+boda-clasica-1.0.0/navy                       accentInk/accent        #FFFFFF/#2E4A7D   8.77    4.5     OK
+boda-clasica-1.0.0/navy                       muted/bg                #647087/#F4F6FA   4.61    3.0     OK
+boda-clasica-1.0.0/navy                       accent/bg               #2E4A7D/#F4F6FA   8.11    3.0     OK
+boda-clasica-1.0.0/navy                       muted/bg (1.4.3)        #647087/#F4F6FA   4.61    4.5     OK
+boda-clasica-1.0.0/navy                       muted/surface (1.4.3)   #647087/#FFFFFF   4.98    4.5     OK
+boda-clasica-1.0.0/navy                       accent/bg (1.4.3)       #2E4A7D/#F4F6FA   8.11    4.5     OK
+boda-clasica-1.0.0/navy                       accent/surface (1.4.3)  #2E4A7D/#FFFFFF   8.77    4.5     OK
+xv-jardin-1.0.0/garden                        ink/bg                  #2E3B27/#F6FAF3   11.22   4.5     OK
+xv-jardin-1.0.0/garden                        ink/surface             #2E3B27/#FFFFFF   11.85   4.5     OK
+xv-jardin-1.0.0/garden                        accentInk/accent        #FFFFFF/#5D7944   4.90    4.5     OK
+xv-jardin-1.0.0/garden                        muted/bg                #647757/#F6FAF3   4.60    3.0     OK
+xv-jardin-1.0.0/garden                        accent/bg               #5D7944/#F6FAF3   4.64    3.0     OK
+xv-jardin-1.0.0/garden                        muted/bg (1.4.3)        #647757/#F6FAF3   4.60    4.5     OK
+xv-jardin-1.0.0/garden                        muted/surface (1.4.3)   #647757/#FFFFFF   4.86    4.5     OK
+xv-jardin-1.0.0/garden                        accent/bg (1.4.3)       #5D7944/#F6FAF3   4.64    4.5     OK
+xv-jardin-1.0.0/garden                        accent/surface (1.4.3)  #5D7944/#FFFFFF   4.90    4.5     OK
+xv-jardin-1.0.0/lilac                         ink/bg                  #372C43/#F8F6FB   12.20   4.5     OK
+xv-jardin-1.0.0/lilac                         ink/surface             #372C43/#FFFFFF   13.09   4.5     OK
+xv-jardin-1.0.0/lilac                         accentInk/accent        #FFFFFF/#835FB0   4.96    4.5     OK
+xv-jardin-1.0.0/lilac                         muted/bg                #7D6798/#F8F6FB   4.58    3.0     OK
+xv-jardin-1.0.0/lilac                         accent/bg               #835FB0/#F8F6FB   4.62    3.0     OK
+xv-jardin-1.0.0/lilac                         muted/bg (1.4.3)        #7D6798/#F8F6FB   4.58    4.5     OK
+xv-jardin-1.0.0/lilac                         muted/surface (1.4.3)   #7D6798/#FFFFFF   4.92    4.5     OK
+xv-jardin-1.0.0/lilac                         accent/bg (1.4.3)       #835FB0/#F8F6FB   4.62    4.5     OK
+xv-jardin-1.0.0/lilac                         accent/surface (1.4.3)  #835FB0/#FFFFFF   4.96    4.5     OK
+boda-clasica-1.0.0/blush                      ink/bg                  #3A2E2B/#FDF7F5   12.33   4.5     OK
+boda-clasica-1.0.0/blush                      ink/surface             #3A2E2B/#FFFFFF   13.07   4.5     OK
+boda-clasica-1.0.0/blush                      accentInk/accent        #FFFFFF/#B05555   4.91    4.5     OK
+boda-clasica-1.0.0/blush                      muted/bg                #7B6E6B/#FDF7F5   4.62    3.0     OK
+boda-clasica-1.0.0/blush                      accent/bg               #B05555/#FDF7F5   4.62    3.0     OK
+boda-clasica-1.0.0/blush                      muted/bg (1.4.3)        #7B6E6B/#FDF7F5   4.62    4.5     OK
+boda-clasica-1.0.0/blush                      muted/surface (1.4.3)   #7B6E6B/#FFFFFF   4.90    4.5     OK
+boda-clasica-1.0.0/blush                      accent/bg (1.4.3)       #B05555/#FDF7F5   4.62    4.5     OK
+boda-clasica-1.0.0/blush                      accent/surface (1.4.3)  #B05555/#FFFFFF   4.91    4.5     OK
+boda-clasica-1.0.0/olive                      ink/bg                  #2F3A2B/#F7F5EE   10.93   4.5     OK
+boda-clasica-1.0.0/olive                      ink/surface             #2F3A2B/#FFFFFF   11.92   4.5     OK
+boda-clasica-1.0.0/olive                      accentInk/accent        #FFFFFF/#657446   5.07    4.5     OK
+boda-clasica-1.0.0/olive                      muted/bg                #6C715D/#F7F5EE   4.63    3.0     OK
+boda-clasica-1.0.0/olive                      accent/bg               #657446/#F7F5EE   4.64    3.0     OK
+boda-clasica-1.0.0/olive                      muted/bg (1.4.3)        #6C715D/#F7F5EE   4.63    4.5     OK
+boda-clasica-1.0.0/olive                      muted/surface (1.4.3)   #6C715D/#FFFFFF   5.05    4.5     OK
+boda-clasica-1.0.0/olive                      accent/bg (1.4.3)       #657446/#F7F5EE   4.64    4.5     OK
+boda-clasica-1.0.0/olive                      accent/surface (1.4.3)  #657446/#FFFFFF   5.07    4.5     OK
+boda-clasica-1.0.0/navy                       ink/bg                  #1E2A44/#F4F6FA   13.20   4.5     OK
+boda-clasica-1.0.0/navy                       ink/surface             #1E2A44/#FFFFFF   14.28   4.5     OK
+boda-clasica-1.0.0/navy                       accentInk/accent        #FFFFFF/#2E4A7D   8.77    4.5     OK
+boda-clasica-1.0.0/navy                       muted/bg                #647087/#F4F6FA   4.61    3.0     OK
+boda-clasica-1.0.0/navy                       accent/bg               #2E4A7D/#F4F6FA   8.11    3.0     OK
+boda-clasica-1.0.0/navy                       muted/bg (1.4.3)        #647087/#F4F6FA   4.61    4.5     OK
+boda-clasica-1.0.0/navy                       muted/surface (1.4.3)   #647087/#FFFFFF   4.98    4.5     OK
+boda-clasica-1.0.0/navy                       accent/bg (1.4.3)       #2E4A7D/#F4F6FA   8.11    4.5     OK
+boda-clasica-1.0.0/navy                       accent/surface (1.4.3)  #2E4A7D/#FFFFFF   8.77    4.5     OK
+richtext-marcas-1.0.0/olive                   ink/bg                  #222222/#FFFFFF   15.90   4.5     OK
+richtext-marcas-1.0.0/olive                   ink/surface             #222222/#F5F5F0   14.54   4.5     OK
+richtext-marcas-1.0.0/olive                   accentInk/accent        #FFFFFF/#556B2F   5.94    4.5     OK
+richtext-marcas-1.0.0/olive                   muted/bg                #6F6F6F/#FFFFFF   5.02    3.0     OK
+richtext-marcas-1.0.0/olive                   accent/bg               #556B2F/#FFFFFF   5.94    3.0     OK
+richtext-marcas-1.0.0/olive                   muted/bg (1.4.3)        #6F6F6F/#FFFFFF   5.02    4.5     OK
+richtext-marcas-1.0.0/olive                   muted/surface (1.4.3)   #6F6F6F/#F5F5F0   4.59    4.5     OK
+richtext-marcas-1.0.0/olive                   accent/bg (1.4.3)       #556B2F/#FFFFFF   5.94    4.5     OK
+richtext-marcas-1.0.0/olive                   accent/surface (1.4.3)  #556B2F/#F5F5F0   5.43    4.5     OK
+xv-jardin-1.0.0/garden                        ink/bg                  #2E3B27/#F6FAF3   11.22   4.5     OK
+xv-jardin-1.0.0/garden                        ink/surface             #2E3B27/#FFFFFF   11.85   4.5     OK
+xv-jardin-1.0.0/garden                        accentInk/accent        #FFFFFF/#5D7944   4.90    4.5     OK
+xv-jardin-1.0.0/garden                        muted/bg                #647757/#F6FAF3   4.60    3.0     OK
+xv-jardin-1.0.0/garden                        accent/bg               #5D7944/#F6FAF3   4.64    3.0     OK
+xv-jardin-1.0.0/garden                        muted/bg (1.4.3)        #647757/#F6FAF3   4.60    4.5     OK
+xv-jardin-1.0.0/garden                        muted/surface (1.4.3)   #647757/#FFFFFF   4.86    4.5     OK
+xv-jardin-1.0.0/garden                        accent/bg (1.4.3)       #5D7944/#F6FAF3   4.64    4.5     OK
+xv-jardin-1.0.0/garden                        accent/surface (1.4.3)  #5D7944/#FFFFFF   4.90    4.5     OK
+xv-jardin-1.0.0/lilac                         ink/bg                  #372C43/#F8F6FB   12.20   4.5     OK
+xv-jardin-1.0.0/lilac                         ink/surface             #372C43/#FFFFFF   13.09   4.5     OK
+xv-jardin-1.0.0/lilac                         accentInk/accent        #FFFFFF/#835FB0   4.96    4.5     OK
+xv-jardin-1.0.0/lilac                         muted/bg                #7D6798/#F8F6FB   4.58    3.0     OK
+xv-jardin-1.0.0/lilac                         accent/bg               #835FB0/#F8F6FB   4.62    3.0     OK
+xv-jardin-1.0.0/lilac                         muted/bg (1.4.3)        #7D6798/#F8F6FB   4.58    4.5     OK
+xv-jardin-1.0.0/lilac                         muted/surface (1.4.3)   #7D6798/#FFFFFF   4.92    4.5     OK
+xv-jardin-1.0.0/lilac                         accent/bg (1.4.3)       #835FB0/#F8F6FB   4.62    4.5     OK
+xv-jardin-1.0.0/lilac                         accent/surface (1.4.3)  #835FB0/#FFFFFF   4.96    4.5     OK
+----------------------------------------------------------------------------------------------------------------
+99 parejas evaluadas · 0 FALLAN

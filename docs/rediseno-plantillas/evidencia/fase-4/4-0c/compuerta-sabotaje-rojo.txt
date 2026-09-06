@@ -1,0 +1,96 @@
+
+ RUN  v3.2.4 /home/user/wt/0c/frontend/packages/schema
+
+ ❯ test/paleta-contraste.contract.test.ts (17 tests | 2 failed) 14ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > encuentra los theme.json de los dos árboles (hoy 5) 2ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/boda-clasica-1.0.0/theme.json: declara al menos una paleta 0ms
+   × compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/boda-clasica-1.0.0/theme.json · paleta "blush": las 9 parejas cumplen su umbral 7ms
+     → frontend/packages/schema/golden/templates/boda-clasica-1.0.0/theme.json · blush:
+  accentInk/accent #FFFFFF/#C98B8B = 2.78:1 < 4.5:1 (texto sobre botones/insignias de acento)
+  accent/bg #C98B8B/#FDF7F5 = 2.62:1 < 3.0:1 (componentes de interfaz (1.4.11))
+  accent/bg (1.4.3) #C98B8B/#FDF7F5 = 2.62:1 < 4.5:1 (enlaces y horas en texto normal)
+  accent/surface (1.4.3) #C98B8B/#FFFFFF = 2.78:1 < 4.5:1 (los mismos, sobre tarjetas): expected [ …(4) ] to deeply equal []
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/boda-clasica-1.0.0/theme.json · paleta "olive": las 9 parejas cumplen su umbral 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/boda-clasica-1.0.0/theme.json · paleta "navy": las 9 parejas cumplen su umbral 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/richtext-marcas-1.0.0/theme.json: declara al menos una paleta 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/richtext-marcas-1.0.0/theme.json · paleta "olive": las 9 parejas cumplen su umbral 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/xv-jardin-1.0.0/theme.json: declara al menos una paleta 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/xv-jardin-1.0.0/theme.json · paleta "garden": las 9 parejas cumplen su umbral 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/xv-jardin-1.0.0/theme.json · paleta "lilac": las 9 parejas cumplen su umbral 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > docs/rediseno-plantillas/diseno/ejemplos/boda-clasica-1.0.0/theme.json: declara al menos una paleta 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > docs/rediseno-plantillas/diseno/ejemplos/boda-clasica-1.0.0/theme.json · paleta "blush": las 9 parejas cumplen su umbral 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > docs/rediseno-plantillas/diseno/ejemplos/boda-clasica-1.0.0/theme.json · paleta "olive": las 9 parejas cumplen su umbral 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > docs/rediseno-plantillas/diseno/ejemplos/boda-clasica-1.0.0/theme.json · paleta "navy": las 9 parejas cumplen su umbral 0ms
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > docs/rediseno-plantillas/diseno/ejemplos/xv-jardin-1.0.0/theme.json: declara al menos una paleta 0ms
+   × compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > docs/rediseno-plantillas/diseno/ejemplos/xv-jardin-1.0.0/theme.json · paleta "garden": las 9 parejas cumplen su umbral 1ms
+     → docs/rediseno-plantillas/diseno/ejemplos/xv-jardin-1.0.0/theme.json · garden:
+  muted/bg #8FA482/#F6FAF3 = 2.55:1 < 3.0:1 (texto secundario grande)
+  muted/bg (1.4.3) #8FA482/#F6FAF3 = 2.55:1 < 4.5:1 (texto secundario de tamaño normal)
+  muted/surface (1.4.3) #8FA482/#FFFFFF = 2.69:1 < 4.5:1 (texto secundario sobre tarjetas): expected [ …(3) ] to deeply equal []
+   ✓ compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > docs/rediseno-plantillas/diseno/ejemplos/xv-jardin-1.0.0/theme.json · paleta "lilac": las 9 parejas cumplen su umbral 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/paleta-contraste.contract.test.ts > compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > frontend/packages/schema/golden/templates/boda-clasica-1.0.0/theme.json · paleta "blush": las 9 parejas cumplen su umbral
+AssertionError: frontend/packages/schema/golden/templates/boda-clasica-1.0.0/theme.json · blush:
+  accentInk/accent #FFFFFF/#C98B8B = 2.78:1 < 4.5:1 (texto sobre botones/insignias de acento)
+  accent/bg #C98B8B/#FDF7F5 = 2.62:1 < 3.0:1 (componentes de interfaz (1.4.11))
+  accent/bg (1.4.3) #C98B8B/#FDF7F5 = 2.62:1 < 4.5:1 (enlaces y horas en texto normal)
+  accent/surface (1.4.3) #C98B8B/#FFFFFF = 2.78:1 < 4.5:1 (los mismos, sobre tarjetas): expected [ …(4) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "accentInk/accent #FFFFFF/#C98B8B = 2.78:1 < 4.5:1 (texto sobre botones/insignias de acento)",
++   "accent/bg #C98B8B/#FDF7F5 = 2.62:1 < 3.0:1 (componentes de interfaz (1.4.11))",
++   "accent/bg (1.4.3) #C98B8B/#FDF7F5 = 2.62:1 < 4.5:1 (enlaces y horas en texto normal)",
++   "accent/surface (1.4.3) #C98B8B/#FFFFFF = 2.78:1 < 4.5:1 (los mismos, sobre tarjetas)",
++ ]
+
+ ❯ test/paleta-contraste.contract.test.ts:113:73
+    111|         // El mensaje enseña TODAS las parejas que caen, no sólo la pr…
+    112|         // rompe, quien la arregle necesita la lista entera para elegi…
+    113|         expect(fallos, `${rel} · ${pal.id}:\n  ${fallos.join("\n  ")}`…
+       |                                                                         ^
+    114|       });
+    115|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/paleta-contraste.contract.test.ts > compuerta AA — theme.json de diseno/ejemplos y de packages/schema/golden > docs/rediseno-plantillas/diseno/ejemplos/xv-jardin-1.0.0/theme.json · paleta "garden": las 9 parejas cumplen su umbral
+AssertionError: docs/rediseno-plantillas/diseno/ejemplos/xv-jardin-1.0.0/theme.json · garden:
+  muted/bg #8FA482/#F6FAF3 = 2.55:1 < 3.0:1 (texto secundario grande)
+  muted/bg (1.4.3) #8FA482/#F6FAF3 = 2.55:1 < 4.5:1 (texto secundario de tamaño normal)
+  muted/surface (1.4.3) #8FA482/#FFFFFF = 2.69:1 < 4.5:1 (texto secundario sobre tarjetas): expected [ …(3) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "muted/bg #8FA482/#F6FAF3 = 2.55:1 < 3.0:1 (texto secundario grande)",
++   "muted/bg (1.4.3) #8FA482/#F6FAF3 = 2.55:1 < 4.5:1 (texto secundario de tamaño normal)",
++   "muted/surface (1.4.3) #8FA482/#FFFFFF = 2.69:1 < 4.5:1 (texto secundario sobre tarjetas)",
++ ]
+
+ ❯ test/paleta-contraste.contract.test.ts:113:73
+    111|         // El mensaje enseña TODAS las parejas que caen, no sólo la pr…
+    112|         // rompe, quien la arregle necesita la lista entera para elegi…
+    113|         expect(fallos, `${rel} · ${pal.id}:\n  ${fallos.join("\n  ")}`…
+       |                                                                         ^
+    114|       });
+    115|     }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 15 passed (17)
+   Start at  15:45:30
+   Duration  402ms (transform 82ms, setup 0ms, collect 79ms, tests 14ms, environment 0ms, prepare 78ms)
+
+undefined
+/home/user/wt/0c/frontend/packages/schema:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/paleta-contraste.contract.test.ts

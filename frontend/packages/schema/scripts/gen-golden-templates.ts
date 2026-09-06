@@ -9,7 +9,7 @@ import { compose, type TemplatePackage } from "../src/compose.ts";
 import type { AssetIndex, BusinessSnapshot } from "../src/composed.ts";
 import {
   textSpec, richTextSpec, sectionSpec, themeFixture, manifestFixture, defaultsFixture,
-  documentFixture, textValue, richTextValueMarcado,
+  documentFixture, textValue, richTextValueMarcado, loc,
 } from "./fixtures.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
@@ -80,18 +80,62 @@ const CASES: CaseDef[] = [
   },
 ];
 
+/** Lee las entradas de un ejemplo de `diseno/ejemplos/` y las compone con el `compose()` real. */
+function componerEjemplo(dir: string, business: BusinessSnapshot) {
+  const src = EJEMPLOS + dir + "/";
+  const manifest = TemplateManifest.parse(readJson(src + "template.json"));
+  const theme = ThemeSpec.parse(readJson(src + "theme.json"));
+  const defaults = DefaultsFile.parse(readJson(src + "defaults.json"));
+  const doc = InvitationDocument.parse(readJson(src + "documento.json"));
+  const assets = buildAssetIndex(collectAssetIds(doc.content, defaults.content));
+  const pkg: TemplatePackage = { manifest, theme, defaults };
+  return { src, manifest, theme, defaults, doc, assets, result: compose(pkg, doc, business, assets, doc.meta.locale) };
+}
+
+/** Rutas JSON en las que dos valores difieren (para poder REVISAR el diff, ADR-1R-D-09). */
+function rutasQueCambian(a: unknown, b: unknown, ruta = "$"): string[] {
+  if (JSON.stringify(a) === JSON.stringify(b)) return [];
+  const objeto = (v: unknown): v is Record<string, unknown> =>
+    typeof v === "object" && v !== null && !Array.isArray(v);
+  if (objeto(a) && objeto(b)) {
+    const claves = [...new Set([...Object.keys(a), ...Object.keys(b)])];
+    return claves.flatMap((k) => rutasQueCambian(a[k], b[k], `${ruta}.${k}`));
+  }
+  if (Array.isArray(a) && Array.isArray(b) && a.length === b.length) {
+    return a.flatMap((v, i) => rutasQueCambian(v, b[i], `${ruta}[${i}]`));
+  }
+  return [`${ruta}: ${JSON.stringify(a)} → ${JSON.stringify(b)}`];
+}
+
+/**
+ * REGENERA la referencia `diseno/ejemplos/<dir>/compuesto.json` desde el `compose()` real.
+ *
+ * `genGoldenTemplates()` compara su salida contra esa referencia y ABORTA si difiere: es la única
+ * comprobación independiente de que `compose()` no ha derivado, y por eso el camino normal NO la
+ * reescribe. Pero cuando lo que cambia es una ENTRADA legítima del ejemplo (`theme.json`,
+ * `defaults.json`, `documento.json`), la referencia tiene que volver a generarse — ADR-1R-D-09 dice
+ * literalmente "se regenera y se revisa el diff", no "es inmutable". Esta función es ese camino, y
+ * es EXPLÍCITO (`--actualizar-referencia`): imprime ruta por ruta lo que cambia para que el diff se
+ * pueda revisar, en vez de dejar que un golden se reescriba solo y la compuerta se mire al espejo.
+ *
+ * Uso: `tsx scripts/gen-golden-templates.ts --actualizar-referencia` y después `gen:golden`.
+ */
+export function regenEjemplosCompuesto(): { dir: string; cambios: string[] }[] {
+  const salida: { dir: string; cambios: string[] }[] = [];
+  for (const { dir, business } of CASES) {
+    const { src, result } = componerEjemplo(dir, business);
+    const anterior: unknown = readJson(src + "compuesto.json");
+    const cambios = rutasQueCambian(anterior, JSON.parse(JSON.stringify(result.composed)));
+    if (cambios.length > 0) writeJson(src + "compuesto.json", result.composed);
+    salida.push({ dir, cambios });
+  }
+  return salida;
+}
+
 export function genGoldenTemplates(): { dir: string; matched: boolean }[] {
   const results: { dir: string; matched: boolean }[] = [];
   for (const { dir, business } of CASES) {
-    const src = EJEMPLOS + dir + "/";
-    const manifest = TemplateManifest.parse(readJson(src + "template.json"));
-    const theme = ThemeSpec.parse(readJson(src + "theme.json"));
-    const defaults = DefaultsFile.parse(readJson(src + "defaults.json"));
-    const doc = InvitationDocument.parse(readJson(src + "documento.json"));
-
-    const assets = buildAssetIndex(collectAssetIds(doc.content, defaults.content));
-    const pkg: TemplatePackage = { manifest, theme, defaults };
-    const result = compose(pkg, doc, business, assets, doc.meta.locale);
+    const { src, manifest, theme, defaults, doc, assets, result } = componerEjemplo(dir, business);
 
     // Autoverificación ANTES de escribir nada (revisión 2-0a-REV, objeción O-01): el golden de
     // referencia de la ronda 1R (`diseno/ejemplos/**/compuesto.json`) es inmutable y es la única
@@ -142,8 +186,33 @@ export function genGoldenTemplates(): { dir: string; matched: boolean }[] {
 // ---------------------------------------------------------------------------------------------
 const DIR_MARCAS = "richtext-marcas-1.0.0";
 
+/**
+ * Paleta del golden SINTETIZADO, corregida a WCAG 2.2 AA (bloque 4-0C).
+ *
+ * `themeFixture()` trae `muted: "#999999"`, que mide 2,85:1 sobre `bg #FFFFFF` y 2,60:1 sobre
+ * `surface #F5F5F0` — por debajo incluso del 3,0 de `04 §17.1`, y muy por debajo del 4,5 que
+ * WCAG 1.4.3 exige a `muted` como color de TEXTO normal (ADR-3-3b-03). Este `theme.json` es uno de
+ * los cinco que `test/paleta-contraste.contract.test.ts` mide, así que un golden con esa paleta
+ * dejaría la compuerta en rojo o la obligaría a hacer excepciones.
+ *
+ * Se corrige con el MISMO método que las cinco paletas reales (ADR-3-2d-04 + ADR-3-3b-03): mismo
+ * matiz y misma saturación HSL (aquí un gris neutro: matiz 0°, saturación 0 %), sólo baja la
+ * luminosidad, hasta el valor MÁS CLARO que cumple con margen +0,08 contra los DOS fondos.
+ * Medido con `frontend/templates/scripts/art/color.mjs`: `#707070` = 4,528 sobre `surface` (falla el
+ * margen), `#6F6F6F` = 4,595 sobre `surface` y 5,025 sobre `bg` (cumple). Ningún otro token cambia.
+ *
+ * Se corrige AQUÍ y no en `themeFixture()` a propósito: el valor por defecto de la fixture está
+ * ESPEJADO a mano en el lado Kotlin (`src/test/.../composition/Fx.kt:127`, `InvariantPathTest.kt:126`,
+ * `ManifestNormalizacionTest.kt:125`), que es territorio prohibido en esta fase; cambiarlo rompería
+ * la paridad de `golden/compose/**` sin poder arreglar el espejo. Queda en `preguntas-abiertas.md`.
+ */
+const PALETA_MARCAS_AA = [{
+  id: "olive", name: loc("Olivo"),
+  tokens: { bg: "#FFFFFF", surface: "#F5F5F0", ink: "#222222", accent: "#556B2F", accentInk: "#FFFFFF", muted: "#6F6F6F" },
+}];
+
 export function genGoldenMarcas(): string {
-  const theme = themeFixture();
+  const theme = themeFixture({ palettes: PALETA_MARCAS_AA });
   const manifest = manifestFixture(
     [
       sectionSpec("cover", "cover", [
@@ -221,6 +290,12 @@ export function genGoldenMarcas(): string {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  if (process.argv.includes("--actualizar-referencia")) {
+    for (const { dir, cambios } of regenEjemplosCompuesto()) {
+      console.log(`diseno/ejemplos/${dir}/compuesto.json: ${cambios.length === 0 ? "sin cambios" : `REGENERADO, ${cambios.length} ruta(s):`}`);
+      for (const c of cambios) console.log(`    ${c}`);
+    }
+  }
   const r = genGoldenTemplates();
   for (const { dir, matched } of r) {
     console.log(`golden/templates/${dir}: ${matched ? "coincide byte a byte con diseno/ejemplos" : "NO coincide con diseno/ejemplos (ver consola)"}`);

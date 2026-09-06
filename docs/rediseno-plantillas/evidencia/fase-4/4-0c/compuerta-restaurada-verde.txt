@@ -1,0 +1,10 @@
+
+ RUN  v3.2.4 /home/user/wt/0c/frontend/packages/schema
+
+ ✓ test/paleta-contraste.contract.test.ts (17 tests) 7ms
+
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+   Start at  15:45:31
+   Duration  413ms (transform 85ms, setup 0ms, collect 62ms, tests 7ms, environment 0ms, prepare 91ms)
+
