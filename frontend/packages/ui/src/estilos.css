@@ -12,3 +12,5 @@
 @import "./styles/typography.css";
 /* Formas (3C-4): animaciones `breathe`/`drift` con `prefers-reduced-motion`. */
 @import "./shapes/shapes.css";
+/* Componentes (bloque 2, F3): EmptyState, Skeleton e Image de producto. */
+@import "./componentes/componentes.css";

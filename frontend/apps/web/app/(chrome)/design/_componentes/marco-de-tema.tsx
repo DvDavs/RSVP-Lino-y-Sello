@@ -19,7 +19,12 @@ export function MarcoDeTema({ children }: { children: ReactNode }) {
   const [tema, setTema] = useState<Tema>("light");
   return (
     <div data-theme={tema} className={`${estilos.raiz} min-h-screen`} data-galeria-tema={tema}>
-      <div className="sticky top-0 z-20 border-b border-ui-divider bg-ui-surface/95 backdrop-blur">
+      {/* `<header>`, no `<div>` (hallazgo de `@axe-core/playwright`, `design-axe.spec.ts`, regla
+          "region"): esta barra vive fuera de `<nav>`/`<main>` y sin landmark quedaba fuera de
+          cualquier región, "contenido huérfano" para un lector de pantalla que navegue por
+          regiones. `<header>` aquí (no anidado en article/aside/main/nav/section) resuelve a
+          role="banner" sin marcar nada a mano. */}
+      <header className="sticky top-0 z-20 border-b border-ui-divider bg-ui-surface/95 backdrop-blur">
         <div className="mx-auto flex max-w-ui-page flex-wrap items-center justify-between gap-3 px-4 py-3">
           <p className="font-ui-label text-ui-label-md uppercase text-ui-ink-muted">
             Sistema de diseño · paleta Bugambilia
@@ -47,7 +52,7 @@ export function MarcoDeTema({ children }: { children: ReactNode }) {
             ))}
           </div>
         </div>
-      </div>
+      </header>
       {children}
     </div>
   );
