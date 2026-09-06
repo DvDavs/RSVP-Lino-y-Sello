@@ -45,7 +45,7 @@ export function Hero() {
             points={14}
             amplitude={3.5}
             ratio="1 / 1"
-            imageId="landing-hero"
+            src="/imagenes/landing-hero.webp"
             alt={es_MX.sitio.hero.fotoPendiente}
             className="mx-auto w-[86%]"
           />

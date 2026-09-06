@@ -32,7 +32,6 @@ máscara), se comprueba que el `alt` sigue describiendo lo que se ve y se BORRA 
 
 | id | dónde se usa | máscara / proporción | tamaño | descripción | prompt sugerido |
 |---|---|---|---|---|---|
-| `landing-hero` | `/` héroe (`components/sitio/Hero.tsx`), sobre `Rays` | `seal` · 1:1 | 1600 × 1600 | pareja de treintañeros riendo con confeti de papel picado al fondo, jardín al atardecer | «Fotografía editorial, pareja mexicana joven riendo al aire libre en una boda en un jardín de hacienda al atardecer, confeti de papel picado de colores en el aire, luz dorada natural, lente 50 mm f/2, fondo desenfocado, sin texto» |
 | `asistente/tipo-boda` | tarjeta de tipo de evento, paso 1 del asistente (`components/asistente/PasoTipoEvento.tsx`, `tipos-de-evento.ts`) | `radius-lg` · 4:3 | 1200 × 900 | detalle de manos con anillos sobre mantel de lino | «Primer plano de manos entrelazadas con anillos sobre mantel de lino crudo, flores de bugambilia desenfocadas, luz de ventana, fotografía de boda editorial» |
 | `asistente/tipo-xv-anos` | ídem, XV años | `radius-lg` · 4:3 | 1200 × 900 | quinceañera con vestido de color intenso bailando con su padre | «Quinceañera bailando el vals con su padre en un salón con luces cálidas, vestido color mango, movimiento, sonrisa, fotografía documental» |
 | `asistente/tipo-bautizo` | ídem, bautizo | `radius-lg` · 4:3 | 1200 × 900 | bebé en brazos con vela y padrinos | «Bautizo en una capilla luminosa, bebé de blanco en brazos, vela encendida, padrinos desenfocados, tonos hueso y añil suave» |
