@@ -13,4 +13,5 @@ export * from "./historias/tipos.ts";
 export { registro, historiaPorSlug } from "./historias/registro.ts";
 
 // Componentes (bloque 2, familia de formularios — F1). Ver `componentes/index.ts`.
+// Componentes (bloque 2): formularios (F1) + superficies y navegación (F2). Ver `componentes/index.ts`.
 export * from "./componentes/index.ts";
