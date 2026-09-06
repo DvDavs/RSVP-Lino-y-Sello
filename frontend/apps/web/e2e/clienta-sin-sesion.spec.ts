@@ -73,7 +73,7 @@ test("una persona sin sesión entra, elige plantilla, escribe, publica y su enla
     await expect(page.getByRole("heading", { name: "¿Qué vamos a celebrar?", level: 1 })).toBeVisible({ timeout: 20_000 });
     await expect(page.getByRole("heading", { name: "Mis invitaciones" })).toBeVisible({ timeout: 20_000 });
     // La captura se toma con la lista YA resuelta, no con el «Preparando…» en pantalla.
-    await expect(page.getByRole("link", { name: /Seguir editando|Elegir plantilla/ }).first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("link", { name: /Abrir en el editor|Elegir plantilla/ }).first()).toBeVisible({ timeout: 20_000 });
     await page.screenshot({ path: `${EVIDENCIA}03-mis-invitaciones.png`, fullPage: true });
 
     // Si tiene varias invitaciones por empezar, dice a cuál. Con una sola, el selector no existe:

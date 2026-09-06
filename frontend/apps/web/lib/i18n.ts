@@ -294,8 +294,14 @@ export const es_MX = {
       lugarAyuda: "La dirección y el mapa se completan dentro del editor.",
       fechaInvalida: "Escribe la fecha como día, mes y año. Por ejemplo: 18 de abril de 2027.",
       guardando: "Guardando tus datos…",
+      // 3C-UX G-03: el aviso decía «Puedes continuar» y «Continuar» NO continuaba. Ahora el texto
+      // ofrece exactamente los dos botones que salen debajo, ni uno más.
       errorGuardar:
-        "No pudimos guardar estos datos. Puedes continuar: los escribes dentro del editor y no se pierde nada.",
+        "No pudimos guardar estos datos. Vuelve a intentarlo, o sigue sin guardar: los escribes dentro del editor y no se pierde nada.",
+      errorGuardarSinRed:
+        "No hay conexión, así que no pudimos guardar estos datos. Vuelve a intentarlo, o sigue sin guardar: los escribes dentro del editor y no se pierde nada.",
+      reintentar: "Volver a guardar",
+      seguirSinGuardar: "Seguir sin guardar",
       omitir: "Lo lleno después",
     },
     listo: {
@@ -310,6 +316,22 @@ export const es_MX = {
       texto:
         "Tu invitación se crea cuando contratas un plan. En cuanto exista, aparece aquí y podrás elegirle una plantilla.",
       accion: "Ver planes",
+      /** Título de la PÁGINA en ese caso: el del estado vacío es su propio encabezado (h2). */
+      tituloDePagina: "Tus invitaciones",
+    },
+    /**
+     * 3C-UX G-02: con todas las invitaciones ya diseñadas, el paso 1 era una pregunta sin
+     * respuestas y un «Continuar» inhabilitado para siempre. Deja de fingir que es el paso 1: dice
+     * en una frase por qué y enseña «Mis invitaciones», que es la salida real.
+     */
+    sinLibres: {
+      titulo: "Todas tus invitaciones ya tienen diseño",
+      texto:
+        "El diseño se cambia desde dentro de cada invitación. Ábrela para seguir editándola o comparte su enlace.",
+      /** Con una sola invitación, el plural sería mentira. */
+      tituloUna: "Tu invitación ya tiene diseño",
+      textoUna:
+        "El diseño se cambia desde dentro de la invitación. Ábrela para seguir editándola o comparte su enlace.",
     },
   },
   editor: {
@@ -325,8 +347,17 @@ export const es_MX = {
       sinInvitaciones:
         "Todavía no tienes ninguna invitación. Tu invitación se crea cuando contratas un plan; en cuanto esté, aparecerá aquí y podrás elegirle una plantilla.",
       misInvitaciones: "Mis invitaciones",
-      seguirEditando: "Seguir editando",
+      // 3C-UX G-06: la fila dice también QUÉ es cada invitación y en qué estado está, y cuando está
+      // publicada enseña el enlace de las invitadas sin obligar a volver a publicar para verlo.
+      seguirEditando: "Abrir en el editor",
       empezar: "Elegir plantilla",
+      estadoEnEdicion: "En edición",
+      estadoPublicada: "Publicada",
+      enlaceDeInvitadas: "Enlace de tus invitadas",
+      copiarEnlace: "Copiar",
+      enlaceCopiado: "Enlace copiado",
+      enlaceNoCopiado: "No pudimos copiar el enlace. Selecciónalo y cópialo a mano.",
+      verComoInvitada: "Ver como invitada",
       errorInvitaciones: "No pudimos cargar tus invitaciones.",
       errorCatalogo: "No pudimos cargar las plantillas.",
       fechaDeLaInvitacion: (fecha: string) => `Fecha del evento: ${fecha}`,
@@ -334,10 +365,7 @@ export const es_MX = {
       sinFecha: "Sin fecha registrada",
       sinAcceso: "No disponible",
       numero: (id: number) => `Invitación n.º ${id}`,
-      todasConPlantilla:
-        "Todas tus invitaciones ya tienen plantilla. Ábrelas para seguir editándolas; el diseño se cambia desde dentro.",
-      unaConPlantilla:
-        "Tu invitación ya tiene plantilla. Ábrela para seguir editándola; el diseño se cambia desde dentro.",
+
     },
     /** Barra superior del editor (`11 §7`, fila «Chrome del editor»). */
     barra: {
