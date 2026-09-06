@@ -1379,3 +1379,36 @@ Supuestos con los que trabajé, todos verificables en `bitacora/3c-ux.md`:
   escriba en el doc y dejo de contarlo como fricción.
 - **No abrí ADR**: los tres cambios que hice son de texto y de origen de dato, ninguno toca paleta,
   tipografía, forma ni componente base.
+
+## Fase 3-C · UX-A (correcciones graves del asistente de creación)
+
+- **Decidí la tercera de las tres opciones que dejó abiertas 3C-UX para G-03: el asistente usa
+  `addItem`.** Escribir el lugar en un grupo que todavía vive en los *defaults* solo tiene un camino
+  legal con el contrato vigente, porque `itemsDe(doc, groupId)` es `[]` mientras `content[groupId]`
+  no exista (`OperationReducer.kt:347` y su espejo `operations-reducer.ts:187`, con el comentario
+  normativo «los `defaults` NO se copian: el escalón de default opera a nivel de bloque de grupo
+  completo»). El asistente **materializa el grupo entero**: reenvía cada ítem de ejemplo con un
+  `addItem` —los valores salen del compuesto, rehidratados a `ScalarValue`— y mete en el primero el
+  lugar que escribió la clienta. Un solo lote, atómico. **Pregunta para el dueño del contrato:** ¿se
+  queda así, o se prefiere que `:choose-template` materialice los grupos al crear el documento (lo
+  que arreglaría también el mismo defecto latente en el editor, ver abajo) o que `setItemBlock`
+  cree el ítem? Mientras no se decida, lo de aquí no cambia ningún contrato: solo usa operaciones
+  que ya existen.
+- **Supuse que promover el itinerario de ejemplo a contenido de usuario es aceptable en ese caso.**
+  Materializar hace que `event.cards` pase de `provenance: "default"` a `"user"`. Verificado que
+  **no** afecta a la compuerta de publicación: `stillDefault` solo recoge bloques `required`
+  (`DefaultComposer.kt:132`) y `event.cards` no lo es en ninguna de las dos plantillas del
+  repositorio. Si mañana una plantilla marca su grupo de momentos como `required`, esta decisión le
+  quitaría el aviso de «sigue con el contenido de ejemplo» y habría que revisarla.
+- **Dejo declarado el mismo defecto, sin corregir, en el editor**: `components/editor/GroupField.tsx`
+  llama a `setItemBlock(groupId, item.itemId, …)` con el `itemId` del compuesto, y `lib/store.ts`
+  no materializa nada, así que **editar cualquier campo de un grupo que sigue en los defaults
+  devuelve el mismo `422 TPL_ITEM_UNKNOWN`**. No lo toqué porque `components/editor/**` es de otro
+  agente en esta misma fase. Reproducción exacta y su arreglo: `bitacora/3c-ux-a.md` §3.
+- **Supuse que `?tipo=` de la portada debe leerse por su slug en español.** La portada enlaza
+  `/editor?tipo=boda|xv-anos|bautizo|comunion|cumpleanos|graduacion|corporativo` y ninguno de los
+  siete es un `EventKind`, así que el asistente los descartaba TODOS. La tabla de equivalencia vive
+  en el asistente (`tipos-de-evento.ts`), no en la portada, porque quien lee el parámetro es el
+  asistente; `corporativo` cae en `generic`. Si se prefiere que la portada enlace el `EventKind`
+  crudo, la tabla sobra y el enlace cambia; el lector seguiría aceptando las dos formas.
+- **No abrí ADR**: nada de lo que toqué cambia paleta, tipografía, forma ni componente base.

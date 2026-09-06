@@ -51,7 +51,7 @@ import {
   type ValoresDeDatos,
 } from "./datos-basicos.ts";
 import { cargarInvitaciones, invitacionObjetivo, sinPlantilla, type FilaInvitacion } from "./invitaciones.ts";
-import { esEventKind, nombreDeTipo } from "./tipos-de-evento.ts";
+import { eventKindDeParametro, nombreDeTipo, slugDeTipo } from "./tipos-de-evento.ts";
 
 const PASOS = ["evento", "plantilla", "datos", "listo"] as const;
 export type PasoDelAsistente = (typeof PASOS)[number];
@@ -88,7 +88,10 @@ export function AsistenteDeCreacion() {
   const parametros = useSearchParams();
 
   const paso: PasoDelAsistente = esPaso(parametros.get("paso")) ? (parametros.get("paso") as PasoDelAsistente) : "evento";
-  const tipoEnUrl = parametros.get("tipo");
+  // 3C-UX G-02, punto 3: la portada enlaza `/editor?tipo=xv-anos` (slug en español) y el asistente
+  // solo aceptaba los ocho `EventKind` crudos, así que descartaba el parámetro SIEMPRE, viniera de
+  // donde viniera. `eventKindDeParametro` acepta las dos formas.
+  const tipoEnUrl = eventKindDeParametro(parametros.get("tipo"));
   const invEnUrl = Number(parametros.get("inv"));
   const plantillaEnUrl = parametros.get("plantilla");
 
@@ -97,7 +100,7 @@ export function AsistenteDeCreacion() {
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
   const [catalogoCompleto, setCatalogoCompleto] = useState<readonly CatalogItem[] | null>(null);
   const [catalogoDelTipo, setCatalogoDelTipo] = useState<readonly CatalogItem[] | null>(null);
-  const [tipoElegido, setTipoElegido] = useState<EventKind | null>(esEventKind(tipoEnUrl) ? tipoEnUrl : null);
+  const [tipoElegido, setTipoElegido] = useState<EventKind | null>(tipoEnUrl);
   const [filtros, setFiltros] = useState<FiltrosDePlantilla>(SIN_FILTROS);
   const [ocupada, setOcupada] = useState<string | null>(null);
   const [errorEleccion, setErrorEleccion] = useState<string | null>(null);
@@ -179,8 +182,9 @@ export function AsistenteDeCreacion() {
             // Con `?plantilla=` en la URL, la invitación ya la empezó ESTE asistente: sigue siendo
             // la suya aunque ya no esté «sin plantilla».
             plantillaEnUrl !== null,
+            tipoEnUrl,
           ),
-    [invitaciones, invEnUrl, plantillaEnUrl],
+    [invitaciones, invEnUrl, plantillaEnUrl, tipoEnUrl],
   );
   const disponibles = useMemo(() => (invitaciones === null ? [] : sinPlantilla(invitaciones)), [invitaciones]);
 
@@ -269,7 +273,7 @@ export function AsistenteDeCreacion() {
   function irA(siguiente: PasoDelAsistente, extra: Readonly<Record<string, string>> = {}): void {
     const query = new URLSearchParams();
     query.set("paso", siguiente);
-    if (tipoElegido) query.set("tipo", tipoElegido);
+    if (tipoElegido) query.set("tipo", slugDeTipo(tipoElegido));
     if (objetivo) query.set("inv", String(objetivo.id));
     if (plantillaEnUrl) query.set("plantilla", plantillaEnUrl);
     for (const [clave, valor] of Object.entries(extra)) query.set(clave, valor);
@@ -356,7 +360,9 @@ export function AsistenteDeCreacion() {
         router.replace(DESTINO_ACCESO);
         return;
       }
-      setErrorGuardado(es_MX.asistente.datos.errorGuardar);
+      setErrorGuardado(
+        error instanceof TypeError ? es_MX.asistente.datos.errorGuardarSinRed : es_MX.asistente.datos.errorGuardar,
+      );
     }
   }
 
@@ -395,26 +401,46 @@ export function AsistenteDeCreacion() {
     };
   });
 
-  const tituloDelPaso = {
-    evento: es_MX.asistente.evento.titulo,
-    plantilla: es_MX.asistente.plantilla.titulo,
-    datos: es_MX.asistente.datos.titulo,
-    listo: es_MX.asistente.listo.titulo,
-  }[paso];
-
-  const ayudaDelPaso = {
-    evento: es_MX.asistente.evento.ayuda,
-    plantilla: tipoElegido ? es_MX.asistente.plantilla.ayuda(nombreDeTipo(tipoElegido)) : "",
-    datos: es_MX.asistente.datos.ayuda,
-    listo: "",
-  }[paso];
-
   const hayObjetivo = objetivo !== null;
   const cargandoInvitaciones = invitaciones === null;
 
+  // 3C-UX G-02. Sin ninguna invitación a la que aplicarle una plantilla, el asistente no tiene nada
+  // que preguntar: preguntarlo igual («¿Qué vamos a celebrar?» con la rejilla escondida y
+  // «Continuar» inhabilitado para siempre) es el muro que encontró el recorrido. La pantalla deja
+  // entonces de fingir que es el paso 1: dice en una frase por qué y enseña «Mis invitaciones»,
+  // que es la salida real —cada una con su estado y, si está publicada, su enlace—.
+  const sinSalidaDeAsistente = !cargandoInvitaciones && !hayObjetivo;
+  const cuantasInvitaciones = invitaciones?.length ?? 0;
+
+  const tituloDelPaso = sinSalidaDeAsistente
+    ? cuantasInvitaciones === 0
+      ? es_MX.asistente.sinInvitaciones.tituloDePagina
+      : cuantasInvitaciones === 1
+        ? es_MX.asistente.sinLibres.tituloUna
+        : es_MX.asistente.sinLibres.titulo
+    : {
+        evento: es_MX.asistente.evento.titulo,
+        plantilla: es_MX.asistente.plantilla.titulo,
+        datos: es_MX.asistente.datos.titulo,
+        listo: es_MX.asistente.listo.titulo,
+      }[paso];
+
+  const ayudaDelPaso = sinSalidaDeAsistente
+    ? cuantasInvitaciones === 0
+      ? "" // el estado vacío ya lleva su propio texto y su acción: repetirlo sería ruido
+      : cuantasInvitaciones === 1
+        ? es_MX.asistente.sinLibres.textoUna
+        : es_MX.asistente.sinLibres.texto
+    : {
+        evento: es_MX.asistente.evento.ayuda,
+        plantilla: tipoElegido ? es_MX.asistente.plantilla.ayuda(nombreDeTipo(tipoElegido)) : "",
+        datos: es_MX.asistente.datos.ayuda,
+        listo: "",
+      }[paso];
+
   return (
     <main className="mx-auto flex w-full max-w-ui-page flex-col gap-8 px-6 pb-32 pt-8">
-      <WizardProgress pasos={pasosProgreso} className="max-w-md" />
+      {sinSalidaDeAsistente ? null : <WizardProgress pasos={pasosProgreso} className="max-w-md" />}
 
       <header className="flex flex-col gap-2">
         <h1 ref={titulo} tabIndex={-1} id={ID_TITULO} className="display-sm text-ui-ink outline-none">
@@ -432,15 +458,15 @@ export function AsistenteDeCreacion() {
         </div>
       ) : null}
 
-      {paso === "evento" ? (
+      {sinSalidaDeAsistente ? <MisInvitaciones invitaciones={invitaciones} idTitulo={ID_MIS_INVITACIONES} /> : null}
+
+      {paso === "evento" && !sinSalidaDeAsistente ? (
         <div className="flex flex-col gap-8">
           {cargandoInvitaciones ? (
             <p role="status" className="text-md text-ui-ink-muted">
               {es_MX.asistente.cargando}
             </p>
-          ) : (
-            <MisInvitaciones invitaciones={invitaciones} idTitulo={ID_MIS_INVITACIONES} />
-          )}
+          ) : null}
 
           {disponibles.length > 1 && objetivo ? (
             <div className="max-w-sm">
@@ -460,12 +486,6 @@ export function AsistenteDeCreacion() {
             </div>
           ) : null}
 
-          {!cargandoInvitaciones && invitaciones.length > 0 && disponibles.length === 0 ? (
-            <p className="max-w-prose text-md text-ui-ink-muted">
-              {invitaciones.length === 1 ? es_MX.editor.catalogo.unaConPlantilla : es_MX.editor.catalogo.todasConPlantilla}
-            </p>
-          ) : null}
-
           {hayObjetivo ? (
             <>
               <PasoTipoEvento
@@ -482,11 +502,13 @@ export function AsistenteDeCreacion() {
               ) : null}
             </>
           ) : null}
-        </div>
-      ) : null}
 
-      {paso === "plantilla" && !cargandoInvitaciones && !hayObjetivo ? (
-        <MisInvitaciones invitaciones={[]} idTitulo={ID_MIS_INVITACIONES} />
+          {/* «Mis invitaciones» va DEBAJO de la rejilla (deuda anotada en `handoffs/3c-6-parcial.md`
+              §3.5): a 390 px la lista empujaba el objetivo del paso —elegir el tipo— bajo el
+              pliegue, así que la pantalla que pregunta enseñaba primero otra cosa. Sigue en el
+              paso 1, que es donde la clienta comprueba a cuál se le va a aplicar la plantilla. */}
+          {cargandoInvitaciones ? null : <MisInvitaciones invitaciones={invitaciones} idTitulo={ID_MIS_INVITACIONES} />}
+        </div>
       ) : null}
 
       {paso === "plantilla" && (cargandoInvitaciones || hayObjetivo) ? (
@@ -536,12 +558,16 @@ export function AsistenteDeCreacion() {
         />
       ) : null}
 
-      {paso === "listo" ? null : (
+      {paso === "listo" || sinSalidaDeAsistente ? null : (
         <nav
           aria-label={es_MX.asistente.navegacion}
           className="fixed inset-x-0 bottom-0 z-10 border-t border-ui-divider bg-ui-surface px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
         >
-          <div className="mx-auto flex w-full max-w-ui-page items-center justify-between gap-3">
+          {/* `flex-wrap`: a 390 px la fila del paso 3 son TRES botones («Atrás», «Lo lleno después»,
+              «Continuar») y sumados no caben en 342 px de contenido, así que la barra desbordaba a
+              lo ancho y «Continuar» se salía de la pantalla — el mismo defecto que M-07 corrigió en
+              el paso 1. Envolviendo, la barra crece hacia arriba y todo queda tocable. */}
+          <div className="mx-auto flex w-full max-w-ui-page flex-wrap items-center justify-between gap-2">
             {paso === "evento" ? (
               <span />
             ) : (
@@ -561,8 +587,15 @@ export function AsistenteDeCreacion() {
             ) : null}
             {paso === "datos" ? (
               <span className="flex items-center gap-2">
-                <Button variant="terciario" onClick={() => irA("listo")}>
-                  {es_MX.asistente.datos.omitir}
+                {/* 3C-UX G-03: tras un fallo de guardado el aviso prometía «Puedes continuar» y no
+                    había ningún botón que continuara. Ahora salen los dos que promete el texto:
+                    seguir sin guardar (los datos se escriben en el editor) o volver a intentarlo. */}
+                <Button
+                  variant="terciario"
+                  onClick={() => irA("listo")}
+                  data-testid={errorGuardado ? "asistente-seguir-sin-guardar" : "asistente-omitir"}
+                >
+                  {errorGuardado ? es_MX.asistente.datos.seguirSinGuardar : es_MX.asistente.datos.omitir}
                 </Button>
                 <Button
                   loading={guardando}
@@ -570,7 +603,7 @@ export function AsistenteDeCreacion() {
                   data-testid="asistente-continuar"
                   onClick={() => void guardarDatos()}
                 >
-                  {es_MX.asistente.continuar}
+                  {errorGuardado ? es_MX.asistente.datos.reintentar : es_MX.asistente.continuar}
                 </Button>
               </span>
             ) : null}
@@ -610,7 +643,7 @@ function hrefDePaso(
 ): string {
   const query = new URLSearchParams();
   query.set("paso", paso);
-  if (tipo) query.set("tipo", tipo);
+  if (tipo) query.set("tipo", slugDeTipo(tipo));
   if (invitationId) query.set("inv", String(invitationId));
   if (plantilla) query.set("plantilla", plantilla);
   return `/editor?${query.toString()}`;

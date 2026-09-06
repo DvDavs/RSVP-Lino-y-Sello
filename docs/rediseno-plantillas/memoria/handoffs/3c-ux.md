@@ -74,3 +74,13 @@ Pruebas ajustadas: `PasoTipoEvento.test.tsx:48`, `AsistenteDeCreacion.test.tsx:2
 ## 6. Qué falta
 Foto de más de 8 MB y RSVP del invitado: no probados, se acabó el presupuesto de contexto. Todo lo
 demás del encargo está recorrido en móvil y en escritorio.
+
+## Correcciones UX-A
+`wt/ux-a` cerró **G-02**, **G-03** y la mitad de **G-06** que vive en `MisInvitaciones.tsx` (detalle
+y cifras en `bitacora/3c-ux-a.md`). G-03: el paso 3 materializa con `addItem` un grupo que solo vive
+en los *defaults* en vez de mandar `setItemBlock` contra un `itemId` que el servidor no conoce
+(`422 TPL_ITEM_UNKNOWN`); mismo defecto reproducido y documentado, sin corregir, en
+`components/editor/GroupField.tsx`+`lib/store.ts` (`preguntas-abiertas.md § UX-A`). Compuertas con
+salida real: `test` 64 ficheros/531 pruebas en verde, `typecheck` 0 errores, e2e reales `:6113`/
+`:3113` `asistente.spec.ts` 7/7 + `clienta-sin-sesion.spec.ts` 1/1. **G-01, G-04, G-05** y la otra
+mitad de G-06 (panel de publicar) siguen abiertos. Sin commit ni push.
