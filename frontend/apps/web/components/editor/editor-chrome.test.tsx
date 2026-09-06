@@ -138,7 +138,10 @@ describe("ConflictDialog · tres opciones y sin rebase automático (04 §12.6)",
     render(<ConflictDialog />);
     const radios = screen.getAllByRole("radio");
     expect(radios).toHaveLength(3);
-    expect((radios[0] as HTMLInputElement).checked).toBe(true);
+    // Fase 3-C: el grupo es el `RadioGroup` del sistema (Radix sobre `<button role="radio">`), así
+    // que «seleccionado» se lee en `aria-checked`, no en la propiedad `checked` de un `<input>`.
+    // Lo que la prueba afirma no cambia: la opción CONSERVADORA viene marcada de fábrica.
+    expect(radios[0]?.getAttribute("aria-checked")).toBe("true");
     expect(screen.getByText(/Traer la versión nueva y perder mi/)).toBeTruthy();
   });
 

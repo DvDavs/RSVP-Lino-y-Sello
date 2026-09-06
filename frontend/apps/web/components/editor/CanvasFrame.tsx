@@ -14,6 +14,8 @@
 // (ADR-018/031, compuerta A1-A8 8/8 en `handoffs/3-0b.md`). No añadir `allow-same-origin` sin
 // repetir la compuerta completa.
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@invitaciones/ui";
+import { IconoVistaPrevia } from "@invitaciones/icons";
 import { createCanvasBridge, type CanvasBridge } from "@/lib/canvas-bridge";
 import { useEditorStore } from "@/lib/store";
 import { es_MX } from "@/lib/i18n";
@@ -97,29 +99,25 @@ export function CanvasFrame({ invitationId }: CanvasFrameProps) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="relative flex-1 overflow-hidden rounded-ui-card border border-ui-border bg-ui-bg-alt">
+      <div className="relative flex-1 overflow-hidden rounded-ui-media bg-ui-surface-alt shadow-ui-1">
         {degradado ? (
           <div role="alert" className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
-            <p className="max-w-prose text-ui-body text-ui-ink">{es_MX.editor.lienzo.noDisponible}</p>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                className="min-h-11 rounded-ui-pill bg-ui-primary px-5 text-ui-aux font-semibold text-ui-on-primary"
+            <p className="max-w-prose text-md text-ui-ink">{es_MX.editor.lienzo.noDisponible}</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Button
                 onClick={() => {
                   useEditorStore.setState((s) => ({ canvas: { ...s.canvas, status: "loading", attempts: 0 } }));
                   setRecarga((n) => n + 1);
                 }}
               >
                 {es_MX.comun.reintentar}
-              </button>
-              <a
-                className="min-h-11 rounded-ui-pill border border-ui-border px-5 leading-11 text-ui-aux font-semibold text-ui-ink"
-                href={`/preview/${invitationId}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {es_MX.editor.lienzo.irAPreview}
-              </a>
+              </Button>
+              <Button asChild variant="secundario">
+                <a href={`/preview/${invitationId}`} target="_blank" rel="noreferrer">
+                  <IconoVistaPrevia size={18} tone="mono" />
+                  {es_MX.editor.lienzo.irAPreview}
+                </a>
+              </Button>
             </div>
           </div>
         ) : (
@@ -135,8 +133,8 @@ export function CanvasFrame({ invitationId }: CanvasFrameProps) {
             aria-busy={estadoLienzo !== "ready"}
             className={
               viewport === "mobile"
-                ? "mx-auto block h-full w-[390px] border-0 bg-white shadow-ui-1"
-                : "block h-full w-full border-0 bg-white"
+                ? "mx-auto block h-full w-[390px] border-0 bg-ui-surface-raised shadow-ui-1"
+                : "block h-full w-full border-0 bg-ui-surface-raised"
             }
           />
         )}

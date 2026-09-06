@@ -3,12 +3,14 @@
 // components/fields/RichTextField.tsx — editor PROPIO mínimo del tipo de bloque `richText`
 // (negrita, cursiva, enlace — `lib/rich-text.ts`). NO usa Tiptap (`preguntas-abiertas.md`).
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Bold, Italic, Link2 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Textarea } from "@invitaciones/ui";
+import { IconoEnlace } from "@invitaciones/icons";
 import type { RichTextSpec, RichTextValue } from "@/lib/block-types.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { es_MX } from "@/lib/i18n.ts";
+import { FieldShell, describedByPara } from "./FieldShell.tsx";
 import { longitudVisible, richDocATextoAMarcado, textoAMarcadoARichDoc } from "@/lib/rich-text.ts";
 
 export interface RichTextFieldProps {
@@ -41,7 +43,7 @@ export function RichTextField({ id, spec, value, esContenidoDeEjemplo, onCommit 
 
   const error = formState.errors.texto?.message;
   const describedBy = describedByPara(id, {
-    help: spec.help?.["es-MX"] ?? "Selecciona texto y usa los botones para resaltarlo o convertirlo en enlace.",
+    help: spec.help?.["es-MX"] ?? es_MX.editor.campo.ayudaTextoRico,
     error,
   });
   const { ref: rhfRef, onChange: rhfOnChange, ...registrados } = register("texto");
@@ -75,44 +77,34 @@ export function RichTextField({ id, spec, value, esContenidoDeEjemplo, onCommit 
     <FieldShell
       id={id}
       label={spec.label["es-MX"]}
-      help={spec.help?.["es-MX"] ?? "Selecciona texto y usa los botones para resaltarlo o convertirlo en enlace."}
+      help={spec.help?.["es-MX"] ?? es_MX.editor.campo.ayudaTextoRico}
       required={spec.required}
       esContenidoDeEjemplo={esContenidoDeEjemplo}
       counter={`${longitud}/${maxLength}`}
       error={error}
     >
-      <div className="flex gap-1" role="toolbar" aria-label="Formato de texto">
-        <button
-          type="button"
-          aria-label="Negrita"
-          onClick={() => envolverSeleccion("**")}
-          className="flex size-9 items-center justify-center rounded-ui-control border border-ui-border-field text-ui-ink hover:bg-ui-bg-alt"
-        >
-          <Bold aria-hidden="true" className="size-4" />
-        </button>
-        <button
-          type="button"
-          aria-label="Cursiva"
-          onClick={() => envolverSeleccion("_")}
-          className="flex size-9 items-center justify-center rounded-ui-control border border-ui-border-field text-ui-ink hover:bg-ui-bg-alt"
-        >
-          <Italic aria-hidden="true" className="size-4" />
-        </button>
-        <button
-          type="button"
-          aria-label="Enlace"
-          onClick={() => envolverSeleccion("[", "](https://)")}
-          className="flex size-9 items-center justify-center rounded-ui-control border border-ui-border-field text-ui-ink hover:bg-ui-bg-alt"
-        >
-          <Link2 aria-hidden="true" className="size-4" />
-        </button>
+      <div className="flex gap-1" role="toolbar" aria-label={es_MX.editor.campo.formato}>
+        <BotonDeFormato etiqueta={es_MX.editor.campo.negrita} onClick={() => envolverSeleccion("**")}>
+          {/* Negrita y cursiva se dibujan con la propia voz `display` del sistema, no con un icono
+              genérico: son las dos letras que todo el mundo reconoce y ya las tenemos en la fuente. */}
+          <span aria-hidden="true" className="font-ui-display text-[17px] font-extrabold leading-none">
+            B
+          </span>
+        </BotonDeFormato>
+        <BotonDeFormato etiqueta={es_MX.editor.campo.cursiva} onClick={() => envolverSeleccion("_")}>
+          <span aria-hidden="true" className="font-ui-display text-[17px] italic leading-none">
+            I
+          </span>
+        </BotonDeFormato>
+        <BotonDeFormato etiqueta={es_MX.editor.campo.enlace} onClick={() => envolverSeleccion("[", "](https://)")}>
+          <IconoEnlace size={18} tone="mono" />
+        </BotonDeFormato>
       </div>
-      <textarea
+      <Textarea
         id={id}
         rows={4}
         aria-invalid={Boolean(error) || undefined}
         aria-describedby={describedBy}
-        className={`${CLASES_CONTROL} h-auto min-h-24 resize-y py-2.5`}
         {...registrados}
         onChange={(e) => {
           void rhfOnChange(e);
@@ -124,5 +116,19 @@ export function RichTextField({ id, spec, value, esContenidoDeEjemplo, onCommit 
         }}
       />
     </FieldShell>
+  );
+}
+
+/** Botón de la barra de formato: 44 px de objetivo (2.5.8), anillo de foco del sistema. */
+function BotonDeFormato({ etiqueta, onClick, children }: { etiqueta: string; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      aria-label={etiqueta}
+      onClick={onClick}
+      className="inline-flex size-11 items-center justify-center rounded-ui-control border-[1.5px] border-ui-border bg-ui-surface-raised text-ui-ink transition-colors duration-100 ease-ui-out hover:bg-ui-surface-alt focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface"
+    >
+      {children}
+    </button>
   );
 }

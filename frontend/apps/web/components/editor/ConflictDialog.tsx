@@ -9,8 +9,14 @@
 //
 // La opción por defecto es la CONSERVADORA (traer la versión nueva). La opción 2 nunca envía nada
 // sin haber mostrado antes la lista de lo que se descartaría.
-import * as Dialog from "@radix-ui/react-dialog";
+//
+// Fase 3-C: `Dialog` de `@invitaciones/ui` con `busy` SIEMPRE activo. `busy` es el estado «ocupado»
+// de `11 §5`: bloquea Esc y el clic fuera y deshabilita el aspa — que es literalmente lo que exige
+// `04 §12.6` (de aquí no se sale sin elegir; el editor está detenido hasta entonces). `11 §5` pide
+// que «ocupado» lleve siempre una explicación visible: es la frase `hayQueElegir`.
 import { useState } from "react";
+import { Button, Dialog, RadioGroup } from "@invitaciones/ui";
+import { es_MX } from "@/lib/i18n";
 import { useEditorStore, type ConflictChoice } from "@/lib/store";
 
 export function ConflictDialog() {
@@ -22,127 +28,81 @@ export function ConflictDialog() {
   if (!conflicto) return null;
   const n = conflicto.pending.length;
   const rebase = conflicto.rebase;
+  const textos = es_MX.editor.conflicto;
 
   return (
-    <Dialog.Root open modal>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
-        <Dialog.Content
-          data-testid="conflict-dialog"
-          className="fixed left-1/2 top-1/2 z-50 w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-ui-card bg-ui-surface p-6 shadow-ui-2"
-          onEscapeKeyDown={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
+    <Dialog
+      open
+      busy
+      title={textos.titulo}
+      description={textos.intro(n)}
+      className="max-w-[34rem]"
+      footer={
+        <Button
+          data-testid="conflict-continue"
+          loading={ocupado}
+          loadingText={es_MX.comun.cargando}
+          onClick={() => {
+            setOcupado(true);
+            void resolver(rebase === null ? eleccion : "rebase").finally(() => setOcupado(false));
+          }}
         >
-          <Dialog.Title className="font-ui-display text-ui-card font-semibold text-ui-ink-heading">
-            Esta invitación cambió en otro lugar
-          </Dialog.Title>
-          <Dialog.Description className="mt-2 text-ui-body text-ui-ink">
-            Alguien (o tú, en otro dispositivo) guardó cambios mientras editabas. Tienes {n}{" "}
-            {n === 1 ? "cambio" : "cambios"} sin guardar.
-          </Dialog.Description>
+          {rebase === null ? textos.continuar : textos.aplicarLosQueSePuedan}
+        </Button>
+      }
+    >
+      <div data-testid="conflict-dialog" className="flex flex-col gap-4">
+        <p className="text-sm text-ui-ink-muted">{textos.hayQueElegir}</p>
 
-          {rebase === null ? (
-            <fieldset className="mt-5 flex flex-col gap-3">
-              <legend className="sr-only">Qué hacer con tus cambios</legend>
-              <Opcion
-                valor="discard-mine"
-                actual={eleccion}
-                onChange={setEleccion}
-                titulo={`Traer la versión nueva y perder mis ${n} ${n === 1 ? "cambio" : "cambios"}`}
-              />
-              <Opcion
-                valor="rebase"
-                actual={eleccion}
-                onChange={setEleccion}
-                titulo={`Intentar aplicar mis ${n} ${n === 1 ? "cambio" : "cambios"} sobre la versión nueva`}
-                detalle="Los revisaremos uno por uno; los que ya no apliquen se descartarán y te los mostraremos antes de enviar nada."
-              />
-              <Opcion
-                valor="review"
-                actual={eleccion}
-                onChange={setEleccion}
-                titulo="Ver mis cambios antes de decidir"
-              />
-              {eleccion === "review" ? <ListaDeCambios labels={conflicto.labels} /> : null}
-            </fieldset>
-          ) : (
-            <div className="mt-5 flex flex-col gap-3">
-              <p className="text-ui-body text-ui-ink">
-                Se pueden aplicar {rebase.aplicables.length} de tus cambios. Estos {rebase.descartadas.length} ya no
-                aplican sobre la versión nueva:
-              </p>
-              <ul className="max-h-48 overflow-y-auto rounded-ui-control bg-ui-bg-alt p-3 text-ui-aux text-ui-ink">
-                {rebase.descartadas.length === 0 ? (
-                  <li>Ninguno: se pueden aplicar todos.</li>
-                ) : (
-                  rebase.descartadas.map((d, i) => (
-                    <li key={i} className="py-0.5">
-                      {d.op.op} — {d.motivo}
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
-          )}
-
-          <div className="mt-6 flex justify-end gap-2">
-            <button
-              type="button"
-              data-testid="conflict-continue"
-              disabled={ocupado}
-              aria-busy={ocupado || undefined}
-              onClick={() => {
-                setOcupado(true);
-                void resolver(rebase === null ? eleccion : "rebase").finally(() => setOcupado(false));
-              }}
-              className="inline-flex h-11 items-center rounded-ui-pill bg-ui-primary px-5 text-ui-aux font-semibold text-ui-on-primary disabled:opacity-50"
-            >
-              {rebase === null ? "Continuar" : "Aplicar los que se puedan"}
-            </button>
+        {rebase === null ? (
+          <>
+            <RadioGroup
+              value={eleccion}
+              onValueChange={(v) => setEleccion(v as ConflictChoice)}
+              aria-label={textos.queHacer}
+              opciones={[
+                { value: "discard-mine", label: textos.traerLaNueva(n) },
+                {
+                  value: "rebase",
+                  label: (
+                    <span className="flex flex-col gap-0.5">
+                      <span>{textos.intentarAplicar(n)}</span>
+                      <span className="text-xs text-ui-ink-muted">{textos.intentarAplicarDetalle}</span>
+                    </span>
+                  ),
+                },
+                { value: "review", label: textos.verMisCambios },
+              ]}
+            />
+            {eleccion === "review" ? <ListaDeCambios labels={conflicto.labels} /> : null}
+          </>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <p className="text-md text-ui-ink">{textos.resumenRebase(rebase.aplicables.length, rebase.descartadas.length)}</p>
+            <ul className="max-h-48 overflow-y-auto rounded-ui-control bg-ui-surface-alt p-3 text-sm text-ui-ink">
+              {rebase.descartadas.length === 0 ? (
+                <li>{textos.seAplicanTodos}</li>
+              ) : (
+                rebase.descartadas.map((d, i) => (
+                  <li key={i} className="py-0.5">
+                    {d.op.op} — {d.motivo}
+                  </li>
+                ))
+              )}
+            </ul>
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  );
-}
-
-function Opcion({
-  valor,
-  actual,
-  onChange,
-  titulo,
-  detalle,
-}: {
-  valor: ConflictChoice;
-  actual: ConflictChoice;
-  onChange: (v: ConflictChoice) => void;
-  titulo: string;
-  detalle?: string;
-}) {
-  return (
-    <label className="flex cursor-pointer gap-3 rounded-ui-control border border-ui-border p-3 has-[:checked]:border-ui-primary has-[:checked]:bg-ui-primary-soft">
-      <input
-        type="radio"
-        name="conflicto"
-        value={valor}
-        checked={actual === valor}
-        onChange={() => onChange(valor)}
-        className="mt-1 size-4 shrink-0 accent-[var(--color-ui-primary)]"
-      />
-      <span>
-        <span className="block text-ui-body font-semibold text-ui-ink-strong">{titulo}</span>
-        {detalle ? <span className="mt-0.5 block text-ui-aux text-ui-ink-muted">{detalle}</span> : null}
-      </span>
-    </label>
+        )}
+      </div>
+    </Dialog>
   );
 }
 
 /** Opción 3: los cambios pendientes en lenguaje natural (`UndoEntry.label`), no ids ni JSON. */
 function ListaDeCambios({ labels }: { labels: string[] }) {
   return (
-    <ul className="max-h-40 overflow-y-auto rounded-ui-control bg-ui-bg-alt p-3 text-ui-aux text-ui-ink">
+    <ul className="max-h-40 overflow-y-auto rounded-ui-control bg-ui-surface-alt p-3 text-sm text-ui-ink">
       {labels.length === 0 ? (
-        <li>No pudimos describir tus cambios pendientes.</li>
+        <li>{es_MX.editor.conflicto.sinDescripcion}</li>
       ) : (
         labels.map((l, i) => (
           <li key={i} className="py-0.5">

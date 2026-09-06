@@ -5,8 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Input } from "@invitaciones/ui";
 import type { LinkSpec, LinkValue } from "@/lib/block-types.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { FieldShell, describedByPara } from "./FieldShell.tsx";
 
 export interface LinkFieldProps {
   id: string;
@@ -53,13 +54,12 @@ export function LinkField({ id, spec, value, esContenidoDeEjemplo, onCommit }: L
   return (
     <FieldShell id={id} label={spec.label["es-MX"]} help={spec.help?.["es-MX"]} required={spec.required} esContenidoDeEjemplo={esContenidoDeEjemplo} error={error}>
       <div className="flex flex-col gap-2">
-        <input
+        <Input
           id={id}
           type="url"
           placeholder="https://…"
           aria-invalid={Boolean(formState.errors.href) || undefined}
           aria-describedby={describedBy}
-          className={CLASES_CONTROL}
           {...hrefRegistrados}
           onChange={(e) => {
             void hrefOnChange(e);
@@ -70,11 +70,10 @@ export function LinkField({ id, spec, value, esContenidoDeEjemplo, onCommit }: L
             hrefRef.current = el;
           }}
         />
-        <input
+        <Input
           type="text"
           placeholder="Texto del enlace (opcional)"
           aria-label={`Texto visible de ${spec.label["es-MX"]}`}
-          className={CLASES_CONTROL}
           {...labelRegistrados}
           onChange={(e) => {
             void labelOnChange(e);

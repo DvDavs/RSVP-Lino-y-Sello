@@ -3,8 +3,9 @@
 // components/fields/TimeField.tsx — campo del tipo de bloque `time`. `<input type="time">`: su valor
 // ya es `HH:MM` en 24 h (`esquema/common.ts` `IsoTime`).
 import { useEffect, useState } from "react";
+import { Input } from "@invitaciones/ui";
 import type { TimeSpec, TimeValue } from "@/lib/block-types.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { FieldShell, describedByPara } from "./FieldShell.tsx";
 
 export interface TimeFieldProps {
   id: string;
@@ -21,12 +22,11 @@ export function TimeField({ id, spec, value, esContenidoDeEjemplo, onCommit }: T
 
   return (
     <FieldShell id={id} label={spec.label["es-MX"]} help={spec.help?.["es-MX"]} required={spec.required} esContenidoDeEjemplo={esContenidoDeEjemplo}>
-      <input
+      <Input
         id={id}
         type="time"
         value={local}
         aria-describedby={describedBy}
-        className={CLASES_CONTROL}
         onChange={(e) => {
           setLocal(e.target.value);
           if (e.target.value) onCommit({ kind: "time", value: e.target.value });

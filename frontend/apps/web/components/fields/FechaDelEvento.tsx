@@ -14,13 +14,13 @@
 // haber cambiado la fecha sin haberla cambiado (el motivo por el que ADR-3-8-06 descartó hacer el
 // campo editable). Por eso este control no produce ninguna operación, no entra en la pila de undo y
 // no pasa por el autoguardado: llama a su ruta y relee.
-import { CalendarDays } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
-import { Button } from "@/components/ui/button.tsx";
+import { Button, Input } from "@invitaciones/ui";
+import { IconoError, IconoEventoFecha } from "@invitaciones/icons";
 import { ApiError } from "@/lib/errors.ts";
 import { es_MX } from "@/lib/i18n.ts";
 import { useEditorStore } from "@/lib/store.ts";
-import { CLASES_CONTROL, describedByPara, idsAyudaError } from "./FieldShell.tsx";
+import { describedByPara, idsAyudaError } from "./FieldShell.tsx";
 
 export interface FechaDelEventoProps {
   /** Etiqueta del `BlockSpec` («Fecha del evento»): la misma que ve el lienzo. */
@@ -72,14 +72,14 @@ export function FechaDelEvento({ label, valor, formateado }: FechaDelEventoProps
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-ui-aux font-semibold text-ui-ink">{label}</span>
+      <span className="text-sm font-semibold text-ui-ink">{label}</span>
 
       {estado === "editando" || estado === "guardando" ? (
         <>
           <label htmlFor={id} className="sr-only">
             {es_MX.editor.fechaEvento.etiquetaCampo}
           </label>
-          <input
+          <Input
             ref={campo}
             id={id}
             type="date"
@@ -90,42 +90,51 @@ export function FechaDelEvento({ label, valor, formateado }: FechaDelEventoProps
               help: es_MX.editor.fechaEvento.explicacion,
               error: error ?? undefined,
             })}
-            className={CLASES_CONTROL}
             onChange={(e) => setBorrador(e.target.value)}
           />
           <div className="flex flex-wrap gap-2">
-            <Button type="button" size="sm" busy={estado === "guardando"} disabled={!borrador} onClick={() => void guardar()}>
-              {estado === "guardando" ? es_MX.editor.fechaEvento.guardando : es_MX.editor.fechaEvento.guardar}
+            <Button
+              type="button"
+              size="sm"
+              loading={estado === "guardando"}
+              loadingText={es_MX.editor.fechaEvento.guardando}
+              disabled={!borrador}
+              onClick={() => void guardar()}
+            >
+              {es_MX.editor.fechaEvento.guardar}
             </Button>
-            <Button type="button" size="sm" variant="ghost" disabled={estado === "guardando"} onClick={cancelar}>
+            <Button type="button" size="sm" variant="terciario" disabled={estado === "guardando"} onClick={cancelar}>
               {es_MX.editor.fechaEvento.cancelar}
             </Button>
           </div>
         </>
       ) : (
         <>
-          <p className="rounded-ui-control bg-ui-bg-alt px-4 py-2.5 text-ui-body text-ui-ink">{formateado || "—"}</p>
+          <p className="rounded-ui-control bg-ui-surface-alt px-4 py-2.5 text-md text-ui-ink">
+            {formateado || es_MX.editor.campo.sinValor}
+          </p>
           <div>
-            <Button type="button" size="sm" variant="secondary" onClick={() => setEstado("editando")}>
-              <CalendarDays aria-hidden="true" className="size-4" />
+            <Button type="button" size="sm" variant="secundario" onClick={() => setEstado("editando")}>
+              <IconoEventoFecha size={18} tone="mono" />
               {es_MX.editor.fechaEvento.abrir}
             </Button>
           </div>
         </>
       )}
 
-      <p id={helpId} className="text-ui-eyebrow text-ui-ink-muted">
+      <p id={helpId} className="text-xs text-ui-ink-muted">
         {es_MX.editor.fechaEvento.explicacion}
       </p>
 
       {error ? (
-        <p id={errorId} role="alert" className="text-ui-eyebrow text-ui-danger">
+        <p id={errorId} role="alert" className="flex items-center gap-1.5 text-xs font-semibold text-ui-danger-text">
+          <IconoError size={16} tone="mono" className="shrink-0" />
           {error}
         </p>
       ) : null}
 
       {estado === "guardada" ? (
-        <p role="status" className="text-ui-eyebrow text-ui-ink-muted">
+        <p role="status" className="text-xs text-ui-ink-muted">
           {es_MX.editor.fechaEvento.guardada}
           {hayQueRepublicar ? <> {es_MX.editor.fechaEvento.republicar}</> : null}
         </p>

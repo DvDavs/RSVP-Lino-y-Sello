@@ -5,10 +5,10 @@
 // `SectionSpec` del manifiesto. `react-hook-form` + resolver Zod vive DENTRO de cada campo
 // (`components/fields/**`), construido desde el `BlockSpec` correspondiente — este archivo solo
 // resuelve QUÉ campo pintar para cada bloque y si va de solo lectura.
-import { ChevronLeft } from "lucide-react";
+import { Button, RadioGroup } from "@invitaciones/ui";
+import { IconoAtras } from "@invitaciones/icons";
 import type { ComposedBlock, ComposedGroup, ResolvedValue } from "@/lib/block-types.ts";
 import { sectionRegistry } from "@invitaciones/sections";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { VariantDiagram } from "./VariantDiagram.tsx";
 import { GroupField } from "./GroupField.tsx";
 import { PhotoManager } from "./PhotoManager.tsx";
@@ -37,26 +37,23 @@ export function BlockForm({ invitationId, manifest, manifestStatus }: { invitati
 
   return (
     <div className="flex flex-col gap-5">
-      <button
-        type="button"
-        onClick={volver}
-        className="flex h-9 items-center gap-1 self-start rounded-ui-control px-1 text-ui-aux font-semibold text-ui-primary hover:bg-ui-primary-soft"
-      >
-        <ChevronLeft aria-hidden="true" className="size-4" /> Volver a secciones
-      </button>
-      <h2 className="-mt-2 text-ui-eyebrow font-semibold uppercase tracking-[1.2px] text-ui-ink-muted">{composedSection.title}</h2>
+      <Button variant="terciario" size="sm" onClick={volver} className="self-start">
+        <IconoAtras size={18} tone="mono" />
+        {es_MX.editor.panel.volverASecciones}
+      </Button>
+      <h2 className="-mt-2 label-md text-ui-ink-muted">{composedSection.title}</h2>
 
       {manifestStatus === "loading" || manifestStatus === "idle" ? (
-        <p role="status" className="text-ui-body text-ui-ink-muted">
+        <p role="status" className="text-md text-ui-ink-muted">
           {es_MX.comun.cargando}
         </p>
       ) : !spec ? (
-        <div role="status" className="rounded-ui-control bg-ui-bg-alt p-3.5 text-ui-aux text-ui-ink">
-          <p>Por ahora no podemos mostrar las opciones de esta sección para editarlas aquí.</p>
+        <div role="status" className="rounded-ui-card bg-ui-surface-alt p-3.5 text-sm text-ui-ink">
+          <p>{es_MX.editor.panel.sinOpciones}</p>
           <p className="mt-1 text-ui-ink-muted">
-            Puedes seguir mostrándola u ocultándola y reordenándola desde la lista; para el contenido, usa{" "}
-            <a href={`/preview/${invitationId}`} target="_blank" rel="noreferrer" className="font-semibold text-ui-primary underline">
-              la vista previa
+            {es_MX.editor.panel.sinOpcionesSalida}{" "}
+            <a href={`/preview/${invitationId}`} target="_blank" rel="noreferrer" className="font-semibold text-ui-link underline">
+              {es_MX.editor.panel.sinOpcionesEnlace}
             </a>{" "}
             mientras tanto.
           </p>
@@ -64,27 +61,28 @@ export function BlockForm({ invitationId, manifest, manifestStatus }: { invitati
       ) : (
         <>
           {spec.variants.length > 1 ? (
-            <div className="flex flex-col gap-2">
-              <span className="text-ui-aux font-semibold text-ui-ink">Diseño de la sección</span>
+            <fieldset className="flex flex-col gap-2">
+              {/* `legend` y no un `<span>`: el grupo de radios tiene que llevar nombre accesible
+                  propio (`04 §6.3`, «Diseño de la sección»). */}
+              <legend className="text-sm font-semibold text-ui-ink">{es_MX.editor.panel.disenoDeLaSeccion}</legend>
               <RadioGroup
                 value={composedSection.variant}
                 onValueChange={(v) => useEditorStore.getState().setSectionVariant(sectionKey, v)}
-                className="flex flex-wrap gap-2"
-              >
-                {spec.variants.map((variante) => (
-                  <label
-                    key={variante}
-                    className="flex cursor-pointer flex-col items-center gap-1 rounded-ui-control border border-ui-border-field p-1.5 has-[[data-state=checked]]:border-ui-primary has-[[data-state=checked]]:bg-ui-primary-soft"
-                  >
-                    <VariantDiagram variant={variante} />
-                    <span className="flex items-center gap-1 text-ui-eyebrow text-ui-ink">
-                      <RadioGroupItem value={variante} />
+                aria-label={es_MX.editor.panel.disenoDeLaSeccion}
+                opciones={spec.variants.map((variante) => ({
+                  value: variante,
+                  // El diagrama es `aria-hidden`: el nombre accesible del radio es la etiqueta es-MX
+                  // de `sectionRegistry` («Pantalla completa», «Enmarcada»), que es como lo nombran
+                  // `e2e/paneles.spec.ts` y la clienta.
+                  label: (
+                    <span className="flex items-center gap-2">
+                      <VariantDiagram variant={variante} />
                       {etiquetaVariante(spec.type, variante)}
                     </span>
-                  </label>
-                ))}
-              </RadioGroup>
-            </div>
+                  ),
+                }))}
+              />
+            </fieldset>
           ) : null}
 
           {spec.blocks.map((blockSpec) => {
@@ -93,8 +91,8 @@ export function BlockForm({ invitationId, manifest, manifestStatus }: { invitati
               const esGaleria = blockSpec.role === "galleryPhotos";
               return (
                 <div key={blockSpec.id} className="flex flex-col gap-1.5">
-                  <span className="text-ui-aux font-semibold text-ui-ink">{etiqueta(blockSpec.label)}</span>
-                  {blockSpec.help ? <p className="text-ui-eyebrow text-ui-ink-muted">{etiqueta(blockSpec.help)}</p> : null}
+                  <span className="text-sm font-semibold text-ui-ink">{etiqueta(blockSpec.label)}</span>
+                  {blockSpec.help ? <p className="text-xs text-ui-ink-muted">{etiqueta(blockSpec.help)}</p> : null}
                   {esGaleria ? (
                     <PhotoManager
                       invitationId={invitationId}

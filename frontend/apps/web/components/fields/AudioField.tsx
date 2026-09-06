@@ -3,9 +3,10 @@
 // components/fields/AudioField.tsx — campo del tipo de bloque `audio` (música de fondo). Sin recorte
 // (no aplica a audio) ni `alt` (`AudioValue` solo lleva `assetId`, `esquema/blocks.ts`).
 import { useRef, useState } from "react";
+import { Button, ProgressRing } from "@invitaciones/ui";
+import { IconoSubir } from "@invitaciones/icons";
 import type { AudioSpec, AudioValue } from "@/lib/block-types.ts";
 import { uploadAsset } from "@/lib/api-client.ts";
-import { Progress } from "@/components/ui/progress.tsx";
 import { FieldShell, describedByPara } from "./FieldShell.tsx";
 import { mensajeDeErrorDeAsset } from "./ImageField.tsx";
 
@@ -57,15 +58,12 @@ export function AudioField({ id, invitationId, spec, value, esContenidoDeEjemplo
         {value ? (
           <audio controls src={value.url} className="h-10 w-full" />
         ) : (
-          <p className="text-ui-body text-ui-ink-muted">Sin música de fondo.</p>
+          <p className="text-md text-ui-ink-muted">Sin música de fondo.</p>
         )}
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="h-9 self-start rounded-ui-pill border border-ui-border-field px-3.5 text-ui-aux font-semibold text-ui-ink hover:bg-ui-bg-alt"
-        >
+        <Button variant="secundario" size="sm" onClick={() => inputRef.current?.click()} className="self-start">
+          <IconoSubir size={18} tone="mono" />
           {value ? "Cambiar audio" : "Elegir audio"}
-        </button>
+        </Button>
         <input
           ref={inputRef}
           type="file"
@@ -78,7 +76,12 @@ export function AudioField({ id, invitationId, spec, value, esContenidoDeEjemplo
             e.target.value = "";
           }}
         />
-        {subiendo ? <Progress value={progreso} label="Subiendo audio" /> : null}
+        {subiendo ? (
+          <div className="flex items-center gap-3">
+            <ProgressRing value={progreso} label="Subiendo audio" size={56} />
+            <span className="text-sm text-ui-ink-muted">Subiendo audio</span>
+          </div>
+        ) : null}
       </div>
     </FieldShell>
   );

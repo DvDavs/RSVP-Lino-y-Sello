@@ -132,12 +132,15 @@ test("E-10c · el diálogo de publicar SÍ contiene el foco mientras está abier
 
   await page.getByTestId("abrir-publicar").focus();
   await page.keyboard.press("Enter");
-  const dialogo = page.getByTestId("publish-dialog");
+  // Fase 3-C: el panel modal es el `Dialog` de `@invitaciones/ui`; `data-testid="publish-dialog"`
+  // marca su CONTENIDO, y el foco atrapado incluye también el aspa de cerrar, que está fuera de ese
+  // nodo. La contención se mide sobre `[role="dialog"]`, que es el panel entero.
+  const dialogo = page.getByRole("dialog", { name: "Publicar invitación" });
   await expect(dialogo).toBeVisible();
   // Radix `Dialog` mueve el foco dentro al abrir (WCAG 2.4.3): el nodo activo debe estar DENTRO.
   await expect(async () => {
     const dentro = await page.evaluate(() => {
-      const dlg = document.querySelector('[data-testid="publish-dialog"]');
+      const dlg = document.querySelector('[role="dialog"]');
       return Boolean(dlg && document.activeElement && dlg.contains(document.activeElement));
     });
     expect(dentro).toBe(true);
@@ -148,7 +151,7 @@ test("E-10c · el diálogo de publicar SÍ contiene el foco mientras está abier
   for (let i = 0; i < 10; i++) {
     await page.keyboard.press("Tab");
     const dentro = await page.evaluate(() => {
-      const dlg = document.querySelector('[data-testid="publish-dialog"]');
+      const dlg = document.querySelector('[role="dialog"]');
       return Boolean(dlg && document.activeElement && dlg.contains(document.activeElement));
     });
     expect(dentro, `Tab #${i + 1} dentro del diálogo se escapó a un elemento de detrás`).toBe(true);

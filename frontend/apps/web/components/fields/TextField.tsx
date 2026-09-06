@@ -10,8 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, type ChangeEvent } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Input, Textarea } from "@invitaciones/ui";
 import type { TextSpec, TextValue } from "@/lib/block-types.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { FieldShell, describedByPara } from "./FieldShell.tsx";
 
 export interface TextFieldProps {
   id: string;
@@ -61,7 +62,6 @@ export function TextField({ id, spec, value, esContenidoDeEjemplo, onCommit }: T
     onChange: alCambiar,
     "aria-invalid": Boolean(error) || undefined,
     "aria-describedby": describedBy,
-    className: CLASES_CONTROL,
   } as const;
 
   return (
@@ -75,17 +75,16 @@ export function TextField({ id, spec, value, esContenidoDeEjemplo, onCommit }: T
       error={error}
     >
       {multiline ? (
-        <textarea
+        <Textarea
           {...compartido}
           rows={4}
           ref={(el) => {
             rhfRef(el);
             elementoRef.current = el;
           }}
-          className={`${CLASES_CONTROL} h-auto min-h-24 resize-y py-2.5`}
         />
       ) : (
-        <input
+        <Input
           {...compartido}
           type="text"
           ref={(el) => {

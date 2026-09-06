@@ -90,7 +90,10 @@ async function flujoConflicto(browser: import("@playwright/test").Browser): Prom
 
     // ── B, que sigue en la revisión vieja, guarda: `409 TPL_REVISION_CONFLICT` ─────────────
     await escribirYGuardar(paginaB, blockId, `${original} · desde B`);
-    const dialogo = paginaB.getByTestId("conflict-dialog");
+    // Fase 3-C: el panel del diálogo lo pinta `Dialog` de `@invitaciones/ui` y el título vive en él,
+    // no dentro del `data-testid` del contenido. Se localiza por ROL y NOMBRE ACCESIBLE, que es lo
+    // que la clienta y el lector de pantalla usan (y lo que el bloque 3 fija como selector).
+    const dialogo = paginaB.getByRole("dialog", { name: "Esta invitación cambió en otro lugar" });
     await expect(dialogo).toBeVisible({ timeout: 20_000 });
     await expect(dialogo.getByText("Esta invitación cambió en otro lugar")).toBeVisible();
     // Las TRES opciones, con la conservadora por defecto (§12.6 (b)).

@@ -5,8 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Input } from "@invitaciones/ui";
 import type { PersonSpec, PersonValue } from "@/lib/block-types.ts";
-import { CLASES_CONTROL, FieldShell, describedByPara } from "./FieldShell.tsx";
+import { FieldShell, describedByPara } from "./FieldShell.tsx";
 
 export interface PersonFieldProps {
   id: string;
@@ -49,13 +50,12 @@ export function PersonField({ id, spec, value, esContenidoDeEjemplo, onCommit }:
   return (
     <FieldShell id={id} label={spec.label["es-MX"]} help={spec.help?.["es-MX"]} required={spec.required} esContenidoDeEjemplo={esContenidoDeEjemplo} error={error}>
       <div className="flex flex-col gap-2">
-        <input
+        <Input
           id={id}
           type="text"
           placeholder="Nombre"
           aria-invalid={Boolean(formState.errors.name) || undefined}
           aria-describedby={describedBy}
-          className={CLASES_CONTROL}
           {...nameRegistrados}
           onChange={(e) => {
             void nameOnChange(e);
@@ -66,11 +66,10 @@ export function PersonField({ id, spec, value, esContenidoDeEjemplo, onCommit }:
             nameRef.current = el;
           }}
         />
-        <input
+        <Input
           type="text"
           placeholder="Nota (opcional, p. ej. «Padrino de velación»)"
           aria-label={`Nota de ${spec.label["es-MX"]}`}
-          className={CLASES_CONTROL}
           {...registroNota}
           onChange={(e) => {
             void registroNota.onChange(e);

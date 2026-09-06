@@ -13,6 +13,8 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Button, Toaster } from "@invitaciones/ui";
+import { IconoAtras, IconoAviso, IconoCerrar, IconoError, IconoInfo, IconoVistaPrevia } from "@invitaciones/icons";
 import { BlockForm } from "@/components/editor/BlockForm";
 import { CanvasFrame } from "@/components/editor/CanvasFrame";
 import { ConflictDialog } from "@/components/editor/ConflictDialog";
@@ -22,7 +24,7 @@ import { SectionList } from "@/components/editor/SectionList";
 import { ThemePicker } from "@/components/editor/ThemePicker";
 import { UndoRedoBar } from "@/components/editor/UndoRedoBar";
 import { ViewportToggle } from "@/components/editor/ViewportToggle";
-import { Button, estilosBoton } from "@/components/ui/button";
+import { tituloDe } from "../../../(public)/_componentes/composed-lectura";
 import { getAuthToken, haySesionCaducada } from "@/lib/api-client";
 import { es_MX } from "@/lib/i18n";
 import { sembrarManifiestoFixture, useTemplateManifest } from "@/lib/manifest";
@@ -67,8 +69,7 @@ export default function PaginaEditorInvitacion() {
 
   const loadState = useEditorStore((s) => s.loadState);
   const loadError = useEditorStore((s) => s.loadError);
-  const templateVersion = useEditorStore((s) => s.templateVersion);
-  const revision = useEditorStore((s) => s.revision);
+  const composed = useEditorStore((s) => s.composed);
   const avisos = useEditorStore((s) => s.avisos);
   const recovered = useEditorStore((s) => s.recovered);
   const tabRole = useEditorStore((s) => s.tabRole);
@@ -77,6 +78,9 @@ export default function PaginaEditorInvitacion() {
   const candadoRef = useRef<TabLock | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const { manifest, theme, status: manifestStatus } = useTemplateManifest(invitationId);
+  // D-6 · el nombre humano de la invitación sale del título de portada ya compuesto (el mismo que
+  // usa «Mis invitaciones»); mientras no haya documento, un texto honesto en vez de un id.
+  const nombreDeLaInvitacion = (composed ? tituloDe(composed) : null) ?? es_MX.editor.barra.sinNombre;
 
   // Al cambiar entre "lista de secciones" y "contenido de un bloque" el panel es contenido NUEVO:
   // sin esto, el `<aside>` conserva el `scrollTop` de la vista anterior y el título/las primeras
@@ -159,7 +163,7 @@ export default function PaginaEditorInvitacion() {
 
   if (loadState === "loading" || loadState === "idle") {
     return (
-      <p role="status" aria-live="polite" className="p-8 text-ui-ink-muted">
+      <p role="status" aria-live="polite" className="p-8 text-md text-ui-ink-muted">
         {es_MX.comun.cargando}
       </p>
     );
@@ -167,9 +171,9 @@ export default function PaginaEditorInvitacion() {
 
   if (loadState === "forbidden") {
     return (
-      <div role="alert" className="m-8 rounded-ui-card bg-ui-surface p-6 shadow-ui-1">
-        <p className="text-ui-body text-ui-ink">No tienes acceso a esta invitación.</p>
-        {loadError ? <p className="mt-1 text-ui-aux text-ui-ink-muted">{loadError}</p> : null}
+      <div role="alert" className="m-8 rounded-ui-card bg-ui-surface-raised p-6 shadow-ui-1">
+        <p className="text-md text-ui-ink">{es_MX.editor.avisos.sinAcceso}</p>
+        {loadError ? <p className="mt-1 text-sm text-ui-ink-muted">{loadError}</p> : null}
       </div>
     );
   }
@@ -186,17 +190,17 @@ export default function PaginaEditorInvitacion() {
       const volver = encodeURIComponent(`/editor/${params.invitationId}`);
       const caducada = haySesionCaducada();
       return (
-        <div role="alert" className="m-8 flex max-w-prose flex-col items-start gap-3 rounded-ui-card bg-ui-surface p-6 shadow-ui-1">
-          <p className="text-ui-body text-ui-ink">{caducada ? es_MX.acceso.sesionTerminada : es_MX.acceso.hayQueEntrar}</p>
-          <Link href={`/acceso?volver=${volver}${caducada ? "&motivo=sesion" : ""}`} className={estilosBoton()}>
-            {es_MX.comun.iniciarSesion}
-          </Link>
+        <div role="alert" className="m-8 flex max-w-prose flex-col items-start gap-3 rounded-ui-card bg-ui-surface-raised p-6 shadow-ui-1">
+          <p className="text-md text-ui-ink">{caducada ? es_MX.acceso.sesionTerminada : es_MX.acceso.hayQueEntrar}</p>
+          <Button asChild>
+            <Link href={`/acceso?volver=${volver}${caducada ? "&motivo=sesion" : ""}`}>{es_MX.comun.iniciarSesion}</Link>
+          </Button>
         </div>
       );
     }
     return (
-      <div role="alert" className="m-8 rounded-ui-card bg-ui-surface p-6 shadow-ui-1">
-        <p className="text-ui-body text-ui-ink">{loadError ?? es_MX.errores.generico}</p>
+      <div role="alert" className="m-8 rounded-ui-card bg-ui-surface-raised p-6 shadow-ui-1">
+        <p className="text-md text-ui-ink">{loadError ?? es_MX.errores.generico}</p>
         <Button className="mt-4" onClick={() => void useEditorStore.getState().load(invitationId)}>
           {es_MX.comun.reintentar}
         </Button>
@@ -205,7 +209,7 @@ export default function PaginaEditorInvitacion() {
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-x-hidden bg-ui-bg">
+    <div className="flex h-screen flex-col overflow-x-hidden bg-ui-surface-alt">
       {/*
         Barra de aplicación FIJA y compacta: el editor necesita deshacer/rehacer, el indicador de
         guardado y "Publicar" visibles SIEMPRE, o el cliente pierde el botón al hacer scroll dentro
@@ -220,21 +224,35 @@ export default function PaginaEditorInvitacion() {
         en el teléfono: ahí la vista previa ya es del ancho del teléfono y el control no significa
         nada. `flex-wrap` en la fila y `min-w-0` en los hijos: cero desbordamiento horizontal.
       */}
-      <header className="sticky top-0 z-10 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-ui-border bg-ui-surface px-4 py-2 ed:h-16 ed:flex-nowrap ed:justify-between ed:py-0">
-        <div className="order-1 flex min-w-0 flex-1 items-center gap-3">
-          <a href="/editor" className="shrink-0 font-ui-display text-ui-body font-semibold text-ui-ink-heading">
-            Invitaciones
-          </a>
-          {/* «boda-clasica · versión 194» es contabilidad interna al lado del nombre de marca
-              (U-18); en el teléfono, además, es lo primero que sobra. Se mantiene en escritorio. */}
-          <span className="hidden truncate text-ui-aux text-ui-ink-muted ed:inline">
-            {templateVersion ? `${templateVersion.slug} · versión ${revision}` : `versión ${revision}`}
-          </span>
+      <header className="sticky top-0 z-10 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-ui-divider bg-ui-surface px-4 py-2 ed:h-16 ed:flex-nowrap ed:justify-between ed:py-0">
+        <div className="order-1 flex min-w-0 flex-1 items-center gap-2">
+          {/* «← Mis invitaciones» del wireframe (`04 §6.2`). En el teléfono queda solo la flecha:
+              el nombre de la invitación es lo que tiene que ganar el espacio. */}
+          <Button asChild variant="terciario" size="sm" className="shrink-0">
+            <Link href="/editor" aria-label={es_MX.editor.barra.inicio}>
+              <IconoAtras size={18} tone="mono" />
+              <span className="hidden ed:inline">{es_MX.editor.barra.inicio}</span>
+            </Link>
+          </Button>
+          {/* D-6 · el nombre HUMANO de la invitación («Ana & Luis»), no `boda-clasica · versión
+              194`: con cinco invitaciones iguales, la contabilidad interna no distingue ninguna.
+              Si el documento todavía no tiene título de portada, se dice «Tu invitación». */}
+          <h1 className="min-w-0 truncate text-md font-semibold text-ui-ink" title={nombreDeLaInvitacion}>
+            {nombreDeLaInvitacion}
+          </h1>
         </div>
-        {/* «Publicar»: en el teléfono acompaña a la marca en la PRIMERA fila —es lo único que no
+        {/* «Publicar»: en el teléfono acompaña al nombre en la PRIMERA fila —es lo único que no
             puede quedar nunca fuera de la pantalla—; en escritorio, el último de la derecha. Es UNA
             sola instancia, movida con `order`: dos instancias serían dos diálogos en el DOM. */}
-        <div className="order-2 shrink-0 ed:order-3">
+        <div className="order-2 flex shrink-0 items-center gap-2 ed:order-3">
+          {/* «Ver» (`11 §7`): la vista previa autenticada, en pestaña nueva. Se oculta en el
+              teléfono, donde la pestaña «Vista previa» ya hace ese trabajo sin salir de la página. */}
+          <Button asChild variant="secundario" size="sm" className="hidden ed:inline-flex">
+            <a href={`/preview/${params.invitationId}`} target="_blank" rel="noreferrer">
+              <IconoVistaPrevia size={18} tone="mono" />
+              {es_MX.editor.lienzo.irAPreview}
+            </a>
+          </Button>
           <PublishDialog invitationId={invitationId} />
         </div>
         <div className="order-3 flex w-full min-w-0 flex-wrap items-center gap-3 ed:order-2 ed:w-auto ed:flex-nowrap">
@@ -252,7 +270,7 @@ export default function PaginaEditorInvitacion() {
         <div
           role="tablist"
           aria-label={es_MX.editor.movil.pestanas}
-          className="flex shrink-0 gap-1 border-b border-ui-border bg-ui-surface px-4 pb-2"
+          className="flex shrink-0 gap-1 rounded-ui-pill border-b border-ui-divider bg-ui-surface px-4 pb-2"
         >
           {(
             [
@@ -279,8 +297,8 @@ export default function PaginaEditorInvitacion() {
                   document.getElementById(`pestana-${otra}`)?.focus();
                 }
               }}
-              className={`h-11 flex-1 rounded-ui-pill px-3 text-ui-aux font-semibold ${
-                pestana === clave ? "bg-ui-primary-soft text-ui-on-primary-soft" : "text-ui-ink-muted"
+              className={`h-11 flex-1 rounded-ui-pill px-3 text-sm font-semibold transition-colors duration-200 ease-ui-out focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface ${
+                pestana === clave ? "bg-ui-primary-soft text-ui-on-primary-soft" : "text-ui-ink-muted hover:text-ui-ink"
               }`}
             >
               {etiqueta}
@@ -290,67 +308,73 @@ export default function PaginaEditorInvitacion() {
       ) : null}
 
       {tabRole === "readonly" ? (
-        <div role="alert" className="flex items-center justify-between gap-4 bg-ui-primary-soft px-4 py-2 text-ui-aux text-ui-on-primary-soft">
-          <span>Esta invitación ya está abierta en otra pestaña.</span>
-          <button
-            type="button"
-            className="rounded-ui-pill bg-ui-primary px-3 py-1.5 font-semibold text-ui-on-primary"
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 bg-ui-primary-soft px-4 py-2 text-sm text-ui-on-primary-soft">
+          <span>{es_MX.editor.avisos.otraPestana}</span>
+          <Button
+            size="sm"
             onClick={() => {
               candadoRef.current?.takeover();
               useEditorStore.getState().setTabRole("editor");
             }}
           >
-            Editar aquí de todas formas
-          </button>
+            {es_MX.editor.avisos.editarAqui}
+          </Button>
         </div>
       ) : null}
 
       {recovered ? (
-        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 bg-ui-bg-alt px-4 py-2 text-ui-aux text-ui-ink">
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 bg-ui-surface-alt px-4 py-2 text-sm text-ui-ink">
           <span>
-            Tenías cambios sin guardar del{" "}
-            {new Date(recovered.at).toLocaleString("es-MX", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} (
-            {recovered.operations.length}).
+            {es_MX.editor.avisos.recuperados(
+              new Date(recovered.at).toLocaleString("es-MX", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }),
+              recovered.operations.length,
+            )}
           </span>
           <span className="flex gap-2">
-            <button
-              type="button"
-              className="rounded-ui-pill bg-ui-primary px-3 py-1.5 font-semibold text-ui-on-primary"
-              onClick={() => useEditorStore.getState().restoreRecovered(true)}
-            >
-              Aplicarlos
-            </button>
-            <button
-              type="button"
-              className="rounded-ui-pill border border-ui-border px-3 py-1.5 font-semibold text-ui-ink"
-              onClick={() => useEditorStore.getState().restoreRecovered(false)}
-            >
-              Descartarlos
-            </button>
+            <Button size="sm" onClick={() => useEditorStore.getState().restoreRecovered(true)}>
+              {es_MX.editor.avisos.aplicarlos}
+            </Button>
+            <Button size="sm" variant="secundario" onClick={() => useEditorStore.getState().restoreRecovered(false)}>
+              {es_MX.editor.avisos.descartarlos}
+            </Button>
           </span>
         </div>
       ) : null}
 
-      {avisos.map((a) => (
-        <div
-          key={a.id}
-          role={a.nivel === "error" ? "alert" : "status"}
-          data-testid="aviso"
-          className={`flex items-start justify-between gap-3 px-4 py-2 text-ui-aux ${
-            a.nivel === "error" ? "bg-red-50 text-ui-danger" : a.nivel === "warning" ? "bg-orange-50 text-ui-ink" : "bg-ui-bg-alt text-ui-ink"
-          }`}
-        >
-          <span>{a.texto}</span>
-          <button
-            type="button"
-            aria-label="Descartar aviso"
-            className="shrink-0 px-2 font-semibold"
-            onClick={() => useEditorStore.getState().dismissWarning(a.id)}
+      {/* Banda de aviso por nivel: pareja fondo/tinta verificada AA de `danger`/`warning`/`info`
+          (`11 §1.4`), con su icono de estado. El cierre es un botón con nombre accesible, no un
+          glifo suelto. */}
+      {avisos.map((a) => {
+        const Icono = a.nivel === "error" ? IconoError : a.nivel === "warning" ? IconoAviso : IconoInfo;
+        return (
+          <div
+            key={a.id}
+            role={a.nivel === "error" ? "alert" : "status"}
+            data-testid="aviso"
+            className={`flex items-start justify-between gap-3 px-4 py-2 text-sm ${
+              a.nivel === "error"
+                ? "bg-ui-danger-soft text-ui-on-danger-soft"
+                : a.nivel === "warning"
+                  ? "bg-ui-warning-soft text-ui-on-warning-soft"
+                  : "bg-ui-info-soft text-ui-on-info-soft"
+            }`}
           >
-            ×
-          </button>
-        </div>
-      ))}
+            <span className="flex min-w-0 items-start gap-2">
+              <Icono size={18} tone="mono" className="mt-px shrink-0" />
+              {a.texto}
+            </span>
+            <Button
+              variant="icono"
+              size="sm"
+              aria-label={es_MX.editor.avisos.descartarAviso}
+              className="shrink-0 text-current"
+              onClick={() => useEditorStore.getState().dismissWarning(a.id)}
+            >
+              <IconoCerrar size={18} tone="mono" />
+            </Button>
+          </div>
+        );
+      })}
 
       <div className={esMovil ? "flex min-h-0 flex-1 flex-col" : "grid min-h-0 flex-1 grid-cols-[minmax(280px,340px)_1fr]"}>
         <aside
@@ -360,17 +384,17 @@ export default function PaginaEditorInvitacion() {
           {...(esMovil
             ? ({ role: "tabpanel", "aria-labelledby": "pestana-editar" } as const)
             : ({ "aria-label": es_MX.editor.panel.secciones } as const))}
-          className={`min-w-0 overflow-y-auto bg-ui-surface p-4 ${esMovil ? "flex-1" : "border-r border-ui-border"}`}
+          className={`min-w-0 overflow-y-auto bg-ui-surface p-4 ${esMovil ? "flex-1" : "border-r border-ui-divider"}`}
         >
           {panel === "block" && selection ? (
             <BlockForm invitationId={invitationId} manifest={manifest} manifestStatus={manifestStatus} />
           ) : (
             <div className="flex flex-col gap-6">
               <div>
-                <h2 className="mb-3 text-ui-body font-semibold text-ui-ink-heading">{es_MX.editor.panel.secciones}</h2>
+                <h2 className="mb-3 heading-sm text-ui-ink">{es_MX.editor.panel.secciones}</h2>
                 <SectionList manifest={manifest} />
               </div>
-              <div className="border-t border-ui-border pt-4">
+              <div className="border-t border-ui-divider pt-4">
                 <ThemePicker theme={theme} />
               </div>
             </div>
@@ -390,6 +414,10 @@ export default function PaginaEditorInvitacion() {
       </div>
 
       <ConflictDialog />
+      {/* Punto de montaje ÚNICO de las tostadas (`handoffs/3c-b2-f2.md`). Vive aquí y no en
+          `app/(chrome)/layout.tsx` porque ese layout es de otra tarea del bloque 3; cuando lo
+          suba, esta línea sobra. */}
+      <Toaster />
     </div>
   );
 }
@@ -423,33 +451,35 @@ function ElegirPlantilla({ invitationId }: { invitationId: number }) {
   }, []);
 
   return (
-    <main className="mx-auto max-w-(--ui-content-max) px-6 py-12" data-testid="elegir-plantilla">
-      <h1 className="font-ui-display text-ui-section font-semibold text-ui-ink-heading">{es_MX.editor.catalogo.titulo}</h1>
-      <p className="mt-2 max-w-prose text-ui-body text-ui-ink-muted">
+    <main className="mx-auto max-w-ui-page px-6 py-12" data-testid="elegir-plantilla">
+      <h1 className="display-sm text-ui-ink">{es_MX.editor.catalogo.titulo}</h1>
+      <p className="mt-2 max-w-prose text-md text-ui-ink-muted">
         Esta invitación todavía no tiene plantilla. Elige el punto de partida; podrás cambiarlo más adelante sin perder
         lo que escribas.
       </p>
       {error ? (
-        <p role="alert" className="mt-6 text-ui-body text-ui-danger">
+        <p role="alert" className="mt-6 flex items-center gap-1.5 text-md font-semibold text-ui-danger-text">
+          <IconoError size={18} tone="mono" className="shrink-0" />
           {error}
         </p>
       ) : null}
       {plantillas === null ? (
-        <p role="status" className="mt-8 text-ui-ink-muted">
+        <p role="status" className="mt-8 text-md text-ui-ink-muted">
           {es_MX.comun.cargando}
         </p>
       ) : (
         <ul className="mt-8 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {plantillas.map((p) => (
-            <li key={`${p.slug}@${p.version}`} className="flex h-full flex-col overflow-hidden rounded-ui-card bg-ui-surface shadow-ui-1">
+            <li key={`${p.slug}@${p.version}`} className="flex h-full flex-col overflow-hidden rounded-ui-media bg-ui-surface-raised shadow-ui-1">
               {/* `<img>` y no `next/image`: la `previewUrl` del catálogo es CADUCABLE (firmada de
                   15 min en S3, `handoffs/3-0a.md` §4) y el optimizador la cachearía por su URL. */}
               <img src={p.previewUrl} alt="" className="aspect-3/4 w-full object-cover" />
               <div className="flex flex-1 flex-col gap-4 p-5">
-                <h2 className="text-ui-card font-bold text-ui-ink-heading">{p.nombre}</h2>
+                <h2 className="heading-sm text-ui-ink">{p.nombre}</h2>
                 <Button
                   className="mt-auto w-full"
-                  busy={ocupada === p.slug}
+                  loading={ocupada === p.slug}
+                  loadingText={es_MX.editor.catalogo.eligiendo}
                   data-testid={`elegir-${p.slug}`}
                   onClick={() => {
                     setOcupada(p.slug);
@@ -459,7 +489,7 @@ function ElegirPlantilla({ invitationId }: { invitationId: number }) {
                       .finally(() => setOcupada(null));
                   }}
                 >
-                  Elegir esta plantilla
+                  {es_MX.editor.catalogo.elegir}
                 </Button>
               </div>
             </li>
