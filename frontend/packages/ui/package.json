@@ -10,7 +10,8 @@
     "./shapes": "./src/shapes/index.ts",
     "./estilos.css": "./src/estilos.css",
     "./shapes/shapes.css": "./src/shapes/shapes.css",
-    "./fonts/fonts.css": "./src/fonts/fonts.css"
+    "./fonts/fonts.css": "./src/fonts/fonts.css",
+    "./historias": "./src/historias/index.ts"
   },
   "scripts": {
     "build": "node scripts/copiar-fuentes-publicas.ts && node scripts/metric-override.ts && tsc --noEmit",
