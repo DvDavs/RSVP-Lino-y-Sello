@@ -38,11 +38,11 @@ fotos, publicar y compartir, conflicto, móvil sin desborde). Textos en `lib/i18
 `asistente.*`, `editor.*`); el emoji de `publicar.yaSeVe` desapareció.
 
 ## 4. Cifras finales medidas (3C-8, sobre la rama integrada)
-e2e **70/70** contra backend real · galería **279/279** · `smoke.sh` **19/19** · `a11y-producto` 0 violaciones ·
-suite del monorepo 10/10 (schema 527 · sections 653 · tokens 55 · icons 179 · ui 654 · web 517) · presupuestos
+e2e **79/79** contra backend real sobre el HEAD final (`0f68f4d`; antes 70/70 en 3C-8) · galería **279/279** · `smoke.sh` **19/19** · `a11y-producto` 0 violaciones ·
+suite del monorepo 10/10 (schema 527 · sections 653 · tokens 55 · icons 179 · ui 654 · web 567) · presupuestos
 `/i/[token]` **142,0 KB gz** · `/` **148,2 KB** · editor **419 KB** (límite 600) · LCP N=9 `/i` mediana
 **1 998 ms** (1 975–2 014) · `/` **1 762 ms** (1 724–1 814) · greps emoji / `lucide-react` / shadcn antiguo **0/0/0**.
-Cierre: visual CUMPLE tras 4 altas corregidas (`3c-cv.md`) · adversarial CERRABLE tras A-01/A-02 (`3c-adv.md`; e2e 71/71, 2 585 pruebas) · UX: NO al llegar (6 graves) y corregido por UX-A/B/C con e2e 8/8, 11/11 y 14/14 (`3c-ux.md`).
+Capturas finales de las 18 pantallas en tres viewports: `evidencia/fase-3c/cierre/final/` (51). Cierre: visual CUMPLE tras 4 altas corregidas (`3c-cv.md`) · adversarial CERRABLE tras A-01/A-02 (`3c-adv.md`; e2e 71/71, 2 585 pruebas) · UX: NO al llegar (6 graves) y corregido por UX-A/B/C con e2e 8/8, 11/11 y 14/14 (`3c-ux.md`).
 
 ## 5. Deuda y decisiones que quedan para el dueño
 - Capa de compatibilidad de `globals.css` (nombres viejos del chrome de la fase 3): la galería y `design/galeria.module.css`
