@@ -1,0 +1,37 @@
+{
+  "name": "@invitaciones/migration-legacy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Herramienta de migración F1 → paquete de plantilla (ADR-1R-C-01/02/03). Lee el JSON CRUDO del repositorio con JSON.parse, enumera todas las hojas como punteros RFC 6901, las clasifica con una tabla declarativa y construye template.json + theme.json + defaults.json + informe de pérdidas. Se borra cuando la migración termina.",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "bin": {
+    "convertir-plantilla": "./src/cli.ts"
+  },
+  "scripts": {
+    "convertir": "tsx src/cli.ts",
+    "cobertura-hojas": "tsx src/cli.ts cobertura",
+    "gen:golden": "tsx src/cli.ts golden --update",
+    "test": "vitest run --coverage",
+    "typecheck": "tsc --noEmit --strict",
+    "lint": "echo 'lint: el paquete se borra al terminar la migración (ADR-1R-C-03)'"
+  },
+  "dependencies": {
+    "@invitaciones/schema": "workspace:*",
+    "@invitaciones/tokens": "workspace:*",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "@vitest/coverage-v8": "3.2.4",
+    "tsx": "4.23.13",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}
