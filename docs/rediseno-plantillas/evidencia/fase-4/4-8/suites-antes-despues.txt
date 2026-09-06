@@ -1,0 +1,32 @@
+Suites, antes y después de 4-8 (2026-09-06)
+=============================================
+
+template-kit (frontend/packages/template-kit) — pnpm test (vitest run --coverage)
+  ANTES:   8 archivos · 151/151 pruebas en verde (check-sabotajes.test.ts: 7 pruebas)
+  DESPUÉS: 8 archivos · 152/152 pruebas en verde (check-sabotajes.test.ts: 8 pruebas,
+           +1: sabotaje "marca ajena en el contenido de demostración")
+  Cobertura DESPUÉS: 95.84% líneas · 85.45% ramas · 98.11% funciones (all files)
+    check.ts: 96.08% líneas · 87.66% ramas
+
+schema (frontend/packages/schema) — vitest run
+  ANTES y DESPUÉS: 18 archivos · 609/609 (sin cambios; usa golden/, no frontend/templates/)
+
+sections (frontend/packages/sections) — vitest run
+  ANTES y DESPUÉS: 36 archivos · 927/927 (sin cambios; registry.contract.test.ts parsea
+  frontend/templates/*/*/template.json —no defaults.json— y no le afecta el cambio de contenido)
+
+migration-legacy (frontend/packages/migration-legacy) — vitest run
+  ANTES y DESPUÉS: 5 archivos · 89/89 (sin cambios; usa sus propios golden/, con
+  "Invitaciones Digitales Agape…" reportado como contaminado en el inventario, sin tocar)
+
+apps/web (frontend/apps/web) — vitest run
+  ANTES y DESPUÉS: 66 archivos · 611/611 (sin cambios; ninguna prueba afirma sobre el texto
+  del pie de las 11 plantillas)
+
+typecheck template-kit: `tsc --noEmit --strict` → sin salida, 0 errores.
+
+`pnpm plantilla check` sobre las 11 plantillas (con la compuerta TPL_THIRD_PARTY_BRAND activa):
+  las 11 en verde, 0 error(es) · 0 aviso(s) · 0 corregido(s) cada una.
+  Salida completa: check-11-plantillas-en-verde.txt
+
+Sabotaje de la compuerta (no vacua): check-sabotaje-marca-ajena.txt

@@ -370,6 +370,10 @@ export function check(opts: OpcionesCheck): ResultadoCheck {
     }
   }
 
+  // 2.45 Marca ajena en el contenido de demostración (ADR-4-8-01): sobre el JSON crudo, no espera
+  // a que el esquema valide, porque para el esquema este texto siempre es válido.
+  hallazgos.push(...revisarMarcaAjena(crudoDefaults));
+
   // 2.5 Assets: se MIDEN y se escriben (P5). Nada de digestos tecleados.
   if (manifiesto.success) {
     hallazgos.push(...revisarAssets(dir, crudoManifiesto, manifiesto.data, escribir, escrituras));
@@ -832,7 +836,58 @@ function revisarFuentes(crudoTema: Json): readonly Hallazgo[] {
 }
 
 // ---------------------------------------------------------------------------------------------
-// 6. `package_hash` del paquete tal y como queda (01 §2.1).
+// 6. Marca ajena en el contenido de demostración (ADR-4-8-01).
+//
+// El esquema no puede saber que un `text` es contenido legítimo: "Invitaciones Digitales Agape
+// 2021. All Rights Reserved." valida perfectamente. Se coló en 10 de 11 plantillas (heredado del
+// catálogo antiguo, `C-FOOTER-TEXT` en migration-legacy/src/reglas-contenido.ts copia el texto del
+// pie sin sanear) y ninguna prueba lo cazaba. Esto SÍ lo caza: nombre del proveedor anterior y su
+// dominio, buscados en cualquier cadena de `defaults.json`, no sólo en el pie.
+// ---------------------------------------------------------------------------------------------
+interface MarcaAjena { readonly patron: RegExp; readonly etiqueta: string }
+
+const MARCAS_AJENAS: readonly MarcaAjena[] = [
+  { patron: /agape/i, etiqueta: "el proveedor del catálogo antiguo («Invitaciones Digitales Agape»)" },
+  { patron: /invitacionesdigitales/i, etiqueta: "un dominio del proveedor del catálogo antiguo («invitacionesdigitales…»)" },
+];
+
+/** Recorre cualquier cadena dentro del valor de un bloque de `defaults.json` buscando marca ajena. */
+function buscarMarcaAjena(
+  nodo: unknown, blockId: string, camino: ReadonlyArray<string | number>, salida: Hallazgo[],
+): void {
+  if (typeof nodo === "string") {
+    const marca = MARCAS_AJENAS.find(m => m.patron.test(nodo));
+    if (marca) {
+      salida.push({
+        severidad: "ERROR", codigo: "TPL_THIRD_PARTY_BRAND", puntero: puntero(DEFAULTS, ...camino),
+        problema: `El contenido de demostración del bloque "${blockId}" menciona ${marca.etiqueta}: "${nodo}".`,
+        sugerencia: "Lino & Sello es la marca del producto (D-02): quita la mención al proveedor anterior. Para un pie de invitación, escribe un texto neutro que no anuncie a nadie, por ejemplo \"Todos los derechos reservados\".",
+      });
+    }
+    return;
+  }
+  if (Array.isArray(nodo)) {
+    nodo.forEach((v, i) => buscarMarcaAjena(v, blockId, [...camino, i], salida));
+    return;
+  }
+  if (nodo && typeof nodo === "object") {
+    for (const [k, v] of Object.entries(nodo as Json)) buscarMarcaAjena(v, blockId, [...camino, k], salida);
+  }
+}
+
+function revisarMarcaAjena(crudoDefaults: Json): readonly Hallazgo[] {
+  const salida: Hallazgo[] = [];
+  const contenido = crudoDefaults["content"];
+  if (contenido && typeof contenido === "object") {
+    for (const [blockId, valor] of Object.entries(contenido as Json)) {
+      buscarMarcaAjena(valor, blockId, ["content", blockId], salida);
+    }
+  }
+  return salida;
+}
+
+// ---------------------------------------------------------------------------------------------
+// 7. `package_hash` del paquete tal y como queda (01 §2.1).
 // ---------------------------------------------------------------------------------------------
 export function hashDelPaquete(dir: string, rutas: readonly string[]): string | undefined {
   const archivos: ArchivoDelPaquete[] = [];

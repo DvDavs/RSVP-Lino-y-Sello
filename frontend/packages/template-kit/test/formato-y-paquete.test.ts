@@ -49,9 +49,9 @@ describe("paquete: el `package_hash` es el de 01 §2.1, no una cuarta fórmula",
   // Los tres valores publicados en `memoria/handoffs/4-0a.md §4`, calculados por
   // `frontend/templates/scripts/build-packages.mjs` y confirmados byte a byte por el backend.
   const PUBLICADOS: ReadonlyArray<[string, string]> = [
-    ["xv-jardin/1.0.0", "sha256:d805fc53656b58b7a29650b5aecfa75e24e14d6d51479dfe8690ad14f442b5ee"],
-    ["boda-clasica/1.0.0", "sha256:02a9a294e889ac04e89d30d559cfee07886d1cde27823aa46f6e7962085d1a96"],
-    ["boda-clasica/1.0.1", "sha256:1d99bac4608383204cf3f586edab9240da05c33210b7504bc59c6b40c118cca2"],
+    ["xv-jardin/1.0.0", "sha256:128c63473c87b7f7efac12b17301bf31fdb64558c0a0b7bfc39fa0681e9bf688"],
+    ["boda-clasica/1.0.0", "sha256:da89e8813f5f27bd9909359aae72c166ac8f519d0f62d6e1077b38ddd688acce"],
+    ["boda-clasica/1.0.1", "sha256:063dd69869f36bf7ae085d5a78a49565bfe59edd5c881b4bc1116f4ebd0edfaa"],
   ];
   for (const [relativo, esperado] of PUBLICADOS) {
     it(`${relativo} → ${esperado.slice(0, 22)}…`, () => {

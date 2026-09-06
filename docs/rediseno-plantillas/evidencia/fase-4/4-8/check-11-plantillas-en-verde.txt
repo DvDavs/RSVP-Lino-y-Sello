@@ -1,0 +1,84 @@
+=== bautizo-elegante ===
+plantilla check /home/user/wt/marca/frontend/templates/bautizo-elegante/1.0.0
+
+package_hash = sha256:e78e6d5b461a603cb4ab641f0be72271e64ed8274d587782f801032e711ecb2d
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== boda-basica ===
+plantilla check /home/user/wt/marca/frontend/templates/boda-basica/1.0.0
+
+package_hash = sha256:e0fca1af936e395c56e94e0e97aa75717577d9c48d83c92fce54d9ee895f18ba
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== boda-clasica/1.0.0 ===
+plantilla check /home/user/wt/marca/frontend/templates/boda-clasica/1.0.0
+
+package_hash = sha256:da89e8813f5f27bd9909359aae72c166ac8f519d0f62d6e1077b38ddd688acce
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== boda-clasica/1.0.1 ===
+plantilla check /home/user/wt/marca/frontend/templates/boda-clasica/1.0.1
+
+package_hash = sha256:063dd69869f36bf7ae085d5a78a49565bfe59edd5c881b4bc1116f4ebd0edfaa
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== boda-premium ===
+plantilla check /home/user/wt/marca/frontend/templates/boda-premium/1.0.0
+
+package_hash = sha256:5e0c0a7546794d36e2c5c540e3752b0c6d3d4fe4d8358a5251c504ed98609d54
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== boda-premium-2 ===
+plantilla check /home/user/wt/marca/frontend/templates/boda-premium-2/1.0.0
+
+package_hash = sha256:d7b9c0b103c9f84d7a0b943ab73d8a96f81d89b3db0f56ca6a2ba41a9580cc73
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== comunion-elegante ===
+plantilla check /home/user/wt/marca/frontend/templates/comunion-elegante/1.0.0
+
+package_hash = sha256:034a636364b4a7755f55467f46ce5ad6d509cfc3fd4d5853f8e3d3ac06d744be
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== confirmacion-elegante ===
+plantilla check /home/user/wt/marca/frontend/templates/confirmacion-elegante/1.0.0
+
+package_hash = sha256:718b6427d9b35d401c01315d2a3c450df8edbba4539c012de058ba49287b697a
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== cumpleanos-elegante ===
+plantilla check /home/user/wt/marca/frontend/templates/cumpleanos-elegante/1.0.0
+
+package_hash = sha256:e14875c0d431940d8aa6d1fa25524e4266864776ec82cf327bd8cd419ed27953
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== evento-elegante ===
+plantilla check /home/user/wt/marca/frontend/templates/evento-elegante/1.0.0
+
+package_hash = sha256:50f3fa0f53d6b14edf72c0c5b58aaab16b591da8994468a0a9e952ef7ca58928
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== xv-elegance ===
+plantilla check /home/user/wt/marca/frontend/templates/xv-elegance/1.0.0
+
+package_hash = sha256:82da74eae2b9499bdfd6538d7e9fe91dad7f2483ba3a25797f9a87a9427f3a0d
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== xv-jardin ===
+plantilla check /home/user/wt/marca/frontend/templates/xv-jardin/1.0.0
+
+package_hash = sha256:128c63473c87b7f7efac12b17301bf31fdb64558c0a0b7bfc39fa0681e9bf688
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
