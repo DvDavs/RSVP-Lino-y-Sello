@@ -243,6 +243,9 @@ importers:
       '@invitaciones/schema':
         specifier: workspace:*
         version: link:../schema
+      '@invitaciones/template-kit':
+        specifier: workspace:*
+        version: link:../template-kit
       '@invitaciones/tokens':
         specifier: workspace:*
         version: link:../tokens

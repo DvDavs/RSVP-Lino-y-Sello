@@ -1,0 +1,64 @@
+# 4-6 — las plantillas convertidas declaran tipografías que el producto no sirve
+# Todas las salidas de abajo son LITERALES, pegadas de la terminal del worktree /home/user/wt/fnt.
+
+## 1. EL ROJO, antes de tocar nada
+$ cd frontend && pnpm --filter web run test
+ ❯ test/fuentes-autoalojadas.test.ts (60 tests | 34 failed) 337ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 34 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed | 64 passed (65)
+      Tests  34 failed | 530 passed (564)
+
+## 2. EL VERDE, tras el remapeo (mismo comando)
+$ pnpm --filter web run test
+ Test Files  65 passed (65)
+      Tests  564 passed (564)
+
+## 3. Las 9 regeneradas con la herramienta (dos corridas, mismos hashes)
+$ for tid in 4 5 6 7 8 9 10 11 13; do pnpm --filter @invitaciones/migration-legacy run convertir $tid \
+    --decision dresscode-bullet=concatenar-a-detalle --decision listtext-elemento-largo=omitir-elemento; done
+plantilla 4  → boda-basica@1.0.0            package_hash = sha256:42d57beef48ffdcde180c9e4e1432ba9ee7dc5008415e3056017b5a9db4c258d
+plantilla 5  → boda-premium@1.0.0           package_hash = sha256:27cf9135e6c046da94a109682e04bcf1f4c7b2ebb876847d3b191d2c110ebec4
+plantilla 6  → xv-elegance@1.0.0            package_hash = sha256:2d190566859ec8713ffff1d4cd0ac382bfab612708e0196585eba25dda260f1c
+plantilla 7  → bautizo-elegante@1.0.0       package_hash = sha256:15bf3cd220cbccdd4833c596ce715d513d70a60c165ff63e1b2f34e2a627627c
+plantilla 8  → comunion-elegante@1.0.0      package_hash = sha256:d49ddee8c5abd96fb30d4279d46d899a42b9964e0da492cee6a7859ec444cb0b
+plantilla 9  → confirmacion-elegante@1.0.0  package_hash = sha256:2ba4ff7708bb86f881e57dcc163ed28196d0807be09469c3ad1005975b3e14d3
+plantilla 10 → cumpleanos-elegante@1.0.0    package_hash = sha256:5394f0832ea0c937163fb99944c1d28d2565f0bfd9013109a623ea2af56c771f
+plantilla 11 → boda-premium-2@1.0.0         package_hash = sha256:76be6c06abe4d6036f47094d36fe78c6b772a7825a8549f64b1043902eef8d01
+plantilla 13 → evento-elegante@1.0.0        package_hash = sha256:50f3fa0f53d6b14edf72c0c5b58aaab16b591da8994468a0a9e952ef7ca58928
+(golden: faltantes 0 en las nueve; segunda corrida idéntica; `git status` sólo marca los 9 theme.json
+ y los 9 informe-de-perdidas.json — ni template.json ni defaults.json ni los golden cambian.)
+
+## 4. `pnpm plantilla check` sobre las 9 (0 errores, y el hash coincide con el de la conversión)
+bautizo-elegante      :: 0 error(es) · 0 aviso(s) · 0 corregido(s)  sha256:15bf3cd2…
+boda-basica           :: 0 error(es) · 0 aviso(s) · 0 corregido(s)  sha256:42d57bee…
+boda-premium          :: 0 error(es) · 0 aviso(s) · 0 corregido(s)  sha256:27cf9135…
+boda-premium-2        :: 0 error(es) · 0 aviso(s) · 0 corregido(s)  sha256:76be6c06…
+comunion-elegante     :: 0 error(es) · 0 aviso(s) · 0 corregido(s)  sha256:d49ddee8…
+confirmacion-elegante :: 0 error(es) · 0 aviso(s) · 0 corregido(s)  sha256:2ba4ff77…
+cumpleanos-elegante   :: 0 error(es) · 0 aviso(s) · 0 corregido(s)  sha256:5394f083…
+evento-elegante       :: 0 error(es) · 0 aviso(s) · 0 corregido(s)  sha256:50f3fa0f…
+xv-elegance           :: 0 error(es) · 0 aviso(s) · 0 corregido(s)  sha256:2d190566…
+
+## 5. LA COMPUERTA NUEVA DEL KIT NO ES VACUA — sabotaje y rojo literal
+Sabotaje: `theme.json` de `bautizo-elegante` con `heading.family = "Great Vibes"`, pesos 400/700.
+$ pnpm plantilla check templates/bautizo-elegante/1.0.0
+plantilla check /home/user/wt/fnt/frontend/templates/bautizo-elegante/1.0.0
+
+ERROR TPL_FONT_NOT_SELF_HOSTED  theme.json#/fontSets/0/heading/family
+  El fontSet "cormorant-garamond-inter" declara la familia "Great Vibes" en heading y la superficie pública NO la autoaloja: esa invitación se pintaría con la pila de reserva (Georgia / la sans del sistema).
+  Sugerencia: Familias autoalojadas hoy, con sus pesos, en apps/web/app/(public)/publico.css: Cormorant Garamond (400, 600), Inter (400, 500), Playfair Display (400, 700), Source Sans 3 (400, 600). La más cercana a "Great Vibes" es "Cormorant Garamond" con pesos [400, 600] — «Great Vibes» es una tipografía MANUSCRITA (script) y NINGUNA de las familias que el producto autoaloja lo es: no hay equivalente. Se sustituye por «Cormorant Garamond», la serif de titular de trazo más caligráfico y mayor contraste de las autoalojadas; el titular pierde la letra manuscrita y hay que restaurarlo en la fase de arte. Escríbela en theme.json, o autoaloja la original (`pnpm add @fontsource/great-vibes` en apps/web y su `@import` en publico.css): la superficie pública nunca pide una fuente a un tercero en tiempo de ejecución (ADR-1R-F-07).
+
+package_hash = sha256:6d3b5252f7191d57c1e67bd927900728924bb50881ce1ed3dadc591d8afef278
+
+1 error(es) · 0 aviso(s) · 0 corregido(s)
+Exit status 1
+(restaurado: `git status` vuelve a marcar sólo el remapeo; el mensaje entero está fijado con `toBe`
+ en `packages/template-kit/test/check.test.ts`.)
+
+## 6. Suites, después
+$ pnpm -r typecheck                      → todos los paquetes "Done"
+$ pnpm --filter @invitaciones/schema run test          Tests  609 passed (609)   Test Files 18 passed
+$ pnpm --filter @invitaciones/sections run test        Tests  927 passed (927)   Test Files 36 passed
+$ pnpm --filter @invitaciones/migration-legacy run test Tests 89 passed (89)     Test Files  5 passed
+$ pnpm --filter @invitaciones/template-kit run test    Tests  151 passed (151)   Test Files  8 passed  (143 → 151: +8 de la compuerta)
+$ pnpm --filter web run test                           Tests  564 passed (564)   Test Files 65 passed

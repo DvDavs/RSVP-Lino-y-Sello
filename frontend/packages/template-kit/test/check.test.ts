@@ -1,10 +1,14 @@
 // test/check.test.ts — el resto de `check`: árbol, migraciones, invariantes, avisos y punteros.
 import { describe, expect, it } from "vitest";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { AYUDA_INVARIANTE, check, punteroDeBloque, revisarRolYSeccion, revisarVariantes } from "../src/check.ts";
-import { copiarPaquete, escribirManifiesto, escribirTema, leerManifiesto, mensajeDe, PAQUETES } from "./ayuda.ts";
+import {
+  AYUDA_INVARIANTE, check, familiaDeSlugFontsource, familiasAutoalojadas, familiasDeCss,
+  FAMILIAS_AUTOALOJADAS_RESERVA, punteroDeBloque, remapearAFamiliaAutoalojada, revisarRolYSeccion,
+  revisarVariantes, rutaPublicoCss,
+} from "../src/check.ts";
+import { copiarPaquete, escribirManifiesto, escribirTema, leerManifiesto, leerTema, mensajeDe, PAQUETES } from "./ayuda.ts";
 
 type J = Record<string, any>;
 
@@ -275,5 +279,117 @@ describe("check: escritura de digestos", () => {
     const r = check({ dir });
     expect(r.ok).toBe(false);
     expect(r.hallazgos.some(h => h.codigo === "TPL_MANIFEST_INVALID")).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// Tipografías autoalojadas (4-6). La regresión que cierra: las 9 plantillas convertidas de F1
+// heredaron las familias del legado (Great Vibes, Poppins, Sacramento, Work Sans), que el producto
+// NO autoaloja, y `apps/web/test/fuentes-autoalojadas.test.ts` medía 34 pruebas rojas de 60. Aquí la
+// misma compuerta actúa sobre el paquete SUELTO, antes de que entre al catálogo.
+// ---------------------------------------------------------------------------------------------
+describe("check: sólo familias que la superficie pública AUTOALOJA (ADR-1R-F-07, ADR-4-6-01)", () => {
+  it("la lista SALE de publico.css: se lee el mismo archivo, con el mismo patrón que la prueba de apps/web", () => {
+    const ruta = rutaPublicoCss();
+    expect(ruta, "no se encontró apps/web/app/(public)/publico.css subiendo desde el kit").toBeDefined();
+    const css = readFileSync(ruta!, "utf8");
+    // El patrón es el de `apps/web/test/fuentes-autoalojadas.test.ts`: familia+peso por `@import`.
+    const pares = [...css.matchAll(/@import\s+"@fontsource\/([^"/]+)\/(\d+)\.css"/g)]
+      .map(m => `${m[1]}/${m[2]}`);
+    expect(pares.length).toBeGreaterThan(0);
+    const derivadas = familiasAutoalojadas().flatMap(f => f.weights.map(w => `${f.family}/${w}`)).sort();
+    expect(derivadas).toEqual([...new Set(pares)].map(p => {
+      const [slug, peso] = p.split("/") as [string, string];
+      return `${familiaDeSlugFontsource(slug)}/${peso}`;
+    }).sort());
+  });
+
+  it("el valor de reserva NO puede quedarse viejo en silencio: coincide con lo que publico.css declara", () => {
+    expect(FAMILIAS_AUTOALOJADAS_RESERVA).toEqual(familiasAutoalojadas());
+  });
+
+  it("el parser agrupa por familia, ordena los pesos y no duplica", () => {
+    const css = '@import "@fontsource/source-sans-3/600.css";\n@import "@fontsource/source-sans-3/400.css";\n'
+      + '@import "@fontsource/source-sans-3/400.css";\n@import "@fontsource/inter/400.css";\n@import "algo/otro.css";';
+    expect(familiasDeCss(css)).toEqual([
+      { family: "Inter", weights: [400] },
+      { family: "Source Sans 3", weights: [400, 600] },
+    ]);
+  });
+
+  it("TODA familia del catálogo de `frontend/templates` está autoalojada (la misma compuerta, por paquete)", () => {
+    const autoalojadas = new Set(familiasAutoalojadas().map(f => f.family));
+    const slugs = readdirSync(PAQUETES, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name);
+    let sets = 0;
+    for (const slug of slugs) {
+      const dir = join(PAQUETES, slug, "1.0.0");
+      if (!existsSync(join(dir, "theme.json"))) continue;
+      const tema = leerTema(dir) as J;
+      for (const fs of tema["fontSets"] as J[]) {
+        sets++;
+        for (const rol of ["heading", "body"] as const) {
+          expect(autoalojadas, `${slug} fontSets[${fs["id"]}].${rol}`).toContain((fs[rol] as J)["family"]);
+        }
+      }
+    }
+    expect(sets).toBeGreaterThan(0);
+  });
+
+  it("una familia manuscrita en el tema se RECHAZA, con el mensaje entero del kit", () => {
+    const dir = copiarPaquete("bautizo-elegante/1.0.0");
+    const tema = leerTema(dir) as J;
+    tema["fontSets"][0].heading = { family: "Great Vibes", weights: [400, 700], source: "google" };
+    escribirTema(dir, tema);
+    expect(mensajeDe(dir, "TPL_FONT_NOT_SELF_HOSTED")).toBe(
+      'ERROR TPL_FONT_NOT_SELF_HOSTED  theme.json#/fontSets/0/heading/family\n'
+      + '  El fontSet "cormorant-garamond-inter" declara la familia "Great Vibes" en heading y la superficie pública NO la autoaloja: esa invitación se pintaría con la pila de reserva (Georgia / la sans del sistema).\n'
+      + '  Sugerencia: Familias autoalojadas hoy, con sus pesos, en apps/web/app/(public)/publico.css: '
+      + 'Cormorant Garamond (400, 600), Inter (400, 500), Playfair Display (400, 700), Source Sans 3 (400, 600). '
+      + 'La más cercana a "Great Vibes" es "Cormorant Garamond" con pesos [400, 600] — '
+      + '«Great Vibes» es una tipografía MANUSCRITA (script) y NINGUNA de las familias que el producto autoaloja lo es: '
+      + 'no hay equivalente. Se sustituye por «Cormorant Garamond», la serif de titular de trazo más caligráfico y mayor '
+      + 'contraste de las autoalojadas; el titular pierde la letra manuscrita y hay que restaurarlo en la fase de arte. '
+      + 'Escríbela en theme.json, o autoaloja la original (`pnpm add @fontsource/great-vibes` en apps/web y su `@import` '
+      + 'en publico.css): la superficie pública nunca pide una fuente a un tercero en tiempo de ejecución (ADR-1R-F-07).',
+    );
+  });
+
+  it("una sans de texto fuera de la lista también se rechaza, y la sugerencia es la sans autoalojada", () => {
+    const dir = copiarPaquete("bautizo-elegante/1.0.0");
+    const tema = leerTema(dir) as J;
+    tema["fontSets"][0].body = { family: "Poppins", weights: [400, 600], source: "google" };
+    escribirTema(dir, tema);
+    const m = mensajeDe(dir, "TPL_FONT_NOT_SELF_HOSTED");
+    expect(m).toContain("theme.json#/fontSets/0/body/family");
+    expect(m).toContain('La más cercana a "Poppins" es "Inter" con pesos [400, 500]');
+    expect(m).toContain("«Poppins» es una sans geométrica");
+  });
+
+  it("el paquete tal y como sale de la conversión NO tiene ningún hallazgo de fuentes", () => {
+    expect(codigos(join(PAQUETES, "bautizo-elegante/1.0.0"))).not.toContain("TPL_FONT_NOT_SELF_HOSTED");
+    expect(codigos(join(PAQUETES, "xv-jardin/1.0.0"))).not.toContain("TPL_FONT_NOT_SELF_HOSTED");
+  });
+
+  it("el criterio de remapeo, familia por familia (ADR-4-6-01)", () => {
+    const r = (f: string, rol: "heading" | "body" = "heading") => remapearAFamiliaAutoalojada(f, rol);
+    // Script: NO hay equivalente autoalojada, y el motivo lo dice con esas palabras.
+    expect(r("Great Vibes").family).toBe("Cormorant Garamond");
+    expect(r("Sacramento").family).toBe("Cormorant Garamond");
+    expect(r("Great Vibes").clase).toBe("script");
+    expect(r("Sacramento").motivo).toContain("no hay equivalente");
+    // Sans de texto.
+    expect(r("Poppins", "body").family).toBe("Inter");
+    expect(r("Work Sans", "body").family).toBe("Inter");
+    expect(r("Open Sans", "body").family).toBe("Source Sans 3");
+    // Serif de titular: old style ↔ alto contraste.
+    expect(r("EB Garamond").family).toBe("Cormorant Garamond");
+    expect(r("Prata").family).toBe("Playfair Display");
+    // Ya autoalojada: no se remapea y los pesos son los que publico.css importa.
+    expect(r("Playfair Display")).toMatchObject({ yaAutoalojada: true, family: "Playfair Display", weights: [400, 700] });
+    expect(r("Inter", "body")).toMatchObject({ yaAutoalojada: true, weights: [400, 500] });
+    // Familia desconocida: cae por su PAPEL, y el motivo dice que no está clasificada.
+    expect(r("Fuente Inventada Xyz").family).toBe("Cormorant Garamond");
+    expect(r("Fuente Inventada Xyz", "body").family).toBe("Inter");
+    expect(r("Fuente Inventada Xyz").motivo).toContain("no está clasificada en la tabla del kit");
   });
 });

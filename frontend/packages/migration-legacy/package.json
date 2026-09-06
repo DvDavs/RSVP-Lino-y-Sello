@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@invitaciones/schema": "workspace:*",
+    "@invitaciones/template-kit": "workspace:*",
     "@invitaciones/tokens": "workspace:*",
     "zod": "4.5.4"
   },

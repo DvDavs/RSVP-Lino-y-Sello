@@ -17,9 +17,9 @@
   ],
   "fontSets": [
     {
-      "id": "playfair-display-poppins",
+      "id": "playfair-display-inter",
       "name": {
-        "es-MX": "Playfair Display y Poppins"
+        "es-MX": "Playfair Display y Inter"
       },
       "heading": {
         "family": "Playfair Display",
@@ -30,15 +30,15 @@
         "source": "google"
       },
       "body": {
-        "family": "Poppins",
+        "family": "Inter",
         "weights": [
           400,
-          600
+          500
         ],
         "source": "google"
       }
     }
   ],
   "defaultPaletteId": "verde",
-  "defaultFontSetId": "playfair-display-poppins"
+  "defaultFontSetId": "playfair-display-inter"
 }

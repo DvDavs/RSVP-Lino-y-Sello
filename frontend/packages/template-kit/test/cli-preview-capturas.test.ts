@@ -21,7 +21,7 @@ describe("pnpm plantilla preview, con sus opciones", () => {
   it("`--puerto`, `--paleta`, `--fuentes` y `--sin-marcadores` llegan hasta el servidor", { timeout: PLAZO }, async () => {
     const r = await ejecutarAsync([
       "preview", BAUTIZO, "--puerto", "5381", "--paleta", "violeta",
-      "--fuentes", "great-vibes-poppins", "--sin-marcadores",
+      "--fuentes", "cormorant-garamond-inter", "--sin-marcadores",
     ]);
     expect(r.codigo).toBe(0);
     expect(r.permanece).toBe(true);
