@@ -312,6 +312,31 @@ importers:
         specifier: 5.0.0
         version: 5.0.0(@types/node@22.20.1)(@vitest/coverage-v8@5.0.0)(jsdom@30.0.1)(vite@8.2.2(@types/node@22.20.1)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.13))
 
+  packages/template-kit:
+    dependencies:
+      '@invitaciones/schema':
+        specifier: workspace:*
+        version: link:../schema
+      '@invitaciones/sections':
+        specifier: workspace:*
+        version: link:../sections
+    devDependencies:
+      '@types/node':
+        specifier: 22.20.1
+        version: 22.20.1
+      '@vitest/coverage-v8':
+        specifier: 3.2.4
+        version: 3.2.4(vitest@3.2.4(@types/node@22.20.1)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.23.13))
+      tsx:
+        specifier: 4.23.13
+        version: 4.23.13
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/node@22.20.1)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(tsx@4.23.13)
+
   packages/tokens:
     devDependencies:
       '@types/node':

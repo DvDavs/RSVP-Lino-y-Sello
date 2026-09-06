@@ -1425,3 +1425,39 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   función (`zdef`) y 65 pruebas caerían si una subida de Zod la cambiara; el riesgo es aceptable
   frente a transcribir a mano 14 ramas. ¿Se fija `zod` a 4.5.4 exacto en el `package.json` (hoy ya
   lo está) y se anota como punto de revisión al subir Zod?
+- [Fase 4 · 4-1A] **¿`I-32` (rol ↔ tipo de sección) y `I-31` (contraste AA) se implementan en el
+  registro?** El kit las comprueba por su lado: la primera como AVISO (ADR-4-1A-01), la segunda como
+  ERROR. Pero un paquete registrado sin pasar por el kit sigue entrando: la plantilla de
+  `evidencia/fase-3/i08-plantilla-minima` se registró con `familyGroup` dentro de una sección `event`
+  y con la variante inexistente `portrait`. **Supuesto tomado:** el kit avisa y no bloquea nada que
+  el backend acepte. ¿Se suben a invariante, o el kit es el único control y entonces registrar sin
+  el kit debería desaconsejarse por escrito?
+- [Fase 4 · 4-1A] **`packages/sections` no publica su fórmula de contraste.** `src/theme/contrast.ts`
+  es la implementación designada por `ADR-1R-F-06` y ya la importan por ruta relativa la compuerta de
+  `packages/schema` y ahora el kit. **Supuesto tomado:** ruta relativa, porque el bloque tenía
+  prohibido tocar `packages/sections` (ADR-4-1A-04). ¿Se añade `"./theme/contrast"` al mapa de
+  `exports` de ese paquete —una línea, aditiva— para que los dos importadores dejen de depender de
+  la ubicación del fichero?
+- [Fase 4 · 4-1A] **Las cuatro parejas de `ADR-3-3b-03` viven ya en tres sitios.**
+  `frontend/templates/scripts/art/paleta-aa.mjs` (fuera del workspace),
+  `packages/schema/test/paleta-contraste.contract.test.ts` y ahora
+  `packages/template-kit/src/contraste.ts`. **Supuesto tomado:** declararlas de nuevo, porque el
+  `.mjs` no se puede importar desde un paquete del workspace. ¿Se mueven a
+  `packages/sections/src/theme/contrast.ts` junto a las cinco de `04 §17.1`, que es donde deberían
+  estar, y las tres copias pasan a importarlas?
+- [Fase 4 · 4-1A] **`frontend/templates/` está vigilado por la suite de `packages/sections`.**
+  `test/registry.contract.test.ts:16-30` recorre todo `*/*/template.json` y hace
+  `TemplateManifest.parse` al COLECTAR: un manifiesto a medias ahí dentro tumba el fichero entero y
+  sus 104 pruebas (medido: 721 → 617). **Supuesto tomado:** `plantilla nueva` sigue escribiendo en
+  `frontend/templates/` por omisión, porque es donde viven los paquetes y donde `registrar` los
+  espera, y el andamio es válido desde el primer byte (con él dentro la suite sube a 725). ¿Se deja
+  así, se enseña en la guía a trabajar con `--destino <tmp>` hasta que `check` esté verde, o el
+  recorrido de esa prueba debería saltarse los paquetes que no validan en vez de reventar?
+- [Fase 4 · 4-1A] **El paquete `template-kit` no entra en `eslint`.** `frontend/eslint.config.mjs`
+  es configuración compartida y no la toqué; el `lint` del paquete es un `echo`. **Supuesto tomado:**
+  no tocar configuración de otros. ¿Se añade el paquete a la configuración de lint del monorepo?
+- [Fase 4 · 4-1A] **Los `422` del registro no tienen salida real de extremo a extremo.** `check`
+  corre antes y los atrapa todos, así que no se pudo provocar ninguno por la vía normal; sus cuatro
+  traducciones están probadas por unidad. **Supuesto tomado:** es aceptable, porque provocar uno
+  exigiría saltarse el `check` a propósito (`--sin-check`, que existe sólo para depurar). ¿Se quiere
+  una prueba de integración que use `--sin-check` para dejar constancia de cada `422`?

@@ -1,0 +1,58 @@
+# evidencia/fase-4/4-1a/nueva-y-check.txt
+# `plantilla nueva` para varias combinaciones de secciones, y el `check` de cada una.
+# Criterio del encargo: lo que emite `nueva` pasa `check` sin UNA SOLA corrección.
+# Fecha: 2026-09-06T16:30:06Z
+
+$ pnpm plantilla nueva cinco-i08 --evento wedding --secciones cover,celebrant,event,rsvp,footer --destino <tmp>
+Creado /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/cinco-i08/1.0.0
+  template.json, theme.json, defaults.json · 5 sección(es) · 10 bloque(s) · 219 líneas de manifiesto
+  check: en verde a la primera (0 errores).
+$ pnpm plantilla check <tmp>/cinco-i08/1.0.0 --no-escribir
+plantilla check /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/cinco-i08/1.0.0
+package_hash = sha256:f5971b87dfafc05a93859f9fb6b01d181ab882ae682a80288388caab9b26a420
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+$ pnpm plantilla nueva una-sola --evento quince --secciones cover --destino <tmp>
+Creado /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/una-sola/1.0.0
+  template.json, theme.json, defaults.json · 1 sección(es) · 3 bloque(s) · 64 líneas de manifiesto
+  check: en verde a la primera (0 errores).
+$ pnpm plantilla check <tmp>/una-sola/1.0.0 --no-escribir
+plantilla check /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/una-sola/1.0.0
+package_hash = sha256:5397e3c8c5566cf2b9cd2b7c62dd4616de85ab8551d0223be50c8debfe95cda7
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+$ pnpm plantilla nueva boda-larga --evento wedding --secciones cover,celebrant,family,story,event,gallery,giftTable,dressCode,rsvp,footer --destino <tmp>
+Creado /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/boda-larga/1.0.0
+  template.json, theme.json, defaults.json · 10 sección(es) · 20 bloque(s) · 506 líneas de manifiesto
+  check: en verde a la primera (0 errores).
+$ pnpm plantilla check <tmp>/boda-larga/1.0.0 --no-escribir
+plantilla check /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/boda-larga/1.0.0
+package_hash = sha256:b1508de92d0b34705c755aa810c13deea4a8480662910bf702d331d70db7a46b
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+$ pnpm plantilla nueva listas --evento birthday --secciones gallery,giftTable,suggestions,amenities --destino <tmp>
+Creado /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/listas/1.0.0
+  template.json, theme.json, defaults.json · 4 sección(es) · 8 bloque(s) · 243 líneas de manifiesto
+  check: en verde a la primera (0 errores).
+$ pnpm plantilla check <tmp>/listas/1.0.0 --no-escribir
+plantilla check /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/listas/1.0.0
+package_hash = sha256:9f54e8c27ebe35ee0be8882ff953eaec813d1dfb7bb1f53e85ad105320ec5831
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+$ pnpm plantilla nueva dos-eventos --evento graduation --secciones cover,event,event,footer --destino <tmp>
+Creado /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/dos-eventos/1.0.0
+  template.json, theme.json, defaults.json · 4 sección(es) · 8 bloque(s) · 219 líneas de manifiesto
+  check: en verde a la primera (0 errores).
+$ pnpm plantilla check <tmp>/dos-eventos/1.0.0 --no-escribir
+plantilla check /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/dos-eventos/1.0.0
+package_hash = sha256:a82f424290dfe504e9cab63f844a719031bd3e57e6cc4492315033e1dae98425
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+$ pnpm plantilla nueva las-doce --evento generic --secciones cover,celebrant,event,gallery,giftTable,suggestions,amenities,rsvp,family,story,dressCode,footer --destino <tmp>
+Creado /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/las-doce/1.0.0
+  template.json, theme.json, defaults.json · 12 sección(es) · 24 bloque(s) · 620 líneas de manifiesto
+  check: en verde a la primera (0 errores).
+$ pnpm plantilla check <tmp>/las-doce/1.0.0 --no-escribir
+plantilla check /tmp/claude-0/-home-user-RSVP---Lino-Sello/266962ed-4e77-5f61-9936-d85c5ee16647/scratchpad/andamios/las-doce/1.0.0
+package_hash = sha256:3899dd224b5fbeca1e585afc636ad1e6f2896245ccfc7b6826c6020612343aed
+0 error(es) · 0 aviso(s) · 0 corregido(s)

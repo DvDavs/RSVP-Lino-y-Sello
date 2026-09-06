@@ -1,0 +1,16 @@
+# evidencia/fase-4/4-1a/i08-la-plantilla-medida.txt
+# `plantilla check` sobre la plantilla que se escribió A MANO en la fase 3 (4 intentos, 7 min 29 s):
+# docs/rediseno-plantillas/evidencia/fase-3/i08-plantilla-minima/1.0.0, copiada a un temporal.
+# El registro la aceptó tal cual; el kit encuentra sus DOS defectos conocidos (ADR-4-0B-04).
+# Fecha: 2026-09-06T16:30:45Z
+
+$ pnpm plantilla check <copia de evidencia/fase-3/i08-plantilla-minima/1.0.0>
+plantilla check <i08>
+AVISO TPL_VARIANT_UNKNOWN  template.json#/sections/1/variants/0
+  La variante "portrait" no existe en el registro de secciones de tipo "celebrant".
+  Sugerencia: Las variantes que los componentes saben pintar son: side-by-side, stacked, centered. Una variante inventada se registra sin error y se cae al render.
+AVISO TPL_ROLE_SECTION_MISMATCH  template.json#/sections/2/blocks/1/role
+  El rol "familyGroup" no está declarado para secciones de tipo "event" (sí para: family).
+  Sugerencia: Cambia el rol por uno de los de esta sección (eventCards) o mueve el bloque a una sección de tipo family. El registro NO comprueba esto todavía (I-32 sin implementar, ADR-4-0B-04): si es a propósito, ignora el aviso.
+package_hash = sha256:4904fa3734c58080fae042a4373b6b3dc440882ab86aafd61e09aa5ff26ba490
+0 error(es) · 2 aviso(s) · 0 corregido(s)
