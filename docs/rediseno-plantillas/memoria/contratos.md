@@ -299,7 +299,7 @@ Un `Dialog`/`Sheet` de historia se expone dentro de `EscaparateSuperposicion`
   catálogo/asistente 473 pruebas, e2e propio 32/32, `/editor` 326 KB gz (3c-6).
 
 ### 13.6 Revisiones del cierre
-`[pendiente: 3c-cv]` `[pendiente: 3c-ux]` `[pendiente: 3c-adv]` — al escribir esta sección
+`**Calidad visual (`handoffs/3c-cv.md`): NO CUMPLÍA como llegó (4 altas de ejecución: iconos `mono` macizos, nombres truncados en el panel de secciones, `WizardProgress` partiendo palabras, error en inglés) y CUMPLE tras corregirlas en `1b978ba`; 51 capturas en tres viewports en `evidencia/fase-3c/cierre/visual/`; medias de composición listadas sin tocar.**` `[pendiente: 3c-ux]` `**Adversarial de a11y y rendimiento (`handoffs/3c-adv.md`): CERRABLE tras A-01 (las fuentes daban 404 en los tres caminos de servicio; ahora se copian en el build de `web` con compuerta por HTTP) y A-02 (objetivos < 24 px en marca, enlace de salto y «Volver»); contraste 0 fallos en 9 pantallas con sabotaje que tumba la compuerta; LCP `/i` mediana 2 202 ms y `/` 1 845 ms bajo carga; e2e 71/71, galería 279/279, 2 585 pruebas; medias sin arreglar: foco en «Cómo llegar» (zona de plantillas), `contraste.ts` no ve capas hermanas, `CDN_ORIGIN` fijo al 6003.**` — al escribir esta sección
 (2026-09-06) los handoffs `memoria/handoffs/3c-cv.md`, `3c-ux.md` y `3c-adv.md` **no existen todavía**
 (`tablero.md` fase 3-C, fila «Cierre: revisiones, guía, memoria, handoff» = **pendiente**). El
 orquestador rellena este párrafo con sus hallazgos y cifras (contraste visual/UX, adversarial) citando

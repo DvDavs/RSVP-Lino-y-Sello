@@ -42,7 +42,7 @@ e2e **70/70** contra backend real · galería **279/279** · `smoke.sh` **19/19*
 suite del monorepo 10/10 (schema 527 · sections 653 · tokens 55 · icons 179 · ui 654 · web 517) · presupuestos
 `/i/[token]` **142,0 KB gz** · `/` **148,2 KB** · editor **419 KB** (límite 600) · LCP N=9 `/i` mediana
 **1 998 ms** (1 975–2 014) · `/` **1 762 ms** (1 724–1 814) · greps emoji / `lucide-react` / shadcn antiguo **0/0/0**.
-Revisiones del cierre: [pendiente: 3c-cv] · [pendiente: 3c-ux] · [pendiente: 3c-adv].
+Revisiones del cierre: visual CUMPLE tras 4 altas corregidas (`3c-cv.md`) · adversarial CERRABLE tras A-01/A-02 (`3c-adv.md`; e2e 71/71, 2 585 pruebas) · UX: [pendiente: 3c-ux].
 
 ## 5. Deuda y decisiones que quedan para el dueño
 - Capa de compatibilidad de `globals.css` (nombres viejos del chrome de la fase 3): la galería y `design/galeria.module.css`
