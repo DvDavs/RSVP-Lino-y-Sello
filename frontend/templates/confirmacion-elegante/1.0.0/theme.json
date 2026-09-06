@@ -1,0 +1,44 @@
+{
+  "palettes": [
+    {
+      "id": "oliva",
+      "name": {
+        "es-MX": "Oliva"
+      },
+      "tokens": {
+        "bg": "#F8F9FA",
+        "surface": "#FFFFFF",
+        "ink": "#2B2B2B",
+        "accent": "#866E14",
+        "accentInk": "#FFFFFF",
+        "muted": "#7E703F"
+      }
+    }
+  ],
+  "fontSets": [
+    {
+      "id": "great-vibes-poppins",
+      "name": {
+        "es-MX": "Great Vibes y Poppins"
+      },
+      "heading": {
+        "family": "Great Vibes",
+        "weights": [
+          400,
+          700
+        ],
+        "source": "google"
+      },
+      "body": {
+        "family": "Poppins",
+        "weights": [
+          400,
+          600
+        ],
+        "source": "google"
+      }
+    }
+  ],
+  "defaultPaletteId": "oliva",
+  "defaultFontSetId": "great-vibes-poppins"
+}

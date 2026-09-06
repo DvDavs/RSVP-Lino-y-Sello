@@ -1,0 +1,441 @@
+{
+  "templateSlug": "cumpleanos-elegante",
+  "templateVersion": "1.0.0",
+  "content": {
+    "amenities.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "5DRXX24YX6F2J50QA6EMNB21FS",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Salón de belleza"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Marck Luga"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.facebook.com/marck.luga.39"
+            }
+          }
+        }
+      ]
+    },
+    "amenities.title": {
+      "kind": "text",
+      "value": "Amenidades"
+    },
+    "couple.heading": {
+      "kind": "text",
+      "value": "Reserva la fecha"
+    },
+    "couple.honoree": {
+      "kind": "person",
+      "name": "Pedro Estrada"
+    },
+    "couple.honoreeMessage": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "¡Precaución! Fiesta en construcción. ¡Te espero en este día tan especial para mí, no me falles!"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "cover.buttonLabel": {
+      "kind": "text",
+      "value": "Save the date"
+    },
+    "cover.subtitle": {
+      "kind": "text",
+      "value": "Mi Cumpleaños"
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "68TK9KSXJN2S0NY69KDTDEAJCF",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Damas"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo/corto o traje elegante."
+            }
+          }
+        },
+        {
+          "itemId": "NK479TWABZMC99VA32T1CHMPSZ",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Caballeros"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje o smoking, corbata, zapatos de vestir."
+            }
+          }
+        }
+      ]
+    },
+    "dressCode.title": {
+      "kind": "text",
+      "value": "Dress Code"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "WM1HHRMEK5JBAN7DHX3RE2HA42",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Fiesta"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T16:30",
+              "end": "2025-12-31T17:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "3RKQJHY96QM60WCPEDP3DE8QTS",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Comida"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T17:30",
+              "end": "2025-12-31T18:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Por definir. (Dale clic para ver la ubicación)"
+            }
+          }
+        },
+        {
+          "itemId": "3TP5HNDE2VM2J6707Y8ZBA9B5N",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "SHOW DE PAYASITO WOODY"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T19:30",
+              "end": "2025-12-31T20:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Por definir. (Dale clic para ver la ubicación)"
+            }
+          }
+        },
+        {
+          "itemId": "JA62159ZTC5QYB4XPXTB17C5K4",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "CUENTOS ESTELARES DE COSI"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T21:30",
+              "end": "2025-12-31T22:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Por definir. (Dale clic para ver la ubicación)"
+            }
+          }
+        }
+      ]
+    },
+    "event.title": {
+      "kind": "text",
+      "value": "Itinerario"
+    },
+    "family.group1": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "219NHK6VVGMR6B93WVY4KR9Z8S",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Maria Gomez"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Madre"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "DQY2T9VHKY903FVH44XKMNNQX9",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Raul Estrada"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Padre"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group1Title": {
+      "kind": "text",
+      "value": "Mis Padres"
+    },
+    "family.group2": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "47X00ED047Z6FPSNZCN54WHS35",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Carolina Aquino"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Madrina"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "T30JQRGVHT71YCKJPH9EHCGGGW",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Roberto Cruz"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Padrino"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group2Title": {
+      "kind": "text",
+      "value": "Mis Padrinos"
+    },
+    "footer.musicEnabled": {
+      "kind": "boolean",
+      "value": true
+    },
+    "footer.note": {
+      "kind": "text",
+      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+    },
+    "gallery.hashtags": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "GAJHTN7RXVCG6Y079SWDC7NKVC",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#confirmación"
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "facebook"
+            }
+          }
+        },
+        {
+          "itemId": "E7STX2XG390V7NKVDVYK50ME4P",
+          "values": {
+            "platform": {
+              "kind": "choice",
+              "optionId": "instagram"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.intro": {
+      "kind": "text",
+      "value": "No olvides tomar fotos"
+    },
+    "gallery.title": {
+      "kind": "text",
+      "value": "Galería"
+    },
+    "gifts.options": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "1XFXA1EQB181XDFTGWWGRYF6KY",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Depósito o transferencia"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Banco: SANTANDER",
+                "Titular: KARLA ZARATE CRUZ",
+                "Cuenta CLABE: 014610606106246881",
+                "Número de tarjeta: 60610624688"
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "DE6CJY78K9TR5XF6EVKD5V1AGE",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "store"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Mesa Liverpool"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Número de evento 50355602"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602"
+            }
+          }
+        }
+      ]
+    },
+    "gifts.title": {
+      "kind": "text",
+      "value": "Mesa de Regalos"
+    },
+    "rsvp.deadline": {
+      "kind": "date",
+      "value": "2025-07-26"
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Boda sin niños, agradecemos su comprensión."
+    },
+    "rsvp.title": {
+      "kind": "text",
+      "value": "Confirma tu asistencia"
+    },
+    "suggestions.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "TFHWHV972S6HAVAZ2PEN2CF3YT",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Hotel"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "City Express Oaxaca"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+            }
+          }
+        },
+        {
+          "itemId": "VR2T4SGP2Q6GRJ7XHVPT9WS1JH",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Sitio de Taxis"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Sitio Antequera"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1"
+            }
+          }
+        },
+        {
+          "itemId": "NKWZ5W8F5EMVEGAAF075F18PZW",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Renta de Autos"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax."
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8"
+            }
+          }
+        }
+      ]
+    },
+    "suggestions.title": {
+      "kind": "text",
+      "value": "Recomendaciones"
+    }
+  }
+}
