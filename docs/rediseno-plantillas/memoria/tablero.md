@@ -149,7 +149,7 @@ esqueleto, el kit y las plantillas convertidas correctas, limpias y accesibles.
 
 | Bloque | Agente | Modelo | Estado | Verificación del orquestador |
 |---|---|---|---|---|
-| 0 entorno, registro idempotente y `boda-clasica@1.0.1` | 4-0a | Opus | lanzado | |
+| 0 entorno, registro idempotente y `boda-clasica@1.0.1` | 4-0a | Opus | **aceptada** (`0f9fc72`) | reimplementé el `package_hash` desde `01 §2.1`+`§5.5` sin mirar su script: da el mismo `sha256:1d99bac4…` (tres implementaciones de acuerdo). Diff 1.0.0↔1.0.1 sólo `version`/`migrationsFrom`/`templateVersion`, `theme.json` idéntico, 9 assets byte a byte. Confirmé su hallazgo en `TemplateRegistrar.kt:196-203`. `smoke.sh` 19/19 tras sembrar |
 | 0 `sectionCatalog` + introspección del esquema (fuente del vocabulario del kit) | 4-0b | Opus | lanzado | |
 | 0 deuda `ADR-3-2d-04`: AA en `diseno/ejemplos/` y `packages/schema/golden/` | 4-0c | Opus | lanzado | |
 | 1 · 4-2 herramienta de conversión F1 → paquete (146 patrones sin mapear → 0) | 4-2 | Opus | lanzado | |
