@@ -30,6 +30,8 @@ export interface TipoDeEvento {
   readonly Icono: ComponenteIcono;
   /** Id de la foto pendiente (`imagenes-pendientes.md`); viaja al placeholder del sistema. */
   readonly imagenId: string;
+  /** Ruta pública de la foto ya entregada; sin ella se mantiene el placeholder. */
+  readonly imagenSrc?: string;
 }
 
 /**
@@ -40,7 +42,7 @@ export interface TipoDeEvento {
  * `preguntas-abiertas.md` § Fase 3-C · 3C-6).
  */
 export const TIPOS_DE_EVENTO: readonly TipoDeEvento[] = [
-  { kind: "wedding", nombre: "Boda", Icono: IconoBoda, imagenId: "asistente/tipo-boda" },
+  { kind: "wedding", nombre: "Boda", Icono: IconoBoda, imagenId: "asistente/tipo-boda", imagenSrc: "/imagenes/asistente/tipo-boda.webp" },
   { kind: "quince", nombre: "XV años", Icono: IconoXvAnos, imagenId: "asistente/tipo-xv-anos" },
   { kind: "baptism", nombre: "Bautizo", Icono: IconoBautizo, imagenId: "asistente/tipo-bautizo" },
   { kind: "communion", nombre: "Primera comunión", Icono: IconoComunion, imagenId: "asistente/tipo-comunion" },

@@ -141,6 +141,7 @@ function TarjetaDeTipo({
         decorative
         mask="radius-lg"
         ratio="4 / 3"
+        src={tipo.imagenSrc}
         imageId={tipo.imagenId}
         tones={tonos}
         className="w-full"

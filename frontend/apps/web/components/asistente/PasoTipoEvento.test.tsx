@@ -95,6 +95,9 @@ describe("paso 1 — ¿Qué vamos a celebrar?", () => {
       />,
     );
     const pendientes = [...container.querySelectorAll("[data-imagen-pendiente]")].map((n) => n.getAttribute("data-imagen-pendiente"));
-    expect(pendientes).toEqual(TIPOS_DE_EVENTO.map((t) => t.imagenId));
+    expect(container.querySelector('img[src="/imagenes/asistente/tipo-boda.webp"]')).not.toBeNull();
+    expect(pendientes).toEqual(
+      TIPOS_DE_EVENTO.filter((tipo) => tipo.imagenSrc === undefined).map((tipo) => tipo.imagenId),
+    );
   });
 });
