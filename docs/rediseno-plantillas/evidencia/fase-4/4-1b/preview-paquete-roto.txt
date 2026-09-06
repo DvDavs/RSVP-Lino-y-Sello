@@ -1,0 +1,15 @@
+Previsualizador de (paquete) en http://127.0.0.1:5393 — Ctrl+C para salir.
+
+El paquete NO pasa check: el navegador enseña estos errores en vez de una página en blanco.
+
+plantilla check /tmp/roto-QGmVOD
+
+ERROR TPL_PACKAGE_MISSING_FILE  defaults.json#$
+  Falta el fichero obligatorio defaults.json del paquete.
+  Sugerencia: Un paquete son siempre template.json, theme.json, defaults.json más, si hace falta, assets/ y migrations/ (01 §2.1). Genera el esqueleto con `plantilla nueva`.
+
+ERROR TPL_PACKAGE_MISSING_FILE  theme.json#$
+  Falta el fichero obligatorio theme.json del paquete.
+  Sugerencia: Un paquete son siempre template.json, theme.json, defaults.json más, si hace falta, assets/ y migrations/ (01 §2.1). Genera el esqueleto con `plantilla nueva`.
+
+2 error(es) · 0 aviso(s) · 0 corregido(s)

@@ -1474,3 +1474,40 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   traducciones están probadas por unidad. **Supuesto tomado:** es aceptable, porque provocar uno
   exigiría saltarse el `check` a propósito (`--sin-check`, que existe sólo para depurar). ¿Se quiere
   una prueba de integración que use `--sin-check` para dejar constancia de cada `422`?
+- [Fase 4 · 4-1B] **`apps/web` está EN ROJO por `bautizo-elegante@1.0.0`, y no es cosa de este bloque.**
+  `apps/web/test/fuentes-autoalojadas.test.ts` recorre todos los `theme.json` de
+  `frontend/templates/**` y exige un `@import "@fontsource/<familia>/<peso>.css"` en
+  `app/(public)/publico.css` por cada par familia+peso. La plantilla convertida declara **Great
+  Vibes 400/700 y Poppins 400/600**, que no están importadas: **4 pruebas rojas de 28** (medido hoy,
+  `pnpm --filter web exec vitest run test/fuentes-autoalojadas.test.ts`). Es exactamente el fallo que
+  esa prueba existe para atrapar y significa que, publicada tal cual, esa invitación se pintaría en
+  Georgia. `apps/web` es área prohibida para 4-1B. **Supuesto tomado:** no tocarlo y reportarlo.
+  ¿Quién añade los cuatro `@import` (y las dos dependencias `@fontsource`) a `apps/web`?
+- [Fase 4 · 4-1B] **Great Vibes y Poppins no están en `GOOGLE_FONT_ALLOWLIST`.**
+  `packages/sections/src/theme/fonts.ts:27-36` cierra la lista a ocho familias y `ADR-1R-F-07` dice
+  que una familia fuera de la lista no puede cargarse. `bautizo-elegante@1.0.0` declara dos que no
+  están, y **nada lo comprueba**: ni `check` (el kit no valida familias contra esa lista) ni el
+  registro. **Supuesto tomado:** el previsualizador las sirve igual (si el paquete npm existe) y no
+  inventa una compuerta nueva. ¿Se amplía la lista con las familias de las plantillas convertidas, o
+  `plantilla check` debe dar un AVISO cuando un `theme.json` declara una familia fuera de la lista?
+- [Fase 4 · 4-1B] **`packages/icons` y `packages/ui` no compilan**, heredado del merge de la fase 3-C
+  en la rama de la fase 4: `Property 'toHaveAttribute' does not exist on type 'Assertion<…>'` (6
+  errores en `icons/test/componentes.test.tsx`, 2 en `ui/test/ilustraciones.test.tsx`). Verificado
+  que es ANTERIOR a este bloque (`git stash -u` y vuelve a fallar igual) y que ninguno de los dos
+  paquetes se toca aquí. **Supuesto tomado:** `pnpm -r typecheck` se reporta como 6 de 8 en verde,
+  con los dos fallos nombrados. ¿Quién arregla la augmentación de tipos de
+  `@testing-library/jest-dom` en esos dos paquetes?
+- [Fase 4 · 4-1B] **El `BusinessSnapshot` de la previsualización es de demostración y está fijado a
+  mano** (2026-11-21 17:30, `#EjemploDelKit`, sin `coverPhotoUrl`). Es la única forma de ver los
+  bloques `source: "business"` sin backend, y va anunciado en la consola y en la salida de
+  `capturas`. **Supuesto tomado:** valores fijos, nunca `new Date()`, para que dos capturas del mismo
+  paquete sean idénticas (R6/R9). ¿Debería `preview` poder leer un snapshot de verdad de una
+  invitación existente (`--invitacion <id>`) cuando el backend esté vivo, para revisar una plantilla
+  con datos reales antes de publicarla?
+- [Fase 4 · 4-1B] **`preview` y `capturas` no tienen compuerta de accesibilidad ni de contraste sobre
+  lo RENDERIZADO.** El navegador ya está abierto y `contratos.md §12.4` insiste en que WCAG se mide
+  sobre la pila renderizada, no sobre parejas de tokens; `apps/web` tiene `axe` y
+  `contraste-plantillas.test.ts`, pero una plantilla NUEVA no pasa por ahí hasta que se publica.
+  **Supuesto tomado:** no ampliar el alcance del encargo. ¿Debería `plantilla capturas` (o un
+  `plantilla auditar`) correr `axe` y la medición de contraste sobre el lienzo y volcarlo con el
+  formato de tres líneas del kit?

@@ -1,0 +1,13 @@
+$ pnpm plantilla preview /tmp/demo-jCTIMl/boda-jardin-1.0.0
+Previsualizador de boda-jardin@1.0.0 en http://127.0.0.1:5390 — Ctrl+C para salir.
+  1 hueco(s) de imagen sin valor se pintan con el marcador del kit. Con `--sin-marcadores` los ves como los verá un invitado: vacíos (R5).
+  Fecha y hora son de DEMOSTRACIÓN (2026-11-21 17:30): los bloques `source: "business"` no viven en el paquete, los pone Postgres al componer la invitación real (R4).
+
+navegador, ANTES  : Portada | Nombre o título principal de la portada | 14 DE NOVIEMBRE DE 2026 | Celebrantes
+
+$ # se edita cover.title en defaults.json: {"kind":"text","value":"Nombre o título principal de la portada"} -> {"kind":"text","value":"Ana & Bruno"}
+$ # NO se reinicia nada, NO se recarga la página
+
+navegador, DESPUÉS: Portada | Ana & Bruno | 14 DE NOVIEMBRE DE 2026 | Celebrantes
+el texto nuevo aparece en 83 ms
+window.__marcaDeLaDemo = "no se ha recargado"  <- la marca sigue viva: la página NO se ha recargado

@@ -1,0 +1,81 @@
+/* preview-app/diagnostico.css — el panel de errores de `check`.
+ *
+ * Es CHROME del kit, no plantilla: color sólo desde `--ui-*` (`@invitaciones/tokens`), nunca desde
+ * `--inv-*`. Se importa aquí y no sólo en `consola.css` porque este panel también se pinta DENTRO
+ * del lienzo (un paquete roto no tiene documento que enseñar), y ahí no hay más hojas cargadas. */
+
+@import "@invitaciones/tokens/tokens.css";
+@import "@fontsource-variable/onest";
+@import "@fontsource-variable/red-hat-mono";
+
+.kit-diagnostico {
+  margin: 0;
+  padding: var(--ui-space-5);
+  background: var(--ui-danger-soft);
+  color: var(--ui-on-danger-soft);
+  font-family: var(--ui-font-text);
+  font-size: var(--ui-text-text-sm);
+  line-height: var(--ui-leading-text-sm);
+}
+
+.kit-diagnostico h2 {
+  margin: 0 0 var(--ui-space-2);
+  font-family: var(--ui-font-display);
+  font-size: var(--ui-text-heading-sm);
+  line-height: var(--ui-leading-heading-sm);
+}
+
+.kit-diagnostico code {
+  font-family: var(--ui-font-label);
+}
+
+.kit-diagnostico__ruta {
+  margin: 0 0 var(--ui-space-4);
+  font-family: var(--ui-font-label);
+  font-size: var(--ui-text-label-sm);
+  overflow-wrap: anywhere;
+}
+
+.kit-diagnostico__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--ui-space-3);
+}
+
+.kit-diagnostico__lista li {
+  border-inline-start: 3px solid var(--ui-danger);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  padding: var(--ui-space-3) var(--ui-space-4);
+}
+
+.kit-diagnostico__lista li[data-severidad="AVISO"] {
+  border-inline-start-color: var(--ui-warning);
+}
+
+.kit-diagnostico__lista li[data-severidad="CORREGIDO"] {
+  border-inline-start-color: var(--ui-success);
+}
+
+.kit-diagnostico pre {
+  margin: 0;
+  font-family: var(--ui-font-label);
+  font-size: var(--ui-text-label-sm);
+  line-height: var(--ui-leading-label-sm);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.kit-diagnostico__resumen {
+  margin: var(--ui-space-4) 0 0;
+  font-family: var(--ui-font-label);
+  font-size: var(--ui-text-label-md);
+}
+
+.kit-diagnostico__pie {
+  margin: var(--ui-space-2) 0 0;
+  color: var(--ui-ink-muted);
+}

@@ -1,0 +1,46 @@
+$ cd frontend && pnpm plantilla capturas templates/bautizo-elegante/1.0.0 --destino ../docs/rediseno-plantillas/evidencia/fase-4/4-1b
+> pnpm --filter @invitaciones/template-kit run plantilla -- capturas templates/bautizo-elegante/1.0.0 --destino ../docs/rediseno-plantillas/evidencia/fase-4/4-1b
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/41/frontend/packages/template-kit
+> tsx src/cli.ts -- capturas templates/bautizo-elegante/1.0.0 --destino ../docs/rediseno-plantillas/evidencia/fase-4/4-1b
+
+3 captura(s) de bautizo-elegante@1.0.0 a 390, 768, 1280 px (x2; Chromium: /opt/pw-browsers/chromium).
+  /home/user/wt/41/docs/rediseno-plantillas/evidencia/fase-4/4-1b/bautizo-elegante@1.0.0-390.png  872.1 KB
+  /home/user/wt/41/docs/rediseno-plantillas/evidencia/fase-4/4-1b/bautizo-elegante@1.0.0-768.png  1172.8 KB
+  /home/user/wt/41/docs/rediseno-plantillas/evidencia/fase-4/4-1b/bautizo-elegante@1.0.0-1280.png  1234.1 KB
+
+Están FUERA de /home/user/wt/41/frontend/templates/bautizo-elegante/1.0.0: dentro serían un TPL_PACKAGE_UNEXPECTED_FILE al registrar.
+  15 hueco(s) de imagen sin valor se pintan con el marcador del kit. Con `--sin-marcadores` los ves como los verá un invitado: vacíos (R5).
+  Fecha y hora son de DEMOSTRACIÓN (2026-11-21 17:30): los bloques `source: "business"` no viven en el paquete, los pone Postgres al componer la invitación real (R4).
+
+$ pnpm plantilla nueva boda-jardin --evento wedding --destino "$ANDAMIO" --nombre "Boda en el jardín" --descripcion "Andamio recién creado por el kit"
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/41/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- nueva boda-jardin --evento wedding --destino /tmp/tmp.FeuVN1HtYV --nombre 'Boda en el jardín' --descripcion 'Andamio recién creado por el kit'
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/41/frontend/packages/template-kit
+> tsx src/cli.ts -- nueva boda-jardin --evento wedding --destino /tmp/tmp.FeuVN1HtYV --nombre 'Boda en el jardín' --descripcion 'Andamio recién creado por el kit'
+
+Creado /tmp/tmp.FeuVN1HtYV/boda-jardin/1.0.0
+  template.json, theme.json, defaults.json · 5 sección(es) · 10 bloque(s) · 222 líneas de manifiesto
+  check: en verde a la primera (0 errores).
+
+Siguiente paso: edita los textos de defaults.json y ejecuta
+  pnpm plantilla check /tmp/tmp.FeuVN1HtYV/boda-jardin/1.0.0
+
+$ pnpm plantilla capturas "$ANDAMIO/boda-jardin/1.0.0" --destino ../docs/rediseno-plantillas/evidencia/fase-4/4-1b
+> pnpm --filter @invitaciones/template-kit run plantilla -- capturas /tmp/tmp.FeuVN1HtYV/boda-jardin/1.0.0 --destino ../docs/rediseno-plantillas/evidencia/fase-4/4-1b
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/41/frontend/packages/template-kit
+> tsx src/cli.ts -- capturas /tmp/tmp.FeuVN1HtYV/boda-jardin/1.0.0 --destino ../docs/rediseno-plantillas/evidencia/fase-4/4-1b
+
+3 captura(s) de boda-jardin@1.0.0 a 390, 768, 1280 px (x2; Chromium: /opt/pw-browsers/chromium).
+  /home/user/wt/41/docs/rediseno-plantillas/evidencia/fase-4/4-1b/boda-jardin@1.0.0-390.png  286.1 KB
+  /home/user/wt/41/docs/rediseno-plantillas/evidencia/fase-4/4-1b/boda-jardin@1.0.0-768.png  536.0 KB
+  /home/user/wt/41/docs/rediseno-plantillas/evidencia/fase-4/4-1b/boda-jardin@1.0.0-1280.png  545.8 KB
+
+Están FUERA de /tmp/tmp.FeuVN1HtYV/boda-jardin/1.0.0: dentro serían un TPL_PACKAGE_UNEXPECTED_FILE al registrar.
+  1 hueco(s) de imagen sin valor se pintan con el marcador del kit. Con `--sin-marcadores` los ves como los verá un invitado: vacíos (R5).
+  Fecha y hora son de DEMOSTRACIÓN (2026-11-21 17:30): los bloques `source: "business"` no viven en el paquete, los pone Postgres al componer la invitación real (R4).

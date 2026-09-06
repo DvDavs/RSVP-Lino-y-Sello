@@ -9,8 +9,8 @@ import { diagnosticar, entornoReal, formatearDoctor } from "./doctor.ts";
 import { formatearHallazgos, resumen } from "./formato.ts";
 import { SECCIONES_POR_DEFECTO, TIPOS_DE_EVENTO, TIPOS_DE_SECCION, escribirPaquete, sectionCatalog } from "./nueva.ts";
 import { registrar } from "./registrar.ts";
-import { preview } from "./preview.ts";
-import { capturas } from "./capturas.ts";
+import { PUERTO_POR_DEFECTO, preview, type ServidorPreview } from "./preview.ts";
+import { ANCHOS_POR_DEFECTO, capturas } from "./capturas.ts";
 
 /** Raíz del repositorio, deducida de la ubicación de este fichero. */
 export const RAIZ = resolve(new URL("../../../..", import.meta.url).pathname);
@@ -77,11 +77,29 @@ export const AYUDA = `plantilla — kit de autor de plantillas (fase 4)
   pnpm plantilla secciones [<tipo>]
       Imprime el catálogo de secciones: variantes, huecos, roles y cuáles escribe el andamio.
 
-  pnpm plantilla preview <dir>      (lo entrega el bloque 4-1B)
-  pnpm plantilla capturas <dir>     (lo entrega el bloque 4-1B)
+  pnpm plantilla preview <dir> [--puerto <n>] [--paleta <id>] [--fuentes <id>] [--sin-marcadores]
+      Levanta el previsualizador local (Vite + packages/sections) y lo deja escuchando: la
+      plantilla, con sus defaults, en móvil y escritorio a la vez, y se repinta al guardar
+      cualquiera de los tres .json. Sin backend. Ctrl+C para salir.
+      --puerto          puerto de partida (por omisión ${PUERTO_POR_DEFECTO}); si está ocupado usa el siguiente.
+      --sin-marcadores  los huecos de imagen sin valor se ven vacíos, como los verá un invitado.
+
+  pnpm plantilla capturas <dir> [--destino <dir>] [--anchos 390,768,1280] [--paleta <id>] [--seccion <clave>]
+      Fotografía la plantilla con Chromium en tres anchos y escribe los PNG FUERA del
+      directorio de la versión (dentro sería TPL_PACKAGE_UNEXPECTED_FILE). Imprime las rutas.
+      --destino  por omisión <slug>/capturas/ junto al paquete.
+      --seccion  recorta a una sección del manifiesto en vez de la página entera.
 `;
 
 export interface ResultadoCli { readonly codigo: number; readonly salida: string }
+
+/** Lo que devuelve `ejecutarAsync`: `ResultadoCli` más lo que sólo tiene sentido en `preview`. */
+export interface ResultadoAsync extends ResultadoCli {
+  /** `true` si el comando ha dejado algo escuchando y el proceso NO debe terminar. */
+  readonly permanece?: boolean;
+  /** El servidor de `preview`, para poder cerrarlo desde una prueba. */
+  readonly servidor?: ServidorPreview;
+}
 
 export function ejecutar(argv: readonly string[]): ResultadoCli {
   const { posicionales, banderas } = parsear(argv);
@@ -95,14 +113,14 @@ export function ejecutar(argv: readonly string[]): ResultadoCli {
       return { codigo: informe.includes("FALTA") ? 1 : 0, salida: informe };
     }
     case "secciones": return cmdSecciones(posicionales[1]);
-    case "preview": {
-      const r = preview({ dir: posicionales[1] ?? "" });
-      return { codigo: r.ok ? 0 : 2, salida: r.salida };
-    }
-    case "capturas": {
-      const r = capturas({ dir: posicionales[1] ?? "" });
-      return { codigo: r.ok ? 0 : 2, salida: r.salida };
-    }
+    case "preview": case "capturas":
+      // Los dos son asíncronos (levantan un servidor y, `capturas`, un navegador). `ejecutar` es
+      // síncrona y lo seguirá siendo: las pruebas de los otros cinco comandos comparan cadenas sin
+      // `await`. `ejecutarAsync` es la puerta de entrada real del CLI y despacha estos dos.
+      return {
+        codigo: 2,
+        salida: `\`plantilla ${comando}\` es asíncrono: usa \`ejecutarAsync\` (lo hace el propio CLI).`,
+      };
     case "ayuda": case "--help": case "-h": return { codigo: 0, salida: AYUDA };
     default:
       return { codigo: 2, salida: `No conozco el comando "${comando}".\n\n${AYUDA}` };
@@ -215,11 +233,74 @@ function cmdSecciones(tipo?: string): ResultadoCli {
   return { codigo: 0, salida: lineas.join("\n").trimEnd() };
 }
 
+/**
+ * Igual que `ejecutar`, más los dos comandos que necesitan `await`: `preview` (levanta un servidor y
+ * NO devuelve hasta que lo matan) y `capturas` (levanta el mismo servidor y un Chromium).
+ *
+ * `preview` es el único comando que no termina: imprime su línea y se queda escuchando. Para que el
+ * proceso siga vivo se devuelve `permanece: true` y el punto de entrada no hace nada más; se
+ * devuelve además el `servidor` para que las pruebas puedan apagarlo (el CLI no lo usa).
+ */
+export async function ejecutarAsync(argv: readonly string[]): Promise<ResultadoAsync> {
+  const { posicionales, banderas } = parsear(argv);
+  const comando = posicionales[0] ?? "ayuda";
+  if (comando === "preview") return cmdPreview(posicionales.slice(1), banderas);
+  if (comando === "capturas") return cmdCapturas(posicionales.slice(1), banderas);
+  return ejecutar(argv);
+}
+
+function entero(v: string | boolean | undefined): number | undefined {
+  if (typeof v !== "string") return undefined;
+  const n = Number.parseInt(v, 10);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+}
+
+async function cmdPreview(pos: readonly string[], banderas: Opciones["banderas"]): Promise<ResultadoAsync> {
+  const crudo = pos[0];
+  if (!crudo) return { codigo: 2, salida: `Falta el directorio del paquete.\n\n${AYUDA}` };
+  try {
+    const s = await preview({
+      dir: resolverDir(crudo),
+      ...(entero(banderas["puerto"]) !== undefined ? { puerto: entero(banderas["puerto"])! } : {}),
+      ...(typeof banderas["paleta"] === "string" ? { paleta: banderas["paleta"] } : {}),
+      ...(typeof banderas["fuentes"] === "string" ? { fuentes: banderas["fuentes"] } : {}),
+      ...(banderas["sin-marcadores"] === true ? { marcadores: false } : {}),
+    });
+    // Código 0 aunque el paquete esté en rojo: el SERVIDOR ha arrancado y enseña los errores, que es
+    // lo que se le ha pedido. El rojo del paquete lo reporta `check`, que es quien tiene ese trabajo.
+    return { codigo: 0, salida: s.salida, permanece: true, servidor: s };
+  } catch (e) {
+    return { codigo: 1, salida: `No he podido levantar el previsualizador: ${(e as Error).message}` };
+  }
+}
+
+async function cmdCapturas(pos: readonly string[], banderas: Opciones["banderas"]): Promise<ResultadoCli> {
+  const crudo = pos[0];
+  if (!crudo) return { codigo: 2, salida: `Falta el directorio del paquete.\n\n${AYUDA}` };
+  const anchos = typeof banderas["anchos"] === "string"
+    ? banderas["anchos"].split(",").map(x => Number.parseInt(x.trim(), 10)).filter(n => Number.isFinite(n) && n > 0)
+    : [...ANCHOS_POR_DEFECTO.map(a => a.ancho)];
+  try {
+    const r = await capturas({
+      dir: resolverDir(crudo),
+      ...(typeof banderas["destino"] === "string" ? { destino: resolverDir(banderas["destino"]) } : {}),
+      ...(anchos.length > 0 ? { anchos } : {}),
+      ...(typeof banderas["paleta"] === "string" ? { paleta: banderas["paleta"] } : {}),
+      ...(typeof banderas["fuentes"] === "string" ? { fuentes: banderas["fuentes"] } : {}),
+      ...(typeof banderas["seccion"] === "string" ? { seccion: banderas["seccion"] } : {}),
+    });
+    return { codigo: r.ok ? 0 : 1, salida: r.salida };
+  } catch (e) {
+    return { codigo: 1, salida: `No he podido capturar la plantilla: ${(e as Error).message}` };
+  }
+}
+
 // Punto de entrada real. `import.meta.url` sólo coincide con `argv[1]` cuando se ejecuta el fichero.
 const esEntrada = process.argv[1] !== undefined &&
   import.meta.url === new URL(`file://${resolve(process.argv[1])}`).href;
 if (esEntrada) {
-  const r = ejecutar(process.argv.slice(2));
+  const r = await ejecutarAsync(process.argv.slice(2));
   process.stdout.write(r.salida + "\n");
   process.exitCode = r.codigo;
+  // `preview` deja el servidor escuchando: el proceso sigue vivo hasta Ctrl+C, sin bucle de espera.
 }
