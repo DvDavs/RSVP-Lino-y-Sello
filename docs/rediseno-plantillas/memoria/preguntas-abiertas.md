@@ -1069,3 +1069,36 @@ producto (conmutador claro/oscuro) y `evidencia/fase-3c/bloque-1/*.png`.
 
 Sin resolver, heredado y NO tocado por este bloque: el emoji de `lib/i18n.ts` (`publicar.yaSeVe`) y
 `lucide-react` en el chrome siguen ahí; `handoffs/3c-0.md` los asigna al agente de iconos.
+
+## Fase 3-C · 3c-b2-f1 (bloque 2, familia de formularios)
+
+- [Fase 3-C · 3c-b2-f1] **Color de la bolita del `Switch`.** `11 §5` dice «bolita 22 con `shadow-1`»
+  sin fijar el rol de color. **Supuesto:** `var(--ui-surface-raised)` (blanco en tema claro, oscuro en
+  tema oscuro), porque da contraste razonable contra `primary`/`border` en las dos superficies y en los
+  dos temas sin inventar un token nuevo. Verificado a ojo en `/design/componentes` (F3 la monta); no
+  medí contraste numérico porque no es una pareja de las 42 verificadas por `packages/tokens` — si el
+  dueño prefiere una pareja garantizada, la alternativa más cercana es `on-primary`/`on-primary-soft`
+  según el estado, con el riesgo de que no contraste igual de bien contra `border` cuando está apagado.
+- [Fase 3-C · 3c-b2-f1] **`Textarea`/`Input` a 16 px de fuente en todo tamaño de pantalla**, no solo en
+  móvil. `11 §5` pide 16 px mínimo en móvil (evita el zoom de iOS) pero el boceto de escritorio usa 15.
+  **Supuesto:** 16 px siempre, sin `media query`, priorizando la regla dura sobre el matiz de 1 px. Si
+  el dueño quiere los 15 px de escritorio, hace falta una `clamp()`/`media query` como la de
+  `typography.css`, no un valor fijo.
+- [Fase 3-C · 3c-b2-f1] **`Button` no fija «ancho igual en reposo y en `loading`»** (`11 §5`, columna de
+  estados). No se implementó por presupuesto de tiempo: la vía más simple sería medir el ancho del
+  botón en reposo (`ResizeObserver` o una medida en el primer render) y fijarlo por `style.minWidth` al
+  entrar en `loading`. Falta.
+- [Fase 3-C · 3c-b2-f1] **Sin unión discriminada que obligue `aria-label` en `Button variant="icono"`
+  sin hijos de texto.** Se documentó en el JSDoc del componente en vez de en el sistema de tipos: una
+  unión que distinga «variant icono sin children de texto» de «con children» habría complicado el tipo
+  público de `PropsBoton` (que además admite `asChild`) más de lo que el presupuesto de esta familia
+  permitía. Si se quiere gate-keeping en tiempo de compilación, es un cambio de tipos, no de runtime.
+- [Fase 3-C · 3c-b2-f1] **`RadioGroup`/`Checkbox` no llevan el tratamiento visual completo de
+  «opción grande»** del moodboard (tarjeta con fondo/borde propios cuando está marcada): solo el
+  objetivo táctil de 44 px con `<label>`. Si una pantalla real (RSVP, asistente) necesita el peso visual
+  de tarjeta, es una variante nueva sobre el mismo componente, no un componente distinto.
+- [Fase 3-C · 3c-b2-f1] **Utilidades de `utilidades/foco.ts`/`controlSombra.ts`/`cn.ts` no están
+  reexportadas desde `@invitaciones/ui`** (solo internas a `packages/ui/src/componentes/*`). Si F2 o F3
+  quieren reutilizar el mismo mecanismo de anillo de foco para sus propios componentes interactivos
+  (Tabs, Dialog, Tooltip, Toast…), hay que subir esas tres funciones/el hook al barril público —
+  cambio mecánico, sin decisión de diseño de por medio.
