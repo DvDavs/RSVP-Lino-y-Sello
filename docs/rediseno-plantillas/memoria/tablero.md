@@ -132,3 +132,29 @@ suite completa tras cada merge; commit y push por bloque.
 | 3 · 3C-6 catálogo y asistente de creación | 3c-6 → relevo | Opus | en curso (handoff parcial por contexto > 300k) | |
 | 3 · 3C-8 e2e, axe, presupuestos y LCP | | Sonnet + revisor | pendiente | |
 | Cierre: revisiones, guía, memoria, handoff | | | pendiente | |
+
+## Fase 4 — plantillas y kit de autor (2026-09-06, en curso)
+
+Rama `claude/fase-4-kit-de-autor`, nacida de la fase 3-C en `563d42e`. Un solo nivel de agentes;
+Opus para el kit, la conversión y las revisiones; Sonnet con revisor Opus para conversiones concretas
+y guías; un Sonnet **ajeno al kit** para la plantilla nueva cronometrada. Worktrees para lo paralelo
+(`/home/user/wt/<id>`), integración con `merge --no-ff` y suite completa tras cada merge, commit y
+push por bloque. Contexto por agente ≤ 300k con relevo por handoff parcial.
+
+Objetivo de negocio medido: hoy una plantilla mínima de 5 secciones cuesta **106 líneas, 7 min 29 s y
+4 intentos** a un programador, y lo caro es el **vocabulario cerrado** (roles, ramas del `oneOf`,
+digestos), que sólo vive en `packages/schema/src/blocks.ts` y que el validador señala sin sugerir
+(`handoffs/3-para-fase-4.md §2-§3`). La fase 4 no busca la plantilla visualmente perfecta: busca el
+esqueleto, el kit y las plantillas convertidas correctas, limpias y accesibles.
+
+| Bloque | Agente | Modelo | Estado | Verificación del orquestador |
+|---|---|---|---|---|
+| 0 entorno, registro idempotente y `boda-clasica@1.0.1` | 4-0a | Opus | lanzado | |
+| 0 `sectionCatalog` + introspección del esquema (fuente del vocabulario del kit) | 4-0b | Opus | lanzado | |
+| 0 deuda `ADR-3-2d-04`: AA en `diseno/ejemplos/` y `packages/schema/golden/` | 4-0c | Opus | lanzado | |
+| 1 · 4-2 herramienta de conversión F1 → paquete (146 patrones sin mapear → 0) | 4-2 | Opus | lanzado | |
+| 1 · 4-1 kit de autor (CLI, validador que sugiere, previsualizador, capturas) | | Opus | pendiente del bloque 0 | |
+| 1 · 4-3 guía «cómo agregar una plantilla» y lista de verificación | | Sonnet + revisor | pendiente del bloque 1 | |
+| 2 · 4-4 conversión de las 9 plantillas legadas (3 cohortes) | | Sonnet ×3 + revisor Opus | pendiente | |
+| 2 · 4-5 plantilla nueva sólo con el kit, cronometrada | | Sonnet ajeno al kit | pendiente | |
+| Cierre: revisión adversarial, merge de 3-C, suite completa, memoria | | Opus | pendiente | |
