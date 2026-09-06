@@ -49,7 +49,7 @@ export const TIPOS_DE_EVENTO: readonly TipoDeEvento[] = [
   { kind: "confirmation", nombre: "Confirmación", Icono: IconoComunion, imagenId: "asistente/tipo-confirmacion", imagenSrc: "/imagenes/asistente/tipo-confirmacion.webp" },
   { kind: "birthday", nombre: "Cumpleaños", Icono: IconoCumpleanos, imagenId: "asistente/tipo-cumpleanos", imagenSrc: "/imagenes/asistente/tipo-cumpleanos.webp" },
   { kind: "graduation", nombre: "Graduación", Icono: IconoGraduacion, imagenId: "asistente/tipo-graduacion", imagenSrc: "/imagenes/asistente/tipo-graduacion.webp" },
-  { kind: "generic", nombre: "Otra celebración", Icono: IconoInvitacion, imagenId: "asistente/tipo-otra" },
+  { kind: "generic", nombre: "Otra celebración", Icono: IconoInvitacion, imagenId: "asistente/tipo-otra", imagenSrc: "/imagenes/asistente/tipo-otra.webp" },
 ];
 
 
