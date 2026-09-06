@@ -16,3 +16,4 @@ Antes de crear o modificar componentes, pantallas, iconos, paleta, tipografía, 
 - Sin pruebas en verde con salida real no hay integración. Golden files se generan, nunca se escriben a mano.
 - Entorno remoto: sin Docker; Postgres efímero con `scripts/pg-ephemeral.sh`; JDK 21; Chromium preinstalado (no `playwright install`); el proxy bloquea Google Fonts y bancos de imágenes (fuentes por npm/Fontsource).
 - Los sub-agentes no pueden lanzar sub-agentes: el orquestador raíz lanza todos.
+- Presupuesto de contexto por agente: **máximo ~300k tokens**. Los encargos se parten para que quepan; un agente que se acerque al límite (o que lleve más de ~2/3 de un encargo grande) escribe un handoff parcial en `memoria/handoffs/<fase>-<ID>-parcial.md` (terminado, a medias con fichero:línea, pendiente, cómo verificar) y termina; el orquestador lanza un agente nuevo que continúa desde ese handoff. Nunca se reanuda un agente con el contexto lleno.

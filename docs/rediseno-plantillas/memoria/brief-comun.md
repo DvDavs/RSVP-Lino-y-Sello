@@ -23,6 +23,10 @@ P1 Esquema único tipado y validado compartido backend/frontend; nada se descart
 - Distingue lo verificado, lo inferido y lo que no pudiste determinar.
 - Economía de tokens: lee solo lo que tu brief indica; no vuelvas a leer el módulo antiguo entero si el resumen por rol te basta; responde en el chat con ≤ 15 líneas.
 
+## Presupuesto de contexto (instrucción del dueño, fase 3-C)
+- Cada agente trabaja con **≤ 300k tokens de contexto**. Si tu encargo es grande, el orquestador lo parte; si aun así te acercas al límite (o llevas más de ~2/3 del encargo y queda mucho), **no sigas implementando**: deja el árbol compilando (`typecheck` en verde; lo que no compile, revertido o comentado y anotado), escribe `memoria/handoffs/<fase>-<ID>-parcial.md` (≤ 60 líneas: terminado y verificado con cifras · a medias con fichero:línea y qué falta · no empezado · decisiones tomadas · comandos exactos para verificar) y termina con un reporte de ≤ 10 líneas. Un agente nuevo continúa desde ese handoff.
+- El orquestador no reanuda agentes con el contexto lleno: lanza agentes nuevos con encargos más pequeños y paralelos cuando el reparto lo permita (ficheros disjuntos), o secuenciales sobre el mismo worktree cuando no.
+
 ## Al terminar (obligatorio; sin memoria no hay aceptación)
 1. `memoria/bitacora/<fase>-<ID>.md`: qué hiciste, evidencia, qué no pudiste, riesgos.
 2. `memoria/handoffs/<fase>-<ID>.md` (≤ 60 líneas, estructurado) si otro agente continúa tu trabajo.
