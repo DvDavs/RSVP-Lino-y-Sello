@@ -19,6 +19,9 @@ import type {
   AssetListQuery,
   AssetListResponse,
   AssetUploadResponse,
+  AuthPasswordResetRequest,
+  AuthPasswordResetResponse,
+  AuthSignupRequest,
   AuthTokenRequest,
   AuthTokenResponse,
   CatalogQuery,
@@ -613,6 +616,51 @@ export async function authLogin(credenciales: AuthTokenRequest): Promise<AuthTok
     setAuthToken(data.accessToken);
   }
   return data;
+}
+
+/**
+ * `POST /auth/signup` — la otra puerta de `/acceso` (pestaña «Crear cuenta», 11 §7). Añadida en la
+ * fase 3-C sin tocar `authLogin` ni el almacenamiento del token: escribe el token por el MISMO
+ * `setAuthToken` y por ninguna otra vía, así que P8 (contratos §8 C4, «el token vive solo en este
+ * archivo») sigue siendo cierto con dos funciones que lo escriben en lugar de una.
+ *
+ * El backend responde `TokenResponse` idéntico al de `/auth/token`: quien se registra queda dentro,
+ * sin un segundo formulario de acceso que rellenar.
+ */
+export async function authSignup(datos: AuthSignupRequest): Promise<AuthTokenResponse> {
+  const r = await peticion<AuthTokenResponse>({
+    method: "POST",
+    path: "/auth/signup",
+    jsonBody: datos,
+    bodyLimitBytes: DEFAULT_JSON_BODY_LIMIT_BYTES,
+    auth: false,
+  });
+  const data = r.data as AuthTokenResponse;
+  if (typeof data.accessToken === "string" && data.accessToken.length > 0) {
+    setAuthToken(data.accessToken);
+  }
+  return data;
+}
+
+/**
+ * `POST /auth/request-password-reset` — recuperación de contraseña. NO escribe token ni sesión.
+ *
+ * La interfaz que la llama enseña SIEMPRE la misma frase pase lo que pase («Si el correo
+ * corresponde a una cuenta…»): el backend ya no devuelve el token de recuperación
+ * (`ADR-3C-N01-01`), y distinguir en pantalla un 200 de un 404 volvería a convertir este extremo
+ * `permitAll` en un enumerador de correos registrados.
+ */
+export async function authRequestPasswordReset(
+  datos: AuthPasswordResetRequest,
+): Promise<AuthPasswordResetResponse> {
+  const r = await peticion<AuthPasswordResetResponse>({
+    method: "POST",
+    path: "/auth/request-password-reset",
+    jsonBody: datos,
+    bodyLimitBytes: DEFAULT_JSON_BODY_LIMIT_BYTES,
+    auth: false,
+  });
+  return (r.data ?? { message: "" }) as AuthPasswordResetResponse;
 }
 
 /**

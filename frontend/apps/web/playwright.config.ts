@@ -48,11 +48,11 @@ export default defineConfig({
     // necesita `'unsafe-eval'`, que es justo la CSP que la ruta del lienzo prohíbe.
     command: "pnpm run build && pnpm run start",
     // HALLAZGO verificado (no en `06 §9`): Playwright solo da el `webServer` por listo ante una
-    // respuesta HTTP < 400. La app no tiene página en `/` (todas las rutas viven bajo grupos:
-    // `/editor`, `/i/[publicToken]`…), así que `/` cae en `app/not-found.tsx` con `404` — Playwright
-    // esperaba para siempre y agotaba el `timeout` de 180 s aunque el servidor estuviera arriba
-    // (confirmado: `curl 127.0.0.1:3000/` responde en <200 ms). Se apunta a `/editor`, que responde
-    // `200` de verdad.
+    // respuesta HTTP < 400. Cuando se escribió esto la app no tenía página en `/` (todas las rutas
+    // vivían bajo grupos: `/editor`, `/i/[publicToken]`…) y `/` caía en `not-found.tsx` con `404`,
+    // así que Playwright esperaba para siempre. Desde la fase 3-C (3C-5) `/` es la PORTADA y
+    // responde `200`, pero la sonda se queda en `/editor` a propósito: es la ruta que de verdad
+    // demuestra que la aplicación arrancó con su cliente HTTP, no una página estática.
     url: `${ORIGEN}/editor`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

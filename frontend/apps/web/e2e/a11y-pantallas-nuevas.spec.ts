@@ -18,9 +18,17 @@ test("pantalla de acceso: 0 violaciones axe críticas o serias", async ({ page }
   await sinViolacionesGraves(page);
 });
 
+// El `h1` de `/ayuda` dejó de ser «Ayuda» en la fase 3-C: `11 §7` fija «¿En qué te ayudamos?» para
+// esta pantalla (3C-5). Es el ÚNICO selector de este archivo que cambia; el resto sigue igual.
 test("página de ayuda: 0 violaciones axe críticas o serias", async ({ page }) => {
   await page.goto("/ayuda");
-  await expect(page.getByRole("heading", { name: "Ayuda", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "¿En qué te ayudamos?", level: 1 })).toBeVisible();
+  await sinViolacionesGraves(page);
+});
+
+test("portada: 0 violaciones axe críticas o serias", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await sinViolacionesGraves(page);
 });
 

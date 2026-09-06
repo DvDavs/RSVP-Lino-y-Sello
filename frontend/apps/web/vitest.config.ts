@@ -42,6 +42,10 @@ export default defineConfig({
         "app/(public)/_componentes/composed-lectura.ts",
         // Bloque 3-5: los 14 campos del panel de contenido y sus pruebas (U-17 y una por tipo de bloque).
         "components/fields/**/*.{ts,tsx}",
+        // Fase 3-C (3C-5): la web pública entera vive en componentes, no en las páginas de ruta
+        // (que siguen fuera de cobertura), así que `components/sitio/**` sí entra: portada,
+        // cabecera y pie, asistente de acceso, buscador de ayuda y los dos estados de error.
+        "components/sitio/**/*.{ts,tsx}",
       ],
       exclude: ["**/*.test.{ts,tsx}", "**/*.d.ts"],
       thresholds: { lines: 60, functions: 65, branches: 50, statements: 60 },

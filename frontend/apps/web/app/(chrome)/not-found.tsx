@@ -11,15 +11,27 @@
 // la hidratación con una discrepancia de HTML (#418), así que el lienzo no arrancaba nunca. La
 // única forma de tener varios layouts raíz en el App Router es no tener ninguno por encima.
 //
-// Sin `style={{…}}` a propósito: las utilidades de `globals.css` bastan y ningún documento de este
-// proyecto debe depender de atributos `style` en línea.
+// Fase 3-C: por estar fuera del grupo `(sitio)`, esta página monta el shell de la web pública a
+// mano (`MarcoSitio`) para no ser una pantalla huérfana sin cabecera ni pie, y ofrece UNA salida
+// (`11 §7`, «ningún callejón sin salida»).
+import type { Metadata } from "next";
+import { EstadoDePagina } from "@/components/sitio/EstadoDePagina";
+import { MarcoSitio } from "@/components/sitio/MarcoSitio";
+import { es_MX } from "@/lib/i18n";
+
+export const metadata: Metadata = {
+  title: es_MX.errores.noExiste.titulo,
+  robots: { index: false, follow: true },
+};
+
 export default function NoEncontradoGlobal() {
   return (
-    <main className="mx-auto max-w-prose px-6 py-24 text-center">
-      <h1 className="font-ui-display text-ui-section font-semibold text-ui-ink-heading">Página no encontrada</h1>
-      <p className="mt-3 text-ui-body text-ui-ink-muted">
-        El enlace que abriste no existe o cambió de dirección.
-      </p>
-    </main>
+    <MarcoSitio>
+      <EstadoDePagina
+        titulo={es_MX.errores.noExiste.titulo}
+        texto={es_MX.errores.noExiste.cuerpo}
+        accion={{ etiqueta: es_MX.comun.irAlInicio, href: "/" }}
+      />
+    </MarcoSitio>
   );
 }

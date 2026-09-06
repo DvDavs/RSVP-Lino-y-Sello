@@ -14,6 +14,11 @@ export const es_MX = {
     cerrarSesion: "Cerrar sesión",
     misInvitaciones: "Mis invitaciones",
     cancelar: "Cancelar",
+    marca: "Invitaciones",
+    entrar: "Entrar",
+    crearCuenta: "Crear cuenta",
+    irAlInicio: "Ir a la portada",
+    ejemplo: "Ejemplo",
   },
   errores: {
     generico: "Algo salió mal. Inténtalo de nuevo.",
@@ -26,6 +31,16 @@ export const es_MX = {
     conflictoRevision: "Alguien más guardó cambios antes que tú. Recarga para verlos.",
     cuerpoDemasiadoGrande: "Ese cambio es demasiado grande para enviarlo de una vez.",
     codigo: (codigo: string) => `Código: ${codigo}`,
+    /** 404 y error de la web pública (11 §7, fila «Estados»): título, frase y UNA salida. */
+    noExiste: {
+      titulo: "Esta página no existe",
+      cuerpo: "El enlace que abriste no existe o cambió de dirección. Desde la portada llegas a todo lo demás.",
+    },
+    algoSalioMal: {
+      titulo: "Algo salió mal",
+      cuerpo: "No pudimos cargar esta página. Vuelve a intentarlo; si sigue pasando, mándanos el código de abajo.",
+      reintentar: "Volver a intentarlo",
+    },
   },
   /**
    * Pantalla de acceso (U-1). `04 §7.1` paso 1 contrataba «401 → redirección a login» y la
@@ -44,11 +59,150 @@ export const es_MX = {
     // El aviso NO acusa a nadie de haber expirado una sesión que nunca existió (U-1).
     hayQueEntrar: "Para ver y editar tu invitación necesitas entrar a tu cuenta.",
     sesionTerminada: "Tu sesión terminó. Vuelve a entrar para seguir donde lo dejaste.",
+
+    // ── Fase 3-C · las dos pestañas de `/acceso` (11 §7, fila «Acceso y registro») ───────────
+    pestanas: "Entrar o crear cuenta",
+    pestanaEntrar: "Entrar",
+    pestanaCrearCuenta: "Crear cuenta",
+
+    // Recuperación de contraseña. La respuesta es SIEMPRE la misma exista o no la cuenta
+    // (`ADR-3C-N01-01`: enumerar correos es la mitad del ataque).
+    olvide: "¿Olvidaste tu contraseña?",
+    recuperar: {
+      titulo: "Recupera tu contraseña",
+      intro: "Escribe tu correo y te mandamos un enlace para cambiarla.",
+      enviar: "Enviar el enlace",
+      enviando: "Enviando…",
+      // Literal de N-01: no confirma ni desmiente que el correo exista.
+      enviado: "Si el correo corresponde a una cuenta, te enviamos un enlace para cambiar la contraseña.",
+      volver: "Volver a entrar",
+    },
+
+    // Registro en tres pasos (11 §7: «paso 2 Elige una contraseña · paso 3 ¿Cómo te llamamos?»).
+    registro: {
+      titulo: "Crea tu cuenta",
+      intro: "Tres datos y ya. Después eliges el tipo de evento.",
+      pasoCorreo: "Tu correo",
+      pasoContrasena: "Elige una contraseña",
+      pasoNombre: "¿Cómo te llamamos?",
+      ayudaCorreo: "Aquí te mandamos el enlace de tu invitación.",
+      ayudaContrasena: "Al menos 8 caracteres, con una mayúscula, una minúscula y un símbolo.",
+      nombre: "Nombre",
+      apellidos: "Apellidos",
+      continuar: "Continuar",
+      atras: "Atrás",
+      crear: "Crear mi cuenta",
+      creando: "Creando tu cuenta…",
+      listo: "Listo. Elige el tipo de evento.",
+      faltaNombre: "Escribe tu nombre.",
+      faltaApellidos: "Escribe tus apellidos.",
+      contrasenaCorta: "Tu contraseña necesita al menos 8 caracteres, una mayúscula, una minúscula y un símbolo.",
+      correoInvalido: "Ese correo no parece válido. Revísalo.",
+      correoOcupado: "Ya hay una cuenta con ese correo. Entra con tu contraseña o recupérala.",
+    },
+  },
+
+  /**
+   * Web pública (`/`). Textos de `11 §7`, fila «Web pública»: segunda persona, verbos concretos,
+   * sin jerga y sin una sola promesa que el producto no cumpla hoy.
+   */
+  sitio: {
+    saltarAlContenido: "Saltar al contenido",
+    navegacion: "Navegación principal",
+    navegacionPie: "Enlaces del pie",
+    comoFunciona: "Cómo funciona",
+    paraCadaCelebracion: "Para cada celebración",
+    planes: "Planes",
+    hero: {
+      eyebrow: "Invitaciones digitales con RSVP",
+      titulo: "Tu invitación, lista en una tarde.",
+      cuerpo:
+        "Eliges un diseño, escribes tus datos y compartes el enlace por WhatsApp. Tus invitados confirman desde su teléfono y tú ves quién viene.",
+      empezar: "Empezar mi invitación",
+      verComoFunciona: "Ver cómo funciona",
+      fotoPendiente: "Pareja celebrando en un jardín al atardecer",
+    },
+    pasos: {
+      titulo: "Tres pasos y a repartir.",
+      intro: "No hay que instalar nada ni saber de diseño.",
+      uno: {
+        titulo: "Elige el diseño",
+        cuerpo: "Dinos qué celebras y te mostramos solo las plantillas que le van. Puedes cambiar de idea después.",
+      },
+      dos: {
+        titulo: "Escribe tus datos",
+        cuerpo: "Nombres, fecha, lugar y tus fotos. Se guarda solo mientras escribes, sin botón de guardar.",
+      },
+      tres: {
+        titulo: "Comparte el enlace",
+        cuerpo: "Publicas y mandas el enlace por WhatsApp. Cada invitado confirma desde su teléfono.",
+      },
+    },
+    tipos: {
+      titulo: "Para cada celebración",
+      intro: "Elige el tipo y te llevamos al asistente con las plantillas que le van.",
+      boda: "Boda",
+      xv: "XV años",
+      bautizo: "Bautizo",
+      comunion: "Primera comunión",
+      cumpleanos: "Cumpleaños",
+      graduacion: "Graduación",
+      corporativo: "Corporativo",
+      empezarCon: (tipo: string) => `Empezar una invitación de ${tipo}`,
+    },
+    testimonios: {
+      titulo: "Lo que cuentan quienes ya la mandaron",
+      // Nada de testimonios inventados haciéndose pasar por reales: van marcados como ejemplo.
+      aviso: "Textos de muestra mientras reunimos testimonios reales de clientas.",
+      uno: {
+        cita: "Mandé el enlace por WhatsApp un martes y para el viernes ya tenía confirmadas a treinta personas.",
+        autora: "Ana Torres",
+        evento: "Boda en Guanajuato",
+      },
+      dos: {
+        cita: "Cambié la hora de la misa desde el teléfono, en la fila del súper, y quedó al momento.",
+        autora: "María Fernanda Cruz",
+        evento: "XV años en Puebla",
+      },
+      tres: {
+        cita: "Mis tíos entraron sin instalar nada. Eso era lo que más me preocupaba.",
+        autora: "Rocío Delgado",
+        evento: "Bautizo en Mérida",
+      },
+    },
+    planesSeccion: {
+      titulo: "Elige tu plan",
+      cuerpo:
+        "Tu invitación nace cuando contratas un plan: ahí se define cuántas plantillas y cuántos invitados incluye. Entra a tu cuenta para ver el tuyo o pedir un cambio.",
+      accion: "Entrar a mi cuenta",
+      nota: "Los precios se acuerdan con quien te atendió; todavía no se publican aquí.",
+    },
+    ctaFinal: {
+      titulo: "¿Empezamos?",
+      cuerpo: "Tu invitación puede estar lista esta misma tarde.",
+      accion: "Empezar mi invitación",
+    },
+    pie: {
+      lema: "Invitaciones digitales con RSVP, hechas en México.",
+      derechos: (anio: number) => `${anio} Invitaciones`,
+    },
   },
   ayuda: {
-    titulo: "Ayuda",
+    titulo: "¿En qué te ayudamos?",
     intro: "Las dudas que más nos llegan mientras preparas tu invitación.",
     volverAlEditor: "Volver a mis invitaciones",
+    buscar: "Busca tu duda",
+    buscarAyuda: "Escribe una palabra: fecha, publicar, enlace, plan…",
+    resultados: (n: number) => `${n} ${n === 1 ? "duda" : "dudas"}`,
+    sinResultados: {
+      titulo: "Ninguna duda coincide",
+      texto: "Prueba con otra palabra o escríbenos y te contestamos nosotros.",
+      accion: "Ver todas las dudas",
+    },
+    contacto: {
+      titulo: "¿No está tu duda aquí?",
+      texto: "Escríbenos por el mismo medio por el que contrataste tu invitación y te contestamos.",
+    },
   },
   editor: {
     catalogo: {
