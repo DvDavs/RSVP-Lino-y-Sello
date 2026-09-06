@@ -1544,3 +1544,6 @@ las que exigen decisión tuya, en orden de impacto:
   navegador para saber por qué puerta se pierde.
 - **B-13 (objetivos táctiles de 36 px) no es mío**: sale del tamaño `sm` de `Button` en
   `@invitaciones/ui`, no del editor. Sigue en pie tal y como la dejó 3C-UX.
+
+## Respuestas del dueño (2026-09-06)
+Ver `memoria/decisiones-dueno.md` (D-01…D-08): sin migración; marca Lino & Sello / linoysello.com; correos hola@, soporte@, no-responder@; WhatsApp +52 951 470 9685 solo contacto; Stripe; imágenes por IA; tema oscuro en segundo plano; producto completo antes de publicar.

@@ -1,0 +1,12 @@
+# Decisiones del dueño (2026-09-06) — mandan sobre el prompt maestro y sobre cualquier ADR anterior
+
+| # | Decisión | Consecuencia |
+|---|---|---|
+| D-01 | **No hay clientes ni plantillas existentes que migrar.** El sistema es nuevo; todo se hace desde cero. | Se desecha la conversión de las 9 plantillas legadas (fase 4, bloques 4-2 y 4-4) y **se cancela la fase 5 de migración** del prompt maestro. `packages/migration-legacy` no se construye. El módulo antiguo de plantillas (`modules/user/invitations`, `modules/master/templates`, `MongoDataInitializer`, colecciones Mongo) se **retira** en la fase de cierre en vez de convivir detrás de bandera (P10 deja de aplicar). |
+| D-02 | Marca: **Lino & Sello**. Dominio: **linoysello.com**. Sin logotipo todavía. | Nombre en toda la interfaz, correos y metadatos. Logotipo: tarea de arte pendiente; mientras, marca tipográfica con la display del sistema. |
+| D-03 | Correos de contacto: el dueño los crea después en su sistema; se fijan ya: **hola@linoysello.com** (contacto/ventas), **soporte@linoysello.com** (ayuda), **no-responder@linoysello.com** (transaccional). | Variables `NEXT_PUBLIC_CONTACTO_CORREO`, `MAIL_FROM`. |
+| D-04 | WhatsApp: **solo contacto** por ahora, número **+52 951 470 9685**. | Enlace `https://wa.me/529514709685?text=...` (click-to-chat, sin API). La API de WhatsApp Business (Meta Cloud API) solo hace falta para **enviar** mensajes automáticos (invitaciones, recordatorios): se decide cuando se active el envío; el backend ya tiene `modules/shared/whatsapp`. |
+| D-05 | **Sí habrá compra en línea: Stripe** (Checkout + webhook). | Nueva fase de producto: plan → pago → invitación habilitada. |
+| D-06 | Imágenes: las produce un **modelo de IA** (GPT Image o similar) a partir de los prompts de `imagenes-pendientes.md`; el dueño las sube. | Cada imagen llega con un mini-prompt de integración. |
+| D-07 | **Tema oscuro: segundo plano.** No se gasta en él hasta que el producto esté completo. | Los tokens ya tienen modo oscuro por `data-theme`; no se expone en la interfaz. |
+| D-08 | Todavía falta producto para publicar: registro, panel del cliente, invitados y RSVP, panel de administración, pagos, despliegue. | Hoja de ruta nueva en `docs/rediseno-plantillas/hoja-de-ruta.md`. Se levanta la prohibición de tocar `auth`, `guests`, `admin` y pagos **para construirles frontend nuevo y endurecerlos**, siempre con ADR, pruebas y revisor Opus. |
