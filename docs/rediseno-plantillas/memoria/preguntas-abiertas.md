@@ -1474,3 +1474,10 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   traducciones están probadas por unidad. **Supuesto tomado:** es aceptable, porque provocar uno
   exigiría saltarse el `check` a propósito (`--sin-check`, que existe sólo para depurar). ¿Se quiere
   una prueba de integración que use `--sin-check` para dejar constancia de cada `422`?
+- [Fase 4 · 4-4A] **`yaCubierto`/`--forzar` de `migration-legacy` queda sin ningún usuario tras mover
+  el `templateId` 5 a `boda-premium` (`ADR-4-4A-01`).** El mecanismo se deja intacto en el tipo y en
+  `cli.ts` porque otra cohorte podría necesitarlo (un slug que otro bloque de fase 3 ya haya escrito a
+  mano). **Supuesto tomado:** conservarlo sin uso activo, porque quitarlo y tener que reintroducirlo
+  costaría más que el código muerto de una fila. ¿Confirma el dueño que ningún `templateId` restante
+  de las cohortes A/B (6, 7, 8, 9, 10, 13 — ya convertidos por otros bloques de 4-4) choca con un slug
+  de diseño existente, o hay que revisar la lista completa antes de dar la fase por cerrada?

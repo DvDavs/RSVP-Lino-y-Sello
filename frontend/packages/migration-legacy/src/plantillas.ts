@@ -38,9 +38,11 @@ export interface PlantillaLegada {
   /** Cohorte A/B/C/D de `05 §1`. */
   readonly cohorteMigracion: "A" | "B";
   /**
-   * `true` si el slug ya tiene un paquete publicado que NO sale de esta herramienta. `boda-clasica@1.0.0`
-   * cubre el `templateId` 5 (ADR-1R-C-07) y lo mantiene otro agente: escribir encima lo destruiría, así
-   * que la herramienta se niega salvo `--forzar`.
+   * `true` si el slug ya tiene un paquete publicado que NO sale de esta herramienta: escribir encima
+   * lo destruiría, así que la herramienta se niega salvo `--forzar`. El `templateId` 5 usó este
+   * mecanismo mientras apuntaba a `boda-clasica` (la plantilla de diseño de 3-2d); el brief 4-4a lo
+   * mueve al slug propio `boda-premium`, así que ningún `templateId` de las cohortes A/B lo necesita
+   * hoy — queda el mecanismo para el próximo choque de slugs.
    */
   readonly yaCubierto?: true;
   readonly nota?: string;
@@ -58,10 +60,10 @@ export const PLANTILLAS: readonly PlantillaLegada[] = [
     cohorte: "boda", eventKind: "wedding", eventTypeId: 1, planId: 1, cohorteMigracion: "A",
   },
   {
-    templateId: 5, slugLegado: "boda_premium", slug: "boda-clasica", nombre: "Boda clásica",
-    fuenteNombre: "V1__initial_schema.sql:1133-1136 (`name` vacío) [V]; ADR-1R-C-07 declara que `boda-clasica@1.0.0` ya cubre el 5",
-    cohorte: "boda", eventKind: "wedding", eventTypeId: 1, planId: 2, cohorteMigracion: "A", yaCubierto: true,
-    nota: "El paquete `frontend/templates/boda-clasica/1.0.0` NO es esta conversión: es una plantilla de diseño nuevo del bloque 3-2d. Convertir el 5 exige antes decidir si sustituye o convive con otro slug.",
+    templateId: 5, slugLegado: "boda_premium", slug: "boda-premium", nombre: "Boda Premium",
+    fuenteNombre: "V1__initial_schema.sql:1133-1136 (`name` vacío) [V]; slug decidido por el orquestador de fase 4 (brief 4-4a §2: `boda-clasica` sigue siendo la plantilla de diseño escrita a mano en 3-2d, no la conversión de F1; conviven bajo slugs distintos)",
+    cohorte: "boda", eventKind: "wedding", eventTypeId: 1, planId: 2, cohorteMigracion: "A",
+    nota: "El paquete `frontend/templates/boda-clasica/1.0.0` NO es esta conversión: es una plantilla de diseño nuevo del bloque 3-2d, y no se toca (PROHIBIDO en el brief de 4-4a). El `templateId` 5 se convierte aquí bajo el slug `boda-premium`.",
   },
   {
     templateId: 6, slugLegado: "xv_premium", slug: "xv-elegance", nombre: "XV Años Elegance Premium",

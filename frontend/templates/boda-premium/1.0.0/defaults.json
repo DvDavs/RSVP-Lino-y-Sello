@@ -1,0 +1,699 @@
+{
+  "templateSlug": "boda-premium",
+  "templateVersion": "1.0.0",
+  "content": {
+    "amenities.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "665Z1R7JFNHA98HE8K43B8MV0R",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Salón de belleza"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Marck Luga"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.facebook.com/marck.luga.39"
+            }
+          }
+        }
+      ]
+    },
+    "amenities.title": {
+      "kind": "text",
+      "value": "Amenidades"
+    },
+    "couple.bride": {
+      "kind": "person",
+      "name": "Camila Estrada"
+    },
+    "couple.brideText": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Mi amor, no encuentro las palabras adecuadas para expresar el gran amor que siento por ti."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "couple.groom": {
+      "kind": "person",
+      "name": "Antonio Barrita"
+    },
+    "couple.groomText": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Ante Dios y ante todos nuestros amigos y familiares, deseo que el mundo se entere que te tomo como esposa, para amarte, cuidarte y respetarte por siempre."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "couple.heading": {
+      "kind": "text",
+      "value": "Save the date!"
+    },
+    "cover.buttonLabel": {
+      "kind": "text",
+      "value": "Save the date"
+    },
+    "cover.title": {
+      "kind": "text",
+      "value": "Antonio & Camila"
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "JKJ0F1B3YJX7XKC0FWJP4AEAN4",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Damas"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo/corto o traje elegante."
+            }
+          }
+        },
+        {
+          "itemId": "N7Z9A4C3MR8QZF045X0AQD5S12",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Caballeros"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje o smoking, corbata, zapatos de vestir."
+            }
+          }
+        },
+        {
+          "itemId": "HM1DYZGM024266C48GHP9S331G",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Damas"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo/corto o traje elegante."
+            }
+          }
+        },
+        {
+          "itemId": "2HC0TJFPDZT735HPNDZT847ASJ",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Caballeros"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje o smoking, corbata, zapatos de vestir."
+            }
+          }
+        }
+      ]
+    },
+    "dressCode.title": {
+      "kind": "text",
+      "value": "Código de Vestir"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "067AD35TQ7EEZGSMMA9DFWJB3H",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Ceremonia Religiosa"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-07-17T16:30",
+              "end": "2025-07-17T17:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Templo de Santo Domingo de Guzmán",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "GSA612PQMN2MMA21ZT4CRVV1B8",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Recepción"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-07-17T19:00",
+              "end": "2025-07-17T19:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Zorba el Griego",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "QT2RRX0PR8VHNKB9DRYFGE2CGC",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Fiesta"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-07-17T19:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Zorba el Griego",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        }
+      ]
+    },
+    "event.locationNote": {
+      "kind": "text",
+      "value": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)"
+    },
+    "event.singlePlaceCards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "537VMFRNTQ6QRZMH5SP2YP1D2A",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Ceremonia Religiosa"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "BDG5J6ZPB2RCPXM137E3GFA3GA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Recepción"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Salón Jardín Las Rosas. (Dale clic para ver la ubicación)",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "N4NR9D6WT1PT9XWE6CATB68AND",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Fiesta"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Salón Jardín Las Rosas. (Dale clic para ver la ubicación)",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        }
+      ]
+    },
+    "event.title": {
+      "kind": "text",
+      "value": "¡Nuestro itinerario, acompáñanos!"
+    },
+    "family.group1": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "5V83C77WJC87SK37DKCKQQEBB7",
+          "values": {
+            "label": {
+              "kind": "text",
+              "value": "Raul Estrada Santiago"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "J7RFW9W1YYJWXYW2AS35TDEHPY",
+          "values": {
+            "label": {
+              "kind": "text",
+              "value": "Teresa Lopez"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group1Title": {
+      "kind": "text",
+      "value": "(Padres de la Novia)"
+    },
+    "family.group2": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "CA3QJV6VGKR8J09H1KS6JCTQMB",
+          "values": {
+            "label": {
+              "kind": "text",
+              "value": "Raul Estrada Santiago"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "78XNATHTY5EZ4JEF9JZFGG5SQK",
+          "values": {
+            "label": {
+              "kind": "text",
+              "value": "Teresa Lopez"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group2Title": {
+      "kind": "text",
+      "value": "(Padres del novio)"
+    },
+    "family.group3": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "VXS9DT8B7EDQA08YVG16XNJVP9",
+          "values": {
+            "label": {
+              "kind": "text",
+              "value": "Raul Estrada Santiago"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "04RWRWX6YQV0GDV3K8KDGYW914",
+          "values": {
+            "label": {
+              "kind": "text",
+              "value": "Teresa Lopez"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group3Title": {
+      "kind": "text",
+      "value": "(Padrinos de Velación)"
+    },
+    "family.intro": {
+      "kind": "listText",
+      "items": [
+        "Hay días en la vida que son especiales por sí solos. Compartirlos con las personas que quieres lo convierte en inolvidables.",
+        "A nuestros Padres",
+        "Gracias por sus consejos y amor incondicional que nos han permitido llegar a este momento de nuestras vidas y poder honrarlos de esta manera."
+      ]
+    },
+    "family.title": {
+      "kind": "text",
+      "value": "¡Te esperamos!"
+    },
+    "footer.musicEnabled": {
+      "kind": "boolean",
+      "value": true
+    },
+    "footer.note": {
+      "kind": "text",
+      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+    },
+    "gallery.hashtags": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "PF6DHQFBVP29GNAW2K91VA9NJS",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#antonioYcamila"
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.facebook.com/hashtag/antonioYcamila"
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "facebook"
+            }
+          }
+        },
+        {
+          "itemId": "V3RYV5YAWC87AG9MFXCD938VZK",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#antonioYcamila"
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.instagram.com/explore/tags/antonioYcamila"
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "instagram"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.intro": {
+      "kind": "text",
+      "value": "No olvides tomar fotos"
+    },
+    "gallery.title": {
+      "kind": "text",
+      "value": "Galería de fotos"
+    },
+    "gifts.options": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "MK9MS439NS09WTWM4MAFRMXG6Z",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "cash"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Depósito o transferencia"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Banco: SANTANDER",
+                "Titular: KARLA ZARATE CRUZ",
+                "Cuenta CLABE: 014610606106246881",
+                "Número de tarjeta: 60610624688"
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "HV9C8RXKXDARAYFXV9EQVZM8GC",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "digital"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Liverpool"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Su presencia es nuestro mejor regalo."
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "GDHWN8WRJWGV212YMFES3KJX1F",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "lluvia de sobres"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "mensaje lluvia de sobres"
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "VQ9TDZVE274B8GMN52YHBAM1QG",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "digital"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Mesa de liverpool"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "visita liverpool",
+                "compra aqui"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "gifts.title": {
+      "kind": "text",
+      "value": "Mesa de Regalos"
+    },
+    "rsvp.deadline": {
+      "kind": "date",
+      "value": "2023-07-26"
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Boda sin niños, agradecemos su comprensión."
+    },
+    "rsvp.title": {
+      "kind": "text",
+      "value": "Confirma tu asistencia"
+    },
+    "story.milestones": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "PCK9AQYJXG3CNVRPR5C6H6T8Z1",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Inicio de nuestro noviazgo"
+            },
+            "date": {
+              "kind": "date",
+              "value": "2012-06-07"
+            },
+            "body": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Ese día me encontraba muy nervioso, pues ya llevábamos de amigos casi un año y era momento de que diéramos el primer paso en nuestra relación, así que me decidí a preguntarle si quería ser mi novia, gracias a dios ella aceptó e iniciamos esta hermosa aventura."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "itemId": "F3H5XWMVRD8SV8AET52FY49WSV",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Propuesta de matrimonio"
+            },
+            "date": {
+              "kind": "date",
+              "value": "2019-12-14"
+            },
+            "body": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Fue un dia maravilloso para los dos, no me lo esperaba, después de 8 años de novios, por fin Santiago decidió proponerme matrimonio y formalizar esta relación tan hermosa, él se lució y me sorprendió con la entrega del anillo de compromiso."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "itemId": "WQME13AS5XKDYVSFH6T1J53YE0",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Pedida de mano"
+            },
+            "date": {
+              "kind": "date",
+              "value": "2019-12-21"
+            },
+            "body": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Decidimos continuar con las tradiciones y ese día vino Santiago con toda su familia a mi casa a pedirle mi mano formalmente a mis padres para que ellos otorgaran su consentimiento de nuestro compromiso, una vez aceptado el mismo Santiago me sorprendió con un espectáculo de juegos pirotécnicos para celebrar la unión oficial de nuestra futura boda."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "story.title": {
+      "kind": "text",
+      "value": "Nuestra historia"
+    },
+    "suggestions.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "PMKWFDYKC15BNEKB3CN47CJZ8E",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Hotel"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "City Express Oaxaca"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+            }
+          }
+        },
+        {
+          "itemId": "XGEPHC681Z2GYAGN4MJ36F7KR8",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Sitio de Taxis"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Sitio Antequera"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1"
+            }
+          }
+        },
+        {
+          "itemId": "RTTAMS1Q1B6YSMRCJ1V40BMK5A",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Renta de Autos"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax."
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8"
+            }
+          }
+        }
+      ]
+    },
+    "suggestions.title": {
+      "kind": "text",
+      "value": "Nuestras recomendaciones"
+    }
+  }
+}

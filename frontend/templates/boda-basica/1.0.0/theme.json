@@ -1,0 +1,44 @@
+{
+  "palettes": [
+    {
+      "id": "rojo",
+      "name": {
+        "es-MX": "Rojo"
+      },
+      "tokens": {
+        "bg": "#FAFAFA",
+        "surface": "#FFFFFF",
+        "ink": "#2B2B2B",
+        "accent": "#DC116A",
+        "accentInk": "#FFFFFF",
+        "muted": "#B04F79"
+      }
+    }
+  ],
+  "fontSets": [
+    {
+      "id": "sacramento-work-sans",
+      "name": {
+        "es-MX": "Sacramento y Work Sans"
+      },
+      "heading": {
+        "family": "Sacramento",
+        "weights": [
+          400,
+          700
+        ],
+        "source": "google"
+      },
+      "body": {
+        "family": "Work Sans",
+        "weights": [
+          400,
+          600
+        ],
+        "source": "google"
+      }
+    }
+  ],
+  "defaultPaletteId": "rojo",
+  "defaultFontSetId": "sacramento-work-sans"
+}
