@@ -1,8 +1,9 @@
 // test/design-tokens.test.ts — el cableado del sistema de diseño nuevo dentro del chrome (fase 3-C,
 // bloque 1). No mide color: eso lo hacen `packages/tokens` (datos) y
 // `evidencia/fase-3c/bloque-1/contraste-en-pantalla.mjs` (pila renderizada). Aquí se vigila que el
-// cableado siga en su sitio y, sobre todo, que la CONVIVENCIA con el chrome provisional de la
-// fase 3 no se rompa por accidente antes de que el bloque 3 lo migre.
+// cableado siga en su sitio y, sobre todo, que la capa de COMPATIBILIDAD que 3C-1b puso en lugar
+// del `@theme` provisional de la fase 3 no se pierda por accidente antes de que el bloque 3 la
+// borre junto con el resto del chrome viejo.
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -21,14 +22,17 @@ describe("tokens del sistema de diseño en el chrome", () => {
     expect(orden).toEqual([...orden].sort((a, b) => a - b));
   });
 
-  it("los tokens provisionales de la fase 3 siguen ahí: el bloque 3 es quien migra el chrome", () => {
-    // Si esto se pone rojo sin que el bloque 3 haya migrado el chrome, alguien borró los tokens
-    // viejos antes de tiempo y las pantallas actuales se quedan sin color.
-    expect(globals).toContain("@theme {");
-    expect(globals).toContain("--color-ui-accent: #4e027c;");
+  it("la capa de compatibilidad (3C-1b) reemplaza al `@theme` provisional: el bloque 3 solo la borra", () => {
+    // 3C-1b (ADR-3C-1-02, enmienda) retiró el `@theme` provisional y sus tres `@import` de fuente
+    // ANTES de que el bloque 3 migrara el chrome, para que el preset nuevo ganara ya en los
+    // nombres repetidos. Si esto se pone rojo, alguien volvió a poner un `@theme` bareto (sin
+    // `inline`) o resucitó los `@import` de fuente vieja.
+    expect(globals).not.toContain("@theme {");
+    expect(globals).toContain("@theme inline {");
+    expect(globals).toContain("--color-ui-accent: var(--ui-primary);");
     expect(globals).toContain("--ui-content-max: 1330px;");
     for (const fuente of ["inter", "bricolage-grotesque", "outfit"]) {
-      expect(globals).toContain(`@import "@fontsource-variable/${fuente}/wght.css";`);
+      expect(globals).not.toContain(`@import "@fontsource-variable/${fuente}/wght.css";`);
     }
   });
 

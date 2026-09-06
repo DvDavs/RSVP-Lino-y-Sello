@@ -4,121 +4,107 @@
 
    Dirección de arte del chrome — MEDIDA, no interpretada (instrucción del dueño, revisor Opus,
    2026-09-04): `docs/rediseno-plantillas/diseno/arte-chrome.md`, Playwright + Chrome real sobre
-   gigsalad.com, 150 líneas, commit `63c0520`. Valores literales de ese documento; las correcciones
-   de contraste WCAG 2.2 AA ya vienen aplicadas ahí (anotadas junto al valor original del sitio) y
-   se copian tal cual — no se recalculan aquí.
-
-   DESVIACIÓN de fuente respecto al documento medido (instrucción del revisor, corrección 1):
-   `arte-chrome.md` mide `Garnett` peso 600 para los títulos. Garnett es tipografía COMERCIAL de
-   foundry — no se copia, no se referencia por nombre esperando que cargue. Su papel de *display* lo
-   cubre una alternativa de licencia abierta, autoalojada por **npm** (Google Fonts no llega desde
-   este entorno; npm sí): `@fontsource-variable/bricolage-grotesque` (candidata principal) o
-   `@fontsource-variable/outfit` (alternativa) — la elección final del dueño se decide sobre las
-   capturas de `docs/rediseno-plantillas/evidencia/fase-3/chrome/tipografia-display-a.png` / `-b.png`.
-   El cuerpo/UI usa `@fontsource-variable/inter` (la misma familia que mide el sitio de referencia). */
+   gigsalad.com, 150 líneas, commit `63c0520`. Ese documento fijó un `@theme` provisional propio
+   (púrpura `#4e027c`, Inter/Bricolage/Outfit por `@fontsource-variable`) pensado para durar hasta
+   que el bloque 3 migrara el chrome entero al sistema nuevo (`11-sistema-de-diseno.md`). 3C-1b
+   retiró ese `@theme` y esos tres `@import` ANTES de esa migración — ver `ADR-3C-1-02` (enmienda),
+   `handoffs/3c-1.md` y `bitacora/3c-1b.md` para el porqué y la capa de compatibilidad que lo
+   sustituye, más abajo. Los valores medidos siguen archivados tal cual en `arte-chrome.md`. */
 @import "tailwindcss";
-@import "@fontsource-variable/inter/wght.css";
-@import "@fontsource-variable/bricolage-grotesque/wght.css";
-@import "@fontsource-variable/outfit/wght.css";
 
 /* FASE 3-C, BLOQUE 1 — sistema de diseño del producto (`diseno/11-sistema-de-diseno.md`).
    `tokens.css` trae las variables `--ui-*` de la paleta Bugambilia (claro y oscuro por
    `data-theme`) y `tailwind.css` el preset semántico (`bg-ui-primary`, `text-ui-on-primary`,
-   `ring-ui-focus`, `font-ui-display`, `text-ui-display-xl`…).
-
-   CONVIVEN A PROPÓSITO con el bloque `@theme` provisional de la fase 3 que sigue más abajo: quien
-   migra el chrome entero y borra ese bloque antiguo es el BLOQUE 3 de esta fase, no este. Como los `@import` van antes, cualquier
-   nombre repetido (`--color-ui-surface`, `--color-ui-focus`, `--radius-ui-card`, `--shadow-ui-1`,
-   `--font-ui-display`…) lo sigue ganando el valor ANTIGUO, así que ni un píxel del chrome actual
-   cambia (verificado compilando Tailwind: `.bg-ui-surface` sigue apuntando a `--color-ui-surface`).
-   Los nombres nuevos (`--color-ui-primary`, `--color-ui-on-primary`, `--text-ui-display-xl`…) se
-   inlinean como `var(--ui-*)` y por eso responden a `data-theme` sin recompilar.
-   Los tokens crudos tampoco chocan: el contenedor nuevo es `--ui-container-max` (1200 px), no
-   `--ui-content-max` (1330 px), que es del chrome viejo y lo usan tres pantallas. */
+   `ring-ui-focus`, `font-ui-display`, `text-ui-display-xl`…). Desde 3C-1b estos dos `@import`
+   ganan sin condiciones en cualquier nombre repetido con el chrome viejo: ya no hay un `@theme`
+   provisional después que los pise. Lo que necesitaba ese chrome y el preset nuevo no cubre con el
+   mismo nombre vive en la capa de compatibilidad, al final de este fichero. */
 @import "@invitaciones/tokens/tokens.css";
 @import "@invitaciones/tokens/tailwind.css";
 
 /* Sistema de diseño nuevo (fase 3-C, bloque 1, 3C-2): Fraunces + Onest + Red Hat Mono autoalojadas,
    tokens `--ui-*` y utilidades `display-*`/`heading-*`/`text-*`/`label-*`/`.prose`
-   (`@invitaciones/ui/estilos.css` → `fonts/fonts.css` + `styles/typography.css`,
-   `11 §2.2`). Aditivo a propósito: los tres `@import` de arriba (inter/bricolage/outfit) NO se
-   quitan aquí — los retira el bloque 3 cuando migre el chrome entero a esta tipografía; hasta
-   entonces conviven porque nada de este bloque toca las utilidades `text-ui-*`/`font-ui-*` de
-   `arte-chrome.md` que ya consume el resto del chrome. Ver `/design/tipografia` para la escala.
-   `--color-ui-*` (más abajo) es el chrome VIEJO — nunca `--ui-*` sin `color-`, el prefijo nuevo. */
+   (`@invitaciones/ui/estilos.css` → `fonts/fonts.css` + `styles/typography.css`, `11 §2.2`).
+   Ver `/design/tipografia` para la escala. */
 @import "@invitaciones/ui/estilos.css";
 
-@theme {
-  /* 1. Color — arte-chrome.md §1 y "Tokens propuestos" (valores ya corregidos para AA) */
-  --color-ui-bg: #ffffff;
-  --color-ui-bg-alt: #faf4ff; /* purple-50, fondo de sección alterna */
-  --color-ui-surface: #ffffff;
-  --color-ui-border: #e4e4e7;
-  --color-ui-border-field: #d4d4d8;
+/* ── COMPATIBILIDAD FASE 3 (la retira el bloque 3) ──────────────────────────────────────────────
+   El chrome de la fase 3 (arte-chrome.md) sigue vivo en las pantallas que el bloque 3 no ha migrado
+   todavía (`/acceso`, `/ayuda`, editor, 404…) y usa nombres — `bg-ui-surface`, `text-ui-ink-heading`,
+   `font-ui-sans`, `rounded-ui-card`, `text-ui-title`… — que antes resolvía su propio `@theme`
+   (púrpura, Inter/Bricolage/Outfit). Ese `@theme` y sus tres `@import` de fuente se retiraron en
+   3C-1b (`ADR-3C-1-02`, enmienda) porque los componentes nuevos del bloque 2 (`bg-ui-surface`,
+   `font-ui-display`, `ring-ui-focus`, `shadow-ui-1`…) necesitaban que el preset de arriba ganara
+   a ese `@theme`, no al revés.
 
-  --color-ui-ink: #3f3f46; /* texto primario, 10.44:1 sobre blanco */
-  --color-ui-ink-strong: #09090b;
-  --color-ui-ink-heading: #4e027c; /* títulos y acento de acción: 12.93:1 en ambos sentidos */
-  --color-ui-ink-muted: #5f5f68; /* corregido; el sitio mide #71717a = 4.48 sobre --color-ui-bg-alt, falla por 0.02 */
-  --color-ui-ink-placeholder: #6b6b74; /* corregido; el sitio mide #a1a1aa = 2.56, no pasa AA */
+   Lo de aquí abajo es DEUDA intencional, no un sistema nuevo: cubre solo los nombres viejos que el
+   chrome usa de verdad y que el preset de arriba NO trae con ese mismo nombre — verificado con
+   `grep -rhoE 'var\(--[a-z-]+\)|\b(bg|text|font|rounded|shadow|ring|border|max-w|w|h|gap|p|m)[a-z]*-ui-[a-z0-9-]+' "apps/web/app/(chrome)" apps/web/components apps/web/lib | sort -u`.
+   Los nombres que YA existen en el preset nuevo (`--color-ui-{surface,surface-raised,surface-alt,
+   ink,ink-muted,ink-placeholder,border,divider,focus,danger,success,warning,info,link,primary*,
+   on-primary*}`, los radios, las sombras, `font-ui-{display,text,label}`…) NO se redefinen aquí:
+   gana el valor nuevo directamente, sin puente. Es la migración de color y tipografía de facto que
+   el bloque 3 solo tiene que confirmar visualmente, no construir.
 
-  --color-ui-accent: #4e027c; /* 12.93:1 sobre blanco y con texto blanco encima */
-  --color-ui-accent-ink: #ffffff;
-  --color-ui-accent-hover: #751cb5;
-  --color-ui-accent-soft: #f1e2fd;
-  --color-ui-accent-soft-ink: #4e027c;
-  --color-ui-accent-brand: #9f49ec; /* decorativo: héroes y bandas, NUNCA botón (arte-chrome.md §1) */
-  --color-ui-accent-link: #8b31d6; /* corregido; el sitio mide #b264f7 = 3.47, no pasa AA */
-  --color-ui-focus: #1c84f4;
+   Excepción deliberada, la familia `accent`: `--color-ui-accent` SÍ existe ya en el preset nuevo,
+   pero ahí significa "mango" decorativo (11 §1.3, nunca botón); en el chrome viejo `bg-ui-accent`
+   es el botón primario (`components/ui/button.tsx`, variant "primary"). Redefinirla aquí sobre
+   `--ui-primary` (el CTA del sistema nuevo) conserva el ROL — no el nombre — hasta que el bloque 3
+   repinte los botones; dejar ganar el mango habría vuelto decorativo cada botón primario del chrome
+   de un día para otro, y eso sí es "romper el chrome actual". */
+@theme inline {
+  /* Superficie y tinta que el chrome viejo nombra distinto al preset nuevo. */
+  --color-ui-bg: var(--ui-surface);
+  --color-ui-bg-alt: var(--ui-surface-alt);
+  --color-ui-border-field: var(--ui-border);
+  --color-ui-ink-heading: var(--ui-ink);
+  --color-ui-ink-strong: var(--ui-ink);
 
-  --color-ui-success: #25944c; /* corregido; el sitio mide #5ccf84 = 1.96 */
-  --color-ui-danger: #e7000b;
-  --color-ui-warning: #ed7308; /* el sitio mide la estrella #ffd447 = 1.42 */
-  --color-ui-info: #1369db;
+  /* Familia `accent` (botón primario del chrome viejo) → rol equivalente del sistema nuevo:
+     `primary`. `--color-ui-accent` y `--color-ui-accent-soft` ya existen en el preset con otro
+     significado (mango decorativo); se redefinen aquí a propósito, ver nota de arriba. */
+  --color-ui-accent: var(--ui-primary);
+  --color-ui-accent-ink: var(--ui-on-primary);
+  --color-ui-accent-hover: var(--ui-primary-hover);
+  --color-ui-accent-soft: var(--ui-primary-soft);
+  --color-ui-accent-soft-ink: var(--ui-on-primary-soft);
+  --color-ui-accent-brand: var(--ui-primary-bright); /* decorativo: héroes y bandas, nunca botón */
+  --color-ui-accent-link: var(--ui-link);
 
-  /* 3. Forma y profundidad — arte-chrome.md §3 (sombra tintada de púrpura, CERO borde en tarjetas) */
-  --radius-ui-control: 8px;
-  --radius-ui-pill: 9999px;
-  --radius-ui-card: 20px;
-  --radius-ui-media: 16px;
-  --shadow-ui-1: 0 4px 4px -1px rgb(78 2 124 / 0.07), 0 2px 12px -2px rgb(78 2 124 / 0.1); /* tarjetas y paneles */
-  --shadow-ui-2: 0 25px 50px -12px rgb(78 2 124 / 0.14), 0 12px 11px -8px rgb(78 2 124 / 0.09); /* elevación alta */
+  /* Tipografía: el chrome viejo solo tiene voz "sans", sin distinguir texto/etiqueta/display. */
+  --font-ui-sans: var(--ui-font-text);
 
-  /* 4. Espaciado — base 4px, arte-chrome.md §4 (Tailwind ya trae esta escala por defecto: --spacing) */
+  /* Escala tipográfica vieja (px fijos, sin clamp) → rol más cercano de la escala nueva (11 §2.2):
+     eyebrow→label-sm · aux→text-sm · body→text-md · card→heading-sm · title→heading-md ·
+     section→heading-lg · display→display-xl. */
+  --text-ui-eyebrow: var(--ui-text-label-sm);
+  --text-ui-eyebrow--line-height: var(--ui-leading-label-sm);
+  --text-ui-aux: var(--ui-text-text-sm);
+  --text-ui-aux--line-height: var(--ui-leading-text-sm);
+  --text-ui-body: var(--ui-text-text-md);
+  --text-ui-body--line-height: var(--ui-leading-text-md);
+  --text-ui-card: var(--ui-text-heading-sm);
+  --text-ui-card--line-height: var(--ui-leading-heading-sm);
+  --text-ui-title: var(--ui-text-heading-md);
+  --text-ui-title--line-height: var(--ui-leading-heading-md);
+  --text-ui-section: var(--ui-text-heading-lg);
+  --text-ui-section--line-height: var(--ui-leading-heading-lg);
+  --text-ui-display: var(--ui-text-display-xl);
+  --text-ui-display--line-height: var(--ui-leading-display-xl);
+
+  /* Layout y movimiento crudos. El contenedor del chrome viejo (1330 px, tres pantallas lo usan
+     como `max-w-(--ui-content-max)`) no es el mismo diseño que `--ui-container-max` nuevo
+     (1200 px, ADR-3C-1-02): no se alían, se conserva el valor literal. `--ui-duration`/`--ui-ease`
+     sí tienen equivalente de valor/categoría en el sistema nuevo. `--breakpoint-ed` es el punto de
+     corte del EDITOR (ADR-3-8-01), no de marca: se conserva igual para seguir generando la
+     variante `ed:` que ya usan las pantallas del editor. */
   --ui-content-max: 1330px;
   --ui-gutter: 48px;
   --ui-gutter-sm: 16px;
   --ui-grid-gap-x: 24px;
   --ui-grid-gap-y: 48px;
-
-  /* 2. Tipografía — arte-chrome.md §2, con --font-ui-display sustituyendo a Garnett (ver DESVIACIÓN) */
-  --font-ui-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-ui-display: "Bricolage Grotesque Variable", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
-
-  --text-ui-eyebrow: 12px;
-  --text-ui-eyebrow--line-height: 15px;
-  --text-ui-aux: 14px;
-  --text-ui-aux--line-height: 21px;
-  --text-ui-body: 16px;
-  --text-ui-body--line-height: 24px;
-  --text-ui-card: 18px;
-  --text-ui-card--line-height: 27px;
-  --text-ui-title: 24px;
-  --text-ui-title--line-height: 30px;
-  --text-ui-section: 30px;
-  --text-ui-section--line-height: 34.5px;
-  --text-ui-display: 48px;
-  --text-ui-display--line-height: 52.8px;
-
-  /* 9. Movimiento — arte-chrome.md §9 */
-  --ui-duration: 200ms;
-  --ui-ease: cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* 10. Punto de corte del EDITOR (U-8, ADR-3-8-01). No es un breakpoint de marca: es la anchura
-     por debajo de la cual el panel de secciones (280-340 px) y un lienzo utilizable dejan de caber
-     a la vez, medido sobre el propio editor. `ed:` = «de 900 px en adelante», es decir, la
-     disposición de dos paneles de `04 §6.2`; por debajo, una columna con pestañas. Ninguna sección
-     de invitación usa este token (`test/tokens-no-leak.test.ts` sigue valiendo: vive en el chrome). */
+  --ui-duration: var(--ui-dur-2);
+  --ui-ease: var(--ui-ease-in-out);
   --breakpoint-ed: 900px;
 }
 
@@ -130,13 +116,13 @@ body {
   background: var(--color-ui-bg);
   color: var(--color-ui-ink);
   font-family: var(--font-ui-sans);
-  font-weight: 500; /* arte-chrome.md §2: "el body es Inter peso 500, no 400" */
+  font-weight: 500; /* valor heredado de arte-chrome.md §2 (medido para Inter); fuera del alcance
+    de 3C-1b tocar el peso — lo revisa el bloque 3 junto con el resto de la tipografía del chrome. */
 }
 
-/* 6. Foco de teclado — MEJORADO respecto a la referencia a propósito (corrección 5 del revisor: el
-   propio documento mide que el foco nativo es "el punto más flojo del sistema" de gigsalad.com).
-   WCAG 2.2 AA 2.4.11 es requisito duro aquí (contratos.md §8): aro propio, visible sobre fondo claro
-   Y sobre el acento, con separación del elemento. */
+/* 6. Foco de teclado — mismo contrato que antes de 3C-1b (aro propio, 3 px, separado del control),
+   ahora sobre `--color-ui-focus` del preset nuevo (`--ui-focus`). WCAG 2.2 AA 2.4.11 sigue siendo
+   requisito duro aquí (contratos.md §8). */
 :focus-visible {
   outline: 3px solid var(--color-ui-focus);
   outline-offset: 2px;
