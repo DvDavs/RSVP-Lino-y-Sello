@@ -11,7 +11,9 @@
 // baja la luminosidad, hasta el valor más claro que cumple con margen.
 
 import { contraste } from "@invitaciones/tokens";
+import { remapearAFamiliaAutoalojada, type RemapeoDeFamilia } from "@invitaciones/template-kit";
 import type { ThemeSpec } from "@invitaciones/schema";
+import type { EntradaPerdida } from "./perdidas.ts";
 
 /** Las parejas garantizadas de `04 §17.1` más las cuatro de 1.4.3 (ADR-3-3b-03). */
 export const PAREJAS_AA: readonly (readonly [string, keyof Tokens, keyof Tokens, number])[] = [
@@ -105,8 +107,12 @@ export interface EntradaTema {
   readonly secundario: readonly number[] | null;
   /** RGBA de los `backgroundColor` de sección, en orden de aparición. */
   readonly fondos: readonly (readonly number[])[];
-  /** `fontFamily` medidos, con cuántas veces aparece cada uno y si es de un título. */
-  readonly fuentes: readonly { readonly familia: string; readonly veces: number; readonly enTitulo: number }[];
+  /** `fontFamily` medidos, con cuántas veces aparece cada uno, si es de un título y DÓNDE se declara. */
+  readonly fuentes: readonly {
+    readonly familia: string; readonly veces: number; readonly enTitulo: number;
+    /** Puntero RFC 6901 de la PRIMERA hoja de F1 que declara esa familia: el origen, para el informe. */
+    readonly puntero: string;
+  }[];
 }
 
 export interface TemaConstruido {
@@ -115,6 +121,8 @@ export interface TemaConstruido {
   readonly comentario: string;
   readonly contraste: { pareja: string; ratio: number; umbral: number }[];
   readonly correcciones: string[];
+  /** Una entrada «a revisar» por cada familia legada que el producto NO autoaloja (P1: nada en silencio). */
+  readonly perdidasDeFuente: readonly EntradaPerdida[];
 }
 
 const GRIS_TINTA = "#2B2B2B";
@@ -155,15 +163,31 @@ export function construirTema(entrada: EntradaTema, nombrePlantilla: string): Te
   const titular = entrada.fuentes.filter((f) => f.enTitulo > 0).sort((a, b) => b.enTitulo - a.enTitulo)[0]?.familia;
   const cuerpo = entrada.fuentes.filter((f) => f.familia !== titular).sort((a, b) => b.veces - a.veces)[0]?.familia
     ?? titular ?? "Inter";
-  const heading = titular ?? cuerpo;
-  const idFuentes = kebab(`${heading}-${cuerpo}`);
+  const headingLegado = titular ?? cuerpo;
+
+  // Las familias del legado NO se copian tal cual: se remapean a las que la superficie pública
+  // AUTOALOJA. La lista y el criterio salen de `@invitaciones/template-kit`, que los deriva de
+  // `apps/web/app/(public)/publico.css` — el único sitio donde el producto monta tipografías
+  // (ADR-1R-F-07, ADR-4-6-01). Copiarlas tal cual es lo que ponía en rojo
+  // `apps/web/test/fuentes-autoalojadas.test.ts` y pintaba la invitación en Georgia.
+  const remapeoTitular = remapearAFamiliaAutoalojada(headingLegado, "heading");
+  const remapeoTexto = remapearAFamiliaAutoalojada(cuerpo, "body");
+  const heading = remapeoTitular.family;
+  const body = remapeoTexto.family;
+  const perdidasDeFuente = [
+    perdidaDeFuente(remapeoTitular, "titular", entrada),
+    perdidaDeFuente(remapeoTexto, "texto", entrada),
+  ].filter((e): e is EntradaPerdida => e !== null);
+
+  // El id describe lo que el `fontSet` LLEVA de verdad, no lo que llevaba el legado.
+  const idFuentes = kebab(`${heading}-${body}`);
 
   const theme: ThemeSpec = {
     palettes: [{ id: idPaleta, name: { "es-MX": nombrePaleta }, tokens }],
     fontSets: [{
-      id: idFuentes, name: { "es-MX": `${heading} y ${cuerpo}` },
-      heading: { family: heading, weights: [400, 700], source: "google" },
-      body: { family: cuerpo, weights: [400, 600], source: "google" },
+      id: idFuentes, name: { "es-MX": `${heading} y ${body}` },
+      heading: { family: heading, weights: [...remapeoTitular.weights], source: "google" },
+      body: { family: body, weights: [...remapeoTexto.weights], source: "google" },
     }],
     defaultPaletteId: idPaleta,
     defaultFontSetId: idFuentes,
@@ -176,11 +200,35 @@ export function construirTema(entrada: EntradaTema, nombrePlantilla: string): Te
     `surface ← blanco. bg ← ${fondoMasRepetido ? `el backgroundColor de sección más repetido (${fondoMasRepetido})` : "gris muy claro"}.`,
     `muted ← el matiz del acento (${Math.round(hAcento)}°) con la saturación al 45 %, oscurecido a ${muted} para cumplir 1.4.3 sobre bg y surface.`,
     `accentInk ← blanco: cumple por construcción, porque accent ya se corrigió contra surface (que es blanco).`,
-    `Tipografías: titular «${heading}» (la que usan los campos de título/encabezado en F1), texto «${cuerpo}» (la más repetida en el resto).`,
+    `Tipografías: titular «${headingLegado}» (la que usan los campos de título/encabezado en F1), texto «${cuerpo}» (la más repetida en el resto).`,
+    remapeoTitular.yaAutoalojada && remapeoTexto.yaAutoalojada
+      ? `Las dos familias las autoaloja ya la superficie pública: el juego pasa tal cual.`
+      : `REMAPEO A FAMILIA AUTOALOJADA (ADR-4-6-01): titular «${headingLegado}» → «${heading}» ${remapeoTitular.weights.join("/")}; texto «${cuerpo}» → «${body}» ${remapeoTexto.weights.join("/")}. ${remapeoTitular.yaAutoalojada ? "" : remapeoTitular.motivo + " "}${remapeoTexto.yaAutoalojada ? "" : remapeoTexto.motivo + " "}El producto solo autoaloja las familias que importa apps/web/app/(public)/publico.css y nunca pide una fuente a un tercero en tiempo de ejecución (ADR-1R-F-07); una familia que no esté ahí se pinta en Georgia / la sans del sistema. Las originales quedan en «a revisar» con su puntero de origen para que la fase de arte pueda restaurarlas.`,
     `La corrección conserva matiz y saturación HSL y sólo baja la luminosidad (ADR-3-2d-04): se corrige el color, nunca el umbral.`,
   ].join(" ");
 
-  return { theme, comentario, contraste: filas, correcciones };
+  return { theme, comentario, contraste: filas, correcciones, perdidasDeFuente };
+}
+
+/**
+ * La entrada «a revisar» de una familia legada que el producto no autoaloja. P1: nada se pierde en
+ * silencio — la familia original, su puntero de origen en F1 y el motivo del cambio quedan escritos
+ * en el informe de pérdidas, que es lo que leerá la fase de arte para restaurarla.
+ */
+function perdidaDeFuente(r: RemapeoDeFamilia, papel: "titular" | "texto", entrada: EntradaTema): EntradaPerdida | null {
+  if (r.yaAutoalojada) return null;
+  const origen = entrada.fuentes.find((f) => f.familia === r.original);
+  return {
+    cubeta: "a revisar",
+    legacyPointer: origen?.puntero ?? "/config/settings/fontFamily",
+    legacyId: null,
+    valor: r.original,
+    clasificacion: "presentacion",
+    reglaId: "tema-fuente-no-autoalojada",
+    motivo: `La familia ${papel} «${r.original}» de F1 NO la autoaloja la superficie pública, así que la plantilla se pintaría con la pila de reserva (Georgia / la sans del sistema). ${r.motivo}`,
+    evidencia: "apps/web/app/(public)/publico.css (único sitio donde se autoalojan fuentes); ADR-1R-F-07; ADR-4-6-01; apps/web/test/fuentes-autoalojadas.test.ts",
+    detalle: `${papel}: «${r.original}» (clase ${r.clase}) → «${r.family}» ${r.weights.join("/")}. Para restaurar la original hay que añadir @fontsource/${r.original.toLowerCase().replace(/[^a-z0-9]+/g, "-")} a apps/web y su @import a publico.css.`,
+  };
 }
 
 function corregir(hex: string, fondos: readonly string[], objetivo: number, token: string, log: string[]): string {

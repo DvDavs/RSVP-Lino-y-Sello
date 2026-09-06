@@ -1550,3 +1550,46 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   **Supuesto tomado:** no ampliar el alcance del encargo. ¿Debería `plantilla capturas` (o un
   `plantilla auditar`) correr `axe` y la medición de contraste sobre el lienzo y volcarlo con el
   formato de tres líneas del kit?
+- [Fase 4 · 4-6] **PROPUESTA CONCRETA PARA LA FASE DE ARTE: qué hace falta para devolverles a las 9
+  convertidas su tipografía legada.** Hoy las 9 se pintan con las cuatro familias que el producto
+  autoaloja (ADR-4-6-01) y la original de cada una está registrada en su informe de pérdidas
+  (`aRevisar`, `reglaId: "tema-fuente-no-autoalojada"`, con `legacyPointer`). Para restaurarlas hay
+  que hacer **dos cosas y sólo dos**, ambas en territorio hoy prohibido (`frontend/apps/web/**`):
+  1. `pnpm --filter web add @fontsource/great-vibes @fontsource/poppins @fontsource/sacramento @fontsource/work-sans`
+     (fichero `frontend/apps/web/package.json`, junto a las cuatro `@fontsource/*` que ya están,
+     líneas 31-34).
+  2. Añadir sus `@import "@fontsource/<familia>/<peso>.css"` en
+     `frontend/apps/web/app/(public)/publico.css` (bloque 2, líneas 59-66), **por peso** y no por
+     subconjunto, con el criterio ya escrito ahí; y volver a poner en cada `theme.json` la familia y
+     los pesos originales. Sin el paso 2 el paso 1 no sirve de nada: `publico.css` es el único sitio
+     donde el producto monta tipografías (ADR-1R-F-07).
+  Al hacerlo, `apps/web/test/fuentes-autoalojadas.test.ts` y `plantilla check` pasan solos: los dos
+  derivan su lista de ese mismo `.css`, no hay ninguna lista que actualizar a mano.
+  **ADVERTENCIA DE PRESUPUESTO.** La superficie pública va con **5,8 KB de margen sobre 150**
+  (cifra del brief del orquestador [I], no medida por mí) y estas familias no son gratis. Medido [V]
+  sobre los paquetes ya instalados en `packages/template-kit/node_modules/@fontsource`:
+  **Great Vibes** latin 400 = **42.800 bytes** (es una manuscrita: pesa como las cuatro actuales
+  juntas), **Poppins** latin 400 = **7.884** y 600 = **8.000**. `Sacramento` y `Work Sans` no están
+  instaladas en este entorno y **no las pude medir** [no determinado]. Sólo Great Vibes ya se come
+  siete veces el margen. **Pregunta:** ¿se sube el presupuesto de la superficie pública, se cargan
+  estas familias **por plantilla** en vez de en la hoja global (hoy `publico.css` las sirve a TODAS
+  las invitaciones, use la familia o no), o se acepta el remapeo de ADR-4-6-01 como definitivo y la
+  fase de arte trabaja con las cuatro autoalojadas?
+- [Fase 4 · 4-6] **La compuerta nueva del kit es de FAMILIA, no de peso, y hay un hueco medido.**
+  `TPL_FONT_NOT_SELF_HOSTED` rechaza una familia que `publico.css` no importe, pero no un PESO que
+  no importe. Motivo verificado [V]: `packages/template-kit/src/nueva.ts:108-109` anda el andamio
+  con `Inter 400/600` mientras `publico.css` importa `Inter 400/500`, así que gatear los pesos
+  pondría en rojo `test/nueva.test.ts:121` (exige **cero** hallazgos en el andamio recién creado) y
+  `nueva.ts` no es de este bloque. Consecuencia real: una plantilla creada hoy con `plantilla nueva`
+  y metida en `frontend/templates/` pone en rojo `fuentes-autoalojadas.test.ts` (le faltaría
+  `@fontsource/inter/600.css`). **Supuesto tomado:** la opción conservadora — gatear sólo la familia
+  y dejar escrito el hueco. ¿Se corrige `nueva.ts` a `Inter 400/500` (una línea) y se amplía la
+  compuerta a los pesos?
+- [Fase 4 · 4-6] **`docs/rediseno-plantillas/memoria/decisiones.md` tiene marcadores de conflicto de
+  Git SIN RESOLVER**, heredados del merge `da46c6e` («merge: 4-1B … en la rama de la fase 4»):
+  `<<<<<<< HEAD` en la línea 1869, `=======` en la 1876 y `>>>>>>> wip/f4-41` en la 1918, con las
+  ADR de 4-4A a un lado y las de 4-1B al otro. Verificado [V] que es anterior a este bloque y que no
+  lo tocó nadie de 4-6: mis dos ADR van **después** del marcador de cierre. **Supuesto tomado:** no
+  resolverlo yo (es memoria de otros bloques y sólo el orquestador acepta ADR). ¿Lo resuelve el
+  orquestador antes de cerrar la fase? Tal cual está, las ADR de los dos lados se leen, pero el
+  archivo no es válido como registro.

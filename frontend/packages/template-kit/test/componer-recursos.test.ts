@@ -30,7 +30,7 @@ describe("componer un paquete de disco a ComposedDocument", () => {
     ]);
     // R8: sin `doc.theme` propio se usa el `defaultPaletteId`/`defaultFontSetId` del paquete.
     expect(e.composed?.theme.paletteId).toBe("violeta");
-    expect(e.composed?.theme.fonts.heading.family).toBe("Great Vibes");
+    expect(e.composed?.theme.fonts.heading.family).toBe("Cormorant Garamond");
     // El informe sale limpio: no hay contenido huérfano ni valores inválidos.
     expect(e.informe).toEqual({
       missingRequired: [], stillDefault: [], orphanContent: [], orphanSections: [],
@@ -128,7 +128,7 @@ describe("componer un paquete de disco a ComposedDocument", () => {
   it("`documentoDeDefaults` copia la estructura del manifiesto, no una lista escrita a mano", () => {
     const m = TemplateManifest.parse(leerManifiesto(join(PAQUETES, "bautizo-elegante/1.0.0")));
     const tema = { palettes: [], fontSets: [], defaultPaletteId: "x", defaultFontSetId: "y" } as never;
-    const doc = documentoDeDefaults(m, tema, {}, "violeta", "great-vibes-poppins", "es-MX");
+    const doc = documentoDeDefaults(m, tema, {}, "violeta", "cormorant-garamond-inter", "es-MX");
     expect(doc.structure.sections).toEqual(
       m.sections.map(s => ({ key: s.key, variant: s.defaultVariant, visible: s.defaultVisible })),
     );

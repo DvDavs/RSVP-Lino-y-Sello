@@ -7,8 +7,8 @@
     "cohorte": "boda"
   },
   "fuentes": [
-    "/home/user/wt/44a/src/main/resources/data/mongo/default_visual_boda_basico.json",
-    "/home/user/wt/44a/src/main/resources/data/mongo/default_content_boda_basico.json"
+    "/home/user/wt/fnt/src/main/resources/data/mongo/default_visual_boda_basico.json",
+    "/home/user/wt/fnt/src/main/resources/data/mongo/default_content_boda_basico.json"
   ],
   "generadoPor": "@invitaciones/migration-legacy (ADR-1R-C-01/02/03): F1 leído con JSON.parse, jamás por EditorModels.kt",
   "resumen": {
@@ -18,10 +18,10 @@
     "descartadas": 25,
     "patronesSinMapear": 0,
     "aceptadas": 4848,
-    "aRevisar": 58,
+    "aRevisar": 60,
     "bloqueantes": 0
   },
-  "criterioDelTema": "Paleta y tipografías de «Boda Básica», derivadas de F1 y nombradas a mano (05 §3 paso 3). accent ← settings.primaryColor #F14E95 corregido a #DC116A por WCAG 2.2 AA. ink ← gris de tinta #2B2B2B (settings.secondaryColor legado es #FFFFFF y no sirve de color de texto). surface ← blanco. bg ← el backgroundColor de sección más repetido (#000000). muted ← el matiz del acento (334°) con la saturación al 45 %, oscurecido a #B04F79 para cumplir 1.4.3 sobre bg y surface. accentInk ← blanco: cumple por construcción, porque accent ya se corrigió contra surface (que es blanco). Tipografías: titular «Sacramento» (la que usan los campos de título/encabezado en F1), texto «Work Sans» (la más repetida en el resto). La corrección conserva matiz y saturación HSL y sólo baja la luminosidad (ADR-3-2d-04): se corrige el color, nunca el umbral.",
+  "criterioDelTema": "Paleta y tipografías de «Boda Básica», derivadas de F1 y nombradas a mano (05 §3 paso 3). accent ← settings.primaryColor #F14E95 corregido a #DC116A por WCAG 2.2 AA. ink ← gris de tinta #2B2B2B (settings.secondaryColor legado es #FFFFFF y no sirve de color de texto). surface ← blanco. bg ← el backgroundColor de sección más repetido (#000000). muted ← el matiz del acento (334°) con la saturación al 45 %, oscurecido a #B04F79 para cumplir 1.4.3 sobre bg y surface. accentInk ← blanco: cumple por construcción, porque accent ya se corrigió contra surface (que es blanco). Tipografías: titular «Sacramento» (la que usan los campos de título/encabezado en F1), texto «Work Sans» (la más repetida en el resto). REMAPEO A FAMILIA AUTOALOJADA (ADR-4-6-01): titular «Sacramento» → «Cormorant Garamond» 400/600; texto «Work Sans» → «Inter» 400/500. «Sacramento» es una tipografía MANUSCRITA (script) y NINGUNA de las familias que el producto autoaloja lo es: no hay equivalente. Se sustituye por «Cormorant Garamond», la serif de titular de trazo más caligráfico y mayor contraste de las autoalojadas; el titular pierde la letra manuscrita y hay que restaurarlo en la fase de arte. «Work Sans» es una sans neogrotesca de texto; «Inter» es la autoalojada de la misma clase. El producto solo autoaloja las familias que importa apps/web/app/(public)/publico.css y nunca pide una fuente a un tercero en tiempo de ejecución (ADR-1R-F-07); una familia que no esté ahí se pinta en Georgia / la sans del sistema. Las originales quedan en «a revisar» con su puntero de origen para que la fase de arte pueda restaurarlas. La corrección conserva matiz y saturación HSL y sólo baja la luminosidad (ADR-3-2d-04): se corrige el color, nunca el umbral.",
   "contrasteMedido": [
     {
       "pareja": "ink/bg",
@@ -26577,6 +26577,17 @@
     },
     {
       "cubeta": "a revisar",
+      "legacyPointer": "/config/sectionCouple/subheading/fontFamily",
+      "legacyId": null,
+      "valor": "Work Sans",
+      "clasificacion": "presentacion",
+      "reglaId": "tema-fuente-no-autoalojada",
+      "motivo": "La familia texto «Work Sans» de F1 NO la autoaloja la superficie pública, así que la plantilla se pintaría con la pila de reserva (Georgia / la sans del sistema). «Work Sans» es una sans neogrotesca de texto; «Inter» es la autoalojada de la misma clase.",
+      "evidencia": "apps/web/app/(public)/publico.css (único sitio donde se autoalojan fuentes); ADR-1R-F-07; ADR-4-6-01; apps/web/test/fuentes-autoalojadas.test.ts",
+      "detalle": "texto: «Work Sans» (clase sans-neogrotesca) → «Inter» 400/500. Para restaurar la original hay que añadir @fontsource/work-sans a apps/web y su @import a publico.css."
+    },
+    {
+      "cubeta": "a revisar",
       "legacyPointer": "/config/sectionCover/coverImage/content",
       "legacyId": null,
       "valor": "https://invitacionesdigitales.s3.us-east-2.amazonaws.com/wedding/demo/portada-lite.jpg",
@@ -26607,6 +26618,17 @@
       "motivo": "Parte de hora del mismo dato de negocio; el bloque `date` lo lee de Postgres, no del documento.",
       "evidencia": "05-migracion.md §4.2; 01-dominio-y-esquema.md §10.1",
       "detalle": "bloque `cover.date` con `source:\"business\"`: el valor se lee de Postgres y un default lo rechazaría el registro (I-28)."
+    },
+    {
+      "cubeta": "a revisar",
+      "legacyPointer": "/config/sectionCover/title/fontFamily",
+      "legacyId": null,
+      "valor": "Sacramento",
+      "clasificacion": "presentacion",
+      "reglaId": "tema-fuente-no-autoalojada",
+      "motivo": "La familia titular «Sacramento» de F1 NO la autoaloja la superficie pública, así que la plantilla se pintaría con la pila de reserva (Georgia / la sans del sistema). «Sacramento» es una tipografía MANUSCRITA (script) y NINGUNA de las familias que el producto autoaloja lo es: no hay equivalente. Se sustituye por «Cormorant Garamond», la serif de titular de trazo más caligráfico y mayor contraste de las autoalojadas; el titular pierde la letra manuscrita y hay que restaurarlo en la fase de arte.",
+      "evidencia": "apps/web/app/(public)/publico.css (único sitio donde se autoalojan fuentes); ADR-1R-F-07; ADR-4-6-01; apps/web/test/fuentes-autoalojadas.test.ts",
+      "detalle": "titular: «Sacramento» (clase script) → «Cormorant Garamond» 400/600. Para restaurar la original hay que añadir @fontsource/sacramento a apps/web y su @import a publico.css."
     },
     {
       "cubeta": "a revisar",

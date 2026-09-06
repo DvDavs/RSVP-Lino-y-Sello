@@ -257,6 +257,9 @@ export function construirDesde(f1: F1, cls: ClasificacionPlantilla, opciones: Op
 
   // --- 6. tema ------------------------------------------------------------------------------------
   const tema = construirTema(entradaDeTema(cls), p.nombre);
+  // Las familias legadas que el producto no autoaloja se sustituyen, y la original queda escrita
+  // en «a revisar» con su puntero de origen (P1, ADR-4-6-01).
+  aRevisar.push(...tema.perdidasDeFuente);
 
   const defaults: DefaultsFile = DefaultsFile.parse({
     templateSlug: p.slug, templateVersion: version, content: contenidoDefaults,
@@ -581,10 +584,10 @@ function entradaDeTema(cls: ClasificacionPlantilla) {
     if (!m || typeof h.valor !== "number") continue;
     const l = fondos.get(m[1]!) ?? []; l[Number(m[2])] = h.valor; fondos.set(m[1]!, l);
   }
-  const familias = new Map<string, { veces: number; enTitulo: number }>();
+  const familias = new Map<string, { veces: number; enTitulo: number; puntero: string }>();
   for (const h of hojas) {
     if (!h.puntero.endsWith("/fontFamily") || typeof h.valor !== "string" || h.valor === "") continue;
-    const f = familias.get(h.valor) ?? { veces: 0, enTitulo: 0 };
+    const f = familias.get(h.valor) ?? { veces: 0, enTitulo: 0, puntero: h.puntero };
     f.veces++;
     // Titular = la familia de los títulos DE SECCIÓN (`/config/sectionX/title|heading/fontFamily`).
     // Los títulos de TARJETA (`items/*/title`) no cuentan: en las 9 plantillas usan la fuente de texto,

@@ -7,8 +7,8 @@
     "cohorte": "no-boda"
   },
   "fuentes": [
-    "/home/user/wt/44b/src/main/resources/data/mongo/default_visual_comunion.json",
-    "/home/user/wt/44b/src/main/resources/data/mongo/default_content_comunion.json"
+    "/home/user/wt/fnt/src/main/resources/data/mongo/default_visual_comunion.json",
+    "/home/user/wt/fnt/src/main/resources/data/mongo/default_content_comunion.json"
   ],
   "generadoPor": "@invitaciones/migration-legacy (ADR-1R-C-01/02/03): F1 leído con JSON.parse, jamás por EditorModels.kt",
   "resumen": {
@@ -18,10 +18,10 @@
     "descartadas": 42,
     "patronesSinMapear": 0,
     "aceptadas": 3710,
-    "aRevisar": 22,
+    "aRevisar": 24,
     "bloqueantes": 0
   },
-  "criterioDelTema": "Paleta y tipografías de «Comunión Premium Elegance», derivadas de F1 y nombradas a mano (05 §3 paso 3). accent ← settings.primaryColor #F14E95 corregido a #DC116A por WCAG 2.2 AA. ink ← gris de tinta #2B2B2B (settings.secondaryColor legado es #FFFFFF y no sirve de color de texto). surface ← blanco. bg ← el backgroundColor de sección más repetido (#F8F9FA). muted ← el matiz del acento (334°) con la saturación al 45 %, oscurecido a #B04F79 para cumplir 1.4.3 sobre bg y surface. accentInk ← blanco: cumple por construcción, porque accent ya se corrigió contra surface (que es blanco). Tipografías: titular «Great Vibes» (la que usan los campos de título/encabezado en F1), texto «Poppins» (la más repetida en el resto). La corrección conserva matiz y saturación HSL y sólo baja la luminosidad (ADR-3-2d-04): se corrige el color, nunca el umbral.",
+  "criterioDelTema": "Paleta y tipografías de «Comunión Premium Elegance», derivadas de F1 y nombradas a mano (05 §3 paso 3). accent ← settings.primaryColor #F14E95 corregido a #DC116A por WCAG 2.2 AA. ink ← gris de tinta #2B2B2B (settings.secondaryColor legado es #FFFFFF y no sirve de color de texto). surface ← blanco. bg ← el backgroundColor de sección más repetido (#F8F9FA). muted ← el matiz del acento (334°) con la saturación al 45 %, oscurecido a #B04F79 para cumplir 1.4.3 sobre bg y surface. accentInk ← blanco: cumple por construcción, porque accent ya se corrigió contra surface (que es blanco). Tipografías: titular «Great Vibes» (la que usan los campos de título/encabezado en F1), texto «Poppins» (la más repetida en el resto). REMAPEO A FAMILIA AUTOALOJADA (ADR-4-6-01): titular «Great Vibes» → «Cormorant Garamond» 400/600; texto «Poppins» → «Inter» 400/500. «Great Vibes» es una tipografía MANUSCRITA (script) y NINGUNA de las familias que el producto autoaloja lo es: no hay equivalente. Se sustituye por «Cormorant Garamond», la serif de titular de trazo más caligráfico y mayor contraste de las autoalojadas; el titular pierde la letra manuscrita y hay que restaurarlo en la fase de arte. «Poppins» es una sans geométrica; entre las autoalojadas la más próxima en color de página y altura de x es «Inter» (neogrotesca). Se pierde el trazo geométrico, no la legibilidad. El producto solo autoaloja las familias que importa apps/web/app/(public)/publico.css y nunca pide una fuente a un tercero en tiempo de ejecución (ADR-1R-F-07); una familia que no esté ahí se pinta en Georgia / la sans del sistema. Las originales quedan en «a revisar» con su puntero de origen para que la fase de arte pueda restaurarlas. La corrección conserva matiz y saturación HSL y sólo baja la luminosidad (ADR-3-2d-04): se corrige el color, nunca el umbral.",
   "contrasteMedido": [
     {
       "pareja": "ink/bg",
@@ -21117,6 +21117,28 @@
       "motivo": "Imagen de la amenidad → `image` rol `amenityImage` del ítem N.",
       "evidencia": "01-dominio-y-esquema.md §10.2",
       "detalle": "URL externa de F1. NO se descarga (el proxy de este entorno bloquea los bancos de imágenes) y el documento no admite URLs: sólo `assetId` opaco (ADR-021). El bloque queda sin default (`provenance:\"empty\"`, R5) hasta que se suba el archivo por la ruta HTTP de assets."
+    },
+    {
+      "cubeta": "a revisar",
+      "legacyPointer": "/config/sectionCover/subtitle/fontFamily",
+      "legacyId": null,
+      "valor": "Poppins",
+      "clasificacion": "presentacion",
+      "reglaId": "tema-fuente-no-autoalojada",
+      "motivo": "La familia texto «Poppins» de F1 NO la autoaloja la superficie pública, así que la plantilla se pintaría con la pila de reserva (Georgia / la sans del sistema). «Poppins» es una sans geométrica; entre las autoalojadas la más próxima en color de página y altura de x es «Inter» (neogrotesca). Se pierde el trazo geométrico, no la legibilidad.",
+      "evidencia": "apps/web/app/(public)/publico.css (único sitio donde se autoalojan fuentes); ADR-1R-F-07; ADR-4-6-01; apps/web/test/fuentes-autoalojadas.test.ts",
+      "detalle": "texto: «Poppins» (clase sans-geometrica) → «Inter» 400/500. Para restaurar la original hay que añadir @fontsource/poppins a apps/web y su @import a publico.css."
+    },
+    {
+      "cubeta": "a revisar",
+      "legacyPointer": "/config/sectionCover/title/fontFamily",
+      "legacyId": null,
+      "valor": "Great Vibes",
+      "clasificacion": "presentacion",
+      "reglaId": "tema-fuente-no-autoalojada",
+      "motivo": "La familia titular «Great Vibes» de F1 NO la autoaloja la superficie pública, así que la plantilla se pintaría con la pila de reserva (Georgia / la sans del sistema). «Great Vibes» es una tipografía MANUSCRITA (script) y NINGUNA de las familias que el producto autoaloja lo es: no hay equivalente. Se sustituye por «Cormorant Garamond», la serif de titular de trazo más caligráfico y mayor contraste de las autoalojadas; el titular pierde la letra manuscrita y hay que restaurarlo en la fase de arte.",
+      "evidencia": "apps/web/app/(public)/publico.css (único sitio donde se autoalojan fuentes); ADR-1R-F-07; ADR-4-6-01; apps/web/test/fuentes-autoalojadas.test.ts",
+      "detalle": "titular: «Great Vibes» (clase script) → «Cormorant Garamond» 400/600. Para restaurar la original hay que añadir @fontsource/great-vibes a apps/web y su @import a publico.css."
     },
     {
       "cubeta": "a revisar",

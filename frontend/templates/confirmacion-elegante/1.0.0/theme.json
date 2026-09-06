@@ -17,28 +17,28 @@
   ],
   "fontSets": [
     {
-      "id": "great-vibes-poppins",
+      "id": "cormorant-garamond-inter",
       "name": {
-        "es-MX": "Great Vibes y Poppins"
+        "es-MX": "Cormorant Garamond y Inter"
       },
       "heading": {
-        "family": "Great Vibes",
+        "family": "Cormorant Garamond",
         "weights": [
           400,
-          700
+          600
         ],
         "source": "google"
       },
       "body": {
-        "family": "Poppins",
+        "family": "Inter",
         "weights": [
           400,
-          600
+          500
         ],
         "source": "google"
       }
     }
   ],
   "defaultPaletteId": "oliva",
-  "defaultFontSetId": "great-vibes-poppins"
+  "defaultFontSetId": "cormorant-garamond-inter"
 }

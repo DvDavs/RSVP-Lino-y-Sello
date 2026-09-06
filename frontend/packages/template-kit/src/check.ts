@@ -11,7 +11,7 @@
 // rol ↔ tipo de sección (ADR-4-0B-04: el backend no lo valida y la plantilla de I-08 se registró con
 // un `familyGroup` dentro de una sección `event`).
 import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import {
   DefaultsFile, MigrationPlan, ROLES, TemplateManifest, ThemeSpec,
   describeBlockType, describeRole, explainBlockSpec, suggestClosest, suggestRole, suggestSectionType,
@@ -401,6 +401,9 @@ export function check(opts: OpcionesCheck): ResultadoCheck {
   // 2.8 Contraste AA de las paletas.
   if (tema.success) hallazgos.push(...revisarContraste(crudoTema));
 
+  // 2.9 Tipografías: sólo familias que la superficie pública AUTOALOJA (ADR-1R-F-07).
+  if (tema.success) hallazgos.push(...revisarFuentes(crudoTema));
+
   const hash = manifiesto.success ? hashDelPaquete(dir, entradas.map(e => e.ruta)) : undefined;
   const ordenados = ordenar(hallazgos);
   const errores = ordenados.filter(h => h.severidad === "ERROR").length;
@@ -626,6 +629,204 @@ function revisarContraste(crudoTema: Json): readonly Hallazgo[] {
       problema: `La paleta "${p.id}" incumple ${fallos.length} de las 9 parejas de contraste WCAG 2.2 AA: ${detalle}.`,
       sugerencia: `Oscurece la tinta, nunca bajes el umbral (contratos.md §12.4). Valores que sí cumplen, calculados con la misma fórmula: ${propuesta}.`,
     });
+  }
+  return salida;
+}
+
+// ---------------------------------------------------------------------------------------------
+// 5-bis. Tipografías: sólo las familias que la superficie pública AUTOALOJA (ADR-1R-F-07).
+//
+// `apps/web/app/(public)/publico.css` es el ÚNICO sitio donde el producto autoaloja tipografías, y
+// la superficie pública NUNCA pide una fuente a un tercero en tiempo de ejecución. Una plantilla que
+// declara una familia que ese archivo no importa no se pinta con esa familia: se pinta con la pila
+// de reserva (Georgia / la sans del sistema) y nada avisa. Eso es lo que midió
+// `apps/web/test/fuentes-autoalojadas.test.ts` sobre el catálogo entero; aquí la MISMA compuerta
+// llega al paquete suelto, antes de que entre al catálogo y antes de registrarlo.
+//
+// La lista NO se teclea: se DERIVA de los `@import "@fontsource/<familia>/<peso>.css"` de ese mismo
+// `.css`, con el mismo patrón que usa esa prueba. Si mañana el producto autoaloja otra familia, esta
+// compuerta la acepta sin que nadie edite este archivo. `FAMILIAS_AUTOALOJADAS_RESERVA` es sólo el
+// valor de reserva de cuando el kit corre fuera del monorepo y no encuentra el `.css`;
+// `check.test.ts` comprueba que coincide con lo que el `.css` declara de verdad, para que no pueda
+// quedarse vieja en silencio.
+// ---------------------------------------------------------------------------------------------
+
+export interface FamiliaAutoalojada {
+  readonly family: string;
+  /** Los pesos que `publico.css` importa de verdad para esa familia, de menor a mayor. */
+  readonly weights: readonly number[];
+}
+
+/** Valor de reserva: lo que `apps/web/app/(public)/publico.css` importaba al escribir esto. */
+export const FAMILIAS_AUTOALOJADAS_RESERVA: readonly FamiliaAutoalojada[] = [
+  { family: "Cormorant Garamond", weights: [400, 600] },
+  { family: "Inter", weights: [400, 500] },
+  { family: "Playfair Display", weights: [400, 700] },
+  { family: "Source Sans 3", weights: [400, 600] },
+];
+
+const PUBLICO_CSS_REL = join("apps", "web", "app", "(public)", "publico.css");
+
+/** `"source-sans-3"` → `"Source Sans 3"`: la inversa de la convención de nombre de Fontsource. */
+export function familiaDeSlugFontsource(slug: string): string {
+  return slug.split("-").filter(p => p.length > 0).map(p => p[0]!.toUpperCase() + p.slice(1)).join(" ");
+}
+
+/** `"Source Sans 3"` → `"source-sans-3"` (convención de nombre de paquete de Fontsource). */
+export function slugFontsource(family: string): string {
+  return family.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+/** Los pares familia+peso de `@import "@fontsource/<familia>/<peso>.css"`, agrupados por familia. */
+export function familiasDeCss(css: string): readonly FamiliaAutoalojada[] {
+  const porFamilia = new Map<string, number[]>();
+  for (const m of css.matchAll(/@import\s+"@fontsource\/([^"/]+)\/(\d+)\.css"/g)) {
+    const familia = familiaDeSlugFontsource(m[1]!);
+    const peso = Number(m[2]);
+    const pesos = porFamilia.get(familia) ?? [];
+    if (!pesos.includes(peso)) pesos.push(peso);
+    porFamilia.set(familia, pesos);
+  }
+  return [...porFamilia.entries()]
+    .map(([family, weights]) => ({ family, weights: [...weights].sort((a, b) => a - b) }))
+    .sort((a, b) => a.family.localeCompare(b.family));
+}
+
+/** Sube directorio a directorio buscando `apps/web/app/(public)/publico.css`. */
+export function rutaPublicoCss(desde: string = import.meta.dirname): string | undefined {
+  let dir = desde;
+  for (let i = 0; i < 16; i++) {
+    const candidato = join(dir, PUBLICO_CSS_REL);
+    if (existsSync(candidato)) return candidato;
+    const padre = dirname(dir);
+    if (padre === dir) break;
+    dir = padre;
+  }
+  return undefined;
+}
+
+let cacheAutoalojadas: readonly FamiliaAutoalojada[] | undefined;
+
+/** Las familias que el producto autoaloja HOY, leídas de `publico.css` (reserva si no se encuentra). */
+export function familiasAutoalojadas(): readonly FamiliaAutoalojada[] {
+  if (cacheAutoalojadas !== undefined) return cacheAutoalojadas;
+  const ruta = rutaPublicoCss();
+  const leidas = ruta === undefined ? [] : familiasDeCss(readFileSync(ruta, "utf8"));
+  cacheAutoalojadas = leidas.length > 0 ? leidas : FAMILIAS_AUTOALOJADAS_RESERVA;
+  return cacheAutoalojadas;
+}
+
+/**
+ * Clase tipográfica: el criterio ESCRITO con el que se elige la familia autoalojada más cercana.
+ * No hay forma automática de medir el parecido entre dos tipos de letra; se clasifica por familia
+ * declarada y la clase dice, en una frase, qué se conserva y qué se pierde (ADR-4-6-01).
+ */
+export type ClaseTipografica =
+  | "serif-old-style" | "serif-alto-contraste" | "sans-geometrica" | "sans-neogrotesca"
+  | "sans-humanista" | "script";
+
+/** Familias conocidas → su clase. Las 5 del catálogo legado y las que el kit ve de verdad. */
+const CLASE_POR_FAMILIA: Readonly<Record<string, ClaseTipografica>> = {
+  "cormorant garamond": "serif-old-style", "eb garamond": "serif-old-style", "garamond": "serif-old-style",
+  "lora": "serif-old-style", "georgia": "serif-old-style", "times new roman": "serif-old-style",
+  "crimson text": "serif-old-style",
+  "playfair display": "serif-alto-contraste", "prata": "serif-alto-contraste",
+  "bodoni moda": "serif-alto-contraste", "didot": "serif-alto-contraste",
+  "poppins": "sans-geometrica", "montserrat": "sans-geometrica", "futura": "sans-geometrica",
+  "raleway": "sans-geometrica",
+  "inter": "sans-neogrotesca", "work sans": "sans-neogrotesca", "helvetica": "sans-neogrotesca",
+  "arial": "sans-neogrotesca", "roboto": "sans-neogrotesca",
+  "source sans 3": "sans-humanista", "open sans": "sans-humanista", "lato": "sans-humanista",
+  "nunito sans": "sans-humanista", "pt sans": "sans-humanista",
+  "great vibes": "script", "sacramento": "script", "dancing script": "script",
+  "parisienne": "script", "allura": "script", "alex brush": "script",
+};
+
+/** Destino por clase, en orden de preferencia; se coge el primero que el producto autoaloje HOY. */
+const DESTINO_POR_CLASE: Readonly<Record<ClaseTipografica, readonly string[]>> = {
+  "serif-old-style": ["Cormorant Garamond", "Playfair Display"],
+  "serif-alto-contraste": ["Playfair Display", "Cormorant Garamond"],
+  "script": ["Cormorant Garamond", "Playfair Display"],
+  "sans-geometrica": ["Inter", "Source Sans 3"],
+  "sans-neogrotesca": ["Inter", "Source Sans 3"],
+  "sans-humanista": ["Source Sans 3", "Inter"],
+};
+
+/** El motivo, escrito, de por qué esa clase va a esa familia. Se copia tal cual al informe. */
+function motivoDeClase(clase: ClaseTipografica, original: string, destino: string): string {
+  switch (clase) {
+    case "script":
+      return `«${original}» es una tipografía MANUSCRITA (script) y NINGUNA de las familias que el producto autoaloja lo es: no hay equivalente. Se sustituye por «${destino}», la serif de titular de trazo más caligráfico y mayor contraste de las autoalojadas; el titular pierde la letra manuscrita y hay que restaurarlo en la fase de arte.`;
+    case "serif-old-style":
+      return `«${original}» es una serif de eje humanista (old style); «${destino}» es la autoalojada de la misma clase.`;
+    case "serif-alto-contraste":
+      return `«${original}» es una serif de alto contraste (didona/transicional) de titular; «${destino}» es la autoalojada de la misma clase.`;
+    case "sans-geometrica":
+      return `«${original}» es una sans geométrica; entre las autoalojadas la más próxima en color de página y altura de x es «${destino}» (neogrotesca). Se pierde el trazo geométrico, no la legibilidad.`;
+    case "sans-neogrotesca":
+      return `«${original}» es una sans neogrotesca de texto; «${destino}» es la autoalojada de la misma clase.`;
+    case "sans-humanista":
+      return `«${original}» es una sans humanista de texto; «${destino}» es la autoalojada de la misma clase.`;
+  }
+}
+
+export interface RemapeoDeFamilia {
+  readonly original: string;
+  readonly family: string;
+  readonly weights: readonly number[];
+  readonly clase: ClaseTipografica;
+  /** `true` cuando la familia ORIGINAL ya la autoaloja el producto: no hay sustitución. */
+  readonly yaAutoalojada: boolean;
+  readonly motivo: string;
+}
+
+/**
+ * La familia autoalojada más cercana a `familia`, con su motivo escrito y los pesos que el producto
+ * importa de verdad para ella. Es la MISMA función que usa la sugerencia de `check` y el remapeo de
+ * `@invitaciones/migration-legacy`: un solo criterio, escrito una sola vez (ADR-4-6-01).
+ */
+export function remapearAFamiliaAutoalojada(familia: string, rol: "heading" | "body"): RemapeoDeFamilia {
+  const disponibles = familiasAutoalojadas();
+  const catalogo = new Map(disponibles.map(f => [f.family, f.weights]));
+  const pesosOriginal = catalogo.get(familia.trim());
+  const claveConocida = CLASE_POR_FAMILIA[familia.trim().toLowerCase()];
+  const clase: ClaseTipografica = claveConocida ?? (rol === "heading" ? "serif-old-style" : "sans-neogrotesca");
+  if (pesosOriginal !== undefined) {
+    return {
+      original: familia, family: familia.trim(), weights: pesosOriginal, clase, yaAutoalojada: true,
+      motivo: `«${familia.trim()}» ya la autoaloja la superficie pública (apps/web/app/(public)/publico.css): no se remapea.`,
+    };
+  }
+  const destino = DESTINO_POR_CLASE[clase].find(f => catalogo.has(f)) ?? disponibles[0]?.family ?? "Inter";
+  const motivoBase = claveConocida === undefined
+    ? `«${familia.trim()}» no está clasificada en la tabla del kit; por su papel (${rol === "heading" ? "titular" : "texto"}) se le asigna la clase «${clase}». `
+    : "";
+  return {
+    original: familia, family: destino, weights: catalogo.get(destino) ?? [400], clase, yaAutoalojada: false,
+    motivo: motivoBase + motivoDeClase(clase, familia.trim(), destino),
+  };
+}
+
+interface CaraDeclarada { readonly family?: unknown; readonly weights?: unknown }
+
+function revisarFuentes(crudoTema: Json): readonly Hallazgo[] {
+  const salida: Hallazgo[] = [];
+  const disponibles = familiasAutoalojadas();
+  const catalogo = new Set(disponibles.map(f => f.family));
+  const lista = disponibles.map(f => `${f.family} (${f.weights.join(", ")})`).join(", ");
+  const sets = (crudoTema["fontSets"] as Array<{ id?: unknown; heading?: CaraDeclarada; body?: CaraDeclarada }> | undefined) ?? [];
+  for (const [i, fs] of sets.entries()) {
+    for (const rol of ["heading", "body"] as const) {
+      const familia = fs[rol]?.family;
+      if (typeof familia !== "string" || catalogo.has(familia)) continue;
+      const sug = remapearAFamiliaAutoalojada(familia, rol);
+      salida.push({
+        severidad: "ERROR", codigo: "TPL_FONT_NOT_SELF_HOSTED",
+        puntero: puntero(TEMA, "fontSets", i, rol, "family"),
+        problema: `El fontSet "${String(fs.id)}" declara la familia "${familia}" en ${rol} y la superficie pública NO la autoaloja: esa invitación se pintaría con la pila de reserva (Georgia / la sans del sistema).`,
+        sugerencia: `Familias autoalojadas hoy, con sus pesos, en apps/web/app/(public)/publico.css: ${lista}. La más cercana a "${familia}" es "${sug.family}" con pesos [${sug.weights.join(", ")}] — ${sug.motivo} Escríbela en theme.json, o autoaloja la original (\`pnpm add @fontsource/${slugFontsource(familia)}\` en apps/web y su \`@import\` en publico.css): la superficie pública nunca pide una fuente a un tercero en tiempo de ejecución (ADR-1R-F-07).`,
+      });
+    }
   }
   return salida;
 }

@@ -17,28 +17,28 @@
   ],
   "fontSets": [
     {
-      "id": "sacramento-work-sans",
+      "id": "cormorant-garamond-inter",
       "name": {
-        "es-MX": "Sacramento y Work Sans"
+        "es-MX": "Cormorant Garamond y Inter"
       },
       "heading": {
-        "family": "Sacramento",
+        "family": "Cormorant Garamond",
         "weights": [
           400,
-          700
+          600
         ],
         "source": "google"
       },
       "body": {
-        "family": "Work Sans",
+        "family": "Inter",
         "weights": [
           400,
-          600
+          500
         ],
         "source": "google"
       }
     }
   ],
   "defaultPaletteId": "rojo",
-  "defaultFontSetId": "sacramento-work-sans"
+  "defaultFontSetId": "cormorant-garamond-inter"
 }
