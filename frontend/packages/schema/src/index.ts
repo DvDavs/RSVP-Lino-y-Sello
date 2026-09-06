@@ -10,3 +10,4 @@ export * from "./compose.ts";
 export * from "./operations-reducer.ts";
 export * from "./operations-validate.ts";
 export * from "./migrate.ts";
+export * from "./introspect.ts";

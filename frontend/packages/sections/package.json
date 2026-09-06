@@ -6,7 +6,8 @@
   "description": "Cimiento visual del render de invitaciones: tema/tokens --inv-*, los 14 componentes de bloque y el sectionRegistry. Sin tailwindcss (04 §19): las secciones no pueden usar utilidades del chrome ni por accidente.",
   "license": "UNLICENSED",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./catalog": "./catalog/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",

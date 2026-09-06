@@ -1394,3 +1394,34 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   se prefiere el import feo a la cuarta copia; si `contrast.ts` se mueve, la prueba deja de compilar
   (ruidoso, no silencioso). ¿Merece la fórmula un paquete propio —o un módulo de `packages/schema`,
   que es quien tiene el espejo Kotlin— del que beban las cuatro?
+
+## Kit de autor — catálogo e introspección (fase 4, 4-0B) (5)
+
+- [Fase 4 · 4-0B] **El esquema no valida `role` ↔ tipo de sección, aunque `01 §3.1` diga que sí.**
+  `invariants.ts` comprueba I-25 (rol de grupo ⟺ bloque `group`) e I-26 (singleton único), pero
+  nadie comprueba la columna «Bloques admitidos» que la prosa llama normativa («un rol fuera de la
+  lista falla el registro»). Medido: la plantilla de `evidencia/fase-3/i08-plantilla-minima` se
+  registró con `201` declarando un grupo de `event` con `role: "familyGroup"` y una variante
+  `portrait` que ningún componente pinta. **Supuesto tomado:** no toco contratos; el catálogo
+  publica la tabla correcta (`RoleInfo.sectionTypes`) y el `--check` del CLI puede avisar sin
+  bloquear. ¿Se quiere una invariante nueva (I-32) con espejo en Kotlin, o basta el aviso del kit?
+- [Fase 4 · 4-0B] **`packages/sections/catalog/` queda fuera de la cobertura y del lint.**
+  `vitest.config.ts` mide solo `src/**` y `"lint": "eslint src"`. El catálogo vive fuera de `src/`
+  por ADR-4-0B-01 (guarda de presupuesto de JS). **Supuesto tomado:** no toco esos dos ficheros de
+  configuración porque son compartidos y hay sesiones vivas en el paquete. ¿Se añade
+  `catalog/**/*.ts` a la cobertura y al comando de lint?
+- [Fase 4 · 4-0B] **Qué escribe el andamio en `celebrant`.** El catálogo declara los huecos de las
+  tres formas (pareja `celebrantA`/`celebrantB`, homenajeada `honoree`), pero `nueva-plantilla` solo
+  puede escribir una. **Supuesto tomado:** escribe `honoree` (XV, bautizo, comunión, cumpleaños:
+  6 de los 8 `EventKind`); para una boda el autor cambia dos líneas. ¿O el andamio debería preguntar
+  el `eventKind` y elegir?
+- [Fase 4 · 4-0B] **`galleryPhoto` y compañía no tienen tabla ejecutable de sección.** Los roles de
+  los `itemBlocks` de un grupo no aparecen en `registry-data.ts` (que solo lista roles de nivel de
+  sección). **Supuesto tomado:** su tipo de sección es el de la sección que contiene al grupo, y la
+  prueba lo verifica contra los `itemBlocks` que declara el catálogo (ADR-4-0B-04). ¿Correcto, o
+  algún rol de ítem debería poder aparecer en dos tipos de sección distintos?
+- [Fase 4 · 4-0B] **`introspect.ts` lee `._zod.def`, interna de Zod 4.5.4.** No hay API pública de
+  Zod para saber qué campos de una rama son obligatorios. **Supuesto tomado:** se aísla en una única
+  función (`zdef`) y 65 pruebas caerían si una subida de Zod la cambiara; el riesgo es aceptable
+  frente a transcribir a mano 14 ramas. ¿Se fija `zod` a 4.5.4 exacto en el `package.json` (hoy ya
+  lo está) y se anota como punto de revisión al subir Zod?
