@@ -45,12 +45,16 @@ on:
   # `claude/fase-3-frontend-orchestration-yuh8sx` (la que existe de verdad en este repositorio hoy)
   # nunca dispara este workflow, exactamente el mismo defecto que la objeción O-05 de 2-0a-REV ya
   # había corregido una vez para la rama de la fase 2.
+  # Tarea «CI real en GitHub» (esta rama): el workflow nunca se habia ejecutado en GitHub. Se
+  # anaden los disparadores que pide el encargo — `pull_request` hacia `main` y `push` a la rama de
+  # trabajo de esta tarea — y `workflow_dispatch` para poder relanzar una ejecucion sin commit vacio.
   pull_request:
     branches:
       [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx]
   push:
     branches:
-      [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx]
+      [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx, claude/ci-github-actions, claude/ci-github-actions-jobs-9qyd9z]
+  workflow_dispatch:
 
 concurrency:
   group: templates2-ci-${{ github.ref }}
@@ -211,7 +215,10 @@ jobs:
     #     (ADR-2-ORQ-03); no hay S3 real disponible en CI, mismo criterio que ADR-3-0a-02.
     #   - `SPRING_DATA_MONGODB_URI` con `serverSelectionTimeoutMS` corto: sin Mongo en el runner,
     #     `MongoDataInitializer` alargaría el arranque ~8 minutos (`handoffs/3-0a.md` §1).
-    needs: [backend, frontend]
+    # Tarea «CI real en GitHub»: el `needs: [backend, frontend]` original serializaba el workflow
+    # (backend/frontend ~N min + e2e ~M min). El encargo fija un objetivo de < 25 min de reloj y
+    # autoriza expresamente paralelizar jobs antes que recortar pruebas: los tres jobs arrancan a la
+    # vez, el tiempo total pasa a ser el del job más lento y ningún job pierde un solo caso.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
