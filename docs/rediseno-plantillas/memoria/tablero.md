@@ -127,5 +127,8 @@ suite completa tras cada merge; commit y push por bloque.
 | 2 · F2 superficies y navegación (Card, Tabs, Dialog, Sheet, Tooltip, Toast, Badge, Avatar, Breadcrumb, WizardProgress, Stepper, ProgressRing) | b2-f2 | Sonnet | **aceptada** (`4ea8d00`) | 465 pruebas; el merge dejó el build rojo por el registro en el barril raíz, corregido en `8f37f2a` |
 | 2 · F3 galería `/design/componentes`, EmptyState, Skeleton, Image, regresión visual/contraste/axe sin backend | b2-f3 | Sonnet | **aceptada** (`f128a74`) | registro reconstruido con 26 historias y `metadatos.ts` generado desde el registro evaluado |
 | 2 · revisión de coherencia y a11y | b2-rev | Opus | **ACEPTAR** con correcciones | 15 fallos → 0: Tailwind sin `@source` de `packages/ui` (28 de 51 utilidades no se generaban), `accent` secuestrada (2,57:1 → 7,6:1), historias de superposición; `design` 279/279 dos veces y re-ejecutado por el orquestador |
-| 3 producto: 3C-5 web pública/acceso · 3C-6 catálogo/asistente · 3C-7 chrome · 3C-8 e2e/presupuestos | | | pendiente | |
+| 3 · 3C-5 web pública y acceso (`/`, `/acceso` en tres pasos, `/ayuda`, 404, errores, `components/sitio`) | 3c-5 | Opus | integrada (`5152f37`), pendiente e2e de 3C-8 | 435 pruebas web, build, `check-budget` `/` 148,1 KB gz, galería 279/279 intacta; capturas enviadas al dueño. Se cortó por límite de uso y cerró con handoff parcial; no hizo falta relevo |
+| 3 · 3C-7 chrome del editor y publicación | 3c-7 | Opus | integrada (`3c510f7`), pendiente e2e de 3C-8 | web 388/388, e2e del editor 28/28 contra backend real en su worktree, editor 395,8 KB gz; shadcn antiguos borrados salvo el shim de `button.tsx` |
+| 3 · 3C-6 catálogo y asistente de creación | 3c-6 → relevo | Opus | en curso (handoff parcial por contexto > 300k) | |
+| 3 · 3C-8 e2e, axe, presupuestos y LCP | | Sonnet + revisor | pendiente | |
 | Cierre: revisiones, guía, memoria, handoff | | | pendiente | |
