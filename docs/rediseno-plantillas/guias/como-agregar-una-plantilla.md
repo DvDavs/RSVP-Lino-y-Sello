@@ -6,7 +6,7 @@ cada una, qué colores están permitidos) te lo da un programa, el kit de autor 
 
 Todos los comandos de esta guía están copiados literalmente de una sesión real en la que se
 siguieron de principio a fin, sin saltarse ninguno. La salida que ves debajo de cada comando es la
-salida real que dio esa sesión (con rutas de ejemplo `/tmp/taller/mi-boda`; tú usarás las tuyas).
+salida real que dio esa sesión (con rutas de ejemplo bajo `/tmp/taller`; tú usarás las tuyas).
 
 ## Qué vas a tener al terminar
 
@@ -18,9 +18,32 @@ con el mismo comando `pnpm plantilla capturas` que usarás tú en el minuto 20):
 
 ## Antes de empezar
 
-Necesitas una terminal abierta en `frontend/` del repositorio y el backend de desarrollo levantado
-(alguien de tu equipo lo hace una vez por sesión de trabajo; si ya está levantado, sáltate esto y ve
-directo al minuto 0). Si te toca levantarlo tú:
+Necesitas dos cosas: las dependencias del monorepo instaladas y el backend de desarrollo levantado
+(esto último alguien de tu equipo lo hace una vez por sesión de trabajo; si ya está levantado,
+sáltatelo y ve directo al minuto 0).
+
+**Las dependencias, siempre.** En una copia recién clonada del repositorio (o en una copia de
+trabajo nueva) no hay nada instalado y `pnpm plantilla` no puede ni arrancar. Se resuelve con un
+comando, y tarda segundos:
+
+```bash
+cd <tu copia del repositorio>/frontend
+pnpm install
+```
+
+Si se te olvida, no te quedas a oscuras: el propio `plantilla` te lo dice antes de intentar nada.
+
+```
+FALTA Dependencias instaladas: el monorepo no está instalado del todo, así que `plantilla` no puede arrancar
+      - las dependencias del propio kit (…/frontend/packages/template-kit/node_modules)
+      - el runner de TypeScript (`tsx`) (…/frontend/packages/template-kit/node_modules/.bin/tsx)
+      `cd frontend && pnpm install` (instala TODO el workspace, no sólo el kit; tarda unos segundos
+      si el store de pnpm ya está caliente). Después repite este mismo comando.
+
+1 comprobación(es) · 1 sin resolver · 0 aviso(s)
+```
+
+**El backend**, si te toca levantarlo a ti:
 
 ```bash
 cd <tu copia del repositorio>
@@ -55,11 +78,11 @@ Salida real:
 ```
 OK    Node: v22.22.2 (el monorepo exige >= 22.22)
 OK    pnpm: pnpm 10.33.0
-OK    Dependencias instaladas: frontend/packages/template-kit/node_modules existe
-OK    Backend: http://127.0.0.1:6043 responde (HTTP 200 a /public/i/sonda/exists)
-OK    TPL_DEV_PORT: TPL_DEV_PORT=6043
-OK    TPL_DEV_DB: TPL_DEV_DB=invitaciones_f4_43
-OK    TPL_TEST_STATE_DIR: TPL_TEST_STATE_DIR=/tmp/templates2-pg-f4-43
+OK    Dependencias instaladas: 5 rutas del workspace instaladas (raíz, kit, tsx, schema, sections)
+OK    Backend: http://127.0.0.1:6081 responde (HTTP 200 a /public/i/sonda/exists)
+OK    TPL_DEV_PORT: TPL_DEV_PORT=6081
+OK    TPL_DEV_DB: TPL_DEV_DB=invitaciones_f4_1c
+OK    TPL_TEST_STATE_DIR: TPL_TEST_STATE_DIR=/tmp/templates2-pg-f4-1c
 AVISO Cuenta MASTER: se usará demo.master@example.com
       El ayudante de registro crea y promueve `demo.master@example.com` si no existe (registrar-http.sh); si quieres otra cuenta, exporta TPL_MASTER_EMAIL y TPL_MASTER_PASS.
 AVISO Base sembrada: no se puede comprobar desde aquí sin consultar la base
@@ -75,19 +98,25 @@ Ahora crea el andamio. Elige un `slug` (identificador corto, en minúsculas, con
 nombre técnico, no el nombre bonito que verá el cliente) y el tipo de evento:
 
 ```bash
-pnpm plantilla nueva mi-boda --evento wedding --destino /tmp/taller/mi-boda
+pnpm plantilla nueva mi-boda --evento wedding --destino /tmp/taller
 ```
 
 Salida real:
 
 ```
-Creado /tmp/taller-43/mi-boda/1.0.0
+Creado /tmp/taller/mi-boda/1.0.0
   template.json, theme.json, defaults.json · 5 sección(es) · 10 bloque(s) · 219 líneas de manifiesto
   check: en verde a la primera (0 errores).
 
 Siguiente paso: edita los textos de defaults.json y ejecuta
-  pnpm plantilla check /tmp/taller-43/mi-boda/1.0.0
+  pnpm plantilla check /tmp/taller/mi-boda/1.0.0
 ```
+
+**En `--destino` va la carpeta contenedora, NO el nombre de tu plantilla**: el comando cuelga él solo
+`<slug>/<version>/` de lo que le des. Con `--destino /tmp/taller` y el slug `mi-boda` el paquete
+queda en `/tmp/taller/mi-boda/1.0.0`; si escribes `--destino /tmp/taller/mi-boda` te saldrá
+`/tmp/taller/mi-boda/mi-boda/1.0.0`, con el nombre repetido. Mira siempre la línea `Creado …`: dice
+exactamente dónde ha escrito.
 
 **Usa siempre `--destino` fuera de `frontend/templates/`** mientras trabajas (por ejemplo un
 directorio bajo `/tmp`). Un manifiesto a medias dentro de `frontend/templates/` hace fallar las
@@ -106,7 +135,9 @@ pnpm plantilla secciones
 
 imprime las 12 secciones del catálogo (`cover, celebrant, event, gallery, giftTable, suggestions,
 amenities, rsvp, family, story, dressCode, footer`), y `pnpm plantilla secciones cover` te da el
-detalle de una sola: sus variantes, sus huecos de texto/imagen y cuáles trae ya el andamio.
+detalle de una sola: sus variantes, sus huecos de texto/imagen y cuáles trae ya el andamio. Cada
+hueco dice de qué **tipo** es; para ver qué se escribe dentro de un tipo, `pnpm plantilla bloque
+<tipo>` (minuto 5-15).
 
 Y el `check` ya salió **en verde a la primera** — no necesitas tocar nada para que el paquete sea
 válido; sólo lleva textos de relleno.
@@ -125,6 +156,58 @@ personalice la suya.
 No necesitas saber el esquema: si escribes algo que no encaja (una clave que no existe, un tipo de
 valor equivocado), `check` te lo dice con el fichero y la línea exacta — ver la sección de errores
 más abajo.
+
+### Cuando un hueco no es un texto suelto: `pnpm plantilla bloque`
+
+La mayoría de los huecos son un texto (`{"kind": "text", "value": "…"}`) o una persona
+(`{"kind": "person", "name": "…"}`), y se ven de un vistazo en el propio `defaults.json`. Pero hay
+huecos que llevan dentro algo más estructurado: una fecha, un lugar con dirección, una lista de
+fotos o un **texto con párrafos** (`richText`, que es lo que usan los mensajes largos como
+`celebrant.message` o el relato de cada hito de `story`). Para esos, **no adivines**: pregúntale al
+kit qué forma tiene ese tipo.
+
+```bash
+pnpm plantilla bloque richText
+```
+
+Salida real:
+
+```
+richText — Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre.
+
+  EL VALOR, en defaults.json bajo "<blockId>" (campos obligatorios: kind, doc):
+    {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Hola"
+              }
+            ]
+          }
+        ]
+      }
+    }
+```
+
+(La ficha sigue con el bloque tal como se declara en `template.json` y con la lista de roles que
+admiten ese tipo.) `pnpm plantilla bloque` sin nada enseña los 14 tipos con su valor mínimo en una
+línea, y `pnpm plantilla secciones <tipo>` te dice de qué tipo es cada hueco de una sección: los dos
+comandos juntos responden «qué escribo aquí» sin abrir una sola línea de código.
+
+### Los `label` de `template.json` también los lee el invitado
+
+En `template.json`, cada bloque tiene un `label`: el rótulo del hueco. **No es sólo un rótulo del
+editor**: en las secciones de familia, ese texto se publica tal cual — el `label` del grupo sale como
+título encima de la lista, y el de cada persona, debajo de su nombre. El andamio ya te los deja
+escritos con rótulos cortos y presentables («Familia», «Parentesco», «Momentos»), pero si copias un
+bloque de otro sitio o lo escribes tú, revísalo: si dejas ahí la frase con la que el catálogo
+describe el hueco, `check` te avisa (error frecuente 8) y el checklist te lo vuelve a preguntar.
 
 **Sobre las imágenes**: el kit **no** dibuja ni descarga nada — pon un archivo de imagen que ya
 tengas (`.webp`, `.png`, `.jpg` o `.svg`) dentro de la carpeta `assets/` de tu plantilla (créala si
@@ -212,18 +295,20 @@ verá un invitado con esos huecos vacíos, añade `--sin-marcadores`.
 pnpm plantilla check /tmp/taller/mi-boda/1.0.0
 ```
 
-Salida real, ya con los textos cambiados y sin errores:
+Salida real (aquí sobre el andamio recién creado; con tus textos dentro, el `package_hash` será
+otro — es la huella del paquete, cambia con cada byte que cambias):
 
 ```
-plantilla check /tmp/taller-43/mi-boda/1.0.0
+plantilla check /tmp/taller/mi-boda/1.0.0
 
-package_hash = sha256:526623213816aa6517378f182655d21261d3b19c1b05cde6fe723b6e494f4ca9
+package_hash = sha256:71611310e5780f3dd43429d29dd5f03048bddac21f5f60a573d668caceb5f52f
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
 ```
 
-Al final siempre sale una línea con el resumen, aunque no la pegue aquí de nuevo: `N error(es) · N
-aviso(s) · N corregido(s)`. Con `0 error(es)` tu plantilla está lista para el catálogo. Si sale algo
-distinto de cero, ve a la sección de errores frecuentes: ahí está el texto exacto de los que más
-cuestan, y cómo se arreglan.
+La última línea es siempre el resumen: `N error(es) · N aviso(s) · N corregido(s)`. Con
+`0 error(es)` tu plantilla está lista para el catálogo. Si sale algo distinto de cero, ve a la
+sección de errores frecuentes: ahí está el texto exacto de los que más cuestan, y cómo se arreglan.
 
 Nota sobre `--no-escribir`: por omisión, `check` **mide y escribe** los digestos de tus imágenes en
 `template.json` cada vez que lo ejecutas (así nunca los tecleas tú). Si en algún momento quieres
@@ -246,11 +331,11 @@ Salida real:
 
 ```
 3 captura(s) de mi-boda@1.0.0 a 390, 768, 1280 px (x2; Chromium: /opt/pw-browsers/chromium).
-  /tmp/taller-43/mi-boda/capturas/mi-boda@1.0.0-390.png  289.6 KB
-  /tmp/taller-43/mi-boda/capturas/mi-boda@1.0.0-768.png  561.3 KB
-  /tmp/taller-43/mi-boda/capturas/mi-boda@1.0.0-1280.png  588.2 KB
+  /tmp/taller/mi-boda/capturas/mi-boda@1.0.0-390.png  286.1 KB
+  /tmp/taller/mi-boda/capturas/mi-boda@1.0.0-768.png  536.0 KB
+  /tmp/taller/mi-boda/capturas/mi-boda@1.0.0-1280.png  545.8 KB
 
-Están FUERA de /tmp/taller-43/mi-boda/1.0.0: dentro serían un TPL_PACKAGE_UNEXPECTED_FILE al registrar.
+Están FUERA de /tmp/taller/mi-boda/1.0.0: dentro serían un TPL_PACKAGE_UNEXPECTED_FILE al registrar.
   1 hueco(s) de imagen sin valor se pintan con el marcador del kit. Con `--sin-marcadores` los ves como los verá un invitado: vacíos (R5).
   Fecha y hora son de DEMOSTRACIÓN (2026-11-21 17:30): los bloques `source: "business"` no viven en el paquete, los pone Postgres al componer la invitación real (R4).
 ```
@@ -273,14 +358,14 @@ pnpm plantilla registrar /tmp/taller/mi-boda/1.0.0
 Salida real (primera vez):
 
 ```
-POST /master/templates2/versions  (/tmp/taller-43/mi-boda/1.0.0)  →  HTTP 201
+POST /master/templates2/versions  (/tmp/taller/mi-boda/1.0.0)  →  HTTP 201
 {
   "result": "created",
   "alreadyRegistered": false,
   "templateVersionId": 4,
   "slug": "mi-boda",
   "version": "1.0.0",
-  "packageHash": "sha256:526623213816aa6517378f182655d21261d3b19c1b05cde6fe723b6e494f4ca9",
+  "packageHash": "sha256:71611310e5780f3dd43429d29dd5f03048bddac21f5f60a573d668caceb5f52f",
   "assetsRegistered": 0
 }
 201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.
@@ -293,7 +378,7 @@ desarrollo. Nada de esto reinicia el backend ni toca una línea de Kotlin.
 Si lo ejecutas otra vez sin cambiar nada, el resultado es distinto **a propósito** — no es un fallo:
 
 ```
-POST /master/templates2/versions  (/tmp/taller-43/mi-boda/1.0.0)  →  HTTP 200
+POST /master/templates2/versions  (/tmp/taller/mi-boda/1.0.0)  →  HTTP 200
 {
   "result": "noop_same_hash",
   "alreadyRegistered": true,
@@ -397,6 +482,67 @@ ERROR TPL_PALETTE_CONTRAST_BELOW_AA  theme.json#/palettes/0/tokens
 **Arreglo**: copia el hexadecimal que te propone la sugerencia (`#7A6E5F` en este ejemplo, para
 `accent`) — ya está calculado con la misma fórmula que usa la validación, así que al pegarlo el error
 desaparece. Nunca se soluciona bajando el umbral de contraste.
+
+### 6. Un valor de `defaults.json` con la forma equivocada (el caso `richText`)
+
+El más fácil de cometer: calcar el patrón de un bloque de texto (`"value": "…"`) en un hueco que no
+es de texto. Aquí, un `richText` (`celebrant.message`) escrito como si fuera un `text`:
+
+```
+ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/celebrant.message
+  Unrecognized key: "value" (unrecognized_keys).
+  Sugerencia: El bloque "celebrant.message" es de tipo `richText`: Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre. Campos obligatorios del valor: kind, doc. Ejemplo mínimo, copiable tal cual en defaults.json: {"kind":"richText","doc":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hola"}]}]}}. La forma de cualquier tipo de bloque, sin abrir código: `pnpm plantilla bloque richText`.
+
+ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/celebrant.message/doc
+  Invalid input: expected object, received undefined (invalid_type).
+  Sugerencia: El bloque "celebrant.message" es de tipo `richText`: Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre. Campos obligatorios del valor: kind, doc. Ejemplo mínimo, copiable tal cual en defaults.json: {"kind":"richText","doc":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hola"}]}]}}. La forma de cualquier tipo de bloque, sin abrir código: `pnpm plantilla bloque richText`.
+```
+
+**Arreglo**: pega el «ejemplo mínimo» de la sugerencia en lugar de lo que habías escrito y cambia el
+texto («Hola») por el tuyo. Pegado tal cual, sin tocar una coma, el paquete queda en verde:
+
+```
+plantilla check /tmp/taller/sabotaje
+
+package_hash = sha256:b76a9a8a60c4b82d1ba791cb0020667c6b3e98e2afca3ce1ff11576a2b786c8a
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+```
+
+Vale igual para cualquier otro tipo: el mensaje siempre nombra el tipo del bloque, sus campos
+obligatorios y un ejemplo copiable.
+
+### 7. Un `itemId` (o un alias de imagen) con letras prohibidas
+
+Cada ficha de una lista repetible lleva un `itemId`, y cada imagen declarada en `template.json` un
+`id` que empieza por `as_`. Los dos usan el mismo alfabeto, que **excluye las letras I, L, O y U**
+(para que nadie confunda un uno con una ele ni un cero con una o). Si inventas uno «con pinta de»
+identificador sin fijarte:
+
+```
+ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/event.cards/items/1/itemId
+  Invalid string: must match pattern /^[0-9A-HJKMNP-TV-Z]{26}$/ (invalid_format).
+  Sugerencia: Cada ficha de un grupo lleva su `itemId`: 26 caracteres en MAYÚSCULAS y dígitos del alfabeto Crockford base32 (0123456789ABCDEFGHJKMNPQRSTVWXYZ): NO admite las letras I, L, O ni U. Por ejemplo "DDMNF44GFZZ98NVXCKDDFYBRDH". Es lo que hace que al reordenar o regenerar no se pierda lo que escribiste en esa ficha (P2, merge por id estable), y no se ve en la invitación.
+```
+
+**Arreglo**: usa el identificador que te propone el mensaje (es válido y no se repite con nada del
+paquete), o escribe uno tuyo con esos caracteres. El alias de una imagen da el mismo mensaje con
+`as_` delante, tanto en `template.json#/assets/N/id` como en el `assetId` de `defaults.json`.
+
+### 8. AVISO: una etiqueta del andamio que nadie cambió
+
+No es un error —el paquete se registra igual—, pero conviene mirarlo: el `label` de las secciones de
+familia se publica en la invitación (ver «Los `label` de `template.json` también los lee el
+invitado»).
+
+```
+AVISO TPL_LABEL_DE_ANDAMIO  template.json#/sections/2/blocks/1/label/es-MX
+  La etiqueta "Lista repetible de momentos del evento (misa, recepción, fiesta)" del bloque "event.cards" es la frase con la que el catálogo describe ese hueco, no un texto tuyo.
+  Sugerencia: El `label` no se queda en el editor: una sección `family` lo publica tal cual (título del grupo y parentesco debajo de cada nombre, FamilySection.tsx:71,198). Escribe en template.json una etiqueta corta y presentable (por ejemplo "Momentos") y repite `plantilla check`.
+```
+
+**Arreglo**: escribe el rótulo que te propone la sugerencia, o el tuyo. Con `pnpm plantilla check
+<dir> --estricto` (el modo que usa la integración continua) los avisos cuentan como errores.
 
 ---
 

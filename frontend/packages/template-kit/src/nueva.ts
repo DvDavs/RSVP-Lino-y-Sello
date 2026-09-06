@@ -122,7 +122,7 @@ export function campoObligatorio(campo: string, slot: CatalogSlot, blockId: stri
     case "id": return blockId;
     case "type": return slot.type;
     case "role": return slot.role;
-    case "label": return { "es-MX": etiqueta(slot) };
+    case "label": return { "es-MX": etiquetaPresentable(slot) };
     case "itemLabel": return { "es-MX": slot.itemLabel ?? "Elemento" };
     case "itemBlocks":
       return (slot.itemBlocks ?? []).filter(i => i.scaffold).map(i => bloque(i, i.blockId));
@@ -135,8 +135,131 @@ export function campoObligatorio(campo: string, slot: CatalogSlot, blockId: stri
   }
 }
 
-/** Etiqueta es-MX del bloque: la primera frase del propósito del rol, en ≤ 200 caracteres (I-27). */
-function etiqueta(slot: CatalogSlot): string {
+/**
+ * Etiqueta es-MX de un bloque del andamio. **No** se deriva del `purpose` del catálogo: ese texto es
+ * ayuda para quien programa («Lista repetible de personas de la familia con su etiqueta») y el
+ * `label` NO se queda en el editor — `packages/sections/src/sections/FamilySection.tsx:71,198`
+ * publica el `label` de un bloque `person` bajo el nombre y el de un `group` como `<h3>` cuando la
+ * sección no trae `groupTitle`. Un andamio que escriba ahí prosa de desarrollador la enseña a los
+ * invitados (bitácora 4-5, hallazgo 6). Tabla curada y corta, en es-MX, sin emojis (ADR-4-1C-01).
+ */
+export const ETIQUETA_POR_ROL: Readonly<Record<string, string>> = {
+  amenityDetail: "Detalles",
+  amenityImage: "Imagen",
+  amenityLink: "Enlace",
+  amenityList: "Amenidades",
+  amenityName: "Nombre",
+  backgroundMusic: "Música de fondo",
+  backgroundMusicEnabled: "Reproducir la música",
+  celebrantA: "Celebrante 1",
+  celebrantAPhoto: "Foto de celebrante 1",
+  celebrantAText: "Texto de celebrante 1",
+  celebrantB: "Celebrante 2",
+  celebrantBPhoto: "Foto de celebrante 2",
+  celebrantBText: "Texto de celebrante 2",
+  celebrantsDate: "Fecha",
+  celebrantsHeading: "Encabezado",
+  celebrantsMessage: "Mensaje conjunto",
+  coverBackground: "Fondo de portada",
+  coverButtonLabel: "Texto del botón",
+  coverButtonLink: "Destino del botón",
+  coverDate: "Fecha del evento",
+  coverImage: "Foto de portada",
+  coverSubtitle: "Subtítulo",
+  coverTitle: "Título de portada",
+  decorative: "Adorno",
+  dressCodeDetail: "Descripción",
+  dressCodeImage: "Imagen",
+  dressCodeRules: "Reglas",
+  dressCodeTitle: "Nombre de la regla",
+  eventCards: "Momentos",
+  eventDate: "Fecha",
+  eventLocationNote: "Nota del lugar",
+  eventMapLink: "Mapa",
+  eventNote: "Nota",
+  eventPlace: "Dónde",
+  eventTime: "Hora",
+  eventTitle: "Nombre del momento",
+  eventWhen: "Cuándo",
+  familyGroup: "Familia",
+  familyGroupTitle: "Título del grupo",
+  familyIntro: "Introducción",
+  footerLink: "Enlace",
+  footerLogo: "Firma",
+  footerNote: "Nota de cierre",
+  galleryIntro: "Introducción",
+  galleryPhoto: "Foto",
+  galleryPhotos: "Fotos",
+  giftOptionDetail: "Detalles",
+  giftOptionImage: "Imagen",
+  giftOptionKind: "Tipo",
+  giftOptionLink: "Enlace",
+  giftOptionTitle: "Nombre de la opción",
+  giftOptions: "Opciones de regalo",
+  godparentA: "Madrina o padrino 1",
+  godparentB: "Madrina o padrino 2",
+  hashtag: "Etiqueta",
+  hashtagLink: "Enlace",
+  hashtagList: "Etiquetas",
+  hashtagPlatform: "Red social",
+  honoree: "Persona homenajeada",
+  honoreeMessage: "Mensaje",
+  honoreePhoto: "Foto",
+  parentA1: "Madre o padre 1",
+  parentA2: "Madre o padre 2",
+  parentB1: "Madre o padre 3",
+  parentB2: "Madre o padre 4",
+  personLabel: "Parentesco",
+  personList: "Personas",
+  personName: "Nombre",
+  personPhoto: "Foto",
+  personPhotoVisible: "Mostrar la foto",
+  rsvpBackground: "Fondo",
+  rsvpChildrenAllowed: "Se admiten niños",
+  rsvpDeadline: "Fecha límite",
+  rsvpKidsNote: "Nota sobre menores",
+  rsvpNote: "Nota",
+  rsvpYoungAllowed: "Se admiten jóvenes",
+  sectionBackground: "Fondo de la sección",
+  sectionIntro: "Introducción",
+  sectionTitle: "Título de la sección",
+  storyBody: "Relato",
+  storyDate: "Fecha",
+  storyImage: "Imagen",
+  storyMilestones: "Hitos",
+  storyTitle: "Título del hito",
+  suggestionDetail: "Detalles",
+  suggestionImage: "Imagen",
+  suggestionLink: "Enlace",
+  suggestionList: "Recomendaciones",
+  suggestionName: "Nombre",
+  witness: "Testigo",
+};
+
+/**
+ * Etiqueta presentable del hueco. **Lanza** si el catálogo trae un hueco de andamio cuyo rol no está
+ * en la tabla: igual que `campoObligatorio`, el andamio prefiere reventar aquí (y poner roja la
+ * prueba `nueva: todos los huecos del andamio tienen etiqueta presentable`) antes que publicar la
+ * frase de ayuda del catálogo como texto de cara al invitado.
+ */
+export function etiquetaPresentable(slot: CatalogSlot): string {
+  const e = ETIQUETA_POR_ROL[slot.role];
+  if (e === undefined) {
+    throw new Error(
+      `andamio: el hueco "${slot.blockId}" (rol "${slot.role}") no tiene etiqueta presentable; ` +
+      "añádela a ETIQUETA_POR_ROL en packages/template-kit/src/nueva.ts (el `purpose` del catálogo " +
+      "NO vale: FamilySection publica el label)",
+    );
+  }
+  return e;
+}
+
+/**
+ * Texto de RELLENO de `defaults.json`: la primera frase del propósito del hueco, en ≤ 200 caracteres
+ * (I-27). Describe qué va ahí y el autor lo sustituye en el minuto 5-15 de la guía; a diferencia del
+ * `label`, esto vive en `defaults.json`, que la guía y el checklist mandan reescribir entero.
+ */
+export function textoDeRelleno(slot: CatalogSlot): string {
   const frase = slot.purpose.split(".")[0]!.trim();
   const corta = frase.length > 0 ? frase : slot.blockId;
   return corta.length > 200 ? corta.slice(0, 197) + "..." : corta;
@@ -188,7 +311,7 @@ export function valorDemo(slot: CatalogSlot): Json | undefined {
   if (slot.type === "image" || slot.type === "audio") return undefined;
   if (slot.type === "group") return undefined;      // lo arma `valorDeGrupo`
   const minimo = describeBlockType(slot.type).minimalValue as Json;
-  if (slot.type === "text") return { kind: "text", value: etiqueta(slot) };
+  if (slot.type === "text") return { kind: "text", value: textoDeRelleno(slot) };
   if (slot.type === "choice") return { kind: "choice", optionId: "opcion-1" };
   return { ...minimo };
 }

@@ -1,0 +1,58 @@
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/1c/frontend/packages/template-kit
+> node bin/plantilla.mjs -- check /tmp/taller/sabotaje --no-escribir
+
+plantilla check /tmp/taller/sabotaje
+
+ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/celebrant.message
+  Unrecognized key: "value" (unrecognized_keys).
+  Sugerencia: El bloque "celebrant.message" es de tipo `richText`: Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre. Campos obligatorios del valor: kind, doc. Ejemplo mínimo, copiable tal cual en defaults.json: {"kind":"richText","doc":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hola"}]}]}}. La forma de cualquier tipo de bloque, sin abrir código: `pnpm plantilla bloque richText`.
+
+ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/celebrant.message/doc
+  Invalid input: expected object, received undefined (invalid_type).
+  Sugerencia: El bloque "celebrant.message" es de tipo `richText`: Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre. Campos obligatorios del valor: kind, doc. Ejemplo mínimo, copiable tal cual en defaults.json: {"kind":"richText","doc":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hola"}]}]}}. La forma de cualquier tipo de bloque, sin abrir código: `pnpm plantilla bloque richText`.
+
+package_hash = sha256:348790f9f8710e246eaf19fb24974d25e2f97f54b034e1c4d9255fcec06c013d
+
+2 error(es) · 0 aviso(s) · 0 corregido(s)
+/home/user/wt/1c/frontend/packages/template-kit:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @invitaciones/template-kit@0.0.0 plantilla: `node bin/plantilla.mjs -- check /tmp/taller/sabotaje --no-escribir`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.
+
+plantilla check /tmp/taller/sabotaje
+
+package_hash = sha256:b76a9a8a60c4b82d1ba791cb0020667c6b3e98e2afca3ce1ff11576a2b786c8a
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+plantilla check /tmp/taller/sabotaje
+
+ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/event.cards/items/1/itemId
+  Invalid string: must match pattern /^[0-9A-HJKMNP-TV-Z]{26}$/ (invalid_format).
+  Sugerencia: Cada ficha de un grupo lleva su `itemId`: 26 caracteres en MAYÚSCULAS y dígitos del alfabeto Crockford base32 (0123456789ABCDEFGHJKMNPQRSTVWXYZ): NO admite las letras I, L, O ni U. Por ejemplo "DDMNF44GFZZ98NVXCKDDFYBRDH". Es lo que hace que al reordenar o regenerar no se pierda lo que escribiste en esa ficha (P2, merge por id estable), y no se ve en la invitación.
+
+package_hash = sha256:f137cc390ac8d34167a9652f4b8bb11ca7c1ab3ad6b03b3213df0046b17c782b
+
+1 error(es) · 0 aviso(s) · 0 corregido(s)
+/home/user/wt/1c/frontend/packages/template-kit:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @invitaciones/template-kit@0.0.0 plantilla: `node bin/plantilla.mjs -- check /tmp/taller/sabotaje --no-escribir`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.
+
+plantilla check /tmp/taller/sabotaje
+
+ERROR I-18_ITEM_BLOCK_UNKNOWN  defaults.json#/content/event.cards[DDMNF44GFZZ98NVXCKDDFYBRDH].event.cards.title
+  Invariante I-18_ITEM_BLOCK_UNKNOWN incumplida en `defaults.event.cards[DDMNF44GFZZ98NVXCKDDFYBRDH].event.cards.title`.
+  Sugerencia: una ficha del grupo trae una clave que no es ninguno de los `itemBlocks[].id` declarados por ese grupo.
+
+AVISO TPL_LABEL_DE_ANDAMIO  template.json#/sections/2/blocks/1/label/es-MX
+  La etiqueta "Lista repetible de momentos del evento (misa, recepción, fiesta)" del bloque "event.cards" es la frase con la que el catálogo describe ese hueco, no un texto tuyo.
+  Sugerencia: El `label` no se queda en el editor: una sección `family` lo publica tal cual (título del grupo y parentesco debajo de cada nombre, FamilySection.tsx:71,198). Escribe en template.json una etiqueta corta y presentable (por ejemplo "Momentos") y repite `plantilla check`.
+
+package_hash = sha256:8db50d97dcf5fc997e3e71378b002823f14444cce6f14bc7d3d791b1892dd68f
+
+1 error(es) · 1 aviso(s) · 0 corregido(s)
+/home/user/wt/1c/frontend/packages/template-kit:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @invitaciones/template-kit@0.0.0 plantilla: `node bin/plantilla.mjs -- check /tmp/taller/sabotaje --no-escribir`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.

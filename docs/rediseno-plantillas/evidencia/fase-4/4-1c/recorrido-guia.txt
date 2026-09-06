@@ -1,0 +1,50 @@
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/1c/frontend/packages/template-kit
+> node bin/plantilla.mjs -- nueva mi-boda --evento wedding --destino /tmp/taller
+
+Creado /tmp/taller/mi-boda/1.0.0
+  template.json, theme.json, defaults.json · 5 sección(es) · 10 bloque(s) · 219 líneas de manifiesto
+  check: en verde a la primera (0 errores).
+
+Siguiente paso: edita los textos de defaults.json y ejecuta
+  pnpm plantilla check /tmp/taller/mi-boda/1.0.0
+
+plantilla check /tmp/taller/mi-boda/1.0.0
+
+package_hash = sha256:71611310e5780f3dd43429d29dd5f03048bddac21f5f60a573d668caceb5f52f
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/1c/frontend/packages/template-kit
+> node bin/plantilla.mjs -- registrar /tmp/taller/mi-boda/1.0.0
+
+POST /master/templates2/versions  (/tmp/taller/mi-boda/1.0.0)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 4,
+  "slug": "mi-boda",
+  "version": "1.0.0",
+  "packageHash": "sha256:71611310e5780f3dd43429d29dd5f03048bddac21f5f60a573d668caceb5f52f",
+  "assetsRegistered": 0
+}
+201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.
+
+POST /master/templates2/versions  (/tmp/taller/mi-boda/1.0.0)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 4,
+  "slug": "mi-boda",
+  "version": "1.0.0",
+  "packageHash": "sha256:71611310e5780f3dd43429d29dd5f03048bddac21f5f60a573d668caceb5f52f",
+  "assetsRegistered": 0
+}
+200 noop_same_hash — ya estaba registrada con EXACTAMENTE el mismo `package_hash`, así que no se ha hecho nada. Es el resultado correcto de volver a registrar el mismo paquete (ADR-008), no un fallo.
+
+3 captura(s) de mi-boda@1.0.0 a 390, 768, 1280 px (x2; Chromium: /opt/pw-browsers/chromium).
+  /tmp/taller/mi-boda/capturas/mi-boda@1.0.0-390.png  286.1 KB
+  /tmp/taller/mi-boda/capturas/mi-boda@1.0.0-768.png  536.0 KB
+  /tmp/taller/mi-boda/capturas/mi-boda@1.0.0-1280.png  545.8 KB
+
+Están FUERA de /tmp/taller/mi-boda/1.0.0: dentro serían un TPL_PACKAGE_UNEXPECTED_FILE al registrar.
+  1 hueco(s) de imagen sin valor se pintan con el marcador del kit. Con `--sin-marcadores` los ves como los verá un invitado: vacíos (R5).
+  Fecha y hora son de DEMOSTRACIÓN (2026-11-21 17:30): los bloques `source: "business"` no viven en el paquete, los pone Postgres al componer la invitación real (R4).

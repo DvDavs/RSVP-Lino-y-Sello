@@ -1988,3 +1988,29 @@ de bloque que la guía cubre con ejemplos concretos; en cuanto aparece un tipo q
   real filtrada por accidente. **Pregunta:** ¿el dueño reconoce alguno de estos nombres como el de
   una persona real (más allá de "Marck Luga"/"Karla Zárate Cruz", ya corregidos)? Si es así, se
   trata igual que el resto.
+
+## Fase 4 · agente 4-1C (correcciones de la prueba de usabilidad)
+- **[Fase 4 · 4-1C] El sitio definitivo de los rótulos presentables de cada rol.** La tabla
+  `ETIQUETA_POR_ROL` (90 roles) vive hoy en `frontend/packages/template-kit/src/nueva.ts` porque
+  `packages/sections` es territorio prohibido en este encargo, pero su sitio natural es el propio
+  catálogo (un `label` junto al `purpose` en cada `CatalogSlot`): así lo compartirían el andamio, el
+  editor y cualquier herramienta futura, y no habría dos vocabularios que mantener sincronizados.
+  **Supuesto tomado:** tabla en el kit, con una prueba que la obliga a cubrir los 90 roles del
+  catálogo (si aparece uno nuevo, el andamio lanza y la suite se pone roja). **Pregunta:** ¿se mueve
+  al catálogo en la próxima fase que pueda tocar `packages/sections`?
+- **[Fase 4 · 4-1C] `TPL_LABEL_DE_ANDAMIO` es AVISO, no ERROR.** Un `label` con la frase de ayuda
+  del catálogo se registra igual; sólo `--estricto` lo pone rojo. **Supuesto tomado:** la opción
+  conservadora, porque el texto del `label` es del autor y el paquete es válido. **Pregunta:** ¿se
+  quiere que el catálogo público no admita nunca una plantilla con ese aviso (es decir, ERROR)?
+- **[Fase 4 · 4-1C] `toga-y-sello@1.0.0` cambió de `package_hash`** al reetiquetarla
+  (`sha256:94c7c029…`, antes la que registró la prueba 4-5). En la base de desarrollo sigue la
+  versión vieja hasta que alguien vuelva a ejecutar `pnpm plantilla registrar` sobre ella.
+  **Supuesto tomado:** no la registro yo (el backend de esta sesión es efímero y el registro de otra
+  sesión no es mío). **Pregunta:** ¿la re-registra el orquestador al integrar la rama?
+- **[Fase 4 · 4-1C] Los textos de relleno de `defaults.json` siguen siendo la frase del catálogo**
+  («Papel de esa persona en el evento (madre, padrino, testigo)» acaba bajo el nombre de la persona
+  en la captura del andamio, ver `evidencia/fase-4/4-1c/prueba-labels@1.0.0-family-1280.png`). Es
+  contenido de demostración que la guía y el checklist mandan reescribir entero, no una etiqueta.
+  **Supuesto tomado:** no se tocan (cambiarlos por textos «bonitos» inventados haría más difícil
+  distinguir lo que falta por escribir). **Pregunta:** ¿se prefiere que el andamio traiga contenido
+  de ejemplo creíble («Madrina de velación») en vez de la descripción del hueco?

@@ -17,7 +17,8 @@ import {
   describeBlockType, describeRole, explainBlockSpec, suggestClosest, suggestRole, suggestSectionType,
   validateManifest, type Violation,
 } from "@invitaciones/schema";
-import { describeSection } from "@invitaciones/sections/catalog";
+import { describeSection, sectionCatalog, type CatalogSection, type CatalogSlot } from "@invitaciones/sections/catalog";
+import { ETIQUETA_POR_ROL, itemIdDeterminista, textoDeRelleno } from "./nueva.ts";
 import { fallosDeContraste, oscurecerHasta, type PaletteTokens } from "./contraste.ts";
 import { ordenar, puntero, type Hallazgo } from "./formato.ts";
 import {
@@ -51,6 +52,26 @@ const DEFAULTS = "defaults.json";
 /** Ejemplo mínimo de un tipo de bloque, en una línea, para la sugerencia. */
 function ejemploMinimo(tipo: string): string {
   return JSON.stringify(describeBlockType(tipo).minimalSpec);
+}
+
+/** Ejemplo mínimo del VALOR de ese tipo de bloque, tal como se escribe en `defaults.json`. */
+export function ejemploMinimoDeValor(tipo: string): string {
+  return JSON.stringify(describeBlockType(tipo).minimalValue);
+}
+
+/**
+ * El alfabeto de los identificadores del paquete (`itemId` y alias de asset): Crockford base32, que
+ * excluye I, L, O y U para que nadie confunda un 1 con una l ni un 0 con una O. El esquema lo dice
+ * como expresión regular (`/^[0-9A-HJKMNP-TV-Z]{26}$/`), que no es una frase en español: la bitácora
+ * 4-5 §5 lo midió como «bastó a medias». Esta constante es la frase.
+ */
+const ALFABETO_EN_PALABRAS =
+  "26 caracteres en MAYÚSCULAS y dígitos del alfabeto Crockford base32 " +
+  "(0123456789ABCDEFGHJKMNPQRSTVWXYZ): NO admite las letras I, L, O ni U";
+
+/** Un identificador válido, derivado de la semilla para que el mensaje sea estable y copiable. */
+function idDeEjemplo(semilla: string): string {
+  return itemIdDeterminista(semilla);
 }
 
 /** Los roles que tienen sentido en un tipo de sección, listados para la sugerencia. */
@@ -204,6 +225,65 @@ export function revisarRutasDeAssets(manifiesto: Json): readonly Hallazgo[] {
     });
   }
   return salida;
+}
+
+/**
+ * Etiquetas del andamio que nadie sustituyó. El `label` de un bloque **no** es sólo el rótulo del
+ * formulario del editor: `FamilySection.tsx:71` lo pinta bajo el nombre de cada persona y
+ * `FamilySection.tsx:198` lo usa de `<h3>` del grupo cuando la sección no trae `groupTitle`. La
+ * bitácora 4-5 (hallazgo 6) lo encontró mirando una captura, no por un mensaje: nada avisaba.
+ * Aviso y no error: el texto del `label` es del autor, y un paquete con la etiqueta del catálogo es
+ * válido, sólo probablemente no es lo que quería (`--estricto` lo pone rojo en integración continua).
+ */
+export function revisarEtiquetasDeAndamio(manifiesto: Json): readonly Hallazgo[] {
+  const salida: Hallazgo[] = [];
+  const secciones = (manifiesto["sections"] as Json[] | undefined) ?? [];
+  for (const [i, s] of secciones.entries()) {
+    const bloques = (s["blocks"] as Json[] | undefined) ?? [];
+    for (const [j, b] of bloques.entries()) {
+      salida.push(...unaEtiqueta(b, puntero(MANIFIESTO, "sections", i, "blocks", j)));
+      const items = (b["itemBlocks"] as Json[] | undefined) ?? [];
+      for (const [k, ib] of items.entries()) {
+        salida.push(...unaEtiqueta(ib, puntero(MANIFIESTO, "sections", i, "blocks", j, "itemBlocks", k)));
+      }
+    }
+  }
+  return salida;
+}
+
+/** Todas las frases de ayuda del catálogo (las que escribía el andamio antes de ADR-4-1C-01). */
+let TEXTOS_DEL_CATALOGO: Set<string> | undefined;
+function textosDelCatalogo(): Set<string> {
+  if (TEXTOS_DEL_CATALOGO === undefined) {
+    const acc = new Set<string>();
+    for (const ficha of Object.values(sectionCatalog) as readonly CatalogSection[]) {
+      for (const slot of ficha.slots) {
+        acc.add(textoDeRelleno(slot));
+        for (const ib of slot.itemBlocks ?? []) acc.add(textoDeRelleno(ib as CatalogSlot));
+      }
+    }
+    TEXTOS_DEL_CATALOGO = acc;
+  }
+  return TEXTOS_DEL_CATALOGO;
+}
+
+function unaEtiqueta(b: Json, base: string): readonly Hallazgo[] {
+  const label = b["label"] as Json | undefined;
+  const texto = label !== undefined && typeof label["es-MX"] === "string" ? (label["es-MX"] as string) : undefined;
+  if (texto === undefined || !textosDelCatalogo().has(texto)) return [];
+  const id = typeof b["id"] === "string" ? (b["id"] as string) : "(sin id)";
+  const rol = typeof b["role"] === "string" ? (b["role"] as string) : "";
+  const sugerido = ETIQUETA_POR_ROL[rol];
+  // Coincidencia inocente: para algún hueco («Título de la sección») la frase del catálogo ES ya la
+  // etiqueta presentable que escribe el andamio corregido. Nada que sustituir, nada que avisar.
+  if (sugerido === texto) return [];
+  return [{
+    severidad: "AVISO", codigo: "TPL_LABEL_DE_ANDAMIO", puntero: `${base}/label/es-MX`,
+    problema: `La etiqueta "${texto}" del bloque "${id}" es la frase con la que el catálogo describe ese hueco, no un texto tuyo.`,
+    sugerencia: "El `label` no se queda en el editor: una sección `family` lo publica tal cual " +
+      "(título del grupo y parentesco debajo de cada nombre, FamilySection.tsx:71,198). Escribe en " +
+      `template.json una etiqueta corta y presentable${sugerido !== undefined ? ` (por ejemplo "${sugerido}")` : ""} y repite \`plantilla check\`.`,
+  }];
 }
 
 /** Rol ↔ tipo de sección: el hueco que el backend NO valida (ADR-4-0B-04). Aviso, no error. */
@@ -365,10 +445,13 @@ export function check(opts: OpcionesCheck): ResultadoCheck {
         severidad: "ERROR", codigo: "TPL_DEFAULTS_INVALID",
         puntero: puntero(DEFAULTS, ...issue.path.map(x => String(x))),
         problema: `${issue.message} (${issue.code}).`,
-        sugerencia: "defaults.json es `{templateSlug, templateVersion, content:{ \"<blockId>\": <valor> }}`; el valor lleva `kind` igual al `type` del bloque.",
+        sugerencia: sugerenciaDeDefaults(issue.path.map(x => String(x)), crudoManifiesto),
       });
     }
   }
+
+  // 2.42 Etiquetas que el andamio escribió y nadie sustituyó: se PUBLICAN (ADR-4-1C-01).
+  hallazgos.push(...revisarEtiquetasDeAndamio(crudoManifiesto));
 
   // 2.45 Marca ajena y datos reales de terceros en el contenido de demostración (ADR-4-8-01,
   // ADR-4-9-01): sobre el JSON crudo, no espera a que el esquema valide, porque para el esquema
@@ -430,9 +513,67 @@ function sugerenciaDeIssue(camino: readonly string[], crudo: Json): string {
       return `${e.message} Ejemplo mínimo: ${ejemploMinimo(tipo)}`;
     }
   }
+  if (camino[0] === "assets" && camino[2] === "id") {
+    return `El \`id\` de una entrada de \`assets\` es el alias con el que defaults.json referencia esa imagen: ` +
+      `\`as_\` seguido de ${ALFABETO_EN_PALABRAS}. Por ejemplo "as_${idDeEjemplo(camino.join("/"))}". ` +
+      "Lo inventas tú (no hace falta que sea un ULID de verdad) y tiene que ser único en el paquete.";
+  }
   const raiz = camino[0] ?? "";
   const forma = "template.json es `{manifestVersion:1, slug, version, name, eventKinds, locales, sections:[…]}` más los opcionales `description, minPlanTier, capabilities, previewImage, assets, migrationsFrom` (01 §2.2).";
   return raiz === "" ? forma : `Corrige \`${camino.join(".")}\`. ${forma}`;
+}
+
+/**
+ * Sugerencia para un issue de Zod de `defaults.json`. La versión anterior repetía la forma general
+ * del fichero y nada más: la bitácora 4-5 §4 midió que **no basta** (dos rondas de tanteo para
+ * averiguar la forma de un `richText`). Ahora resuelve el tipo del bloque en el manifiesto y trae el
+ * **ejemplo mínimo del valor**, igual que `TPL_BLOCK_SPEC_INVALID` trae el del `BlockSpec`.
+ */
+export function sugerenciaDeDefaults(camino: readonly string[], manifiesto: Json): string {
+  const forma = "defaults.json es `{templateSlug, templateVersion, content:{ \"<blockId>\": <valor> }}`; el valor lleva `kind` igual al `type` del bloque.";
+  if (camino[0] !== "content" || camino[1] === undefined) return forma;
+  const ultimo = camino[camino.length - 1];
+  if (ultimo === "itemId") {
+    return `Cada ficha de un grupo lleva su \`itemId\`: ${ALFABETO_EN_PALABRAS}. ` +
+      `Por ejemplo "${idDeEjemplo(camino.join("/"))}". Es lo que hace que al reordenar o regenerar ` +
+      "no se pierda lo que escribiste en esa ficha (P2, merge por id estable), y no se ve en la invitación.";
+  }
+  if (ultimo === "assetId") {
+    return `Un \`assetId\` es el alias de una imagen del propio paquete: \`as_\` seguido de ${ALFABETO_EN_PALABRAS}. ` +
+      `Por ejemplo "as_${idDeEjemplo(camino.join("/"))}". Tiene que ser exactamente el mismo \`id\` que declaras ` +
+      "en la entrada de `assets` de template.json; si no está declarado ahí, la imagen no resuelve (I-09).";
+  }
+  const resuelto = tipoDelValor(manifiesto, camino);
+  if (resuelto === undefined) return forma;
+  const info = describeBlockType(resuelto.tipo);
+  return `El bloque "${resuelto.id}" es de tipo \`${resuelto.tipo}\`: ${info.summary} ` +
+    `Campos obligatorios del valor: ${info.value.required.join(", ")}. ` +
+    `Ejemplo mínimo, copiable tal cual en defaults.json: ${ejemploMinimoDeValor(resuelto.tipo)}. ` +
+    `La forma de cualquier tipo de bloque, sin abrir código: \`pnpm plantilla bloque ${resuelto.tipo}\`.`;
+}
+
+/**
+ * Tipo del valor al que apunta un camino de `defaults.json`, leído del manifiesto:
+ * `content/<blockId>` es el bloque, y `content/<blockId>/items/<n>/values/<itemBlockId>` el bloque
+ * de dentro de una ficha del grupo.
+ */
+function tipoDelValor(manifiesto: Json, camino: readonly string[]): { id: string; tipo: string } | undefined {
+  const blockId = camino[1]!;
+  for (const s of (manifiesto["sections"] as Json[] | undefined) ?? []) {
+    for (const b of (s["blocks"] as Json[] | undefined) ?? []) {
+      if (b["id"] !== blockId) continue;
+      if (camino[2] === "items" && camino[4] === "values" && camino[5] !== undefined) {
+        const ib = ((b["itemBlocks"] as Json[] | undefined) ?? [])
+          .find(x => x["id"] === camino[5] || `${blockId}.${String(x["id"])}` === camino[5]);
+        if (ib !== undefined && typeof ib["type"] === "string") {
+          return { id: `${blockId} → ${String(ib["id"])}`, tipo: ib["type"] as string };
+        }
+        return undefined;
+      }
+      if (typeof b["type"] === "string") return { id: blockId, tipo: b["type"] as string };
+    }
+  }
+  return undefined;
 }
 
 function ayudaDeInvariante(v: Violation, manifiesto: Json): string {
