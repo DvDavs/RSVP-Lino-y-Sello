@@ -1,0 +1,402 @@
+{
+  "manifestVersion": 1,
+  "slug": "toga-y-sello",
+  "version": "1.0.0",
+  "name": {
+    "es-MX": "Toga y Sello"
+  },
+  "description": {
+    "es-MX": "Invitación de graduación con itinerario de ceremonia y recepción, familia y código de vestimenta"
+  },
+  "eventKinds": [
+    "graduation"
+  ],
+  "minPlanTier": 1,
+  "locales": [
+    "es-MX"
+  ],
+  "capabilities": [],
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "title": {
+        "es-MX": "Portada"
+      },
+      "variants": [
+        "full",
+        "framed",
+        "split"
+      ],
+      "defaultVariant": "full",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "cover.title",
+          "role": "coverTitle",
+          "label": {
+            "es-MX": "Nombre o título principal de la portada"
+          },
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "cover.date",
+          "role": "coverDate",
+          "label": {
+            "es-MX": "Fecha del evento tal como se ve en la portada"
+          },
+          "type": "date"
+        },
+        {
+          "id": "cover.subtitle",
+          "role": "coverSubtitle",
+          "label": {
+            "es-MX": "Subtítulo de la portada"
+          },
+          "type": "text"
+        },
+        {
+          "id": "cover.image",
+          "role": "coverImage",
+          "label": {
+            "es-MX": "Fotografía principal de la portada"
+          },
+          "type": "image",
+          "required": true
+        }
+      ]
+    },
+    {
+      "key": "celebrant",
+      "type": "celebrant",
+      "title": {
+        "es-MX": "Celebrantes"
+      },
+      "variants": [
+        "side-by-side",
+        "stacked",
+        "centered"
+      ],
+      "defaultVariant": "side-by-side",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "celebrant.title",
+          "role": "celebrantsHeading",
+          "label": {
+            "es-MX": "Encabezado de la sección de celebrantes"
+          },
+          "type": "text"
+        },
+        {
+          "id": "celebrant.honoree",
+          "role": "honoree",
+          "label": {
+            "es-MX": "Persona homenajeada cuando el evento gira en torno a una sola (XV, bautizo)"
+          },
+          "type": "person",
+          "required": true
+        },
+        {
+          "id": "celebrant.message",
+          "role": "honoreeMessage",
+          "label": {
+            "es-MX": "Mensaje de la persona homenajeada"
+          },
+          "type": "richText"
+        }
+      ]
+    },
+    {
+      "key": "family",
+      "type": "family",
+      "title": {
+        "es-MX": "Familia y padrinos"
+      },
+      "variants": [
+        "cards",
+        "list"
+      ],
+      "defaultVariant": "cards",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "family.heading",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título de la sección"
+          },
+          "type": "text"
+        },
+        {
+          "id": "family.members",
+          "role": "familyGroup",
+          "label": {
+            "es-MX": "Familia"
+          },
+          "type": "group",
+          "itemLabel": {
+            "es-MX": "Persona"
+          },
+          "itemBlocks": [
+            {
+              "id": "name",
+              "role": "personName",
+              "label": {
+                "es-MX": "Nombre de una persona dentro de una lista de familia"
+              },
+              "type": "person",
+              "required": true
+            },
+            {
+              "id": "label",
+              "role": "personLabel",
+              "label": {
+                "es-MX": "Papel de esa persona en el evento (madre, padrino, testigo)"
+              },
+              "type": "text"
+            }
+          ],
+          "required": true,
+          "min": 1,
+          "max": 12
+        }
+      ]
+    },
+    {
+      "key": "event",
+      "type": "event",
+      "title": {
+        "es-MX": "Evento"
+      },
+      "variants": [
+        "timeline",
+        "cards",
+        "single-place"
+      ],
+      "defaultVariant": "timeline",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "event.heading",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título de la sección"
+          },
+          "type": "text"
+        },
+        {
+          "id": "event.cards",
+          "role": "eventCards",
+          "label": {
+            "es-MX": "Lista repetible de momentos del evento (misa, recepción, fiesta)"
+          },
+          "type": "group",
+          "itemLabel": {
+            "es-MX": "Momento"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "eventTitle",
+              "label": {
+                "es-MX": "Nombre de un momento del evento"
+              },
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "when",
+              "role": "eventWhen",
+              "label": {
+                "es-MX": "Intervalo de fecha y hora de un momento del evento"
+              },
+              "type": "dateTimeRange"
+            },
+            {
+              "id": "place",
+              "role": "eventPlace",
+              "label": {
+                "es-MX": "Lugar de un momento del evento, con dirección y mapa"
+              },
+              "type": "location"
+            }
+          ],
+          "required": true,
+          "min": 1,
+          "max": 6
+        }
+      ]
+    },
+    {
+      "key": "gallery",
+      "type": "gallery",
+      "title": {
+        "es-MX": "Galería"
+      },
+      "variants": [
+        "grid-6",
+        "grid-9",
+        "carousel",
+        "masonry"
+      ],
+      "defaultVariant": "grid-6",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "gallery.heading",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título de la sección"
+          },
+          "type": "text"
+        },
+        {
+          "id": "gallery.photos",
+          "role": "galleryPhotos",
+          "label": {
+            "es-MX": "Lista repetible de fotografías de la galería"
+          },
+          "type": "group",
+          "itemLabel": {
+            "es-MX": "Fotografía"
+          },
+          "itemBlocks": [
+            {
+              "id": "photo",
+              "role": "galleryPhoto",
+              "label": {
+                "es-MX": "Una fotografía de la galería"
+              },
+              "type": "image",
+              "required": true
+            }
+          ],
+          "required": true,
+          "min": 1,
+          "max": 12
+        }
+      ]
+    },
+    {
+      "key": "dressCode",
+      "type": "dressCode",
+      "title": {
+        "es-MX": "Código de vestimenta"
+      },
+      "variants": [
+        "two-columns",
+        "cards"
+      ],
+      "defaultVariant": "two-columns",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "dressCode.heading",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título de la sección"
+          },
+          "type": "text"
+        },
+        {
+          "id": "dressCode.rules",
+          "role": "dressCodeRules",
+          "label": {
+            "es-MX": "Lista repetible de reglas de vestimenta"
+          },
+          "type": "group",
+          "itemLabel": {
+            "es-MX": "Regla"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "dressCodeTitle",
+              "label": {
+                "es-MX": "Nombre de la regla de vestimenta (etiqueta, formal, playa)"
+              },
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "detail",
+              "role": "dressCodeDetail",
+              "label": {
+                "es-MX": "Explicación de la regla de vestimenta"
+              },
+              "type": "text"
+            }
+          ],
+          "required": true,
+          "min": 1,
+          "max": 4
+        }
+      ]
+    },
+    {
+      "key": "rsvp",
+      "type": "rsvp",
+      "title": {
+        "es-MX": "Confirmación"
+      },
+      "variants": [
+        "banner",
+        "form-inline"
+      ],
+      "defaultVariant": "banner",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "rsvp.heading",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título de la sección"
+          },
+          "type": "text"
+        },
+        {
+          "id": "rsvp.note",
+          "role": "rsvpNote",
+          "label": {
+            "es-MX": "Mensaje principal de la sección de confirmación"
+          },
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "key": "footer",
+      "type": "footer",
+      "title": {
+        "es-MX": "Pie"
+      },
+      "variants": [
+        "simple"
+      ],
+      "defaultVariant": "simple",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "footer.note",
+          "role": "footerNote",
+          "label": {
+            "es-MX": "Nota de cierre al pie de la invitación"
+          },
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "assets": [],
+  "migrationsFrom": []
+}

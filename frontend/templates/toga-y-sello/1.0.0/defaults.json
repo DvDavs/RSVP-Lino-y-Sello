@@ -1,0 +1,202 @@
+{
+  "templateSlug": "toga-y-sello",
+  "templateVersion": "1.0.0",
+  "content": {
+    "cover.title": {
+      "kind": "text",
+      "value": "Valentina Reyes Cordero"
+    },
+    "cover.subtitle": {
+      "kind": "text",
+      "value": "Generación 2026 · Licenciatura en Arquitectura"
+    },
+    "cover.date": {
+      "kind": "date",
+      "value": "2026-12-05"
+    },
+    "celebrant.title": {
+      "kind": "text",
+      "value": "Nuestra egresada"
+    },
+    "celebrant.honoree": {
+      "kind": "person",
+      "name": "Valentina Reyes Cordero"
+    },
+    "celebrant.message": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Después de cinco años de desvelos, entregas de madrugada y muchos cafés, por fin llega el día de recibir el título. Nos daría muchísimo gusto contar con su compañía para celebrar este logro tan esperado."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "family.heading": {
+      "kind": "text",
+      "value": "Con el cariño de"
+    },
+    "family.members": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "W3EK8S82SK8BRFX26KVJJYKMB3",
+          "values": {
+            "name": {
+              "kind": "person",
+              "name": "Leticia Cordero Ibarra"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Madre"
+            }
+          }
+        },
+        {
+          "itemId": "HTZG5KN14Y07J7K248H9DV4T93",
+          "values": {
+            "name": {
+              "kind": "person",
+              "name": "Ricardo Reyes Montaño"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Padre"
+            }
+          }
+        },
+        {
+          "itemId": "2BMGPM6T51NMRG3ZQDP91FZVJD",
+          "values": {
+            "name": {
+              "kind": "person",
+              "name": "Ing. Humberto Salazar Peña"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Padrino de generación"
+            }
+          }
+        }
+      ]
+    },
+    "event.heading": {
+      "kind": "text",
+      "value": "El itinerario del día"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "MXERD2AR1BJYAPVDDPV4NRCV65",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Ceremonia de graduación"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-12-05T17:00"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Auditorio Ignacio Zaragoza, Universidad Autónoma de Puebla"
+            }
+          }
+        },
+        {
+          "itemId": "TRR9X5R31JMKAB0H3S60QHXWCN",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Brindis y recepción"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-12-05T19:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Salón Los Encinos, Cholula"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.heading": {
+      "kind": "text",
+      "value": "El camino hasta aquí"
+    },
+    "gallery.photos": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "35X1C9NNV0GBCGVH7K187QGAYF",
+          "values": {}
+        },
+        {
+          "itemId": "HFEZ191GY6BD4548SA5WRHRSRA",
+          "values": {}
+        },
+        {
+          "itemId": "14MTEMQWDS0T2X3EEE335QJMWR",
+          "values": {}
+        }
+      ]
+    },
+    "dressCode.heading": {
+      "kind": "text",
+      "value": "Código de vestimenta"
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "DMGBH6M6ERFQT62W0PFKX93V72",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Formal"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo o traje sastre para ellas, traje oscuro para ellos. La ceremonia se lleva a cabo dentro del auditorio."
+            }
+          }
+        },
+        {
+          "itemId": "3SXR2RFR35QH59RME0TM84T68F",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Colores a evitar"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Por respeto a la toga de la generación, pedimos evitar el azul marino y el dorado durante la ceremonia."
+            }
+          }
+        }
+      ]
+    },
+    "rsvp.heading": {
+      "kind": "text",
+      "value": "Confírmanos tu asistencia"
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "El cupo del auditorio es limitado, así que te pedimos confirmar antes del 20 de noviembre para reservar tu lugar."
+    },
+    "footer.note": {
+      "kind": "text",
+      "value": "Gracias por acompañarnos en este logro. Nos vemos el 5 de diciembre."
+    }
+  }
+}
