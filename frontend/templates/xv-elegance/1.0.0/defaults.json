@@ -1,0 +1,480 @@
+{
+  "templateSlug": "xv-elegance",
+  "templateVersion": "1.0.0",
+  "content": {
+    "amenities.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "31Y71C0E1AVAX6WMHYF0P8NZEK",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Salón de belleza"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Marck Luga"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.facebook.com/marck.luga.39"
+            }
+          }
+        }
+      ]
+    },
+    "amenities.title": {
+      "kind": "text",
+      "value": "Amenidades"
+    },
+    "couple.heading": {
+      "kind": "text",
+      "value": "Save the date!"
+    },
+    "couple.honoree": {
+      "kind": "person",
+      "name": "Luz Elena"
+    },
+    "couple.honoreeMessage": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Dejo atrás un mundo y entro a otro nuevo ... Aunque a veces dudo o temo, estoy llena de esperanzas y de sueños ... Tengo la sensación de que estoy construyendo mi propio camino"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "cover.buttonLabel": {
+      "kind": "text",
+      "value": "Save the date"
+    },
+    "cover.subtitle": {
+      "kind": "text",
+      "value": "Los XV de"
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "A8RTXJWSBSA5RCCWFPZHM0BG0X",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Damas"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo/corto o traje elegante."
+            }
+          }
+        },
+        {
+          "itemId": "JTP22E69XWRNNDAK27SJQBRXKA",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Caballeros"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje o smoking, corbata, zapatos de vestir."
+            }
+          }
+        }
+      ]
+    },
+    "dressCode.title": {
+      "kind": "text",
+      "value": "Dress Code"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "NA6PSPR7T1RMMM213FXVQYBBXE",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Ceremonia"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T16:30",
+              "end": "2025-12-31T17:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "NZXQBXZ918PJ46D9SFHN1VBFM7",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Fiesta"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T19:00",
+              "end": "2025-12-31T19:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Por definir. (Dale clic para ver la ubicación)"
+            }
+          }
+        }
+      ]
+    },
+    "event.title": {
+      "kind": "text",
+      "value": "Itinerario"
+    },
+    "family.group1": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "95041JZXSGJXEQPVBWTMSZPN4K",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Maria Gomez"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Madre"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "1EW689P0WNFKTGTYN5CJD1JGY7",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Raul Estrada"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Padre"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group1Title": {
+      "kind": "text",
+      "value": "Mis Padres"
+    },
+    "family.group2": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "HY550JDH642HDXWF52H31ZAX2D",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Carolina Aquino"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Madrina"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "WD9CEMA2YGN6F0XN07S62R96V8",
+          "values": {
+            "person": {
+              "kind": "person",
+              "name": "Roberto Cruz"
+            },
+            "label": {
+              "kind": "text",
+              "value": "Padrino"
+            },
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group2Title": {
+      "kind": "text",
+      "value": "Mis Padrinos"
+    },
+    "family.intro": {
+      "kind": "listText",
+      "items": [
+        "Los momentos más felices de la vida se tornan gratos cuando tenemos la suerte de compartirlos con los familiares y amigos más queridos.",
+        "Tu estás entre ellos.",
+        "Por tal motivo quiero festejar mi alegría contigo",
+        "¡Mis Quince Años!"
+      ]
+    },
+    "footer.musicEnabled": {
+      "kind": "boolean",
+      "value": true
+    },
+    "footer.note": {
+      "kind": "text",
+      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+    },
+    "gallery.hashtags": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "VGR8F6W90WFM26ZF6RXV2M9GZ7",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#rebecaYsantiago"
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.facebook.com/hashtag/rebecaYsantiago"
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "facebook"
+            }
+          }
+        },
+        {
+          "itemId": "QA4S1J6KN0RTZYV92PTSP70K80",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#rebecaYsantiago"
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.instagram.com/explore/tags/rebecaYsantiago"
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "instagram"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.intro": {
+      "kind": "text",
+      "value": "No olvides tomar fotos"
+    },
+    "gallery.title": {
+      "kind": "text",
+      "value": "Galería"
+    },
+    "gifts.options": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "CYATMFYBNAVJDQ85W9MEB197XF",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "cash"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Depósito o transferencia"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Banco: SANTANDER",
+                "Titular: KARLA ZARATE CRUZ",
+                "Cuenta CLABE: 014610606106246881",
+                "Número de tarjeta: 60610624688"
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "3X3KX06Q9MCKFGPGF3YJG56SGT",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "store"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Mesa Liverpool"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Número de evento 50355602"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602"
+            }
+          }
+        },
+        {
+          "itemId": "D1PC3XG4DMGHGJMR5AZZBPS45K",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "lluvia de sobres"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "mensaje lluvia de sobres"
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "Q9B4FAE6A5Q171AXW0QX0MSNDV",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "digital"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Mesa de liverpool"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "visita liverpool",
+                "compra aqui"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "gifts.title": {
+      "kind": "text",
+      "value": "Mesa de Regalos"
+    },
+    "rsvp.deadline": {
+      "kind": "date",
+      "value": "2025-07-26"
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Boda sin niños, agradecemos su comprensión."
+    },
+    "rsvp.title": {
+      "kind": "text",
+      "value": "Confirma tu asistencia"
+    },
+    "suggestions.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "QGAGDEWZPJR651QPAWFDY765YZ",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Hotel"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "City Express Oaxaca"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+            }
+          }
+        },
+        {
+          "itemId": "W9220C288RX973A5TPGT8Y9FCD",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Sitio de Taxis"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Sitio Antequera"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1"
+            }
+          }
+        },
+        {
+          "itemId": "YP4KV4KB359BMXCR94M6S8C5FH",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Renta de Autos"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax."
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8"
+            }
+          }
+        },
+        {
+          "itemId": "Z0GDM7P78F8XM6WY22AN85TKHN",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "fisico"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Si deseas hacernos un obsequio, podras hacerlo durante el evento."
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "suggestions.title": {
+      "kind": "text",
+      "value": "Recomendaciones"
+    }
+  }
+}

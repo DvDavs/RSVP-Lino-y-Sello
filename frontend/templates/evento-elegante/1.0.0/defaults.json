@@ -1,0 +1,406 @@
+{
+  "templateSlug": "evento-elegante",
+  "templateVersion": "1.0.0",
+  "content": {
+    "amenities.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "8CVE8AFCEX79AJYDBRNPNVJSWM",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Salón de belleza"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Marck Luga"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.facebook.com/marck.luga.39"
+            }
+          }
+        }
+      ]
+    },
+    "amenities.title": {
+      "kind": "text",
+      "value": "Amenidades"
+    },
+    "couple.heading": {
+      "kind": "text",
+      "value": "¡Nos Casamos!"
+    },
+    "couple.honoree": {
+      "kind": "person",
+      "name": "Nombre del Festejado o Pareja"
+    },
+    "couple.honoreeMessage": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Frase del festejado (XV/Bautizo)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "cover.buttonLabel": {
+      "kind": "text",
+      "value": "Save the date"
+    },
+    "cover.subtitle": {
+      "kind": "text",
+      "value": "Nuestra Boda / Mis XV"
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "KGDE40JBPZTJWZ0AS9JGDRSPM4",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Mujeres"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido Largo"
+            }
+          }
+        },
+        {
+          "itemId": "K5YK1TT2RFAAGD8FX2AT39GQF7",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Hombres"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje Formal"
+            }
+          }
+        }
+      ]
+    },
+    "dressCode.title": {
+      "kind": "text",
+      "value": "Código de Vestimenta"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "55H9NK3V6QN1S9ZXES0CNZ5B31",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Ceremonia"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-10-20T16:00",
+              "end": "2025-10-20T17:00"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Catedral Metropolitana",
+              "mapHref": "https://maps.google.com/..."
+            }
+          }
+        },
+        {
+          "itemId": "CQ86XSB2PTQ14VX0M5MFPAWX3J",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Recepción"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-10-20T18:00"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Salón de Eventos",
+              "mapHref": "https://maps.google.com/..."
+            }
+          }
+        }
+      ]
+    },
+    "event.title": {
+      "kind": "text",
+      "value": "Itinerario"
+    },
+    "family.group1": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "QEA5Z1C4VSZ728M7VDQJKCN079",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "WPVNVK086ZXE7F8JK92TDHACGB",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group2": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "84S27PZP7K4P99X6X7ZTTDH03C",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "WD4HHXQA5FGB558Q7E2Q26REK9",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.intro": {
+      "kind": "listText",
+      "items": [
+        "Con la bendición de..."
+      ]
+    },
+    "footer.musicEnabled": {
+      "kind": "boolean",
+      "value": true
+    },
+    "footer.note": {
+      "kind": "text",
+      "value": "Todos los derechos reservados"
+    },
+    "gallery.hashtags": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "KFNEFVWPHYYZ8643XSV83QV4W4",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#NuestraBoda"
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://instagram.com/..."
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "facebook"
+            }
+          }
+        },
+        {
+          "itemId": "TW7MF9B1RHDXZB4F8BJNDG3A4F",
+          "values": {
+            "platform": {
+              "kind": "choice",
+              "optionId": "instagram"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.intro": {
+      "kind": "text",
+      "value": "Comparte tus momentos"
+    },
+    "gallery.title": {
+      "kind": "text",
+      "value": "Galería"
+    },
+    "gifts.options": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "08VZQFM7BC66P17D7HMC6C9FWT",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Banco Santander"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Banco: Santander",
+                "Cuenta: 1234567890",
+                "CLABE: 012345678901234567",
+                "Titular: Juan Perez"
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "5GT77RCQC6HX5TWV857YTQ1ZZH",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "store"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Liverpool"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Número de evento: 12345"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://mesaderegalos.liverpool.com..."
+            }
+          }
+        }
+      ]
+    },
+    "gifts.title": {
+      "kind": "text",
+      "value": "Mesa de Regalos"
+    },
+    "rsvp.deadline": {
+      "kind": "date",
+      "value": "2025-10-15"
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Evento solo adultos"
+    },
+    "rsvp.title": {
+      "kind": "text",
+      "value": "Confirmación"
+    },
+    "story.milestones": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "XWYMTC53P33B8YRSF3KM9J0PP8",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Nos conocimos"
+            },
+            "body": {
+              "kind": "richText",
+              "doc": {
+                "type": "doc",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Fue amor a primera vista..."
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "suggestions.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "7JZW1XBG4X6RH6BTAVCAP4HKY0",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Hotel"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "City Express Oaxaca"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+            }
+          }
+        },
+        {
+          "itemId": "DG6B89W6HE7SDR2XFGHQJT9QG0",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Sitio de Taxis"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Sitio Antequera"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1"
+            }
+          }
+        },
+        {
+          "itemId": "5ZBJWETQJQAJAX78MQCN34V53F",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Renta de Autos"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax."
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8"
+            }
+          }
+        }
+      ]
+    },
+    "suggestions.title": {
+      "kind": "text",
+      "value": "Recomendaciones"
+    }
+  }
+}
