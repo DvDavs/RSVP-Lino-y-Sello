@@ -65,7 +65,7 @@ test("los cuatro pasos: tipo de evento → plantilla → datos básicos → abri
     // El tipo con el que la invitación quedó REGISTRADA viene preseleccionado y marcado.
     const boda = page.getByRole("radio", { name: /Boda/ });
     await expect(boda).toHaveAttribute("aria-checked", "true", { timeout: 20_000 });
-    await expect(page.getByText("El de tu invitación")).toBeVisible();
+    await expect(page.getByText("Tu evento")).toBeVisible();
     await sinViolacionesGraves(page);
 
     await page.getByTestId("asistente-continuar").click();

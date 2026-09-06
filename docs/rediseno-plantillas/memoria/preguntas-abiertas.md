@@ -1348,3 +1348,34 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   (`/acceso`, `/editor`) a `@invitaciones/ui` directo. Borrados el shim, la carpeta `components/ui/`
   entera y la constante — sin preguntar, porque ya no tenían NINGÚN importador (cambio local,
   seguro, mecánico) y así lo pedía el propio brief de este bloque.
+
+## Fase 3-C · UX (recorrido sin instrucciones, cierre)
+
+Supuestos con los que trabajé, todos verificables en `bitacora/3c-ux.md`:
+
+- **Supuse que «no hay ruta HTTP para crear una invitación» sigue siendo la decisión vigente**
+  (ADR-2-4-02, y `scripts/seed-demo.sh` lo documenta). Por eso NO clasifiqué como defecto de código
+  que el paso 1 del asistente no ofrezca «crear una invitación nueva». Lo que sí clasifiqué como
+  fricción grave (G-01) es que el botón principal de la portada —«Empezar mi invitación»— lleve en
+  cuatro toques a un circuito cerrado sin precio, sin contacto y sin salida: la portada promete
+  autoservicio y el producto es de venta asistida. **Pregunta al dueño:** ¿la portada debe dejar de
+  prometer autoservicio, o el asistente debe poder originar la invitación? Mientras no se decida, lo
+  mínimo es un medio de contacto real en `/ayuda` y en la sección «Elige tu plan».
+- **Supuse que insertar la fila de `invitation` por SQL (lo mismo que hace `seed-demo.sh`) es la
+  única manera de llegar al asistente**, y así lo hice para poder evaluar el resto. Todo lo que
+  evalúo a partir de §1.5 de la bitácora lo evalúo con esa llave maestra.
+- **Supuse que el `itemId` que devuelve el documento compuesto debía ser direccionable por
+  `setItemBlock`.** No lo es en un documento recién creado (G-03: `422 TPL_ITEM_UNKNOWN` sobre
+  `event.cards[<itemId de defaults>]`). No decidí yo el arreglo porque toca el contrato de
+  operaciones: o el `:choose-template` materializa los grupos de los *defaults*, o `setItemBlock`
+  crea el ítem, o el asistente usa `addItem`. **Pregunta:** ¿cuál de las tres?
+- **Supuse que la comprobación previa de publicación debe mirar lo que verá el invitado, no solo el
+  `content` del documento.** Con ese criterio, G-04 (dos fechas distintas publicadas sin aviso, con
+  el guardián U-4 en su sitio) y G-05 («Nombre de la mamá» publicado) son defectos y no decisiones.
+  Si el criterio es el contrario —la revisión solo mira lo que la clienta escribió—, entonces hay que
+  decir que los *defaults* de la plantilla son contenido publicable y quitarles el aire de ejemplo.
+- **Supuse que el mínimo táctil es 44 px** (B-13). El doc 11 fija tamaños de control pero no un
+  mínimo táctil explícito; si el sistema quiere quedarse en 36 px para acciones secundarias, que se
+  escriba en el doc y dejo de contarlo como fricción.
+- **No abrí ADR**: los tres cambios que hice son de texto y de origen de dato, ninguno toca paleta,
+  tipografía, forma ni componente base.

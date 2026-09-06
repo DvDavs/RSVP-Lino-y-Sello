@@ -64,6 +64,15 @@ function esPaso(valor: string | null): valor is PasoDelAsistente {
   return valor !== null && (PASOS as readonly string[]).includes(valor);
 }
 
+/**
+ * Nombre de marca de la plantilla («XV Jardín»), no su `slug` («xv-jardin»). Si el catálogo todavía
+ * no está cargado se devuelve el `slug`, que es mejor que un hueco.
+ */
+function nombreDePlantilla(slug: string | null, catalogo: readonly CatalogItem[] | null): string {
+  if (slug === null) return "";
+  return catalogo?.find((item) => item.slug === slug)?.name["es-MX"] ?? slug;
+}
+
 /** `clientBatchId` del lote del paso 3 (`^[A-Za-z0-9_-]{8,64}$`). */
 function idDeLote(): string {
   return `asistente-${Date.now().toString(36)}`;
@@ -521,7 +530,9 @@ export function AsistenteDeCreacion() {
         <PasoListo
           invitationId={objetivo.id}
           nombreDelTipo={tipoElegido ? nombreDeTipo(tipoElegido) : nombreDeTipo(objetivo.eventKind)}
-          nombreDeLaPlantilla={plantillaEnUrl ?? ""}
+          // 3C-UX F-08: el paso 4 mostraba el `slug` de la URL («plantilla «xv-jardin»»), que a la
+          // clienta le parece un nombre de archivo. El catálogo ya trae el nombre de marca.
+          nombreDeLaPlantilla={nombreDePlantilla(plantillaEnUrl, catalogoDelTipo ?? catalogoCompleto)}
         />
       ) : null}
 
