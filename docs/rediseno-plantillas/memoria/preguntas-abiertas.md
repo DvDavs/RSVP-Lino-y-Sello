@@ -1069,3 +1069,40 @@ producto (conmutador claro/oscuro) y `evidencia/fase-3c/bloque-1/*.png`.
 
 Sin resolver, heredado y NO tocado por este bloque: el emoji de `lib/i18n.ts` (`publicar.yaSeVe`) y
 `lucide-react` en el chrome siguen ahí; `handoffs/3c-0.md` los asigna al agente de iconos.
+
+## Fase 3-C · 3c-b2-f2 (bloque 2 · familia de superficies y navegación)
+
+Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas en `ADR-3C-B2F2-01`.
+
+- **Nombres `WizardProgress`/`Stepper`.** El doc 11 solo tiene un «Stepper» (el de pasos del
+  asistente); el brief pide además un stepper NUMÉRICO con ese mismo nombre. **Supuesto:** el de
+  pasos se llama `WizardProgress` en código (nombre literal del brief) y `Stepper` queda para el
+  numérico. ¿Confirma el dueño esta partición, o prefiere que el de pasos conserve el nombre
+  `Stepper` del doc 11 y el numérico se llame de otra forma (`QuantityStepper`, `Contador`)?
+- **`aria-modal="true"` fijado a mano en `Dialog`/`Sheet`.** Verificado [V] que
+  `@radix-ui/react-dialog@1.1.23` no lo escribe por sí solo (a diferencia de versiones anteriores
+  documentadas en la web de Radix). Sin pregunta pendiente: es una corrección de conformidad WAI-ARIA,
+  no una decisión de diseño; documentado por si una actualización futura de la dependencia lo
+  reintroduce y el atributo queda duplicado (inofensivo, pero el comentario del código quedaría
+  desactualizado).
+- **Retorno de foco de `Dialog`/`Sheet` exige usar la prop `trigger`.** Verificado [V] con Radix
+  1.1.23 + React 19.2 en jsdom: `DialogContentModal` devuelve el foco a `context.triggerRef.current`
+  (el nodo real de `Dialog.Trigger`), NUNCA a "lo último que tenía el foco" si el diálogo se abre por
+  `open`/`onOpenChange` controlados desde un botón ajeno sin pasar por la prop `trigger`. No es un
+  defecto de este componente: es el comportamiento de Radix. Documentado en `handoffs/3c-b2-f2.md`
+  para que quien use `Dialog`/`Sheet` en el editor real sepa que el retorno automático de foco solo
+  funciona si el disparador va por `trigger` (si el diálogo se abre por otra vía — p. ej. tras guardar
+  —, hay que devolver el foco a mano).
+- **Movimiento de entrada de `Dialog`/`Sheet`/`Toast` NO implementado.** `11 §6.1`/`§6.2` piden
+  entradas con `dur-3`/`ease-out`. Implementarlo sin parpadeo exige `forceMount` + una librería de
+  animación de salida (Radix no anima la desaparición por sí solo) o `@starting-style`; se dejó fuera
+  por presupuesto de este bloque. **Supuesto:** los tres componentes aparecen/desaparecen sin
+  transición (cumple `prefers-reduced-motion` trivialmente: no hay nada que apagar) hasta que otro
+  bloque lo añada. ¿Es aceptable entregar la fase 3-C sin esa animación, o hace falta antes del cierre?
+- **Delay del `Tooltip` por ratón.** `11 §5` no fija un número; se tomó `400 ms` (el valor por
+  defecto de Radix es 700 ms, se acortó porque el sistema pide interacciones ágiles). El foco de
+  teclado sigue sin retardo (accesibilidad, no configurable). ¿De acuerdo con 400 ms?
+- **Icono del `ProgressRing` completo.** El boceto de `moodboard/partes/06-componentes.html` sustituye
+  el número por un check al llegar a 100 %; se siguió ese boceto (el `aria-valuetext` sigue diciendo
+  «100 %» para quien usa lector de pantalla). ¿Se prefiere mantener el «100 %» visible también en ese
+  estado, en vez del check?
