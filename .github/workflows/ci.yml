@@ -208,17 +208,9 @@ jobs:
     #     (`/actuator/health` da 401, `anyRequest().authenticated()`); la sonda pasa a
     #     `GET /public/i/sonda/exists`, la misma que usa `scripts/dev-backend.sh` (permitAll, siempre
     #     responde 2xx sin importar el token).
-    #   - Rol `evolution`: `V1__initial_schema.sql` hace `ALTER TABLE … OWNER TO evolution` y el
-    #     servicio `postgres:16` de GitHub Actions no lo crea solo (a diferencia del clúster efímero
-    #     local de `scripts/pg-ephemeral.sh`, que sí lo hace) — paso nuevo antes de `bootRun`.
-    #   - `TEMPLATES2_ASSETS_BUCKET`/`TEMPLATES2_ASSETS_MODE=local`: obligatoria y sin defecto
-    #     (ADR-2-ORQ-03); no hay S3 real disponible en CI, mismo criterio que ADR-3-0a-02.
-    #   - `SPRING_DATA_MONGODB_URI` con `serverSelectionTimeoutMS` corto: sin Mongo en el runner,
-    #     `MongoDataInitializer` alargaría el arranque ~8 minutos (`handoffs/3-0a.md` §1).
-    # Tarea «CI real en GitHub»: el `needs: [backend, frontend]` original serializaba el workflow
-    # (backend/frontend ~N min + e2e ~M min). El encargo fija un objetivo de < 25 min de reloj y
-    # autoriza expresamente paralelizar jobs antes que recortar pruebas: los tres jobs arrancan a la
-    # vez, el tiempo total pasa a ser el del job más lento y ningún job pierde un solo caso.
+    #   - Rol `evolution`, entorno de assets, webhook de revalidación y recorte de Mongo: todo eso
+    #     vive ahora en `scripts/ci-backend.sh` (tarea «CI real en GitHub»), que además ESPERA de
+    #     verdad al arranque y falla con el log a la vista — ver la cabecera de ese script.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -229,6 +221,10 @@ jobs:
       # En el entorno local de desarrollo esta variable ya apunta a /opt/pw-browsers y NO
       # debe ejecutarse `playwright install` (contratos.md §7).
       PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.pw-browsers
+      # `playwright.config.ts` y `playwright.design.config.ts` ya leen esta variable: si el binario
+      # existe, lo usan como `executablePath`. Es lo que iguala el motor de render del runner al del
+      # entorno donde se generaron las capturas de referencia.
+      PW_CHROMIUM_PATH: ${{ github.workspace }}/.pw-browsers/chromium-1194/chrome-linux/chrome
       CI: "true"
     services:
       postgres:
@@ -249,6 +245,13 @@ jobs:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
+      # Sin esto el job se descargaba TODA la caché de dependencias de Gradle en cada corrida antes
+      # de poder compilar el backend: el mismo `setup-gradle` que ya usa el job `backend`.
+      - name: Gradle con caché
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
       - uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
@@ -265,68 +268,59 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-          key: pw-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          key: pw1194-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
 
-      - name: Instalar Chromium
+      # DIVERGENCIA REAL runner/local, corregida aquí (handoffs/ci-github.md §1):
+      #   a) `pnpm exec playwright` desde `frontend/` NO resuelve nada: `@playwright/test` es
+      #      dependencia de `apps/web`, no de la raíz del monorepo. En local colaba porque hay un
+      #      `playwright` global en el PATH del contenedor; en el runner el paso moría en 0 s
+      #      («playwright: not found») y con él TODO el job. Va con `--filter web`.
+      #   b) Las 124 capturas de referencia de la galería se generaron con el Chromium
+      #      **revisión 1194** (141.0.7390.37) que este proyecto usa en local por `executablePath`
+      #      (`playwright.config.ts`), no con el 1234 que instalaría `@playwright/test@1.62.1`.
+      #      Comparar píxeles entre dos versiones de Chrome distintas no prueba nada: se instala la
+      #      MISMA revisión 1194 —`playwright-core@1.56.0` es la que la fija— y se apunta ahí con
+      #      `PW_CHROMIUM_PATH`, la variable que la propia config ya lee. Las dependencias del
+      #      sistema y `ffmpeg` (obligatorio: `video: retain-on-failure` graba SIEMPRE) los pone el
+      #      Playwright pineado del proyecto.
+      # Las dependencias APT del sistema van SIEMPRE (viven en la imagen del runner, no en la caché
+      # de navegadores); el navegador y ffmpeg solo cuando la caché no acertó.
+      - name: Dependencias del sistema para Chromium
+        run: pnpm --filter web exec playwright install-deps chromium
+      - name: "ffmpeg (obligatorio; `video: retain-on-failure` graba en TODAS las pruebas)"
         if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter web exec playwright install ffmpeg
+      - name: Chromium 1194 — la MISMA revisión con la que se hicieron las capturas de referencia
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx --yes playwright-core@1.56.0 install chromium
 
-      - name: Dependencias del sistema para Chromium (cuando el navegador vino de caché)
-        if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
-
-      - name: Rol "evolution" (V1__initial_schema.sql hace ALTER TABLE … OWNER TO evolution)
+      - name: Backend por script (Postgres del servicio, assets locales, webhook cableado)
         working-directory: .
-        run: |
-          PGPASSWORD=postgres psql -h 127.0.0.1 -p 55432 -U postgres -d postgres -v ON_ERROR_STOP=1 -c \
-            "DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'evolution') THEN CREATE ROLE evolution LOGIN SUPERUSER PASSWORD 'evolution123'; END IF; END \$\$;"
-
-      - name: Backend en segundo plano (perfil test)
-        working-directory: .
-        run: |
-          chmod +x gradlew
-          mkdir -p build/dev
-          ./gradlew --no-daemon bootRun --args='--spring.profiles.active=test' > build/dev/backend-e2e.log 2>&1 &
-          echo "esperando a que $BASE responda…"
-          for i in $(seq 1 60); do
-            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 3 "$BASE/public/i/sonda/exists" || true)"
-            if [ -n "$code" ] && [ "$code" != "000" ]; then echo "backend arriba (HTTP $code)"; break; fi
-            sleep 5
-          done
+        run: scripts/ci-backend.sh
         env:
-          BASE: http://127.0.0.1:6003
-          SPRING_DATASOURCE_URL: jdbc:postgresql://127.0.0.1:55432/templates2_e2e
-          SPRING_DATASOURCE_USERNAME: evolution
-          SPRING_DATASOURCE_PASSWORD: evolution123
-          # Sin Mongo en el runner: se recorta el tiempo de selección de servidor, igual que hace
-          # `scripts/dev-backend.sh` (handoffs/3-0a.md §1), para que MongoDataInitializer no alargue
-          # el arranque ~8 minutos.
-          SPRING_DATA_MONGODB_URI: "mongodb://localhost:27017/invitaciones?serverSelectionTimeoutMS=250&connectTimeoutMS=250"
-          # Obligatoria y sin defecto (ADR-2-ORQ-03); sin S3 real en CI, modo local (ADR-3-0a-02).
+          TPL_CI_PGPORT: "55432"
+          TPL_CI_DB: templates2_e2e
           TEMPLATES2_ASSETS_BUCKET: templates2-ci-e2e
           TEMPLATES2_ASSETS_MODE: local
           TEMPLATES2_ASSETS_LOCAL_DIR: ${{ github.workspace }}/build/templates2-assets
-          TEMPLATES2_ASSETS_LOCAL_BASE_URL: http://127.0.0.1:6003/public/templates2-assets
-          TEMPLATES2_ASSETS_PUBLIC_BASE_URL: http://127.0.0.1:6003/public/templates2-assets
 
       # Bloque 3-6 — GAP CRÍTICO cerrado: hasta aquí NINGUNA prueba de este archivo podía correr,
       # porque el job arranca un backend VACÍO (Flyway sin datos: cero plantillas registradas, cero
-      # cuenta de demostración). Las 35 pruebas de `frontend/apps/web/e2e/**` (medido en esta misma
-      # sesión, contra el backend real) dependen TODAS, directa o indirectamente, de
-      # `scripts/seed-demo.sh` (cuenta `demo.boda@example.com`, las dos plantillas registradas, una
-      # invitación publicada) — sin él, el primer `POST /auth/token` de `e2e/global-setup.ts`
-      # respondería 401 y el job entero fallaría en el primer segundo, no por un defecto del
-      # producto sino porque nadie sembró nada. `scripts/seed-demo.sh` NO se edita (prohibido, brief
-      # de este bloque): se le da el mismo `state.env` que ya lee para encontrar el puerto de
-      # Postgres — aquí no hay `scripts/pg-ephemeral.sh` (CI usa el servicio `postgres:` de arriba,
-      # puerto fijo 55432) — y el `PGPASSWORD` que sus llamadas a `psql` necesitan contra un
-      # servidor con contraseña (el clúster efímero local no la pide; este servicio sí).
+      # cuenta de demostración). Las e2e de `frontend/apps/web/e2e/**` dependen TODAS, directa o
+      # indirectamente, de `scripts/seed-demo.sh` (cuenta `demo.boda@example.com`, las dos plantillas
+      # registradas, una invitación publicada) — sin él, el primer `POST /auth/token` de
+      # `e2e/global-setup.ts` respondería 401. `scripts/seed-demo.sh` NO se edita: se le da el mismo
+      # `state.env` que ya lee para encontrar el puerto de Postgres —aquí no hay `pg-ephemeral.sh`,
+      # CI usa el servicio `postgres:` de arriba, puerto fijo 55432— y el `PGPASSWORD` que sus
+      # llamadas a `psql` necesitan contra un servidor con contraseña.
+      # `TPL_TEST_PGBIN`: en el runner `psql` está en /usr/bin (envoltorio de postgresql-common), no
+      # en /usr/lib/postgresql/16/bin, que es el defecto del script (divergencia runner/local).
       - name: Sembrar demo (cuenta, plantillas registradas, invitación publicada)
         working-directory: .
         run: |
           mkdir -p /tmp/templates2-pg
           echo "TPL_TEST_PGPORT=55432" > /tmp/templates2-pg/state.env
-          bash scripts/seed-demo.sh
+          TPL_TEST_PGBIN="$(dirname "$(command -v psql)")" bash scripts/seed-demo.sh
         env:
           TPL_DEV_BASE: http://127.0.0.1:6003
           TPL_DEV_DB: templates2_e2e
@@ -334,15 +328,17 @@ jobs:
 
       # El servidor web del frontend lo arranca Playwright (`webServer` de playwright.config.ts),
       # NO un `&` suelto en este paso: un proceso lanzado con `&` en un step muere al terminarlo.
-      - name: e2e + a11y
-        run: pnpm --filter web exec playwright test --fail-on-flaky-tests
+      #
+      # Dos invocaciones a propósito (política anti-flake, `06 §8.2` / ADR-1R-C-11): `a11y-publico`
+      # es el único spec que flakea en paralelo (`handoffs/3c-para-siguiente.md`), así que corre
+      # aparte con `--workers=1` y el resto conserva los 4 workers de la config. No es cuarentena:
+      # el spec SE EJECUTA y su fallo rompe el job igual que cualquier otro (`--fail-on-flaky-tests`
+      # en ambas). Queda anotado como issue en `memoria/issues-ci.md` (I-CI-01).
+      - name: e2e + a11y (4 workers, todos los specs menos a11y-publico)
+        run: pnpm --filter web exec playwright test --fail-on-flaky-tests '^(?!.*a11y-publico\.spec\.ts).*$'
 
-      # Fase 3-C, bloque 2 (F3): galería de diseño (`/design`), aparte de las pruebas de arriba
-      # porque no toca el backend en absoluto (ni Postgres ni `scripts/seed-demo.sh`) — tiene su
-      # propia config sin `globalSetup`, con su propio `webServer` en el puerto 3133
-      # (`playwright.design.config.ts`, brief 3c-b2-f3 §4/§5). Mismo Chromium, cacheado arriba.
-      - name: e2e de la galería de diseño (regresión visual, contraste y axe)
-        run: pnpm --filter web exec playwright test --config=playwright.design.config.ts --fail-on-flaky-tests
+      - name: a11y del render público con un solo worker (I-CI-01)
+        run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=1 a11y-publico.spec.ts
 
       - if: always()
         uses: actions/upload-artifact@v4
@@ -360,19 +356,15 @@ jobs:
           path: build/dev/backend-e2e.log
           retention-days: 7
 
-      # Bloque 3-6 — compuerta (b) de `04 §16.2` (LCP y el resto de Core Web Vitals): AUSENTE por
-      # completo de este workflow hasta ahora — solo la compuerta (a) (`check-budget.mjs`, vía
-      # `presupuesto.spec.ts` dentro del paso de arriba) se ejecutaba en CI. `lighthouserc.cjs`
-      # (bloque 3-3) ya descubre la URL publicada por la API real, así que solo hace falta
-      # apuntarlo a un Chrome real: se reutiliza el que el paso "Instalar Chromium"/la caché de
-      # arriba ya dejó en `PLAYWRIGHT_BROWSERS_PATH`, localizado por patrón porque el número de
-      # revisión cambia con la versión de Playwright.
+      # Bloque 3-6 — compuerta (b) de `04 §16.2` (LCP y el resto de Core Web Vitals).
+      # `lighthouserc.cjs` (bloque 3-3) descubre la URL publicada por la API real, así que solo hace
+      # falta apuntarlo a un Chrome real: el mismo Chromium 1194 que instaló el paso de arriba.
       - name: LCP y Core Web Vitals (LHCI, 04 §16.2)
         working-directory: frontend/apps/web
         run: |
-          CHROME_PATH="$(find "$PLAYWRIGHT_BROWSERS_PATH" -maxdepth 2 -type d -name 'chromium-*' -print -quit)/chrome-linux/chrome"
+          CHROME_PATH="$PLAYWRIGHT_BROWSERS_PATH/chromium-1194/chrome-linux/chrome"
           echo "CHROME_PATH=$CHROME_PATH"
-          test -x "$CHROME_PATH" || { echo "No encuentro el Chromium de Playwright en $PLAYWRIGHT_BROWSERS_PATH"; exit 1; }
+          test -x "$CHROME_PATH" || { echo "No encuentro el Chromium 1194 en $PLAYWRIGHT_BROWSERS_PATH"; exit 1; }
           CHROME_PATH="$CHROME_PATH" npx lhci autorun --config=./lighthouserc.cjs
 
       - if: always()
@@ -380,4 +372,71 @@ jobs:
         with:
           name: lhci-reports
           path: frontend/apps/web/.lighthouseci/**
+          retention-days: 7
+
+  # ── Galería de diseño ───────────────────────────────────────────────────────────────────────────
+  # Fase 3-C, bloque 2 (F3): regresión visual, contraste y axe de `/design` (279 pruebas). Estaba
+  # como UN PASO MÁS del job `e2e`, y ahí sumaba su propio `next build` + sus 279 pruebas a un job
+  # que ya compilaba el backend, sembraba y corría las e2e con backend real: el objetivo de < 25 min
+  # de reloj del encargo no cabía. Se saca a un job propio —autorizado expresamente («si no llega,
+  # paraleliza jobs… nunca recortes pruebas»)— porque NO toca el backend en absoluto: ni Postgres ni
+  # `seed-demo.sh`; tiene su propia config sin `globalSetup` y su propio `webServer` en el 3133
+  # (`playwright.design.config.ts`). Ni una sola prueba deja de ejecutarse: cambian de job, no
+  # desaparecen.
+  design:
+    name: galería de diseño (regresión visual + contraste + axe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.pw-browsers
+      # `playwright.config.ts` y `playwright.design.config.ts` ya leen esta variable: si el binario
+      # existe, lo usan como `executablePath`. Es lo que iguala el motor de render del runner al del
+      # entorno donde se generaron las capturas de referencia.
+      PW_CHROMIUM_PATH: ${{ github.workspace }}/.pw-browsers/chromium-1194/chrome-linux/chrome
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Caché de navegadores
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
+          key: pw1194-${{ runner.os }}-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+
+      # Las dependencias APT del sistema van SIEMPRE (viven en la imagen del runner, no en la caché
+      # de navegadores); el navegador y ffmpeg solo cuando la caché no acertó.
+      - name: Dependencias del sistema para Chromium
+        run: pnpm --filter web exec playwright install-deps chromium
+      - name: "ffmpeg (obligatorio; `video: retain-on-failure` graba en TODAS las pruebas)"
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter web exec playwright install ffmpeg
+      - name: Chromium 1194 — la MISMA revisión con la que se hicieron las capturas de referencia
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx --yes playwright-core@1.56.0 install chromium
+
+      - name: e2e de la galería de diseño (regresión visual, contraste y axe)
+        run: pnpm --filter web exec playwright test --config=playwright.design.config.ts --fail-on-flaky-tests
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: design-report
+          path: |
+            frontend/apps/web/playwright-report/**
+            frontend/apps/web/test-results/**
           retention-days: 7
