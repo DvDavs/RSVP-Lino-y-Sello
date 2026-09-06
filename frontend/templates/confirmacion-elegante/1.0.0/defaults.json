@@ -1,0 +1,375 @@
+{
+  "templateSlug": "confirmacion-elegante",
+  "templateVersion": "1.0.0",
+  "content": {
+    "amenities.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "PMW9C9S1VSQK49TAHNR3FYQS4D",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Salón de belleza"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Marck Luga"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.facebook.com/marck.luga.39"
+            }
+          }
+        }
+      ]
+    },
+    "amenities.title": {
+      "kind": "text",
+      "value": "Amenidades"
+    },
+    "couple.heading": {
+      "kind": "text",
+      "value": "Reserva la fecha"
+    },
+    "couple.honoree": {
+      "kind": "person",
+      "name": "Pedro Estrada"
+    },
+    "couple.honoreeMessage": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Hoy que mi alma se viste con sus mejores galas; bendíceme y bendice a los que amo."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "cover.buttonLabel": {
+      "kind": "text",
+      "value": "Save the date"
+    },
+    "cover.subtitle": {
+      "kind": "text",
+      "value": "Mi confirmación"
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "ZWED81SQJNHDNCBQ2CMCMSHVP6",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Damas"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo/corto o traje elegante."
+            }
+          }
+        },
+        {
+          "itemId": "YW7P439M6JC5WKQGQ0HWNGEP71",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Caballeros"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje o smoking, corbata, zapatos de vestir."
+            }
+          }
+        }
+      ]
+    },
+    "dressCode.title": {
+      "kind": "text",
+      "value": "Dress Code"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "C0880YKFC6H1SS3FZB23FK3H5V",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Ceremonia"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T16:30",
+              "end": "2025-12-31T17:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "BKKA451EDFJN30D070FE15V30G",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Fiesta"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T19:00",
+              "end": "2025-12-31T19:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Por definir. (Dale clic para ver la ubicación)"
+            }
+          }
+        }
+      ]
+    },
+    "event.title": {
+      "kind": "text",
+      "value": "Itinerario"
+    },
+    "family.group1": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "JQ94AKDBA3QB9QV0B1S12DK948",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "KCE2KPFSJWXRZPZ13SS2YB0WEH",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group2": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "NNND70XMDQPQZ9YEE3T7W4NM9A",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "JVZCYJFCFFK5YX06SZB5XCP1HX",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.intro": {
+      "kind": "listText",
+      "items": [
+        "Una luz para toda la vida me dará Dios en la confirmación. Los invito a acompañarme y alegrarme en este día."
+      ]
+    },
+    "footer.musicEnabled": {
+      "kind": "boolean",
+      "value": true
+    },
+    "footer.note": {
+      "kind": "text",
+      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+    },
+    "gallery.hashtags": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "HKWVQ4W9CVH18W680WH6ZXB4AS",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#confirmación"
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "facebook"
+            }
+          }
+        },
+        {
+          "itemId": "JGSG17TW885N082D8E429MWS9S",
+          "values": {
+            "platform": {
+              "kind": "choice",
+              "optionId": "instagram"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.intro": {
+      "kind": "text",
+      "value": "No olvides tomar fotos"
+    },
+    "gallery.title": {
+      "kind": "text",
+      "value": "Galería"
+    },
+    "gifts.options": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "B4JHS19GQQWNYN8ZNTA8ZZXJHB",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "cash"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Depósito o transferencia"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Banco: SANTANDER",
+                "Titular: KARLA ZARATE CRUZ",
+                "Cuenta CLABE: 014610606106246881",
+                "Número de tarjeta: 60610624688"
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "890XJ9BF5GMY78554ZJHN6222F",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "store"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Mesa Liverpool"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Número de evento 50355602"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602"
+            }
+          }
+        }
+      ]
+    },
+    "gifts.title": {
+      "kind": "text",
+      "value": "Mesa de Regalos"
+    },
+    "rsvp.deadline": {
+      "kind": "date",
+      "value": "2023-07-26"
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Boda sin niños, agradecemos su comprensión."
+    },
+    "rsvp.title": {
+      "kind": "text",
+      "value": "Confirma tu asistencia"
+    },
+    "suggestions.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "A0B53TR2KBAH3Z8WMAP3D64S4A",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Hotel"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "City Express Oaxaca"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+            }
+          }
+        },
+        {
+          "itemId": "BD9D2QRJFH8C19Q373KEZYNJ73",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Sitio de Taxis"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Sitio Antequera"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1"
+            }
+          }
+        },
+        {
+          "itemId": "WRRTH3ZMFCQSRRVF2S8XA1K65F",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Renta de Autos"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax."
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8"
+            }
+          }
+        }
+      ]
+    },
+    "suggestions.title": {
+      "kind": "text",
+      "value": "Recomendaciones"
+    }
+  }
+}

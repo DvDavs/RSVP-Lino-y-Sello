@@ -1474,3 +1474,17 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   traducciones están probadas por unidad. **Supuesto tomado:** es aceptable, porque provocar uno
   exigiría saltarse el `check` a propósito (`--sin-check`, que existe sólo para depurar). ¿Se quiere
   una prueba de integración que use `--sin-check` para dejar constancia de cada `422`?
+- [Fase 4 · 4-4b] **Corrección menor a la memoria: `familyIntro` de `cumpleanos` mide 273 caracteres,
+  no 278.** `handoffs/4-2.md` y `ADR-4-2-02` citan 278; medido de nuevo sobre
+  `src/main/resources/data/mongo/default_content_cumpleanos.json → texts.familyIntro` y sobre el
+  `informe-de-perdidas.json` producido por la herramienta: ambos dan **273**, mismo texto carácter a
+  carácter. No cambia ninguna decisión (273 > 200 igual viola I-16, la decisión sigue siendo
+  `omitir-elemento`). **Supuesto tomado:** no corregí `handoffs/4-2.md` ni la ADR (no son míos y no
+  cambian su sentido). ¿Se corrige la cifra en esos dos documentos la próxima vez que se toquen?
+- [Fase 4 · 4-4b] **`pnpm --filter … run convertir -- <id>` no funciona en este worktree**: el `--`
+  llega literal al script (`tsx src/cli.ts -- 8 --dry-run`) y el CLI lo rechaza con salida 2, pese a
+  ser el comando exacto de `handoffs/4-2.md`. Usé `npx tsx src/cli.ts <id> …` directamente dentro de
+  `packages/migration-legacy/`, que ejecuta lo mismo y funciona. **Supuesto tomado:** es una
+  peculiaridad de esta instalación de pnpm (10.33), no un defecto de la herramienta — no toqué
+  `cli.ts` ni `package.json`. ¿Vale la pena que 4-2 (o quien mantenga el paquete) añada una nota en
+  su comentario de cabecera con la forma alternativa, para que el próximo agente no lo repita?

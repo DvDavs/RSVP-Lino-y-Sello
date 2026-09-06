@@ -1,0 +1,375 @@
+{
+  "templateSlug": "comunion-elegante",
+  "templateVersion": "1.0.0",
+  "content": {
+    "amenities.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "D3BHMCQRPX0ZJN47DRVPAYNH50",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Salón de belleza"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Marck Luga"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.facebook.com/marck.luga.39"
+            }
+          }
+        }
+      ]
+    },
+    "amenities.title": {
+      "kind": "text",
+      "value": "Amenidades"
+    },
+    "couple.heading": {
+      "kind": "text",
+      "value": "Reserva la fecha"
+    },
+    "couple.honoree": {
+      "kind": "person",
+      "name": "Vanessa Jiménez"
+    },
+    "couple.honoreeMessage": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Señor, hoy recibo el sagrado sacramento de la comunión para ser bendecida con la gracia de tu amor, toma mi corazón en tus benditas manos y jamás te separes de mí."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "cover.buttonLabel": {
+      "kind": "text",
+      "value": "Save the date"
+    },
+    "cover.subtitle": {
+      "kind": "text",
+      "value": "Mi primera comunión"
+    },
+    "dressCode.rules": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "SF4NV6CMSXYB6E8HMQ7QX139YV",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Damas"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Vestido largo/corto o traje elegante."
+            }
+          }
+        },
+        {
+          "itemId": "E2PEW786S1Z4005Q40MC51Q4D2",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Caballeros"
+            },
+            "detail": {
+              "kind": "text",
+              "value": "Traje o smoking, corbata, zapatos de vestir."
+            }
+          }
+        }
+      ]
+    },
+    "dressCode.title": {
+      "kind": "text",
+      "value": "Dress Code"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "F8C0AXYS31TQFJ0J578Y01BN7Z",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Ceremonia"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T16:30",
+              "end": "2025-12-31T17:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Templo de Santo Domingo de Guzmán. (Dale clic para ver la ubicación)",
+              "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6"
+            }
+          }
+        },
+        {
+          "itemId": "6WT35H3BNHJB7JEM8R1A5HRW1Q",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Fiesta"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2025-12-31T19:00",
+              "end": "2025-12-31T19:30"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Por definir. (Dale clic para ver la ubicación)"
+            }
+          }
+        }
+      ]
+    },
+    "event.title": {
+      "kind": "text",
+      "value": "Itinerario"
+    },
+    "family.group1": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "R74H5WR0T5DDNBJ0C4JGBH80VE",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "0FSGS77YXT5Y17YJ0DR602SEAK",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.group2": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "5TNFSP3Y4M228W00447NFA5HH5",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        },
+        {
+          "itemId": "4T0621X9NYV7CRC2N2TVP3P9NT",
+          "values": {
+            "showPhoto": {
+              "kind": "boolean",
+              "value": true
+            }
+          }
+        }
+      ]
+    },
+    "family.intro": {
+      "kind": "listText",
+      "items": [
+        "Acompáñame a celebrar este día tan especial en el que recibo por primera vez a nuestro señor Jesucristo."
+      ]
+    },
+    "footer.musicEnabled": {
+      "kind": "boolean",
+      "value": true
+    },
+    "footer.note": {
+      "kind": "text",
+      "value": "Invitaciones Digitales Agape 2021. All Rights Reserved."
+    },
+    "gallery.hashtags": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "4RP6HPJSJYGT9ZKKMZ5NPXP89V",
+          "values": {
+            "tag": {
+              "kind": "text",
+              "value": "#comunión"
+            },
+            "platform": {
+              "kind": "choice",
+              "optionId": "facebook"
+            }
+          }
+        },
+        {
+          "itemId": "ZKAYVW4CY9ZHRXHT435K2A8B58",
+          "values": {
+            "platform": {
+              "kind": "choice",
+              "optionId": "instagram"
+            }
+          }
+        }
+      ]
+    },
+    "gallery.intro": {
+      "kind": "text",
+      "value": "No olvides tomar fotos"
+    },
+    "gallery.title": {
+      "kind": "text",
+      "value": "Galería"
+    },
+    "gifts.options": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "MVY588CVXY4GZT45NCS61F86WH",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "cash"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Depósito o transferencia"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Banco: SANTANDER",
+                "Titular: KARLA ZARATE CRUZ",
+                "Cuenta CLABE: 014610606106246881",
+                "Número de tarjeta: 60610624688"
+              ]
+            }
+          }
+        },
+        {
+          "itemId": "VT24S1A31X10AX3KS53FVMV4DH",
+          "values": {
+            "kind": {
+              "kind": "choice",
+              "optionId": "store"
+            },
+            "title": {
+              "kind": "text",
+              "value": "Mesa Liverpool"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Número de evento 50355602"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602"
+            }
+          }
+        }
+      ]
+    },
+    "gifts.title": {
+      "kind": "text",
+      "value": "Mesa de Regalos"
+    },
+    "rsvp.deadline": {
+      "kind": "date",
+      "value": "2023-07-26"
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Boda sin niños, agradecemos su comprensión."
+    },
+    "rsvp.title": {
+      "kind": "text",
+      "value": "Confirma tu asistencia"
+    },
+    "suggestions.items": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "R2GHFGH8G0N1V3Q09DJ6BATVX6",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Hotel"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "City Express Oaxaca"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca"
+            }
+          }
+        },
+        {
+          "itemId": "40ZJWD9BH4MAK4VBZ4K9KMPV6F",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Sitio de Taxis"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Sitio Antequera"
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://www.seccionamarilla.com.mx/resultados/sitio-antequera/1"
+            }
+          }
+        },
+        {
+          "itemId": "R385KCPKDCFPRR9J25K76AB6MA",
+          "values": {
+            "name": {
+              "kind": "text",
+              "value": "Renta de Autos"
+            },
+            "detail": {
+              "kind": "listText",
+              "items": [
+                "Murguía 102, RUTA INDEPENDENCIA, Centro, 68000 Oaxaca de Juárez, Oax."
+              ]
+            },
+            "link": {
+              "kind": "link",
+              "href": "https://goo.gl/maps/iEfDN2DXwF3FcpEc8"
+            }
+          }
+        }
+      ]
+    },
+    "suggestions.title": {
+      "kind": "text",
+      "value": "Recomendaciones"
+    }
+  }
+}
