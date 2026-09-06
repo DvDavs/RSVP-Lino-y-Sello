@@ -1474,3 +1474,18 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   traducciones están probadas por unidad. **Supuesto tomado:** es aceptable, porque provocar uno
   exigiría saltarse el `check` a propósito (`--sin-check`, que existe sólo para depurar). ¿Se quiere
   una prueba de integración que use `--sin-check` para dejar constancia de cada `422`?
+- [Fase 4 · 4-4C] **`eventKind` y `minPlanTier` del `templateId` 13 (`evento-elegante`, cohorte B) no
+  se pueden confirmar desde este repositorio.** `05 §10.2` y `contratos.md §9` [V] son explícitos: el
+  13 no tiene fila `invitation_template` (ninguna migración de Flyway lo inserta) y su `event_type` 7
+  tampoco existe en Flyway. La herramienta de 4-2 (`src/plantillas.ts:98-101`) ya deja escrito el
+  supuesto más conservador y yo lo dejé sin tocar: `eventKind: "generic"` (`05 §10.2`: «si en
+  producción tampoco existe, el paquete se registra con `eventKinds: ["generic"]`») y
+  `minPlanTier: 2`, leído directamente de F1 (`default_content_evento.json`: `"eventTypeId":7,
+  "planId":2`), no inventado. Verificado en esta ronda: la conversión construye y pasa `check` con
+  `eventKinds: ["generic"]`, `minPlanTier: 2`
+  (`frontend/templates/evento-elegante/1.0.0/template.json`). **Qué haría falta para confirmarlo:**
+  una consulta a Postgres de PRODUCCIÓN — `SELECT * FROM invitation_template WHERE id = 13` (por si
+  existe allí una fila que este repositorio no ve) y `SELECT * FROM event_type WHERE id = 7` — para
+  saber si el 13 tiene un `eventKind` real distinto de `generic` y un `min_plan_tier` distinto de 2.
+  Mientras esa fila no se lea, `evento-elegante@1.0.0` queda registrado con el supuesto conservador y
+  debe tratarse como revisable, no como dato firme.
