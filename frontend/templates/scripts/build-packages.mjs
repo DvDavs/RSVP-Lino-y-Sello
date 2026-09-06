@@ -196,6 +196,220 @@ for (const t of PLANTILLAS) {
   console.log(`   huella local del paquete (no es el package_hash del backend): sha256:${sha256(Buffer.from(partes.join('|'))).slice(0, 32)}…`);
 }
 
+// =================================================================================================
+// VERSIONES DERIVADAS (bloque 4-0A de la fase 4) — subir un paquete ya publicado a la siguiente
+// versión semver SIN volver a dibujar nada y SIN teclear un solo `sha256`.
+//
+// Por qué existe (handoffs/3-para-fase-4.md §4): `boda-clasica` cambió de contenido en I-09, así que
+// una base con la `1.0.0` ANTIGUA responde `409 TPL_VERSION_HASH_MISMATCH` al re-registrarse — que es
+// el comportamiento correcto (ADR-008: una versión publicada nunca se pisa), no un fallo. La salida
+// no es pisar la versión: es publicar una nueva.
+//
+// Por qué DERIVA de `frontend/templates/<slug>/<desde>/` y no de `diseno/ejemplos/` como el bucle de
+// arriba: el ejemplo de diseño describe la `1.0.0` y `diseno/**` es área de sólo lectura para este
+// bloque. Además, derivar del paquete ya construido garantiza por construcción que la versión nueva
+// contiene EXACTAMENTE los mismos bytes de arte (`build-art.mjs` necesita `@resvg/resvg-js` y
+// `sharp`, dependencias nativas que este entorno no tiene instaladas — ADR-3B-I09-02 lo midió), y
+// que el diff estructural contra la anterior es vacío salvo que alguien lo cambie a propósito.
+//
+// Lo que hace, en orden:
+//   1. copia `assets/` byte a byte;
+//   2. reescribe `template.json` con `version` = destino y `migrationsFrom` = [origen], y vuelve a
+//      MEDIR `sha256`/`bytes` de cada archivo real (P5: nunca se teclean);
+//   3. reescribe `defaults.json` con `templateVersion` = destino (lo exige
+//      `TemplatePackageParser.comprobarDefaults`, `TPL_PACKAGE_DEFAULTS_MISMATCH`);
+//   4. copia `theme.json` sin tocar;
+//   5. calcula el DIFF ESTRUCTURAL con el mismo algoritmo del backend
+//      (`migration/StructuralDiffCalculator.kt`) y emite `migrations/<desde>-to-<hasta>.json` con un
+//      `MigrationPlan` que lo cubra (ADR-028). Diff vacío ⇒ `ops: []`;
+//   6. calcula el `package_hash` REAL de las dos versiones con la fórmula de `01 §2.1`, para poder
+//      cotejarlo con el que devuelve el registro sin tener que levantar el backend.
+//
+// Uso:  node frontend/templates/scripts/build-packages.mjs            (construye)
+//       node frontend/templates/scripts/build-packages.mjs --check    (falla si hay deriva)
+
+const DERIVADAS = [
+  { slug: 'boda-clasica', desde: '1.0.0', hasta: '1.0.1' },
+];
+
+/** `canonicalJson` de `01 §5.5`, idéntico a `packages/schema/src/compose.ts:228` y a `CanonicalJson.kt`. */
+function canonicalJson(v) {
+  if (v === null || typeof v === 'number' || typeof v === 'boolean' || typeof v === 'string') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(canonicalJson).join(',') + ']';
+  return '{' + Object.keys(v).filter((k) => v[k] !== undefined).sort()
+    .map((k) => JSON.stringify(k) + ':' + canonicalJson(v[k])).join(',') + '}';
+}
+
+/**
+ * `package_hash` **exactamente** como `01 §2.1` y `schema/PackageHasher.kt`: una línea
+ * `"<ruta>\t<sha256hex>"` por archivo, ordenadas por la codificación UTF-8 de la ruta, unidas con
+ * `\n` (sin `\n` final). Los `.json` se hashean canonicalizados; los assets, por sus bytes literales.
+ */
+function packageHash(archivos) {
+  const orden = (a, b) => Buffer.compare(Buffer.from(a.ruta, 'utf8'), Buffer.from(b.ruta, 'utf8'));
+  const lineas = [...archivos].sort(orden).map((f) => {
+    const contenido = f.json !== undefined ? Buffer.from(canonicalJson(f.json), 'utf8') : f.bytes;
+    return `${f.ruta}\t${sha256(contenido)}`;
+  });
+  return 'sha256:' + sha256(Buffer.from(lineas.join('\n'), 'utf8'));
+}
+
+/** Lee un paquete de disco tal y como lo verá el registro. */
+function leerPaquete(dir) {
+  const json = (n) => JSON.parse(fs.readFileSync(path.join(dir, n), 'utf8'));
+  const archivos = [
+    { ruta: 'template.json', json: json('template.json') },
+    { ruta: 'theme.json', json: json('theme.json') },
+    { ruta: 'defaults.json', json: json('defaults.json') },
+  ];
+  const dirAssets = path.join(dir, 'assets');
+  if (fs.existsSync(dirAssets)) {
+    for (const n of fs.readdirSync(dirAssets).sort()) {
+      archivos.push({ ruta: `assets/${n}`, bytes: fs.readFileSync(path.join(dirAssets, n)) });
+    }
+  }
+  const dirMig = path.join(dir, 'migrations');
+  if (fs.existsSync(dirMig)) {
+    for (const n of fs.readdirSync(dirMig).sort()) {
+      archivos.push({ ruta: `migrations/${n}`, json: JSON.parse(fs.readFileSync(path.join(dirMig, n), 'utf8')) });
+    }
+  }
+  return { manifiesto: archivos[0].json, theme: archivos[1].json, defaults: archivos[2].json, archivos };
+}
+
+/** `blockId → BlockSpec` de todos los bloques de primer nivel (los `itemBlocks` de un grupo no cuentan). */
+function bloquesDe(manifiesto) {
+  const r = new Map();
+  for (const s of manifiesto.sections) for (const b of s.blocks) r.set(b.id, { ...b, sectionKey: s.key });
+  return r;
+}
+
+/**
+ * Espejo exacto de `StructuralDiffCalculator.kt`: sólo mira lo que puede ROMPER un documento ya
+ * escrito (lo que desaparece o se estrecha). Añadir un bloque, una sección, una variante o una
+ * paleta no entra en el diff: R2 le da su default y R1c lo coloca en su sitio.
+ */
+function diffEstructural(anterior, nueva) {
+  const antes = bloquesDe(anterior.manifiesto);
+  const ahora = bloquesDe(nueva.manifiesto);
+  const removedBlocks = []; const retypedBlocks = []; const narrowedGroups = [];
+  for (const id of [...antes.keys()].sort()) {
+    const a = antes.get(id); const b = ahora.get(id);
+    if (!b) { removedBlocks.push(id); continue; }
+    if (a.type !== b.type) { retypedBlocks.push({ id, from: a.type, to: b.type }); continue; }
+    if (a.type === 'group' && b.max < a.max) narrowedGroups.push({ id, from: a.max, to: b.max });
+  }
+  const seccionesAhora = new Map(nueva.manifiesto.sections.map((s) => [s.key, s]));
+  const removedSections = []; const removedVariants = [];
+  for (const s of [...anterior.manifiesto.sections].sort((x, y) => (x.key < y.key ? -1 : x.key > y.key ? 1 : 0))) {
+    const n = seccionesAhora.get(s.key);
+    if (!n) { removedSections.push(s.key); continue; }
+    for (const v of [...s.variants].sort()) if (!n.variants.includes(v)) removedVariants.push({ sectionKey: s.key, variant: v });
+  }
+  const ids = (xs) => xs.map((x) => x.id);
+  const removedPalettes = ids(anterior.theme.palettes).filter((id) => !ids(nueva.theme.palettes).includes(id)).sort();
+  const removedFontSets = ids(anterior.theme.fontSets).filter((id) => !ids(nueva.theme.fontSets).includes(id)).sort();
+  return { removedBlocks, removedSections, retypedBlocks, narrowedGroups, removedPalettes, removedFontSets, removedVariants };
+}
+
+const diffVacio = (d) => Object.values(d).every((x) => x.length === 0);
+
+/**
+ * `MigrationPlan` MÍNIMO que cubre el diff, con las 11 operaciones del catálogo cerrado de `01 §6.2`
+ * y con la misma noción de "cubierto" que `MigrationPlanCoverageChecker.kt`.
+ *
+ * Sólo se derivan mecánicamente las tres que no exigen una decisión de autor: `removeSection`
+ * (que además cubre los bloques de su sección), `removeBlock` y `shrinkGroup`. Un bloque que cambia
+ * de tipo necesita que un humano elija `converterId`, y una paleta o una variante retiradas necesitan
+ * un destino: para esos el generador **falla nombrando el elemento** en vez de inventar una
+ * operación. P1: nada se descarta en silencio, tampoco aquí.
+ */
+function planDeMigracion(slug, desde, hasta, anterior, diff) {
+  const ops = [];
+  const seccionesRetiradas = new Set(diff.removedSections);
+  for (const key of diff.removedSections) ops.push({ op: 'removeSection', key });
+  const seccionDeBloque = new Map([...bloquesDe(anterior.manifiesto)].map(([id, b]) => [id, b.sectionKey]));
+  for (const id of diff.removedBlocks) {
+    if (seccionesRetiradas.has(seccionDeBloque.get(id))) continue;   // la removeSection ya lo cubre
+    ops.push({ op: 'removeBlock', id });
+  }
+  for (const g of diff.narrowedGroups) ops.push({ op: 'shrinkGroup', groupId: g.id, max: g.to });
+  const aMano = [
+    ...diff.retypedBlocks.map((r) => `retypedBlock ${r.id} (${r.from}→${r.to}): elige converterId y escribe changeBlockType`),
+    ...diff.removedPalettes.map((p) => `removedPalette ${p}: escribe renamePalette con la paleta destino`),
+    ...diff.removedFontSets.map((f) => `removedFontSet ${f}: escribe renameFontSet con el set destino`),
+    ...diff.removedVariants
+      .filter((v) => !seccionesRetiradas.has(v.sectionKey))
+      .map((v) => `removedVariant ${v.sectionKey}.${v.variant}: el catálogo de 11 ops no remapea variantes (hueco conocido, MigrationPlanCoverageChecker.kt); sólo se cubre retirando o renombrando la sección`),
+  ];
+  if (aMano.length > 0) {
+    console.error(`   el diff ${desde} → ${hasta} tiene elementos que NO se pueden derivar sin decidir:`);
+    for (const l of aMano) console.error(`     · ${l}`);
+    process.exit(2);
+  }
+  return { templateSlug: slug, from: desde, to: hasta, ops };
+}
+
+for (const d of DERIVADAS) {
+  const dirDesde = path.join(DESTINO, d.slug, d.desde);
+  const dirHasta = path.join(DESTINO, d.slug, d.hasta);
+  console.log('');
+  console.log(`== ${d.slug}: ${d.desde} → ${d.hasta} (versión derivada) ==`);
+  if (!fs.existsSync(path.join(dirDesde, 'template.json'))) {
+    console.error(`   FALTA ${path.relative(RAIZ, dirDesde)}: la versión de origen no está construida`);
+    process.exit(2);
+  }
+  const anterior = leerPaquete(dirDesde);
+
+  // 1. assets, byte a byte. No se dibuja nada: la versión nueva publica el mismo arte.
+  for (const nombre of fs.readdirSync(path.join(dirDesde, 'assets')).sort()) {
+    escribir(path.join(dirHasta, 'assets', nombre), fs.readFileSync(path.join(dirDesde, 'assets', nombre)));
+  }
+
+  // 2. manifiesto: versión nueva, `migrationsFrom` y `assets[]` MEDIDOS de los archivos reales.
+  const manifiesto = JSON.parse(JSON.stringify(anterior.manifiesto));
+  manifiesto.version = d.hasta;
+  manifiesto.migrationsFrom = [d.desde];
+  manifiesto.assets = anterior.manifiesto.assets.map((e) => {
+    const bytes = fs.readFileSync(path.join(SOLO_COMPROBAR ? dirDesde : dirHasta, e.path));
+    return { ...e, sha256: sha256(bytes), bytes: bytes.length };
+  });
+  escribir(path.join(dirHasta, 'template.json'), JSON.stringify(manifiesto, null, 2) + '\n');
+
+  // 3-4. `theme.json` tal cual; `defaults.json` sólo cambia la versión que declara.
+  escribir(path.join(dirHasta, 'theme.json'), JSON.stringify(anterior.theme, null, 2) + '\n');
+  const defaults = JSON.parse(JSON.stringify(anterior.defaults));
+  defaults.templateVersion = d.hasta;
+  escribir(path.join(dirHasta, 'defaults.json'), JSON.stringify(defaults, null, 2) + '\n');
+
+  // 5. diff estructural + plan de migración (ADR-028).
+  const nueva = { manifiesto, theme: anterior.theme, defaults };
+  const diff = diffEstructural(anterior, nueva);
+  const plan = planDeMigracion(d.slug, d.desde, d.hasta, anterior, diff);
+  const nombrePlan = `${d.desde}-to-${d.hasta}.json`;
+  escribir(path.join(dirHasta, 'migrations', nombrePlan), JSON.stringify(plan, null, 2) + '\n');
+  const resumen = Object.entries(diff).filter(([, v]) => v.length > 0)
+    .map(([k, v]) => `${k}=${v.length}`).join(' ');
+  console.log(`   diff estructural contra ${d.desde}: ${diffVacio(diff) ? 'VACÍO' : resumen}`);
+  console.log(`   migrations/${nombrePlan}: ${plan.ops.length} operación(es)`);
+  if (!diffVacio(diff) && manifiesto.version.split('.')[0] === anterior.manifiesto.version.split('.')[0]) {
+    console.error('   AVISO: el diff NO es vacío y el bump no es mayor: el registro lo rechazará con');
+    console.error('          422 TPL_MANIFEST_BREAKING_CHANGE_NOT_MAJOR (TemplateRegistrar.kt:196-203), aunque el plan lo cubra.');
+  }
+
+  // 6. `package_hash` real de las dos versiones (`01 §2.1`).
+  const nuevos = [
+    { ruta: 'template.json', json: manifiesto },
+    { ruta: 'theme.json', json: anterior.theme },
+    { ruta: 'defaults.json', json: defaults },
+    { ruta: `migrations/${nombrePlan}`, json: plan },
+    ...anterior.archivos.filter((f) => f.ruta.startsWith('assets/')),
+  ];
+  console.log(`   package_hash ${d.slug}@${d.desde} = ${packageHash(anterior.archivos)}`);
+  console.log(`   package_hash ${d.slug}@${d.hasta} = ${packageHash(nuevos)}`);
+  console.log(`   ${path.relative(RAIZ, dirHasta)}`);
+}
+
 if (SOLO_COMPROBAR && deriva > 0) {
   console.error(`\n${deriva} archivo(s) con deriva: vuelve a ejecutar sin --check.`);
   process.exit(1);

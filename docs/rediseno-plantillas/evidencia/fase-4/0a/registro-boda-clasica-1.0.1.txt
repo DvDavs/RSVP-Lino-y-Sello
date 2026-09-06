@@ -1,0 +1,37 @@
+== llamada 1: boda-clasica@1.0.1 ==
+POST /master/templates2/versions  (frontend/templates/boda-clasica/1.0.1)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 4,
+  "slug": "boda-clasica",
+  "version": "1.0.1",
+  "packageHash": "sha256:1d99bac4608383204cf3f586edab9240da05c33210b7504bc59c6b40c118cca2",
+  "assetsRegistered": 9,
+  "structuralDiff": {
+    "removedBlocks": [],
+    "removedSections": [],
+    "retypedBlocks": [],
+    "narrowedGroups": [],
+    "removedPalettes": [],
+    "removedFontSets": [],
+    "removedVariants": []
+  }
+}
+
+== llamada 2: el MISMO paquete, byte a byte ==
+POST /master/templates2/versions  (frontend/templates/boda-clasica/1.0.1)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 4,
+  "slug": "boda-clasica",
+  "version": "1.0.1",
+  "packageHash": "sha256:1d99bac4608383204cf3f586edab9240da05c33210b7504bc59c6b40c118cca2",
+  "assetsRegistered": 0
+}
+
+== tpl_template_version tras las dos llamadas ==
+4|boda-clasica|1.0.1|published|sha256:1d99bac4608383204cf3f586edab9240da05c33210b7504bc59c6b40c118cca2|1.0.0
+== cuántas filas boda-clasica@1.0.1 hay (debe ser 1) ==
+1

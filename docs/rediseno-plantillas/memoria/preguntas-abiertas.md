@@ -1300,3 +1300,38 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
 - **`/editor` no está en `scripts/check-budget.mjs`.** Medido a mano: 326,4 KB gz de primera carga
   (era 311,8 KB). **Supuesto:** le aplica el presupuesto del editor (600 KB), no el de la landing.
   ¿Se añade la ruta a la compuerta (fichero fuera del área de este agente)?
+
+## Fase 4 · bloque 4-0A (entorno, registro y versionado) — 5
+
+- [Fase 4 · 4-0A] **`contratos.md §3` describe mal el registro y contradice a ADR-028 y al código.**
+  Dice que el registro «EXIGE que un diff estructural contra la versión previa esté cubierto por un
+  `MigrationPlan` **si el bump no es mayor**». `TemplateRegistrar.kt:196-203` rechaza cualquier diff
+  no vacío cuando el bump **no** es mayor, con plan o sin él; el plan sólo se comprueba cuando el
+  bump SÍ es mayor. Un `MigrationPlan` no puede rescatar nunca un `1.0.0 → 1.0.1`. **Supuesto
+  tomado:** manda el código y ADR-028 (y `01 §6.3`, «un minor/patch solo puede añadir»); la frase de
+  `contratos.md §3` está mal redactada. ¿Se corrige la frase, o el comportamiento pretendido era el
+  de `contratos.md` y hay que cambiar el código? Sólo el orquestador toca `contratos.md`.
+- [Fase 4 · 4-0A] **La cabecera de `scripts/smoke.sh` documenta una receta incompleta.** Dice
+  `dev-backend.sh start` y luego `smoke.sh`; sobre un clúster recién creado eso da **4/19 OK** con
+  20 comprobaciones fallidas, porque la ruta 2 hace `:choose-template` sobre `xv-jardin@1.0.0`, que
+  nadie ha registrado, y ese `404` arrastra otras 13 rutas. Con `seed-demo.sh` en medio: 19/19.
+  **Supuesto tomado:** la receta correcta es `start` → `seed-demo.sh` → `smoke.sh`, y lo dejo
+  documentado en `handoffs/4-0a.md` sin tocar el script (`scripts/**` es sólo lectura para este
+  bloque). ¿Se corrige la cabecera, o mejor que `smoke.sh` siembre lo que necesita y deje de
+  depender del orden?
+- [Fase 4 · 4-0A] **¿Se depreca `boda-clasica@1.0.0` ahora que existe la `1.0.1`?** No lo hice.
+  **Supuesto tomado:** la opción conservadora es dejarla `published`: tiene documentos vivos (la
+  invitación de la demostración la usa) y deprecar cambia el catálogo para todos los clientes.
+  Si la intención es que las invitaciones nuevas nazcan en `1.0.1`, hace falta decidir además si las
+  existentes se migran con el plan (vacío) o se quedan donde están.
+- [Fase 4 · 4-0A] **Cada versión duplica sus assets en el repositorio.**
+  `boda-clasica/1.0.1/assets/` son 9 WebP (~380 KB) idénticos a los de `1.0.0/assets/`, y con cada
+  versión nueva se repite. **Supuesto tomado:** la inmutabilidad y la autocontención del paquete
+  valen ese precio, y es lo que exige el árbol de `01 §2.1`. ¿Se acepta como norma, o el kit de
+  autor debe ofrecer alguna forma de compartir arte entre versiones (que hoy el árbol no permite)?
+- [Fase 4 · 4-0A] **Tercera implementación de `canonicalJson` en el repositorio.** El generador de
+  paquetes lleva ahora la suya (Kotlin `CanonicalJson.kt`, `packages/schema/src/compose.ts:228` y
+  `frontend/templates/scripts/build-packages.mjs`), porque `frontend/templates/` está aislado del
+  workspace pnpm a propósito (ADR-3-2d-01) y no puede importar `@invitaciones/schema`. **Supuesto
+  tomado:** copiar seis líneas es preferible a romper ese aislamiento. ¿Se acepta, o el kit de autor
+  de la fase 4 debe entrar en el workspace pnpm y consumir el esquema de verdad?
