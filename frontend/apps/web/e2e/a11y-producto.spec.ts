@@ -67,6 +67,86 @@ async function auditoriaAxe(page: Page, donde: string, opciones: OpcionesAuditor
   ).toEqual([]);
 }
 
+/**
+ * WCAG 2.2 AA 2.5.8 «Target Size (Minimum)» sobre las pantallas del PRODUCTO (3C-ADV).
+ *
+ * Hueco que cierra: la compuerta de los 24 px existía sólo en `e2e/design-objetivos.spec.ts`, que
+ * recorre EXCLUSIVAMENTE las páginas de la GALERÍA (`paginasDeGaleria()`). Los componentes sueltos
+ * de `@invitaciones/ui` medían bien ahí y, compuestos en las pantallas reales, no: medido en la
+ * revisión adversarial del cierre, el enlace de marca de `CabeceraSitio` daba 109,4 x 23,4 px, el
+ * enlace de salto de `MarcoSitio` 123,6 x 21 px YA ENFOCADO (su `px-4 py-2` lo anulaba
+ * `not-sr-only`) y el «Volver a mis invitaciones» de `/ayuda` 160,6 x 18 px. `axe` no tiene regla
+ * para esto y ninguna de las auditorías de arriba lo veía.
+ *
+ * Mismo criterio que la galería: 24 px reales por lado, sin excepciones — la excepción «inline» de
+ * 2.5.8 no se aplica a ninguno de los objetivos de estas pantallas (ninguno vive dentro de una
+ * frase) y admitirla aquí volvería la compuerta discutible.
+ */
+const SELECTOR_INTERACTIVO = [
+  "a[href]",
+  "button",
+  "input:not([type=hidden])",
+  "select",
+  "textarea",
+  "summary",
+  "[tabindex]:not([tabindex='-1'])",
+  "[role=button]",
+  "[role=link]",
+  "[role=tab]",
+  "[role=switch]",
+  "[role=checkbox]",
+  "[role=radio]",
+  "[role=combobox]",
+  "[role=option]",
+  "[role=menuitem]",
+].join(",");
+
+async function objetivosDeAlMenos24px(page: Page, donde: string): Promise<void> {
+  const pequenos = await page.evaluate((selector) => {
+    const malos: Array<{ etiqueta: string; texto: string; ancho: number; alto: number }> = [];
+    for (const el of document.querySelectorAll(selector)) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) continue; // fuera del flujo o sin pintar
+      const estilo = getComputedStyle(el);
+      if (estilo.visibility === "hidden" || estilo.display === "none") continue;
+      if (el.closest("iframe")) continue;
+      // Un elemento recortado para lectores de pantalla (`sr-only`) NO es un objetivo: nadie puede
+      // apuntarlo hasta que recibe el foco, y entonces deja de estar recortado. El enlace de salto
+      // se mide aparte, ya enfocado, en `enlaceDeSaltoDeAlMenos24px`.
+      if (estilo.clipPath === "inset(50%)" || estilo.clip === "rect(0px, 0px, 0px, 0px)") continue;
+      if (r.width < 24 || r.height < 24) {
+        malos.push({
+          etiqueta: `${el.tagName.toLowerCase()}.${typeof el.className === "string" ? el.className.split(" ")[0] : ""}`,
+          texto: (el.textContent ?? "").trim().slice(0, 50),
+          ancho: Number(r.width.toFixed(1)),
+          alto: Number(r.height.toFixed(1)),
+        });
+      }
+    }
+    return malos;
+  }, SELECTOR_INTERACTIVO);
+  expect(pequenos, `${donde}: objetivos por debajo de 24 x 24 px reales:\n${JSON.stringify(pequenos, null, 2)}`).toEqual(
+    [],
+  );
+}
+
+/** El enlace de salto sólo existe con el foco puesto: se mide DESPUÉS de tabular hasta él. */
+async function enlaceDeSaltoDeAlMenos24px(page: Page, donde: string): Promise<void> {
+  await page.keyboard.press("Tab");
+  const salto = await page.evaluate(() => {
+    const el = document.activeElement as HTMLElement | null;
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { texto: (el.textContent ?? "").trim(), ancho: Number(r.width.toFixed(1)), alto: Number(r.height.toFixed(1)) };
+  });
+  expect(salto, `${donde}: el primer Tab no llegó a ningún elemento`).not.toBeNull();
+  expect(salto!.texto, `${donde}: el primer Tab tiene que llegar al enlace de salto`).toBe("Saltar al contenido");
+  expect(
+    salto!.alto >= 24 && salto!.ancho >= 24,
+    `${donde}: el enlace de salto mide ${salto!.ancho} x ${salto!.alto} px con el foco puesto (mínimo 24)`,
+  ).toBe(true);
+}
+
 async function sinParejasPorDebajoDeUmbral(page: Page, donde: string): Promise<void> {
   await page.evaluate(async () => {
     await document.fonts.ready;
@@ -86,6 +166,8 @@ test("landing (/): axe sin violaciones ni incompletas, contraste sobre la pila r
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await auditoriaAxe(page, "landing");
   await sinParejasPorDebajoDeUmbral(page, "landing");
+  await objetivosDeAlMenos24px(page, "landing");
+  await enlaceDeSaltoDeAlMenos24px(page, "landing");
 });
 
 test("acceso (/acceso): axe sin violaciones ni incompletas, contraste sobre la pila renderizada", async ({ page }) => {
@@ -93,6 +175,7 @@ test("acceso (/acceso): axe sin violaciones ni incompletas, contraste sobre la p
   await expect(page.getByRole("heading", { name: "Entra a tu cuenta" })).toBeVisible();
   await auditoriaAxe(page, "acceso");
   await sinParejasPorDebajoDeUmbral(page, "acceso");
+  await objetivosDeAlMenos24px(page, "acceso");
 
   // La segunda pestaña (Crear cuenta) es una disposición distinta: mismo criterio de exigencia.
   await page.getByRole("tab", { name: "Crear cuenta" }).click();
@@ -104,6 +187,7 @@ test("ayuda (/ayuda): axe sin violaciones ni incompletas", async ({ page }) => {
   await page.goto("/ayuda");
   await expect(page.getByRole("heading", { name: "¿En qué te ayudamos?", level: 1 })).toBeVisible();
   await auditoriaAxe(page, "ayuda");
+  await objetivosDeAlMenos24px(page, "ayuda");
 });
 
 test("404 público (/i/<token inexistente>): axe sin violaciones ni incompletas", async ({ page }) => {
@@ -171,6 +255,7 @@ test("editor y publicar: axe sin violaciones ni incompletas, contraste sobre la 
     await expect(page.getByRole("heading", { name: "Secciones" })).toBeVisible({ timeout: 30_000 });
     await auditoriaAxe(page, "editor · lista de secciones", { excluirLienzo: true });
     await sinParejasPorDebajoDeUmbral(page, "editor · lista de secciones");
+    await objetivosDeAlMenos24px(page, "editor · lista de secciones");
 
     await page.getByTestId("abrir-publicar").click();
     await expect(page.getByRole("dialog", { name: "Publicar invitación" })).toBeVisible({ timeout: 20_000 });

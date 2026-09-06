@@ -17,7 +17,11 @@ export function CabeceraSitio() {
   return (
     <header className="border-b border-ui-divider bg-ui-surface">
       <div className="mx-auto flex w-full max-w-ui-page items-center justify-between gap-3 px-5 py-3 sm:px-8">
-        <Link href="/" className="heading-sm rounded-ui-control text-ui-ink">
+        {/* `inline-flex items-center py-1`: sin relleno vertical el enlace medía 109,4 x 23,4 px
+            (3C-ADV, `getBoundingClientRect`), 0,6 px por debajo del mínimo de 24 px de WCAG 2.2 AA
+            2.5.8. El `py-1` no mueve un píxel de la cabecera — el botón «Entrar» de la derecha ya
+            es más alto y es él quien fija la altura de la fila. */}
+        <Link href="/" className="heading-sm inline-flex items-center rounded-ui-control py-1 text-ui-ink">
           {es_MX.comun.marca}
         </Link>
 

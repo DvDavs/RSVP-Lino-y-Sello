@@ -10,8 +10,8 @@
     "safari >= 15"
   ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node ../../packages/ui/scripts/copiar-fuentes-publicas.ts && next dev",
+    "build": "node ../../packages/ui/scripts/copiar-fuentes-publicas.ts && next build",
     "start": "next start",
     "test": "vitest run --coverage",
     "lint": "eslint . --config ../../eslint.config.mjs",

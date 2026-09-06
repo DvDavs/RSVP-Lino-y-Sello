@@ -43,7 +43,13 @@ export default function PaginaAyuda() {
         </h2>
         <p className="text-md mt-2 max-w-[56ch] text-ui-ink-muted">{es_MX.ayuda.contacto.texto}</p>
         <p className="mt-4">
-          <Link href="/editor" className="rounded-ui-control text-sm font-semibold text-ui-link hover:underline">
+          {/* `inline-flex items-center py-1`: medía 160,6 x 18 px (3C-ADV), por debajo del mínimo
+              de 24 px de 2.5.8. No es un enlace dentro de una frase (está solo en su párrafo), así
+              que no le vale la excepción «inline» de ese criterio. */}
+          <Link
+            href="/editor"
+            className="inline-flex items-center rounded-ui-control py-1 text-sm font-semibold text-ui-link hover:underline"
+          >
             {es_MX.ayuda.volverAlEditor}
           </Link>
         </p>
