@@ -1299,4 +1299,52 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   «¿Dónde?» de `11 §7`. ¿O el paso 3 debería limitarse a nombres y fecha?
 - **`/editor` no está en `scripts/check-budget.mjs`.** Medido a mano: 326,4 KB gz de primera carga
   (era 311,8 KB). **Supuesto:** le aplica el presupuesto del editor (600 KB), no el de la landing.
-  ¿Se añade la ruta a la compuerta (fichero fuera del área de este agente)?
+  ¿Se añade la ruta a la compuerta (fichero fuera del área de este agente)? **Resuelto en 3C-8**:
+  ya estaba en `check-budget.mjs` (`LIMITES_BASE` trae las tres rutas) cuando este agente empezó —
+  no hizo falta añadirla.
+
+## Fase 3-C · 3C-8 (e2e, axe, presupuestos y LCP — cierre del bloque 3)
+- **`/i/[publicToken]` y `/` siguen sobre presupuesto (156,2 y 153,4 KB gz de 150) tras el recorte
+  real que sí pude hacer** (el `es_MX` monolítico de `lib/i18n.ts` metía el árbol de textos del
+  editor/asistente en la ruta pública por dos frases; movidas a `textos.ts`, −6,9 KB en `/i`). Lo
+  que queda: `tailwind-merge` + `@radix-ui/react-slot` (~17,8 KB gz) aparecen como "JS propio" de
+  LAS TRES rutas por igual —incluida `/i/[publicToken]`, que no importa `@invitaciones/ui` en
+  ninguna parte de su código (`grep` confirmado)— porque Turbopack agrupa ese vendor compartido
+  entre 2+ rutas y `check-budget.mjs` no distingue eso de código genuinamente propio de la ruta.
+  **No es nuevo de este bloque**: ya estaba implícito en la medida de 3C-5 (146,0/148,1 KB), que no
+  lo desglosó. **Supuesto:** no me correspondía ni tocar la partición de chunks de Turbopack (riesgo
+  alto, fuera del alcance de "verificar y medir") ni subir el límite sin autorización. **Pregunta al
+  dueño:** ¿ADR para reconocer ~15-20 KB de vendor compartido del chrome como coste inevitable de
+  CUALQUIER ruta que use `@invitaciones/ui` (subiendo `/` y `/i` a, digamos, 160-165 KB con el
+  margen citado), o se abre una tarea dedicada a partición de chunks de Turbopack antes de tocar el
+  número? Mientras tanto, `e2e/landing.spec.ts:93` y `e2e/presupuesto.spec.ts:32` quedan en rojo
+  con la cifra real (deliberado: `contratos.md §6`, "sin pruebas en verde con salida real no hay
+  integración").
+
+  **Respuesta medida (3C-8b):** no era vendor compartido de `@invitaciones/ui` en general — era
+  `app/not-found.tsx` (RAÍZ), que por ser el límite de árbol de TODAS las rutas (`04 §19`) colgaba
+  su JS de CADA una. Montaba `MarcoSitio` → `CabeceraSitio` → `Button` (cliente, con
+  `tailwind-merge` + `@radix-ui/react-slot` detrás) solo para pintar un 404; `/i/[publicToken]` no
+  importa nada de `@invitaciones/ui` en su propio código pero pagaba esos ~17,8 KB gz igual, por
+  colgar del mismo `not-found` raíz. Reescrito como Server Component puro (sin `"use client"`, sin
+  `components/sitio/**`, sin `Button`; markup propio sobre las clases de `EmptyState`,
+  `ErrorGenerico` importado directo como ya hacía `PantallaError.tsx`): `/i/[publicToken]`
+  156,2→**142,0 KB** gz, `/` 153,4→**148,2 KB** gz (límite 150 KB), los dos DENTRO de presupuesto
+  sin subir el límite ni tocar la partición de chunks de Turbopack. La versión rica sigue en
+  `app/(chrome)/not-found.tsx` para el `notFound()` del chrome. No hizo falta el ADR planteado
+  arriba: no era coste estructural de `@invitaciones/ui`, era un límite de árbol con un import de
+  más. Margen en `/` queda ajustado (1,8 KB): una foto o icono nuevo en la portada puede volver a
+  sacarla de presupuesto; detalle en `handoffs/3c-8.md` §3C-8b.
+- **`aria-hidden-focus` (incomplete) tolerado en `e2e/a11y-producto.spec.ts` para el diálogo de
+  publicar**, sobre los centinelas `[data-radix-focus-guard]` y el resto del chrome que Radix marca
+  `aria-hidden` mientras el `Dialog` está abierto (`hideOthers`). **Supuesto:** es un patrón
+  ESPERADO de cualquier `Dialog` modal de Radix (mismo mecanismo que `bitacora/3c-b2-f3.md` ya
+  documentó para la galería), no un defecto — y que de verdad el foco no escapa ya está PROBADO por
+  `e2e/teclado-editor.spec.ts:124` (Tab dentro del diálogo abierto). Si el dueño no lo comparte, la
+  tolerancia vive en un único `Set` (`REGLAS_INCOMPLETAS_TOLERADAS_CON_DIALOGO_MODAL`) fácil de
+  retirar.
+- **Shim `components/ui/button.tsx` y `CLASES_CONTROL` de `FieldShell`** (pregunta abierta de 3C-7):
+  confirmado con `grep` que 3C-5/3C-6 ya habían migrado las dos pantallas que los importaban
+  (`/acceso`, `/editor`) a `@invitaciones/ui` directo. Borrados el shim, la carpeta `components/ui/`
+  entera y la constante — sin preguntar, porque ya no tenían NINGÚN importador (cambio local,
+  seguro, mecánico) y así lo pedía el propio brief de este bloque.

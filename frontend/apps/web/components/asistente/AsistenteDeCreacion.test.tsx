@@ -148,8 +148,8 @@ describe("paso 1 → paso 2 (el cierre de UX-N-02)", () => {
     // Y el paso 2, con esa URL, solo trae las plantillas de ese tipo.
     render(<AsistenteDeCreacion />);
     await waitFor(() => expect(getCatalog).toHaveBeenCalledWith({ eventKind: "quince" }));
-    expect(await screen.findByRole("heading", { name: "XV Jardín", level: 3 })).toBeTruthy();
-    expect(screen.queryByRole("heading", { name: "Boda clásica", level: 3 })).toBeNull();
+    expect(await screen.findByRole("heading", { name: "XV Jardín", level: 2 })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Boda clásica", level: 2 })).toBeNull();
   });
 
   it("si el tipo elegido no es el registrado, se avisa en vez de dejarlo pasar en silencio", async () => {

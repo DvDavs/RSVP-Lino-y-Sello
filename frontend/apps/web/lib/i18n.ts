@@ -31,10 +31,13 @@ export const es_MX = {
     conflictoRevision: "Alguien más guardó cambios antes que tú. Recarga para verlos.",
     cuerpoDemasiadoGrande: "Ese cambio es demasiado grande para enviarlo de una vez.",
     codigo: (codigo: string) => `Código: ${codigo}`,
-    /** 404 y error de la web pública (11 §7, fila «Estados»): título, frase y UNA salida. */
+    /** 404 y error de la web pública (11 §7, fila «Estados»): título, frase, UNA acción primaria
+     *  («Ir a la portada») y una salida secundaria hacia `/ayuda` (mismo patrón que
+     *  `errores.algoSalioMal`: nunca dos botones primarios, `11 §5`). */
     noExiste: {
       titulo: "Esta página no existe",
       cuerpo: "El enlace que abriste no existe o cambió de dirección. Desde la portada llegas a todo lo demás.",
+      verAyuda: "Ver la ayuda",
     },
     algoSalioMal: {
       titulo: "Algo salió mal",
@@ -560,16 +563,10 @@ export const es_MX = {
   preview: {
     titulo: "Vista previa",
   },
-  publico: {
-    noDisponible: {
-      titulo: "Esta invitación ya no está disponible",
-      cuerpo: "El enlace pudo haber expirado, cambiado o el anfitrión retiró la invitación.",
-    },
-    error: {
-      titulo: "No pudimos abrir esta invitación",
-      cuerpo: "Ocurrió un problema al cargar el contenido. Inténtalo de nuevo en un momento.",
-    },
-  },
+  // `publico.*` se retiró de aquí en 3C-8: vivía solo para `/i/[publicToken]/{error,not-found}.tsx`,
+  // y como `es_MX` es un único objeto exportado, importar una sola clave suya bundlea el árbol
+  // ENTERO — sacaba la ruta pública de presupuesto (163,1 de 150 KB gz). Mismo texto, ahora en
+  // `app/(public)/i/[publicToken]/textos.ts` (`textosPublicos.error` / `.noDisponible`).
   revalidate: {
     noAutorizado: "Token de revalidación inválido.",
     cuerpoInvalido: "Cuerpo de la petición inválido.",

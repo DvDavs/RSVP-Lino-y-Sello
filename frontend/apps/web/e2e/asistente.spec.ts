@@ -73,9 +73,9 @@ test("los cuatro pasos: tipo de evento → plantilla → datos básicos → abri
     // ── Paso 2 ────────────────────────────────────────────────────────────────────────────────
     await expect(page.getByRole("heading", { name: "Elige el punto de partida", level: 1 })).toBeVisible();
     expect(await page.getByText("Paso 2 de 4").isVisible()).toBe(true);
-    await expect(page.getByRole("heading", { name: "Boda clásica", level: 3 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: "Boda clásica", level: 2 })).toBeVisible({ timeout: 20_000 });
     // Filtrado por tipo: la plantilla de XV no aparece aquí.
-    await expect(page.getByRole("heading", { name: "XV Jardín", level: 3 })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "XV Jardín", level: 2 })).toHaveCount(0);
     await sinViolacionesGraves(page);
 
     await page.getByTestId("asistente-usar-boda-clasica").click();
@@ -119,8 +119,8 @@ test("UX-N-02 cerrada: una invitación de XV años NO ve las plantillas de boda"
     await page.getByTestId("asistente-continuar").click();
     await peticion;
 
-    await expect(page.getByRole("heading", { name: "XV Jardín", level: 3 })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByRole("heading", { name: "Boda clásica", level: 3 })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "XV Jardín", level: 2 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: "Boda clásica", level: 2 })).toHaveCount(0);
     await expect(page.getByTestId("asistente-usar-boda-clasica")).toHaveCount(0);
   } finally {
     borrarInvitacion(invitationId);
@@ -133,7 +133,7 @@ test("bloqueo por plan: motivo a la vista y una salida real, nunca un control mu
   try {
     await sesionDemo(page, token);
     await page.goto(`/editor?paso=plantilla&tipo=wedding&inv=${invitationId}`);
-    await expect(page.getByRole("heading", { name: "Boda clásica", level: 3 })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: "Boda clásica", level: 2 })).toBeVisible({ timeout: 20_000 });
 
     // «Boda clásica» exige el plan 2 y esta invitación es de plan 1.
     await expect(page.getByText("Requiere el plan 2").first()).toBeVisible();

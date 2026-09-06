@@ -34,7 +34,9 @@ export default defineConfig({
       include: [
         "lib/**/*.{ts,tsx}",
         "app/api/**/*.{ts,tsx}",
-        "components/ui/**/*.{ts,tsx}",
+        // 3C-8: la carpeta del shim (`components` + `ui`, con `button.tsx` de 3C-7: `estilosBoton`,
+        // `<Button>` traductor) se retiró de aquí junto con el directorio — muerta en cuanto
+        // `/acceso` y `/editor` (3C-5/3C-6) dejaron de importarla.
         "components/public/**/*.{ts,tsx}",
         "components/editor/**/*.{ts,tsx}",
         // Bloque 3-3: `composed-lectura.ts` es lógica pura (qué sale de la invitación hacia los

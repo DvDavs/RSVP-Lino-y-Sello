@@ -130,15 +130,3 @@ export function SoloLectura({
     </div>
   );
 }
-
-/**
- * PUENTE TEMPORAL (fase 3-C, bloque 3). Los 14 campos de `components/fields/**` ya usan `Input` y
- * `Textarea` de `@invitaciones/ui`, que fijan alto (46 px), foco y borde por `style` calculado. Esta
- * constante solo sigue viva porque `app/(chrome)/acceso/page.tsx` —pantalla de otra tarea del mismo
- * bloque— la importa; reproduce el mismo aspecto con utilidades del preset, sin ningún nombre de la
- * capa de compatibilidad. Bórrala cuando `/acceso` use `Input` del sistema.
- *
- * @deprecated Usa `<Input>` de `@invitaciones/ui`.
- */
-export const CLASES_CONTROL =
-  "h-[46px] w-full min-w-0 rounded-ui-control bg-ui-surface-raised px-[14px] text-base text-ui-ink shadow-[inset_0_0_0_1.5px_var(--color-ui-border)] outline-none placeholder:text-ui-ink-placeholder disabled:cursor-not-allowed disabled:bg-ui-surface-alt disabled:text-ui-ink-muted";

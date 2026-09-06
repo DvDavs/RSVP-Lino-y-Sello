@@ -376,7 +376,12 @@ export default function PaginaEditorInvitacion() {
         );
       })}
 
-      <div className={esMovil ? "flex min-h-0 flex-1 flex-col" : "grid min-h-0 flex-1 grid-cols-[minmax(280px,340px)_1fr]"}>
+      {/* 3C-8: era un `<div>` — axe `landmark-one-main` (moderate), detectado por
+          `e2e/a11y-producto.spec.ts` (más estricto que `sinViolacionesGraves`, que solo mira
+          `critical`/`serious`). El panel y el lienzo SON el contenido del editor; la cabecera fija,
+          la barra de pestañas y los avisos quedan fuera a propósito (no son el contenido, son
+          chrome de la página). Mismas clases: `<main>` es de bloque por defecto, igual que `<div>`. */}
+      <main className={esMovil ? "flex min-h-0 flex-1 flex-col" : "grid min-h-0 flex-1 grid-cols-[minmax(280px,340px)_1fr]"}>
         <aside
           ref={panelRef}
           id="panel-editar"
@@ -411,7 +416,7 @@ export default function PaginaEditorInvitacion() {
         >
           <CanvasFrame invitationId={params.invitationId} />
         </section>
-      </div>
+      </main>
 
       <ConflictDialog />
       {/* Punto de montaje ÚNICO de las tostadas (`handoffs/3c-b2-f2.md`). Vive aquí y no en

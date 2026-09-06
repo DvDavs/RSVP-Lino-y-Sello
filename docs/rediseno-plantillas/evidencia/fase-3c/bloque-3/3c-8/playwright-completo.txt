@@ -1,0 +1,258 @@
+[WebServer] Warning: Custom Cache-Control headers detected for the following routes:
+[WebServer]   - /_next/static/media/:path*
+[WebServer] 
+[WebServer] Setting a custom Cache-Control header can break Next.js development behavior.
+[WebServer] Turbopack build encountered 1 warning:
+[WebServer] ./apps/web/instrumentation.ts:35:3
+[WebServer] Warning: A Node.js API is used (process.exit at line: 35) which is not supported in the Edge Runtime.
+[WebServer]     Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+[WebServer]   33 |   const raya = "═".repeat(96);
+[WebServer]   34 |   console.error(`\n${raya}\n  ARRANQUE ABORTADO · ${titulo}\n${raya}\n  ${motivo}\n${raya}...
+[WebServer] > 35 |   process.exit(1);
+[WebServer]      |   ^^^^^^^^^^^^
+[WebServer]   36 | }
+[WebServer]   37 |
+[WebServer]   38 | export function register(): void {
+[WebServer] 
+[WebServer] Ecmascript file had an error
+[WebServer] 
+[WebServer] 
+global-setup: token de demo.boda@example.com obtenido una sola vez y cacheado para toda la corrida.
+
+Running 70 tests using 2 workers
+
+  ✓   2 [chromium] › e2e/a11y-pantallas-nuevas.spec.ts:23:1 › página de ayuda: 0 violaciones axe críticas o serias (2.0s)
+  ✓   1 [chromium] › e2e/a11y-pantallas-nuevas.spec.ts:15:1 › pantalla de acceso: 0 violaciones axe críticas o serias (2.0s)
+  ✓   3 [chromium] › e2e/a11y-pantallas-nuevas.spec.ts:29:1 › portada: 0 violaciones axe críticas o serias (2.7s)
+  ✓   5 [chromium] › e2e/a11y-pantallas-nuevas.spec.ts:47:1 › catálogo con sesión (Mis invitaciones + plantillas): 0 violaciones axe críticas o serias (1.8s)
+  ✓   4 [chromium] › e2e/a11y-pantallas-nuevas.spec.ts:35:1 › editor en el teléfono (390×844, con pestañas): 0 violaciones axe críticas o serias (5.9s)
+  ✓   6 [chromium] › e2e/a11y-producto.spec.ts:84:1 › landing (/): axe sin violaciones ni incompletas, contraste sobre la pila renderizada (2.4s)
+  ✓   8 [chromium] › e2e/a11y-producto.spec.ts:103:1 › ayuda (/ayuda): axe sin violaciones ni incompletas (1.7s)
+  ✓   7 [chromium] › e2e/a11y-producto.spec.ts:91:1 › acceso (/acceso): axe sin violaciones ni incompletas, contraste sobre la pila renderizada (2.8s)
+  ✓   9 [chromium] › e2e/a11y-producto.spec.ts:109:1 › 404 público (/i/<token inexistente>): axe sin violaciones ni incompletas (1.5s)
+  ✓  10 [chromium] › e2e/a11y-producto.spec.ts:115:1 › asistente de creación, los cuatro pasos: axe sin violaciones ni incompletas en cada uno (5.7s)
+  ✓  11 [chromium] › e2e/a11y-producto.spec.ts:150:1 › editor y publicar: axe sin violaciones ni incompletas, contraste sobre la pila renderizada (5.5s)
+  ✓  12 [chromium] › e2e/a11y-publico.spec.ts:50:1 › invitación publicada: 0 violaciones axe críticas o serias (2.6s)
+  ✓  13 [chromium] › e2e/a11y-publico.spec.ts:71:1 › invitación publicada en móvil (390x844): 0 violaciones axe críticas o serias (2.4s)
+  ✓  14 [chromium] › e2e/a11y.spec.ts:8:1 › página de invitación no disponible: 0 violaciones axe críticas o serias (1.3s)
+  ✓  15 [chromium] › e2e/a11y.spec.ts:16:1 › `/editor` sin sesión: lleva a la pantalla de acceso, y esa pantalla no tiene violaciones graves (2.2s)
+  ✓  17 [chromium] › e2e/asistente.spec.ts:108:1 › UX-N-02 cerrada: una invitación de XV años NO ve las plantillas de boda (1.2s)
+  ✓  18 [chromium] › e2e/asistente.spec.ts:130:1 › bloqueo por plan: motivo a la vista y una salida real, nunca un control mudo (1.4s)
+  ✓  16 [chromium] › e2e/asistente.spec.ts:52:1 › los cuatro pasos: tipo de evento → plantilla → datos básicos → abrir mi invitación (5.6s)
+  ✓  20 [chromium] › e2e/asistente.spec.ts:180:1 › sin sesión, `/editor` lleva a la pantalla de acceso con el retorno puesto (731ms)
+  ✓  19 [chromium] › e2e/asistente.spec.ts:154:1 › en el teléfono (390×844) cabe todo y los botones del asistente quedan a la vista (2.3s)
+  ✓  22 [chromium] › e2e/cambiar-fecha.spec.ts:80:1 › cambiar la fecha de una invitación YA publicada avisa de que hay que volver a publicar (2.5s)
+  ✓  21 [chromium] › e2e/cambiar-fecha.spec.ts:22:1 › la clienta cambia la fecha de su evento desde el editor y sus invitados la ven (3.2s)
+  ✓  24 [chromium] › e2e/conflicto.spec.ts:61:1 › E-06 · dos navegadores editan lo mismo: el segundo ve el diálogo y nada se pierde en silencio (3.0s)
+  ✓  25 [chromium] › e2e/conflicto.spec.ts:140:1 › E-06b · dos PESTAÑAS del mismo navegador no llegan a chocar: la segunda entra en solo lectura (2.1s)
+  ✓  26 [chromium] › e2e/deshacer.spec.ts:41:1 › E-02 · escribir, deshacer, rehacer y recargar: el estado coincide con lo último confirmado (2.1s)
+  ✓  27 [chromium] › e2e/deshacer.spec.ts:108:1 › E-02b · deshacer antes de que salga el lote no genera tráfico (04 §11.3, caso 1) (1.1s)
+  ✓  28 [chromium] › e2e/editor-3c-evidencia.spec.ts:37:1 › editor de escritorio · axe AA sin violaciones graves en lista, panel de bloque y publicación (5.3s)
+  ✓  23 [chromium] › e2e/clienta-sin-sesion.spec.ts:43:1 › una persona sin sesión entra, elige plantilla, escribe, publica y su enlace abre y está al día (15.5s)
+  ✓  29 [chromium] › e2e/editor-3c-evidencia.spec.ts:56:1 › capturas del editor a 1440 y a 390 (evidencia del bloque 3) (2.7s)
+  ✓  30 [chromium] › e2e/editor-movil.spec.ts:32:3 › el editor cabe a lo ancho en iPhone 390×844 y «Publicar» se ve (WCAG 1.4.10) (1.2s)
+  ✓  31 [chromium] › e2e/editor-movil.spec.ts:32:3 › el editor cabe a lo ancho en mínimo de 1.4.10 · 320×640 y «Publicar» se ve (WCAG 1.4.10) (1.2s)
+  ✓  32 [chromium] › e2e/editor-movil.spec.ts:49:1 › en el teléfono, lista y vista previa son dos pestañas y las dos se pueden ver (1.4s)
+  ✓  33 [chromium] › e2e/editor-movil.spec.ts:77:1 › en escritorio NO hay pestañas: los dos paneles se ven a la vez (04 §6.2 intacto) (1.1s)
+  ✓  34 [chromium] › e2e/editor-nucleo.spec.ts:28:3 › núcleo del editor › E-N1 · `:choose-template` es el primer paso: sin él, `GET .../document` da 404 y no crea nada (1.6s)
+  ✓  35 [chromium] › e2e/editor-nucleo.spec.ts:57:3 › núcleo del editor › E-N2 · el lienzo arranca, pinta la invitación y un clic abre el bloque en el panel (2.3s)
+  ✓  36 [chromium] › e2e/editor-nucleo.spec.ts:106:3 › núcleo del editor › E-N3 · la vista móvil cambia el ancho del lienzo (flujo D, 04 §7.4) (2.0s)
+  ✓  37 [chromium] › e2e/editor-nucleo.spec.ts:123:3 › núcleo del editor › E-N4 · el autoguardado escribe de verdad: la revisión del servidor sube (4.3s)
+  ✓  39 [chromium] › e2e/foto-grande-avisa.spec.ts:18:1 › una foto de más de 8 MB avisa donde la clienta está mirando (U-7) (3.6s)
+  ✓  40 [chromium] › e2e/imagenes.spec.ts:14:1 › imágenes · elegir, recortar, subir, alt obligatorio y punto focal (2.6s)
+  ✓  41 [chromium] › e2e/imagenes.spec.ts:74:1 › imágenes · un formato no admitido se rechaza antes de subir, con texto es-MX (1.5s)
+  ✓  42 [chromium] › e2e/landing.spec.ts:28:1 › la portada existe y explica el producto en la primera pantalla (670ms)
+  ✓  38 [chromium] › e2e/flujo-principal.spec.ts:51:1 › E-01 · elegir plantilla → editar textos y fotos → cambiar paleta → ocultar sección → publicar → abrir como invitado (12.4s)
+  ✓  43 [chromium] › e2e/landing.spec.ts:44:1 › los siete tipos de evento llevan su tipo al asistente (892ms)
+  ✓  44 [chromium] › e2e/landing.spec.ts:62:1 › ni un enlace de la portada es un callejón: todos los destinos responden (1.5s)
+  ✓  45 [chromium] › e2e/landing.spec.ts:77:1 › los testimonios van marcados como ejemplo (no son clientas reales todavía) (961ms)
+  ✘  47 [chromium] › e2e/landing.spec.ts:93:1 › el JS de primera carga de la portada cabe en el presupuesto de 150 KB gz (195ms)
+  ✓  48 [chromium] › e2e/lienzo-csp.spec.ts:47:1 › la ruta del lienzo lleva la CSP sin 'self' y NO produce ni una violación (A4) (1.0s)
+  ✓  46 [chromium] › e2e/landing.spec.ts:83:1 › axe AA: 0 violaciones críticas o serias, en teléfono y en escritorio (3.5s)
+  ✓  49 [chromium] › e2e/lienzo-csp.spec.ts:83:1 › una inyección de script bloqueada por la CSP SÍ se registra: el recolector no es decorativo (1.1s)
+  ✓  50 [chromium] › e2e/lienzo-csp.spec.ts:127:1 › A4 sobre el lienzo REALMENTE pintado: cero violaciones con tema y secciones montados (1.5s)
+  ✓  51 [chromium] › e2e/paleta-preview.spec.ts:57:1 › vista previa de paleta · el color del lienzo cambia al pasar el ratón y vuelve al salir (2.5s)
+  ✘  53 [chromium] › e2e/presupuesto.spec.ts:32:1 › el JS de primera carga de /i/[publicToken] cabe en el presupuesto de 150 KB gz (190ms)
+  ✓  54 [chromium] › e2e/presupuesto.spec.ts:37:1 › la compuerta de presupuesto rompe de verdad cuando se excede (192ms)
+  ✓  55 [chromium] › e2e/presupuesto.spec.ts:45:1 › la compuerta mide el JS PROPIO de cada ruta, no solo el runtime común (176ms)
+  ✓  52 [chromium] › e2e/paneles.spec.ts:12:1 › panel de contenido · variante, texto con autoguardado y bloque de negocio en solo lectura (3.9s)
+  ✓  56 [chromium] › e2e/publicar.spec.ts:16:1 › publicar · sin bloqueos, camino feliz hasta el enlace y copiarlo (2.3s)
+  ✓  57 [chromium] › e2e/publicar.spec.ts:53:1 › publicar · un bloqueo real (texto de ejemplo) sale en la lista y es accionable (3.5s)
+  ✓  59 [chromium] › e2e/publico-no-disponible.spec.ts:8:1 › publicToken inexistente muestra el estado de no disponible, sin trampas de foco (721ms)
+  ✓  58 [chromium] › e2e/publicar.spec.ts:87:1 › despublicar y rotar el enlace, con sus estados de carga (3.3s)
+  ✓  61 [chromium] › e2e/render-publico.spec.ts:66:1 › la invitación publicada se abre y muestra el texto y las imágenes sembradas (973ms)
+  ✓  62 [chromium] › e2e/render-publico.spec.ts:124:1 › noindex: la invitación nunca se indexa (etiqueta y cabecera) (530ms)
+  ✓  63 [chromium] › e2e/render-publico.spec.ts:140:1 › un publicToken inexistente cae en el estado de no disponible, sin filtrar nada (518ms)
+  ✓  60 [chromium] › e2e/red-cortada.spec.ts:35:1 › E-12 · red cortada a mitad de edición y restaurada: pasa por «sin conexión» y termina en «Guardado», sin perder nada (3.9s)
+  ✓  64 [chromium] › e2e/render-publico.spec.ts:158:1 › una sección oculta desaparece de la invitación publicada tras revalidar (2.4s)
+  ✓  66 [chromium] › e2e/render-publico.spec.ts:207:1 › el HTML se sirve desde caché ISR y no desde un render por visita (65ms)
+  ✓  67 [chromium] › e2e/secciones.spec.ts:146:1 › U-18/E-toggle · una sección required:true no tiene interruptor y una normal sí (1.8s)
+  ✓  68 [chromium] › e2e/teclado-editor.spec.ts:52:1 › E-10a · Tab hacia adelante por el editor: nunca se pierde ni se atasca el foco (2.4s)
+  ✓  65 [chromium] › e2e/secciones.spec.ts:76:1 › E-03/E-04/E-05 · ratón, teclado y menú ⋮ producen el MISMO reorderSections (8.2s)
+  ✓  69 [chromium] › e2e/teclado-editor.spec.ts:96:1 › E-10b · Shift+Tab hacia atrás: el recorrido también funciona en reversa (3.3s)
+  ✓  70 [chromium] › e2e/teclado-editor.spec.ts:124:1 › E-10c · el diálogo de publicar SÍ contiene el foco mientras está abierto, y Escape lo cierra devolviendo el foco (1.5s)
+
+
+  1) [chromium] › e2e/landing.spec.ts:93:1 › el JS de primera carga de la portada cabe en el presupuesto de 150 KB gz 
+
+    Error: salida literal de check-budget:
+
+    /i/[publicToken]: 156.2 KB gz de primera carga (límite 150.0 KB)
+      runtime común de Next   127.6 KB   (5 chunks)
+            69.8 KB  static/chunks/2ehjd87zpbetx.js
+            41.9 KB  static/chunks/1s8eld-ci-pje.js
+             8.2 KB  static/chunks/2-iaqxq-76xdc.js
+             4.3 KB  static/chunks/turbopack-1notkzsqzseex.js
+             3.5 KB  static/chunks/3ulo8skrjwpgl.js
+      JS propio de la ruta     28.6 KB   (5 chunks)
+            10.0 KB  static/chunks/2l_br1yx_r59i.js
+             9.0 KB  static/chunks/0nwvk190_5at5.js
+             8.8 KB  static/chunks/3na9vjdfzu8-z.js
+             0.5 KB  static/chunks/3fjb8vgv6gnyh.js
+             0.3 KB  static/chunks/2m4nuqiepcimo.js
+      polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+      EXCEDIDO por 6.2 KB
+
+    /: 153.4 KB gz de primera carga (límite 150.0 KB)
+      runtime común de Next   127.6 KB   (5 chunks)
+            69.8 KB  static/chunks/2ehjd87zpbetx.js
+            41.9 KB  static/chunks/1s8eld-ci-pje.js
+             8.2 KB  static/chunks/2-iaqxq-76xdc.js
+             4.3 KB  static/chunks/turbopack-1notkzsqzseex.js
+             3.5 KB  static/chunks/3ulo8skrjwpgl.js
+      JS propio de la ruta     25.8 KB   (4 chunks)
+             9.0 KB  static/chunks/0nwvk190_5at5.js
+             8.8 KB  static/chunks/3na9vjdfzu8-z.js
+             5.7 KB  static/chunks/0z591u_zc9-s2.js
+             2.2 KB  static/chunks/29a2zw8hlqgeg.js
+      polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+      EXCEDIDO por 3.4 KB
+
+    /editor/[invitationId]: 424.4 KB gz de primera carga (límite 600.0 KB)
+      runtime común de Next   127.6 KB   (5 chunks)
+            69.8 KB  static/chunks/2ehjd87zpbetx.js
+            41.9 KB  static/chunks/1s8eld-ci-pje.js
+             8.2 KB  static/chunks/2-iaqxq-76xdc.js
+             4.3 KB  static/chunks/turbopack-1notkzsqzseex.js
+             3.5 KB  static/chunks/3ulo8skrjwpgl.js
+      JS propio de la ruta    296.8 KB   (15 chunks)
+            87.2 KB  static/chunks/40fqtkp3wl470.js
+            74.8 KB  static/chunks/3qpg4rbp9vxz_.js
+            42.6 KB  static/chunks/28o2yckbpahih.js
+            17.4 KB  static/chunks/1uellnic_m3va.js
+            13.7 KB  static/chunks/2r6lvieg8yo6x.js
+            12.0 KB  static/chunks/1od92j0wkhrmq.js
+            10.0 KB  static/chunks/2l_br1yx_r59i.js
+             9.0 KB  static/chunks/0nwvk190_5at5.js
+             8.8 KB  static/chunks/3na9vjdfzu8-z.js
+             7.6 KB  static/chunks/3qh51xhygbvl4.js
+             5.7 KB  static/chunks/0z591u_zc9-s2.js
+             3.7 KB  static/chunks/21eaaatc5e-_6.js
+             3.4 KB  static/chunks/3dv2c13bs93xc.js
+             0.4 KB  static/chunks/2gbcu7b9ru0mz.js
+             0.4 KB  static/chunks/03371il1iu818.js
+      polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+
+    check-budget: presupuesto de JS excedido (04 §16.2). Orden de actuación: 1) ¿se coló el chrome en la ruta pública? 2) diferir la isla de RSVP; 3) reducir pesos tipográficos; 4) subconjunto de fuentes más estrecho; 5) si nada basta, ADR para subir el presupuesto.
+
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      107 |     salida = `${e.stdout ?? ""}${e.stderr ?? ""}`;
+      108 |   }
+    > 109 |   expect(codigo, `salida literal de check-budget:\n${salida}`).toBe(0);
+          |                                                                ^
+      110 |   // `check-budget.mjs` colorea su salida; se quitan los códigos ANSI antes de leer las cifras.
+      111 |   // eslint-disable-next-line no-control-regex
+      112 |   const limpia = salida.replace(/\u001b\[[0-9;]*m/g, "");
+        at /home/user/RSVP---Lino-Sello/frontend/apps/web/e2e/landing.spec.ts:109:64
+
+    Error Context: test-results/landing-el-JS-de-primera-c-45a86-el-presupuesto-de-150-KB-gz-chromium/error-context.md
+
+  2) [chromium] › e2e/presupuesto.spec.ts:32:1 › el JS de primera carga de /i/[publicToken] cabe en el presupuesto de 150 KB gz 
+
+    Error: salida literal de check-budget:
+
+    /i/[publicToken]: 156.2 KB gz de primera carga (límite 150.0 KB)
+      runtime común de Next   127.6 KB   (5 chunks)
+            69.8 KB  static/chunks/2ehjd87zpbetx.js
+            41.9 KB  static/chunks/1s8eld-ci-pje.js
+             8.2 KB  static/chunks/2-iaqxq-76xdc.js
+             4.3 KB  static/chunks/turbopack-1notkzsqzseex.js
+             3.5 KB  static/chunks/3ulo8skrjwpgl.js
+      JS propio de la ruta     28.6 KB   (5 chunks)
+            10.0 KB  static/chunks/2l_br1yx_r59i.js
+             9.0 KB  static/chunks/0nwvk190_5at5.js
+             8.8 KB  static/chunks/3na9vjdfzu8-z.js
+             0.5 KB  static/chunks/3fjb8vgv6gnyh.js
+             0.3 KB  static/chunks/2m4nuqiepcimo.js
+      polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+      EXCEDIDO por 6.2 KB
+
+    /: 153.4 KB gz de primera carga (límite 150.0 KB)
+      runtime común de Next   127.6 KB   (5 chunks)
+            69.8 KB  static/chunks/2ehjd87zpbetx.js
+            41.9 KB  static/chunks/1s8eld-ci-pje.js
+             8.2 KB  static/chunks/2-iaqxq-76xdc.js
+             4.3 KB  static/chunks/turbopack-1notkzsqzseex.js
+             3.5 KB  static/chunks/3ulo8skrjwpgl.js
+      JS propio de la ruta     25.8 KB   (4 chunks)
+             9.0 KB  static/chunks/0nwvk190_5at5.js
+             8.8 KB  static/chunks/3na9vjdfzu8-z.js
+             5.7 KB  static/chunks/0z591u_zc9-s2.js
+             2.2 KB  static/chunks/29a2zw8hlqgeg.js
+      polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+      EXCEDIDO por 3.4 KB
+
+    /editor/[invitationId]: 424.4 KB gz de primera carga (límite 600.0 KB)
+      runtime común de Next   127.6 KB   (5 chunks)
+            69.8 KB  static/chunks/2ehjd87zpbetx.js
+            41.9 KB  static/chunks/1s8eld-ci-pje.js
+             8.2 KB  static/chunks/2-iaqxq-76xdc.js
+             4.3 KB  static/chunks/turbopack-1notkzsqzseex.js
+             3.5 KB  static/chunks/3ulo8skrjwpgl.js
+      JS propio de la ruta    296.8 KB   (15 chunks)
+            87.2 KB  static/chunks/40fqtkp3wl470.js
+            74.8 KB  static/chunks/3qpg4rbp9vxz_.js
+            42.6 KB  static/chunks/28o2yckbpahih.js
+            17.4 KB  static/chunks/1uellnic_m3va.js
+            13.7 KB  static/chunks/2r6lvieg8yo6x.js
+            12.0 KB  static/chunks/1od92j0wkhrmq.js
+            10.0 KB  static/chunks/2l_br1yx_r59i.js
+             9.0 KB  static/chunks/0nwvk190_5at5.js
+             8.8 KB  static/chunks/3na9vjdfzu8-z.js
+             7.6 KB  static/chunks/3qh51xhygbvl4.js
+             5.7 KB  static/chunks/0z591u_zc9-s2.js
+             3.7 KB  static/chunks/21eaaatc5e-_6.js
+             3.4 KB  static/chunks/3dv2c13bs93xc.js
+             0.4 KB  static/chunks/2gbcu7b9ru0mz.js
+             0.4 KB  static/chunks/03371il1iu818.js
+      polyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)
+
+    check-budget: presupuesto de JS excedido (04 §16.2). Orden de actuación: 1) ¿se coló el chrome en la ruta pública? 2) diferir la isla de RSVP; 3) reducir pesos tipográficos; 4) subconjunto de fuentes más estrecho; 5) si nada basta, ADR para subir el presupuesto.
+
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 0
+    Received: 1
+
+      32 | test("el JS de primera carga de /i/[publicToken] cabe en el presupuesto de 150 KB gz", () => {
+      33 |   const { codigo, salida } = correrCompuerta();
+    > 34 |   expect(codigo, `salida literal de check-budget:\n${salida}`).toBe(0);
+         |                                                                ^
+      35 | });
+      36 |
+      37 | test("la compuerta de presupuesto rompe de verdad cuando se excede", () => {
+        at /home/user/RSVP---Lino-Sello/frontend/apps/web/e2e/presupuesto.spec.ts:34:64
+
+    Error Context: test-results/presupuesto-el-JS-de-prime-4cd5b-el-presupuesto-de-150-KB-gz-chromium/error-context.md
+
+  2 failed
+    [chromium] › e2e/landing.spec.ts:93:1 › el JS de primera carga de la portada cabe en el presupuesto de 150 KB gz 
+    [chromium] › e2e/presupuesto.spec.ts:32:1 › el JS de primera carga de /i/[publicToken] cabe en el presupuesto de 150 KB gz 
+  68 passed (1.7m)
+EXIT_CODE=1

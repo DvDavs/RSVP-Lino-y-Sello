@@ -1,0 +1,46 @@
+== measure-lcp: protocolo de LCP (I-11) ==========================================
+puerto propio ......... 3140
+corridas objetivo ...... 9
+presupuesto ............ 2500 ms
+carga de la máquina ....  08:24:19 up  1:04,  0 user,  load average: 4.12, 5.16, 3.74
+====================================================================================
+puerto 3140: libre — confirmado antes de medir.
+
+-- lhci collect (9 corridas, throttlingMethod: devtools, puerto 3140) -----------
+(node:18105) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Started a web server with "PORT=3140 pnpm run start"...
+Running Lighthouse 9 time(s) on http://127.0.0.1:3140/i/pub_FVEVQXREDTZ12CDNB8BVX7JDN3
+Run #1...done.
+Run #2...done.
+Run #3...done.
+Run #4...done.
+Run #5...done.
+Run #6...done.
+Run #7...done.
+Run #8...done.
+Run #9...done.
+Done running Lighthouse!
+
+corridas por número:
+  #1  LCP = 2004.5 ms
+  #2  LCP = 1978.3 ms
+  #3  LCP = 1975.4 ms
+  #4  LCP = 2013.7 ms
+  #5  LCP = 2006.2 ms
+  #6  LCP = 2011.9 ms
+  #7  LCP = 1979.1 ms
+  #8  LCP = 1997.0 ms
+  #9  LCP = 1998.4 ms
+
+N solicitado ........... 9
+N efectivo (válidas) .... 9
+Descartadas (NO_LCP) .... 0
+Mediana ................. 1998.4 ms
+Rango .................... 1975.4 – 2013.7 ms
+Presupuesto .............. 2500 ms
+
+RESULTADO: CUMPLE — la mediana (1998.4 ms) está dentro del presupuesto (2500 ms).
+====================================================================================
+LHR crudos conservados en: /home/user/RSVP---Lino-Sello/frontend/apps/web/.lighthouseci (uno por corrida, incluidas las descartadas).
+EXIT_CODE=0

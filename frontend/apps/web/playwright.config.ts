@@ -19,6 +19,13 @@ const ORIGEN = `http://127.0.0.1:${PUERTO}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // 3C-8: `design.spec.ts`, `design-contraste.spec.ts`, `design-axe.spec.ts` y
+  // `design-objetivos.spec.ts` son el proyecto APARTE de `playwright.design.config.ts` (brief
+  // 3c-b2-f3 §4: sin backend, `webServer` propio en :3133). Sin este `testIgnore`, esta config
+  // TAMBIÉN los recoge (mismo `testDir`) y los corre contra :3000 con backend real — generan
+  // capturas `*-chromium-linux.png` espurias que no son las de referencia (`*-design-linux.png`) y
+  // duplican el trabajo. Detectado en `handoffs/3c-6-parcial.md` §3.5.
+  testIgnore: ["design.spec.ts", "design-contraste.spec.ts", "design-axe.spec.ts", "design-objetivos.spec.ts"],
   // Bloque 3-6, política anti-flake (`contratos.md` §6 / ADR-1R-C-11): autentica la cuenta de
   // demostración UNA SOLA VEZ, antes de que arranque ningún worker — ver `e2e/global-setup.ts`.
   // Sin esto, `fullyParallel: true` dispara logins concurrentes de la MISMA cuenta y provoca el 500

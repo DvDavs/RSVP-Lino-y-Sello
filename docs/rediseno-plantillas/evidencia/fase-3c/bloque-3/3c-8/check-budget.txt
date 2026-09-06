@@ -1,0 +1,58 @@
+
+[31m/i/[publicToken]: 156.2 KB gz de primera carga (límite 150.0 KB)[0m
+  runtime común de Next   127.6 KB   (5 chunks)
+[90m        69.8 KB  static/chunks/2ehjd87zpbetx.js[0m
+[90m        41.9 KB  static/chunks/1s8eld-ci-pje.js[0m
+[90m         8.2 KB  static/chunks/2-iaqxq-76xdc.js[0m
+[90m         4.3 KB  static/chunks/turbopack-1notkzsqzseex.js[0m
+[90m         3.5 KB  static/chunks/3ulo8skrjwpgl.js[0m
+  JS propio de la ruta     28.6 KB   (5 chunks)
+[90m        10.0 KB  static/chunks/2l_br1yx_r59i.js[0m
+[90m         9.0 KB  static/chunks/0nwvk190_5at5.js[0m
+[90m         8.8 KB  static/chunks/3na9vjdfzu8-z.js[0m
+[90m         0.5 KB  static/chunks/3fjb8vgv6gnyh.js[0m
+[90m         0.3 KB  static/chunks/2m4nuqiepcimo.js[0m
+  [90mpolyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)[0m
+[31m  EXCEDIDO por 6.2 KB[0m
+
+[31m/: 153.4 KB gz de primera carga (límite 150.0 KB)[0m
+  runtime común de Next   127.6 KB   (5 chunks)
+[90m        69.8 KB  static/chunks/2ehjd87zpbetx.js[0m
+[90m        41.9 KB  static/chunks/1s8eld-ci-pje.js[0m
+[90m         8.2 KB  static/chunks/2-iaqxq-76xdc.js[0m
+[90m         4.3 KB  static/chunks/turbopack-1notkzsqzseex.js[0m
+[90m         3.5 KB  static/chunks/3ulo8skrjwpgl.js[0m
+  JS propio de la ruta     25.8 KB   (4 chunks)
+[90m         9.0 KB  static/chunks/0nwvk190_5at5.js[0m
+[90m         8.8 KB  static/chunks/3na9vjdfzu8-z.js[0m
+[90m         5.7 KB  static/chunks/0z591u_zc9-s2.js[0m
+[90m         2.2 KB  static/chunks/29a2zw8hlqgeg.js[0m
+  [90mpolyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)[0m
+[31m  EXCEDIDO por 3.4 KB[0m
+
+[32m/editor/[invitationId]: 424.5 KB gz de primera carga (límite 600.0 KB)[0m
+  runtime común de Next   127.6 KB   (5 chunks)
+[90m        69.8 KB  static/chunks/2ehjd87zpbetx.js[0m
+[90m        41.9 KB  static/chunks/1s8eld-ci-pje.js[0m
+[90m         8.2 KB  static/chunks/2-iaqxq-76xdc.js[0m
+[90m         4.3 KB  static/chunks/turbopack-1notkzsqzseex.js[0m
+[90m         3.5 KB  static/chunks/3ulo8skrjwpgl.js[0m
+  JS propio de la ruta    296.8 KB   (15 chunks)
+[90m        87.2 KB  static/chunks/40fqtkp3wl470.js[0m
+[90m        74.8 KB  static/chunks/01wpm-hdl7jhs.js[0m
+[90m        42.6 KB  static/chunks/28o2yckbpahih.js[0m
+[90m        17.4 KB  static/chunks/1uellnic_m3va.js[0m
+[90m        13.7 KB  static/chunks/2r6lvieg8yo6x.js[0m
+[90m        12.0 KB  static/chunks/1od92j0wkhrmq.js[0m
+[90m        10.0 KB  static/chunks/2l_br1yx_r59i.js[0m
+[90m         9.0 KB  static/chunks/0nwvk190_5at5.js[0m
+[90m         8.8 KB  static/chunks/3na9vjdfzu8-z.js[0m
+[90m         7.6 KB  static/chunks/3qh51xhygbvl4.js[0m
+[90m         5.7 KB  static/chunks/0z591u_zc9-s2.js[0m
+[90m         3.8 KB  static/chunks/3-bgy0c2j48u9.js[0m
+[90m         3.4 KB  static/chunks/3dv2c13bs93xc.js[0m
+[90m         0.4 KB  static/chunks/2gbcu7b9ru0mz.js[0m
+[90m         0.4 KB  static/chunks/03371il1iu818.js[0m
+  [90mpolyfills (nomodule)     38.6 KB   NO cuentan: ningún navegador del browserslist los descarga (límite propio 64.0 KB)[0m
+
+[31mcheck-budget: presupuesto de JS excedido (04 §16.2). Orden de actuación: 1) ¿se coló el chrome en la ruta pública? 2) diferir la isla de RSVP; 3) reducir pesos tipográficos; 4) subconjunto de fuentes más estrecho; 5) si nada basta, ADR para subir el presupuesto.[0m
