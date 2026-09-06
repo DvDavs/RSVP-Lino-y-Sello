@@ -1,0 +1,19 @@
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/47/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- registrar templates/cumpleanos-elegante/1.0.0
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/47/frontend/packages/template-kit
+> tsx src/cli.ts -- registrar templates/cumpleanos-elegante/1.0.0
+
+POST /master/templates2/versions  (/home/user/wt/47/frontend/templates/cumpleanos-elegante/1.0.0)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 10,
+  "slug": "cumpleanos-elegante",
+  "version": "1.0.0",
+  "packageHash": "sha256:5394f0832ea0c937163fb99944c1d28d2565f0bfd9013109a623ea2af56c771f",
+  "assetsRegistered": 0
+}
+201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.

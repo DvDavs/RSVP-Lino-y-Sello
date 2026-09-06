@@ -1842,3 +1842,9 @@ las que exigen decisión tuya, en orden de impacto:
 
 ## Respuestas del dueño (2026-09-06)
 Ver `memoria/decisiones-dueno.md` (D-01…D-08): sin migración; marca Lino & Sello / linoysello.com; correos hola@, soporte@, no-responder@; WhatsApp +52 951 470 9685 solo contacto; Stripe; imágenes por IA; tema oscuro en segundo plano; producto completo antes de publicar.
+
+## 4-7 (registro contra el backend y capturas del catálogo)
+- **Sin preguntas nuevas.** Los 12 registros, la idempotencia (`ADR-008`), la coincidencia
+  kit↔backend de los 12 `package_hash`, y el catálogo con su filtro por `eventKind` se verificaron
+  contra el backend real sin discrepancia alguna. Detalle en `memoria/handoffs/4-7.md` y
+  `evidencia/fase-4/4-7/LEEME.md`.

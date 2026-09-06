@@ -1,0 +1,19 @@
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/47/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- registrar templates/xv-elegance/1.0.0
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/47/frontend/packages/template-kit
+> tsx src/cli.ts -- registrar templates/xv-elegance/1.0.0
+
+POST /master/templates2/versions  (/home/user/wt/47/frontend/templates/xv-elegance/1.0.0)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 12,
+  "slug": "xv-elegance",
+  "version": "1.0.0",
+  "packageHash": "sha256:2d190566859ec8713ffff1d4cd0ac382bfab612708e0196585eba25dda260f1c",
+  "assetsRegistered": 0
+}
+201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.

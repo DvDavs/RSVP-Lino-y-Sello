@@ -1,0 +1,23 @@
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/47/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- registrar templates/bautizo-elegante/1.0.0
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/47/frontend/packages/template-kit
+> tsx src/cli.ts -- registrar templates/bautizo-elegante/1.0.0
+
+POST /master/templates2/versions  (/home/user/wt/47/frontend/templates/bautizo-elegante/1.0.0)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 4,
+  "slug": "bautizo-elegante",
+  "version": "1.0.0",
+  "packageHash": "sha256:15bf3cd220cbccdd4833c596ce715d513d70a60c165ff63e1b2f34e2a627627c",
+  "assetsRegistered": 0
+}
+201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.
+
+real	0m1.393s
+user	0m1.332s
+sys	0m0.174s

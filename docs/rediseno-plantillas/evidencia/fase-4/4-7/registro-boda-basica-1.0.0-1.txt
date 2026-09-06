@@ -1,0 +1,19 @@
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/47/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- registrar templates/boda-basica/1.0.0
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/47/frontend/packages/template-kit
+> tsx src/cli.ts -- registrar templates/boda-basica/1.0.0
+
+POST /master/templates2/versions  (/home/user/wt/47/frontend/templates/boda-basica/1.0.0)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 5,
+  "slug": "boda-basica",
+  "version": "1.0.0",
+  "packageHash": "sha256:42d57beef48ffdcde180c9e4e1432ba9ee7dc5008415e3056017b5a9db4c258d",
+  "assetsRegistered": 0
+}
+201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.
