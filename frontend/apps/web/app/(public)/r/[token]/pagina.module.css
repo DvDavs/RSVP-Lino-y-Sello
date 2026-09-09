@@ -1,11 +1,30 @@
 /* app/(public)/r/[token]/pagina.module.css — estilos del enlace personal del invitado.
  *
- * Solo `--inv-*` (los valores de RESERVA de `tokens.css`) y ni un `--ui-*`: esta ruta vive en el
- * grupo `(public)`, que NO importa `globals.css` ni Tailwind (P3, `04 §19`). Fichero propio y no
- * reutilizado de `../../i/[publicToken]/`: esa carpeta es territorio de otra sesión y un import
- * cruzado ataría dos pantallas que van a evolucionar por separado. */
+ * Solo `--inv-*` (los valores de RESERVA de `tokens.css`, sobrescritos en tiempo de ejecución por
+ * `ThemeProvider` cuando la invitación carga) y ni un `--ui-*`: esta ruta vive en el grupo
+ * `(public)`, que NO importa `globals.css` ni Tailwind (P3, `04 §19`). Fichero propio, no
+ * reutilizado de `../../i/[publicToken]/`: esa carpeta es territorio de otra sesión.
+ *
+ * `--inv-touch-target-min` (tokens.css) vale 24px — pensado para chips informativos, no para un
+ * control con el que el invitado ACTÚA. El wireframe (`12-producto-completo.md` §B3.1) exige
+ * >= 44px para el RadioGroup y los contadores (WCAG 2.5.5 AAA): se declara aquí un mínimo propio,
+ * no derivado de ningún token de color (la regla de "solo tokens" es de COLOR, `identidad-visual`
+ * §"Color solo desde tokens" — un tamaño de objetivo de toque no es un valor de marca). */
+.pantalla {
+  --r-toque-min: 2.75rem; /* 44px */
+  --r-tarjeta-radio: var(--inv-radius-lg);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--inv-color-bg);
+  color: var(--inv-color-ink);
+}
 
+/* ---------------------------------------------------------------------- estados de pantalla completa
+ * (cargando / no-resuelve / límite / error). Mismo patrón que la ruta hermana: centrado, con los
+ * tokens de RESERVA (aquí no hay documento del que sacarlos, salvo que ya se conozca uno). */
 .aviso {
+  flex: 1;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -16,9 +35,35 @@
   text-align: center;
   background: var(--inv-color-bg);
   color: var(--inv-color-ink);
+  position: relative;
+  overflow: clip;
 }
 
-.titulo {
+/* Forma decorativa propia (equivalente ligero a `Blob`/`ColorShadow` de `@invitaciones/ui/shapes`,
+ * que no se importa aquí: ese paquete depende de `--ui-*` y de Tailwind, ninguno de los dos
+ * disponible en `(public)` — importarlo rompería el presupuesto de la ruta, README §"Presupuesto").
+ * Un halo de color puro CSS, apagado, detrás del texto: nunca detrás de un control ni de texto que
+ * necesite contraste medido (aquí solo decora el fondo vacío). */
+.manchaFondo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 15%, color-mix(in srgb, var(--inv-color-accent) 16%, transparent), transparent 45%),
+    radial-gradient(circle at 85% 80%, color-mix(in srgb, var(--inv-color-accent) 12%, transparent), transparent 40%);
+}
+
+.avisoContenido {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--inv-space-4);
+}
+
+.avisoTitulo {
   margin: 0;
   max-width: var(--inv-measure);
   font-family: var(--inv-font-heading);
@@ -28,7 +73,15 @@
   letter-spacing: var(--inv-tracking-tight);
 }
 
-/* Filete decorativo, igual que en la ruta hermana: separa sin parecer un error de servidor. */
+.avisoCuerpo {
+  margin: 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+  line-height: var(--inv-leading-relaxed);
+  color: var(--inv-color-muted);
+}
+
 .filete {
   width: var(--inv-space-8);
   height: 1px;
@@ -38,11 +91,558 @@
   opacity: 0.6;
 }
 
-.cuerpo {
+.accion {
+  min-height: var(--r-toque-min);
+  min-width: var(--r-toque-min);
+  padding: var(--inv-space-3) var(--inv-space-5);
+  border: 1px solid var(--inv-color-accent);
+  border-radius: var(--inv-radius-sm);
+  background: var(--inv-color-accent);
+  color: var(--inv-color-accent-ink);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  letter-spacing: var(--inv-tracking-wide);
+  cursor: pointer;
+}
+
+.accion:focus-visible {
+  outline: var(--inv-focus-ring-width) solid var(--inv-color-ink);
+  outline-offset: var(--inv-focus-ring-offset);
+}
+
+/* Técnica estándar de ocultación visual conservando el nodo en el árbol de accesibilidad. */
+.soloLectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ----------------------------------------------------------------------------- pantalla resuelta
+ * Móvil: columna única (tarjeta, invitación, barra fija). Escritorio (>= 1024px, §B3.1): grid de
+ * dos columnas, la de identidad/decisión FIJA a la izquierda. */
+.contenido {
+  flex: 1;
+  padding: var(--inv-space-5) var(--inv-space-4) var(--inv-space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--inv-space-6);
+  /* Espacio para que la barra fija de móvil no tape el último control. */
+  padding-bottom: calc(var(--inv-space-8) + var(--r-toque-min));
+}
+
+@media (min-width: 64rem) {
+  .contenido {
+    display: grid;
+    grid-template-columns: minmax(20rem, 24rem) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--inv-space-6);
+    max-width: var(--inv-content-max);
+    margin-inline: auto;
+    padding-bottom: var(--inv-space-8);
+  }
+
+  .columnaFija {
+    position: sticky;
+    top: var(--inv-space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--inv-space-5);
+  }
+}
+
+.columnaInvitacion {
+  min-width: 0;
+}
+
+/* --------------------------------------------------------------------------------- portada mini
+ * Foto con FORMA (nunca rectángulo duro, `identidad-visual`): radio grande y asimétrico, un
+ * "blob" suave con CSS puro — sin importar `@invitaciones/ui/shapes` (mismo motivo que arriba). */
+.fotoPortada {
+  align-self: center;
+  width: min(70%, 14rem);
+  aspect-ratio: 4 / 5;
+  overflow: clip;
+  border-radius: 58% 42% 60% 40% / 46% 40% 60% 54%;
+  box-shadow: var(--inv-shadow-lg);
+}
+
+.fotoPortada img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ------------------------------------------------------------------------------ tarjeta OPACA
+ * "así se lee el nombre, no con degradado ni text-shadow" (§B3.1). Superficie sólida, nunca
+ * texto directo sobre la foto de arriba. */
+.tarjeta {
+  background: var(--inv-color-surface);
+  border-radius: var(--r-tarjeta-radio);
+  box-shadow: var(--inv-shadow-md);
+  padding: var(--inv-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--inv-space-3);
+}
+
+.etiqueta {
   margin: 0;
-  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-muted);
+}
+
+.nombre {
+  margin: 0;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-2xl);
+  line-height: var(--inv-leading-tight);
+  letter-spacing: var(--inv-tracking-tight);
+}
+
+.cuposTexto {
+  margin: 0;
   font-family: var(--inv-font-body);
   font-size: var(--inv-text-base);
   line-height: var(--inv-leading-relaxed);
+}
+
+.separador {
+  border: 0;
+  border-top: var(--inv-border-width) solid color-mix(in srgb, var(--inv-color-ink) 14%, transparent);
+  margin: 0;
+}
+
+.eventoInfo {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
   color: var(--inv-color-muted);
+}
+
+/* --------------------------------------------------------------------------- tarjeta de decisión */
+.encabezadoDecision {
+  margin: 0;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-xl);
+  line-height: var(--inv-leading-snug);
+}
+
+.radioGrupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--inv-space-2);
+}
+
+@media (min-width: 24rem) {
+  .radioGrupo {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
+
+.radioOpcion {
+  display: flex;
+  align-items: center;
+  gap: var(--inv-space-2);
+  min-height: var(--r-toque-min);
+  padding: var(--inv-space-2) var(--inv-space-3);
+  border-radius: var(--inv-radius-md);
+  border: 1px solid color-mix(in srgb, var(--inv-color-ink) 20%, transparent);
+  cursor: pointer;
+  flex: 1 1 auto;
+  transition-property: border-color, background-color;
+  transition-duration: var(--inv-motion-fast);
+  transition-timing-function: var(--inv-motion-ease);
+}
+
+.radioOpcion[data-marcada="true"] {
+  border-color: var(--inv-color-accent);
+  background: color-mix(in srgb, var(--inv-color-accent) 10%, transparent);
+}
+
+.radioOpcion:has(input:focus-visible) {
+  outline: var(--inv-focus-ring-width) solid var(--inv-color-ink);
+  outline-offset: var(--inv-focus-ring-offset);
+}
+
+.radioEntrada {
+  /* El input real sigue en el DOM (semántica y teclado nativos), pero visualmente lo pinta
+   * `.radioIndicador`: técnica estándar, nunca `display:none` (eso lo saca del árbol accesible). */
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.radioIndicador {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--inv-color-ink) 40%, transparent);
+  display: grid;
+  place-items: center;
+}
+
+.radioOpcion[data-marcada="true"] .radioIndicador {
+  border-color: var(--inv-color-accent);
+}
+
+.radioIndicador::after {
+  content: "";
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: var(--inv-color-accent);
+  transform: scale(0);
+  transition: transform var(--inv-motion-fast) var(--inv-motion-ease);
+}
+
+.radioOpcion[data-marcada="true"] .radioIndicador::after {
+  transform: scale(1);
+}
+
+.radioTexto {
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+}
+
+/* --------------------------------------------------------------------------------- contadores */
+.contadoresEncabezado {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-muted);
+}
+
+.contadores {
+  display: flex;
+  flex-direction: column;
+  gap: var(--inv-space-2);
+}
+
+.contadorFila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--inv-space-3);
+}
+
+.contadorEtiqueta {
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+}
+
+.contadorControles {
+  display: flex;
+  align-items: center;
+  gap: var(--inv-space-2);
+}
+
+.contadorBoton {
+  width: var(--r-toque-min);
+  height: var(--r-toque-min);
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--inv-color-ink) 30%, transparent);
+  background: var(--inv-color-surface);
+  color: var(--inv-color-ink);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-lg);
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.contadorBoton:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.contadorBoton:focus-visible {
+  outline: var(--inv-focus-ring-width) solid var(--inv-color-ink);
+  outline-offset: var(--inv-focus-ring-offset);
+}
+
+.contadorValor {
+  min-width: 1.75rem;
+  text-align: center;
+  font-family: var(--inv-font-body);
+  font-weight: var(--inv-weight-medium);
+  font-size: var(--inv-text-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.contadorDe {
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-muted);
+}
+
+/* --------------------------------------------------------------------------------- botones CTA */
+.botonPrimario {
+  min-height: calc(var(--r-toque-min) * 1.15);
+  padding-inline: var(--inv-space-5);
+  border: none;
+  border-radius: var(--inv-radius-md);
+  background: var(--inv-color-accent);
+  color: var(--inv-color-accent-ink);
+  font-family: var(--inv-font-body);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-lg);
+  cursor: pointer;
+  box-shadow: var(--inv-shadow-sm);
+  transition-property: transform, box-shadow, opacity;
+  transition-duration: var(--inv-motion-normal);
+  transition-timing-function: var(--inv-motion-ease);
+}
+
+.botonPrimario:hover:not(:disabled) {
+  box-shadow: var(--inv-shadow-md);
+  transform: translateY(-0.0625rem);
+}
+
+.botonPrimario:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.botonPrimario:focus-visible {
+  outline: var(--inv-focus-ring-width) solid var(--inv-color-ink);
+  outline-offset: var(--inv-focus-ring-offset);
+}
+
+.botonSecundario {
+  min-height: var(--r-toque-min);
+  padding-inline: var(--inv-space-5);
+  border: 1px solid var(--inv-color-accent);
+  border-radius: var(--inv-radius-md);
+  background: transparent;
+  color: var(--inv-color-accent);
+  font-family: var(--inv-font-body);
+  font-weight: var(--inv-weight-medium);
+  font-size: var(--inv-text-base);
+  cursor: pointer;
+}
+
+.botonSecundario:focus-visible {
+  outline: var(--inv-focus-ring-width) solid var(--inv-color-ink);
+  outline-offset: var(--inv-focus-ring-offset);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botonPrimario,
+  .radioOpcion,
+  .radioIndicador::after {
+    transition: none;
+  }
+  .botonPrimario:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+.ayudaTexto {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-muted);
+}
+
+.errorEnvio {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-accent);
+  font-weight: var(--inv-weight-medium);
+}
+
+/* --------------------------------------------------------------------------------- ya respondió
+ * "« FORMA: ColorShadow bajo la tarjeta »" — halo de color detrás de la tarjeta, CSS puro. */
+.tarjetaResumen {
+  position: relative;
+}
+
+.tarjetaResumen::before {
+  content: "";
+  position: absolute;
+  inset: -0.75rem;
+  z-index: -1;
+  border-radius: calc(var(--r-tarjeta-radio) + 0.75rem);
+  background: radial-gradient(
+    ellipse at 30% 100%,
+    color-mix(in srgb, var(--inv-color-accent) 35%, transparent),
+    transparent 70%
+  );
+}
+
+.resumenIcono {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--inv-color-accent) 16%, transparent);
+  color: var(--inv-color-accent);
+}
+
+.resumenEncabezado {
+  margin: 0;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-xl);
+  line-height: var(--inv-leading-snug);
+}
+
+.resumenDetalle {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+  line-height: var(--inv-leading-relaxed);
+}
+
+.resumenCorreo {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-muted);
+}
+
+/* -------------------------------------------------------------------------- convocatoria cerrada */
+.cerrado {
+  background: color-mix(in srgb, var(--inv-color-muted) 12%, var(--inv-color-surface));
+  border-radius: var(--inv-radius-md);
+  padding: var(--inv-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--inv-space-2);
+}
+
+.cerradoTitulo {
+  margin: 0;
+  font-family: var(--inv-font-heading);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-lg);
+}
+
+.cerradoCuerpo {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-muted);
+}
+
+/* ---------------------------------------------------------------------------- invitación completa */
+.invitacionCargando {
+  padding: var(--inv-space-7) var(--inv-space-4);
+  text-align: center;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-sm);
+  color: var(--inv-color-muted);
+}
+
+/* -------------------------------------------------------------------------------- barra fija (móvil)
+ * "mientras no haya respuesta" — nunca en escritorio, donde la columna fija ya cumple ese papel. */
+.barraFija {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--inv-space-3);
+  padding: var(--inv-space-3) var(--inv-space-4);
+  padding-bottom: max(var(--inv-space-3), env(safe-area-inset-bottom));
+  background: var(--inv-color-surface);
+  box-shadow: 0 -0.25rem 1rem color-mix(in srgb, var(--inv-color-ink) 16%, transparent);
+}
+
+@media (min-width: 64rem) {
+  .barraFija {
+    display: none;
+  }
+}
+
+.barraFijaEtiqueta {
+  margin: 0;
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-xs);
+  font-weight: var(--inv-weight-medium);
+  letter-spacing: var(--inv-tracking-wide);
+  text-transform: uppercase;
+  color: var(--inv-color-muted);
+  flex: none;
+}
+
+.barraFijaBotones {
+  display: flex;
+  gap: var(--inv-space-2);
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.barraFijaBoton {
+  min-height: var(--r-toque-min);
+  padding-inline: var(--inv-space-4);
+  border-radius: var(--inv-radius-md);
+  font-family: var(--inv-font-body);
+  font-weight: var(--inv-weight-medium);
+  font-size: var(--inv-text-sm);
+  cursor: pointer;
+  border: 1px solid var(--inv-color-accent);
+  background: transparent;
+  color: var(--inv-color-accent);
+}
+
+.barraFijaBoton[data-enfasis="true"] {
+  background: var(--inv-color-accent);
+  color: var(--inv-color-accent-ink);
+}
+
+.barraFijaBoton:focus-visible {
+  outline: var(--inv-focus-ring-width) solid var(--inv-color-ink);
+  outline-offset: var(--inv-focus-ring-offset);
+}
+
+/* ------------------------------------------------------------------------- puente al gancho DOM
+ * Botón portado dentro de `#rsvp-mount-{key}` (contrato §3): cuando la invitación tiene su propia
+ * sección de RSVP, ahí también aparece un control real (no el `<a>` inerte de `mode="canvas"`) que
+ * lleva de vuelta a la tarjeta de decisión — nunca duplica el formulario completo (peso). */
+.puente {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--r-toque-min) * 1.15);
+  padding-inline: var(--inv-space-6);
+  border-radius: var(--inv-radius-md);
+  border: none;
+  background: var(--inv-color-surface);
+  color: var(--inv-color-accent);
+  font-family: var(--inv-font-body);
+  font-weight: var(--inv-weight-heading);
+  font-size: var(--inv-text-base);
+  cursor: pointer;
+  box-shadow: var(--inv-shadow-sm);
+}
+
+.puente:focus-visible {
+  outline: var(--inv-focus-ring-width) solid var(--inv-color-ink);
+  outline-offset: var(--inv-focus-ring-offset);
 }
