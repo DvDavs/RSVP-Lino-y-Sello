@@ -1568,3 +1568,55 @@ Las cuatro sesiones en paralelo (E2–E5) **no deben volver a decidirlas por su 
 ### Contradicciones entre agentes que resolvió el orquestador de E1
 
 Están en `diseno/12-producto-completo.md §0` y en las ADR `ADR-5-E1-01` (ruta `/r/[token]` con un solo token, frente a los dos tokens que proponía el inventario) y `ADR-5-E1-02` (cuatro subpaquetes en `modules/product`, no cinco). No se reabren.
+
+## Fase 5 · sesión E2 (invitados, RSVP y compartir, 2026-09-09)
+
+Ninguna bloqueó la sesión: en cada una se tomó la opción conservadora y se siguió. Las que llevan
+**medida** traen la cifra real, no una estimación.
+
+### Lo que hay que decidir con el dueño
+
+- [Fase 5 · E2] **Datos personales y tokens de invitado en los registros del servidor.**
+  `src/main/resources/application.yml:132` fija `logging.level.org.hibernate: debug` (y `:35`,
+  `show-sql: true`). Con eso, el `EntityPrinter` de Hibernate vuelca la entidad entera del invitado
+  en cada volcado: **nombre, correo, teléfono y los dos tokens completos**. Medido en una sesión de
+  diez minutos de uso normal: 31 líneas con tokens de invitado y 395 con correos. Quien lea los
+  registros —o un servicio de agregación de registros, o una copia de seguridad de ellos— puede
+  responder el RSVP de cualquier invitado. **Supuesto tomado:** el orquestador de E2 baja ese nivel
+  a `info`, pese a que `application.yml` es fichero compartido que la memoria de cimientos dice que
+  nadie edita, porque la alternativa es dejar secretos y datos personales en los registros de
+  producción por respetar una frontera de territorio. Queda avisado para la sesión de integración.
+  ¿Se confirma, y quiere el dueño además una política de retención de registros para la fase 7?
+- [Fase 5 · E2] **El límite de intentos del RSVP puede usarse contra la propia invitada.** Medido:
+  con 40 peticiones sobre un token, quien tenga el enlace —una captura de pantalla reenviada basta—
+  deja a esa invitada sin poder confirmar durante 15 minutos. **Supuesto tomado:** el cubo pasa de
+  ser por token a ser por (token, IP), porque a 128 bits de entropía el cubo por token no protege
+  de nada y sí es un arma contra la dueña del enlace. ¿Se acepta el compromiso?
+
+### Hallazgos que no son de E2 y nadie ha reclamado
+
+- [Fase 5 · E2] **`FAIL_ON_UNKNOWN_PROPERTIES` está activo en TODA la aplicación, no solo en
+  `templates2`.** `Templates2JsonConfig.kt:35-36` declara un `ObjectMapper` estricto que desactiva
+  el de Spring Boot por `@ConditionalOnMissingBean`; el comentario de `:16-19` afirma que eso no
+  ocurre porque el bean no está marcado `@Primary`, y **no basta**. Medido: `POST /auth/token` con
+  un campo de más responde `400` con el nombre de la clase de la petición y la lista de propiedades
+  conocidas dentro del cuerpo, lo que amplifica el hallazgo S-02 (`include-message: always`) y
+  regala el mapa de los DTO a cualquiera. **Supuesto tomado:** E2 **no lo toca** —`templates2` es de
+  otro dueño y su configuración de JSON afecta a todo el producto— y se defiende en su propio
+  territorio con `@JsonIgnoreProperties(ignoreUnknown = true)` en los DTO de entrada del RSVP.
+  ¿Quién lo cierra: el dueño de `templates2` o la sesión de integración?
+
+### Trabajo de arte que E2 no puede inventar
+
+- [Fase 5 · E2] **Falta una ilustración de «sin invitados».** El estado vacío de la pantalla de
+  invitados usa `sin-invitaciones` por ser la más cercana del catálogo
+  (`packages/ui/src/ilustraciones/tipos.ts` solo trae `sin-invitaciones`, `sin-fotos` y
+  `error-generico`). No se inventa una ilustración nueva: es dirección de arte, no código.
+  **Supuesto tomado:** se reutiliza la existente y se anota aquí para que quien produzca la
+  ilustración actualice esa línea.
+- [Fase 5 · E2] **`EmptyState` del sistema acepta una sola acción, por diseño** («nunca dos botones
+  primarios»), y el wireframe del estado vacío de invitados (`diseno/12-producto-completo.md §B3.2`)
+  pide dos: «Agregar invitado» y «Pegar una lista». **Supuesto tomado:** se compuso el bloque con
+  `EmptyState` para la ilustración y el texto, y los dos botones fuera de su propiedad de acción, en
+  vez de cambiar un componente compartido del sistema desde una sesión de producto. ¿Debe
+  `EmptyState` admitir una acción secundaria, o el wireframe debe bajar a un solo botón?

@@ -18,6 +18,7 @@ import {
 } from "@/lib/invitados/api";
 import { textosInvitados as t } from "@/lib/invitados/textos";
 import { es_MX } from "@/lib/i18n";
+import { CompartirInvitacion } from "./CompartirInvitacion";
 import { Contadores } from "./Contadores";
 import { FormularioInvitado } from "./FormularioInvitado";
 import { PegarLista } from "./PegarLista";
@@ -184,6 +185,10 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
         {t.titulo}
       </h1>
       <p className="mt-2 text-md text-ui-ink-muted">{t.subtitulo}</p>
+
+      <div className="mt-8">
+        <CompartirInvitacion invitationId={invitationId} />
+      </div>
 
       {estado === "cargando" ? (
         <div className="mt-8 grid gap-6">

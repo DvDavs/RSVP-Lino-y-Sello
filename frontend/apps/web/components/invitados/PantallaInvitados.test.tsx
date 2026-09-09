@@ -1,10 +1,20 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as apiClient from "@/lib/api-client";
 import * as invitadosApi from "@/lib/invitados/api";
 import { ApiError } from "@/lib/errors";
 import type { GuestItem, GuestPage, GuestSummary } from "@/lib/invitados/api";
 import { PantallaInvitados } from "./PantallaInvitados";
+
+// `CompartirInvitacion` (bloque 5-3) vive dentro de esta pantalla y pide `getDocument` por su
+// cuenta. Sin mock, cae al «error» de ESE bloque y pinta su PROPIO «Reintentar» — que choca con el
+// `getByText("Reintentar")` (singular) de las pruebas de abajo, que son de la lista de invitados,
+// no de ese bloque. Se deja en «no publicada» por defecto: es el estado que no añade ni un
+// «Reintentar» ni un enlace a la pantalla, así que no interfiere con ninguna prueba de aquí.
+beforeEach(() => {
+  vi.spyOn(apiClient, "getDocument").mockResolvedValue({ activeRelease: null } as never);
+});
 
 // jsdom no implementa estos tres (Radix Select los usa al abrir/desplazar el panel). El paquete
 // `@invitaciones/ui` los rellena en SU `test/setup.ts`; `apps/web` no lo hace todavía, así que se

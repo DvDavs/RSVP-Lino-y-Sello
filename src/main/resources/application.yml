@@ -129,7 +129,12 @@ templates2:
 logging:
   level:
     root: info
-    org.hibernate: debug
+    # Fase 5 (E2), hallazgo de la revision adversarial de invitados y RSVP: en `debug`, el
+    # `EntityPrinter` de Hibernate vuelca la entidad entera del invitado en cada flush, es decir
+    # nombre, correo, telefono y los DOS tokens completos. Medido en diez minutos de uso normal: 31
+    # lineas con tokens de invitado y 395 con correos. Quien lea los registros puede responder el
+    # RSVP de cualquiera. `info` es el minimo honesto; para depurar SQL se sube en local y se baja.
+    org.hibernate: info
     org.springframework: info
 # --- Modulo product (fase 5, bloque 5-0c; ver diseno/_12c-modulo-product.md y ADR-5-0C-01) ---
 # Estas variables las consumen E4 (pagos: producto.pagos.*) y E3 (cuenta y marca: producto.correo.* y

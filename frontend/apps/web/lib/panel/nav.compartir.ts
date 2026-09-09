@@ -9,13 +9,16 @@ import type { EntradaDeNavegacion } from "./tipos.ts";
  * entregaría a los invitados un enlace que no abre — es exactamente el defecto U-6 que la fase 3
  * midió y corrigió (`lib/enlace-publico.ts`). Mientras no haya release, la entrada no se pinta.
  *
- * Hoy apunta al editor —que es donde vive «Publicar y compartir» desde 3C— para no inventar una
- * ruta que nadie sirve. E2 la cambia a su pantalla cuando la tenga.
+ * Apunta a la pantalla de invitados (`/editor/[invitationId]/invitados`, bloque 5-3): ahí vive el
+ * reparto por invitado (`components/invitados/AccionesInvitado.tsx`) y el bloque de compartir la
+ * invitación en general (`components/invitados/CompartirInvitacion.tsx`, el enlace público
+ * `/i/[publicToken]`, no el personal de nadie). Antes apuntaba al editor «para no inventar una ruta
+ * que nadie sirve» — esa ruta ya existe y es donde tiene sentido compartir.
  */
 export const entradaCompartir: EntradaDeNavegacion = {
   id: "compartir",
   etiqueta: "compartir",
-  href: (invitationId) => `/editor/${encodeURIComponent(invitationId)}`,
+  href: (invitationId) => `/editor/${encodeURIComponent(invitationId)}/invitados`,
   icono: "IconoCompartir",
   orden: 20,
   visible: (estado) => estado.publicada,

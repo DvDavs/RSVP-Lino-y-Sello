@@ -32,6 +32,15 @@ Base de la superficie pública: `/public/r/{token}`.
    `modules.product.guests` (el de `templates2` está acotado a su paquete y no alcanza, parte C §3).
    Códigos: `GUEST_NOT_FOUND`, `GUEST_INVALID`, `GUEST_DUPLICATE`, `GUEST_QUOTA_EXCEEDED`,
    `INVITATION_NOT_FOUND`, `RSVP_LINK_NOT_FOUND`, `RSVP_CLOSED`, `RSVP_TOO_MANY_ATTEMPTS`.
+   **Ratificado por el orquestador**, sobre lo implementado: cada subpaquete declara **su propio**
+   advice acotado (`…guests.panel` y `…guests.rsvp`), lo que evitó que dos agentes en paralelo se
+   pisaran un fichero (ADR-5-E2-04); se añadieron `GUEST_INTERNAL` y `RSVP_INTERNAL` para que ningún
+   `500` salga sin `code` por `GeneralExceptionHandler`, que con `include-message: always` (S-02)
+   filtraría el mensaje interno; `GUEST_EMAIL_UNAVAILABLE` queda **declarado y sin productor** desde
+   que `:send-email` funciona, y se conserva por si el transporte de correo no está configurado; y
+   `RSVP_CLOSED` lo produce **también el panel**, no solo la superficie pública, porque
+   `:send-email` necesita el mismo «esta invitación ya no admite respuestas» y duplicar el concepto
+   con otro nombre habría sido peor.
 7. **Idioma.** Nombres de clase y campos JSON en inglés (como todo el repositorio); mensajes y
    comentarios en es-MX.
 
@@ -139,10 +148,19 @@ invitación y día, como el que ya tiene `EmailGuestNotifier.kt:79-84`.
 - Cupos por encima de lo asignado → `422 GUEST_QUOTA_EXCEEDED`.
 
 ### Límite de intentos
-Por **IP** y por **token**, con la misma disciplina de `AuthThrottleService` (ámbito propio, no
+Por **IP** y por **(token, IP)**, con la misma disciplina de `AuthThrottleService` (ámbito propio, no
 compartido con `/auth`). Superado → `429 RSVP_TOO_MANY_ATTEMPTS`, cuerpo idéntico para cualquier
 token. Con 128 bits de entropía (S-12) la fuerza bruta no es viable; el límite existe por coste, no
 por confidencialidad, y **no** debe convertirse en un oráculo (el 429 no dice si el token existía).
+
+> **Rectificación ratificada por el orquestador (revisión adversarial, ataque #4).** Este párrafo
+> decía «por IP **y por token**», y así se implementó primero. La revisión lo midió y resultó
+> explotable **contra la propia invitada**: con 40 peticiones, cualquiera que vea una captura del
+> enlace la deja sin poder confirmar durante quince minutos. El cubo por token pasa a ser por
+> **(token, IP)**. El motivo es que a 128 bits el cubo por token no protegía de nada —no hay quien
+> adivine un token, así que no hay a quién frenar— y sí era un arma contra la única persona que
+> tiene ese enlace legítimamente. Verificado en vivo: el atacante desde otra IP se bloquea solo y la
+> dueña del enlace sigue respondiendo `200`.
 
 ## 3. Frontend
 

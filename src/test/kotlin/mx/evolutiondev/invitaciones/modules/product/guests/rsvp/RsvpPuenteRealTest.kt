@@ -34,7 +34,7 @@ class RsvpPuenteRealTest {
 
     @Test
     fun `la consulta corre contra el esquema real y cada columna cae en su campo`() {
-        PgTestCluster.newConnection().use { cx ->
+        enUnaTransaccionQueSeDeshace { cx ->
             val token = sembrar(cx, sufijo = "ok")
 
             val fila = leer(cx, token)
@@ -63,7 +63,7 @@ class RsvpPuenteRealTest {
      */
     @Test
     fun `la proyeccion real trae exactamente los catorce alias que el mapeo pide`() {
-        PgTestCluster.newConnection().use { cx ->
+        enUnaTransaccionQueSeDeshace { cx ->
             val token = sembrar(cx, sufijo = "alias")
 
             cx.prepareStatement(sqlConParametro()).use { ps ->
@@ -83,7 +83,7 @@ class RsvpPuenteRealTest {
      */
     @Test
     fun `sin release activo la consulta no devuelve nada, igual que un token inventado`() {
-        PgTestCluster.newConnection().use { cx ->
+        enUnaTransaccionQueSeDeshace { cx ->
             val token = sembrar(cx, sufijo = "sinrelease", releaseActivo = false)
 
             assertNull(leer(cx, token), "una invitación sin publicar es indistinguible de un token falso")
@@ -94,6 +94,24 @@ class RsvpPuenteRealTest {
     // =============================================================================================
     // Siembra
     // =============================================================================================
+
+    /**
+     * Todo lo que esta prueba siembra se **deshace**: el clúster efímero es **compartido** con las
+     * pruebas de persistencia de `templates2`, que leen catálogos como `event_type` y cuentan filas.
+     * Dejar ahí un `event_type` vacío las rompe —comprobado— así que la siembra vive dentro de una
+     * transacción que siempre termina en `rollback`. Dentro de la transacción la consulta ve las
+     * filas, que es todo lo que hace falta.
+     */
+    private fun enUnaTransaccionQueSeDeshace(bloque: (Connection) -> Unit) {
+        PgTestCluster.newConnection().use { cx ->
+            cx.autoCommit = false
+            try {
+                bloque(cx)
+            } finally {
+                cx.rollback()
+            }
+        }
+    }
 
     /** El SQL real, con el parámetro con nombre traducido a `?` para JDBC puro. */
     private fun sqlConParametro() = lector.sql.replace(":confirmationToken", "?")
@@ -113,7 +131,6 @@ class RsvpPuenteRealTest {
         val marca = "${System.nanoTime()}-$sufijo"
         val token = "tok-$marca".take(60)
 
-        cx.autoCommit = true
         val eventType = insertar(cx, "event_type")
         val plan = insertar(cx, "invitation_plan")
         val plantilla = cx.prepareStatement(

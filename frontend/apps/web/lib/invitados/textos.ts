@@ -100,6 +100,29 @@ export const textosInvitados = {
     errorEnlace: "No pudimos traer el enlace. Inténtalo de nuevo.",
   },
 
+  // Compartir LA INVITACIÓN, no el enlace de nadie en particular: para un grupo de WhatsApp o para
+  // pegar en redes. Vive aparte de `compartir` (arriba), que es siempre por invitado.
+  compartirGeneral: {
+    titulo: "Comparte tu invitación",
+    descripcion: "Este es el enlace general, para un grupo o tus redes. No es el enlace personal de nadie.",
+    cargando: "Comprobando si tu invitación está publicada",
+    errorEstado: "No pudimos comprobar si tu invitación ya está publicada.",
+    enlaceEtiqueta: "Tu enlace",
+    copiarEnlace: "Copiar enlace",
+    enlaceCopiado: "Enlace copiado",
+    errorCopiar: "No pudimos copiar. Inténtalo de nuevo.",
+    botonWhatsapp: "Compartir por WhatsApp",
+    mensajeRedesEtiqueta: "Mensaje para redes",
+    copiarMensaje: "Copiar mensaje",
+    mensajeCopiado: "Mensaje copiado",
+    mensaje: (enlace: string) =>
+      `Te compartimos el enlace de nuestra invitación. Ahí puedes ver todos los detalles y confirmarnos si nos acompañas: ${enlace}`,
+    noPublicada: {
+      texto: "Publica tu invitación para conseguir el enlace que se abre para todos tus invitados.",
+      ir: "Ir a publicar",
+    },
+  },
+
   formulario: {
     tituloAlta: "Agregar invitado",
     descripcionAlta: "Escribe sus datos. Solo el nombre es obligatorio.",
