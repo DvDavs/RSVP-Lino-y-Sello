@@ -18,10 +18,10 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ComposedDocument } from "@invitaciones/schema";
-import { ApiError, getPublicRender } from "@/lib/api-client";
-import { type RsvpEstado, type RsvpGuest, enviarRsvp, obtenerRsvp } from "@/lib/invitados/rsvp";
+import { ApiError, type RsvpEstado, type RsvpGuest, enviarRsvp, obtenerRsvp } from "@/lib/invitados/rsvp";
 import { RenderInvitacion } from "../../_componentes/RenderInvitacion";
 import { Contador } from "./Contador";
+import { obtenerRenderPublico } from "./renderPublico";
 import { textosInvitado } from "./textos";
 import estilos from "./pagina.module.css";
 
@@ -531,7 +531,7 @@ function InvitacionCompleta({ publicToken }: { publicToken: string }) {
 
   useEffect(() => {
     let vigente = true;
-    getPublicRender(publicToken)
+    obtenerRenderPublico(publicToken)
       .then((resultado) => {
         if (!vigente) return;
         if (resultado.status === "ok") setComposed(resultado.data.composed);

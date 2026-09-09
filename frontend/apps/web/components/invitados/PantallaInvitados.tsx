@@ -26,6 +26,10 @@ import { EsqueletoTarjetasInvitados, TarjetasInvitados } from "./TarjetasInvitad
 
 const TAMANO_PAGINA = 25;
 const RETRASO_BUSQUEDA_MS = 300;
+/** Alto real del `Input` de búsqueda y del `Select`/`Button` de la fila de filtros (`packages/ui`).
+ *  El esqueleto reserva EXACTAMENTE ese hueco para que nada salte al terminar la carga. */
+const ALTO_CAMPO_FILTRO = 46;
+const ALTO_CONTROL_FILTRO = 44;
 
 type EstadoCarga = "cargando" | "listo" | "error";
 type FiltroEstado = GuestStatus | "TODOS";
@@ -49,8 +53,15 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
   const [exportando, setExportando] = useState(false);
   const primerLoteHecho = useRef(false);
   const tituloRef = useRef<HTMLHeadingElement>(null);
+  // Número de la última búsqueda pedida. El rebote de 300 ms no evita que dos peticiones convivan:
+  // basta con que la de «Ro» tarde más que la de «Rocío» para que la lista termine enseñando los
+  // resultados de «Ro» bajo el texto «Rocío». Se atiende SOLO a la última pedida; las que llegan
+  // tarde se descartan sin tocar la pantalla.
+  const ultimaPeticion = useRef(0);
 
   const cargarPrimeraPagina = useCallback(async (): Promise<void> => {
+    const miPeticion = ultimaPeticion.current + 1;
+    ultimaPeticion.current = miPeticion;
     if (!primerLoteHecho.current) setEstado("cargando");
     setErrorMensaje(null);
     try {
@@ -63,6 +74,7 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
           size: TAMANO_PAGINA,
         }),
       ]);
+      if (miPeticion !== ultimaPeticion.current) return;
       primerLoteHecho.current = true;
       setResumen(resumenNuevo);
       setInvitados([...listaNueva.content]);
@@ -70,6 +82,9 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
       setTotalPaginas(listaNueva.totalPages);
       setEstado("listo");
     } catch (error) {
+      // Un fallo de una búsqueda ya superada tampoco puede pintar de rojo la pantalla de la búsqueda
+      // que sí está en curso.
+      if (miPeticion !== ultimaPeticion.current) return;
       setErrorMensaje(mensajeDeError(error));
       setEstado("error");
     }
@@ -173,6 +188,18 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
       {estado === "cargando" ? (
         <div className="mt-8 grid gap-6">
           <Skeleton variante="bloque" alto={104} etiqueta={t.cargando} />
+          {/* La fila de búsqueda, filtro y acciones también ocupa sitio. Sin su hueco, al terminar
+              la carga aparecía de golpe y empujaba la tabla hacia abajo: justo el salto de
+              maquetación que `ui-pantalla` §7 prohíbe. Mismo contenedor y mismas medidas que la fila
+              real (`sm:w-64` / `sm:w-44` / los tres botones), y sin etiqueta propia: el estado de
+              carga ya lo anuncia el bloque de contadores de arriba, una vez. */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <Skeleton variante="bloque" alto={ALTO_CAMPO_FILTRO} className="w-full sm:w-64" etiqueta="" />
+              <Skeleton variante="bloque" alto={ALTO_CONTROL_FILTRO} className="w-full sm:w-44" etiqueta="" />
+            </div>
+            <Skeleton variante="bloque" alto={ALTO_CONTROL_FILTRO} className="w-full sm:w-80" etiqueta="" />
+          </div>
           <EsqueletoTablaInvitados />
           <EsqueletoTarjetasInvitados />
         </div>

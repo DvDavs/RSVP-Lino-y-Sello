@@ -27,7 +27,9 @@ export function formatoRelativo(iso: string | null, ahora: Date = new Date()): s
   const fecha = new Date(iso);
   if (Number.isNaN(fecha.getTime())) return "";
   const segundos = Math.max(0, Math.round((ahora.getTime() - fecha.getTime()) / 1000));
-  if (segundos < 60) return t.relativo.ahoraMismo;
+  // Con el prefijo, como los otros tres tramos: la cifra se pinta detrás de un «·» en la tabla, y
+  // «· un momento» a secas se leía como una etiqueta suelta y no como «cuándo contestó».
+  if (segundos < 60) return t.tabla.actualizadoHace(t.relativo.ahoraMismo);
   const minutos = Math.round(segundos / 60);
   if (minutos < 60) return t.tabla.actualizadoHace(t.relativo.minutos(minutos));
   const horas = Math.round(minutos / 60);

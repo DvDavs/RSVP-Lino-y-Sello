@@ -2,6 +2,7 @@ package mx.evolutiondev.invitaciones.modules.product.guests.rsvp
 
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import jakarta.persistence.Tuple
 import org.springframework.stereotype.Repository
 
 /**
@@ -81,20 +82,20 @@ class RsvpGuestReader(
      * ser un `null` indistinguible y volvería a haber oráculo; la prueba lo caza.
      */
     internal val sql = """
-        SELECT g.full_name,
-               g.adults_count,
-               g.children_count,
-               g.young_count,
-               g.adults_count_confirmed,
-               g.children_count_confirmed,
-               g.young_count_confirmed,
-               g.attendance_status,
+        SELECT g.full_name AS full_name,
+               g.adults_count AS adults_count,
+               g.children_count AS children_count,
+               g.young_count AS young_count,
+               g.adults_count_confirmed AS adults_count_confirmed,
+               g.children_count_confirmed AS children_count_confirmed,
+               g.young_count_confirmed AS young_count_confirmed,
+               g.attendance_status AS attendance_status,
                (g.email IS NOT NULL AND btrim(g.email) <> '') AS has_email,
-               d.public_token,
-               COALESCE(i.children_allowed, FALSE),
-               COALESCE(i.young_allowed, FALSE),
-               COALESCE(i.date, ''),
-               COALESCE(i."time", '')
+               d.public_token AS public_token,
+               COALESCE(i.children_allowed, FALSE) AS children_allowed,
+               COALESCE(i.young_allowed, FALSE) AS young_allowed,
+               COALESCE(i.date, '') AS event_date,
+               COALESCE(i."time", '') AS event_time
         FROM invitation_guest g
         JOIN invitation i  ON i.id = g.invitation_id
         JOIN customer c    ON c.id = i.customer_id
@@ -113,32 +114,80 @@ class RsvpGuestReader(
      */
     fun read(confirmationToken: String): RsvpGuestRow? {
         @Suppress("UNCHECKED_CAST")
-        val filas = entityManager.createNativeQuery(sql)
+        val filas = entityManager.createNativeQuery(sql, Tuple::class.java)
             .setParameter("confirmationToken", confirmationToken)
-            .resultList as List<Array<Any?>>
+            .resultList as List<Tuple>
         val fila = filas.firstOrNull() ?: return null
-        return RsvpGuestRow(
-            fullName = fila[0] as? String ?: "",
-            adults = fila[1].entero(),
-            children = fila[2].entero(),
-            young = fila[3].entero(),
-            adultsConfirmed = fila[4].entero(),
-            childrenConfirmed = fila[5].entero(),
-            youngConfirmed = fila[6].entero(),
-            status = fila[7] as? String ?: ESTADO_POR_DEFECTO,
-            hasEmail = fila[8] as? Boolean ?: false,
-            publicToken = fila[9] as? String ?: "",
-            childrenAllowed = fila[10] as? Boolean ?: false,
-            youngAllowed = fila[11] as? Boolean ?: false,
-            eventDate = fila[12] as? String ?: "",
-            eventTime = fila[13] as? String ?: "",
-        )
+        return mapear { columna -> fila.get(columna) }
     }
+
+    /**
+     * ### Por qué el mapeo es **por nombre** de columna y no por posición
+     * Hallazgo de la revisión adversarial de E2. Estas catorce columnas se leían de un
+     * `Array<Any?>` por índice (`fila[0]`, `fila[1]`, …) contra una consulta que no tiene ninguna
+     * prueba con una base de datos real detrás. Un `SELECT` reordenado —añadir una columna en medio
+     * es el cambio más natural del mundo— habría cruzado valores **en silencio**: `hasEmail` leyendo
+     * `childrenAllowed`, `adults` leyendo los confirmados. Nada habría fallado; la ficha del invitado
+     * simplemente habría dicho otra cosa, y en una ruta pública eso es enseñar datos equivocados a un
+     * desconocido.
+     *
+     * Con el nombre, un alias que desaparezca revienta en el acto —`Tuple.get` lanza cuando el alias
+     * no existe— y reordenar el `SELECT` deja de tener efecto alguno. Por eso cada columna de la
+     * consulta lleva su `AS` explícito.
+     *
+     * La función recibe el **acceso a la columna** en vez de la fila para que `RsvpPuenteRealTest`
+     * pueda ejercitar exactamente este mapeo contra el Postgres efímero, con la consulta real y el
+     * `ResultSet` real de un JDBC, sin montar un contexto de Spring.
+     */
+    internal fun mapear(columna: (String) -> Any?): RsvpGuestRow = RsvpGuestRow(
+        fullName = columna(COL_FULL_NAME) as? String ?: "",
+        adults = columna(COL_ADULTS).entero(),
+        children = columna(COL_CHILDREN).entero(),
+        young = columna(COL_YOUNG).entero(),
+        adultsConfirmed = columna(COL_ADULTS_CONFIRMED).entero(),
+        childrenConfirmed = columna(COL_CHILDREN_CONFIRMED).entero(),
+        youngConfirmed = columna(COL_YOUNG_CONFIRMED).entero(),
+        status = columna(COL_STATUS) as? String ?: ESTADO_POR_DEFECTO,
+        hasEmail = columna(COL_HAS_EMAIL) as? Boolean ?: false,
+        publicToken = columna(COL_PUBLIC_TOKEN) as? String ?: "",
+        childrenAllowed = columna(COL_CHILDREN_ALLOWED) as? Boolean ?: false,
+        youngAllowed = columna(COL_YOUNG_ALLOWED) as? Boolean ?: false,
+        eventDate = columna(COL_EVENT_DATE) as? String ?: "",
+        eventTime = columna(COL_EVENT_TIME) as? String ?: "",
+    )
 
     /** `adults_count` es anulable (V16:13) y el driver puede devolver cualquier `Number`. */
     private fun Any?.entero(): Int = (this as? Number)?.toInt() ?: 0
 
-    private companion object {
+    internal companion object {
         const val ESTADO_POR_DEFECTO = "PENDING"
+
+        /**
+         * Los alias de la proyección, uno por campo de [RsvpGuestRow]. Son los mismos nombres que
+         * escribe el `SELECT`; tenerlos como constantes es lo que permite que la prueba contra la
+         * base real compruebe la correspondencia sin repetir literales.
+         */
+        const val COL_FULL_NAME = "full_name"
+        const val COL_ADULTS = "adults_count"
+        const val COL_CHILDREN = "children_count"
+        const val COL_YOUNG = "young_count"
+        const val COL_ADULTS_CONFIRMED = "adults_count_confirmed"
+        const val COL_CHILDREN_CONFIRMED = "children_count_confirmed"
+        const val COL_YOUNG_CONFIRMED = "young_count_confirmed"
+        const val COL_STATUS = "attendance_status"
+        const val COL_HAS_EMAIL = "has_email"
+        const val COL_PUBLIC_TOKEN = "public_token"
+        const val COL_CHILDREN_ALLOWED = "children_allowed"
+        const val COL_YOUNG_ALLOWED = "young_allowed"
+        const val COL_EVENT_DATE = "event_date"
+        const val COL_EVENT_TIME = "event_time"
+
+        /** Todos los alias, en el orden del `SELECT`. La prueba real los recorre. */
+        val COLUMNAS = listOf(
+            COL_FULL_NAME, COL_ADULTS, COL_CHILDREN, COL_YOUNG,
+            COL_ADULTS_CONFIRMED, COL_CHILDREN_CONFIRMED, COL_YOUNG_CONFIRMED,
+            COL_STATUS, COL_HAS_EMAIL, COL_PUBLIC_TOKEN,
+            COL_CHILDREN_ALLOWED, COL_YOUNG_ALLOWED, COL_EVENT_DATE, COL_EVENT_TIME,
+        )
     }
 }

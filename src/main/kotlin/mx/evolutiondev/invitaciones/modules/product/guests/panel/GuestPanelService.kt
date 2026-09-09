@@ -40,6 +40,9 @@ class GuestPanelService(
     private val pasteReader: GuestPasteReader,
     private val linkBuilder: GuestShareLinkBuilder,
     private val csvWriter: GuestCsvWriter,
+    private val mailer: GuestLinkMailer,
+    private val releaseReader: GuestReleaseReader,
+    private val limiteDiario: GuestEmailDailyLimit,
 ) {
 
     // =============================================================================================
@@ -272,6 +275,53 @@ class GuestPanelService(
             whatsappUrl = linkBuilder.whatsapp(invitado.phone, texto),
             shareText = texto,
         )
+    }
+
+    /**
+     * `POST …/guests/{guestId}:send-email` (contrato `5-2` §1): manda a **ese** invitado su enlace
+     * personal por correo. Devuelve cuando el correo queda **encolado**, no cuando sale; por eso la
+     * ruta responde `202`.
+     *
+     * Las cuatro puertas, en este orden y todas antes de tocar el correo:
+     *
+     * 1. **Propiedad de la invitación**, la misma de todo el panel ([autorizar]).
+     * 2. **Pertenencia del invitado a esa invitación**, vía `getGuest`, que es donde vive el arreglo
+     *    de S-04. Sin esto, `:send-email` sería una forma de mandar el enlace de un invitado ajeno a
+     *    su propia dirección — es decir, el IDOR otra vez, con acuse de recibo.
+     * 3. **Hay a dónde mandarlo y sirve de algo**: el invitado tiene correo y la invitación tiene
+     *    release activo. Sin release, `GET /public/` + `r/{token}` responde `404` y el correo llevaría
+     *    a la invitada a una puerta cerrada. Las dos cosas responden `409 RSVP_CLOSED` con el motivo,
+     *    como pide el contrato.
+     * 4. **Tope por invitación y día** ([GuestEmailDailyLimit]): que el producto no se pueda usar como
+     *    remitente en masa contra una dirección que alguien escriba en la lista.
+     */
+    fun enviarCorreo(userId: Long, appRole: AppRole, invitationId: Long, guestId: Long) {
+        autorizar(userId, appRole, invitationId)
+        val invitado = traducirFallos { guestsService.getGuest(userId, appRole, guestId, invitationId) }
+
+        val correo = invitado.email?.trim()?.takeIf { it.isNotEmpty() }
+            ?: throw GuestPanelException.RsvpClosed(
+                "Este invitado no tiene correo. Agrégaselo o comparte su enlace por WhatsApp",
+            )
+
+        val token = invitado.confirmationToken?.takeIf { it.isNotBlank() }
+            ?: throw GuestPanelException.GuestInvalid(
+                "Este invitado todavía no tiene un enlace personal. Vuelve a guardarlo para generarlo",
+            )
+
+        if (!releaseReader.tieneReleaseActivo(invitationId)) {
+            throw GuestPanelException.RsvpClosed(
+                "Publica tu invitación antes de enviarla: por ahora el enlace no abriría nada",
+            )
+        }
+
+        if (!limiteDiario.consumir(invitationId)) {
+            throw GuestPanelException.RsvpClosed(
+                "Ya enviaste muchos correos de esta invitación hoy. Inténtalo de nuevo mañana",
+            )
+        }
+
+        mailer.enviar(destinatario = correo, nombre = invitado.fullName, url = linkBuilder.enlace(token))
     }
 
     // =============================================================================================

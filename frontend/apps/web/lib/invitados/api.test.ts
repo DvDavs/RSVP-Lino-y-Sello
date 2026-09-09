@@ -361,3 +361,36 @@ describe("401/403 tiran el token muerto (paridad con `marcarSesionCaducada` de a
     expect(getAuthToken()).toBe("jwt-bueno");
   });
 });
+
+describe("un 2xx cuyo cuerpo NO es JSON se clasifica, no revienta con un SyntaxError pelado", () => {
+  it("listGuests lanza UnknownApiError si el 200 trae HTML (proxy, página de mantenimiento)", async () => {
+    const html = "<!doctype html><html><body>502 desde el proxy</body></html>";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(html, { status: 200, headers: { "Content-Type": "text/html" } })),
+    );
+    // El fallo tiene que ser una de las TRES clases del proyecto: la pantalla decide qué enseñar con
+    // `error instanceof ApiError | SessionError`, y un `SyntaxError` de `JSON.parse` no es ninguna.
+    const error = await listGuests(7).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(UnknownApiError);
+    expect((error as UnknownApiError).rawBody).toContain("502 desde el proxy");
+  });
+});
+
+describe("el token solo se tira cuando el 401/403 NO trae `code` (criterio de api-client)", () => {
+  it("un 403 CON `code` del módulo deja la sesión intacta: es un fallo de la ruta, no de la sesión", async () => {
+    setAuthToken("jwt-bueno");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaJson(403, errorDe("GUEST_NOT_FOUND"))));
+    // Si esto tirara el token, un error de permisos sobre UN invitado echaría a la clienta de la
+    // aplicación entera y perdería lo que estuviera escribiendo.
+    await expect(getGuestLink(7, 12)).rejects.toBeInstanceOf(ApiError);
+    expect(getAuthToken()).toBe("jwt-bueno");
+  });
+
+  it("un 401 CON `code` tampoco la tira", async () => {
+    setAuthToken("jwt-bueno");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaJson(401, errorDe("INVITATION_NOT_FOUND"))));
+    await expect(listGuests(7)).rejects.toBeInstanceOf(ApiError);
+    expect(getAuthToken()).toBe("jwt-bueno");
+  });
+});

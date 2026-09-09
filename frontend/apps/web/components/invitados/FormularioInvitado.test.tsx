@@ -136,4 +136,28 @@ describe("FormularioInvitado — edición y borrado", () => {
     await waitFor(() => expect(alEliminar).toHaveBeenCalledWith(1));
     expect(eliminar).toHaveBeenCalledWith(7, 1);
   });
+
+  // Arreglo de la revisión Opus: cae si se quita el `useEffect` que mueve el foco.
+  it("al pedir confirmación, el foco va a «Cancelar» y no se queda huérfano en el `<body>`", async () => {
+    const usuario = userEvent.setup();
+    vi.spyOn(invitadosApi, "deleteGuest").mockResolvedValue(undefined);
+    render(
+      <FormularioInvitado
+        invitationId={7}
+        rules={{ childrenAllowed: false, youngAllowed: false }}
+        guest={item()}
+        onGuardado={vi.fn()}
+        onEliminado={vi.fn()}
+        trigger={<button type="button">editar</button>}
+      />,
+    );
+    await usuario.click(screen.getByText("editar"));
+    await usuario.click(await screen.findByText("Eliminar invitado"));
+
+    // El disparador que se acaba de pulsar se desmonta con el paso anterior: sin llevar el foco a
+    // sitio, se cae al `<body>` dentro de un diálogo abierto. Y va a la opción SEGURA, porque el
+    // botón destructivo de este paso ocupa el lugar donde estaba «Guardar cambios».
+    const cancelar = await screen.findByRole("button", { name: "Cancelar" });
+    await waitFor(() => expect(document.activeElement).toBe(cancelar));
+  });
 });

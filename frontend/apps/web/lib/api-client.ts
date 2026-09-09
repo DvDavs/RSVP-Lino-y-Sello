@@ -90,8 +90,16 @@ export function haySesionCaducada(): boolean {
   return sesionCaducada;
 }
 
-/** Se llama desde `peticion()`/`uploadAsset()` al clasificar un 401/403 sin código `TPL_*`. */
-function marcarSesionCaducada(): void {
+/**
+ * Se llama al clasificar un 401/403 sin código `TPL_*`.
+ *
+ * **Exportada** desde la fase 5 (E2). `peticion()` es privada y solo reconoce códigos `TPL_*`, así
+ * que los clientes de los módulos nuevos (`lib/invitados/api.ts` y los que vengan) clasifican sus
+ * propios errores; sin esta señal podían tirar el token pero no levantar la bandera, y entonces
+ * `/acceso` decía «inicia sesión» en vez de «tu sesión caducó» — el defecto U-1 que cerró la fase
+ * 3-C. La bandera sigue viviendo en un solo sitio: aquí.
+ */
+export function marcarSesionCaducada(): void {
   // Solo es «caducada» si de verdad había token: sin token es «todavía no ha entrado».
   sesionCaducada = getAuthToken() !== null;
   // El token que ya no vale se tira: dejarlo puesto hace que cada ruta vuelva a fallar igual y que

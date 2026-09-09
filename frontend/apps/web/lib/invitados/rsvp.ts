@@ -18,7 +18,19 @@
 // SIN `timestamp` ni `statusCode` (a diferencia de `TplErrorResponse`, que sí los lleva). `ApiError`
 // exige esos dos campos por tipo; se rellenan aquí con el estado HTTP real y la hora de recepción,
 // nunca inventando el `code`/`message`, que son los únicos que importan para clasificar.
-import { ApiError, SessionError, UnknownApiError, getApiBaseUrl } from "@/lib/api-client";
+//
+// Las clases de error se importan de `@/lib/errors` y NO de `@/lib/api-client`: ese módulo hace, en
+// su cabecera, `import { OperationBatch } from "@invitaciones/schema"` (el esquema de operaciones
+// del editor, con Zod) — importar CUALQUIER cosa de ahí arrastra ese módulo entero al bundle del
+// cliente. Medido con `pnpm run build && pnpm run budget`: ~87 KB gz de más en el primer JS de esta
+// ruta pública, que no usa el editor ni Zod para nada (ver también `./renderPublico.ts`, mismo
+// motivo para el otro fetch de esta pantalla). `getApiBaseUrl` se duplica aquí (una línea) por el
+// mismo motivo: es la única función de `api-client.ts` que esta ruta necesita.
+import { ApiError, SessionError, UnknownApiError } from "@/lib/errors";
+
+function getApiBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:6003";
+}
 
 // -------------------------------------------------------------------------------------------
 // Formas — verificadas contra el backend vivo (ver bitácora del handoff 5-2-D), no supuestas del
@@ -174,4 +186,4 @@ export async function enviarRsvp(token: string, input: RsvpRespuestaInput): Prom
   return peticionRsvp<RsvpEstado>(token, { method: "PUT", jsonBody: cuerpo });
 }
 
-export { ApiError, SessionError, UnknownApiError } from "@/lib/api-client";
+export { ApiError, SessionError, UnknownApiError } from "@/lib/errors";

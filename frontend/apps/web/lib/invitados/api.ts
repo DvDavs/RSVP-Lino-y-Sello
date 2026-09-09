@@ -12,9 +12,9 @@ import {
   ApiError,
   SessionError,
   UnknownApiError,
-  clearAuthToken,
   getApiBaseUrl,
   getAuthToken,
+  marcarSesionCaducada,
 } from "@/lib/api-client";
 import type {
   GuestExportFile,
@@ -56,23 +56,8 @@ function esCuerpoDeError(valor: unknown): valor is CuerpoDeError {
   return typeof valor === "object" && valor !== null && typeof (valor as CuerpoDeError).code === "string";
 }
 
-/**
- * Un 401/403 significa que el token que llevábamos ya no vale. `lib/api-client.ts` tira el token en
- * ese caso (`marcarSesionCaducada`, `:94-100`) y sin eso CADA ruta vuelve a fallar igual y la
- * pantalla de acceso no sabe que hay que volver a entrar. Esa función es privada de aquel módulo y
- * `lib/api-client.ts` es territorio compartido, así que aquí se replica la mitad que SÍ es pública
- * (`clearAuthToken`). Queda pendiente para el orquestador exportar la señal `sesionCaducada`; ver la
- * nota de la revisión.
- */
-function olvidarSesionCaducada(): void {
-  // Solo es «caducada» si de verdad había token: sin token es «todavía no ha entrado».
-  if (getAuthToken() !== null) clearAuthToken();
-}
-
 /** Clasifica una respuesta no-2xx y la lanza. Nunca se descarta un error en silencio (P1). */
 function clasificarYLanzar(status: number, textoCrudo: string): never {
-  if (status === 401 || status === 403) olvidarSesionCaducada();
-
   let cuerpo: unknown;
   try {
     cuerpo = textoCrudo.length > 0 ? JSON.parse(textoCrudo) : undefined;
@@ -96,6 +81,11 @@ function clasificarYLanzar(status: number, textoCrudo: string): never {
   // 401/403 de la cadena de filtros de Spring Security, sin `code` reconocible (mismo criterio que
   // `lib/api-client.ts`: la sesión terminó o el rol no alcanza, y esa distinción solo la sabe aquí).
   if (status === 401 || status === 403) {
+    // El olvido de la sesión va AQUÍ y no antes de leer el cuerpo: un 401/403 CON `code` del módulo
+    // es un fallo de la ruta, no de la sesión, y tirar el token en ese caso echaría a la clienta de
+    // la aplicación por un error de permisos de un recurso concreto. Es el mismo criterio que
+    // `lib/api-client.ts` (`marcarSesionCaducada` solo corre cuando no hay código reconocible).
+    marcarSesionCaducada();
     throw new SessionError(status, textoCrudo);
   }
 
@@ -142,7 +132,18 @@ async function peticionInvitados<T>(opciones: OpcionesPeticion): Promise<T | und
 
   if (!respuesta.ok) clasificarYLanzar(respuesta.status, textoCrudo);
 
-  return textoCrudo.length > 0 ? (JSON.parse(textoCrudo) as T) : undefined;
+  if (textoCrudo.length === 0) return undefined;
+
+  try {
+    return JSON.parse(textoCrudo) as T;
+  } catch {
+    // Un 2xx cuyo cuerpo NO es JSON (una página de error de un proxy, un HTML de mantenimiento) se
+    // escapaba de aquí como un `SyntaxError` pelado: ninguna de las tres clases de error del
+    // proyecto, así que `error instanceof ApiError|SessionError` fallaba y la pantalla enseñaba el
+    // mensaje genérico sin saber siquiera qué ruta se rompió. Se clasifica como lo que es: una
+    // respuesta que no reconocemos.
+    throw new UnknownApiError(respuesta.status, textoCrudo);
+  }
 }
 
 // =============================================================================================

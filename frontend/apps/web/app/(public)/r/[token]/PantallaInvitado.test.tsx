@@ -8,7 +8,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ComposedDocument } from "@invitaciones/schema";
-import { ApiError } from "@/lib/api-client";
+import { ApiError } from "@/lib/invitados/rsvp";
 import type { RsvpEstado } from "@/lib/invitados/rsvp";
 import { PantallaInvitado } from "./PantallaInvitado";
 
@@ -16,20 +16,17 @@ vi.mock("@/lib/invitados/rsvp", async () => {
   const real = await vi.importActual<typeof import("@/lib/invitados/rsvp")>("@/lib/invitados/rsvp");
   return { ...real, obtenerRsvp: vi.fn(), enviarRsvp: vi.fn() };
 });
-vi.mock("@/lib/api-client", async () => {
-  const real = await vi.importActual<typeof import("@/lib/api-client")>("@/lib/api-client");
-  return { ...real, getPublicRender: vi.fn() };
-});
+vi.mock("./renderPublico", () => ({ obtenerRenderPublico: vi.fn() }));
 vi.mock("../../_componentes/RenderInvitacion", () => ({
   RenderInvitacion: () => <div data-testid="invitacion-render">invitación</div>,
 }));
 
 import { obtenerRsvp, enviarRsvp } from "@/lib/invitados/rsvp";
-import { getPublicRender } from "@/lib/api-client";
+import { obtenerRenderPublico } from "./renderPublico";
 
 const obtenerRsvpMock = vi.mocked(obtenerRsvp);
 const enviarRsvpMock = vi.mocked(enviarRsvp);
-const getPublicRenderMock = vi.mocked(getPublicRender);
+const getPublicRenderMock = vi.mocked(obtenerRenderPublico);
 
 const NOMBRE_INVITADO = "María Fernanda Cruz";
 
@@ -183,10 +180,15 @@ describe("estado 2 — ya respondió, en los dos sentidos", () => {
 
     expect(await screen.findByText(/avisamos que no podrás ir/i)).toBeTruthy();
 
-    // Y volver a confirmar una segunda vez — "cuantas veces haga falta".
+    // Y volver a confirmar una segunda vez — "cuantas veces haga falta". Al reabrir el formulario
+    // tras declinar, la decisión pre-cargada es la ÚLTIMA respuesta real ("No podré ir"): el
+    // formulario de edición siempre refleja lo que el invitado contestó, igual que arriba (al
+    // reabrir desde "Confirmado" ya venía marcado "Sí"). Por eso aquí se selecciona "Sí" a mano
+    // antes de enviar, igual que arriba se seleccionó "No" a mano.
     await usuario.click(screen.getByRole("button", { name: /cambiar mi respuesta/i }));
+    await usuario.click(await screen.findByRole("radio", { name: /sí, ahí estaré/i }));
     enviarRsvpMock.mockResolvedValueOnce(estadoPendiente({ status: "CONFIRMED", adultsConfirmed: 2, childrenConfirmed: 1 }));
-    await usuario.click(await screen.findByRole("button", { name: /confirmar mi asistencia/i }));
+    await usuario.click(screen.getByRole("button", { name: /confirmar mi asistencia/i }));
 
     expect(await screen.findByText(/quedaste confirmada/i)).toBeTruthy();
     expect(enviarRsvpMock).toHaveBeenCalledTimes(3);

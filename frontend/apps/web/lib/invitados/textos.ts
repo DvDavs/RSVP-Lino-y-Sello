@@ -86,6 +86,14 @@ export const textosInvitados = {
     verEnlace: "Ver el enlace",
     botonWhatsapp: "WhatsApp",
     botonCorreo: "Correo",
+    // Nombres accesibles de los cuatro botones de acción, que se repiten en CADA fila y en CADA
+    // tarjeta: sin el nombre del invitado, un lector de pantalla recita «Copiar enlace, botón»
+    // veinticinco veces sin decir de quién es el enlace que se va a copiar o mandar. Cada uno empieza
+    // por el texto visible del botón (WCAG 2.5.3, «etiqueta en el nombre»).
+    copiarEnlaceDe: (nombre: string) => `Copiar enlace de ${nombre}`,
+    verEnlaceDe: (nombre: string) => `Ver el enlace de ${nombre}`,
+    whatsappA: (nombre: string) => `WhatsApp a ${nombre}`,
+    correoA: (nombre: string) => `Correo a ${nombre}`,
     correoEnviado: (nombre: string) => `Le mandamos su enlace a ${nombre} por correo.`,
     sinCorreo: "Este invitado no tiene correo registrado.",
     sinTelefono: "Este invitado no tiene teléfono registrado.",

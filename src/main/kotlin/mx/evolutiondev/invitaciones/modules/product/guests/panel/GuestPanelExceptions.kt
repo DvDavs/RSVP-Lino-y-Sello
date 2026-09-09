@@ -6,16 +6,20 @@ package mx.evolutiondev.invitaciones.modules.product.guests.panel
  * Los seis primeros son literalmente los del contrato que esta superficie puede producir. Los dos
  * últimos son añadidos declarados, no inventados en silencio:
  *
- * - `GUEST_EMAIL_UNAVAILABLE` (**501**) — el envío por correo de un enlace concreto todavía no
- *   existe; ver [GuestPanelController.sendEmail].
+ * - `RSVP_CLOSED` (**409**) — el contrato §1 lo pide por su nombre para `:send-email`: la invitación
+ *   no está publicada, o el invitado no tiene correo, o ya se agotó la cuota del día. Es del catálogo
+ *   del contrato §0.6 aunque nazca en la superficie pública.
+ * - `GUEST_EMAIL_UNAVAILABLE` (**501**) — se conserva declarado para que ninguna respuesta antigua
+ *   quede sin código, pero ya **no lo produce ninguna ruta**: `:send-email` está construida.
  * - `GUEST_INTERNAL` (**500**) — red de seguridad del advice. Sin él, cualquier excepción no prevista
  *   saldría por `GeneralExceptionHandler`, que **sí** filtra detalle interno al cliente
  *   (`Templates2ExceptionHandler.kt:152-160` documenta ese mismo defecto). Es la misma disciplina que
  *   ADR-016 fijó para `templates2`: ninguna ruta del módulo devuelve un `500` sin `code` y ninguna
  *   devuelve una traza.
  *
- * `RSVP_LINK_NOT_FOUND`, `RSVP_CLOSED` y `RSVP_TOO_MANY_ATTEMPTS` son de la superficie pública
- * (contrato §2), que vive en `modules/product/guests/rsvp` y **no** es de este paquete.
+ * `RSVP_LINK_NOT_FOUND` y `RSVP_TOO_MANY_ATTEMPTS` son **solo** de la superficie pública (contrato
+ * §2), que vive en `modules/product/guests/rsvp` y no es de este paquete. `RSVP_CLOSED` lo comparten
+ * las dos superficies: allí porque el evento ya pasó, aquí porque no hay a dónde mandar el enlace.
  */
 enum class GuestPanelErrorCode(val httpStatus: Int) {
     GUEST_NOT_FOUND(404),
@@ -23,6 +27,7 @@ enum class GuestPanelErrorCode(val httpStatus: Int) {
     GUEST_DUPLICATE(409),
     GUEST_QUOTA_EXCEEDED(422),
     INVITATION_NOT_FOUND(404),
+    RSVP_CLOSED(409),
     GUEST_EMAIL_UNAVAILABLE(501),
     GUEST_INTERNAL(500),
 }
@@ -64,7 +69,17 @@ sealed class GuestPanelException(
     class QuotaExceeded(mensaje: String) :
         GuestPanelException(GuestPanelErrorCode.GUEST_QUOTA_EXCEEDED, mensaje)
 
-    /** Ruta declarada en el contrato y todavía no construida; ver [GuestPanelController.sendEmail]. */
+    /**
+     * No se puede mandar este correo **ahora**, y el mensaje dice por qué en términos de la clienta:
+     * la invitación no está publicada, el invitado no tiene dirección, o ya se llegó al tope del día.
+     * Nunca lleva detalle interno.
+     */
+    class RsvpClosed(mensaje: String) : GuestPanelException(GuestPanelErrorCode.RSVP_CLOSED, mensaje)
+
+    /**
+     * Se conserva por compatibilidad del catálogo; ninguna ruta la lanza desde que `:send-email`
+     * existe. Ver [GuestPanelController.sendEmail].
+     */
     class EmailUnavailable :
         GuestPanelException(
             GuestPanelErrorCode.GUEST_EMAIL_UNAVAILABLE,

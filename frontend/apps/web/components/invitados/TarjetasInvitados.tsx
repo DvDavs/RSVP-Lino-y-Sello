@@ -20,7 +20,9 @@ function SheetCompartir({ invitationId, invitado }: { readonly invitationId: num
       open={abierto}
       onOpenChange={setAbierto}
       trigger={
-        <Button variant="secundario" size="md" className="flex-1">
+        // El nombre del invitado va en el nombre accesible: en la lista de móvil no hay fila de
+        // tabla que dé contexto, y «Compartir, botón» repetido veinticinco veces no dice con quién.
+        <Button variant="secundario" size="md" className="flex-1" aria-label={t.compartir.tituloDialogo(nombre)}>
           {t.acciones.compartir}
         </Button>
       }
@@ -69,7 +71,12 @@ export function TarjetasInvitados({ invitationId, rules, invitados, onCambiado, 
                 onGuardado={onCambiado}
                 onEliminado={onEliminado}
                 trigger={
-                  <Button variant="terciario" size="md" className="flex-1">
+                  <Button
+                    variant="terciario"
+                    size="md"
+                    className="flex-1"
+                    aria-label={t.tabla.editarA(nombreVisible(invitado.fullName))}
+                  >
                     {t.acciones.editar}
                   </Button>
                 }

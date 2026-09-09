@@ -55,12 +55,15 @@ export function TablaInvitados({ invitationId, rules, invitados, onCambiado, onE
                   trigger={
                     // El disparador dice lo que hace, no solo a quién: un lector de pantalla oía
                     // «María Fernanda Cruz, botón» sin saber que abre la edición (y que ahí vive el
-                    // borrado). El anillo de foco es el del sistema (`--ui-focus`), no el del
-                    // navegador, que aquí no se veía.
+                    // borrado). El anillo de foco es el MISMO del resto del chrome del editor
+                    // (`ring-ui-focus` + `ring-offset`, como `components/editor/SectionRow.tsx:84`):
+                    // escrito con utilidades del preset y no con `var(--ui-…)` a mano, porque una
+                    // cadena `--ui-` fuera de `app/(chrome)/**` rompe la frontera chrome/invitación
+                    // que vigila `test/tokens-no-leak.test.ts`.
                     <button
                       type="button"
                       aria-label={t.tabla.editarA(nombreVisible(invitado.fullName))}
-                      className="rounded-ui-control px-1 py-2 text-left heading-sm text-ui-ink outline-none hover:text-ui-link hover:underline focus-visible:shadow-[0_0_0_2px_var(--ui-surface-raised),0_0_0_5px_var(--ui-focus)]"
+                      className="rounded-ui-control px-1 py-2 text-left heading-sm text-ui-ink hover:text-ui-link hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface-raised"
                     >
                       {nombreVisible(invitado.fullName)}
                     </button>

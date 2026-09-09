@@ -49,10 +49,31 @@ class GuestCsvWriter {
 
     /** Entrecomilla solo cuando hace falta y duplica las comillas de dentro, como manda el RFC 4180. */
     private fun celda(valor: String): String {
-        val limpio = valor.replace("\r\n", " ").replace('\n', ' ').replace('\r', ' ')
+        val limpio = neutralizarFormula(
+            valor.replace("\r\n", " ").replace('\n', ' ').replace('\r', ' '),
+        )
         val necesitaComillas = limpio.contains(SEPARADOR) || limpio.contains('"')
         return if (necesitaComillas) "\"${limpio.replace("\"", "\"\"")}\"" else limpio
     }
+
+    /**
+     * **Inyección de fórmulas (CSV injection), cerrada.** Excel, LibreOffice y Google Sheets evalúan
+     * el contenido de una celda que empieza por `=`, `+`, `-` o `@` como **fórmula**, y el
+     * entrecomillado del RFC 4180 no lo impide: es sintaxis del CSV, no del evaluador. `=cmd|'/c
+     * calc'!A1` en una celda abre una petición DDE al abrir el archivo.
+     *
+     * No es teórico y no depende de que la clienta se ataque a sí misma: se reprodujo con un invitado
+     * **anónimo** que escribió `=HYPERLINK("http://…","Felicidades")` en el `message` de
+     * `PUT /public/` + `r/{token}`; ese texto viaja a la columna «Mensaje» del CSV que la clienta
+     * descarga y abre. Es decir, la superficie más expuesta del producto llegaba hasta la máquina de
+     * la clienta.
+     *
+     * El arreglo es el estándar: se antepone un apóstrofo, que las tres hojas de cálculo tratan como
+     * «esto es texto» y no pintan en la celda. Se cubren también el tabulador y el retorno de carro,
+     * que algunas versiones aceptan como preámbulo de fórmula.
+     */
+    private fun neutralizarFormula(valor: String): String =
+        if (valor.isNotEmpty() && valor.first() in PREFIJOS_DE_FORMULA) "'$valor" else valor
 
     private fun estadoEnEspanol(estado: String): String = when (estado) {
         "CONFIRMED" -> "Confirmado"
@@ -66,6 +87,9 @@ class GuestCsvWriter {
         const val BOM = "\uFEFF"
         const val SEPARADOR = ","
         const val SALTO = "\r\n"
+
+        /** Caracteres con los que una hoja de cálculo empieza a leer una fórmula. Ver [celda]. */
+        val PREFIJOS_DE_FORMULA = setOf('=', '+', '-', '@', '\t', '\r')
 
         val ENCABEZADOS = listOf(
             "Nombre",

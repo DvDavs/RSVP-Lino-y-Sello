@@ -65,11 +65,15 @@ describe("TablaInvitados — accesibilidad", () => {
     expect(screen.getByRole("button", { name: t.tabla.editarA(t.tabla.sinNombre) })).not.toBeNull();
   });
 
-  it("el disparador de edición lleva anillo de foco visible del sistema (--ui-focus)", () => {
+  it("el disparador de edición lleva el anillo de foco del chrome, con las utilidades del preset", () => {
     pintarTabla();
     const disparador = screen.getByRole("button", { name: t.tabla.editarA("María Fernanda Cruz") });
-    expect(disparador.className).toContain("focus-visible:");
-    expect(disparador.className).toContain("var(--ui-focus)");
+    // Mismo anillo que el resto del editor (`SectionRow`, `MenuDeFila`, `ThemePicker`).
+    expect(disparador.className).toContain("focus-visible:ring-ui-focus");
+    expect(disparador.className).toContain("focus-visible:ring-offset-2");
+    // Y NUNCA la cadena cruda del token: `components/**` está fuera de `app/(chrome)/**` y
+    // `test/tokens-no-leak.test.ts` la marca como fuga de la frontera chrome/invitación.
+    expect(disparador.className).not.toContain("--ui-");
   });
 });
 
@@ -131,5 +135,35 @@ describe("orden de encabezados", () => {
     );
     expect(screen.getByRole("heading", { level: 2, name: "María Fernanda Cruz" })).not.toBeNull();
     expect(screen.queryByRole("heading", { level: 3 })).toBeNull();
+  });
+});
+
+describe("los botones que se repiten en cada fila dicen DE QUIÉN son", () => {
+  // `Copiar enlace`, `Ver el enlace`, `WhatsApp` y `Correo` aparecen una vez por invitado con el
+  // mismo texto visible: sin el nombre en el nombre accesible, un lector de pantalla recita cien
+  // botones idénticos y no hay forma de saber a quién se le manda su enlace. Cada etiqueta empieza
+  // por el texto visible del botón (WCAG 2.5.3).
+  it.each([
+    ["Copiar enlace de María Fernanda Cruz"],
+    ["Ver el enlace de María Fernanda Cruz"],
+    ["WhatsApp a María Fernanda Cruz"],
+    ["Correo a María Fernanda Cruz"],
+  ])("la fila de la tabla tiene el botón «%s»", (nombreAccesible) => {
+    pintarTabla();
+    expect(screen.getByRole("button", { name: nombreAccesible })).not.toBeNull();
+  });
+
+  it("en la tarjeta de móvil, «Compartir» y «Editar» también llevan el nombre", () => {
+    render(
+      <TarjetasInvitados
+        invitationId={7}
+        rules={reglas}
+        invitados={[invitado()]}
+        onCambiado={() => {}}
+        onEliminado={() => {}}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Compartir con María Fernanda Cruz" })).not.toBeNull();
+    expect(screen.getByRole("button", { name: t.tabla.editarA("María Fernanda Cruz") })).not.toBeNull();
   });
 });
