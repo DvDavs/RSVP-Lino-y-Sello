@@ -25,6 +25,14 @@ Es seguro repetirlo: cada paquete ya registrado responde `200 noop_same_hash`. *
 entorno nuevo aparece con dos plantillas, no está roto: le falta ese bucle.** Conviene que la fase 5
 lo meta en el arranque del entorno de desarrollo.
 
+**Aviso, medido en el cierre de la fase 4**: en cuanto corras ese bucle, **una e2e se pone roja sin que
+nadie haya tocado el producto**. `e2e/asistente.spec.ts:164` («bloqueo por plan») busca el enlace «Ver
+qué incluye el plan 2» sin acotarlo a una tarjeta; con el catálogo completo hay **tres** plantillas de
+boda que exigen ese plan y Playwright falla por *strict mode violation*. El producto está bien: las
+tres enseñan su motivo y su salida. El arreglo es una línea y está descrito en
+`issues-fase-4.md` (I-4CIERRE-06); no se aplicó desde la fase 4 porque `e2e/**` es de la sesión de CI.
+Con el catálogo completo, la suite e2e da **78 de 79**, y ésa es la única roja.
+
 ## Los ocho `eventKind` y su plantilla
 | `eventKind` | plantillas |
 |---|---|

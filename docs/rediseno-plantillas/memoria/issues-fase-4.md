@@ -44,3 +44,30 @@ el propio encargo (ver `bitacora/4-adv.md` y `decisiones.md` ADR-4-ADV-01) y no 
 - **Cómo reproducirla**: `evidencia/fase-4/4-adv/registro-auditoria.txt` §5c — con un slug fresco (`adv4-version-menor`) se registra `1.0.0` (`201`) y LUEGO `0.9.0` (`201` también, con `structuralDiff` vacío porque el contenido es idéntico). El catálogo queda con las dos versiones `published`; `GET /master/templates2/versions?slug=…` las lista ambas.
 - **Riesgo**: bajo — nada se pisa ni se pierde (P1 sigue cumpliéndose: cada versión es su propia fila inmutable) y el catálogo sigue ofreciendo la de mayor versión a los documentos nuevos. Pero un typo humano de versión (`0.9.0` en vez de `1.9.0`, por ejemplo) se acepta sin ninguna señal más que un `201` silencioso — nadie avisa de que el slug ya tenía una versión más alta.
 - **Arreglo propuesto**: en `TemplateRegistrar.register`, tras el paso 4 (idempotencia), si `versions.findLatestPublished(plantilla.id)` existe y su versión es MAYOR que la que se está registrando, añadir un aviso (`WARNING`, no bloqueante — no hay base para prohibirlo, un slug puede legítimamente recibir una versión histórica) en la respuesta y en la fila de auditoría, del estilo `"se registra 0.9.0 después de que 1.0.0 ya estuviera publicada"`. No amerita un código de error nuevo ni bloquear el alta.
+
+## I-4CIERRE-06 — Registrar el catálogo completo rompe una e2e del asistente (localizador sin acotar)
+
+- **Dónde**: `frontend/apps/web/e2e/asistente.spec.ts:164-165`, prueba «bloqueo por plan: motivo a la
+  vista y una salida real, nunca un control mudo».
+- **Qué pasa**: la prueba busca el enlace de salida con
+  `page.getByRole("link", { name: "Ver qué incluye el plan 2" })` **sin acotarlo a una tarjeta y sin
+  `.first()`**, mientras que la aserción de la línea anterior sí usa `.first()` para el texto
+  «Requiere el plan 2». Cuando el catálogo tiene **una sola** plantilla de boda que exige el plan 2,
+  pasa. Con el catálogo completo hay **tres** (`boda-clasica`, `boda-premium`, `boda-premium-2`) y
+  Playwright falla por *strict mode violation*: «resolved to 3 elements».
+- **Cómo reproducirlo**: levantar el backend, `scripts/seed-demo.sh`, registrar las quince versiones
+  (`for d in frontend/templates/*/1.*/; do pnpm plantilla registrar "$d"; done`) y correr
+  `npx playwright test e2e/asistente.spec.ts:153`. Con sólo lo que siembra `seed-demo.sh` (dos
+  plantillas), la prueba pasa.
+- **Riesgo real**: **no es un defecto del producto**. Las tres plantillas enseñan correctamente su
+  motivo de bloqueo y su enlace de salida; lo que falla es el localizador de la prueba. Pero **sí es
+  una trampa esperando a la fase 5**: en cuanto un entorno registre el catálogo entero —que es lo que
+  el handoff `4-para-fase-5.md` le dice que haga— esta prueba se pone roja sin que nadie haya tocado
+  el producto.
+- **Arreglo propuesto** (una línea): acotar el localizador a la tarjeta de `boda-clasica`, como ya
+  hace la propia prueba con `getByTestId("asistente-usar-boda-clasica")`, o añadir `.first()`.
+- **Por qué no se arregló aquí**: `frontend/apps/web/e2e/**` es territorio de la sesión de CI, que
+  corre en paralelo (`claude/ci-github-actions-jobs-9qyd9z`). Tocarlo desde el cierre de la fase 4
+  provocaría un conflicto en un fichero que otra sesión está editando.
+- **Medido en el cierre**: con el catálogo completo, la suite e2e da **78 de 79**, y ésta es la única
+  roja.
