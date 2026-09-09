@@ -22,3 +22,10 @@ Lee primero `docs/rediseno-plantillas/diseno/10-identidad-visual.md` (dirección
 
 ## Libertad
 Todo lo demás es libre y se espera creatividad: proponer mejores paletas, formas nuevas, componentes nuevos, micro-interacciones, siempre que mejore el producto, sea accesible y quede documentado. Objetivo: un producto único, diferenciador, fácil de usar, bonito de ver y completamente funcional.
+
+## Skills de encargo (fase 5)
+Para el trabajo mecánico de cada tipo de entregable, después de leer las reglas de arriba, carga la
+skill específica: `ui-componente` (un componente de `packages/ui`), `ui-pantalla` (una página de
+`apps/web`), `ui-formulario` (react-hook-form + Zod con los controles del sistema), `ui-flujo-asistente`
+(un asistente por pasos), `ui-icono` (un icono nuevo de `packages/icons`). Para levantar y probar el
+producto completo, o antes de escribir cualquier e2e nuevo: `pruebas-producto`.

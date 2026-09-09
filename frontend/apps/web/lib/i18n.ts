@@ -663,6 +663,79 @@ export const es_MX = {
   // y como `es_MX` es un único objeto exportado, importar una sola clave suya bundlea el árbol
   // ENTERO — sacaba la ruta pública de presupuesto (163,1 de 150 KB gz). Mismo texto, ahora en
   // `app/(public)/i/[publicToken]/textos.ts` (`textosPublicos.error` / `.noDisponible`).
+  /**
+   * Fase 5 · andamio del PANEL DEL CLIENTE y marcadores de las rutas nuevas (5-0d).
+   *
+   * `nav.*` son las etiquetas del registro de navegación (`lib/panel/nav.ts`): cada entrada declara
+   * una CLAVE de aquí, nunca un literal, y el tipo `EntradaDeNavegacion` obliga a que la clave
+   * exista (`keyof Es_MX["panel"]["nav"]`).
+   *
+   * `marcador.*` y `secciones.*` son el texto de las páginas EN CONSTRUCCIÓN que dejan sitio a cada
+   * sesión de la fase 5. Cada sesión sustituye su pantalla entera y se lleva por delante su entrada
+   * de `secciones`; `nav` y `marcador` sobreviven.
+   *
+   * EXCEPCIÓN deliberada: `/r/[token]` (la confirmación del invitado) NO lee de aquí. Vive en el
+   * grupo `(public)`, y `es_MX` es un único objeto `as const`: importar una sola clave arrastra el
+   * árbol entero del chrome al JS de una ruta pública y móvil — medido en 3C-8, sacó `/i` de
+   * presupuesto (163,1 de 150 KB gz). Sus textos están en `app/(public)/r/[token]/textos.ts`, igual
+   * que los de `/i/[publicToken]`.
+   */
+  panel: {
+    nav: {
+      invitados: "Invitados",
+      plan: "Plan",
+      compartir: "Compartir",
+    },
+    marcador: {
+      /** Insignia de la página: dice de una lo que es, antes de leer nada más. */
+      enConstruccion: "En construcción",
+      volverAlEditor: "Volver al editor",
+      verMisInvitaciones: "Ver mis invitaciones",
+      verLaAyuda: "Ver la ayuda",
+    },
+    secciones: {
+      invitados: {
+        titulo: "Invitados",
+        texto:
+          "Aquí vas a llevar tu lista de invitados y ver quién confirmó, quién no puede ir y quién todavía no contesta. Estamos construyéndola; por ahora no hay nada que mostrar.",
+      },
+      plan: {
+        titulo: "Tu plan",
+        texto:
+          "Aquí vas a ver el plan de esta invitación, lo que incluye y cómo cambiarlo. Estamos construyéndolo; por ahora no hay nada que mostrar.",
+      },
+      precios: {
+        titulo: "Planes y precios",
+        texto:
+          "Aquí van a estar los planes con lo que incluye cada uno y su precio. Todavía no los publicamos. Mientras tanto, en la ayuda te decimos cómo contratar.",
+      },
+      pago: {
+        titulo: "Tu pago",
+        texto:
+          "Esta es la página a la que vas a regresar al terminar de pagar. Todavía no está conectada, así que aquí no se cobra nada ni se confirma ningún pago.",
+      },
+      admin: {
+        titulo: "Administración",
+        texto:
+          "Esta sección es para el equipo de Lino & Sello. Todavía no está construida: no muestra información de ninguna cuenta ni de ninguna invitación.",
+      },
+      perfil: {
+        titulo: "Tu cuenta",
+        texto:
+          "Aquí vas a poder cambiar tus datos, tu contraseña y la marca de tus invitaciones. Estamos construyéndolo; por ahora no hay nada que mostrar.",
+      },
+      contacto: {
+        titulo: "Contacto",
+        texto:
+          "Aquí va a estar la forma de escribirnos. Mientras la terminamos, los medios de contacto que ya existen están en la ayuda.",
+      },
+      legal: {
+        titulo: "Avisos legales",
+        texto:
+          "Aquí van a estar el aviso de privacidad, los términos del servicio y la política de cookies. Todavía no los publicamos.",
+      },
+    },
+  },
   revalidate: {
     noAutorizado: "Token de revalidación inválido.",
     cuerpoInvalido: "Cuerpo de la petición inválido.",

@@ -9,6 +9,7 @@ Producto SaaS de invitaciones digitales con RSVP. Backend Kotlin/Spring (`src/`)
 
 ## Identidad visual y UX (frontend)
 Antes de crear o modificar componentes, pantallas, iconos, paleta, tipografía, formularios, flujos o textos de interfaz, carga la skill `identidad-visual` (`.claude/skills/identidad-visual/SKILL.md`) y lee `docs/rediseno-plantillas/diseno/10-identidad-visual.md`. Reglas que nunca se rompen: sin emojis en la interfaz; sin tipografía ni controles genéricos; color solo desde tokens con parejas AA; fotos con máscara o forma; chrome del producto separado de los tokens de las plantillas de invitación.
+Para el trabajo mecánico de cada encargo, además: `ui-componente`, `ui-pantalla`, `ui-formulario`, `ui-flujo-asistente`, `ui-icono`, `pruebas-producto` (todas en `.claude/skills/`).
 
 ## Reglas de ingeniería
 - Módulo nuevo: `modules/templates2` (backend) y `frontend/`. No tocar el módulo antiguo (`modules/user/invitations`, `modules/master/templates`, `MongoDataInitializer`), RSVP, invitados, auth ni pagos salvo autorización explícita registrada como ADR.

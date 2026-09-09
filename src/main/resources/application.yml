@@ -131,3 +131,29 @@ logging:
     root: info
     org.hibernate: debug
     org.springframework: info
+# --- Modulo product (fase 5, bloque 5-0c; ver diseno/_12c-modulo-product.md y ADR-5-0C-01) ---
+# Estas variables las consumen E4 (pagos: producto.pagos.*) y E3 (cuenta y marca: producto.correo.* y
+# producto.contacto.*); un despliegue real las debe traer del ENTORNO, nunca escritas aqui en claro.
+# Todo lo sensible nace VACIO: vacio significa "funcion desactivada", no "usa el valor de siempre".
+# Se leen con @ConfigurationProperties (modules/product/ProductPropertiesConfig.kt), asi que anadir
+# logica de pagos o de marca NO obliga a volver a tocar este fichero.
+# FRONTEND_URL no se toca: ya existe como app.frontend.url y se reutiliza tal cual.
+producto:
+  pagos:
+    stripe:
+      # Secretos de Stripe. Sin clave-secreta no se cobra; es decision de E4 fallar al arrancar o
+      # degradar la compra, pero nunca cobrar contra una clave adivinada.
+      clave-secreta: ${STRIPE_SECRET_KEY:}
+      secreto-webhook: ${STRIPE_WEBHOOK_SECRET:}
+      moneda: ${STRIPE_MONEDA:MXN}
+  correo:
+    # Remitente de marca de los correos del producto nuevo (no es el transporte: eso es core/email).
+    remitente: ${MAIL_FROM:}
+    remitente-nombre: "${MAIL_FROM_NOMBRE:Lino & Sello}"
+    responder-a: ${MAIL_RESPONDER_A:}
+  contacto:
+    # Datos que la interfaz pinta en pie de pagina, ayuda y avisos legales.
+    # WhatsApp es solo click-to-chat (wa.me), sin API de WhatsApp Business (ADR-DUENO-02).
+    correo: ${CONTACTO_CORREO:}
+    whatsapp: ${CONTACTO_WHATSAPP:}
+    soporte: ${SOPORTE_CORREO:}

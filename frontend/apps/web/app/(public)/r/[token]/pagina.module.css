@@ -1,0 +1,48 @@
+/* app/(public)/r/[token]/pagina.module.css — estilos del enlace personal del invitado.
+ *
+ * Solo `--inv-*` (los valores de RESERVA de `tokens.css`) y ni un `--ui-*`: esta ruta vive en el
+ * grupo `(public)`, que NO importa `globals.css` ni Tailwind (P3, `04 §19`). Fichero propio y no
+ * reutilizado de `../../i/[publicToken]/`: esa carpeta es territorio de otra sesión y un import
+ * cruzado ataría dos pantallas que van a evolucionar por separado. */
+
+.aviso {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--inv-space-4);
+  padding: var(--inv-space-7) var(--inv-space-5);
+  text-align: center;
+  background: var(--inv-color-bg);
+  color: var(--inv-color-ink);
+}
+
+.titulo {
+  margin: 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-heading);
+  font-size: var(--inv-text-2xl);
+  font-weight: var(--inv-weight-heading);
+  line-height: var(--inv-leading-snug);
+  letter-spacing: var(--inv-tracking-tight);
+}
+
+/* Filete decorativo, igual que en la ruta hermana: separa sin parecer un error de servidor. */
+.filete {
+  width: var(--inv-space-8);
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: var(--inv-color-accent);
+  opacity: 0.6;
+}
+
+.cuerpo {
+  margin: 0;
+  max-width: var(--inv-measure);
+  font-family: var(--inv-font-body);
+  font-size: var(--inv-text-base);
+  line-height: var(--inv-leading-relaxed);
+  color: var(--inv-color-muted);
+}
