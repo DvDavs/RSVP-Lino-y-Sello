@@ -45,6 +45,9 @@ class EmailVerificationServiceTest {
         maxFallosPorIp = 20,
         ventanaMinutos = 15,
         maxEntradas = 50_000,
+        // R3-01: el presupuesto que frena una lista de direcciones distintas ya no es el de IP —que
+        // sin proxy declarado era el de todo el mundo— sino el global del ámbito.
+        maxEnviosGlobales = 5,
     )
 
     private val servicio = EmailVerificationService(
@@ -320,8 +323,9 @@ class EmailVerificationServiceTest {
         whenever(jwtUtil.generateSecureToken()).thenReturn("token-fresco")
         guardaLoQueLeDen()
 
-        // Cinco direcciones DISTINTAS, todas reales y sin verificar: el cubo por cuenta no las frena,
-        // porque cada correo tiene el suyo. El presupuesto por IP sí.
+        // Seis direcciones DISTINTAS, todas reales y sin verificar: ni el cubo por cuenta ni el cubo
+        // por destinatario las frenan, porque cada correo tiene el suyo. El presupuesto global del
+        // ámbito sí (R3-01; antes era el de IP, que sin proxy declarado era el de toda la plataforma).
         val cuentas = (1..6).map { n ->
             cuenta().also {
                 it.id = n.toLong()
@@ -339,7 +343,7 @@ class EmailVerificationServiceTest {
         assertEquals("token-fresco", cuentas[4].emailVerificationToken, "los cinco primeros sí salen")
         assertNull(
             cuentas[5].emailVerificationToken,
-            "el sexto NO acuna token ni manda correo: el presupuesto por IP se agoto",
+            "el sexto NO acuna token ni manda correo: el presupuesto global del ambito se agoto",
         )
     }
 }

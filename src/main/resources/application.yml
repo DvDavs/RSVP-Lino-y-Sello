@@ -50,7 +50,13 @@ spring:
       ddl-auto: validate
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-    show-sql: true
+    # R3-02. Estaba en `true` fijo, y este es el UNICO application.yml del repositorio: cualquier
+    # despliegue volcaba en el registro todas las sentencias que ejecuta la aplicacion. Apagado por
+    # defecto y disponible en desarrollo con `SPRING_JPA_SHOW_SQL=true`.
+    # Ojo con lo que apaga y lo que no: esto imprime el SQL, con `?` en los parametros; quien
+    # imprimia los VALORES —el token de verificacion, el de recuperacion y el hash de la
+    # contrasena— es el nivel de `org.hibernate` (ver `logging.level`, al final del fichero).
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -193,9 +199,36 @@ templates2:
     token: ${TEMPLATES2_REVALIDATE_TOKEN:}
     timeout-ms: ${TEMPLATES2_REVALIDATE_TIMEOUT_MS:3000}
 logging:
+  # R3-02 (`bitacora/5-E3-R3-verificacion.md` §4). `org.hibernate: debug` mas `show-sql: true`
+  # dejaban el registro de CUALQUIER despliegue lleno de material sensible: con DEBUG, Hibernate
+  # imprime cada entidad que carga o descarga (`EntityPrinter`) y cada parametro que enlaza o
+  # extrae (`org.hibernate.orm.jdbc.bind` / `.extract`), asi que el registro acababa conteniendo el
+  # token de verificacion de correo en claro, el de recuperacion, el hash bcrypt y los datos
+  # personales de las clientas. Quien lee los registros —operacion, un agregador, un servicio de
+  # errores— se quedaba con cualquier cuenta que tuviera una verificacion o una recuperacion en
+  # curso.
+  #
+  # Que se apaga y que no: NO se apaga el registro de la aplicacion (`root: info` sigue igual, y
+  # los avisos de Hibernate tambien: `info` deja pasar el arranque, el dialecto y los WARN/ERROR).
+  # Lo que se apaga es exactamente lo que vuelca datos.
+  #
+  # Como se enciende en desarrollo, y solo ahi (nunca por defecto):
+  #   SPRING_JPA_SHOW_SQL=true        -> las sentencias, con `?` en lugar de los valores
+  #   LOG_HIBERNATE=debug             -> el DEBUG de Hibernate (sentencias y plan), SIN valores
+  #   LOG_HIBERNATE_PARAMETROS=trace  -> los valores enlazados y extraidos (TRACE es su nivel real)
+  #   LOG_HIBERNATE_ENTIDADES=debug   -> el volcado de la entidad entera; necesita ADEMAS
+  #                                      LOG_HIBERNATE=debug, porque quien llama a `EntityPrinter`
+  #                                      es el listener de flush y ese va bajo `org.hibernate`
+  # Comprobado contra un backend real (bitacora/5-E3-C5.md §4): con LOG_HIBERNATE=debug a secas
+  # salieron 277 sentencias y CERO valores; los valores solo aparecen con su propia variable.
+  # Las tres lineas de abajo estan fijadas a proposito y NO heredan de `org.hibernate`: subir
+  # `LOG_HIBERNATE` a debug para diagnosticar una consulta ya no arrastra, de propina, los datos.
   level:
     root: info
-    org.hibernate: debug
+    org.hibernate: ${LOG_HIBERNATE:info}
+    org.hibernate.orm.jdbc.bind: ${LOG_HIBERNATE_PARAMETROS:info}
+    org.hibernate.orm.jdbc.extract: ${LOG_HIBERNATE_PARAMETROS:info}
+    org.hibernate.internal.util.EntityPrinter: ${LOG_HIBERNATE_ENTIDADES:info}
     org.springframework: info
 # --- Modulo product (fase 5, bloque 5-0c; ver diseno/_12c-modulo-product.md y ADR-5-0C-01) ---
 # Estas variables las consumen E4 (pagos: producto.pagos.*) y E3 (cuenta y marca: producto.correo.* y

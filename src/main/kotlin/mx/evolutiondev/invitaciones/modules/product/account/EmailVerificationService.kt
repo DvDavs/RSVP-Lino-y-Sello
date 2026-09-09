@@ -195,12 +195,15 @@ class EmailVerificationService(
 
             // R1-14. El cubo por cuenta se indexa por el correo recibido, así que rotar la dirección en
             // cada intento lo esquiva: con una lista de correos reales sin verificar, una petición por
-            // dirección es un correo por dirección. Este presupuesto **por IP y por ventana** cuenta los
-            // envíos que de verdad salen, no las peticiones, así que la rotación deja de amplificar.
+            // dirección es un correo por dirección. Este presupuesto cuenta los envíos que de verdad
+            // salen, no las peticiones, así que la rotación deja de amplificar: quien pone el techo al
+            // caudal es el cubo **global del ámbito** (R3-01), y quien protege un buzón concreto es el
+            // cubo por destinatario. El de IP sólo cuenta con proxy declarado, porque sin él la IP es
+            // la del proxy para todo el mundo y el presupuesto dejaba a la plataforma entera sin correo.
             // Se agota **en silencio**: la respuesta es la misma de siempre. Si el agotamiento
             // respondiera `429` sería un oráculo nuevo —solo se agotaría con direcciones reales— y
             // habríamos cambiado una fuga por otra.
-            if (hayQueMandar && authThrottleService.consumirEnvio(AmbitoIntentos.VERIFICACION)) {
+            if (hayQueMandar && authThrottleService.consumirEnvio(AmbitoIntentos.VERIFICACION, customer.email)) {
                 val token = jwtUtil.generateSecureToken()
                 customer.emailVerificationToken = token
                 customer.emailVerificationExpiry = Instant.now().plusSeconds(horasDeValidez * 3600)

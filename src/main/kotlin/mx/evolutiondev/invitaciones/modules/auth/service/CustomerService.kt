@@ -165,7 +165,10 @@ class CustomerService(
         // Se agota **en silencio**, como en el reenvío: la respuesta del alta es exactamente la
         // misma y la cuenta se crea igual. Quien se quede sin correo de verificación tiene
         // `POST /auth/verify-email:resend`, que lleva su propio presupuesto en otro ámbito.
-        if (authThrottleService.consumirEnvio(AmbitoIntentos.REGISTRO)) {
+        // R3-01: el presupuesto va contra el **destinatario** (y contra el techo global del ámbito),
+        // no contra la IP. Sin proxy declarado la IP era la del proxy para todo el mundo, así que
+        // cinco altas seguidas dejaban a la plataforma entera sin correo de verificación, en silencio.
+        if (authThrottleService.consumirEnvio(AmbitoIntentos.REGISTRO, savedUser.email)) {
             coroutineScope.launch {
                 emailService.sendEmail(
                     to = savedUser.email,

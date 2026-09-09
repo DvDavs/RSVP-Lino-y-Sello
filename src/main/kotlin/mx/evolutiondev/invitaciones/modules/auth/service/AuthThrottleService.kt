@@ -50,12 +50,23 @@ class DemasiadosIntentosException(
  * los tres cubos protegen cosas distintas y ninguno de ellos es el que adivina contraseñas: el de
  * `/auth/token` sigue siendo 20 y sigue siendo el único que abre sesión.
  */
-enum class AmbitoIntentos(val prefijo: String) {
-    /** `POST /auth/token` — el de I-02. Cada fallo de credenciales cuenta; un acceso correcto limpia. */
-    ACCESO("acceso"),
+enum class AmbitoIntentos(val prefijo: String, val topeGlobal: Boolean) {
+    /**
+     * `POST /auth/token` — el de I-02. Cada fallo de credenciales cuenta; un acceso correcto limpia.
+     *
+     * **Sin tope global** (R3-01), y a propósito: aquí la defensa dura es el cubo por cuenta
+     * (5/15 min), que es el que de verdad acota la adivinación contra un objetivo. Un techo de
+     * fallos para toda la plataforma sería el peor interruptor posible —cualquiera lo agota y **nadie
+     * puede entrar**— a cambio de nada que el cubo por cuenta no dé ya.
+     */
+    ACCESO("acceso", topeGlobal = false),
 
-    /** `POST /auth/request-password-reset` — **cada** petición cuenta; no hay «éxito» que limpie. */
-    RECUPERACION("recuperacion"),
+    /**
+     * `POST /auth/request-password-reset` — **cada** petición cuenta; no hay «éxito» que limpie.
+     * Lleva tope global: es `permitAll`, acuña un token y manda correo, y sin proxy declarado no hay
+     * ninguna otra identidad que acote el caudal (R3-01).
+     */
+    RECUPERACION("recuperacion", topeGlobal = true),
 
     /**
      * `POST /auth/signup` — **cada** petición cuenta, la rechazada y la que crea la cuenta (R2-02).
@@ -66,7 +77,7 @@ enum class AmbitoIntentos(val prefijo: String) {
      * `429`. Y el alta con éxito es precisamente la petición cara: escribe una fila de `customer` y
      * encola **dos** correos. Aquí no hay «éxito» que limpie nada, igual que en [RECUPERACION].
      */
-    REGISTRO("registro"),
+    REGISTRO("registro", topeGlobal = true),
 
     /**
      * `POST /auth/verify-email:resend` (fase 5, E3; `12-producto-completo.md §A6.4` punto 5).
@@ -75,7 +86,7 @@ enum class AmbitoIntentos(val prefijo: String) {
      * amplificador de correo —una petición sin autenticar, un correo enviado— sobre un canal SMTP de
      * cuenta gratuita.
      */
-    VERIFICACION("verificacion"),
+    VERIFICACION("verificacion", topeGlobal = true),
 
     /**
      * `PUT /user/account/password` y `POST /user/account/email` (fase 5, E3). Ámbito **propio** y no
@@ -83,11 +94,41 @@ enum class AmbitoIntentos(val prefijo: String) {
      * persona legítima sin poder **entrar** fallando adrede el cambio de contraseña. Con ámbito
      * propio, agotar el cambio de contraseña agota exactamente el cambio de contraseña.
      */
-    CAMBIO_CUENTA("cambio-cuenta"),
+    CAMBIO_CUENTA("cambio-cuenta", topeGlobal = false),
 }
 
 /**
  * I-02 (H-ADV-05): límite de intentos y hash señuelo para `POST /auth/token`.
+ *
+ * ### Con qué identidad limita, y qué protege cada cubo (R3-01)
+ * El cubo por **IP** sólo cuenta cuando el despliegue ha declarado que hay un proxy de confianza
+ * delante ([confiarEnXff]). Es la misma decisión que R2-01 obligó a tomar en
+ * `ProductInvitationThrottle` (`ADR-5-E3-C4-02`) y por la misma razón: con `confiar-en-x-forwarded-for`
+ * en `false` —que es el defecto correcto mientras nadie declare el proxy— `remoteAddr` es la
+ * dirección del **proxy para todo el mundo**, así que ese cubo no limita a un cliente: es un
+ * interruptor de plataforma. Reproducido en `5-E3-R3-verificacion.md §4`: veinte peticiones a
+ * `/auth/signup` dejaban a **cualquier** clienta sin poder registrarse durante quince minutos, y a
+ * partir del sexto alta nadie recibía el correo de verificación.
+ *
+ * Aquí no se podía copiar la otra mitad del arreglo de R2-01 —limitar por `customer_id`— porque el
+ * alta, la recuperación y el reenvío **no tienen usuario**: son `permitAll`. Así que lo que queda,
+ * cuando no hay proxy declarado, es esto:
+ *
+ * | Cubo | Cuándo cuenta | Qué protege |
+ * |---|---|---|
+ * | por **cuenta** (correo), 5/ventana | siempre | que no se machaque una dirección concreta |
+ * | por **IP**, 20/ventana | sólo con proxy declarado | que un cliente concreto no acapare |
+ * | **global de ámbito**, 300/ventana | siempre, en los ámbitos sin usuario | que un guión desbocado no escriba filas sin fin |
+ * | envío por **destinatario**, 5/ventana | siempre | que no se bombardee un buzón |
+ * | envío por **IP**, 5/ventana | sólo con proxy declarado | que un cliente concreto no acapare el correo |
+ * | envío **global de ámbito**, 60/ventana | siempre | que el producto no sea un cañón de correo |
+ *
+ * Lo que **no** queda protegido sin proxy declarado, dicho con todas las letras: quien esté dispuesto
+ * a sostener más de veinte peticiones por minuto puede agotar el tope global de un ámbito y dejar a
+ * la plataforma sin altas (o sin recuperaciones, o sin reenvíos) el resto de la ventana. No hay forma
+ * de evitarlo sin una identidad de cliente: por eso el tope global es **holgado** —está para acotar
+ * la catástrofe, no para ser el freno de cada día— y por eso el arreglo de verdad es declarar el
+ * proxy. Ver `preguntas-abiertas.md`.
  *
  * La fase 3 publicó la pantalla `/acceso` y con ella abrió al público un `/auth/token` que
  * (a) no limitaba intentos —60 fallos seguidos, ninguno bloqueado— y (b) tenía un oráculo de
@@ -151,6 +192,40 @@ class AuthThrottleService(
          */
         @Value("\${auth.token.throttle.max-envios-por-ip:5}") private val maxEnviosPorIp: Int = 5,
         /**
+         * R3-01. Techo de correos por **destinatario**, ámbito y ventana. Es el cubo de envíos que
+         * **no** depende de ver la IP del cliente: sin proxy declarado, el de arriba no cuenta, y sin
+         * éste el reenvío y el alta seguirían pudiendo bombardear un buzón concreto. Cinco por el
+         * mismo motivo que [maxEnviosPorIp]: un buzón real casi nunca necesita más en un cuarto de
+         * hora.
+         */
+        @Value("\${auth.token.throttle.max-envios-por-destino:5}") private val maxEnviosPorDestino: Int = 5,
+        /**
+         * R3-01. Techo de correos que salen **en todo el despliegue** por ámbito y ventana. Protege el
+         * recurso que de verdad es compartido —la cuenta SMTP y la reputación del dominio— del caso
+         * que ningún cubo por dirección puede parar: una lista de direcciones reales, una petición por
+         * dirección.
+         *
+         * Es **por ámbito**, no uno solo para todos: si fuera compartido, gastar el correo del alta
+         * dejaría sin correo a la recuperación, que es exactamente la denegación cruzada que el KDoc
+         * de [AmbitoIntentos] explica que hay que evitar.
+         *
+         * 60 y no 300 a propósito: agotar esto **degrada** (no sale el correo, la operación sigue) y
+         * queda un `WARN` en el registro para quien opera, mientras que agotar [maxGlobalPorAmbito]
+         * **deniega**. Al recurso caro se le pone el techo bajo porque equivocarse a la baja cuesta un
+         * reenvío; al que deniega, el techo alto.
+         */
+        @Value("\${auth.token.throttle.max-envios-globales:60}") private val maxEnviosGlobales: Int = 60,
+        /**
+         * R3-01. Techo de peticiones **de todo el despliegue** por ámbito y ventana, para los ámbitos
+         * sin usuario ([AmbitoIntentos.topeGlobal]). Existe porque, sin proxy declarado, no hay
+         * ninguna otra identidad: el cubo por correo se esquiva rotando la dirección y el de IP no
+         * cuenta. Está deliberadamente **holgado** —300 en quince minutos son veinte por minuto, muy
+         * por encima de cualquier ráfaga legítima de este producto— porque su trabajo es acotar la
+         * catástrofe, no frenar el uso normal; y porque cuanto más bajo, más barato le sale a
+         * cualquiera dejar a la plataforma sin altas. Ver la tabla del KDoc de la clase.
+         */
+        @Value("\${auth.token.throttle.max-global-por-ambito:300}") private val maxGlobalPorAmbito: Int = 300,
+        /**
          * ¿Se puede creer la cabecera `X-Forwarded-For`? **Por defecto NO**, y no es paranoia: la
          * cabecera la pone el cliente, así que confiar en ella sin un proxy delante convierte el
          * límite por IP en decoración —basta rotar el valor en cada intento— y además deja pegar a
@@ -169,8 +244,25 @@ class AuthThrottleService(
     private val porCuenta = ConcurrentHashMap<String, Ventana>()
     private val porIp = ConcurrentHashMap<String, Ventana>()
 
-    /** Presupuesto de envíos por IP y ámbito (R1-14). Separado de [porIp]: cuenta cosas distintas. */
+    /**
+     * Presupuesto de envíos (R1-14, ampliado en R3-01). Separado de [porIp] porque cuenta cosas
+     * distintas: envíos que de verdad salen, no peticiones. Un solo mapa con tres formas de clave
+     * —`ip:…`, `destino:…` y `global:…`— para que la poda sea la misma para las tres.
+     */
     private val porEnvio = ConcurrentHashMap<String, Ventana>()
+
+    /**
+     * R3-01. Techo de peticiones para **todo el despliegue**, por ámbito. La clave es el prefijo del
+     * ámbito y nada más: aquí no hay identidad que meter, y ése es justamente el punto.
+     */
+    private val porAmbito = ConcurrentHashMap<String, Ventana>()
+
+    /**
+     * Ventana de envíos cuyo agotamiento ya se avisó, por clave global. Sirve para que el aviso salga
+     * **una vez por ventana** y no una vez por rechazo. Tiene tantas entradas como ámbitos con correo,
+     * así que no necesita poda.
+     */
+    private val avisadoHasta = ConcurrentHashMap<String, Long>()
 
     /** Inyectable **sólo** desde las pruebas, para avanzar la ventana sin dormir 15 minutos. */
     internal var reloj: () -> Long = System::currentTimeMillis
@@ -187,10 +279,27 @@ class AuthThrottleService(
 
     init {
         log.info(
-                "auth: límite de intentos activo en {} — {} fallos/cuenta, {} fallos/IP, ventana {} min, tope {} entradas",
+                "auth: límite de intentos activo en {} — {} fallos/cuenta, ventana {} min, tope {} entradas",
                 AmbitoIntentos.entries.joinToString(", ") { it.prefijo },
-                maxFallosPorCuenta, maxFallosPorIp, ventanaMinutos, maxEntradas
+                maxFallosPorCuenta, ventanaMinutos, maxEntradas
         )
+        // R3-01. Que quien opera lea en el arranque con qué se está protegiendo de verdad, sin tener
+        // que deducirlo: sin proxy declarado, los cubos por IP no cuentan y el techo es el global.
+        if (confiarEnXff) {
+            log.info(
+                    "auth: proxy de confianza DECLARADO — límite por IP activo ({} fallos/IP, {} envíos/IP por ventana)",
+                    maxFallosPorIp, maxEnviosPorIp
+            )
+        } else {
+            log.info(
+                    "auth: SIN proxy de confianza declarado — los cubos por IP NO cuentan (serían un techo " +
+                            "para toda la plataforma, no por cliente). Quedan: {} intentos/cuenta, {} peticiones " +
+                            "por ámbito y ventana en {}, {} envíos/destinatario y {} envíos por ámbito y ventana",
+                    maxFallosPorCuenta, maxGlobalPorAmbito,
+                    AmbitoIntentos.entries.filter { it.topeGlobal }.joinToString(", ") { it.prefijo },
+                    maxEnviosPorDestino, maxEnviosGlobales
+            )
+        }
     }
 
     /**
@@ -202,7 +311,10 @@ class AuthThrottleService(
     fun comprobar(ambito: AmbitoIntentos, email: String) {
         val ahora = reloj()
         if (bloqueada(porCuenta, claveCuenta(ambito, email), maxFallosPorCuenta, ahora)) throw DemasiadosIntentosException()
-        if (bloqueada(porIp, claveIp(ambito), maxFallosPorIp, ahora)) throw DemasiadosIntentosException()
+        // El cubo por IP sólo vale cuando la IP que se ve es la del cliente (R3-01): ver el KDoc de
+        // la clase. Sin proxy declarado no se mira siquiera, porque bloquearía a todo el mundo a la vez.
+        if (confiarEnXff && bloqueada(porIp, claveIp(ambito), maxFallosPorIp, ahora)) throw DemasiadosIntentosException()
+        if (ambito.topeGlobal && bloqueada(porAmbito, ambito.prefijo, maxGlobalPorAmbito, ahora)) throw DemasiadosIntentosException()
     }
 
     /** `POST /auth/token`. Se conserva sin ámbito para no tocar la firma que usa `CustomerService`. */
@@ -216,7 +328,8 @@ class AuthThrottleService(
     fun registrarIntento(ambito: AmbitoIntentos, email: String) {
         val ahora = reloj()
         incrementar(porCuenta, claveCuenta(ambito, email), ahora)
-        incrementar(porIp, claveIp(ambito), ahora)
+        if (confiarEnXff) incrementar(porIp, claveIp(ambito), ahora)
+        if (ambito.topeGlobal) incrementar(porAmbito, ambito.prefijo, ahora)
     }
 
     /** Un intento fallido de `POST /auth/token`. */
@@ -236,16 +349,30 @@ class AuthThrottleService(
     fun registrarExito(ambito: AmbitoIntentos, email: String) {
         // Solo lo usa ACCESO. `REGISTRO` dejó de llamarlo en R2-02 y `RECUPERACION` nunca lo llamó.
         porCuenta.remove(claveCuenta(ambito, email))
-        porIp.remove(claveIp(ambito))
+        if (confiarEnXff) porIp.remove(claveIp(ambito))
+        // [porAmbito] NO se limpia nunca con un éxito, y es deliberado (R3-01): es un techo de
+        // plataforma, así que dejar que una operación correcta lo reinicie equivale a no tenerlo —el
+        // hallazgo exacto de R2-02, que aquí volvería multiplicado por todas las cuentas del mundo—.
+        // Los dos ámbitos que llaman a este método no llevan tope global, así que hoy no hay nada que
+        // limpiar; la línea que falta es la que importa.
     }
 
     /** Un acceso correcto por `POST /auth/token`. */
     fun registrarExito(email: String) = registrarExito(AmbitoIntentos.ACCESO, email)
 
     /**
-     * Pide permiso para **mandar un correo** en este ámbito desde esta IP (R1-14; extendido al alta
-     * en R2-02). Devuelve `true` y consume una unidad si queda presupuesto en la ventana; `false` si
-     * se agotó.
+     * Pide permiso para **mandar un correo** a [destino] en este ámbito (R1-14; extendido al alta en
+     * R2-02; repartido en tres cubos en R3-01). Devuelve `true` y consume una unidad de cada cubo si
+     * queda presupuesto en la ventana; `false` si alguno se agotó, sin gastar ninguno.
+     *
+     * Los tres cubos, y por qué hacen falta los tres (R3-01):
+     * - **por destinatario** (5): que nadie use el producto para bombardear un buzón. Es el único que
+     *   funciona sin ver la IP del cliente, y por eso es el que se añadió.
+     * - **por IP** (5): sólo cuando hay proxy declarado ([confiarEnXff]). Antes era el único, y sin
+     *   proxy no acotaba a un cliente sino a la plataforma entera: cinco altas y **nadie** recibía su
+     *   correo de verificación, en silencio (`5-E3-R3-verificacion.md §4`).
+     * - **global del ámbito** (60): el que sustituye al anterior en su papel de techo de caudal, ahora
+     *   con un número elegido para eso y con un `WARN` en el registro cuando se agota.
      *
      * Quien llama tiene que **callarse el `false`**: seguir respondiendo exactamente lo mismo y no
      * mandar el correo. Un `429` aquí sería un oráculo de enumeración nuevo —el presupuesto solo se
@@ -256,25 +383,48 @@ class AuthThrottleService(
      * una instancia el techo se multiplica por el número de instancias**. Anotado en
      * `preguntas-abiertas.md`; es un asunto de despliegue, no de este código.
      */
-    fun consumirEnvio(ambito: AmbitoIntentos): Boolean {
+    fun consumirEnvio(ambito: AmbitoIntentos, destino: String): Boolean {
         val ahora = reloj()
-        val clave = claveIp(ambito)
-        var concedido = false
-        porEnvio.compute(clave) { _, actual ->
-            when {
-                actual == null || ahora >= actual.hasta -> {
-                    concedido = true
-                    Ventana(ahora + ventanaMs, 1)
-                }
-                actual.fallos < maxEnviosPorIp -> {
-                    concedido = true
-                    actual.copy(fallos = actual.fallos + 1)
-                }
-                else -> actual
+        val porDestino = "destino:" + ambito.prefijo + ":" + destino.trim().lowercase(Locale.ROOT).take(320)
+        val global = "global:" + ambito.prefijo
+        val porCliente = if (confiarEnXff) "ip:" + claveIp(ambito) else null
+
+        // Se mira ANTES de gastar en los tres cubos: si uno no tiene hueco, no se consume de los
+        // otros. Dos hilos justo en el borde pueden colarse por uno; el sobrepaso está acotado por el
+        // número de hilos y no cambia el orden de magnitud de ningún techo.
+        if (!hayHueco(porEnvio, porDestino, maxEnviosPorDestino, ahora)) return false
+        if (porCliente != null && !hayHueco(porEnvio, porCliente, maxEnviosPorIp, ahora)) return false
+        if (!hayHueco(porEnvio, global, maxEnviosGlobales, ahora)) {
+            // El único de los tres que se avisa: que el correo del producto entero se haya agotado no
+            // puede enterarse nadie sólo porque una clienta se quede sin él (R3-01). Al que llama se
+            // le sigue devolviendo `false` a secas —el silencio hacia fuera es lo que evita el
+            // oráculo—, pero quien opera tiene aquí la línea.
+            //
+            // **Una sola línea por ventana**, no una por rechazo: bajo ataque los rechazos son
+            // cientos, y un arreglo sobre el registro que convierta el registro en un altavoz sería
+            // un mal chiste. La marca es el fin de la ventana viva, así que la siguiente ventana que
+            // se agote vuelve a avisar.
+            val ventana = porEnvio[global]?.hasta
+            if (ventana != null && avisadoHasta.put(global, ventana) != ventana) {
+                log.warn(
+                        "auth: presupuesto de correo AGOTADO en el ámbito {} ({} envíos por ventana de {} min); " +
+                                "las siguientes operaciones de este ámbito NO mandarán correo hasta que la ventana caduque",
+                        ambito.prefijo, maxEnviosGlobales, ventanaMinutos
+                )
             }
+            return false
         }
-        podar(porEnvio, ahora)
-        return concedido
+
+        incrementar(porEnvio, porDestino, ahora)
+        if (porCliente != null) incrementar(porEnvio, porCliente, ahora)
+        incrementar(porEnvio, global, ahora)
+        return true
+    }
+
+    /** ¿Cabe una unidad más en la ventana viva de esta clave? No consume nada. */
+    private fun hayHueco(mapa: ConcurrentHashMap<String, Ventana>, clave: String, limite: Int, ahora: Long): Boolean {
+        val v = mapa[clave] ?: return true
+        return ahora >= v.hasta || v.fallos < limite
     }
 
     /**
@@ -332,27 +482,25 @@ class AuthThrottleService(
     private fun claveIp(ambito: AmbitoIntentos): String = ambito.prefijo + ":" + ipCliente()
 
     /**
-     * IP del cliente. Se prefiere el primer salto de `X-Forwarded-For` porque en producción la
-     * aplicación va detrás de un proxy y `remoteAddr` sería el del proxy para **todo el mundo**:
-     * con 20 fallos se bloquearía a todos los usuarios a la vez. La contrapartida es que la
-     * cabecera es falsificable mientras no haya proxy de confianza configurado
-     * (`server.forward-headers-strategy` vive en `application.yml`, área prohibida), así que el
-     * límite por IP es una defensa secundaria; la dura es la de cuenta. Anotado en
-     * `preguntas-abiertas.md`.
+     * IP del cliente. **Sólo se llama con [confiarEnXff] puesto** (R3-01), que es la única situación
+     * en la que lo que se ve es de verdad la dirección de quien llama: sin proxy declarado
+     * `remoteAddr` es la del proxy para **todo el mundo** y el cubo dejaba de limitar a un cliente
+     * para limitar a la plataforma. Con la bandera puesta se prefiere el primer salto de
+     * `X-Forwarded-For`, que es lo que el proxy de confianza reescribe; `remoteAddr` queda de reserva
+     * por si la cabecera no llega.
+     *
+     * Para activarlo hacen falta las dos cosas, y en este orden: `server.forward-headers-strategy` en
+     * el despliegue —para que Spring reconstruya bien la petición— y
+     * `auth.token.throttle.confiar-en-x-forwarded-for=true`. Anotado en `preguntas-abiertas.md`.
      */
     private fun ipCliente(): String {
         val atributos = RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
                 ?: return "sin-peticion"
         val peticion = atributos.request
-        // La cabecera sólo se mira si alguien ha declarado que hay un proxy de confianza delante.
-        // Con `confiarEnXff = false` (el defecto) el contador va SIEMPRE contra la dirección real del
-        // socket, que el cliente no puede falsificar.
-        if (confiarEnXff) {
-            val reenviada = peticion.getHeader("X-Forwarded-For")
-            if (!reenviada.isNullOrBlank()) {
-                val primera = reenviada.substringBefore(',').trim()
-                if (primera.isNotEmpty()) return primera.take(64)
-            }
+        val reenviada = peticion.getHeader("X-Forwarded-For")
+        if (!reenviada.isNullOrBlank()) {
+            val primera = reenviada.substringBefore(',').trim()
+            if (primera.isNotEmpty()) return primera.take(64)
         }
         return (peticion.remoteAddr ?: "desconocida").take(64)
     }

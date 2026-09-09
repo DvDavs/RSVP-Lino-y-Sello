@@ -9,7 +9,7 @@ Todo cuerpo es JSON. Rutas bajo `/auth/**` son públicas; las de `/user/**` exig
 |---|---|---|
 | `POST /auth/token/refresh` | público | Mismo payload `{refreshToken}` y misma respuesta `{accessToken, refreshToken, role, isSurveyAnswered}`, pero **el `refreshToken` que devuelve es NUEVO y el que enviaste deja de valer**. Guarda siempre el de la respuesta o el siguiente refresco dará `400`. **Desde el 2026-09-09 (agente 5-E3-C4, R1-07): reusar un token ya canjeado pasados 30 s revoca TODAS las sesiones de la cuenta** —es la firma de un token copiado—, así que el `400` puede significar «vuelve a entrar con la contraseña». Dos canjes casi simultáneos del mismo token (dos pestañas) siguen sin cerrar la sesión: uno gana, el otro recibe `400` y la sesión del que ganó sigue viva. **No reintentes un canje con el token viejo**: guarda el nuevo o manda a `/acceso`. |
 | `POST /auth/reset-password` | público | Mismo payload `{resetToken, newPassword}`. Añade `429` al pasarse de intentos. Al cambiar la contraseña **se cierran todas las sesiones** de esa cuenta: tras un reset hay que volver a `POST /auth/token`. |
-| `POST /auth/signup` | público | Mismo payload y misma respuesta (sesión iniciada de inmediato, **no se bloquea el acceso**). La cuenta nace con `emailVerified=false` y recibe el correo de verificación (desde el 2026-09-09, R2-02, ese envío pasa por un presupuesto por IP: si se agota, la cuenta se crea igual y **sin correo**, con la misma respuesta; la salida es el reenvío desde `/perfil`). Mensaje de teléfono corregido: pide `+52` + 10 dígitos con ejemplo. Un teléfono ya registrado **ya no da error**. |
+| `POST /auth/signup` | público | Mismo payload y misma respuesta (sesión iniciada de inmediato, **no se bloquea el acceso**). La cuenta nace con `emailVerified=false` y recibe el correo de verificación (desde el 2026-09-09, R2-02, ese envío pasa por un presupuesto: si se agota, la cuenta se crea igual y **sin correo**, con la misma respuesta; la salida es el reenvío desde `/perfil`. Desde R3-01 el presupuesto es por **destinatario** y por **ámbito**, no por IP: ver el punto 7). Mensaje de teléfono corregido: pide `+52` + 10 dígitos con ejemplo. Un teléfono ya registrado **ya no da error**. |
 
 > **Corrección de esta fila (5-E3-C1, hallazgo R1-01).** El alta pública **ya no reactiva cuentas
 > deshabilitadas**. Antes, un correo de una cuenta dada de baja reactivaba la cuenta y le escribía la
@@ -94,8 +94,11 @@ El `401` por token ausente o caducado y el `403` por rol los escribe la cadena d
    la cuenta (al abrir un enlace viejo o al pedir un reenvío). Un enlace caducado que ya se limpió responde
    `CUENTA_TOKEN_INVALIDO` en vez de `CUENTA_TOKEN_CADUCADO` si se vuelve a pulsar: los dos ofrecen lo mismo —pedir uno
    nuevo—, así que la interfaz puede tratarlos igual.
-7. **Un reenvío puede no mandar correo aunque responda `200`** (5-E3-C1, R1-14). Hay un techo de envíos por IP y ventana
-   que se agota **en silencio**, a propósito: avisar delataría qué direcciones existen. La interfaz no puede prometer
+7. **Un reenvío puede no mandar correo aunque responda `200`** (5-E3-C1, R1-14; retocado el 2026-09-09 por 5-E3-C5,
+   R3-01). Hay un techo de envíos que se agota **en silencio**, a propósito: avisar delataría qué direcciones existen.
+   Desde R3-01 son tres cubos —5 por **destinatario** y ventana, 60 por **ámbito** y ventana en todo el despliegue, y
+   5 por IP **sólo si el despliegue declara un proxy de confianza**—; antes era sólo el de IP, que sin proxy era un
+   presupuesto único para toda la plataforma. Para la interfaz no cambia nada: la respuesta sigue siendo la misma. La interfaz no puede prometer
    «te lo acabamos de mandar»; el texto correcto es el condicional que ya devuelve el backend
    («si el correo corresponde a una cuenta sin verificar…»).
 8. **El teléfono no es único** (5-E3-C1, R1-10). Ninguna ruta —pública ni administrativa— rechaza ya un número repetido.

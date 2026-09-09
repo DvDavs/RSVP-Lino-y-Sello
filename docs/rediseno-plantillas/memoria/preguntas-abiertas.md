@@ -1877,3 +1877,54 @@ antes.
    real que responda el servidor en vez de adivinar la regla en el cliente (H-27, dos validadores
    que divergen) — pero si en el uso real resulta confuso ver «Eliminar» en una fila que nunca lo va
    a lograr, vale la pena que `GET /product/invitations` (pregunta 2) traiga ese dato.
+
+---
+
+## Agente 5-E3-C5 (2026-09-09) — lo que dejan abierto las dos correcciones de R3
+
+1. **`/auth/token` se ha quedado sin freno de pulverización mientras no haya proxy declarado, y hace falta una
+   decisión.** Al dejar de contar el cubo por IP sin proxy (`ADR-5-E3-C5-02`), una contraseña probada contra
+   muchas cuentas distintas ya no topa con nada: el cubo por cuenta (5/ventana) no la ve, porque cada cuenta
+   recibe un solo intento. La alternativa —un techo de fallos para toda la plataforma, como el que sí llevan el
+   alta, la recuperación y el reenvío— se descartó a propósito: trescientos fallos son segundos de trabajo y
+   dejarían al producto **entero** sin poder entrar, de forma repetible y gratuita, que es un daño peor y más
+   fácil. Las opciones reales, ninguna gratis:
+   - **(a) Dejarlo como está** hasta que haya proxy: el ataque necesita además adivinar direcciones (la
+     enumeración está cerrada) y contraseñas (hay requisitos de fortaleza). Coste cero, riesgo asumido.
+   - **(b) Declarar el proxy** (`server.forward-headers-strategy` + `confiar-en-x-forwarded-for=true`): lo
+     recupera entero y además cierra la denegación global. Es la respuesta buena y es de despliegue.
+   - **(c) Un techo global de fallos en `ACCESO`, muy alto** (miles): recupera algo de freno a cambio de
+     reabrir el apagón del acceso, sólo que más caro. No se recomienda.
+   **Pregunta al dueño: ¿(a) hasta que haya proxy, o hay proxy ya y podemos ir a (b)?**
+
+2. **¿Cuánto tráfico legítimo tiene de verdad este producto?** Los dos techos nuevos —300 peticiones y 60
+   correos por ámbito y ventana de 15 min— están puestos «muy por encima de cualquier ráfaga plausible» a
+   ojo, sin una sola medida de tráfico real, porque no hay ninguna disponible. Son la única barrera que queda
+   sin proxy declarado, así que **el número importa**: si el producto hace campañas y puede recibir cien altas
+   en diez minutos, 300 se queda corto y bloquearía a clientas de verdad; si nunca pasa de diez al día, 300 es
+   un regalo para quien quiera abusar y podría bajarse mucho. Se ajustan sin tocar código
+   (`auth.token.throttle.max-global-por-ambito` y `.max-envios-globales`). **Pregunta al dueño: ¿hay alguna
+   cifra de altas por hora, aunque sea aproximada, con la que calibrarlos?**
+
+3. **Nadie está mirando el `WARN` de «presupuesto de correo agotado».** Ahora el producto avisa en su registro
+   —una línea por ventana— cuando deja de mandar correos de verificación o de recuperación. Eso sólo sirve si
+   alguien lo lee: hoy no hay alerta, ni panel, ni nada que lo mire. Es la señal de que o hay un ataque o los
+   techos están mal calibrados (punto 2), y en los dos casos hay clientas quedándose sin poder verificar su
+   cuenta. **Pregunta al dueño: ¿hay algún sitio a donde mandar avisos de operación (correo, un canal, un
+   agregador de registros)?** Mientras no lo haya, el aviso está en un fichero que nadie abre.
+
+4. **`println` con datos personales en tres ficheros que este encargo no podía tocar.** Buscando lo que pedía
+   R3-02 aparecieron siete sitios que escriben correos, teléfonos o respuestas crudas de una API externa fuera
+   de todo `logger`: `modules/shared/guests/notifier/EmailGuestNotifier.kt:155,206,275`,
+   `modules/shared/whatsapp/WhatsAppService.kt:112,116,118` y
+   `core/email/strategy/MailerSendEmailStrategy.kt:61,72,79`. No son configuración —no los apaga ningún nivel
+   de registro, porque `println` va a la salida estándar sin pasar por logback— así que la corrección de R3-02
+   **no los cubre**. Son de `modules/shared` y `core/email`, que pertenecen a otros. **Para el orquestador:
+   ¿a quién se le asigna?** Es trabajo de media hora y cierra el resto del hallazgo.
+
+5. **`CustomerEntity` es un `data class` y su `toString()` lleva el hash y los dos tokens**
+   (`core/auth/model/CustomerEntity.kt:16`). Hoy nadie la interpola en un registro y la configuración ya no la
+   vuelca, pero un `log.info("$customer")` de cualquiera reabre R3-02 sin tocar `application.yml`. Cerrarlo del
+   todo sería sobrescribir `toString()` en la entidad para que no imprima `password`, `emailVerificationToken`
+   ni `resetToken` — un cambio pequeño, pero en una entidad compartida con el módulo antiguo, así que no se
+   hizo en este encargo. **Pregunta al orquestador: ¿se autoriza tocar `CustomerEntity` para eso?**

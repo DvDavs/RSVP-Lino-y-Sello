@@ -222,25 +222,53 @@ class SignupCuentaTest {
      * `429`, porque cada alta con éxito llamaba a `registrarExito`, que **borra el contador de IP**:
      * el techo no mordía nunca. Ahora el alta con éxito cuenta como cualquier otra petición.
      *
-     * Correos distintos a propósito: así el cubo que tiene que frenar es el de IP, que es el único
-     * que un guion de altas en cadena no puede esquivar.
+     * Correos distintos a propósito: así el cubo que tiene que frenar no puede ser el de cuenta, que
+     * un guion de altas en cadena esquiva rotando la dirección. **Desde R3-01 el que frena es el tope
+     * global del ámbito**, no el de IP: sin proxy declarado la IP es la del proxy para todo el mundo,
+     * así que ese cubo no distinguía a la clienta del atacante (ver la prueba de abajo). Lo que esta
+     * prueba fija es que las altas en cadena **siguen topando**: R2-02 no se reabre.
      */
     @Test
-    @DisplayName("R2-02: N altas seguidas desde la misma IP acaban en 429")
+    @DisplayName("R2-02: N altas seguidas con correos distintos acaban en 429 (tope global del ámbito)")
     fun lasAltasSeguidasDesdeUnaIpTopan() {
         repositorioVacio()
         val limitadorPropio = AuthThrottleService(
             passwordEncoder = encoder,
             maxFallosPorCuenta = 5,
-            maxFallosPorIp = 3,
+            maxFallosPorIp = 20,
             ventanaMinutos = 15,
             maxEntradas = 50_000,
+            maxGlobalPorAmbito = 3,
         )
         val servicioPropio = servicioConLimitador(limitadorPropio)
 
         repeat(3) { i -> servicioPropio.signUp(alta("alta$i@ejemplo.mx")) }
 
         assertFailsWith<DemasiadosIntentosException> { servicioPropio.signUp(alta("alta3@ejemplo.mx")) }
+    }
+
+    /**
+     * **R3-01, el hallazgo, contra el alta.** Es la prueba que la revisora reprodujo a mano: veinte
+     * peticiones de alta desde una IP y, tras ellas, **otra clienta** que no puede registrarse. La
+     * causa era que el cubo por IP contaba aunque nadie hubiera declarado un proxy delante, y sin
+     * proxy `remoteAddr` es la dirección del proxy **para todo el mundo**: no era un freno por
+     * cliente, era un interruptor de plataforma.
+     *
+     * Con la configuración por defecto —que es la que corre en cualquier despliegue que no haya
+     * declarado su proxy— las veinte altas ya no dejan a nadie fuera.
+     */
+    @Test
+    @DisplayName("R3-01: veinte altas seguidas NO dejan sin registrarse a la clienta siguiente")
+    fun veinteAltasNoDejanSinRegistrarseALaSiguiente() {
+        repositorioVacio()
+        // Por defecto: sin `confiarEnXff`, con los topes reales del producto.
+        val limitadorPropio = AuthThrottleService(passwordEncoder = encoder)
+        val servicioPropio = servicioConLimitador(limitadorPropio)
+
+        repeat(20) { i -> servicioPropio.signUp(alta("ruidosa$i@ejemplo.mx")) }
+
+        val legitima = servicioPropio.signUp(alta("clienta.legitima@ejemplo.mx"))
+        assertEquals("clienta.legitima@ejemplo.mx", legitima.email, "la clienta siguiente tiene que poder registrarse")
     }
 
     /**
@@ -261,7 +289,9 @@ class SignupCuentaTest {
             maxFallosPorIp = 20,
             ventanaMinutos = 15,
             maxEntradas = 50_000,
-            maxEnviosPorIp = 2,
+            // R3-01: el presupuesto que frena un guion de altas con correos distintos ya no es el de
+            // IP —que sin proxy declarado no cuenta— sino el global del ámbito.
+            maxEnviosGlobales = 2,
         )
         val servicioPropio = servicioConLimitador(limitadorPropio, verificacionSimulada)
 

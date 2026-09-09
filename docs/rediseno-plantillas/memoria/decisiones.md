@@ -2493,3 +2493,104 @@ el texto va también aquí íntegro para que este registro siga siendo autosufic
   todo. El caso «con cupo lleno, quiere una más» queda con una salida de dos pasos (borrar, luego
   recargar para que `cuantasInvitaciones` vuelva a 0 o a alguna «sin plantilla») en vez de un paso
   solo — documentado aquí y en `preguntas-abiertas.md` en vez de silenciado.
+
+## ADR-5-E3-C5-01 — El registro nace mudo sobre los datos: se apaga lo que vuelca valores, no el registro
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E3-C5
+- Contexto: R3-02 (ALTA). `application.yml:53` (`show-sql: true`) y `:198` (`org.hibernate: debug`), sin
+  perfil que lo apagara y siendo éste el **único** `application.yml` del repositorio: cualquier despliegue
+  publicaba en su registro el token de verificación de correo en claro, el de recuperación, el hash bcrypt y
+  los datos personales de cada clienta que Hibernate cargara. Quien lee los registros —operación, un
+  agregador, un servicio de errores— se quedaba con cualquier cuenta con una verificación o una recuperación
+  en curso. Preexistente; no lo trajo ninguna corrección de esta fase.
+- Decisión: apagar por defecto **exactamente los cuatro emisores que imprimen valores**, y dejar los cuatro
+  disponibles por variable de entorno:
+  - `spring.jpa.show-sql: ${SPRING_JPA_SHOW_SQL:false}` — las sentencias (con `?`, sin valores).
+  - `logging.level.org.hibernate: ${LOG_HIBERNATE:info}`.
+  - `logging.level.org.hibernate.orm.jdbc.bind` y `…extract: ${LOG_HIBERNATE_PARAMETROS:info}` — los valores
+    que se escriben y se leen.
+  - `logging.level.org.hibernate.internal.util.EntityPrinter: ${LOG_HIBERNATE_ENTIDADES:info}` — la entidad
+    entera en cada carga y descarga.
+  `root: info` y `org.springframework: info` **no se tocan**: esto no es apagar el registro.
+- Por qué los tres emisores se fijan APARTE y no heredando de `org.hibernate`: si sólo se bajara el logger
+  padre, el día que alguien lo suba a `debug` para mirar una consulta —que es una necesidad legítima y va a
+  pasar— se llevaría de propina los valores y las entidades, y el hallazgo volvería sin que nadie lo notara.
+  Con las tres líneas fijadas, subir `LOG_HIBERNATE` da diagnóstico **sin** datos. Comprobado contra un
+  backend real: con `LOG_HIBERNATE=debug` salieron 277 sentencias SQL y 2 792 líneas de Hibernate, y **cero**
+  parámetros enlazados, cero valores extraídos, cero volcados de entidad y cero hashes.
+- Por qué esos nombres de logger y no el del inventario: en Hibernate 6 —la versión del proyecto,
+  `hibernate-core-6.6.4.Final`— los emisores son `org.hibernate.orm.jdbc.bind` / `.extract`, verificados
+  dentro del jar (`JdbcBindingLogging.class`, `JdbcExtractingLogging.class`). El nombre de Hibernate 5
+  (`org.hibernate.type.descriptor.sql.BasicBinder`) ya no emite nada: fijarlo a él habría dejado la fuga
+  abierta con aspecto de arreglada.
+- Consecuencias: por defecto, ningún despliegue vuelve a escribir un token, un hash ni un dato personal en su
+  registro por configuración de fábrica, y hay una prueba que lo fija sobre el `application.yml` real
+  (`RegistroSinDatosSensiblesTest`, barrido de **todos** los `logging.level.*`, no una lista de tres). Lo que
+  esta decisión **no** cubre, y queda dicho: cualquiera puede reabrir la fuga desde el código, porque
+  `CustomerEntity` es un `data class` y su `toString()` lleva el hash y los dos tokens
+  (`core/auth/model/CustomerEntity.kt:16`); hoy nadie la interpola en un log. Y sigue habiendo `println` y
+  `logger.info` con correos y teléfonos fuera de este territorio, listados por `fichero:línea` en
+  `bitacora/5-E3-C5.md §3`.
+
+## ADR-5-E3-C5-02 — Sin proxy declarado, `auth` limita por cuenta, por destinatario y por un techo de
+  plataforma; el cubo por IP sólo cuenta cuando alguien declara el proxy
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E3-C5
+- Contexto: R3-01 (MEDIA). El arreglo de R2-02 hizo que toda petición de `/auth/signup` contara en el cubo por
+  IP. Pero `confiar-en-x-forwarded-for` es `false` por defecto —y tiene que serlo, o la cabecera la pone el
+  cliente—, así que `remoteAddr` es la dirección del proxy **para todo el mundo**: veinte peticiones dejaban a
+  cualquier clienta sin registrarse quince minutos, y el presupuesto de correo (5 por IP) dejaba a partir del
+  sexto alta a **todas** las clientas nuevas sin correo de verificación, en silencio. Es el defecto que R2-01
+  denunció en `ProductInvitationThrottle` y que `ADR-5-E3-C4-02` corrigió allí, no aplicado aquí.
+- Por qué no basta con copiar `ADR-5-E3-C4-02`: ahí el arreglo tenía dos mitades —(a) el cubo por IP sólo con
+  proxy declarado y (b) limitar por `customer_id`—. La (a) se copia tal cual. La (b) **no existe aquí**: el
+  alta, la recuperación y el reenvío son `permitAll` y no tienen usuario. Quitar el cubo por IP sin poner nada
+  en su sitio dejaba el alta sin freno y reabría R2-02.
+- Decisión, en cuatro puntos:
+  1. **El cubo por IP (intentos y envíos) sólo cuenta con `confiar-en-x-forwarded-for=true`.** Mientras esté en
+     `false` no se mira siquiera: un freno cuyo peor caso es una denegación de servicio global no es un freno.
+  2. **Un techo global por ámbito** (`max-global-por-ambito`, **300** por ventana de 15 min) para los ámbitos
+     sin usuario: `REGISTRO`, `RECUPERACION` y `VERIFICACION`. Deliberadamente **holgado** —veinte peticiones
+     por minuto, muy por encima de cualquier ráfaga legítima de este producto—: su trabajo es acotar la
+     catástrofe, no ser el freno de cada día, y cuanto más bajo, más barato le sale a cualquiera dejar a la
+     plataforma sin altas. Un éxito **nunca** lo limpia (`registrarExito`): dejar que una operación correcta
+     reinicie un techo de plataforma es el hallazgo de R2-02 multiplicado.
+  3. **`ACCESO` y `CAMBIO_CUENTA` no llevan techo global**, y es una decisión con coste. En `ACCESO` la
+     defensa dura es el cubo por cuenta (5/ventana) y un techo de fallos para toda la plataforma sería el peor
+     interruptor imaginable: trescientos fallos son segundos de trabajo y dejarían al producto entero sin poder
+     entrar, repetible y gratis. **El coste asumido**: sin proxy declarado, `/auth/token` se queda **sin freno
+     de pulverización** (una contraseña contra muchas cuentas distintas), porque el cubo por cuenta no lo ve.
+     Se elige contra el apagón trivial y a favor de un ataque que además necesita adivinar direcciones —la
+     enumeración está cerrada— y contraseñas. Anotado como pregunta al dueño.
+  4. **El presupuesto de correo pasa de un cubo a tres**: por **destinatario** (5/ventana; el único que
+     funciona sin ver la IP, y el que impide bombardear un buzón), por **IP** (5, sólo con proxy declarado) y
+     **global del ámbito** (60/ventana, siempre). El global es **por ámbito y no uno solo compartido**: si lo
+     fuera, gastar el correo del alta dejaría sin correo a la recuperación, que es la denegación cruzada que
+     `AmbitoIntentos` existe para evitar. Se comprueban los tres **antes** de gastar ninguno, para que un cubo
+     agotado no consuma presupuesto de los otros.
+  5. Al agotarse el presupuesto global de correo se escribe un `WARN`, **una sola línea por ventana**. Hacia
+     fuera sigue el silencio de R2-02 (un `429` ahí sería un oráculo de enumeración), pero «en silencio» no
+     puede significar que quien opera no se entere de que el producto ha dejado de mandar correo.
+- **Qué queda protegido y qué no, por configuración de despliegue** (lo importante de esta ADR):
+
+  | | **Sin proxy declarado** (defecto de hoy) | **Con `forward-headers-strategy` + `confiar-en-x-forwarded-for=true`** |
+  |---|---|---|
+  | Machacar una cuenta concreta | protegido: 5/ventana por correo | igual |
+  | Bombardear un buzón | protegido: 5 envíos/ventana por destinatario | igual |
+  | Un cliente que acapara altas o correo | **NO** protegido por cliente: no hay identidad. Sólo lo acota el techo global | protegido: 20 peticiones y 5 envíos por IP y ventana |
+  | Pulverización en `/auth/token` | **NO** protegido (punto 3) | protegido: 20 fallos por IP y ventana |
+  | Caudal total de altas / recuperaciones / reenvíos | acotado: 300 peticiones por ámbito y ventana | igual, y además por IP |
+  | Caudal total de correo | acotado: 60 envíos por ámbito y ventana, con `WARN` | igual, y además por IP |
+  | **Denegación de servicio contra toda la plataforma** | **posible**: quien sostenga más de 20 peticiones por minuto agota el techo global de un ámbito y deja a todo el mundo sin altas (o sin recuperación, o sin reenvío) el resto de la ventana. No hay forma de evitarlo sin identidad de cliente | **no**: el techo que salta primero es el del atacante |
+
+  Dicho de otra forma: sin proxy declarado el producto pasa de «veinte peticiones apagan el registro de todos»
+  a «trescientas peticiones sostenidas lo apagan», y gana la protección del buzón, que antes no tenía. El
+  arreglo de verdad —el que quita la última fila— es de despliegue.
+- **`server.forward-headers-strategy` no se tocó**, y este arreglo **no lo necesita**: funciona con la
+  configuración por defecto. Cambiar esa línea altera cómo Spring reconstruye **todas** las peticiones
+  (esquema, host, URLs generadas) y es una decisión de despliegue, no de código; sigue anotada en
+  `preguntas-abiertas.md`.
+- Consecuencias: R2-02 no se reabre —las altas en cadena siguen topando en `429`, ahora contra el techo global,
+  con la misma prueba adaptada—, R1-14 tampoco —rotar la dirección sigue sin comprar un correo por
+  dirección—, y `ProductInvitationThrottle` y `AuthThrottleService` toman por fin la **misma** decisión sobre
+  la IP. Se pierde el freno de pulverización de `/auth/token` mientras no haya proxy (punto 3). Los seis cubos
+  siguen siendo in-process: con más de una instancia los techos se multiplican por el número de instancias,
+  como ya estaba anotado para los tres limitadores.

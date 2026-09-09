@@ -172,12 +172,32 @@ class AuthThrottleServiceTest {
         assertEquals(bloqueoExistente.message, bloqueoInexistente.message)
     }
 
+    /**
+     * **Desde R3-01, esto sólo vale con un proxy de confianza declarado**, y hay que decirlo entero:
+     * la pulverización —una contraseña contra veinte cuentas distintas— la corta el cubo por IP, que
+     * es el único que ve «quién» está probando, porque el cubo por cuenta nunca llega a cinco. Sin
+     * proxy declarado ese cubo no cuenta (ver `sinProxyDeclaradoElCuboPorIpNoBloqueaATodos`), así que
+     * **hoy, sin proxy, `/auth/token` no tiene freno de pulverización**: queda el tope de cinco por
+     * cuenta y ventana, y nada más. Es una pérdida real y está anotada en `preguntas-abiertas.md`.
+     *
+     * La alternativa —un techo de fallos para toda la plataforma— se descartó a propósito
+     * (`elAccesoNoLlevaTopeGlobal`): trescientos fallos son segundos de trabajo y dejarían al producto
+     * entero sin poder entrar, de forma repetible y gratuita. Entre un ataque que necesita adivinar
+     * direcciones y contraseñas y un apagón trivial del acceso, se elige contra el apagón.
+     */
     @Test
-    @DisplayName("el bloqueo por IP corta la pulverización sobre muchas cuentas distintas")
+    @DisplayName("el bloqueo por IP corta la pulverización sobre muchas cuentas distintas (con proxy declarado)")
     fun elLimitePorIpCortaLaPulverizacion() {
         val repositorio = mock<CustomerRepository>()
         whenever(repositorio.findByEmailEvenIfDisabled(org.mockito.kotlin.any())).thenReturn(null)
-        val limitador = limitador()
+        val limitador = AuthThrottleService(
+                passwordEncoder = encoder,
+                maxFallosPorCuenta = 5,
+                maxFallosPorIp = 20,
+                ventanaMinutos = 15,
+                maxEntradas = 50_000,
+                confiarEnXff = true
+        )
         val servicio = servicio(repositorio, limitador)
 
         // 20 correos distintos: ninguno llega a 5 fallos, pero la IP sí llega a 20.
@@ -251,27 +271,102 @@ class AuthThrottleServiceTest {
      * 25 intentos fallidos con la cabecera rotando dieron 25 `401` y **ningún** `429`; sin rotarla,
      * el `429` llegaba en el 21.º. Con esto, el límite por IP que pidió el dueño no limitaba nada.
      */
+    /**
+     * **R3-01.** El cubo por IP sólo puede contar cuando la IP que se ve es la de quien llama, y eso
+     * pasa **únicamente** con un proxy de confianza declarado. Sin declararlo, `remoteAddr` es la
+     * dirección del proxy para todo el mundo: veinte fallos de cualquiera dejaban a **toda la
+     * plataforma** sin poder entrar durante quince minutos. Es el mismo defecto que R2-01 denunció en
+     * `ProductInvitationThrottle` y que se corrigió allí (`ADR-5-E3-C4-02`).
+     *
+     * En rojo antes del arreglo: la última línea recibía `DemasiadosIntentosException`.
+     */
     @Test
-    @DisplayName("N-03 · rotar X-Forwarded-For NO salta el límite por IP: la cabecera no se cree por defecto")
-    fun xffNoSeCree() {
+    @DisplayName("R3-01 · sin proxy declarado, el cubo por IP NO puede bloquear a un tercero")
+    fun sinProxyDeclaradoElCuboPorIpNoBloqueaATodos() {
         val peticion = MockHttpServletRequest()
         peticion.remoteAddr = "203.0.113.7"
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(peticion))
         try {
             val limitador = limitador()
-            // Veinte fallos, cada uno afirmando venir de una IP distinta. Antes del arreglo cada uno
-            // estrenaba contador; ahora los veinte caen en la dirección real del socket.
+            // Veinte fallos: veinte cuentas distintas, así que ningún cubo por cuenta llega a cinco.
+            // Todos caen en la misma «IP», que sin proxy es la del proxy — o sea, la de todo el mundo.
             repeat(20) { i ->
                 peticion.addHeader("X-Forwarded-For", "198.51.100.$i")
                 limitador.registrarFallo("cuenta$i@example.test")
             }
-            val bloqueo = assertFailsWith<DemasiadosIntentosException> {
-                limitador.comprobar("otra.cuenta@example.test")
-            }
-            assertEquals("Demasiados intentos. Espera unos minutos e inténtalo de nuevo.", bloqueo.message)
+            // Y aun así, quien no ha fallado ni una vez sigue pudiendo intentar entrar.
+            limitador.comprobar("otra.cuenta@example.test")
         } finally {
             RequestContextHolder.resetRequestAttributes()
         }
+    }
+
+    /**
+     * La contrapartida de la prueba de arriba, dicha entera: la defensa **dura** de `/auth/token` no
+     * era el cubo por IP sino el de cuenta, y ése sigue intacto. Cinco fallos contra una dirección
+     * concreta y esa dirección queda bloqueada, haya proxy o no lo haya.
+     */
+    @Test
+    @DisplayName("R3-01 · quitar el cubo por IP no toca la defensa dura: el cubo por cuenta sigue")
+    fun elCuboPorCuentaSigueSiendoLaDefensaDura() {
+        val peticion = MockHttpServletRequest()
+        peticion.remoteAddr = "203.0.113.7"
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(peticion))
+        try {
+            val limitador = limitador()
+            repeat(5) { limitador.registrarFallo("victima@example.test") }
+            assertFailsWith<DemasiadosIntentosException> { limitador.comprobar("victima@example.test") }
+        } finally {
+            RequestContextHolder.resetRequestAttributes()
+        }
+    }
+
+    /**
+     * **R3-01, el ámbito sin usuario.** El alta, la recuperación y el reenvío son `permitAll`: no hay
+     * `customer_id` con el que limitar, como sí lo había en `ProductInvitationThrottle`. Lo que queda
+     * sin proxy declarado es el **tope global del ámbito**, deliberadamente holgado. Aquí se fija que
+     * existe y que muerde, y —sobre todo— que no se derrama a otro ámbito.
+     */
+    @Test
+    @DisplayName("R3-01 · el tope global del ámbito acota el caudal y NO se derrama a otro ámbito")
+    fun elTopeGlobalAcotaElCaudalSinDerramarse() {
+        val limitador = AuthThrottleService(
+                passwordEncoder = encoder,
+                maxFallosPorCuenta = 5,
+                maxFallosPorIp = 20,
+                ventanaMinutos = 15,
+                maxEntradas = 50_000,
+                maxGlobalPorAmbito = 4
+        )
+        // Cuatro correos distintos: ningún cubo por cuenta llega a cinco; el que cuenta es el global.
+        repeat(4) { i -> limitador.registrarIntento(AmbitoIntentos.REGISTRO, "alta$i@example.test") }
+        assertFailsWith<DemasiadosIntentosException> {
+            limitador.comprobar(AmbitoIntentos.REGISTRO, "otra@example.test")
+        }
+        // La recuperación tiene el suyo, y el acceso no lleva tope global en absoluto: agotar el alta
+        // no puede dejar a nadie sin entrar ni sin recuperar su contraseña.
+        limitador.comprobar(AmbitoIntentos.RECUPERACION, "otra@example.test")
+        limitador.comprobar(AmbitoIntentos.ACCESO, "otra@example.test")
+    }
+
+    /**
+     * **R3-01, el otro lado.** `ACCESO` no lleva tope global a propósito: un techo de fallos para toda
+     * la plataforma sería el peor interruptor imaginable —cualquiera lo agota y nadie puede entrar— y
+     * no aporta nada que el cubo por cuenta no dé ya.
+     */
+    @Test
+    @DisplayName("R3-01 · ACCESO no lleva tope global: nadie puede cerrar la puerta a todo el mundo")
+    fun elAccesoNoLlevaTopeGlobal() {
+        val limitador = AuthThrottleService(
+                passwordEncoder = encoder,
+                maxFallosPorCuenta = 5,
+                maxFallosPorIp = 20,
+                ventanaMinutos = 15,
+                maxEntradas = 50_000,
+                maxGlobalPorAmbito = 4
+        )
+        repeat(40) { i -> limitador.registrarIntento(AmbitoIntentos.ACCESO, "cuenta$i@example.test") }
+        limitador.comprobar(AmbitoIntentos.ACCESO, "otra@example.test")
     }
 
     // =============================================================================================
@@ -319,7 +414,16 @@ class AuthThrottleServiceTest {
         peticion.remoteAddr = "203.0.113.9"
         RequestContextHolder.setRequestAttributes(ServletRequestAttributes(peticion))
         try {
-            val limitador = limitador()
+            // Con proxy declarado, que desde R3-01 es la única configuración en la que el cubo por IP
+            // cuenta: sin declararlo esa «IP» sería la del proxy, o sea la de todo el mundo.
+            val limitador = AuthThrottleService(
+                    passwordEncoder = encoder,
+                    maxFallosPorCuenta = 5,
+                    maxFallosPorIp = 20,
+                    ventanaMinutos = 15,
+                    maxEntradas = 50_000,
+                    confiarEnXff = true
+            )
             // 20 cuentas distintas: ninguna llega a 5, pero la IP llega a 20 en RECUPERACION.
             repeat(20) { i -> limitador.registrarIntento(AmbitoIntentos.RECUPERACION, "cuenta$i@example.test") }
             assertFailsWith<DemasiadosIntentosException> {
@@ -385,6 +489,12 @@ class AuthThrottleServiceTest {
     // R1-14 · presupuesto de envios por IP
     // ---------------------------------------------------------------------------------------
 
+    /**
+     * R1-14 con el mecanismo de R3-01: quien impide que rotar la direccion amplifique el correo ya no
+     * es el cubo por IP —que sin proxy declarado era el de todo el mundo— sino el **global del
+     * ambito**. La propiedad que R1-14 pedia es la misma y sigue en pie: una lista de direcciones
+     * reales no compra un correo por direccion.
+     */
     @Test
     @DisplayName("R1-14: el presupuesto de envios NO se esquiva rotando el correo")
     fun elPresupuestoDeEnviosNoSeEsquivaRotandoElCorreo() {
@@ -394,24 +504,75 @@ class AuthThrottleServiceTest {
                 maxFallosPorIp = 20,
                 ventanaMinutos = 15,
                 maxEntradas = 50_000,
-                maxEnviosPorIp = 3
+                maxEnviosGlobales = 3
         )
 
         // El cubo POR CUENTA no frena esto: cada correo tiene el suyo, así que rotar la direccion en
         // cada intento lo esquiva por definicion. Lo que se acota es el caudal de envios.
         repeat(3) { i ->
             assertTrue(
-                    limitador.consumirEnvio(AmbitoIntentos.VERIFICACION),
+                    limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "destino$i@example.test"),
                     "el envio ${i + 1} tiene que caber en el presupuesto"
             )
         }
         assertFalse(
-                limitador.consumirEnvio(AmbitoIntentos.VERIFICACION),
-                "el cuarto envio de la misma IP y ventana ya no cabe, venga del correo que venga"
+                limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "destino3@example.test"),
+                "el cuarto envio de la ventana ya no cabe, venga del correo que venga"
         )
 
         // Y no contamina otros ambitos: la recuperacion tiene su propio presupuesto.
-        assertTrue(limitador.consumirEnvio(AmbitoIntentos.RECUPERACION))
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.RECUPERACION, "destino0@example.test"))
+    }
+
+    /**
+     * **R3-01.** El cubo que protege un buzon concreto es el de **destinatario**, y es el unico de los
+     * tres que funciona sin ver la IP de quien llama: por eso se anadio. Aqui el presupuesto global
+     * tiene sitio de sobra y aun asi el quinto correo al mismo buzon no sale.
+     */
+    @Test
+    @DisplayName("R3-01: el presupuesto por destinatario protege un buzon aunque el global tenga sitio")
+    fun elPresupuestoPorDestinatarioProtegeUnBuzon() {
+        val limitador = AuthThrottleService(
+                passwordEncoder = encoder,
+                maxEnviosPorDestino = 2,
+                maxEnviosGlobales = 100
+        )
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "victima@example.test"))
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "victima@example.test"))
+        assertFalse(
+                limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "VICTIMA@example.test"),
+                "ni cambiando la caja de la direccion: la clave va normalizada"
+        )
+        // Y el buzon de al lado no paga por ello.
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "otra@example.test"))
+    }
+
+    /**
+     * **R3-01.** Un cubo agotado no puede gastar los otros dos: si el global no tiene sitio, el
+     * presupuesto del destinatario tiene que quedar intacto para cuando la ventana global se renueve.
+     */
+    @Test
+    @DisplayName("R3-01: si un cubo de envio niega, no se consume de los otros")
+    fun unCuboAgotadoNoGastaLosOtros() {
+        val limitador = AuthThrottleService(
+                passwordEncoder = encoder,
+                maxEnviosPorDestino = 5,
+                maxEnviosGlobales = 1
+        )
+        var ahora = 1_000_000L
+        limitador.reloj = { ahora }
+
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "ana@example.test"))
+        repeat(10) {
+            assertFalse(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "ana@example.test"))
+        }
+
+        ahora += 15 * 60_000L + 1
+        // Si los diez rechazos hubieran gastado el cubo del destinatario (5), este no cabria.
+        assertTrue(
+                limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "ana@example.test"),
+                "los rechazos del cubo global no pueden haber gastado el del destinatario"
+        )
     }
 
     @Test
@@ -423,18 +584,18 @@ class AuthThrottleServiceTest {
                 maxFallosPorIp = 20,
                 ventanaMinutos = 15,
                 maxEntradas = 50_000,
-                maxEnviosPorIp = 2
+                maxEnviosGlobales = 2
         )
         var ahora = 1_000_000L
         limitador.reloj = { ahora }
 
-        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
-        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
-        assertFalse(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "ana@example.test"))
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "bea@example.test"))
+        assertFalse(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "cris@example.test"))
 
         ahora += 15 * 60_000L + 1
         assertTrue(
-                limitador.consumirEnvio(AmbitoIntentos.VERIFICACION),
+                limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "cris@example.test"),
                 "pasada la ventana, quien de verdad necesita un reenvio lo consigue"
         )
     }
@@ -448,10 +609,10 @@ class AuthThrottleServiceTest {
                 maxFallosPorIp = 20,
                 ventanaMinutos = 15,
                 maxEntradas = 50_000,
-                maxEnviosPorIp = 1
+                maxEnviosGlobales = 1
         )
-        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
-        assertFalse(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "ana@example.test"))
+        assertFalse(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION, "bea@example.test"))
 
         // El presupuesto agotado no se lleva por delante el cubo de intentos: `comprobar` sigue
         // pasando, que es lo que garantiza que la respuesta siga siendo un 200 generico y no un 429.
