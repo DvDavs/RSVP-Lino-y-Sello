@@ -563,7 +563,46 @@ export function AsistenteDeCreacion() {
         </div>
       ) : null}
 
-      {sinSalidaDeAsistente ? <MisInvitaciones invitaciones={invitaciones} idTitulo={ID_MIS_INVITACIONES} /> : null}
+      {errorBorrado ? (
+        <p role="alert" className="rounded-ui-control bg-ui-danger-soft px-4 py-3 text-sm text-ui-on-danger-soft">
+          {errorBorrado}
+        </p>
+      ) : null}
+
+      {sinSalidaDeAsistente ? (
+        <>
+          <MisInvitaciones
+            invitaciones={invitaciones}
+            idTitulo={ID_MIS_INVITACIONES}
+            alEmpezar={cuantasInvitaciones === 0 ? irAlFormularioDeAlta : undefined}
+            onBorrar={(id) => void borrarInvitacionDesdeLista(id)}
+            borrandoId={borrandoId}
+          />
+          {/* Cierre de G-01: sin NINGUNA invitación, esto YA NO es un callejón sin salida — es la
+              puerta al alta real (`POST /product/invitations`, contrato §1). Se limita a este caso
+              (no al de «todas con plantilla», `e2e/asistente.spec.ts` de otra sesión ya prueba esa
+              pantalla sin control alguno) — `MisInvitaciones` de arriba SÍ ofrece «Eliminar» en los
+              dos casos: es la salida real del tope de 3 borradores (contrato §4) sin depender de
+              que este formulario esté a la vista. */}
+          {cuantasInvitaciones === 0 ? (
+            <PasoCrearInvitacion
+              idTitulo={ID_TITULO_CREAR}
+              tipoElegido={tipoElegido}
+              alSeleccionarTipo={setTipoElegido}
+              conteo={conteoPorTipo(catalogoCompleto ?? [])}
+              fecha={fechaCrear}
+              hora={horaCrear}
+              hashtag={hashtagCrear}
+              alCambiarFecha={setFechaCrear}
+              alCambiarHora={setHoraCrear}
+              alCambiarHashtag={setHashtagCrear}
+              enviando={creando}
+              error={errorCrear}
+              alEnviar={() => void crearNuevaInvitacion()}
+            />
+          ) : null}
+        </>
+      ) : null}
 
       {paso === "evento" && !sinSalidaDeAsistente ? (
         <div className="flex flex-col gap-8">
@@ -612,7 +651,14 @@ export function AsistenteDeCreacion() {
               §3.5): a 390 px la lista empujaba el objetivo del paso —elegir el tipo— bajo el
               pliegue, así que la pantalla que pregunta enseñaba primero otra cosa. Sigue en el
               paso 1, que es donde la clienta comprueba a cuál se le va a aplicar la plantilla. */}
-          {cargandoInvitaciones ? null : <MisInvitaciones invitaciones={invitaciones} idTitulo={ID_MIS_INVITACIONES} />}
+          {cargandoInvitaciones ? null : (
+            <MisInvitaciones
+              invitaciones={invitaciones}
+              idTitulo={ID_MIS_INVITACIONES}
+              onBorrar={(id) => void borrarInvitacionDesdeLista(id)}
+              borrandoId={borrandoId}
+            />
+          )}
         </div>
       ) : null}
 

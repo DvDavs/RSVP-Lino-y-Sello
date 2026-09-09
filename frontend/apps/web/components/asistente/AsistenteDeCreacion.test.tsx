@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CatalogItem } from "@/lib/api-types";
@@ -30,6 +30,8 @@ const chooseTemplate = vi.fn();
 const postOperations = vi.fn();
 const setEvent = vi.fn();
 const getAuthToken = vi.fn();
+const crearInvitacion = vi.fn();
+const eliminarInvitacion = vi.fn();
 
 vi.mock("@/lib/api-client", async (original) => {
   const real = await original<typeof import("@/lib/api-client")>();
@@ -42,14 +44,36 @@ vi.mock("@/lib/api-client", async (original) => {
     postOperations: (...args: never[]) => postOperations(...args),
     setEvent: (...args: never[]) => setEvent(...args),
     getAuthToken: () => getAuthToken(),
+    crearInvitacion: (...args: never[]) => crearInvitacion(...args),
+    eliminarInvitacion: (...args: never[]) => eliminarInvitacion(...args),
   };
 });
 
-const { ApiError } = await import("@/lib/errors");
+const { ApiError, UnknownApiError } = await import("@/lib/errors");
 
 /** `ApiError(respuesta, httpStatus)`: la firma real de `lib/errors.ts`, no una inventada. */
 function errorApi(codigo: string, httpStatus: number, mensaje = "error de prueba") {
   return new ApiError({ timestamp: new Date().toISOString(), statusCode: httpStatus, code: codigo, message: mensaje }, httpStatus);
+}
+
+/**
+ * `POST`/`DELETE /product/invitations` responden `{code, message, details}` pero su `code` NO
+ * empieza por `TPL_` (son `PRD_*`), así que `peticion()` los clasifica como `UnknownApiError`
+ * (`lib/api-client.ts`), nunca como `ApiError` — igual que las rutas de cuenta. Se arma el mismo
+ * cuerpo crudo que mandaría el backend real, para que `codigoAlta`/`traducirErrorAlta` lo lean tal
+ * cual lo harían en producción.
+ */
+function errorProducto(codigo: string, httpStatus: number, detalles?: unknown, mensaje = "error de prueba") {
+  return new UnknownApiError(
+    httpStatus,
+    JSON.stringify({
+      timestamp: new Date().toISOString(),
+      statusCode: httpStatus,
+      code: codigo,
+      message: mensaje,
+      ...(detalles !== undefined ? { details: detalles } : {}),
+    }),
+  );
 }
 
 const BODA: CatalogItem = {
@@ -102,6 +126,8 @@ beforeEach(() => {
   parametros = new URLSearchParams();
   push.mockClear();
   replace.mockClear();
+  crearInvitacion.mockReset();
+  eliminarInvitacion.mockReset();
   getAuthToken.mockReturnValue("token-de-prueba");
   listarInvitaciones.mockResolvedValue([INVITACION_SIN_PLANTILLA]);
   getDocument.mockRejectedValue(errorApi("TPL_DOCUMENT_NOT_STARTED", 404, "sin documento"));
@@ -299,12 +325,15 @@ describe("paso 4 — listo", () => {
 });
 
 describe("estados sin salida", () => {
-  it("sin ninguna invitación, el estado vacío explica de dónde salen y lleva a los planes", async () => {
+  it("sin ninguna invitación, hay un camino real para crear la primera (cierre de G-01)", async () => {
     listarInvitaciones.mockResolvedValue([]);
     render(<AsistenteDeCreacion />);
     expect(await screen.findByRole("heading", { name: "Todavía no tienes invitaciones" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Ver planes" }).getAttribute("href")).toBe("/ayuda#planes");
-    expect(screen.queryByRole("radiogroup")).toBeNull();
+    // Fase 5, E3: ya NO manda a los planes — el alta existe, así que el botón lleva al formulario
+    // que está en la misma pantalla, no a una promesa de que «se crea al contratar».
+    expect(screen.queryByRole("link", { name: "Ver planes" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Empezar mi invitación" })).toBeTruthy();
+    expect(await screen.findByRole("radiogroup", { name: "Crea tu invitación" })).toBeTruthy();
   });
 
   it("3C-UX G-02: con TODAS las invitaciones ya diseñadas, el paso 1 explica y ofrece la salida", async () => {
@@ -322,11 +351,14 @@ describe("estados sin salida", () => {
     expect(screen.queryByRole("radiogroup")).toBeNull();
     expect(screen.queryByTestId("asistente-continuar")).toBeNull();
     expect(screen.queryByText("Paso 1 de 4")).toBeNull();
-    // Y la salida real: la invitación, su estado y su enlace público.
+    // Y la salida real: la invitación, su estado y su enlace público…
     expect(screen.getByRole("link", { name: "Abrir en el editor" }).getAttribute("href")).toBe("/editor/7");
     expect(screen.getByText("Publicada")).toBeTruthy();
     expect(screen.getByText(/\/i\/pub_x$/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Ver como invitada" }).getAttribute("href")).toMatch(/\/i\/pub_x$/);
+    // … Y, fase 5 E3: «Eliminar» de verdad en la fila — la salida real del tope de 3 borradores
+    // (contrato §4), disponible aquí aunque el formulario de alta se limite al caso sin ninguna.
+    expect(screen.getByTestId("asistente-eliminar-7")).toBeTruthy();
   });
 
   it("con el catálogo caído se avisa y se puede reintentar", async () => {
@@ -351,5 +383,123 @@ describe("estados sin salida", () => {
     expect(screen.getByText("Paso 2 de 4")).toBeTruthy();
     const titulo = await screen.findByRole("heading", { name: "Elige el punto de partida", level: 1 });
     await waitFor(() => expect(document.activeElement).toBe(titulo));
+  });
+});
+
+// ── Alta desde el asistente (fase 5, E3; cierre de G-01; `handoffs/5-1b-contrato-alta.md`) ──────
+const ALTA_BODA = {
+  invitationId: 61,
+  eventKind: "wedding" as const,
+  eventDate: "2027-06-10",
+  eventTime: "17:30",
+  childrenAllowed: true,
+  youngAllowed: true,
+  hashtag: "",
+  isPaid: false,
+  isEnabled: true,
+  isFinished: false,
+  usesTemplates2: true,
+  createdAt: "2026-09-09T00:00:00Z",
+};
+
+describe("alta desde el asistente (cierre de G-01)", () => {
+  beforeEach(() => {
+    listarInvitaciones.mockResolvedValue([]);
+  });
+
+  /** Llena las tres preguntas que `POST /product/invitations` exige a la vez (contrato §2). */
+  async function llenarFormularioDeAlta(tipo: RegExp) {
+    render(<AsistenteDeCreacion />);
+    await userEvent.click(await screen.findByRole("radio", { name: tipo }));
+    await userEvent.clear(screen.getByLabelText("Fecha del evento"));
+    await userEvent.type(screen.getByLabelText("Fecha del evento"), "2027-06-10");
+    fireEvent.change(screen.getByLabelText("Hora de inicio"), { target: { value: "17:30" } });
+  }
+
+  it("alta feliz: crea la invitación y avanza al paso 2 con ESA invitación", async () => {
+    crearInvitacion.mockResolvedValue(ALTA_BODA);
+    await llenarFormularioDeAlta(/Boda/);
+    await userEvent.click(screen.getByTestId("asistente-crear-invitacion"));
+    await waitFor(() =>
+      expect(crearInvitacion).toHaveBeenCalledWith({ eventKind: "wedding", eventDate: "2027-06-10", eventTime: "17:30" }),
+    );
+    expect(push).toHaveBeenCalledWith(expect.stringContaining("paso=plantilla"));
+    expect(push).toHaveBeenCalledWith(expect.stringContaining("inv=61"));
+  });
+
+  it("doble envío: el botón se deshabilita al primer clic y no se manda dos veces", async () => {
+    let resolver: ((valor: unknown) => void) | null = null;
+    crearInvitacion.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolver = resolve;
+        }),
+    );
+    await llenarFormularioDeAlta(/Boda/);
+    const boton = screen.getByTestId("asistente-crear-invitacion") as HTMLButtonElement;
+    await userEvent.click(boton);
+    expect(boton.disabled).toBe(true); // `loading`: `11 §7`, sin esto un segundo clic mandaría dos altas
+    await userEvent.click(boton); // un clic sobre un botón deshabilitado no dispara `onClick`
+    expect(crearInvitacion).toHaveBeenCalledTimes(1);
+    resolver!(ALTA_BODA);
+    await waitFor(() => expect(push).toHaveBeenCalledWith(expect.stringContaining("inv=61")));
+  });
+
+  it("un `500` NO se reintenta solo: el botón vuelve a estar disponible y hay que pulsarlo de nuevo", async () => {
+    crearInvitacion.mockRejectedValueOnce(errorProducto("PRD_INTERNAL", 500));
+    await llenarFormularioDeAlta(/Boda/);
+    await userEvent.click(screen.getByTestId("asistente-crear-invitacion"));
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(crearInvitacion).toHaveBeenCalledTimes(1); // ni un reintento automático por el `5xx`
+    expect((screen.getByTestId("asistente-crear-invitacion") as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("`409 PRD_DRAFT_LIMIT_REACHED`: el mensaje trae los números del tope", async () => {
+    crearInvitacion.mockRejectedValueOnce(errorProducto("PRD_DRAFT_LIMIT_REACHED", 409, { limit: 3, current: 3 }));
+    await llenarFormularioDeAlta(/Boda/);
+    await userEvent.click(screen.getByTestId("asistente-crear-invitacion"));
+    expect((await screen.findByRole("alert")).textContent).toContain("Ya tienes 3 invitaciones sin publicar");
+  });
+
+  it("con el tope ya lleno (todas con plantilla), «Eliminar» sigue siendo la salida real desde el asistente", async () => {
+    // No se llega aquí desde ESTE formulario (se limita al caso sin ninguna invitación, para no
+    // chocar con `e2e/asistente.spec.ts` de otra sesión), sino desde «Mis invitaciones»: es donde
+    // el `409` — «publica una o elimina la que no vayas a usar» — encuentra su salida de verdad.
+    const TRES_BORRADORES = [
+      { id: 1, status: "paid", event: "Boda", plan: "Básico", date: "2027-01-01", time: "10:00" },
+      { id: 2, status: "paid", event: "Boda", plan: "Básico", date: "2027-02-01", time: "10:00" },
+      { id: 3, status: "paid", event: "Boda", plan: "Básico", date: "2027-03-01", time: "10:00" },
+    ];
+    listarInvitaciones.mockResolvedValue(TRES_BORRADORES);
+    getDocument.mockResolvedValue({ revision: 0, composed: COMPUESTO }); // las tres ya tienen plantilla
+    eliminarInvitacion.mockResolvedValue(undefined);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(<AsistenteDeCreacion />);
+    await userEvent.click(await screen.findByTestId("asistente-eliminar-1"));
+    await waitFor(() => expect(eliminarInvitacion).toHaveBeenCalledWith(1));
+  });
+
+  it("`429 PRD_TOO_MANY_REQUESTS`: se pide esperar, sin contador", async () => {
+    crearInvitacion.mockRejectedValueOnce(errorProducto("PRD_TOO_MANY_REQUESTS", 429));
+    await llenarFormularioDeAlta(/Boda/);
+    await userEvent.click(screen.getByTestId("asistente-crear-invitacion"));
+    expect((await screen.findByRole("alert")).textContent).toContain("muy rápido");
+  });
+
+  it("si `:choose-template` falla tras un alta correcta, la invitación NO queda huérfana: sigue disponible para reintentar", async () => {
+    // XV Jardín (plan 1) y no Boda clásica (plan 2): toda invitación nace en plan 1 (contrato §7),
+    // así que es la plantilla que de verdad puede elegir sin tocar el tema de planes en esta prueba.
+    crearInvitacion.mockResolvedValue({ ...ALTA_BODA, eventKind: "quince" });
+    chooseTemplate.mockRejectedValueOnce(errorApi("TPL_INTERNAL", 500, "boom"));
+    await llenarFormularioDeAlta(/XV años/);
+    await userEvent.click(screen.getByTestId("asistente-crear-invitacion"));
+    // El alta tuvo éxito (misma instancia, sin recargar) y avanza sola al paso 2, con SU invitación.
+    await waitFor(() => expect(push).toHaveBeenCalledWith(expect.stringContaining("inv=61")));
+    await userEvent.click(await screen.findByTestId("asistente-usar-xv-jardin"));
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    // El fallo de `:choose-template` NO la abandona: la invitación recién creada sigue siendo el
+    // objetivo del paso 2 y el mismo botón reintenta — nunca queda huérfana ni sin decírselo.
+    expect(screen.getByTestId("asistente-usar-xv-jardin")).toBeTruthy();
   });
 });

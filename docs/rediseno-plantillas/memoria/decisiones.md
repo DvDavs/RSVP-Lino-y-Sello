@@ -2322,3 +2322,174 @@ el texto va también aquí íntegro para que este registro siga siendo autosufic
   sigue criptográficamente vivo hasta que caduca — contrato §2 — y dejarlo puesto confundiría) y
   manda a `/acceso?motivo=sesion`, reutilizando el aviso que `AsistenteAcceso.tsx` ya pinta para una
   sesión terminada, sin tocar ese archivo más de lo que ya se tocó para el registro (fase 5, E3).
+
+## ADR-5-E3-C4-01 — La reutilización de un refresco revoca la familia entera, pero con una ventana de
+  gracia de 30 s; y la rotación no va en una transacción de método
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E3-C4
+- Contexto: R1-07 (`bitacora/5-E3-R1-seguridad.md`, confirmado sin tocar por R2). `rotateRefreshToken`
+  borraba con `delete(entidad)` sin comprobar que hubiera borrado algo y sin transacción, así que dos
+  canjes simultáneos del mismo token emitían **dos refrescos válidos**; y el canje repetido —que es la
+  señal de que alguien copió el token— no revocaba nada: quien canjeó primero seguía dentro sus siete
+  días. El arreglo que R1 propone (`@Transactional` + `DELETE … WHERE token = ?` con cuenta de filas +
+  `deleteAllByCustomerId` ante un canje de token inexistente o ya usado) tiene dos aristas que hay que
+  decidir a mano, y son las dos que hacen que esta corrección se haga mal.
+- Decisión, en tres partes:
+  1. **La carrera se cierra con la cuenta de filas del `DELETE`**, no con un candado: la base de datos
+     serializa los dos canjes, uno recibe 1 y el otro 0, y solo quien recibe 1 emite token.
+  2. **La revocación de familia se hace con ventana de gracia (30 s, configurable en
+     `auth.refresh.gracia-reutilizacion-segundos`).** Dentro de la ventana, el canje de un token ya
+     consumido falla pero **no** revoca; fuera de ella, revoca todas las sesiones de la cuenta. La
+     atribución («de quién era este token que ya no está en la tabla») se apoya en un rastro en memoria
+     de **huellas SHA-256** de tokens consumidos, con la misma contrapartida in-process que el resto de
+     los limitadores del módulo.
+  3. **`rotateRefreshToken` NO lleva `@Transactional`.**
+- Alternativas descartadas:
+  - **Revocar ante cualquier canje fallido, sin ventana** (la letra de R1-07). Convierte toda carrera
+    benigna —dos pestañas, el móvil y el navegador, un reintento tras un corte de red— en un cierre de
+    sesión con contraseña de por medio. Es un fallo frecuente y visible a cambio de un ataque raro, y
+    entrena a la gente a no usar el producto en dos sitios. El caso que el informe describe (el ladrón
+    canjea y la víctima refresca horas después, o al revés) cae **siempre** fuera de una ventana de
+    treinta segundos, así que la ventana no le quita nada a la detección: solo le quita los falsos
+    positivos. Y si aun así la detección no llega (otra instancia, un reinicio), entrar con la
+    contraseña revoca la familia igual (`createOrUpdateRefreshToken`), así que el corte no depende solo
+    de esto.
+  - **Guardar los tokens consumidos en la base** (columna `consumed_at` o tabla aparte, migración
+    `V45`). Es el patrón completo y sobreviviría al reinicio y a varias instancias. Se descarta **en
+    este encargo** por coste y riesgo: obliga a una migración y a una política de purga de una tabla que
+    crece con cada canje de cada sesión, para mejorar una detección que ya funciona en el caso que el
+    informe describe. Queda anotado en `preguntas-abiertas.md` como la vía si el producto pasa a más de
+    una instancia.
+  - **`@Transactional` en el método.** Revertiría la revocación de la familia, que es justo la escritura
+    que tiene que sobrevivir a la excepción con la que el método termina. La atomicidad que hace falta no
+    es la del par borrado+alta: es la del borrado consigo mismo, y esa la da la sentencia. Si el alta
+    fallara tras el borrado, la sesión se pierde y hay que volver a entrar: seguro, y mucho menos malo
+    que perder la revocación.
+- Consecuencias: `/auth/token/refresh` sigue respondiendo `400` con el **mismo texto** en todos los
+  caminos que fallan —el cuerpo no dice si hubo revocación, que sería avisar al ladrón—. El frontend no
+  cambia. `createOrUpdateRefreshToken` pasa a borrar en bloque por cuenta, con lo que entrar con la
+  contraseña echa a cualquier sesión de refresco anterior; de paso desaparece `findByCustomer`, una
+  derivada de resultado único que con dos filas de la misma cuenta daba `500` (la trampa de R1-10).
+
+## ADR-5-E3-C4-02 — El freno de las invitaciones limita por `customer_id`, con un cubo por operación, y
+  el cubo por IP solo cuenta si hay un proxy de confianza declarado
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E3-C4
+- Contexto: R2-01. El freno que R1-05 pidió contaba por IP **siempre**, y `confiar-en-x-forwarded-for`
+  es `false` por defecto —y tiene que serlo, o la cabecera la pone el cliente—, así que detrás de un
+  proxy `remoteAddr` es el del proxy para todo el mundo: 60 escrituras de cualquiera dejaban a la
+  plataforma entera sin poder crear **ni borrar** invitaciones. Y como el borrado compartía cubo con el
+  alta, agotarlo quitaba la salida que R1-05 acababa de construir para destrabarse del tope de tres.
+- Decisión: la identidad del cubo es el **`customer_id`** —las dos rutas están autenticadas, así que
+  viene del token, no se puede falsificar y es la unidad de cuota del producto—, con **un cubo por
+  operación** (`OperacionInvitacion.ALTA` / `BORRADO`, 20 y 30 en quince minutos). El cubo por IP se
+  conserva como segunda barrera pero **solo cuenta cuando `confiar-en-x-forwarded-for` está en `true`**,
+  que es la única situación en la que la IP que se ve es la del cliente. Se añade además un barrido
+  periódico de ventanas caducadas: antes solo se podaba al llegar a 50 000 entradas, o sea nunca.
+- Alternativas descartadas:
+  - **Fijar `server.forward-headers-strategy` en `application.yml`** para que la IP fuera de verdad la
+    del cliente. Se descarta: esa propiedad cambia cómo Spring reconstruye **todas** las peticiones
+    (esquema, host, URLs generadas), no solo este freno, y ponerla sin saber qué proxy hay delante puede
+    romper enlaces y redirecciones en producción. Es una decisión de despliegue, no de este encargo:
+    `application.yml` **no se tocó** y lo que hay que poner el día que haya proxy queda escrito en el
+    KDoc de la clase y en `preguntas-abiertas.md`.
+  - **Un solo cubo para las dos rutas, con el tope más alto.** No arregla nada: el borrado seguiría
+    pagando el caudal del alta, que es justo lo que R2-01 objeta.
+- Consecuencias: agotar el alta ya no puede quitarle a nadie el borrado (esto cierra también la mitad de
+  R2-04), y ninguna clienta puede dejar a otra sin servicio. La contrapartida, dicha: sin proxy de
+  confianza, un atacante con muchas cuentas tiene un cubo por cuenta; el freno acota el trabajo **por
+  clienta**, que es lo que el hallazgo pedía, no el total de la plataforma. El total lo acota el freno de
+  `/auth/signup`, que sí es por IP y que R2-02 acaba de arreglar.
+
+## ADR-5-E3-C4-03 — En `/auth/signup` toda petición cuenta, y sus dos correos pasan por el presupuesto
+  de envíos
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E3-C4
+- Contexto: R2-02. El alta con éxito llamaba a `registrarExito(REGISTRO, …)`, que **borra el contador de
+  IP**: las altas correctas no se acumulaban nunca y el techo de 20/IP solo frenaba tanteos fallidos —la
+  revisora creó cinco cuentas seguidas desde una IP sin un solo `429`—. Y los dos correos del alta
+  (bienvenida y verificación) no pasaban por `consumirEnvio`, el presupuesto que R1-14 creó para el
+  reenvío sobre el mismo canal SMTP.
+- Decisión: en `REGISTRO` cuenta **toda** petición, la que crea la cuenta también, igual que en
+  `RECUPERACION`; `registrarExito` queda solo para `ACCESO`. Y los dos correos van detrás de un único
+  `consumirEnvio(REGISTRO)` por alta: o salen los dos o no sale ninguno, y el agotamiento es **silencioso**
+  (misma respuesta, cuenta creada igual).
+- Alternativas descartadas:
+  - **Limpiar solo el cubo de cuenta y seguir sin contar el éxito.** No cierra nada: el cubo de cuenta se
+    indexa por el correo del alta, así que una lista de correos distintos lo esquiva entero; el que frena
+    un guion de altas en cadena es el de IP.
+  - **Responder `429` cuando se agota el presupuesto de correo.** Sería un oráculo nuevo —el presupuesto
+    solo se gasta con altas que de verdad ocurren— y además rompería un alta legítima por un problema de
+    caudal de correo. Se calla, como en el reenvío.
+  - **Un permiso por correo (dos por alta).** Descartado: los dos correos hablan del mismo buzón y mandar
+    solo la bienvenida sin la verificación es peor que no mandar ninguno.
+- Consecuencias: 20 altas por IP y ventana de quince minutos (el defecto de `max-fallos-por-ip`), y como
+  mucho 5 altas con correo por IP y ventana. Quien se quede sin correo de verificación tiene
+  `POST /auth/verify-email:resend`, que lleva su propio presupuesto en otro ámbito. Con más de una
+  instancia los dos techos se multiplican por el número de instancias: la contrapartida in-process de
+  siempre, ya anotada.
+
+## ADR-5-E3-C4-04 — `JWT_SECRET` se rechaza también por entropía, con umbrales que no suspenden a una
+  clave aleatoria
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E3-C4
+- Contexto: R1-14, la mitad que quedaba. jjwt rechaza por debajo de 256 bits y la compuerta rechazaba
+  vacías y en blanco, pero **32 caracteres iguales pasan las dos puertas**: 256 bits de material y cero
+  de secreto para la clave que firma la sesión de todo el mundo, MASTER incluido.
+- Decisión: `SecretosObligatorios` comprueba longitud ≥ 32, ≥ 10 caracteres distintos y entropía de
+  Shannon total ≥ 112 bits, y falla con un mensaje que dice **cómo generar una buena**
+  (`openssl rand -base64 48`) sin generar ni sugerir ningún valor.
+- Alternativas descartadas:
+  - **Umbrales más duros** (p. ej. 128 bits o 12 caracteres distintos). Suspenderían a una clave
+    hexadecimal aleatoria de 32 caracteres, que es un valor legítimo, y una compuerta que rechaza claves
+    buenas empuja al operador a inventarse otra cosa. Los umbrales elegidos cortan lo degenerado
+    —repetición de un carácter o de un patrón corto— con margen sobrado para lo aleatorio.
+  - **Comprobar la entropía en `JwtUtil`, al crear el bean.** Es donde sale hoy el error de clave corta y
+    es justo el mensaje ilegible que esta compuerta existe para evitar.
+- Consecuencias: un despliegue con una clave degenerada **deja de arrancar** y se le dice por qué y qué
+  hacer. La clave de desarrollo de `scripts/dev-backend.sh` (240 bits) sigue valiendo y hay una prueba que
+  lo fija, para que nadie endurezca el umbral y rompa el arranque local sin enterarse.
+
+## ADR-5-E3-B3-01 — El alta conecta al asistente solo cuando la clienta no tiene NINGUNA invitación; el borrado se ofrece siempre
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: 5-E3-B3
+- Contexto: cerrar el agujero G-01 (`POST /product/invitations`, `handoffs/5-1b-contrato-alta.md`)
+  conectando el alta al asistente de creación, y resolver la salida del tope de 3 borradores
+  (`409 PRD_DRAFT_LIMIT_REACHED`) ahora que `DELETE /product/invitations/{id}` existe.
+- **Qué pasa si `:choose-template` falla después de un alta correcta** (§2 del encargo): NADA se
+  deshace y no se le oculta a la clienta. El alta y la elección de plantilla son dos llamadas
+  independientes por diseño del propio contrato (§5: «el alta NO aplica la plantilla»), así que un
+  fallo del segundo paso deja exactamente lo que esa independencia promete: una invitación real,
+  suya, sin plantilla todavía — el mismo estado en el que queda cualquier invitación «sin plantilla»
+  del flujo normal (una fila más en `sinPlantilla()`, `invitaciones.ts`). El paso 2
+  (`elegirPlantilla` en `AsistenteDeCreacion.tsx`, ya existente, sin tocar) ya sabe explicar el fallo
+  con un aviso (`errorEleccion`, `role="alert"`) y dejar reintentar sobre la MISMA invitación — no
+  hacía falta lógica de compensación ni de "deshacer el alta": la invitación **no queda huérfana**
+  porque nunca deja de tener dueña ni de aparecer en «Mis invitaciones» la próxima vez que la
+  clienta entre a `/editor`, con estado real y una acción («Elegir plantilla») en vez de un hueco.
+  Alternativa descartada: borrar automáticamente la invitación si el segundo paso falla. Se
+  descartó porque el borrado es destructivo y sin papelera (contrato §1 bis) y porque le quitaría a
+  la clienta un dato real que YA es suyo (la invitación existe en la base, con su fecha y su hora)
+  solo porque una llamada de red falló — cambiaría un fallo recuperable por una pérdida de verdad.
+- **Cómo sale la clienta del tope de 3 borradores** (§4 del encargo): «Eliminar» es un botón real en
+  cada fila de `MisInvitaciones.tsx` (`onBorrar`/`borrandoId`, con `window.confirm` antes de llamar,
+  contrato §1 bis exige confirmación explícita), disponible SIEMPRE que la lista se muestra —tanto
+  en el estado «sin ninguna invitación» como en «todas con plantilla»—, no solo cuando el `409`
+  acaba de ocurrir. Es la traducción literal del mensaje del backend («publica una o elimina la que
+  no vayas a usar») en un botón de verdad.
+- **Decisión de alcance, forzada por el territorio del encargo**: el formulario de alta
+  (`PasoCrearInvitacion.tsx`) solo se muestra cuando la clienta no tiene NINGUNA invitación
+  (`cuantasInvitaciones === 0`), no también cuando todas ya tienen plantilla. La razón NO es de
+  producto —tener 3 invitaciones ya diseñadas y querer una cuarta es una necesidad real— sino de
+  compatibilidad: `e2e/asistente.spec.ts` (de otra sesión, fuera del territorio de este agente,
+  `AVISO` del brief) verificaba en real contra el backend que ese estado («todas con diseño») NO
+  pinta ningún `radiogroup` ni ningún control extra («ni un control inhabilitado sin explicación en
+  toda la pantalla»); mostrar ahí el formulario de alta (que trae su propio `PasoTipoEvento`, y por
+  tanto su propio `radiogroup`) rompía esa prueba de verdad contra el servidor. Se decidió respetar
+  el límite de territorio en vez de tocar un fichero de otra sesión: el formulario se limita al caso
+  que el encargo señala explícitamente como el agujero a cerrar (G-01, «una clienta sin ninguna
+  invitación») y el borrado —que no pinta ningún control nuevo en esa pantalla, solo cambia un
+  botón que ya existía— se ofrece en los dos casos. Efecto práctico: hoy una clienta que ya agotó
+  el cupo de 3 borradores NO puede iniciar una cuarta invitación desde el asistente sin borrar antes
+  una de las tres — puede hacerlo (el botón está ahí), pero el asistente no le ofrece ambas cosas en
+  la misma pantalla. Pregunta para el dueño del producto, y para quien reciba `e2e/asistente.spec.ts`
+  después: `preguntas-abiertas.md`, entrada de este mismo agente.
+- Consecuencias: el agujero G-01 (clienta sin ninguna invitación, sin salida) queda cerrado del
+  todo. El caso «con cupo lleno, quiere una más» queda con una salida de dos pasos (borrar, luego
+  recargar para que `cuantasInvitaciones` vuelva a 0 o a alguna «sin plantilla») en vez de un paso
+  solo — documentado aquí y en `preguntas-abiertas.md` en vez de silenciado.

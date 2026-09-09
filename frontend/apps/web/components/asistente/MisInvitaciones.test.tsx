@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { MisInvitaciones, fechaLegible } from "./MisInvitaciones.tsx";
 import type { FilaInvitacion } from "./invitaciones.ts";
 
@@ -23,12 +23,21 @@ function fila(parcial: Partial<FilaInvitacion>): FilaInvitacion {
 }
 
 describe("Mis invitaciones (paso 1 del asistente)", () => {
-  it("sin invitaciones explica de dónde salen y lleva a los planes, sin botones muertos", () => {
+  it("sin invitaciones y sin `alEmpezar`, el estado vacío lleva a los planes (respaldo)", () => {
     render(<MisInvitaciones invitaciones={[]} idTitulo="t" />);
     expect(screen.getByRole("heading", { name: "Todavía no tienes invitaciones" })).toBeTruthy();
-    const accion = screen.getByRole("link", { name: "Ver planes" });
+    const accion = screen.getByRole("link", { name: "Empezar mi invitación" });
     expect(accion.getAttribute("href")).toBe("/ayuda#planes");
     expect(document.querySelectorAll('a[href="#"]')).toHaveLength(0);
+  });
+
+  it("fase 5, E3 (cierre de G-01): con `alEmpezar`, la acción es un botón que lleva al formulario de alta", () => {
+    const alEmpezar = vi.fn();
+    render(<MisInvitaciones invitaciones={[]} idTitulo="t" alEmpezar={alEmpezar} />);
+    const accion = screen.getByRole("button", { name: "Empezar mi invitación" });
+    expect(accion.getAttribute("href")).toBeNull();
+    fireEvent.click(accion);
+    expect(alEmpezar).toHaveBeenCalledTimes(1);
   });
 
   it("enseña el nombre humano cuando la invitación ya tiene documento", () => {
@@ -83,6 +92,36 @@ describe("Mis invitaciones (paso 1 del asistente)", () => {
   it("sin fecha registrada lo dice en vez de dejar un hueco", () => {
     render(<MisInvitaciones invitaciones={[fila({ date: "" })]} idTitulo="t" />);
     expect(screen.getByText("Sin fecha registrada")).toBeTruthy();
+  });
+
+  it("sin `onBorrar`, ninguna fila ofrece «Eliminar» (solo lectura)", () => {
+    render(<MisInvitaciones invitaciones={[fila({})]} idTitulo="t" />);
+    expect(screen.queryByRole("button", { name: "Eliminar" })).toBeNull();
+  });
+
+  it("con `onBorrar`, pide confirmación explícita antes de llamar (contrato §1 bis)", () => {
+    const onBorrar = vi.fn();
+    const confirmar = vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(<MisInvitaciones invitaciones={[fila({})]} idTitulo="t" onBorrar={onBorrar} />);
+    fireEvent.click(screen.getByRole("button", { name: "Eliminar" }));
+    expect(confirmar).toHaveBeenCalledTimes(1);
+    expect(onBorrar).not.toHaveBeenCalled(); // canceló la confirmación: no se llama
+    confirmar.mockReturnValue(true);
+    fireEvent.click(screen.getByRole("button", { name: "Eliminar" }));
+    expect(onBorrar).toHaveBeenCalledWith(3);
+    confirmar.mockRestore();
+  });
+
+  it("mientras se borra OTRA fila, la de aquí queda deshabilitada", () => {
+    render(
+      <MisInvitaciones
+        invitaciones={[fila({ id: 3 }), fila({ id: 4 })]}
+        idTitulo="t"
+        onBorrar={vi.fn()}
+        borrandoId={4}
+      />,
+    );
+    expect((screen.getByTestId("asistente-eliminar-3") as HTMLButtonElement).disabled).toBe(true);
   });
 });
 

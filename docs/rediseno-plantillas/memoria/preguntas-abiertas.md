@@ -1794,3 +1794,86 @@ antes.
    sigue resolviéndose con un `SessionError` que manda a `/acceso`, como antes. Construir el
    interceptor completo es una pieza aparte, con superficie de prueba propia, y no estaba entre las
    tres pantallas de este encargo.
+
+---
+
+## Del agente E3-C4 (2026-09-09, correcciones de la segunda revisión de seguridad)
+
+1. **R2-03 · Cinco contraseñas malas de un tercero dejan a la dueña sin entrar quince minutos. Esto lo
+   decide el dueño, no un agente.** Es deuda conocida y deliberada desde la fase 3-C (`ADR-3C-N01-01`) y
+   este encargo la dejó **como está**, solo comprobada: `AuthThrottleService` cuenta 5 fallos por cuenta
+   y ventana con la clave del correo recibido, y `comprobar` va **antes** de tocar la base, así que
+   acertar la contraseña no perdona el bloqueo; el mismo patrón está en `VERIFICACION`. La elección es
+   entre dos males y no hay una tercera opción gratis:
+   - **(a) Dejarlo como está**: quien sepa un correo puede dejar a esa persona sin entrar quince
+     minutos, tantas veces como quiera. Coste cero, riesgo de denegación dirigida contra una clienta.
+   - **(b) Dejar pasar el acierto de contraseña aunque el cubo esté lleno**: se acaba la denegación,
+     pero el límite deja de frenar la adivinación de contraseñas —que es para lo que se puso—, porque
+     el atacante ya no paga por el intento que acierta.
+   - **(c) Retrasar en vez de rechazar** (que el intento número seis tarde unos segundos): conserva las
+     dos propiedades, pero cuesta hilos del servidor y hay que medir su efecto con carga.
+   - **(d) Un segundo factor o un desafío tipo captcha** al llegar al tope: es la solución de verdad y
+     es un proyecto, no un parche.
+   **Pregunta al dueño: ¿(a), (c) o (d)?** Mientras no haya respuesta queda (a), y queda dicho que es un
+   riesgo asumido, no un descuido.
+
+2. **¿El rastro de tokens de refresco consumidos debe vivir en la base de datos?** La detección de
+   reutilización de `ADR-5-E3-C4-01` se apoya en un mapa **en memoria** de huellas de tokens ya
+   canjeados. Con una sola instancia funciona; con varias, o tras un reinicio, la **detección** se pierde
+   (falla hacia el lado seguro: deja de revocar, nunca revoca de más, y entrar con la contraseña sigue
+   echando al ladrón). Llevarlo a la base es una migración `V45` (columna `consumed_at` o tabla aparte) y
+   una política de purga. **Decisión pendiente, ligada a la de siempre: cuándo pasa esto a más de una
+   instancia.** Lo mismo vale para los tres limitadores in-process que ya estaban anotados.
+
+3. **El día que haya un proxy delante hay que tocar dos cosas, y en este orden.** El freno de las
+   invitaciones ya no cuenta por IP mientras nadie declare un proxy de confianza (`ADR-5-E3-C4-02`), y el
+   de `auth` tiene el mismo interruptor. Para recuperar esa barrera hacen falta **las dos**:
+   `server.forward-headers-strategy` en el despliegue (para que Spring lea `X-Forwarded-For`) y
+   `product.invitations.throttle.confiar-en-x-forwarded-for=true` /
+   `auth.token.throttle.confiar-en-x-forwarded-for=true`. Poner solo la segunda es peor que no poner
+   ninguna: la cabecera la pondría el cliente. **`application.yml` no se tocó en este encargo** a
+   propósito: `forward-headers-strategy` cambia cómo se reconstruyen todas las peticiones y es una
+   decisión de despliegue.
+
+4. **R2-06 queda cerrado solo en la mitad de `account`.** `ProductAccountExceptionHandler` ya relanza los
+   `ErrorResponse` de Spring MVC, así que un `Content-Type` no aceptado vuelve a ser `415` y no `500`
+   (comprobado contra el backend). Su gemelo, `ProductInvitationsExceptionHandler.kt:97-106`, **sigue
+   convirtiendo esos 4xx en `500`**: está fuera del alcance de este encargo (`modules/product/invitations`
+   solo por el freno) y es una línea de trabajo para quien tenga ese módulo. Aviso de camino: el cuerpo de
+   ese `415` lo fabrica la plataforma, así que hereda `include-message: always` (S-02) y, **en desarrollo
+   con `spring-boot-devtools` en el classpath**, también la traza de pila. No es nuevo ni propio de esta
+   ruta —le pasa a cualquier 4xx que resuelva Spring en toda la aplicación— pero es una razón más para
+   cerrar S-02.
+
+5. **R2-04, la otra mitad, sigue abierta.** El cupo compartido entre crear y borrar ya está resuelto
+   (`ADR-5-E3-C4-02`), pero no lo otro que R2 señala: `ProductInvitationRepository.kt:167-169` cuenta como
+   borrador lo que no tiene release **activo**, mientras el borrado rechaza si existe **cualquier**
+   release, así que una invitación publicada y luego retirada ocupa hueco para siempre y hace falta un
+   MASTER. Es una decisión de producto («¿una invitación retirada sigue ocupando cuota?») antes que un
+   arreglo técnico.
+
+## Fase 5 · E3 · 5-E3-B3 (alta conectada al asistente, cierre de G-01)
+
+1. **¿El formulario de alta debería ofrecerse también cuando la clienta YA tiene invitaciones pero
+   ninguna sin plantilla (tope lleno o casi)?** Hoy se limita al caso «sin ninguna invitación»
+   (`ADR-5-E3-B3-01`) para no romper `e2e/asistente.spec.ts` (de otra sesión, fuera de mi
+   territorio), que prueba contra el backend real que esa pantalla no pinta ningún control extra.
+   El borrado («Eliminar») SÍ está disponible ahí, así que la clienta no está atascada — pero para
+   crear una CUARTA invitación tiene que borrar una y volver a entrar a `/editor` (dos pasos, no
+   uno). Si el producto quiere ese formulario también en ese estado, hace falta tocar
+   `e2e/asistente.spec.ts` a la vez (líneas ~209-224, la prueba que hoy exige `radiogroup` en 0) —
+   decisión y ficheros de otra sesión.
+2. **`GET /product/invitations`** no existe todavía (el contrato solo publica `POST` y `DELETE`).
+   El frontend sigue leyendo `/user/invitations/all` (módulo antiguo) para saber qué invitaciones
+   tiene la clienta, incluidas las recién creadas por la ruta nueva — funciona porque la fila vive en
+   la misma tabla `invitation`, pero significa que cualquier campo que el alta nueva escriba y el
+   DTO antiguo no exponga (p. ej. `hashtag`, los dos `*Allowed`) no llega a `InvitacionDelCliente` sin
+   pasar por `GET …/document` (que el asistente ya sondea por cada fila). Si `product/invitations`
+   gana su propio `GET` algún día, vale la pena que `cargarInvitaciones()` migre a él.
+3. **El botón «Eliminar» se ofrece para CUALQUIER fila**, incluidas las que el backend rechazará por
+   `paid`/`published`/`legacy` (`409 PRD_INVITATION_NOT_DELETABLE`): la interfaz no sabe de antemano
+   cuáles son borrables porque el frontend no tiene «¿tuvo alguna vez un release?» en
+   `FilaInvitacion` (solo `activeRelease` ACTUAL). Se decidió intentar siempre y mostrar el motivo
+   real que responda el servidor en vez de adivinar la regla en el cliente (H-27, dos validadores
+   que divergen) — pero si en el uso real resulta confuso ver «Eliminar» en una fila que nunca lo va
+   a lograr, vale la pena que `GET /product/invitations` (pregunta 2) traiga ese dato.

@@ -16,7 +16,9 @@ import {
   chooseTemplate,
   clearAuthToken,
   clearRefreshToken,
+  crearInvitacion,
   deleteAsset,
+  eliminarInvitacion,
   getAuthToken,
   getCatalog,
   getProfile,
@@ -500,5 +502,114 @@ describe("rutas de cuenta: /auth/verify-email* y /user/account/** (§2)", () => 
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("", { status: 500 })));
     await expect(logoutAccount()).rejects.toBeInstanceOf(UnknownApiError);
     expect(getAuthToken()).toBe("jwt-vivo");
+  });
+});
+
+// ── Alta y borrado de invitaciones (fase 5, E3; `modules/product/invitations`,
+// `handoffs/5-1b-contrato-alta.md`) ─────────────────────────────────────────────────────────────
+describe("crearInvitacion / eliminarInvitacion (product/invitations)", () => {
+  it("crearInvitacion manda POST a /product/invitations con el cuerpo y el Authorization", async () => {
+    setAuthToken("jwt-cliente");
+    const fetchMock = vi.fn().mockResolvedValue(
+      respuestaJson(201, {
+        invitationId: 42,
+        eventKind: "quince",
+        eventDate: "2027-05-01",
+        eventTime: "17:30",
+        childrenAllowed: true,
+        youngAllowed: true,
+        hashtag: "#Prueba",
+        isPaid: false,
+        isEnabled: true,
+        isFinished: false,
+        usesTemplates2: true,
+        createdAt: "2026-09-09T04:57:23.695173932Z",
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const resultado = await crearInvitacion({ eventKind: "quince", eventDate: "2027-05-01", eventTime: "17:30" });
+    expect(resultado.invitationId).toBe(42);
+    const [url, opciones] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/product/invitations");
+    expect(opciones.method).toBe("POST");
+    expect((opciones.headers as Headers).get("Authorization")).toBe("Bearer jwt-cliente");
+    expect(JSON.parse(opciones.body as string)).toEqual({
+      eventKind: "quince",
+      eventDate: "2027-05-01",
+      eventTime: "17:30",
+    });
+  });
+
+  it("crearInvitacion también acepta el `200` del reenvío exacto dentro de la ventana de 60 s (contrato §3)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        respuestaJson(200, {
+          invitationId: 42,
+          eventKind: "quince",
+          eventDate: "2027-05-01",
+          eventTime: "17:30",
+          childrenAllowed: true,
+          youngAllowed: true,
+          hashtag: "",
+          isPaid: false,
+          isEnabled: true,
+          isFinished: false,
+          usesTemplates2: true,
+          createdAt: "2026-09-09T04:57:23.695173932Z",
+        }),
+      ),
+    );
+    await expect(
+      crearInvitacion({ eventKind: "quince", eventDate: "2027-05-01", eventTime: "17:30" }),
+    ).resolves.toMatchObject({ invitationId: 42 });
+  });
+
+  it("un `409 PRD_DRAFT_LIMIT_REACHED` es `UnknownApiError` (el `code` no empieza por `TPL_`) con `details` intactos", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        respuestaJson(409, {
+          timestamp: "09/09/2026 10:00:00",
+          statusCode: 409,
+          code: "PRD_DRAFT_LIMIT_REACHED",
+          message: "Ya tienes 3 invitaciones sin publicar. Publica una o elimina la que no vayas a usar para crear otra.",
+          details: { limit: 3, current: 3 },
+        }),
+      ),
+    );
+    const error = await crearInvitacion({ eventKind: "wedding", eventDate: "2027-05-01", eventTime: "17:30" }).catch(
+      (e: unknown) => e,
+    );
+    expect(error).toBeInstanceOf(UnknownApiError);
+    expect((error as UnknownApiError).rawBody).toContain("PRD_DRAFT_LIMIT_REACHED");
+    expect((error as UnknownApiError).rawBody).toContain('"limit":3');
+  });
+
+  it("eliminarInvitacion manda DELETE a /product/invitations/{id} y no intenta parsear el 204", async () => {
+    setAuthToken("jwt-cliente");
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(eliminarInvitacion(42)).resolves.toBeUndefined();
+    const [url, opciones] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/product/invitations/42");
+    expect(opciones.method).toBe("DELETE");
+  });
+
+  it("un `404 PRD_INVITATION_NOT_FOUND` en el borrado también es `UnknownApiError`, no `ApiError`", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        respuestaJson(404, {
+          timestamp: "09/09/2026 10:00:00",
+          statusCode: 404,
+          code: "PRD_INVITATION_NOT_FOUND",
+          message: "no encontramos esa invitación",
+        }),
+      ),
+    );
+    const error = await eliminarInvitacion(999).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(UnknownApiError);
+    expect(error).not.toBeInstanceOf(ApiError);
   });
 });

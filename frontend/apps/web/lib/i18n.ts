@@ -401,7 +401,7 @@ export const es_MX = {
       // Fase 5, E3 (cierre de G-01): antes esto era literalmente falso — el alta por USER no
       // existía y solo la creaba un ADMIN al vender un plan. Ahora la clienta la crea aquí mismo.
       texto: "Créala aquí mismo: elige el tipo de evento, la fecha y la hora, y ya tienes dónde empezar a diseñar.",
-      accion: "Crear mi invitación",
+      accion: "Empezar mi invitación",
       /** Título de la PÁGINA en ese caso: el del estado vacío es su propio encabezado (h2). */
       tituloDePagina: "Tus invitaciones",
     },

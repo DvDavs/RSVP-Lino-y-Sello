@@ -97,7 +97,7 @@ Cuerpo `{timestamp, statusCode, code, message, details}`, misma forma que `TplEr
 | `400` | `PRD_TIME_INVALID` | `eventTime` no es `HH:MM` de 24 h |
 | `400` | `PRD_HASHTAG_TOO_LONG` | `hashtag` de más de 100 caracteres; `details.max` |
 | `409` | `PRD_DRAFT_LIMIT_REACHED` | ya tiene **3 borradores**; `details.limit`, `details.current` |
-| `429` | `PRD_TOO_MANY_REQUESTS` | freno de caudal de este subpaquete: demasiadas altas o borrados de la misma cuenta (20/15 min) o de la misma IP (60/15 min). Cuerpo **constante**: no dice cuál de los dos cubos saltó ni cuánto falta. Se reintenta más tarde, no de inmediato |
+| `429` | `PRD_TOO_MANY_REQUESTS` | freno de caudal de este subpaquete. **Cubos separados por operación y por cuenta** (corregido el 2026-09-09, agente 5-E3-C4, R2-01): 20 altas y 30 borrados por cuenta y 15 min. Agotar el alta **no** deja sin borrado —esa es la salida del tope de tres— y ninguna clienta puede bloquear a otra: ya no hay cubo por IP salvo que el despliegue declare un proxy de confianza. Cuerpo **constante**: no dice qué cubo saltó ni cuánto falta. Se reintenta más tarde, no de inmediato |
 | `500` | `PRD_TEMPLATE_BRIDGE_MISSING` | falta la fila puente de `V42`/`V44` para ese `eventKind` (entorno mal migrado) |
 | `500` | `PRD_INTERNAL` | cualquier otra; cuerpo mudo |
 
