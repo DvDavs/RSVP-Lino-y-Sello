@@ -2074,3 +2074,47 @@ de bloque que la guía cubre con ejemplos concretos; en cuanto aparece un tipo q
   omisión es una decisión de producto, no parte de "publicar la versión corregida en el
   catálogo"). **Pregunta:** ¿se quiere que la demo por defecto siga la versión más alta del
   catálogo en vez de un número fijo?
+
+## Fase 4 · cierre — lo que el dueño decide (2026-09-09)
+
+Todo lo de aquí está **decidido con la opción conservadora y ya aplicado**: nada bloquea. Lo que el
+dueño diga cambia el rumbo de la fase 6 o la 7, no el estado de hoy.
+
+- **[D-01, lo que se hace con las 9 plantillas convertidas] — RECOMENDACIÓN: se quedan.** El dueño
+  decidió que no hay nada que migrar, y esa decisión llegó cuando las nueve **ya estaban convertidas,
+  integradas y en verde**. Desde entonces han recibido tres rondas de trabajo: se les quitó la marca
+  del proveedor anterior (4-8), los datos reales de terceros (4-9) y las tipografías que el producto
+  no sirve (4-6), y las quince versiones están registradas y en el catálogo. Borrarlas hoy dejaría el
+  catálogo con **cuatro** plantillas (las dos de diseño y las dos que salieron de las pruebas
+  ciegas) y **cuatro tipos de evento sin ninguna**: bautizo, comunión, confirmación y evento
+  genérico. Son correctas, accesibles y limpias; lo que les falta es arte, que es exactamente el
+  trabajo de la fase 6. **Supuesto tomado:** se quedan como catálogo de partida que la fase 6 viste.
+  **Pregunta:** ¿de acuerdo, o prefieres un catálogo más corto y que la fase 6 empiece de cero con
+  6-8 plantillas nuevas hechas con el kit?
+- **[`packages/migration-legacy`] — RECOMENDACIÓN: retirar en la fase 7, no antes.** Ya hizo su
+  trabajo y D-01 le quita el motivo de existir, pero es la única forma de reproducir esas nueve
+  plantillas si alguna hubiera que rehacer. **La sospecha de que pesa en la suite se midió en vez de
+  suponerse: 89 pruebas en 16,2 s de reloj**, y eso con tres agentes trabajando en paralelo en la
+  misma máquina — **no llega ni a un minuto**, así que no hay ninguna prisa. Marcado en
+  `hoja-de-ruta.md` para retirarse con el módulo antiguo y Mongo. **Pregunta:** ¿de acuerdo?
+- **[La demostración sigue sembrando la versión vieja de `boda-clasica`] — decidido: no se toca
+  aquí.** `seed-demo.sh` siembra `boda-clasica@1.0.0` por defecto, así que la invitación de ejemplo
+  no enseña la miniatura corregida de `1.0.2`. Comprobé por qué antes de decidir: **once puntos de
+  `apps/web` fijan literalmente `boda-clasica@1.0.0`** (fixtures del manifiesto, pruebas del
+  catálogo del asistente, `e2e/preparar-panel.ts`, `e2e/paleta-preview.spec.ts`). Cambiar la versión
+  de siembra rompe esas pruebas, y `apps/web` es territorio de la fase 5, que corre en paralelo.
+  **Supuesto tomado:** se deja el valor por defecto; quien quiera ver la nueva pasa
+  `TPL_DEMO_VERSION=1.0.2`. **Pregunta:** ¿lo recoge la fase 5 al actualizar sus fixtures?
+- **[Dos nombres de lugar real en 8 plantillas convertidas] — RECOMENDACIÓN: un bloque corto en la
+  fase 6.** Está detallado con `fichero:línea` en la sección de 4-9c, arriba. Ninguna compuerta los
+  caza porque no son marcas ni enlaces ni números: son nombres propios. Sustituirlos cambia el
+  `package_hash` de ocho plantillas, así que es un bloque con su registro y su verificación, no un
+  retoque de cierre. Como la fase 6 va a tocar esas ocho plantillas para vestirlas, **el momento
+  natural es ese**. **Pregunta:** ¿se hace en la fase 6 junto con el arte, o antes?
+- **[Las cinco issues que dejó la revisión adversarial]** están en `memoria/issues-fase-4.md` con su
+  reproducción y su arreglo propuesto. Ninguna es alta: la única alta que encontró (el
+  previsualizador servía cualquier fichero del disco) **está corregida y fijada con una prueba**. Las
+  cinco tienen en común una cosa que conviene que el dueño sepa: **las compuertas de contenido de
+  tercero miran `defaults.json` y no `template.json`**, así que un autor que escriba el dato en el
+  sitio equivocado pasa en verde. **Pregunta:** ¿se cierran en la fase 6, que es la que más va a usar
+  el kit, o antes?
