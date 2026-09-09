@@ -138,7 +138,7 @@ export function PantallaPago() {
   if (estado.tipo === "cancelado") {
     return (
       <Bloque testId="pago-cancelado">
-        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink focus:outline-none">
+        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink rounded-ui-control focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface">
           {es_MX.sitio.pago.cancelado.titulo}
         </h1>
         <p className="text-md max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.cancelado.cuerpo}</p>
@@ -160,7 +160,7 @@ export function PantallaPago() {
     const siguiente = `/pago?inv=${String(invitationId)}${sesion !== null ? `&sesion=${encodeURIComponent(sesion)}` : ""}`;
     return (
       <Bloque testId="pago-sin-sesion">
-        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink focus:outline-none">
+        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink rounded-ui-control focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface">
           {es_MX.sitio.pago.sinSesion.titulo}
         </h1>
         <p className="text-md max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.sinSesion.cuerpo}</p>
@@ -174,7 +174,7 @@ export function PantallaPago() {
   if (estado.tipo === "error") {
     return (
       <Bloque testId="pago-error">
-        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink focus:outline-none">
+        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink rounded-ui-control focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface">
           {es_MX.sitio.pago.error.titulo}
         </h1>
         <p className="text-md max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.error.cuerpo}</p>
@@ -201,7 +201,7 @@ export function PantallaPago() {
     return (
       <Bloque testId="pago-esperando">
         <ProgressRing indeterminate label={es_MX.sitio.pago.esperando.progreso} size={96} />
-        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink focus:outline-none">
+        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink rounded-ui-control focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface">
           {es_MX.sitio.pago.esperando.titulo}
         </h1>
         {/* El sondeo cambia lo que dice esta zona sin que nadie toque nada: `role="status"` +
@@ -260,7 +260,7 @@ export function PantallaPago() {
         <Seal points={12} amplitude={4} tone="support-1-soft" className="absolute inset-0 h-24 w-24" />
         <IconoExito size={40} tone="mono" className="relative text-ui-support-1-deep" />
       </div>
-      <h1 ref={tituloRef} tabIndex={-1} className="display-lg text-ui-ink focus:outline-none">
+      <h1 ref={tituloRef} tabIndex={-1} className="display-lg text-ui-ink rounded-ui-control focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ui-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ui-surface">
         {es_MX.sitio.pago.confirmado.titulo}
       </h1>
       <p className="text-md max-w-[48ch] text-ui-ink-muted">{subtitulo}</p>

@@ -161,3 +161,19 @@ faltaba y ensambló. Es la razón de que no haya `bitacora/5-0a.md`, `5-0b-B.md`
 **Rojo conocido y ajeno:** `components/sitio/portada.test.tsx` falla desde `bfdcbaa` (integración de
 la imagen de portada sin pruebas ejecutadas). Comprobado con `git stash` que falla igual sin ninguno
 de los cambios de esta sesión. Lo arregla E6 al mergear la rama de las imágenes.
+
+## Fase 5 · sesión E4 — planes y pagos con Stripe (2026-09-09, rama `claude/fase-5-pagos-hmb028`)
+
+| Bloque | Agente | Modelo | Estado | Verificación del orquestador |
+|---|---|---|---|---|
+| 5-4-A · backend `modules/product/payments`, V42–V44, puerta `TPL_PLAN_UNPAID` | 5-4-A | Opus | **aceptada** | `./gradlew check` 1337/0 en su entrega; rutas verificadas con curl (catálogo, plan propio, ajena → 404, sin token → 401, checkout → 503 sin clave, webhook sin secreto → 503) |
+| 5-4-B1 · `lib/pagos` + `/precios` | 5-4-B1 | Sonnet | **aceptada** con correcciones de R1 | 27 pruebas nuevas; se indexa; sin pago en línea la tarjeta lo dice |
+| 5-4-B2 · `/editor/[id]/plan` + bloqueo «Falta el plan» | 5-4-B2 | Sonnet | **aceptada** con correcciones de R1 | 17 pruebas; diffs mínimos en `PublishDialog` (+29/−9) y `PasoListo` (+7/−1) |
+| 5-4-B3 · `/pago` | 5-4-B3 | Sonnet | **aceptada** con correcciones de R1 | 11 pruebas; el estado lo manda el backend, nunca la URL |
+| 5-4-R1 · revisión de pantallas | 5-4-R1 | Opus | **hecha** | 3 altas (retorno `?volver=`, `comprobanteUrl` https, redirección solo a checkout.stripe.com) y 8 medias corregidas; +14 pruebas |
+| 5-4-E · e2e `pagos-puerta`, `pagos-compra` | 5-4-E | Sonnet | **aceptada** | 16/16 con `--workers=4 --repeat-each=2`, repetido por el orquestador contra el backend endurecido: 16 passed (30.0s) |
+| 5-4-ADV · revisión adversarial | 5-4-ADV | Opus | **CERRABLE** | 7 medias/bajas corregidas con prueba que fallaba antes; `./gradlew check` 1351/0; A-01 (S-03, `mark-as-paid` sin jerarquía) abierta para E5 con parche propuesto |
+| 5-4-CAP / 5-4-V · 21 capturas reales y 2 defectos visuales | 5-4-CAP, 5-4-V | Sonnet | **hecha** | 21/21 verificadas y enviadas al dueño; historial con región desplazable y foco por tokens |
+
+**Cifras finales**: typecheck 6/6 · web test 667/668 (rojo ajeno de `portada.test.tsx`; 598 antes de E4) · Kotlin 1351/0 · e2e de pagos 16/16 con 4 workers.
+**Incidencia**: 429 de sesión a las ~11:50 UTC tumbó a dos agentes con el trabajo en disco; reanudados a las 12:13 y terminados. Detalle en `bitacora/5-4-orquestador.md`.

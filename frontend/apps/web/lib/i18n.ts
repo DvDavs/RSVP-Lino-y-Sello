@@ -887,6 +887,7 @@ export const es_MX = {
       historial: {
         titulo: "Pagos de esta invitación",
         vacio: "Todavía no hay pagos registrados.",
+        deslizate: "Pagos de esta invitación, desplázate para ver más",
         fecha: "Fecha",
         plan: "Plan",
         importe: "Importe",

@@ -108,7 +108,6 @@ test.describe("pagos · compra con webhook simulado", () => {
     const sufijo = sufijoUnico();
     const { token, customerId } = await cuentaNueva();
     const invitationId = await invitacionSinPagarPublicable(token, customerId);
-    let invitationId2: number | null = null;
     try {
       const plan = await planRecomendado();
       const sessionId = `cs_test_e2e_${sufijo}`;
@@ -143,10 +142,8 @@ test.describe("pagos · compra con webhook simulado", () => {
       expect(plan1.body.pagada).toBe(false);
     } finally {
       borrarPagosDe(invitationId);
-      if (invitationId2 !== null) borrarPagosDe(invitationId2);
       borrarEventosDe(sufijo);
       borrarInvitacion(invitationId);
-      if (invitationId2 !== null) borrarInvitacion(invitationId2);
     }
   });
 
