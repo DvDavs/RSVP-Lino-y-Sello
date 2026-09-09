@@ -1,0 +1,58 @@
+{
+  "palettes": [
+    {
+      "id": "arena",
+      "name": {
+        "es-MX": "Arena"
+      },
+      "tokens": {
+        "bg": "#FAF7F2",
+        "surface": "#FFFFFF",
+        "ink": "#2E2A26",
+        "accent": "#8C6A45",
+        "accentInk": "#FFFFFF",
+        "muted": "#6E655C"
+      }
+    },
+    {
+      "id": "tinta",
+      "name": {
+        "es-MX": "Tinta"
+      },
+      "tokens": {
+        "bg": "#F5F7FA",
+        "surface": "#FFFFFF",
+        "ink": "#232B33",
+        "accent": "#3C5A78",
+        "accentInk": "#FFFFFF",
+        "muted": "#5A6672"
+      }
+    }
+  ],
+  "fontSets": [
+    {
+      "id": "clasica",
+      "name": {
+        "es-MX": "Clásica"
+      },
+      "heading": {
+        "family": "Cormorant Garamond",
+        "weights": [
+          400,
+          600
+        ],
+        "source": "bundled"
+      },
+      "body": {
+        "family": "Inter",
+        "weights": [
+          400,
+          600
+        ],
+        "source": "bundled"
+      }
+    }
+  ],
+  "defaultPaletteId": "arena",
+  "defaultFontSetId": "clasica"
+}

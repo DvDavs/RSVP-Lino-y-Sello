@@ -1,0 +1,118 @@
+{
+  "templateSlug": "cumple-retro",
+  "templateVersion": "1.0.0",
+  "content": {
+    "cover.title": {
+      "kind": "text",
+      "value": "Los 30 de Renata · Fiesta Retro"
+    },
+    "cover.date": {
+      "kind": "date",
+      "value": "2026-11-14"
+    },
+    "cover.image": {
+      "kind": "image",
+      "assetId": "as_8T0FEX1B1E1PH7H4PV3VSVXF42",
+      "alt": "Foto de relleno (no corresponde al tema retro): jardín usado como marcador de la portada",
+      "focal": { "x": 0.5, "y": 0.4 }
+    },
+    "celebrant.title": {
+      "kind": "text",
+      "value": "La festejada"
+    },
+    "celebrant.honoree": {
+      "kind": "person",
+      "name": "Renata Torres"
+    },
+    "celebrant.message": {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Cumplo 30 años y quiero celebrarlo como se debe: con música ochentera, luces de neón y toda la gente que quiero cerca. "
+              },
+              {
+                "type": "text",
+                "marks": ["bold"],
+                "text": "No hay código de vestimenta serio"
+              },
+              {
+                "type": "text",
+                "text": ", pero si te animas a venir con algo retro, mejor todavía."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Va a haber pastel, barra de dulces y una pista de baile abierta toda la noche. Te espero para brindar juntos."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "event.heading": {
+      "kind": "text",
+      "value": "Así va a estar la noche"
+    },
+    "event.cards": {
+      "kind": "group",
+      "items": [
+        {
+          "itemId": "WB2ENHEHM3R3GPA11ZZVV9C684",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Cóctel de bienvenida"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-11-14T19:00"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Terraza Neón, Salón Andrómeda, Guadalajara"
+            }
+          }
+        },
+        {
+          "itemId": "MVBTKPSG2VFFFDPB3DPT8D6DCE",
+          "values": {
+            "title": {
+              "kind": "text",
+              "value": "Cena, pastel y pista de baile"
+            },
+            "when": {
+              "kind": "dateTimeRange",
+              "start": "2026-11-14T21:00"
+            },
+            "place": {
+              "kind": "location",
+              "name": "Salón Andrómeda, Guadalajara"
+            }
+          }
+        }
+      ]
+    },
+    "rsvp.heading": {
+      "kind": "text",
+      "value": "Confirma tu lugar en la pista"
+    },
+    "rsvp.note": {
+      "kind": "text",
+      "value": "Avísanos antes del 1 de noviembre si vienes, para reservarte silla y dulces suficientes."
+    },
+    "footer.note": {
+      "kind": "text",
+      "value": "Con cariño, Renata y su familia. ¡Nos vemos en la pista!"
+    }
+  }
+}
