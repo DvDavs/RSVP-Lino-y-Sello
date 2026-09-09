@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "templateVersionId": 1,
+      "slug": "boda-clasica",
+      "version": "1.0.2",
+      "name": {
+        "es-MX": "Boda clásica"
+      },
+      "eventKinds": [
+        "wedding"
+      ],
+      "minPlanTier": 2,
+      "previewUrl": "http://127.0.0.1:6093/public/templates2-assets/templates2/template/boda-clasica/1.0.2/9590d2203b71c65f53eae09cdfee42ecf310987f6ea3ac0aea6849b67612f90c.webp",
+      "capabilities": [
+        "story",
+        "hashtags",
+        "music"
+      ],
+      "status": "published"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+==============================================================================
+ seed-demo — invitación de demostración de boda-clasica@1.0.0
+ base: http://127.0.0.1:6093   postgres: 127.0.0.1:33197/invitaciones_f4_9c   2026-09-09T02:19:30Z
+==============================================================================
+
+-- 1. cuentas ---------------------------------------------------------------
+  cliente USER id=15 (demo.boda@example.com) · MASTER demo.master@example.com promovido por SQL
+
+-- 2. plantillas ------------------------------------------------------------
+  boda-clasica@1.0.0 HTTP 201  result=created          templateVersionId=2  packageHash=sha256:cf0120182112711ac8137a465680c2ad0ba7b3196fd1a04e83d050775048e111
+  xv-jardin@1.0.0 HTTP 201  result=created          templateVersionId=3  packageHash=sha256:128c63473c87b7f7efac12b17301bf31fdb64558c0a0b7bfc39fa0681e9bf688
+  catálogo: boda-clasica@1.0.2, xv-jardin@1.0.0
+
+-- 3. invitación ------------------------------------------------------------
+  invitación id=3 creada por SQL (no hay ruta HTTP para uses_templates2, ADR-2-4-02)
+
+-- 4. :choose-template ------------------------------------------------------
+  POST …/document:choose-template → HTTP 201  revision=0  publicToken=pub_79HA9N9HW0T4CQJE7HW50KAXJ2
+  revision=0 publicToken=pub_79HA9N9HW0T4CQJE7HW50KAXJ2
+  CompositionReport ANTES de sembrar: {"missingRequired":[],"stillDefault":["couple.bride","couple.groom","cover.image","cover.title"]}
+  (los assetId de defaults.json NO se resuelven: cover.image queda 'empty'. Diagnóstico en bitacora/3-2d.md §5)
+
+-- 5. assets ----------------------------------------------------------------
+  arte de la paleta "blush" (/home/user/wt/49c/frontend/templates/boda-clasica/demo/blush)
+  cover.webp         HTTP 201  assetId=as_01M21ZD6Z6KJKFCMZ1M4ATV9YG  46544 B  reused=false
+  dress-a.webp       HTTP 201  assetId=as_01M21ZD71KCGKWSV8JKTQREK1H  30978 B  reused=false
+  dress-b.webp       HTTP 201  assetId=as_01M21ZD73PB4NA0D71PSYQ39FP  28232 B  reused=false
+  gallery-1.webp     HTTP 201  assetId=as_01M21ZD75VM105QFN17SXSGFNH  34620 B  reused=false
+  gallery-2.webp     HTTP 201  assetId=as_01M21ZD781ERSB9X6SRFTBEQ0T  39670 B  reused=false
+  gallery-3.webp     HTTP 201  assetId=as_01M21ZD79Y00T65MBTCK59APD1  44764 B  reused=false
+  gallery-4.webp     HTTP 201  assetId=as_01M21ZD7BVR4ACS2TSKX35TD3M  34554 B  reused=false
+  gallery-5.webp     HTTP 201  assetId=as_01M21ZD7DN31NEGN5AB6EETBW5  31400 B  reused=false
+  gallery-6.webp     HTTP 201  assetId=as_01M21ZD7FJZCRY7WWNCSGQVZKN  34858 B  reused=false
+  portrait-a.webp    HTTP 201  assetId=as_01M21ZD7HD667DJ3PFW8A85SBZ  42822 B  reused=false
+  portrait-b.webp    HTTP 201  assetId=as_01M21ZD7K4AG2FDN6ZFWZQJ5RZ  41268 B  reused=false
+  story-1.webp       HTTP 201  assetId=as_01M21ZD7MV57PBFFGGR5TW8J84  37046 B  reused=false
+  story-2.webp       HTTP 201  assetId=as_01M21ZD7PKJ0XHH9J5XT6DPVJR  31384 B  reused=false
+  GET …/assets → 13 assets en la invitación
+
+-- 6. operaciones -----------------------------------------------------------
+  seed-boda-01-portada               HTTP 200  applied=true  revision=1  (3 operaciones)
+  seed-boda-02-novios                HTTP 200  applied=true  revision=2  (7 operaciones)
+  seed-boda-03-familia               HTTP 200  applied=true  revision=3  (9 operaciones)
+  seed-boda-04-itinerario            HTTP 200  applied=true  revision=4  (5 operaciones)
+  seed-boda-05-galeria-historia      HTTP 200  applied=true  revision=5  (11 operaciones)
+  seed-boda-06-regalos-y-detalles    HTTP 200  applied=true  revision=6  (16 operaciones)
+
+-- 6b. paleta ---------------------------------------------------------------
+  setTheme paletteId=blush fontSetId=serif-elegante → HTTP 200  applied=true  revision=7
+
+-- 7. publicación -----------------------------------------------------------
+  preflight: canPublish=true  bloqueos=
+  POST …/release → HTTP 201  contentHash=sha256:f4aaa4313059a6785ab0d3516aad536f5ffc8a15b577771bfabcad85cbc095fe
+  releases: #null sha256:f4aaa4313059a…
+
+-- 8. render público --------------------------------------------------------
+  GET /public/i/pub_79HA9N9HW0T4CQJE7HW50KAXJ2/render → HTTP 200
+  ETag: "sha256:f4aaa4313059a6785ab0d3516aad536f5ffc8a15b577771bfabcad85cbc095fe"
+  secciones visibles: cover, couple, family, event, gallery, story, giftTable, suggestions, amenities, dressCode, rsvp, footer
+  imágenes resueltas: 14
+  primera imagen: http://127.0.0.1:6093/public/templates2-assets/templates2/invitation/3/ebaf89d6cc6943faabb18501d29d9cd00fb3d7b50962e8db24f8cab42808cd55.webp → HTTP 200
+
+==============================================================================
+  INVITACIÓN PUBLICADA
+    enlace público   http://127.0.0.1:6093/public/i/pub_79HA9N9HW0T4CQJE7HW50KAXJ2/render   (JSON del render)
+    ruta de apps/web /i/pub_79HA9N9HW0T4CQJE7HW50KAXJ2
+    plantilla        boda-clasica@1.0.0   paleta blush   tipografía serif-elegante
+    invitationId     3      customerId 15
+    editor           demo.boda@example.com / Demo1234!
+==============================================================================

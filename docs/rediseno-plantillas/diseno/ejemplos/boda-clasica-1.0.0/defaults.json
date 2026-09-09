@@ -23,8 +23,8 @@
     ] },
     "event.title": { "kind": "text", "value": "Itinerario" },
     "event.cards": { "kind": "group", "items": [
-      { "itemId": "01J8DEM0000000000000000EV1", "values": { "title": { "kind": "text", "value": "Ceremonia religiosa" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T16:30", "end": "2026-12-12T17:30" }, "place": { "kind": "location", "name": "Templo de Santo Domingo de Guzmán", "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6" } } },
-      { "itemId": "01J8DEM0000000000000000EV2", "values": { "title": { "kind": "text", "value": "Recepción" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T19:00" }, "place": { "kind": "location", "name": "Zorba el Griego", "mapHref": "https://maps.app.goo.gl/Q84SBQZJ36owN2uz6" } } },
+      { "itemId": "01J8DEM0000000000000000EV1", "values": { "title": { "kind": "text", "value": "Ceremonia religiosa" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T16:30", "end": "2026-12-12T17:30" }, "place": { "kind": "location", "name": "Templo de Santo Domingo de Guzmán", "mapHref": "https://www.example.com/mapa-ubicacion" } } },
+      { "itemId": "01J8DEM0000000000000000EV2", "values": { "title": { "kind": "text", "value": "Recepción" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T19:00" }, "place": { "kind": "location", "name": "Zorba el Griego", "mapHref": "https://www.example.com/mapa-ubicacion" } } },
       { "itemId": "01J8DEM0000000000000000EV3", "values": { "title": { "kind": "text", "value": "Fiesta" }, "when": { "kind": "dateTimeRange", "start": "2026-12-12T19:30", "end": "2026-12-13T02:00" }, "place": { "kind": "location", "name": "Zorba el Griego" } } }
     ] },
     "gallery.title": { "kind": "text", "value": "Galería" },
@@ -39,16 +39,16 @@
     ] },
     "gifts.title": { "kind": "text", "value": "Mesa de regalos" },
     "gifts.options": { "kind": "group", "items": [
-      { "itemId": "01J8DEM0000000000000000GF1", "values": { "kind": { "kind": "choice", "optionId": "bank" }, "title": { "kind": "text", "value": "Depósito o transferencia" }, "detail": { "kind": "listText", "items": [ "Banco: SANTANDER", "Titular: KARLA ZARATE CRUZ", "Cuenta CLABE: 014610606106246881" ] } } },
-      { "itemId": "01J8DEM0000000000000000GF2", "values": { "kind": { "kind": "choice", "optionId": "store" }, "title": { "kind": "text", "value": "Liverpool" }, "detail": { "kind": "listText", "items": [ "Número de evento 50355602" ] }, "link": { "kind": "link", "href": "https://mesaderegalos.liverpool.com.mx/milistaderegalos/50355602", "label": "Ver mesa" } } }
+      { "itemId": "01J8DEM0000000000000000GF1", "values": { "kind": { "kind": "choice", "optionId": "bank" }, "title": { "kind": "text", "value": "Depósito o transferencia" }, "detail": { "kind": "listText", "items": [ "Banco: Banco de Ejemplo", "Titular: Nombre Apellido (cuenta de ejemplo)", "Cuenta CLABE: 000000000000000000 (ejemplo, sustitúyela por la tuya)" ] } } },
+      { "itemId": "01J8DEM0000000000000000GF2", "values": { "kind": { "kind": "choice", "optionId": "store" }, "title": { "kind": "text", "value": "Tienda departamental" }, "detail": { "kind": "listText", "items": [ "Número de evento 000000 (ejemplo)" ] }, "link": { "kind": "link", "href": "https://www.example.com/mesa-de-regalos", "label": "Ver mesa" } } }
     ] },
     "suggestions.title": { "kind": "text", "value": "Recomendaciones" },
     "suggestions.items": { "kind": "group", "items": [
-      { "itemId": "01J8DEM0000000000000000SG1", "values": { "name": { "kind": "text", "value": "City Express Oaxaca" }, "detail": { "kind": "listText", "items": [ "Hotel" ] }, "link": { "kind": "link", "href": "https://www.cityexpress.com/centro/hoteles-mexico/oaxaca/oaxaca-de-juarez/oaxaca" } } }
+      { "itemId": "01J8DEM0000000000000000SG1", "values": { "name": { "kind": "text", "value": "Hotel Los Encinos" }, "detail": { "kind": "listText", "items": [ "Hotel" ] }, "link": { "kind": "link", "href": "https://www.example.com/hotel-los-encinos" } } }
     ] },
     "amenities.title": { "kind": "text", "value": "Amenidades" },
     "amenities.items": { "kind": "group", "items": [
-      { "itemId": "01J8DEM0000000000000000AM1", "values": { "name": { "kind": "text", "value": "Marck Luga" }, "detail": { "kind": "listText", "items": [ "Salón de belleza" ] }, "link": { "kind": "link", "href": "https://www.facebook.com/marck.luga.39" } } }
+      { "itemId": "01J8DEM0000000000000000AM1", "values": { "name": { "kind": "text", "value": "Salón Bella Luna" }, "detail": { "kind": "listText", "items": [ "Salón de belleza" ] }, "link": { "kind": "link", "href": "https://www.example.com/salon-bella-luna" } } }
     ] },
     "dressCode.title": { "kind": "text", "value": "Código de vestimenta" },
     "dressCode.rules": { "kind": "group", "items": [
@@ -58,6 +58,6 @@
     "rsvp.title": { "kind": "text", "value": "Confirma tu asistencia" },
     "rsvp.note": { "kind": "text", "value": "Por favor confirma tu asistencia antes del evento." },
     "rsvp.background": { "kind": "image", "assetId": "as_01J8DEM000000000000000RSV1", "alt": "", "focal": { "x": 0.5, "y": 0.5 } },
-    "footer.note": { "kind": "text", "value": "Invitaciones Digitales Agape. Todos los derechos reservados." }
+    "footer.note": { "kind": "text", "value": "Todos los derechos reservados" }
   }
 }

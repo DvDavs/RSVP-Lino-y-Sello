@@ -26,6 +26,6 @@
     ] },
     "rsvp.title": { "kind": "text", "value": "Confirma tu asistencia" },
     "rsvp.note": { "kind": "text", "value": "Por favor confirma antes del evento." },
-    "footer.note": { "kind": "text", "value": "Invitaciones Digitales Agape. Todos los derechos reservados." }
+    "footer.note": { "kind": "text", "value": "Todos los derechos reservados" }
   }
 }

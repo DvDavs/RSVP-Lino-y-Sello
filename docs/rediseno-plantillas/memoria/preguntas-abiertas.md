@@ -2038,3 +2038,39 @@ de bloque que la guía cubre con ejemplos concretos; en cuanto aparece un tipo q
   plantilla (mi brief prohíbe tocar `frontend/packages/**`, donde vive `check.ts`). **Pregunta:**
   ¿conviene una revisión manual periódica de `frontend/templates/scripts/demo-content.mjs`, o un
   lint aparte, ya que el contrato de compuertas no lo alcanza?
+
+## 4-9c (publicar `boda-clasica@1.0.2` con el `preview.webp` corregido; cierre)
+- **[Fase 4 · 4-9C] No hay mecanismo de "versión de contenido" para `defaults.json`/`theme.json`,
+  solo para los tres assets de imagen.** `build-packages.mjs` construye el paquete base de
+  `1.0.0` copiando `defaults.json`/`theme.json` directamente de `docs/rediseno-plantillas/diseno/ejemplos/<slug>-<version>/`
+  en cada corrida. Corregir un texto en el ejemplo y reconstruir **pisa el `defaults.json` de la
+  versión ya registrada** — medido en vivo (ver ADR-4-9C-02): al arreglar dos nombres de negocio
+  real en el ejemplo de `boda-clasica-1.0.0` y volver a correr `build-packages.mjs`,
+  `frontend/templates/boda-clasica/{1.0.0,1.0.1}/defaults.json` cambiaron de `package_hash`.
+  **Supuesto tomado:** revertí el arreglo (ejemplo y paquetes) para no romper la congelación de
+  `1.0.0`/`1.0.1`; los dos nombres reales siguen sin corregir. **Pregunta:** ¿se quiere un
+  mecanismo `contentRegenerado` (análogo a `arteRegenerado` de ADR-4-9C-01) para poder corregir
+  contenido de una versión ya registrada publicando una versión derivada, o se prefiere que estos
+  arreglos de contenido salten directo a una versión mayor nueva (p. ej. `boda-clasica@1.0.3`)
+  cada vez que haga falta?
+- **[Fase 4 · 4-9C] Los mismos dos nombres reales («Zorba el Griego», restaurante real; «Templo de
+  Santo Domingo de Guzmán», monumento real) viven como TEXTO en otras 8 plantillas convertidas**,
+  no sólo en `boda-clasica`: `frontend/templates/boda-basica/1.0.0/defaults.json:182,201,219,228,242`,
+  `frontend/templates/boda-premium/1.0.0/defaults.json:165,184,202,211,225`,
+  `frontend/templates/boda-premium-2/1.0.0/defaults.json:251`,
+  `frontend/templates/{bautizo-elegante,comunion-elegante,confirmacion-elegante,cumpleanos-elegante,xv-elegance}/1.0.0/defaults.json:118`.
+  Ninguna compuerta de `check.ts` los detecta (`TPL_THIRD_PARTY_BRAND` es una lista cerrada de
+  patrones de marca; `TPL_THIRD_PARTY_LINK`/`TPL_THIRD_PARTY_BANK_DATA` miran URLs y rachas de
+  dígitos, no nombres propios de lugar). **Supuesto tomado:** fuera de mi encargo (acotado a
+  `boda-clasica`/`xv-jardin`, y sólo imágenes en el punto del barrido final) y de mi permiso
+  (tocar 8 plantillas más cambia sus `package_hash`, decisión que no me corresponde tomar sola al
+  cerrar). **Pregunta:** ¿se abre un bloque para sustituir estos dos nombres en las 8 plantillas
+  (mismo criterio que 4-9/4-9b: ficticio verosímil de la misma categoría) y para una compuerta
+  nueva (lista curada de nombres propios de lugar/negocio conocidos, o revisión manual periódica)?
+- **[Fase 4 · 4-9C] `scripts/seed-demo.sh` sigue sembrando contra `boda-clasica@1.0.0` por
+  defecto** (`TPL_DEMO_VERSION`, `seed-demo.sh:39`) — la invitación de demostración no enseña el
+  `preview.webp` corregido de `1.0.2` a menos que alguien pase esa variable explícitamente.
+  **Supuesto tomado:** no toqué el valor por defecto (cambiar qué versión siembra la demo por
+  omisión es una decisión de producto, no parte de "publicar la versión corregida en el
+  catálogo"). **Pregunta:** ¿se quiere que la demo por defecto siga la versión más alta del
+  catálogo en vez de un número fijo?

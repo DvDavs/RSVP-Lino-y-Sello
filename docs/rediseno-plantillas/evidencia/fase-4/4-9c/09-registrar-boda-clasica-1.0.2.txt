@@ -1,0 +1,46 @@
+=== 1a registro (capturado en vivo durante la tarea) ===
+POST /master/templates2/versions  (/home/user/wt/49c/frontend/templates/boda-clasica/1.0.2)  →  HTTP 201
+{
+  "result": "created",
+  "alreadyRegistered": false,
+  "templateVersionId": 1,
+  "slug": "boda-clasica",
+  "version": "1.0.2",
+  "packageHash": "sha256:e069c76d5cde6664461f7d576191ffd26504d635f7d98faf6a36cbefba6a344a",
+  "assetsRegistered": 9
+}
+201 created — la versión se ha publicado. Es nueva en la base: ya se puede elegir desde el catálogo.
+
+=== 2o registro (capturado en vivo durante la tarea) ===
+POST /master/templates2/versions  (/home/user/wt/49c/frontend/templates/boda-clasica/1.0.2)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 1,
+  "slug": "boda-clasica",
+  "version": "1.0.2",
+  "packageHash": "sha256:e069c76d5cde6664461f7d576191ffd26504d635f7d98faf6a36cbefba6a344a",
+  "assetsRegistered": 0
+}
+200 noop_same_hash — ya estaba registrada con EXACTAMENTE el mismo `package_hash`, así que no se ha hecho nada. Es el resultado correcto de volver a registrar el mismo paquete (ADR-008), no un fallo.
+
+=== 3a llamada, ahora mismo, para confirmar que sigue siendo noop (evidencia adicional) ===
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/49c/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- registrar ../frontend/templates/boda-clasica/1.0.2
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/49c/frontend/packages/template-kit
+> node bin/plantilla.mjs -- registrar ../frontend/templates/boda-clasica/1.0.2
+
+POST /master/templates2/versions  (/home/user/wt/49c/frontend/templates/boda-clasica/1.0.2)  →  HTTP 200
+{
+  "result": "noop_same_hash",
+  "alreadyRegistered": true,
+  "templateVersionId": 1,
+  "slug": "boda-clasica",
+  "version": "1.0.2",
+  "packageHash": "sha256:e069c76d5cde6664461f7d576191ffd26504d635f7d98faf6a36cbefba6a344a",
+  "assetsRegistered": 0
+}
+200 noop_same_hash — ya estaba registrada con EXACTAMENTE el mismo `package_hash`, así que no se ha hecho nada. Es el resultado correcto de volver a registrar el mismo paquete (ADR-008), no un fallo.
