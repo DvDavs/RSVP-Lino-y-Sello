@@ -27,7 +27,8 @@
 // CIERRE E-10c (`bitacora/3c-ux-b.md`): «abrir-publicar» era un botón SUELTO al lado del `Dialog`,
 // no su `trigger` — Radix solo devuelve el foco a `context.triggerRef` al cerrar con Escape, así que
 // sin `Trigger` el foco caía al principio del documento. Ahora el botón ES el `trigger` del `Dialog`.
-import { useState } from "react";
+import Link from "next/link";
+import { useState, type ReactNode } from "react";
 import type { ComposedDocument, TemplateManifest } from "@invitaciones/schema";
 import { Badge, Button, Dialog, DialogClose, toast } from "@invitaciones/ui";
 import { IconoAviso, IconoCompartir, IconoCopiar, IconoError, IconoExterno, IconoVer } from "@invitaciones/icons";
@@ -74,6 +75,9 @@ const CODIGOS_BLOQUEO_CONOCIDOS = new Set([
   "TPL_PUBLISH_BLOCKED_MISSING_REQUIRED",
   "TPL_PUBLISH_BLOCKED_DEFAULT_CONTENT",
   "TPL_PUBLISH_BLOCKED_INVALID_VALUES",
+  // ADR-5-0B-01 (sesión E4, `handoffs/5-4-contrato-pagos.md` §2.6): la puerta de publicación por
+  // plan pagado vive en el backend (`ReleaseService`) y llega aquí como un bloqueo más.
+  "TPL_PLAN_UNPAID",
 ]);
 
 /**
@@ -428,14 +432,26 @@ export function PublishDialog({ invitationId, manifest: manifestExterno }: { inv
                       ]}
                     />
                   ) : null}
-                  {preflight.blockers.map((b, i) => (
-                    <Hallazgo
-                      key={`b-${i}`}
-                      bloquea
-                      texto={textoHallazgo(b, composed)}
-                      acciones={[{ texto: es_MX.editor.publicar.completar, onAccion: () => irAlBloque(b) }]}
-                    />
-                  ))}
+                  {preflight.blockers.map((b, i) =>
+                    // ADR-5-0B-01 · «Falta el plan» no es un bloque de contenido: no hay sección a
+                    // la que saltar, y el sitio que lo resuelve es la pantalla del plan, no el
+                    // lienzo. Mismo aspecto que cualquier otro bloqueo (`Hallazgo`), pero su acción
+                    // es un enlace del sistema, no un salto de sección.
+                    b.code === "TPL_PLAN_UNPAID" ? (
+                      <Hallazgo key={`b-${i}`} bloquea texto={textoHallazgo(b, composed)} acciones={[]}>
+                        <Button asChild variant="terciario" size="sm" data-testid="publicar-ir-al-plan">
+                          <Link href={`/editor/${invitationId}/plan`}>{es_MX.panel.plan.elegirPlan}</Link>
+                        </Button>
+                      </Hallazgo>
+                    ) : (
+                      <Hallazgo
+                        key={`b-${i}`}
+                        bloquea
+                        texto={textoHallazgo(b, composed)}
+                        acciones={[{ texto: es_MX.editor.publicar.completar, onAccion: () => irAlBloque(b) }]}
+                      />
+                    ),
+                  )}
                   {preflight.warnings.map((w, i) => (
                     <Hallazgo
                       key={`w-${i}`}
@@ -639,11 +655,14 @@ function Hallazgo({
   acciones,
   bloquea,
   testId,
+  children,
 }: {
   texto: string;
   acciones: Array<{ texto: string; onAccion: () => void; testId?: string; principal?: boolean }>;
   bloquea: boolean;
   testId?: string;
+  /** Acción que no es un `onAccion` local (p. ej. un enlace del sistema a otra pantalla). */
+  children?: ReactNode;
 }) {
   const Icono = bloquea ? IconoError : IconoAviso;
   return (
@@ -669,6 +688,7 @@ function Hallazgo({
             {accion.texto}
           </Button>
         ))}
+        {children}
       </span>
     </li>
   );

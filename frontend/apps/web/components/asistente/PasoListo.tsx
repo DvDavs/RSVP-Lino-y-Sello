@@ -26,10 +26,16 @@ export function PasoListo({ invitationId, nombreDelTipo, nombreDeLaPlantilla }: 
           <p className="text-md text-ui-ink-muted">{es_MX.asistente.listo.queSigue}</p>
         </div>
       </Card>
-      <div>
+      <div className="flex flex-col items-start gap-2">
         <Button size="lg" asChild data-testid="asistente-abrir-editor">
           <Link href={`/editor/${invitationId}`}>{es_MX.asistente.listo.abrir}</Link>
         </Button>
+        {/* ADR-5-0B-01: editar es gratis, el plan solo hace falta para publicar — el asistente no
+            empuja a pagar antes de haber visto nada, solo deja la salida a mano. */}
+        <Button size="md" variant="secundario" asChild data-testid="asistente-elegir-plan">
+          <Link href={`/editor/${invitationId}/plan`}>{es_MX.panel.plan.elegirPlan}</Link>
+        </Button>
+        <p className="text-sm text-ui-ink-muted">{es_MX.asistente.listo.notaPlan}</p>
       </div>
     </div>
   );
