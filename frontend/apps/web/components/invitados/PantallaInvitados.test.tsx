@@ -102,7 +102,10 @@ describe("PantallaInvitados — búsqueda y filtro van al backend", () => {
     const listar = vi.spyOn(invitadosApi, "listGuests").mockResolvedValue(pagina([invitado()]));
     const usuario = userEvent.setup();
     render(<PantallaInvitados invitationId={7} />);
-    await screen.findByRole("button", { name: "María Fernanda Cruz" });
+    // Ancla de espera: la lista ya está pintada. El nombre accesible del disparador de edición es
+    // «Editar a <nombre>» (dice QUÉ hace, `TablaInvitados.test.tsx`), y en jsdom se pintan a la vez
+    // la tabla y las tarjetas — de ahí `findAllByRole` con expresión regular sobre el nombre.
+    await screen.findAllByRole("button", { name: /María Fernanda Cruz/ });
 
     await usuario.type(screen.getByLabelText("Buscar por nombre"), "Rocío");
 
@@ -117,7 +120,10 @@ describe("PantallaInvitados — búsqueda y filtro van al backend", () => {
     const listar = vi.spyOn(invitadosApi, "listGuests").mockResolvedValue(pagina([invitado()]));
     const usuario = userEvent.setup();
     render(<PantallaInvitados invitationId={7} />);
-    await screen.findByRole("button", { name: "María Fernanda Cruz" });
+    // Ancla de espera: la lista ya está pintada. El nombre accesible del disparador de edición es
+    // «Editar a <nombre>» (dice QUÉ hace, `TablaInvitados.test.tsx`), y en jsdom se pintan a la vez
+    // la tabla y las tarjetas — de ahí `findAllByRole` con expresión regular sobre el nombre.
+    await screen.findAllByRole("button", { name: /María Fernanda Cruz/ });
 
     const disparador = screen.getByRole("combobox", { name: "Filtrar por estado" });
     disparador.focus();
@@ -137,7 +143,10 @@ describe("PantallaInvitados — cupos de niños/jóvenes en el alta", () => {
     vi.spyOn(invitadosApi, "listGuests").mockResolvedValue(pagina([invitado()]));
     const usuario = userEvent.setup();
     render(<PantallaInvitados invitationId={7} />);
-    await screen.findByRole("button", { name: "María Fernanda Cruz" });
+    // Ancla de espera: la lista ya está pintada. El nombre accesible del disparador de edición es
+    // «Editar a <nombre>» (dice QUÉ hace, `TablaInvitados.test.tsx`), y en jsdom se pintan a la vez
+    // la tabla y las tarjetas — de ahí `findAllByRole` con expresión regular sobre el nombre.
+    await screen.findAllByRole("button", { name: /María Fernanda Cruz/ });
 
     await usuario.click(screen.getAllByText("Agregar invitado")[0]!);
     expect(await screen.findByLabelText(/Niños/i)).toBeTruthy();
