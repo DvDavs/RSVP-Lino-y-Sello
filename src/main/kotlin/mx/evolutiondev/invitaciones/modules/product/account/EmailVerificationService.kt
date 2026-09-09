@@ -104,7 +104,12 @@ class EmailVerificationService(
             // abandonada (`ana@gmial.com`, un dedazo) seguía siendo una oferta de toma de cuenta viva:
             // bastaba con volver a armarla. El pendiente y el token nacen juntos
             // (`AccountService.pedirCambioDeCorreo`), así que mueren juntos.
-            limpiarVerificacionCaducada(customer)
+            // Hay que **guardar**: `verificar` no es `@Transactional`, así que la entidad que devolvió
+            // el repositorio está desligada y sin este `save` la limpieza se perdería. Sólo escribe si
+            // de verdad había algo que borrar, y sólo puede ocurrir una vez por token.
+            if (limpiarVerificacionCaducada(customer)) {
+                customerRepository.save(customer)
+            }
             throw AccountException(
                 AccountErrorCode.CUENTA_TOKEN_CADUCADO,
                 "El enlace de verificación caducó. Pide uno nuevo.",

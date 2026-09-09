@@ -3,13 +3,16 @@ package mx.evolutiondev.invitaciones.modules.product.account
 import mx.evolutiondev.invitaciones.core.model.GeneralMessageResponse
 import mx.evolutiondev.invitaciones.core.util.formatter.DateFormatterImpl
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import kotlin.test.assertFailsWith
 import org.springframework.core.annotation.AnnotatedElementUtils
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.test.web.servlet.MockMvc
@@ -122,5 +125,107 @@ class AccountRoutesContractTest {
             EmailVerificationController::class.java, PreAuthorize::class.java,
         )
         assertEquals(null, anotacion, "verify-email tiene que seguir siendo pública")
+    }
+    // ---------------------------------------------------------------------------------------
+    // R1-08 · la red final del advice
+    // ---------------------------------------------------------------------------------------
+
+    /**
+     * El mensaje que trae de verdad una `DataIntegrityViolationException` de Postgres. Lleva **el
+     * correo de la otra clienta** y el nombre de la restricción; con `include-message: always` (S-02)
+     * el manejo genérico del núcleo lo devolvía tal cual en el cuerpo.
+     */
+    private val mensajeQueNoDebeSalir =
+        "duplicate key value violates unique constraint \"customer_email_key\" " +
+            "Detail: Key (email)=(otra.clienta@ejemplo.mx) already exists."
+
+    @Test
+    @DisplayName("R1-08: una excepcion inesperada sale como 500 MUDO, no repite su mensaje")
+    fun laRedFinalEsMudaYNoRepiteElMensajeDeLaExcepcion() {
+        whenever(verificacion.verificar(any()))
+            .thenThrow(DataIntegrityViolationException(mensajeQueNoDebeSalir))
+
+        val cuerpo = mvc.perform(
+            post("/auth/verify-email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"token":"token-en-carrera"}"""),
+        )
+            .andExpect(status().isInternalServerError)
+            .andExpect(jsonPath("$.code").value("CUENTA_ERROR_INTERNO"))
+            .andExpect(jsonPath("$.message").value(ProductAccountExceptionHandler.MENSAJE_INTERNO))
+            .andReturn().response.contentAsString
+
+        assertFalse(
+            cuerpo.contains("otra.clienta@ejemplo.mx"),
+            "el cuerpo NO puede llevar el correo de otra clienta: $cuerpo",
+        )
+        assertFalse(
+            cuerpo.contains("customer_email_key"),
+            "ni el nombre de la restriccion: $cuerpo",
+        )
+    }
+
+    @Test
+    @DisplayName("R1-08: el choque de correo al confirmar sale como 409 con code, no como 500")
+    fun elChoqueDeCorreoNoSaleComoQuinientos() {
+        // El servicio ya traduce la violación de integridad a error de dominio; aquí se comprueba que
+        // el advice la publica con el `code` que el frontend espera.
+        whenever(verificacion.verificar(any())).thenThrow(
+            AccountException(
+                AccountErrorCode.CUENTA_CORREO_NO_DISPONIBLE,
+                "Ese correo ya no está disponible. Pide el cambio otra vez con otro.",
+            ),
+        )
+
+        mvc.perform(
+            post("/auth/verify-email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"token":"token-en-carrera"}"""),
+        )
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.code").value("CUENTA_CORREO_NO_DISPONIBLE"))
+    }
+
+    @Test
+    @DisplayName("R1-08: el cuerpo del error inesperado tiene exactamente los cuatro campos de siempre")
+    fun unTerceroNoLeeElCorreoAjenoEnElCuerpoDelError() {
+        whenever(verificacion.verificar(any()))
+            .thenThrow(IllegalStateException(mensajeQueNoDebeSalir))
+
+        mvc.perform(
+            post("/auth/verify-email")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"token":"lo-que-sea"}"""),
+        )
+            .andExpect(status().isInternalServerError)
+            .andExpect(jsonPath("$.*", org.hamcrest.Matchers.hasSize<Any>(4)))
+            .andExpect(jsonPath("$.statusCode").value(500))
+            .andExpect(jsonPath("$.code").value("CUENTA_ERROR_INTERNO"))
+    }
+
+    @Test
+    @DisplayName("R1-08: la red final NO se traga el 403 de @PreAuthorize")
+    fun laRedFinalNoConvierteUn403EnUn500() {
+        // Trampa documentada en `ProductInvitationsExceptionHandler.kt:63-72`: un
+        // `@ExceptionHandler(Exception)` captura también la `AccessDeniedException` y convierte el 403
+        // de la plataforma en un 500. El advice la relanza, así que aquí tiene que SALIR sin tocar.
+        whenever(verificacion.verificar(any()))
+            .thenThrow(org.springframework.security.access.AccessDeniedException("denegado"))
+
+        // MockMvc envuelve en `ServletException` todo lo que sale del `DispatcherServlet` sin manejar:
+        // que salga así es exactamente la prueba de que el advice NO la capturó y de que la excepción
+        // llega intacta a la cadena de filtros, donde `InvitationsAccessDeniedHandler` escribe el 403.
+        val escapada = assertFailsWith<jakarta.servlet.ServletException> {
+            mvc.perform(
+                post("/auth/verify-email")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""{"token":"lo-que-sea"}"""),
+            )
+        }
+        assertEquals(
+            org.springframework.security.access.AccessDeniedException::class.java,
+            escapada.cause?.javaClass,
+            "tiene que escapar la MISMA AccessDeniedException, no un 500 de la red final",
+        )
     }
 }

@@ -380,4 +380,81 @@ class AuthThrottleServiceTest {
             RequestContextHolder.resetRequestAttributes()
         }
     }
+
+    // ---------------------------------------------------------------------------------------
+    // R1-14 · presupuesto de envios por IP
+    // ---------------------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("R1-14: el presupuesto de envios NO se esquiva rotando el correo")
+    fun elPresupuestoDeEnviosNoSeEsquivaRotandoElCorreo() {
+        val limitador = AuthThrottleService(
+                passwordEncoder = encoder,
+                maxFallosPorCuenta = 5,
+                maxFallosPorIp = 20,
+                ventanaMinutos = 15,
+                maxEntradas = 50_000,
+                maxEnviosPorIp = 3
+        )
+
+        // El cubo POR CUENTA no frena esto: cada correo tiene el suyo, así que rotar la direccion en
+        // cada intento lo esquiva por definicion. Lo que se acota es el caudal de envios.
+        repeat(3) { i ->
+            assertTrue(
+                    limitador.consumirEnvio(AmbitoIntentos.VERIFICACION),
+                    "el envio ${i + 1} tiene que caber en el presupuesto"
+            )
+        }
+        assertFalse(
+                limitador.consumirEnvio(AmbitoIntentos.VERIFICACION),
+                "el cuarto envio de la misma IP y ventana ya no cabe, venga del correo que venga"
+        )
+
+        // Y no contamina otros ambitos: la recuperacion tiene su propio presupuesto.
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.RECUPERACION))
+    }
+
+    @Test
+    @DisplayName("R1-14: el presupuesto de envios se renueva al pasar la ventana")
+    fun elPresupuestoDeEnviosSeRenuevaAlPasarLaVentana() {
+        val limitador = AuthThrottleService(
+                passwordEncoder = encoder,
+                maxFallosPorCuenta = 5,
+                maxFallosPorIp = 20,
+                ventanaMinutos = 15,
+                maxEntradas = 50_000,
+                maxEnviosPorIp = 2
+        )
+        var ahora = 1_000_000L
+        limitador.reloj = { ahora }
+
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
+        assertFalse(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
+
+        ahora += 15 * 60_000L + 1
+        assertTrue(
+                limitador.consumirEnvio(AmbitoIntentos.VERIFICACION),
+                "pasada la ventana, quien de verdad necesita un reenvio lo consigue"
+        )
+    }
+
+    @Test
+    @DisplayName("R1-14: agotar el presupuesto de envios NO bloquea el 429 ni al reves")
+    fun elPresupuestoDeEnviosEsIndependienteDelCuboDeIntentos() {
+        val limitador = AuthThrottleService(
+                passwordEncoder = encoder,
+                maxFallosPorCuenta = 5,
+                maxFallosPorIp = 20,
+                ventanaMinutos = 15,
+                maxEntradas = 50_000,
+                maxEnviosPorIp = 1
+        )
+        assertTrue(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
+        assertFalse(limitador.consumirEnvio(AmbitoIntentos.VERIFICACION))
+
+        // El presupuesto agotado no se lleva por delante el cubo de intentos: `comprobar` sigue
+        // pasando, que es lo que garantiza que la respuesta siga siendo un 200 generico y no un 429.
+        limitador.comprobar(AmbitoIntentos.VERIFICACION, "ana@example.test")
+    }
 }

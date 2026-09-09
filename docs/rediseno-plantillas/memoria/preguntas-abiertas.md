@@ -1647,3 +1647,118 @@ commit de datos personales.**
 - [Fase 5 · E3-B1] **`/precios` no entra en el sitemap** porque su propio marcador (E4, ajeno) sigue declarando `robots: { index: false }`. Cuando E4 lo publique de verdad, hay que añadirlo a `RUTAS_DE_VENTA` de `lib/rutas-publicas.ts` — dejo la fila anotada aquí para que no se olvide en la integración de E6.
 - [Fase 5 · E3-B1] **No hay política de cookies (`/legal/cookies`) porque el producto no pone ninguna cookie de terceros hoy** (sesión en `localStorage`, sin analítica ni script de seguimiento — comprobado en el código, `ADR-5-E3-B1-02`). Si se añade Stripe con cookies propias más allá del iframe de Checkout, o cualquier analítica, hay que crear esa página entonces. ¿Está previsto añadir analítica (medición de conversión, por ejemplo) en una fase próxima? Si es que sí, mejor saberlo antes de que aparezca sin aviso.
 - [Fase 5 · E3-B1] **No corrí la suite de e2e (Playwright) ni `a11y-producto.spec.ts` para `/contacto` ni `/legal`** por presupuesto de contexto de este bloque: solo Vitest + `typecheck` + `build` + `check-budget.mjs`, que es lo que el encargo pedía como compuerta explícita. Las pantallas nuevas quedan sin verificación de accesibilidad automatizada de extremo a extremo ni de presupuesto de JS propio (el script solo mide `/`, `/i/[publicToken]` y `/editor/[invitationId]`). Riesgo a cerrar antes de integrar: añadir `/contacto` y `/legal/**` a `e2e/a11y-producto.spec.ts` y confirmar contraste con `e2e/util/contraste.ts` sobre las tarjetas nuevas (`TarjetasContacto`) y el aviso de borrador (`text-ui-warning-text` sobre `bg-ui-surface`).
+
+### Fase 5 · E3-C2 — alta y borrado de invitación (arreglo de R1-05/R1-11/R1-12/R1-15)
+
+- [Fase 5 · E3-C2] **Hay dos limitadores de caudal con la misma forma y contadores separados**: `AuthThrottleService` (`modules/auth`) y `ProductInvitationThrottle` (`modules/product/invitations`, nuevo). El segundo existe porque el primero está en territorio prohibido para este encargo y porque colgarse de un ámbito suyo compartiría el cubo por IP con una ruta de autenticación (denegación cruzada). Cuando `modules/auth` deje de ser territorio ajeno, ¿se funden en uno con un ámbito más? Los dos son **in-process**: con más de una instancia el límite se divide y se pierde al reiniciar. **Supuesto tomado:** 20 altas/borrados por cuenta y 60 por IP en 15 minutos; nadie ha validado esos números contra tráfico real.
+- [Fase 5 · E3-C2] **`invitation_guest_notification` no tiene `ON DELETE CASCADE`.** Su clave ajena se creó en `V10`, después de la `V9` que puso la cascada en las otras trece tablas (`V10:11-14`). El borrado nuevo (`DELETE /product/invitations/{id}`) lo esquiva borrando esas filas explícitamente en la misma transacción, pero **el defecto sigue ahí para cualquier otro borrado de invitación**, incluido `DELETE /master/invitations/{id}/force` del módulo antiguo: una invitación con avisos enviados falla con violación de clave ajena. No lo arreglé porque cambiar la cascada de una tabla compartida altera el comportamiento del módulo antiguo, que no es de este encargo. ¿Quién lo cierra y en qué fase?
+- [Fase 5 · E3-C2] **El borrado del propio borrador es destructivo y no hay papelera.** Se lleva por cascada documento, revisiones, releases, invitados y sus confirmaciones, y encola las imágenes de S3 en `tpl_asset_gc`. Solo se permite si la invitación nunca se publicó ni se pagó, y el contrato obliga al frontend a pedir confirmación explícita. ¿Hace falta una papelera (borrado lógico con caducidad) para el producto, o basta con la confirmación? **Supuesto tomado:** basta, porque un borrador que nunca se publicó no tiene destinatarios que puedan haber visto nada.
+- [Fase 5 · E3-C2] **El `planTier` sigue viajando por la FK del catálogo antiguo** (`invitation → invitation_template → invitation_plan.is_premium`), ahora con dieciséis filas puente en vez de ocho. Es la mecánica que ADR-5-E3-C2-04 documenta para E4, y se retira en la fase 7 con la tabla. La alternativa limpia —que `templates2` lea `is_paid`— exige cambiar `BusinessSnapshotReader`, que consumen la elección de plantilla y el preflight de publicación. ¿Se hace en la fase 7, con la retirada, o antes?
+- [Fase 5 · E3-C2] **`PgTestCluster` usa un `TPL_TEST_STATE_DIR` compartido por defecto** (`/tmp/templates2-pg-2-1`). Con dos agentes corriendo la suite a la vez, el `stop` de uno mata el clúster del otro y salen fallos de `Connection refused` que no son del código (me pasó una vez; la cabecera de `scripts/pg-ephemeral.sh` ya lo documenta como riesgo conocido). Y dos `./gradlew test` sobre el mismo `build/` se pisan los ficheros de resultados («Could not write XML test results»). ¿Se fija un directorio de estado por agente en el arranque de sesión, para que esto no vuelva a leerse como un fallo de la rama?
+- [Fase 5 · E3-C1] **Hoy una cuenta deshabilitada sólo la reactiva un ADMIN.** Cerrar R1-01 obligó a que el alta pública dejara de reactivar, y eso era la **única vía de vuelta** autoservicio. La sustituta correcta —reactivación tras probar la posesión del buzón, reutilizando el flujo de `verify-email`— **no se construyó** (razones en `ADR-5-E3-C1-01`: colgarla del alta reintroduce una diferencia de tiempo entre «cuenta deshabilitada» y «cuenta viva» y un amplificador de correo sin autenticar). Tres preguntas al dueño: (a) ¿cuántas cuentas se dan de baja y cuántas vuelven, o sea, cuánto duele esto de verdad? (b) ¿la vía de vuelta debe ser autoservicio con enlace al buzón, o basta con «escribe a soporte»? (c) mientras tanto, ¿hay que quitar del frontend cualquier texto que invite a «volver a registrarte con tu correo de siempre», que ahora responde «ese correo no está disponible»? **Supuesto tomado:** que una cuenta dada de baja es un caso raro y que soporte puede cubrirlo unas semanas.
+- [Fase 5 · E3-C1] **Nadie puede saber quién dio de baja una cuenta que después se reactivó.** Comprobado a raíz de R1-01: los dos caminos administrativos de reactivación (`CustomerService.reactivateDisabledUserByAdmin`, `AdminUsersService.reactivateDisabledAdministrator`) ponen `deletedBy = null` **y además pisan `createdBy`** con el id de quien reactiva, así que se pierden las dos huellas. No es escalada de privilegios —son rutas autenticadas y con jerarquía, y `updatedBy` guarda quién reactivó— pero no hay tabla de auditoría en el sistema, así que la información **no se puede recuperar**. No lo cambié: alterar la semántica de auditoría del módulo administrativo se sale de los seis hallazgos. ¿Se quiere una tabla de auditoría de cuentas (quién deshabilitó, cuándo y por qué), o basta con dejar de pisar `createdBy`?
+- [Fase 5 · E3-C1] **El limitador de caudal sigue siendo in-process, y el presupuesto de envíos nuevo también.** `AuthThrottleService` guarda sus cubos en un `ConcurrentHashMap` de la instancia; el presupuesto de envíos de `ADR-5-E3-C1-04` (R1-14) usa el mismo mecanismo. Con más de una instancia el techo se **multiplica por el número de instancias** y se pierde entero al reiniciar. El encargo pedía explícitamente **no** arreglarlo aquí porque es de despliegue. Preguntas: ¿va a haber más de una instancia en producción?, y si va a haberla, ¿se pone un almacén compartido (Redis) o se acepta el techo multiplicado? **Supuesto tomado:** una sola instancia, que es lo que hay hoy.
+- [Fase 5 · E3-C1] **El techo de envíos son 5 por IP y 15 minutos, y ese número no lo ha validado nadie.** Es el presupuesto de `ADR-5-E3-C1-04` y se agota **en silencio**: pasado el quinto, `POST /auth/verify-email:resend` sigue respondiendo `200` con su mensaje de siempre pero no manda nada (avisar delataría qué direcciones existen). Detrás de un NAT compartido —una oficina, un hotel, una boda entera mirando el enlace desde el mismo wifi— cinco pueden quedarse cortos y la persona no verá ningún aviso, sólo un correo que no llega. ¿Se sube el número, se acepta, o se acompaña de algo que el frontend pueda decir sin delatar nada?
+- [Fase 5 · E3-C1] **El teléfono ya no es único en ninguna ruta** (`ADR-5-E3-C1-03`) y ninguna responde ya «este número no se encuentra disponible». La base nunca lo impuso —`customer.phone` no tiene índice único— y ningún flujo autentica ni recupera por número, así que retirarlo no abre secuestro. Pero es una decisión de producto disfrazada de arreglo técnico: ¿el dueño quiere que dos cuentas puedan compartir teléfono (una pareja organizando la misma boda, por ejemplo), o el número debe volver a ser único con su índice, su migración y una política para las colisiones que ya existan en los datos vivos?
+
+---
+
+## S-01 · ESTADO REAL TRAS E3-C3, Y LA LISTA COMPLETA DE ROTACIONES DEL DUEÑO
+
+Escrito por **E3-C3** (fase 5, sesión E3) al cerrar `R1-03` y `R1-13` de
+`bitacora/5-E3-R1-seguridad.md`. **Éste es el único sitio donde está el estado completo de S-01**;
+lo de más arriba y lo de ADR-5-E3-A3-01 son piezas sueltas del mismo hallazgo.
+**En esta sección no hay ningún valor de secreto: sólo `fichero:línea`.**
+
+### 1. Qué queda externalizado (hecho, no pendiente)
+
+Los **seis** secretos que enumera la tabla de S-01 (`diseno/12-producto-completo.md:441-448` y las
+dos filas de «fuera del `yml`») están **fuera del árbol de trabajo**. Ninguno tiene valor por defecto
+que sirva para nada:
+
+| Secreto | Dónde estaba | Variable | ¿Impide arrancar? |
+|---|---|---|---|
+| Clave de firma del JWT | `application.yml` | `JWT_SECRET` | **Sí** (ADR-5-E3-A3-01) |
+| Credencial de AWS (id) | `application.yml` | `AWS_ACCESS_KEY_ID` | **Sí** |
+| Credencial de AWS (secreto) | `application.yml` | `AWS_SECRET_ACCESS_KEY` | **Sí** |
+| Cuenta del buzón Gmail | `application.yml` + `core/email/MailConfig.kt` | `MAIL_USERNAME` | **Sí** |
+| Contraseña de aplicación del Gmail | `application.yml` + `core/email/MailConfig.kt` | `MAIL_PASSWORD` | **Sí** |
+| Token de Meta Graph (WhatsApp) | `application.yml:134`, `docker-compose.yml:53` | `WHATSAPP_ACCESS_TOKEN` | **No**: vacío = canal apagado (ADR-5-E3-C3-01) |
+| `hub.verify_token` del webhook | `modules/shared/whatsapp/WhatsAppWebhookController.kt:13` | `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | **No**: vacío = webhook apagado |
+
+Contexto de las dos últimas filas: WhatsApp hoy es *solo click-to-chat* (`decisiones-dueno.md` D-04),
+así que exigirlo para arrancar rompería despliegues que no lo usan. Con el canal apagado,
+`/api/whatsapp/**` y `/webhook` responden `503` con el motivo, nunca un `500` ni una llamada a Meta.
+
+La contraseña del Postgres de desarrollo (`SPRING_DATASOURCE_PASSWORD`) **conserva su valor por
+defecto a propósito** y no es parte de S-01: es el par que los propios scripts crean en la máquina
+(ADR-5-E3-A3-01 §4).
+
+### 2. Qué sigue vivo en el histórico de git — Y ESTO ES LO QUE IMPORTA
+
+**Los seis siguen en el histórico y los seis siguen siendo válidos.** Sacarlos del fichero **no
+invalida ninguno**: quien tenga un clon del repositorio de cualquier fecha los tiene enteros. No se
+reescribe el histórico (rompe todas las copias y **tampoco** invalidaría nada: hay clones, ramas y
+CI que ya lo tienen). **Lo único que invalida un secreto es rotarlo.**
+
+Mientras no se roten, el sistema está **exactamente igual de expuesto** que antes de esta fase.
+
+### 3. Rotaciones pendientes del dueño, y qué rompe cada una
+
+Es **decisión del dueño**, no del agente que escribe el código. Orden sugerido: primero las que no
+cortan sesiones de clientas.
+
+| # | Qué rotar | Dónde se rota | Qué se rompe al rotarla | Después hay que… |
+|---|---|---|---|---|
+| 1 | **Token de acceso de WhatsApp (Meta)** | Meta / WhatsApp Business, regenerar el token permanente | **Nada del producto**: hoy no hay envío automático (D-04). Sólo dejaría de funcionar un envío manual por `/api/whatsapp/send-masivo` si alguien lo usa | poner `WHATSAPP_ACCESS_TOKEN` en el entorno, o dejarla vacía y que el canal siga apagado |
+| 2 | **`verify_token` del webhook de WhatsApp** | Meta, al reconfigurar el webhook | El alta del webhook en Meta hay que **rehacerla** con el token nuevo | poner `WHATSAPP_WEBHOOK_VERIFY_TOKEN` y volver a dar de alta el webhook |
+| 3 | **Credenciales de AWS** | IAM: crear un par nuevo y **desactivar el viejo** (desactivar es lo único que corta el acceso; borrar el fichero no) | Nada, si el par nuevo tiene los mismos permisos sobre el bucket. Si sólo se crea el nuevo y no se desactiva el viejo, **no se ha rotado nada** | `AWS_ACCESS_KEY_ID` y `AWS_SECRET_ACCESS_KEY` en el entorno antes de reiniciar |
+| 4 | **Contraseña de aplicación del Gmail** | Cuenta de Google: revocar la actual y generar otra | El envío de correo, hasta que se ponga la nueva. **Ya es seguro rotarla**: desde ADR-5-E3-A4-01 el transporte lee `spring.mail.*` de verdad (antes `MailConfig.kt` la tenía escrita en Kotlin y rotarla habría roto el correo sin arreglo por configuración) | `MAIL_PASSWORD` en el entorno antes de reiniciar |
+| 5 | **Clave de firma del JWT** | Generar una nueva de ≥32 caracteres | **Cierra la sesión de TODAS las clientas en producción**, de golpe y sin aviso. Es la única que tiene coste visible para el cliente: hay que avisar y elegir el momento | `JWT_SECRET` en el entorno; los refresh tokens vivos dejan de servir |
+
+**Pendiente de decidir además (bloquea el despliegue, no el código): dónde viven estas variables** en
+producción — gestor de secretos, `.env` fuera del repositorio, variables del proveedor. Hoy
+`docker-compose.yml` las lee del entorno del operador con `${VAR:?…}` y falla nombrando la que falte.
+
+### 4. Lo que E3-C3 encontró en el barrido y **no** ha tocado (necesita autorización)
+
+Ninguno es un valor de los seis: son **otras formas** del mismo problema, halladas buscando formas y
+no valores. Se listan por `fichero:línea` para que el orquestador decida.
+
+1. **`docs/rediseno-plantillas/diseno/12-producto-completo.md:453`** — el documento de diseño **pega
+   el literal del `verify_token`** dentro de la descripción del hallazgo. Es el único sitio del árbol
+   donde ese secreto sigue escrito. Fuera del territorio de E3-C3. Arreglo: sustituir el literal por
+   `fichero:línea`, como hace el resto del informe.
+2. **`src/main/resources/db/migration/V2__add_initial_data_and_customer_fields.sql:3, :7, :11, :15`** —
+   **la misma contraseña en claro** para cuatro cuentas MASTER/ADMIN con correos reales, sembrada con
+   `crypt(...)`. Es una credencial **viva**, no sólo histórica: cualquier entorno que haya corrido esta
+   migración tiene esas cuentas con esa contraseña. La migración **no se toca** (cambiarla altera su
+   suma de comprobación y Flyway rompería el arranque de cualquier entorno existente): **hay que
+   cambiar esas cuatro contraseñas en la base de datos**. Ya anotado en ADR-5-E3-A3-01; se repite aquí
+   porque es una rotación pendiente más y no estaba en la lista.
+3. **`src/main/resources/db/migration/V1__initial_schema.sql:885-896`** — `COPY public.customer` con
+   **9 filas de personas reales**: correo, nombre, apellido y el hash bcrypt de la contraseña.
+   **`:1215-1223`** — `COPY public.refresh_tokens` con **8 tokens de sesión en claro**.
+   **`:902-905`** — `COPY public.dashboard_notification` con 3 correos y teléfonos reales.
+   Es **el mismo volcado** que R1-02 encontró en `invitaciones.sql` y que `d138590` retiró: retirar
+   aquel fichero **no** sacó los datos del árbol, porque la migración inicial los trae dentro. Y ésta
+   tampoco se puede editar (suma de comprobación de Flyway). Pendiente de decisión del dueño: tratar
+   esos correos, hashes y tokens como comprometidos, y decidir si se planifica un `flyway repair` con
+   una línea base limpia o se acepta el riesgo por escrito.
+4. **`src/main/kotlin/.../modules/shared/whatsapp/WhatsAppWebhookController.kt:52` y `:82`** — dos
+   números de teléfono de la empresa escritos en el código (uno como filtro del remitente, otro dentro
+   del texto que se envía). No son credenciales; se anotan porque son datos de contacto cableados que
+   `producto.contacto.whatsapp` ya debería servir.
+
+Lo que **no** apareció, buscado a propósito: ningún `.env`, `.pem`, `.p12` ni clave privada; ninguna
+clave con prefijo (`AKIA…`, `sk_live…`, `whsec_…`, `ghp_…`, `xox…`); ningún volcado `COPY public.`
+fuera de `V1`; y en `.github/workflows/ci.yml` sólo credenciales de un Postgres efímero del propio
+runner.
+
+### 5. ¿Se puede dar S-01 por cerrado?
+
+**No.** Todo lo que dependía del código está hecho —los seis fuera del árbol, compuerta de arranque
+para los cinco que la merecen, apagado limpio para los dos que no, y el despliegue por compose otra
+vez en pie—. Lo que queda es **la rotación de los cinco valores de la tabla §3 y las contraseñas de
+las cuentas sembradas (§4.2)**, que es del dueño. S-01 se cierra cuando esa lista esté hecha, no
+antes.

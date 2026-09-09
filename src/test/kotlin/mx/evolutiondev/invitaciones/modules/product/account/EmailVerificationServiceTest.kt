@@ -21,6 +21,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.time.Instant
 
@@ -120,16 +121,19 @@ class EmailVerificationServiceTest {
     }
 
     @Test
-    @DisplayName("token caducado: CUENTA_TOKEN_CADUCADO y la cuenta no se toca")
+    @DisplayName("token caducado: CUENTA_TOKEN_CADUCADO y la cuenta NO queda verificada")
     fun tokenCaducado() {
         val cliente = cuenta(token = "token-viejo", vive = false)
         whenever(repositorio.findByEmailVerificationToken("token-viejo")).thenReturn(cliente)
+        guardaLoQueLeDen()
 
         val error = assertFailsWith<AccountException> { servicio.verificar("token-viejo") }
 
         assertEquals(AccountErrorCode.CUENTA_TOKEN_CADUCADO, error.code)
-        assertFalse(cliente.emailVerified)
-        verify(repositorio, never()).save(any<CustomerEntity>())
+        assertFalse(cliente.emailVerified, "un token caducado NUNCA verifica")
+        // Desde R1-06 el token caducado se **borra** (y con él el pendiente), así que aquí sí se
+        // escribe. Antes no se escribía y el pendiente sobrevivía para siempre.
+        assertNull(cliente.emailVerificationToken)
     }
 
     @Test
@@ -219,5 +223,123 @@ class EmailVerificationServiceTest {
         repeat(5) { servicio.reenviar("nadie@ejemplo.mx") }
 
         assertFailsWith<DemasiadosIntentosException> { servicio.reenviar("nadie@ejemplo.mx") }
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // R1-06 · `email_pending` caduca y el reenvio no lo re-arma
+    // ---------------------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("R1-06: el reenvio SIN autenticar no re-arma un cambio de correo pendiente")
+    fun elReenvioNoRearmaUnCambioDeCorreoPendiente() {
+        // Ana pidió mudarse a una direccion con un dedazo y nunca confirmó. El token sigue vivo.
+        val cliente = cuenta(token = "token-viejo", pendiente = "ana@gmial.example")
+        whenever(repositorio.findByEmail("ana@ejemplo.mx")).thenReturn(cliente)
+        whenever(jwtUtil.generateSecureToken()).thenReturn("token-fresco")
+
+        // Un tercero, sin autenticarse, pide el reenvio con el correo ACTUAL de Ana.
+        val respuesta = servicio.reenviar("ana@ejemplo.mx")
+
+        assertEquals(EmailVerificationService.MENSAJE_REENVIO, respuesta.message, "la respuesta no cambia")
+        assertEquals("token-viejo", cliente.emailVerificationToken, "NO se acuna token nuevo")
+        assertEquals("ana@gmial.example", cliente.emailPending, "el pendiente no se toca")
+        verify(repositorio, never()).save(any<CustomerEntity>())
+        verify(jwtUtil, never()).generateSecureToken()
+    }
+
+    @Test
+    @DisplayName("R1-06: el pendiente caducado se borra cuando alguien abre el enlace viejo")
+    fun elPendienteCaducadoSeBorraCuandoSeUsaElEnlaceViejo() {
+        val cliente = cuenta(token = "token-viejo", vive = false, pendiente = "ana@gmial.example")
+        whenever(repositorio.findByEmailVerificationToken("token-viejo")).thenReturn(cliente)
+        guardaLoQueLeDen()
+
+        assertFailsWith<AccountException> { servicio.verificar("token-viejo") }
+
+        assertNull(cliente.emailPending, "el cambio pendiente muere con su token")
+        assertNull(cliente.emailVerificationToken)
+        assertNull(cliente.emailVerificationExpiry)
+        assertEquals("ana@ejemplo.mx", cliente.email, "el correo de acceso no se movio")
+        verify(repositorio).save(cliente)
+    }
+
+    @Test
+    @DisplayName("R1-06: el reenvio limpia el pendiente caducado y solo entonces vuelve a mandar")
+    fun elReenvioLimpiaElPendienteCaducadoYVuelveAFuncionar() {
+        // Cuenta sin verificar y con un cambio pendiente cuya ventana ya paso.
+        val cliente = cuenta(token = "token-muerto", vive = false, pendiente = "ana@gmial.example")
+        whenever(repositorio.findByEmail("ana@ejemplo.mx")).thenReturn(cliente)
+        whenever(jwtUtil.generateSecureToken()).thenReturn("token-fresco")
+        guardaLoQueLeDen()
+
+        val respuesta = servicio.reenviar("ana@ejemplo.mx")
+
+        assertEquals(EmailVerificationService.MENSAJE_REENVIO, respuesta.message)
+        assertNull(cliente.emailPending, "el pendiente caducado se borro")
+        assertEquals("token-fresco", cliente.emailVerificationToken, "y el reenvio vuelve a funcionar")
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // R1-08 · el choque contra el indice unico no se escapa
+    // ---------------------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("R1-08: el choque contra el indice unico de customer.email sale como error de dominio")
+    fun elChoqueContraElIndiceUnicoSaleComoErrorDeDominio() {
+        val cliente = cuenta(token = "token-bueno", pendiente = "nueva@ejemplo.mx")
+        whenever(repositorio.findByEmailVerificationToken("token-bueno")).thenReturn(cliente)
+        // La comprobacion de disponibilidad pasa: la carrera ocurre DESPUES de ella.
+        whenever(repositorio.findByEmailEvenIfDisabled("nueva@ejemplo.mx")).thenReturn(null)
+        whenever(repositorio.save(any<CustomerEntity>())).thenThrow(
+            DataIntegrityViolationException(
+                "ERROR: duplicate key value violates unique constraint \"customer_email_key\" " +
+                    "Detail: Key (email)=(nueva@ejemplo.mx) already exists.",
+            ),
+        )
+
+        val error = assertFailsWith<AccountException> { servicio.verificar("token-bueno") }
+
+        assertEquals(AccountErrorCode.CUENTA_CORREO_NO_DISPONIBLE, error.code)
+        assertFalse(
+            error.message.orEmpty().contains("nueva@ejemplo.mx"),
+            "el mensaje NO puede repetir el correo en conflicto: es el de otra clienta",
+        )
+        assertFalse(
+            error.message.orEmpty().contains("customer_email_key"),
+            "ni el nombre de la restriccion",
+        )
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // R1-14 · el presupuesto de envios calla en vez de delatar
+    // ---------------------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("R1-14: agotado el presupuesto de envios, el reenvio calla y responde lo mismo")
+    fun elReenvioCallaCuandoSeAgotaElPresupuestoDeEnvios() {
+        whenever(jwtUtil.generateSecureToken()).thenReturn("token-fresco")
+        guardaLoQueLeDen()
+
+        // Cinco direcciones DISTINTAS, todas reales y sin verificar: el cubo por cuenta no las frena,
+        // porque cada correo tiene el suyo. El presupuesto por IP sí.
+        val cuentas = (1..6).map { n ->
+            cuenta().also {
+                it.id = n.toLong()
+                it.email = "sin-verificar-$n@ejemplo.mx"
+                whenever(repositorio.findByEmail("sin-verificar-$n@ejemplo.mx")).thenReturn(it)
+            }
+        }
+
+        cuentas.forEachIndexed { i, c ->
+            val respuesta = servicio.reenviar("sin-verificar-${i + 1}@ejemplo.mx")
+            // La respuesta es la MISMA siempre: el agotamiento no se nota desde fuera.
+            assertEquals(EmailVerificationService.MENSAJE_REENVIO, respuesta.message)
+        }
+
+        assertEquals("token-fresco", cuentas[4].emailVerificationToken, "los cinco primeros sí salen")
+        assertNull(
+            cuentas[5].emailVerificationToken,
+            "el sexto NO acuna token ni manda correo: el presupuesto por IP se agoto",
+        )
     }
 }
