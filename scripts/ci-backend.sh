@@ -87,10 +87,27 @@ mkdir -p "$(dirname "$LOG")"
 # Sin `--spring.profiles.active=test`: no existe `application-test.yml` ni una sola `@Profile` en
 # `src/main/kotlin` (comprobado), así que el perfil no cambiaba nada; se arranca con exactamente la
 # misma configuración con la que `scripts/dev-backend.sh` midió las 79/79 e2e en local.
-echo "ci-backend: compilando y arrancando en $BASE (log: $LOG)"
-nohup ./gradlew bootRun --console=plain --no-daemon \
-    --args="--server.port=$PUERTO" \
-    -Dorg.gradle.jvmargs=-Xmx2g >>"$LOG" 2>&1 &
+# I-CI-01, medido: se COMPILA primero y se arranca el JAR, en vez de dejar `bootRun` vivo.
+# `./gradlew bootRun` mantiene durante TODA la fase de pruebas el JVM lanzador de Gradle, el worker
+# que ejecuta la aplicación y el demonio de Kotlin — el propio runner los enumera al limpiar
+# («Terminate orphan process: (java)», CUATRO en la corrida 34299786630). En una máquina de 4 vCPU
+# que además sostiene Postgres, `next start` y dos Chromium, esas JVM de más son justo la CPU que le
+# falta al lienzo del editor para pintar dentro de su presupuesto (`06 §8.2` punto 8: `expect` 5 s).
+# Con el jar queda UN solo proceso Java, que además es el artefacto de producción — lo que el CI
+# debería estar probando de todos modos. `in-process` evita el demonio de Kotlin al compilar.
+echo "ci-backend: compilando el jar (bootJar)"
+./gradlew bootJar --console=plain --no-daemon \
+    -Dkotlin.compiler.execution.strategy=in-process \
+    -Dorg.gradle.jvmargs=-Xmx2g >>"$LOG" 2>&1 || {
+  echo "ci-backend: falló la compilación del jar. Últimas 60 líneas del log:" >&2
+  tail -60 "$LOG" >&2
+  exit 1
+}
+JAR="$(ls -1 "$RAIZ"/build/libs/*.jar 2>/dev/null | grep -v -- '-plain\.jar$' | head -1)"
+[ -n "$JAR" ] || { echo "ci-backend: no encuentro el jar en build/libs" >&2; ls -la "$RAIZ/build/libs" >&2; exit 1; }
+
+echo "ci-backend: arrancando $JAR en $BASE (log: $LOG)"
+nohup java -jar "$JAR" --server.port="$PUERTO" >>"$LOG" 2>&1 &
 echo $! > "$PIDFILE"
 PID="$(cat "$PIDFILE")"
 

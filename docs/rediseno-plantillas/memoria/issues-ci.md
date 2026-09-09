@@ -27,6 +27,29 @@ ADR-1R-C-11) prohíbe la cuarentena sin issue, y aquí no hay ninguna prueba en 
   prueba cree su propia invitación en vez de compartir la sembrada. Hecho eso, el CI puede volver a
   subir los workers y esta issue se cierra.
 
+## I-CI-03 · El lienzo del editor tarda demasiado bajo paralelismo — abierta
+
+- **Qué se observa.** Con más de un worker, las pruebas que esperan a que PINTE el lienzo
+  (`.lienzo-raiz` dentro del iframe) agotan sus esperas de 20-30 s, y pasan en el reintento en
+  ~5 s. Medido en el runner: con 4 workers, `editor-nucleo` E-N2/E-N3/E-N4, `paleta-preview` y
+  `lienzo-csp` ([34052024407](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34052024407));
+  con 2 workers, `teclado-editor` E-10a — 22,3 s en el primer intento y **5,2 s en el reintento**
+  ([34299786630](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34299786630)).
+- **Qué NO es.** No es aislamiento de datos: la prueba que falla y la que pasa miran la misma
+  invitación sin escribirla, y el reintento a solas va sobrado. Es reloj — 4 vCPU compartidos por la
+  JVM del backend, `next start`, Postgres, dos Chromium y el `ffmpeg` que graba vídeo de TODAS las
+  pruebas (`video: retain-on-failure`, `06 §8.2` punto 7).
+- **Qué se hizo.** Nada en esas pruebas: están fuera del territorio de la tarea de I-CI-01, que solo
+  podía tocar dos specs. Lo que sí se quitó es un pico de CPU evitable: la prueba de capturas de
+  `editor-3c-evidencia.spec.ts` volvió a la invitación sembrada (lienzo caliente) en vez de rendir
+  en frío las doce secciones de una invitación nueva.
+- **Qué falta decidir.** Tres caminos, todos fuera de esta tarea: (a) subir el tope del
+  `toBeVisible` del lienzo en las pruebas afectadas (es máquina, no producto); (b) dejar de grabar
+  vídeo en CI y quedarse con la traza del reintento, que exige enmendar `06 §8.2` punto 7;
+  (c) medir por qué el primer pintado del lienzo cuesta tanto y arreglarlo en el producto, que es
+  lo único que también mejora la experiencia real. Hasta entonces, el número de workers del job
+  `e2e` es un compromiso, no un óptimo.
+
 ## I-CI-02 · Las capturas de referencia atan el CI a Chromium 1194 — abierta
 
 - **Qué se observa.** Las 124 capturas de `e2e/design.spec.ts-snapshots/` se generaron con el
