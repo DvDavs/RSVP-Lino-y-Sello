@@ -12,6 +12,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
@@ -37,9 +38,10 @@ class StripeWebhookServiceTest {
     private val eventos: ProductStripeEventRepository = mock()
     private val pagos: ProductPaymentRepository = mock()
     private val banderas: InvitationPaymentFlagRepository = mock()
+    private val dominio: ApplicationEventPublisher = mock()
 
     private fun servicio(props: ProductPaymentsProperties = PagosFx.propiedades()) =
-        StripeWebhookService(props, eventos, pagos, banderas, ObjectMapper())
+        StripeWebhookService(props, eventos, pagos, banderas, ObjectMapper(), dominio)
 
     private fun mvc(props: ProductPaymentsProperties = PagosFx.propiedades()): MockMvc =
         MockMvcBuilders.standaloneSetup(StripeWebhookController(servicio(props)))

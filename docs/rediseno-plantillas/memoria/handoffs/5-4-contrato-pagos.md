@@ -181,3 +181,26 @@ Implementado el §1–§4 completo. Lo que **no** salió exactamente como estaba
    `null`, y el §2.1/§2.2 se apoya en que `null` significa algo. Verificado contra el backend vivo.
    **Es información que el frontend debe conocer**: cualquier campo nullable nuevo de cualquier
    sesión necesita la anotación o se cae de la respuesta.
+
+---
+
+## Nota de la revisión adversarial (5-4-ADV, 2026-09-09) — dos endurecimientos del §2.5
+
+Lo demás del contrato aguantó el ataque (firma, idempotencia, propiedad, precio del servidor, puerta
+de publicación, fugas): la evidencia está en `bitacora/5-4-adv.md`. Dos cambios de comportamiento en
+el webhook que quien escriba e2e o pruebas contra él debe conocer:
+
+1. **Un campo ausente ya no vale por "sí".** `checkout.session.completed` /
+   `…async_payment_succeeded` solo marcan pagada si `data.object.object` es `checkout.session`,
+   `payment_status` es exactamente `paid`, y `amount_total` (número) y `currency` (texto) **están** y
+   coinciden con lo guardado. Antes, un evento firmado sin `payment_status` o sin `amount_total`
+   abría la puerta sin comparar nada. Sigue respondiendo `200` en todos esos casos.
+2. **`charge.refunded` distingue total de parcial.** Solo retira `is_paid` y el release si
+   `refunded = true` o `amount_refunded >= amount`; un reembolso parcial queda anotado y no toca la
+   invitación. `charge.dispute.created` retira siempre. Y al retirar el release se anuncia además
+   `PublicRenderInvalidated(…, DESPUBLICADO)`, que antes no se anunciaba: el borde dejaba de servir
+   solo cuando caducaba su caché.
+
+Valores nuevos de `product_stripe_event.resultado` (todos con respuesta `200`): `OBJETO_INESPERADO`,
+`SIN_IMPORTE_COMPARABLE`, `PAGO_DUPLICADO`, `REEMBOLSO_PARCIAL`. Los códigos `PAY_*` del §3 **no
+cambian** y ninguna respuesta HTTP del §2 cambia de forma.

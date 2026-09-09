@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.stripe.exception.SignatureVerificationException
 import com.stripe.model.Event
 import com.stripe.net.Webhook
+import mx.evolutiondev.invitaciones.modules.templates2.api.PublicRenderInvalidated
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -37,6 +39,15 @@ class StripeWebhookService(
     private val pagos: ProductPaymentRepository,
     private val banderas: InvitationPaymentFlagRepository,
     private val json: ObjectMapper,
+    /**
+     * Revision 5-4-ADV. Retirar el release apaga el enlace en origen; el borde sigue sirviendo lo
+     * que cacheo hasta que caduque. Se anuncia [PublicRenderInvalidated] **dentro** de esta
+     * transaccion y lo consume `RevalidationNotifier` despues del commit (`@TransactionalEventListener`
+     * `AFTER_COMMIT`, ADR-2-6-01): si el webhook falla y se revierte, no se invalida nada porque nada
+     * ha cambiado. Publicar el evento es una llamada en memoria y su consumidor no propaga nunca, asi
+     * que esto no puede tumbar el procesamiento de un evento de Stripe.
+     */
+    private val eventosDeDominio: ApplicationEventPublisher,
 ) {
 
     private val log = LoggerFactory.getLogger(StripeWebhookService::class.java)
@@ -78,7 +89,7 @@ class StripeWebhookService(
             TIPO_COMPLETADA, TIPO_ASINCRONA_OK -> completar(objeto)
             TIPO_ASINCRONA_FALLIDA -> cambiarEstadoPorSesion(objeto, EstadoDePago.FALLIDO)
             TIPO_CADUCADA -> cambiarEstadoPorSesion(objeto, EstadoDePago.CADUCADO)
-            TIPO_REEMBOLSO, TIPO_DISPUTA -> reembolsar(objeto)
+            TIPO_REEMBOLSO, TIPO_DISPUTA -> reembolsar(objeto, tipo)
             else -> RES_IGNORADO
         }
         eventos.marcarProcesado(id, resultado)
@@ -96,16 +107,27 @@ class StripeWebhookService(
      */
     private fun completar(objeto: JsonNode?): String {
         val sesion = objeto ?: return RES_SIN_OBJETO
-        val estadoDePago = sesion.path("payment_status").asText(null)
-        if (estadoDePago != null && estadoDePago != "paid") return RES_NO_PAGADA
+        // Revisión 5-4-ADV. `data.object` viene etiquetado por Stripe y se comprueba antes de leerle
+        // un solo campo: un objeto de otro tipo con una `metadata` que se parezca a la nuestra no
+        // puede marcar pagada una invitación por el simple hecho de llegar en un evento de sesión.
+        if (texto(sesion, "object") != OBJETO_SESION) return RES_OBJETO_INESPERADO
+        // **Ausente cuenta como "no consta"**, no como "sí" (5-4-ADV): la sesión existe, el cobro no.
+        if (texto(sesion, "payment_status") != "paid") return RES_NO_PAGADA
         val pago = buscarPago(sesion) ?: return RES_SIN_PAGO
         if (pago.estado == EstadoDePago.PAGADO) return RES_YA_PAGADO
 
-        // La comprobación que impide que alguien pague 1 centavo por un plan de 899 pesos.
-        val importe = sesion.path("amount_total").takeIf { it.isNumber }?.asLong()
-        val moneda = sesion.path("currency").asText(null)
-        if (importe != null && importe != pago.importeCentavos) return RES_IMPORTE_DISTINTO
-        if (moneda != null && !moneda.equals(pago.moneda, ignoreCase = true)) return RES_IMPORTE_DISTINTO
+        // La comprobación que impide que alguien pague 1 centavo por un plan de 899 pesos. El
+        // contrato §2.5 dice "se verifica que `amount_total` y `currency` coinciden": un campo que
+        // falta no se puede verificar, así que **no** abre la puerta — se anota y se revisa a mano,
+        // exactamente el mismo criterio que un importe distinto.
+        val importe = sesion.path("amount_total").takeIf { it.isNumber }?.asLong() ?: return RES_SIN_IMPORTE
+        val moneda = texto(sesion, "currency") ?: return RES_SIN_IMPORTE
+        if (importe != pago.importeCentavos) return RES_IMPORTE_DISTINTO
+        if (!moneda.equals(pago.moneda, ignoreCase = true)) return RES_IMPORTE_DISTINTO
+
+        // Cobro doble: la clienta abrió el checkout dos veces y pagó las dos, o pagó mientras un
+        // ADMIN marcaba la invitación a mano. Se mide ANTES de escribir, o esta misma fila contaría.
+        val yaHabiaOtroCobro = pagos.countByInvitationIdAndEstado(pago.invitationId, EstadoDePago.PAGADO) > 0
 
         pago.estado = EstadoDePago.PAGADO
         pago.pagadoEn = Instant.now()
@@ -117,6 +139,13 @@ class StripeWebhookService(
         // `total_amount` es un dato HEREDADO que el panel antiguo pinta; el importe de verdad es
         // `product_payment.importe_centavos` (`12-producto-completo.md §A5.3`).
         banderas.marcarPagada(pago.invitationId, pago.importeCentavos / 100.0)
+        // El dinero está tomado y negarlo no lo devuelve: la fila dice la verdad y el evento queda
+        // anotado para que alguien reembolse el cobro sobrante a mano (no hay pantalla que lo enseñe
+        // todavía: es la misma pregunta abierta que `IMPORTE_DISTINTO`).
+        if (yaHabiaOtroCobro) {
+            log.warn("pagos: segundo cobro PAGADO de la misma invitación (paymentId={})", pago.id)
+            return RES_PAGO_DUPLICADO
+        }
         return RES_PROCESADO
     }
 
@@ -135,8 +164,13 @@ class StripeWebhookService(
      * `is_paid` vuelve a `false` **y se retira el release activo**, para que el enlace público deje
      * de servir en origen de inmediato. La invitación y sus invitados **no** se borran.
      */
-    private fun reembolsar(objeto: JsonNode?): String {
+    private fun reembolsar(objeto: JsonNode?, tipo: String): String {
         val cargo = objeto ?: return RES_SIN_OBJETO
+        // Revisión 5-4-ADV: `charge.refunded` llega igual por devolver un peso que por devolverlo
+        // todo, y retirar el enlace público por una devolución parcial apaga la invitación de una
+        // clienta que sigue habiendo pagado su plan. Un contracargo (`charge.dispute.created`) no
+        // habla de reembolsos y sí retira siempre: ahí el dinero se ha ido entero.
+        if (tipo == TIPO_REEMBOLSO && !esReembolsoTotal(cargo)) return RES_REEMBOLSO_PARCIAL
         val intent = texto(cargo, "payment_intent") ?: return RES_SIN_PAGO
         val pago = pagos.findByStripePaymentIntentId(intent) ?: return RES_SIN_PAGO
         pago.estado = EstadoDePago.REEMBOLSADO
@@ -144,7 +178,13 @@ class StripeWebhookService(
         texto(cargo, "receipt_url")?.let { pago.comprobanteUrl = it }
         pagos.saveAndFlush(pago)
         banderas.marcarNoPagada(pago.invitationId)
-        banderas.retirarReleaseActivo(pago.invitationId)
+        if (banderas.retirarReleaseActivo(pago.invitationId) > 0) {
+            banderas.publicTokenDe(pago.invitationId)?.let { token ->
+                eventosDeDominio.publishEvent(
+                    PublicRenderInvalidated(pago.invitationId, token, PublicRenderInvalidated.Motivo.DESPUBLICADO),
+                )
+            }
+        }
         return RES_PROCESADO
     }
 
@@ -177,6 +217,19 @@ class StripeWebhookService(
         evento.dataObjectDeserializer?.rawJson?.let { json.readTree(it) }
     }.getOrNull()
 
+    /**
+     * Un `charge.refunded` es total si Stripe marca `refunded = true` o si lo devuelto cubre el
+     * cargo. Si el cuerpo no trae ninguno de los dos datos, se considera **parcial**: la duda cierra
+     * el paso a apagar el enlace de alguien, no lo abre.
+     */
+    private fun esReembolsoTotal(cargo: JsonNode): Boolean {
+        val marcado = cargo.path("refunded")
+        if (marcado.isBoolean && marcado.asBoolean()) return true
+        val cargado = cargo.path("amount").takeIf { it.isNumber }?.asLong() ?: return false
+        val devuelto = cargo.path("amount_refunded").takeIf { it.isNumber }?.asLong() ?: return false
+        return devuelto >= cargado
+    }
+
     private fun texto(nodo: JsonNode, campo: String): String? =
         nodo.path(campo).takeIf { it.isTextual }?.asText()?.takeIf { it.isNotBlank() }
 
@@ -198,5 +251,23 @@ class StripeWebhookService(
         const val RES_SIN_OBJETO = "SIN_OBJETO"
         const val RES_NO_PAGADA = "SESION_NO_PAGADA"
         const val RES_YA_PAGADO = "YA_PAGADO"
+
+        // Resultados anadidos por la revision 5-4-ADV. Los tres significan lo mismo para Stripe
+        // (`200`, no reintentes) y cosas distintas para quien revise `product_stripe_event`.
+
+        /** `data.object` no es el tipo que ese evento promete: no se lee como si lo fuera. */
+        const val RES_OBJETO_INESPERADO = "OBJETO_INESPERADO"
+
+        /** Falta `amount_total` o `currency`: no hay nada que comparar, asi que no se paga. */
+        const val RES_SIN_IMPORTE = "SIN_IMPORTE_COMPARABLE"
+
+        /** La invitacion ya tenia otro cobro PAGADO: se cobro dos veces y hay que devolver uno. */
+        const val RES_PAGO_DUPLICADO = "PAGO_DUPLICADO"
+
+        /** `charge.refunded` de una devolucion parcial: no anula el plan, queda para revision. */
+        const val RES_REEMBOLSO_PARCIAL = "REEMBOLSO_PARCIAL"
+
+        /** Objeto de una sesion de Checkout, tal y como Stripe lo etiqueta. */
+        const val OBJETO_SESION = "checkout.session"
     }
 }

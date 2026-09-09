@@ -213,6 +213,39 @@ class PaymentsControllerTest {
         assertEquals(89900, pasarela.peticiones.single().importeCentavos)
     }
 
+    /**
+     * Revisión 5-4-ADV. La prueba de arriba monta el convertidor por defecto de `standaloneSetup`,
+     * que **ignora** las claves que sobran; el `ObjectMapper` que la aplicación usa de verdad es el de
+     * `templates2` (`Templates2JsonConfig.kt:35`, sin `@Primary` pero único bean de ese tipo, así que
+     * el de Spring Boot no se crea) y ese trae `FAIL_ON_UNKNOWN_PROPERTIES`. Con él, un cuerpo con
+     * `is_paid`, `importe` o `moneda` no se ignora: se **rechaza** antes de tocar nada.
+     *
+     * Comprobado contra el backend vivo de `:6003` con
+     * `{"invitationId":5,"planCodigo":"fiesta","importe":1,"precioCentavos":1,"moneda":"USD","is_paid":true}`
+     * → `400 PAY_MALFORMED_JSON`. Esta prueba lo fija para que nadie lo afloje sin darse cuenta.
+     */
+    @Test
+    fun `con el mapper de la aplicacion una clave desconocida en el checkout responde 400`() {
+        val mvc = MockMvcBuilders.standaloneSetup(PaymentsController(consultas(), checkout()))
+            .defaultRequest<org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder>(
+                PagosFx.peticionPorDefecto(PagosFx.autenticacion(7)),
+            )
+            .setMessageConverters(
+                org.springframework.http.converter.json.MappingJackson2HttpMessageConverter(
+                    mx.evolutiondev.invitaciones.modules.templates2.schema.Templates2Json.mapper,
+                ),
+            )
+            .setControllerAdvice(PaymentsExceptionHandler())
+            .build()
+        mvc.perform(
+            post("/product/payments/checkout").contentType(MediaType.APPLICATION_JSON)
+                .content("""{"invitationId":12,"planCodigo":"fiesta","importe":1,"moneda":"USD","is_paid":true}"""),
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("PAY_MALFORMED_JSON"))
+        assertTrue(pasarela.peticiones.isEmpty(), "un cuerpo rechazado no llega a Stripe")
+    }
+
     @Test
     fun `sin clave de Stripe el checkout responde 503 PAY_NOT_CONFIGURED`() {
         prepararCheckout()

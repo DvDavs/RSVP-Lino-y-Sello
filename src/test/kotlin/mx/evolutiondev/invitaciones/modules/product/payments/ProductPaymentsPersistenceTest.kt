@@ -48,7 +48,8 @@ class PagosTestConfig {
         pagos: ProductPaymentRepository,
         banderas: InvitationPaymentFlagRepository,
         json: ObjectMapper,
-    ) = StripeWebhookService(PagosFx.propiedades(), eventos, pagos, banderas, json)
+        dominio: org.springframework.context.ApplicationEventPublisher,
+    ) = StripeWebhookService(PagosFx.propiedades(), eventos, pagos, banderas, json, dominio)
 
     @Bean
     fun catalogo(planes: ProductPlanRepository, json: ObjectMapper) =
@@ -92,6 +93,7 @@ class ProductPaymentsPersistenceTest {
     }
 
     @PersistenceContext private lateinit var em: EntityManager
+    @Autowired private lateinit var fuente: javax.sql.DataSource
     @Autowired private lateinit var planes: ProductPlanRepository
     @Autowired private lateinit var pagos: ProductPaymentRepository
     @Autowired private lateinit var eventos: ProductStripeEventRepository
@@ -126,6 +128,48 @@ class ProductPaymentsPersistenceTest {
     // =============================================================================================
     // V44 — idempotencia real
     // =============================================================================================
+
+    /**
+     * **Escenario 7 del encargo (5-4-ADV): dos webhooks idénticos a la vez.** Stripe reintenta, y
+     * dos entregas del mismo evento pueden solaparse. Aquí no se simula nada: son dos conexiones de
+     * verdad al mismo Postgres, cada una con su transacción, insertando el mismo `event.id` a la vez.
+     *
+     * Lo que se mide es que la exclusión la da la **clave primaria** y no un `if` optimista: la
+     * segunda transacción se bloquea en el índice único hasta que la primera confirma y entonces
+     * `ON CONFLICT DO NOTHING` le devuelve `0` filas. Exactamente una de las dos procesa el evento.
+     */
+    @Test
+    fun `dos webhooks identicos a la vez solo dejan procesar a uno`() {
+        val id = "evt_${UUID.randomUUID()}"
+        val barrera = java.util.concurrent.CyclicBarrier(2)
+        val hilos = java.util.concurrent.Executors.newFixedThreadPool(2)
+        try {
+            val tareas = (1..2).map {
+                java.util.concurrent.Callable {
+                    fuente.connection.use { c ->
+                        c.autoCommit = false
+                        barrera.await(10, java.util.concurrent.TimeUnit.SECONDS)
+                        val filas = c.prepareStatement(
+                            "INSERT INTO product_stripe_event (event_id, tipo) VALUES (?, ?) " +
+                                "ON CONFLICT (event_id) DO NOTHING",
+                        ).use { st ->
+                            st.setString(1, id)
+                            st.setString(2, "checkout.session.completed")
+                            st.executeUpdate()
+                        }
+                        c.commit()
+                        filas
+                    }
+                }
+            }
+            val resultados = hilos.invokeAll(tareas).map { it.get(20, java.util.concurrent.TimeUnit.SECONDS) }
+            assertEquals(1, resultados.sum(), "solo una de las dos entregas inserta: $resultados")
+            assertEquals(1L, contarEventos(id), "y en la tabla queda una sola fila")
+        } finally {
+            hilos.shutdownNow()
+            borrarEvento(id)
+        }
+    }
 
     @Test
     fun `el mismo event_id solo se inserta una vez`() {
@@ -309,6 +353,21 @@ class ProductPaymentsPersistenceTest {
     private fun releaseActivo(releaseId: Long): Boolean =
         em.createNativeQuery("SELECT is_active FROM tpl_release WHERE id = :id")
             .setParameter("id", releaseId).singleResult as Boolean
+
+    /** Fuera de la transacción de la prueba: las dos conexiones del escenario 7 ya confirmaron. */
+    private fun contarEventos(eventId: String): Long = fuente.connection.use { c ->
+        c.prepareStatement("SELECT count(*) FROM product_stripe_event WHERE event_id = ?").use { st ->
+            st.setString(1, eventId)
+            st.executeQuery().use { rs -> rs.next(); rs.getLong(1) }
+        }
+    }
+
+    private fun borrarEvento(eventId: String) = fuente.connection.use { c ->
+        c.prepareStatement("DELETE FROM product_stripe_event WHERE event_id = ?").use { st ->
+            st.setString(1, eventId)
+            st.executeUpdate()
+        }
+    }
 
     private fun totalAmount(invitationId: Long): Double =
         (em.createNativeQuery("SELECT total_amount FROM invitation WHERE id = :id")

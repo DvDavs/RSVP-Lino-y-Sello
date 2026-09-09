@@ -1627,3 +1627,41 @@ Están en `diseno/12-producto-completo.md §0` y en las ADR `ADR-5-E1-01` (ruta 
   `app/(chrome)/editor/[invitationId]/page.tsx`), en vez del `?siguiente=` que traía mi propio
   encargo. No toqué `TarjetaPlan.tsx` (fuera de mi territorio); si nadie lo corrige, «Empieza gratis»
   sigue sin devolver a la clienta a donde estaba.
+
+## Fase 5 · sesión E4 (5-4-ADV)
+
+- [Fase 5 · E4 · 5-4-ADV] **Cualquier ADMIN puede marcar pagada cualquier invitación del sistema.**
+  Medido en vivo contra `:6003`: un ADMIN recién creado, sin ninguna relación con la clienta ni con la
+  invitación, hace `PUT /admin/invitations/5/mark-as-paid` y recibe `200`; la invitación queda
+  `pagada: true` **sin una sola fila en `product_payment`** y la puerta de publicación se abre. Es el
+  hallazgo **S-03** de `12-producto-completo.md:476-489`: `InvitationAdminService.markAsPaid` recibe
+  el `updatedBy` y no lo usa para autorizar. Es la puerta trasera de todo el cobro. **Territorio de
+  E5**, no lo toqué; el parche (tres líneas con `validateInvitationAccess`) está en
+  `bitacora/5-4-adv.md`. **Pregunta al dueño:** ¿un ADMIN debe poder regalar el plan? Si la respuesta
+  es «sí, pero solo a sus clientas», basta el parche; si es «sí, y queremos verlo en la contabilidad»,
+  esa marca a mano debería dejar una fila propia en `product_payment` en vez de un booleano suelto.
+  **Supuesto tomado:** ninguno; queda abierto y dicho en el veredicto.
+
+- [Fase 5 · E4 · 5-4-ADV] **Se puede pagar dos veces la misma invitación y hoy solo queda anotado.**
+  Nada impide abrir dos sesiones de Checkout sobre la misma invitación (`CheckoutService.crear` no es
+  transaccional ni toma cerrojo, y `product_payment` no tiene unicidad por invitación) y pagar las
+  dos. Añadí la **detección** —el segundo cobro queda como `PAGO_DUPLICADO` en `product_stripe_event`—
+  pero no la prevención, porque las dos salidas son decisión de producto: (a) índice parcial único
+  sobre `(invitation_id) WHERE estado = 'PENDIENTE'` y reutilizar la sesión abierta —hay que decidir
+  qué se hace cuando esa sesión ya caducó en Stripe—, que además exige migración nueva (V45, fuera de
+  este encargo; y V45 es de otra sesión); o (b) dejarlo y devolver el dinero a mano. **Supuesto
+  tomado:** (b), que es lo que hay hoy, más el aviso que antes no existía.
+
+- [Fase 5 · E4 · 5-4-ADV] **Cuatro resultados nuevos de `product_stripe_event` que tampoco ve nadie.**
+  A `IMPORTE_DISTINTO` (pregunta abierta de 5-4-A) se le suman `OBJETO_INESPERADO`,
+  `SIN_IMPORTE_COMPARABLE`, `PAGO_DUPLICADO` y `REEMBOLSO_PARCIAL`. Los dos primeros significan «hubo
+  un cobro que no se pudo verificar y por eso no se marcó pagada», y son justamente los que una
+  clienta notaría (pagó y su invitación sigue bloqueada). Sin una pantalla o un aviso, eso se convierte
+  en un ticket de soporte, no en una alerta. Refuerza la pregunta de 5-4-A: **la tabla necesita ojos**
+  (candidata a `/admin`, E5). **Supuesto tomado:** revisión manual, que es lo conservador.
+
+- [Fase 5 · E4 · 5-4-ADV] **¿Un reembolso parcial debe anular el plan?** Hoy decidí que **no**
+  (`ADR-5-4-05`): `charge.refunded` solo cierra la puerta si el reembolso cubre el cargo entero, y uno
+  parcial queda anotado sin tocar la invitación. Es defendible —quien pagó y recibió una devolución
+  parcial sigue teniendo su plan— pero es una regla de negocio, no una deducción técnica. **Supuesto
+  tomado:** el reembolso parcial no anula nada; un contracargo sí, siempre.

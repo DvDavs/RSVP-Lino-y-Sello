@@ -36,6 +36,14 @@ interface ProductPaymentRepository : JpaRepository<ProductPaymentEntity, Long> {
     fun findByStripeCheckoutSessionId(sessionId: String): ProductPaymentEntity?
 
     fun findByStripePaymentIntentId(paymentIntentId: String): ProductPaymentEntity?
+
+    /**
+     * Cuantos cobros de esa invitacion estan en ese estado. Lo usa el webhook (revision 5-4-ADV)
+     * para detectar el **cobro doble**: dos sesiones de Checkout abiertas sobre la misma invitacion
+     * y las dos pagadas. El dinero ya esta tomado y negarlo no lo devuelve, asi que el segundo cobro
+     * se registra igual, pero el evento queda anotado como `PAGO_DUPLICADO` en lugar de `PROCESADO`.
+     */
+    fun countByInvitationIdAndEstado(invitationId: Long, estado: EstadoDePago): Long
 }
 
 /**
@@ -140,6 +148,18 @@ interface InvitationPaymentFlagRepository : Repository<InvitationPaymentRow, Lon
         nativeQuery = true,
     )
     fun retirarReleaseActivo(@Param("invitationId") invitationId: Long): Int
+
+    /**
+     * El `public_token` del documento de esa invitacion, o `null` si no tiene documento.
+     *
+     * Lo necesita el reembolso (revision 5-4-ADV): retirar la fila de `tpl_release` apaga el enlace
+     * **en origen**, pero lo que el borde tiene cacheado sigue sirviendose hasta que caduque. Es
+     * exactamente el caso que ADR-2-6-01 describe para despublicar, y un reembolso o un contracargo
+     * no puede dejar la invitacion visible unos minutos mas. Consulta nativa acotada a una columna,
+     * mismo criterio que el resto de este fichero: este modulo no monta las entidades de `templates2`.
+     */
+    @Query(value = "SELECT public_token FROM tpl_document WHERE invitation_id = :invitationId", nativeQuery = true)
+    fun publicTokenDe(@Param("invitationId") invitationId: Long): String?
 }
 
 /** Lo que la pantalla de plan necesita saber de la invitación, sin cargar el módulo antiguo. */
