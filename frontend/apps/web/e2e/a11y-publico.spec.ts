@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import { obtenerDemo, revalidar } from "./util/demo";
+import { obtenerDemo } from "./util/demo";
 
 // e2e/a11y-publico.spec.ts — ADR-024: CERO violaciones `critical` o `serious` de axe sobre el render
 // público REAL (la invitación publicada, no un estado vacío). Complementa `e2e/a11y.spec.ts`, que
@@ -26,14 +26,13 @@ import { obtenerDemo, revalidar } from "./util/demo";
 // ejecutar el fichero solo — `bitacora/3c-adv.md` §6.2). Es una carrera de MUESTREO, no de datos, y
 // la arreglan `esperarPinturaEstable()` + el `expect.poll` de abajo; el mutex no la habría tocado.
 
-// Misma purga que en `render-publico.spec.ts`: la ruta es ISR y axe debe medir la invitación
-// publicada AHORA, no una versión cacheada de hasta cinco minutos antes.
-test.beforeAll(async ({ browserName }, testInfo) => {
-  void browserName; // Playwright exige el primer parámetro de fixtures; no se usa ninguno aquí.
-  const demo = await obtenerDemo();
-  const base = (testInfo.project.use.baseURL as string | undefined) ?? "http://127.0.0.1:3000";
-  await revalidar(base, demo.publicToken);
-});
+// Aquí había una purga de la caché ISR (`revalidar()`), copiada de `render-publico.spec.ts`.
+// I-CI-01 la quita: purgar es ESCRIBIR en un recurso compartido — la etiqueta ISR de la invitación
+// publicada— y `render-publico.spec.ts:207` mide justo eso, que el HTML se sirva de la caché
+// (`x-nextjs-cache: HIT`) tras calentarla, sin tomar el mutex. Con dos o más workers, una purga de
+// este fichero entre el calentamiento y la comprobación del otro da un MISS espurio.
+// No se pierde nada: axe mide la accesibilidad del RENDER PUBLICADO, y una copia cacheada de ese
+// mismo release es el mismo HTML. Estas dos pruebas quedan así de solo lectura, de verdad.
 
 async function violacionesGraves(page: import("@playwright/test").Page) {
   const resultados = await new AxeBuilder({ page }).analyze();
@@ -69,11 +68,17 @@ async function esperarPinturaEstable(page: import("@playwright/test").Page): Pro
   await page.evaluate(async () => {
     await document.fonts.ready;
     // `fonts.ready` resuelve cuando las fuentes están CARGADAS, no cuando el repintado que provocan
-    // está COMMITEADO: bajo contención de CPU (4 workers + backend + `next start` en 4 vCPU) axe
-    // alcanzaba a muestrear en medio (`bitacora/3c-adv.md` §6.2). Dos `requestAnimationFrame`
-    // encadenados devuelven el control DESPUÉS del siguiente fotograma pintado — estado observable
-    // del navegador, no un `waitForTimeout` (prohibido por `06 §8.2` punto 2).
-    await new Promise<void>((listo) => requestAnimationFrame(() => requestAnimationFrame(() => listo())));
+    // ya está en pantalla: bajo contención de CPU axe alcanzaba a muestrear en medio
+    // (`bitacora/3c-adv.md` §6.2). El segundo `requestAnimationFrame` encadenado se ejecuta al
+    // principio del fotograma SIGUIENTE, o sea con el anterior ya compuesto — estado observable del
+    // navegador, no un `waitForTimeout` (prohibido por `06 §8.2` punto 2).
+    // Va con tope: una pestaña sin repintar (compositor ocluido) no emite fotogramas y la espera se
+    // quedaría colgada hasta agotar la prueba, con un error opaco en vez del informe de axe. Si el
+    // tope salta, el `expect.poll` de abajo vuelve a muestrear igualmente.
+    await Promise.race([
+      new Promise<void>((listo) => requestAnimationFrame(() => requestAnimationFrame(() => listo()))),
+      new Promise<void>((listo) => setTimeout(listo, 1000)),
+    ]);
   });
 }
 
@@ -83,12 +88,17 @@ async function esperarPinturaEstable(page: import("@playwright/test").Page): Pro
  * porque un repintado en curso da un resultado que no describe lo que lee una invitada — y el
  * fichero ya tiene medido que ese falso rojo aparece bajo carga y desaparece al repetir. No oculta
  * nada: una violación REAL sigue ahí en cada reintento y la prueba falla igual, con el informe
- * completo. `bitacora/3c-adv.md` §6.2 avisa además del riesgo simétrico (un falso VERDE por
- * muestreo temprano); repetir hasta que el resultado se estabilice también lo reduce.
+ * completo. Lo que NO hace, y conviene no creérselo: `expect.poll` para en la primera muestra que
+ * pasa, así que no protege contra el falso VERDE que `bitacora/3c-adv.md` §6.2 también avisa —
+ * contra eso solo vale que la página esté quieta antes de mirar, que es lo que hace
+ * `esperarPinturaEstable()`.
+ * Tope corto (8 s) a propósito: con las esperas de arriba (5 s de `toHaveCount` + hasta 30 s de
+ * carga de imágenes) un poll largo se comería el `timeout: 30_000` de `playwright.config.ts` en
+ * local, y una violación REAL saldría como «Test timeout» en vez de como el informe de axe.
  */
 async function exigirCeroViolacionesGraves(page: import("@playwright/test").Page, donde: string): Promise<void> {
   await expect
-    .poll(async () => violacionesGraves(page), { message: donde, timeout: 20_000, intervals: [1000, 2000, 3000] })
+    .poll(async () => violacionesGraves(page), { message: donde, timeout: 8_000, intervals: [1000, 2000, 2000] })
     .toEqual([]);
 }
 

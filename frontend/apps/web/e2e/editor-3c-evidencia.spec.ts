@@ -10,7 +10,15 @@
 import { existsSync, mkdirSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { borrarInvitacion, cuentaNueva, invitacionConDocumento, sesionDemo } from "./preparar.ts";
+import {
+  borrarInvitacion,
+  conLockDeInvitacionSembrada,
+  cuentaNueva,
+  invitacionConDocumento,
+  invitacionSembrada,
+  jwtDemo,
+  sesionDemo,
+} from "./preparar.ts";
 
 const EVIDENCIA = new URL("../../../../docs/rediseno-plantillas/evidencia/fase-3c/bloque-3/3c-7/", import.meta.url).pathname;
 if (!existsSync(EVIDENCIA)) mkdirSync(EVIDENCIA, { recursive: true });
@@ -43,11 +51,8 @@ async function sinViolacionesGraves(page: Page, donde: string): Promise<void> {
  * (`preparar.ts` § `cuentaNueva`, `contratos.md §6`); `cuentaNueva()` acuña un correo distinto por
  * llamada, así que dos pruebas en paralelo nunca comparten ni la cuenta ni la invitación.
  *
- * Consecuencia asumida y visible: `:choose-template` deja el contenido por defecto de la plantilla
- * (textos reales de `defaults.json`) pero **sin fotos** — los `assetId` de `defaults.json` no se
- * resuelven hasta que alguien sube el arte (`scripts/seed-demo.sh` §4, ya documentado ahí). Las
- * capturas de evidencia siguen mostrando el CHROME rediseñado, que es lo que este fichero mide y
- * fotografía; las imágenes de la invitación las cubre `render-publico.spec.ts`.
+ * Lo usa la prueba de `axe`, que mide el CHROME y no depende del contenido. La de CAPTURAS no
+ * puede: ver el comentario de esa prueba, más abajo.
  */
 async function conEditorPropio(page: Page, cuerpo: () => Promise<void>): Promise<void> {
   const cuenta = await cuentaNueva();
@@ -82,9 +87,28 @@ test("editor de escritorio · axe AA sin violaciones graves en lista, panel de b
   });
 });
 
+/**
+ * Esta prueba SÍ usa la invitación sembrada, y con el mutex — es la excepción razonada a la regla
+ * de «cada prueba, la suya» (`06 §8.2` punto 4), por dos motivos MEDIDOS:
+ *   1. Es evidencia: las cinco capturas viven versionadas en `docs/rediseno-plantillas/evidencia/`
+ *      y enseñan la invitación de la demostración CON su arte. Una invitación recién creada no
+ *      tiene fotos (los `assetId` de `defaults.json` no se resuelven hasta subir el arte,
+ *      `scripts/seed-demo.sh` §4): la evidencia del repositorio dejaría de ser la que produce la
+ *      prueba.
+ *   2. El lienzo de una invitación NUEVA es un render en FRÍO de las doce secciones. En el runner
+ *      agotó los 30 s del `toBeVisible` **dos veces seguidas** (corrida 34299786630, con 2
+ *      workers) y de paso se llevó por delante a `teclado-editor` E-10a, que esperaba el MISMO
+ *      `.lienzo-raiz` en otro worker: es un pico de CPU, no un fallo de aislamiento. Sobre la
+ *      invitación sembrada el lienzo ya está caliente.
+ * El mutex cubre lo que la regla pide de verdad aquí: que nadie cambie la invitación mientras se
+ * la fotografía. La prueba de `axe` de arriba —la que SÍ chocaba con esta— ya no la comparte.
+ */
 test("capturas del editor a 1440 y a 390 (evidencia del bloque 3)", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await conEditorPropio(page, async () => {
+  await conLockDeInvitacionSembrada(async () => {
+    await sesionDemo(page, await jwtDemo());
+    await page.goto(`/editor/${invitacionSembrada()}`);
+    await expect(page.getByRole("heading", { name: "Secciones" })).toBeVisible({ timeout: 30_000 });
     await expect(page.frameLocator('iframe[title="Vista previa de la invitación"]').locator(".lienzo-raiz")).toBeVisible({
       timeout: 30_000,
     });

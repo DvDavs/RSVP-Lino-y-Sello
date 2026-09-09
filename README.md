@@ -35,3 +35,8 @@ cobertura), `e2e` (Playwright contra el backend real, sembrado con `scripts/seed
 y `design` (regresión visual, contraste y axe de la galería `/design`). Lo que hubo que corregir para
 que el runner de GitHub se comportara como el entorno local está en
 [`memoria/handoffs/ci-github.md`](docs/rediseno-plantillas/memoria/handoffs/ci-github.md).
+
+Se dispara en los `push` a `main` y a las ramas de integración vivas (hoy `claude/fase-4-kit-de-autor`
+y `claude/fase-5-producto`), en los `pull_request` hacia `main` y a mano con `workflow_dispatch`. No
+hay comodines a propósito: una corrida completa cuesta unos 28 minutos de Actions sumando los cuatro
+jobs, así que las ramas de sesión no disparan CI — se prueba en la rama de integración.

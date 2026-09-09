@@ -170,12 +170,14 @@ export function borrarInvitacion(id: number): void {
   try {
     sql(`DELETE FROM tpl_document WHERE invitation_id = ${id};`);
   } catch {
-    /* puede no existir */
+    /* puede no existir; y `invitation` lo borra en cascada (V32-V37) */
   }
   try {
     sql(`DELETE FROM invitation WHERE id = ${id};`);
-  } catch {
-    /* la puede referenciar un release: no es fatal para la prueba */
+  } catch (error) {
+    // No es fatal para la prueba (la puede referenciar un release), pero callarlo del todo dejaba
+    // basura invisible: en local se acumula corrida tras corrida (I-CI-01, objeción 10).
+    console.warn(`borrarInvitacion(${id}): no pude borrar la invitación —`, error);
   }
 }
 
@@ -217,13 +219,21 @@ export async function invitacionConDocumento(
   templateSlug = "boda-clasica",
 ): Promise<number> {
   const id = invitacionSinDocumento(templateId, customerId);
-  const r = await fetch(`${API_BASE}/editor/invitations/${id}/document:choose-template`, {
-    method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
-    body: JSON.stringify({ templateSlug, templateVersion: "1.0.0" }),
-  });
-  if (!r.ok) throw new Error(`:choose-template → ${r.status}: ${await r.text()}`);
-  return id;
+  // La fila ya existe: si `:choose-template` falla, hay que borrarla AQUÍ. El llamador no puede —
+  // no llegó a recibir el id— y su `finally` no la limpiaría: quedaría una invitación huérfana por
+  // cada fallo, sin señal (I-CI-01, objeción 5 de la revisión).
+  try {
+    const r = await fetch(`${API_BASE}/editor/invitations/${id}/document:choose-template`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+      body: JSON.stringify({ templateSlug, templateVersion: "1.0.0" }),
+    });
+    if (!r.ok) throw new Error(`:choose-template → ${r.status}: ${await r.text()}`);
+    return id;
+  } catch (error) {
+    borrarInvitacion(id);
+    throw error;
+  }
 }
 
 /** Lee la revisión actual del documento por la ruta real (no por SQL). */

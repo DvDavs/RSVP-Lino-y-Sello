@@ -12,11 +12,9 @@
 #   3. Deriva del JSON Schema: `06 §9` comprobaba `packages/schema/dist/*.schema.json`. La ruta
 #      contractual real (contratos.md §5, ADR-1R-D-08) es `packages/schema/json-schema/`, no
 #      `dist/` — corregido aquí.
-#   4. Job `e2e`: **NO OPERATIVO en esta fase** (`if: false` al nivel del job, más abajo). Referencia
-#      `frontend/apps/web`, que no existe todavía — `apps/web` es de la fase 3 (contratos.md §1,
-#      ADR-017). Los pasos se dejan completos y listos para que la fase 3 solo borre el `if: false`
-#      cuando `apps/web` exista; no se inventa una app mínima para "hacerlo pasar" (eso ocultaría
-#      que no hay nada real que probar).
+#   4. Job `e2e`: nota SUPERADA. Nació `if: false` porque `apps/web` no existía en la fase 2; la
+#      fase 3 lo creó (contratos.md §1, ADR-017) y el bloque 3-6 retiró la bandera. El job es
+#      operativo desde entonces y corre las 79 pruebas contra el backend real.
 #   5. El job `backend` asume que `jacocoTestReport`/`jacocoTestCoverageVerification` (06 §2.1) ya
 #      están configurados en build.gradle.kts. **2-0a NO los añade** (fuera de su alcance: "no
 #      añadas dependencias al build.gradle.kts... las añade 2-0b"), así que este job **fallará**
@@ -52,9 +50,11 @@ on:
     branches:
       [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx]
   # Tarea I-CI-01: se anaden las dos ramas de INTEGRACION vivas — `claude/fase-4-kit-de-autor` y
-  # `claude/fase-5-producto`. Sin ellas la fase 5 no tendria CI en absoluto. NO se anaden comodines
-  # (`wip/*`, `claude/fase-5-*` de sesion): cada push cuesta ~28 min de Actions sumando los cuatro
-  # jobs, y las ramas de sesion empujan muchas veces al dia (coste anotado en `issues-ci.md`).
+  # `claude/fase-5-producto`. Sin ellas la fase 5 no tendria CI en absoluto. Van SOLO en `push`, que
+  # es lo que pedia el encargo: un `pull_request` HACIA esas ramas sigue sin disparar el workflow (si
+  # se quiere, se anaden tambien arriba). NO se anaden comodines (`wip/*`, `claude/fase-5-*` de
+  # sesion): cada push cuesta ~28 min de Actions sumando los cuatro jobs, y las ramas de sesion
+  # empujan muchas veces al dia (coste anotado en `issues-ci.md`).
   push:
     branches:
       [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx, claude/ci-github-actions, claude/ci-github-actions-jobs-9qyd9z, claude/fase-4-kit-de-autor, claude/fase-5-producto]
@@ -365,7 +365,7 @@ jobs:
       # del backend, `next start` y Postgres. Eso es máquina, no aislamiento.
       # NO se salta, omite ni pone en cuarentena ninguna prueba: corren las 79, y
       # `--fail-on-flaky-tests` sigue rompiendo el job si alguna pasa solo en el reintento.
-      - name: e2e + a11y (las 79, en paralelo — I-CI-01 cerrada)
+      - name: e2e + a11y (la suite completa, en paralelo — I-CI-01)
         run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=2 --timeout=60000
         env:
           TPL_DEV_DB: templates2_e2e
