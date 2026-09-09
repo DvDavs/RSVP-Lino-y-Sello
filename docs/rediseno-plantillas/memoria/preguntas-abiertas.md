@@ -1568,3 +1568,15 @@ Las cuatro sesiones en paralelo (E2–E5) **no deben volver a decidirlas por su 
 ### Contradicciones entre agentes que resolvió el orquestador de E1
 
 Están en `diseno/12-producto-completo.md §0` y en las ADR `ADR-5-E1-01` (ruta `/r/[token]` con un solo token, frente a los dos tokens que proponía el inventario) y `ADR-5-E1-02` (cuatro subpaquetes en `modules/product`, no cinco). No se reabren.
+
+## Fase 5 · sesión E4 (5-4-B3)
+
+- [Fase 5 · E4 · 5-4-B3] **Sondeo de `/pago` tras el minuto: ¿se detiene o sigue en segundo plano?**
+  El wireframe (`12-producto-completo.md §5`) dice "sondeo cada 3 s (máximo ~60 s)" y por separado
+  "pasado el minuto, mensaje «Está tardando más de lo normal»". Interpreté "máximo ~60 s" como que
+  el sondeo automático se DETIENE al llegar ahí (no sigue llamando al backend cada 3 s
+  indefinidamente): tras mostrar «Está tardando», la clienta solo se entera de que ya se confirmó si
+  recarga la página o sigue el enlace «Ver mi plan». **Supuesto tomado:** conservador (no queremos un
+  `setInterval` sin límite en una pestaña que alguien deja abierta toda la tarde). Si el dueño
+  prefiere que el sondeo siga (más lento, cada 10-15 s por ejemplo) en vez de detenerse, es un cambio
+  pequeño en `components/pago/PantallaPago.tsx`.

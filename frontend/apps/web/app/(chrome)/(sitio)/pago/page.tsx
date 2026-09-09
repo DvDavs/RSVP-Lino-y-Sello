@@ -1,23 +1,27 @@
-// app/(chrome)/(sitio)/pago/page.tsx — MARCADOR de la página de vuelta de Stripe Checkout.
-// Dueña: sesión E4 (pagos con Stripe). Se sustituye entera (ver `README.md` de esta carpeta).
+// app/(chrome)/(sitio)/pago/page.tsx — la vuelta de Stripe Checkout (fase 5, sesión E4).
+// Sustituye ENTERO el marcador de 5-0d (ver `README.md` de esta carpeta).
+//
+// Server component: solo metadatos y el límite de `Suspense` que `useSearchParams` exige en el App
+// Router (mismo patrón que `/precios` y `/acceso`). Todo el estado del pago se pide al backend
+// DESDE EL NAVEGADOR (`PantallaPago`, `"use client"`): esta página no hace ningún fetch y nunca
+// decide "pagado" por sí misma.
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import { Marcador } from "@/lib/panel/Marcador";
+import { CargaPago } from "@/components/pago/CargaPago";
+import { PantallaPago } from "@/components/pago/PantallaPago";
 import { es_MX } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: es_MX.panel.secciones.pago.titulo,
-  // Una página de vuelta de pago NUNCA se indexa: lleva identificadores de sesión de compra en la
-  // URL y no tiene sentido fuera del flujo. Esta línea se queda cuando E4 ponga la pantalla real.
+  title: { absolute: es_MX.sitio.pago.tituloDocumento },
+  // `noindex` PERMANENTE: esta página lleva identificadores de sesión de compra en la URL y no
+  // tiene sentido fuera del flujo de vuelta de Checkout (README de esta carpeta).
   robots: { index: false, follow: false },
 };
 
-export default function MarcadorPago() {
+export default function PaginaPago() {
   return (
-    <Marcador
-      contenedor="div"
-      titulo={es_MX.panel.secciones.pago.titulo}
-      texto={es_MX.panel.secciones.pago.texto}
-      accion={{ href: "/editor", etiqueta: es_MX.panel.marcador.verMisInvitaciones }}
-    />
+    <Suspense fallback={<CargaPago />}>
+      <PantallaPago />
+    </Suspense>
   );
 }

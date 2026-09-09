@@ -257,6 +257,57 @@ export const es_MX = {
         titulo: "¿Prefieres que te lo expliquemos?",
       },
     },
+    /**
+     * `/pago` (fase 5, sesión E4): la vuelta de Stripe Checkout. Tres estados en una sola ruta
+     * (`12-producto-completo.md §5`) y el que manda es el del BACKEND, nunca la URL de vuelta:
+     * volver de Checkout no es haber pagado. `README.md` de esta carpeta detalla la regla.
+     */
+    pago: {
+      tituloDocumento: "Tu pago · Lino & Sello",
+      esperando: {
+        titulo: "Estamos confirmando tu pago",
+        cuerpo:
+          "Tu banco ya nos contestó; falta que el cobro quede registrado. Esto suele tardar unos segundos. No cierres esta página.",
+        /** Nombre accesible del `ProgressRing` indeterminado. */
+        progreso: "Confirmando tu pago",
+      },
+      tardando: {
+        titulo: "Está tardando más de lo normal",
+        cuerpo: "Puede que el cobro tarde un poco más de lo habitual. Puedes seguir esperando o revisar tu plan.",
+      },
+      /** Compartido por "tardando" y por el estado de error: la misma salida honesta a soporte. */
+      soporte: {
+        conCorreo: "Si prefieres, escríbenos y lo revisamos contigo:",
+        sinCorreo: "Escríbenos desde la ayuda y lo revisamos contigo.",
+        irAyuda: "Ir a la ayuda",
+        asunto: "Mi pago no se confirma",
+      },
+      confirmado: {
+        titulo: "Listo, tu plan está activo",
+        conEvento: (plan: string, evento: string) => `Plan ${plan} para «${evento}».`,
+        sinEvento: (plan: string) => `Plan ${plan} activo.`,
+        sinPlan: "Tu plan está activo.",
+        comprobante: "Guarda esta página como constancia; el comprobante de Stripe llega a tu correo.",
+        verComprobante: "Ver comprobante de Stripe",
+        irInvitacion: "Ir a mi invitación",
+        verPlan: "Ver mi plan",
+      },
+      cancelado: {
+        titulo: "No completaste el pago",
+        cuerpo: "No te cobramos nada. Tu invitación sigue guardada tal como la dejaste.",
+        volverAIntentar: "Volver a intentar",
+        verPlanes: "Ver los planes",
+      },
+      sinSesion: {
+        titulo: "Entra a tu cuenta para ver el estado de tu pago",
+        cuerpo: "Necesitamos que inicies sesión para consultar este pago.",
+        entrar: "Iniciar sesión",
+      },
+      error: {
+        titulo: "No pudimos consultar tu pago",
+        cuerpo: "Vuelve a intentarlo en un momento; si sigue pasando, escríbenos.",
+      },
+    },
   },
   ayuda: {
     titulo: "¿En qué te ayudamos?",
@@ -381,6 +432,10 @@ export const es_MX = {
       queSigue:
         "Dentro del editor cambias textos, fotos y colores, y publicas cuando esté lista. Nada se ve en internet hasta que tú lo publiques.",
       abrir: "Abrir mi invitación",
+      // ADR-5-0B-01 (puerta de publicación): editar y previsualizar son gratis, el plan solo hace
+      // falta para publicar. `panel.plan.elegirPlan` es el texto del botón (se reutiliza: es el
+      // mismo destino y la misma etiqueta que el resto del producto usa para ir al plan).
+      notaPlan: "Puedes escribirla y verla gratis; el plan solo hace falta para publicarla.",
     },
     sinInvitaciones: {
       titulo: "Todavía no tienes invitaciones",
@@ -695,6 +750,10 @@ export const es_MX = {
         TPL_PUBLISH_BLOCKED_MISSING_REQUIRED: "Falta completar",
         TPL_PUBLISH_BLOCKED_DEFAULT_CONTENT: "Sigue con el texto de ejemplo",
         TPL_PUBLISH_BLOCKED_INVALID_VALUES: "Tiene un valor que ya no es válido",
+        // ADR-5-0B-01: la puerta de publicación (`ReleaseService`) bloquea sin plan pagado. El
+        // texto vive aquí porque `textoHallazgo` (PublishDialog.tsx) resuelve TODOS los bloqueos
+        // por este mapa; el enlace a la pantalla del plan es el cambio propio de PublishDialog.tsx.
+        TPL_PLAN_UNPAID: "Falta el plan: publica cuando tu invitación tenga un plan pagado.",
       },
       avisoSeccionVacia: "Esta sección está visible pero no tiene contenido todavía",
     },
@@ -724,6 +783,8 @@ export const es_MX = {
    * que los de `/i/[publicToken]`.
    */
   panel: {
+    /** Nombre accesible de la barra de navegación del panel del cliente (`components/plan/BarraDelPanel.tsx`). */
+    navegacion: "Secciones de tu invitación",
     nav: {
       invitados: "Invitados",
       plan: "Plan",
@@ -777,6 +838,69 @@ export const es_MX = {
         texto:
           "Aquí van a estar el aviso de privacidad, los términos del servicio y la política de cookies. Todavía no los publicamos.",
       },
+    },
+    /**
+     * `/editor/[invitationId]/plan` (fase 5, sesión E4): el plan de ESTA invitación — la oferta
+     * mientras no está pagada (estado vacío de la pantalla), el resumen cuando ya lo está, y el
+     * historial de pagos. Ningún precio se escribe aquí: siempre viene del backend
+     * (`handoffs/5-4-contrato-pagos.md` §2.2/§2.4) y se formatea con `lib/pagos/dinero.ts`.
+     */
+    plan: {
+      metaTitulo: "Plan de tu invitación",
+      invitacionSinNombre: "Tu invitación",
+      cargando: "Cargando tu plan…",
+      sinSesion: {
+        hayQueEntrar: "Para ver el plan de tu invitación necesitas entrar a tu cuenta.",
+        sesionTerminada: "Tu sesión terminó. Vuelve a entrar para seguir donde lo dejaste.",
+      },
+      error: {
+        titulo: "No pudimos cargar tu plan",
+        cuerpo: "Revisa tu conexión e inténtalo de nuevo.",
+        escribenos: (correo: string) => `Si sigue pasando, escríbenos a ${correo}.`,
+        verAyuda: "Ver la ayuda",
+      },
+      oferta: {
+        titulo: "Esta invitación todavía no tiene plan",
+        texto:
+          "Puedes escribirla y verla completa sin pagar. Para publicarla y mandarla a tus invitados necesitas un plan.",
+        opciones: "Elige un plan",
+        pagarYPublicar: "Pagar y publicar",
+        abriendoPago: "Abriendo el pago…",
+        verTodosLosPlanes: "Ver todos los planes",
+        sinPagoEnLinea: "El pago en línea todavía no está disponible.",
+        catalogoError: "No pudimos cargar los planes.",
+      },
+      errores: {
+        noConfigurado: "El pago en línea todavía no está disponible.",
+        yaPagada: "Esta invitación ya tiene un plan pagado. Actualizamos la información.",
+        planNoEncontrado: "Ese plan ya no está disponible. Aquí tienes el catálogo actualizado.",
+        generico: "No pudimos abrir el pago. Inténtalo de nuevo.",
+      },
+      pagado: {
+        planActivo: "Plan activo",
+        badgePagado: "Pagado",
+        pagadoEl: (fecha: string, importe: string) => `Pagado el ${fecha} · ${importe}`,
+        sinDatosDePlan: "Tu plan está activo; si tienes dudas escríbenos.",
+        irAMiInvitacion: "Ir a mi invitación",
+        verComprobante: "Ver mi comprobante",
+      },
+      historial: {
+        titulo: "Pagos de esta invitación",
+        vacio: "Todavía no hay pagos registrados.",
+        fecha: "Fecha",
+        plan: "Plan",
+        importe: "Importe",
+        estado: "Estado",
+        comprobante: "Comprobante",
+        estados: {
+          PAGADO: "Pagado",
+          PENDIENTE: "Pendiente",
+          FALLIDO: "Fallido",
+          CADUCADO: "Caducado",
+          REEMBOLSADO: "Reembolsado",
+        },
+      },
+      elegirPlan: "Elegir plan",
     },
   },
   revalidate: {
