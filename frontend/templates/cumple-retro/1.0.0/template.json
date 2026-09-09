@@ -1,0 +1,234 @@
+{
+  "manifestVersion": 1,
+  "slug": "cumple-retro",
+  "version": "1.0.0",
+  "name": {
+    "es-MX": "Cumple Retro"
+  },
+  "eventKinds": [
+    "birthday"
+  ],
+  "minPlanTier": 1,
+  "locales": [
+    "es-MX"
+  ],
+  "capabilities": [],
+  "sections": [
+    {
+      "key": "cover",
+      "type": "cover",
+      "title": {
+        "es-MX": "Portada"
+      },
+      "variants": [
+        "full",
+        "framed",
+        "split"
+      ],
+      "defaultVariant": "full",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "cover.title",
+          "role": "coverTitle",
+          "label": {
+            "es-MX": "Título de portada"
+          },
+          "type": "text",
+          "required": true
+        },
+        {
+          "id": "cover.date",
+          "role": "coverDate",
+          "label": {
+            "es-MX": "Fecha del evento"
+          },
+          "type": "date"
+        },
+        {
+          "id": "cover.image",
+          "role": "coverImage",
+          "label": {
+            "es-MX": "Foto de portada"
+          },
+          "type": "image",
+          "required": true
+        }
+      ]
+    },
+    {
+      "key": "celebrant",
+      "type": "celebrant",
+      "title": {
+        "es-MX": "Celebrantes"
+      },
+      "variants": [
+        "side-by-side",
+        "stacked",
+        "centered"
+      ],
+      "defaultVariant": "side-by-side",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "celebrant.title",
+          "role": "celebrantsHeading",
+          "label": {
+            "es-MX": "Encabezado"
+          },
+          "type": "text"
+        },
+        {
+          "id": "celebrant.honoree",
+          "role": "honoree",
+          "label": {
+            "es-MX": "Persona homenajeada"
+          },
+          "type": "person",
+          "required": true
+        },
+        {
+          "id": "celebrant.message",
+          "role": "honoreeMessage",
+          "label": {
+            "es-MX": "Mensaje de la festejada"
+          },
+          "type": "richText"
+        }
+      ]
+    },
+    {
+      "key": "event",
+      "type": "event",
+      "title": {
+        "es-MX": "Evento"
+      },
+      "variants": [
+        "timeline",
+        "cards",
+        "single-place"
+      ],
+      "defaultVariant": "timeline",
+      "required": false,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "event.heading",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título de la sección"
+          },
+          "type": "text"
+        },
+        {
+          "id": "event.cards",
+          "role": "eventCards",
+          "label": {
+            "es-MX": "Momentos"
+          },
+          "type": "group",
+          "itemLabel": {
+            "es-MX": "Momento"
+          },
+          "itemBlocks": [
+            {
+              "id": "title",
+              "role": "eventTitle",
+              "label": {
+                "es-MX": "Nombre del momento"
+              },
+              "type": "text",
+              "required": true
+            },
+            {
+              "id": "when",
+              "role": "eventWhen",
+              "label": {
+                "es-MX": "Cuándo"
+              },
+              "type": "dateTimeRange"
+            },
+            {
+              "id": "place",
+              "role": "eventPlace",
+              "label": {
+                "es-MX": "Dónde"
+              },
+              "type": "location"
+            }
+          ],
+          "required": true,
+          "min": 1,
+          "max": 6
+        }
+      ]
+    },
+    {
+      "key": "rsvp",
+      "type": "rsvp",
+      "title": {
+        "es-MX": "Confirmación"
+      },
+      "variants": [
+        "banner",
+        "form-inline"
+      ],
+      "defaultVariant": "banner",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "rsvp.heading",
+          "role": "sectionTitle",
+          "label": {
+            "es-MX": "Título de la sección"
+          },
+          "type": "text"
+        },
+        {
+          "id": "rsvp.note",
+          "role": "rsvpNote",
+          "label": {
+            "es-MX": "Nota"
+          },
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "key": "footer",
+      "type": "footer",
+      "title": {
+        "es-MX": "Pie"
+      },
+      "variants": [
+        "simple"
+      ],
+      "defaultVariant": "simple",
+      "required": true,
+      "defaultVisible": true,
+      "blocks": [
+        {
+          "id": "footer.note",
+          "role": "footerNote",
+          "label": {
+            "es-MX": "Nota de cierre"
+          },
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "assets": [
+    {
+      "id": "as_8T0FEX1B1E1PH7H4PV3VSVXF42",
+      "path": "assets/portada.webp",
+      "sha256": "ebaf89d6cc6943faabb18501d29d9cd00fb3d7b50962e8db24f8cab42808cd55",
+      "contentType": "image/webp",
+      "bytes": 46544
+    }
+  ],
+  "migrationsFrom": []
+}
