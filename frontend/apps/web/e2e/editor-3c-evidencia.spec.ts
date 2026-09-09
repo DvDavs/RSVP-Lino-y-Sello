@@ -1,7 +1,7 @@
 // e2e/editor-3c-evidencia.spec.ts — compuerta y evidencia del chrome del editor rediseñado
 // (fase 3-C, bloque 3, tarea 3C-7).
 //
-// Dos cosas, en la misma pasada porque necesitan el mismo estado sembrado:
+// Dos cosas, cada una sobre SU PROPIA invitación (`06 §8.2` punto 4; ver `conEditorPropio` abajo):
 //   1. `axe` AA sin violaciones críticas ni serias en las TRES vistas del editor de escritorio
 //      —lista de secciones, panel de un bloque y diálogo de publicación—, que es donde vive todo lo
 //      que esta tarea rehízo. El editor a 390 ya lo cubre `a11y-pantallas-nuevas.spec.ts`.
@@ -10,7 +10,7 @@
 import { existsSync, mkdirSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { invitacionSembrada, jwtDemo, sesionDemo } from "./preparar.ts";
+import { borrarInvitacion, cuentaNueva, invitacionConDocumento, sesionDemo } from "./preparar.ts";
 
 const EVIDENCIA = new URL("../../../../docs/rediseno-plantillas/evidencia/fase-3c/bloque-3/3c-7/", import.meta.url).pathname;
 if (!existsSync(EVIDENCIA)) mkdirSync(EVIDENCIA, { recursive: true });
@@ -28,52 +28,82 @@ async function sinViolacionesGraves(page: Page, donde: string): Promise<void> {
   expect(graves, `${donde}\n${JSON.stringify(graves, null, 2)}`).toEqual([]);
 }
 
-async function abrirEditor(page: Page): Promise<void> {
-  await sesionDemo(page, await jwtDemo());
-  await page.goto(`/editor/${invitacionSembrada()}`);
-  await expect(page.getByRole("heading", { name: "Secciones" })).toBeVisible({ timeout: 30_000 });
+/**
+ * AISLAMIENTO DE DATOS (`06 §8.2` punto 4, issue I-CI-01): cada prueba abre el editor sobre una
+ * invitación **suya**, de una cuenta **suya**, y la borra al terminar.
+ *
+ * Antes esto llamaba a `invitacionSembrada()` a pelo: LA invitación de la demostración, compartida
+ * por otros ocho ficheros, y sin el mutex `conLockDeInvitacionSembrada`. Las dos pruebas de este
+ * fichero entraban a la vez en la misma invitación y la segunda se quedaba sin lienzo — medido en
+ * el runner de GitHub, no supuesto: con `--workers=2` fue el ÚNICO fallo de las 79
+ * (corrida 34052672869), y obligó al CI a serializar con `--workers=1` (ADR-CI-01).
+ *
+ * Se crea cuenta nueva y no una invitación más de la cuenta de demostración porque el `POST
+ * /auth/token` concurrente de la MISMA cuenta hace 500 en el módulo `auth` antiguo
+ * (`preparar.ts` § `cuentaNueva`, `contratos.md §6`); `cuentaNueva()` acuña un correo distinto por
+ * llamada, así que dos pruebas en paralelo nunca comparten ni la cuenta ni la invitación.
+ *
+ * Consecuencia asumida y visible: `:choose-template` deja el contenido por defecto de la plantilla
+ * (textos reales de `defaults.json`) pero **sin fotos** — los `assetId` de `defaults.json` no se
+ * resuelven hasta que alguien sube el arte (`scripts/seed-demo.sh` §4, ya documentado ahí). Las
+ * capturas de evidencia siguen mostrando el CHROME rediseñado, que es lo que este fichero mide y
+ * fotografía; las imágenes de la invitación las cubre `render-publico.spec.ts`.
+ */
+async function conEditorPropio(page: Page, cuerpo: () => Promise<void>): Promise<void> {
+  const cuenta = await cuentaNueva();
+  const invitationId = await invitacionConDocumento(cuenta.token, cuenta.customerId);
+  try {
+    await sesionDemo(page, cuenta.token);
+    await page.goto(`/editor/${invitationId}`);
+    await expect(page.getByRole("heading", { name: "Secciones" })).toBeVisible({ timeout: 30_000 });
+    await cuerpo();
+  } finally {
+    borrarInvitacion(invitationId);
+  }
 }
 
 test("editor de escritorio · axe AA sin violaciones graves en lista, panel de bloque y publicación", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await abrirEditor(page);
-  await sinViolacionesGraves(page, "lista de secciones + apariencia");
+  await conEditorPropio(page, async () => {
+    await sinViolacionesGraves(page, "lista de secciones + apariencia");
 
-  // Panel de un bloque: campos, variante de sección y bloque de solo lectura.
-  await page.getByTestId("section-row-cover").click();
-  await expect(page.getByRole("heading", { name: /portada/i })).toBeVisible();
-  await sinViolacionesGraves(page, "panel de bloque (portada)");
+    // Panel de un bloque: campos, variante de sección y bloque de solo lectura.
+    await page.getByTestId("section-row-cover").click();
+    await expect(page.getByRole("heading", { name: /portada/i })).toBeVisible();
+    await sinViolacionesGraves(page, "panel de bloque (portada)");
 
-  // Diálogo de publicación con su lista de revisión.
-  await page.getByRole("button", { name: "Volver a secciones" }).click();
-  await page.getByTestId("abrir-publicar").click();
-  await expect(page.getByRole("dialog", { name: "Publicar invitación" })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId("confirmar-publicar")).toBeVisible();
-  await sinViolacionesGraves(page, "diálogo de publicación");
-  await page.keyboard.press("Escape");
+    // Diálogo de publicación con su lista de revisión.
+    await page.getByRole("button", { name: "Volver a secciones" }).click();
+    await page.getByTestId("abrir-publicar").click();
+    await expect(page.getByRole("dialog", { name: "Publicar invitación" })).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("confirmar-publicar")).toBeVisible();
+    await sinViolacionesGraves(page, "diálogo de publicación");
+    await page.keyboard.press("Escape");
+  });
 });
 
 test("capturas del editor a 1440 y a 390 (evidencia del bloque 3)", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await abrirEditor(page);
-  await expect(page.frameLocator('iframe[title="Vista previa de la invitación"]').locator(".lienzo-raiz")).toBeVisible({
-    timeout: 30_000,
+  await conEditorPropio(page, async () => {
+    await expect(page.frameLocator('iframe[title="Vista previa de la invitación"]').locator(".lienzo-raiz")).toBeVisible({
+      timeout: 30_000,
+    });
+    await page.screenshot({ path: `${EVIDENCIA}editor-1440.png` });
+
+    await page.getByTestId("section-row-cover").click();
+    await expect(page.getByRole("heading", { name: /portada/i })).toBeVisible();
+    await page.screenshot({ path: `${EVIDENCIA}panel-de-bloque-1440.png` });
+
+    await page.getByRole("button", { name: "Volver a secciones" }).click();
+    await page.getByTestId("abrir-publicar").click();
+    await expect(page.getByRole("dialog", { name: "Publicar invitación" })).toBeVisible({ timeout: 20_000 });
+    await page.screenshot({ path: `${EVIDENCIA}publicar-1440.png` });
+    await page.keyboard.press("Escape");
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByRole("tablist", { name: "Qué quieres ver" })).toBeVisible({ timeout: 20_000 });
+    await page.screenshot({ path: `${EVIDENCIA}editor-390.png` });
+    await page.getByRole("tab", { name: "Vista previa" }).click();
+    await page.screenshot({ path: `${EVIDENCIA}vista-previa-390.png` });
   });
-  await page.screenshot({ path: `${EVIDENCIA}editor-1440.png` });
-
-  await page.getByTestId("section-row-cover").click();
-  await expect(page.getByRole("heading", { name: /portada/i })).toBeVisible();
-  await page.screenshot({ path: `${EVIDENCIA}panel-de-bloque-1440.png` });
-
-  await page.getByRole("button", { name: "Volver a secciones" }).click();
-  await page.getByTestId("abrir-publicar").click();
-  await expect(page.getByRole("dialog", { name: "Publicar invitación" })).toBeVisible({ timeout: 20_000 });
-  await page.screenshot({ path: `${EVIDENCIA}publicar-1440.png` });
-  await page.keyboard.press("Escape");
-
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByRole("tablist", { name: "Qué quieres ver" })).toBeVisible({ timeout: 20_000 });
-  await page.screenshot({ path: `${EVIDENCIA}editor-390.png` });
-  await page.getByRole("tab", { name: "Vista previa" }).click();
-  await page.screenshot({ path: `${EVIDENCIA}vista-previa-390.png` });
 });

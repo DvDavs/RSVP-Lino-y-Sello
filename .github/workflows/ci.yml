@@ -51,9 +51,13 @@ on:
   pull_request:
     branches:
       [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx]
+  # Tarea I-CI-01: se anaden las dos ramas de INTEGRACION vivas — `claude/fase-4-kit-de-autor` y
+  # `claude/fase-5-producto`. Sin ellas la fase 5 no tendria CI en absoluto. NO se anaden comodines
+  # (`wip/*`, `claude/fase-5-*` de sesion): cada push cuesta ~28 min de Actions sumando los cuatro
+  # jobs, y las ramas de sesion empujan muchas veces al dia (coste anotado en `issues-ci.md`).
   push:
     branches:
-      [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx, claude/ci-github-actions, claude/ci-github-actions-jobs-9qyd9z]
+      [main, claude/agent-network-invitation-41nx5y, claude/fase-2-backend-orchestration-ksyuzi, claude/fase-3-frontend-orchestration-yuh8sx, claude/ci-github-actions, claude/ci-github-actions-jobs-9qyd9z, claude/fase-4-kit-de-autor, claude/fase-5-producto]
   workflow_dispatch:
 
 concurrency:
@@ -329,11 +333,9 @@ jobs:
       # El servidor web del frontend lo arranca Playwright (`webServer` de playwright.config.ts),
       # NO un `&` suelto en este paso: un proceso lanzado con `&` en un step muere al terminarlo.
       #
-      # Dos invocaciones a propósito (política anti-flake, `06 §8.2` / ADR-1R-C-11): `a11y-publico`
-      # es el único spec que flakea en paralelo (`handoffs/3c-para-siguiente.md`), así que corre
-      # aparte con `--workers=1` y el resto conserva los 4 workers de la config. No es cuarentena:
-      # el spec SE EJECUTA y su fallo rompe el job igual que cualquier otro (`--fail-on-flaky-tests`
-      # en ambas). Queda anotado como issue en `memoria/issues-ci.md` (I-CI-01).
+      # UNA sola invocación: las 79 pruebas del editor, del render público y de a11y en la misma
+      # pasada. No hay ningún spec apartado ni corriendo con menos workers que el resto (lo hubo
+      # mientras I-CI-01 estuvo abierta); el detalle está en el paso de más abajo.
       #
       # DIVERGENCIA runner/local nº 8 (handoffs/ci-github.md): las propias pruebas hablan con
       # Postgres. `e2e/preparar.ts:32` abre `psql` para insertar la fila de `invitation` que no tiene
@@ -345,25 +347,26 @@ jobs:
       # supplied». Medido: 46 de 77 pruebas en rojo por esto en la corrida 34051529623, todas con el
       # mismo error. Se arregla con entorno, sin tocar una línea de `frontend/**`.
       #
-      # DIVERGENCIA runner/local nº 9 (ADR-CI-01) — UNA sola invocación con UN solo worker.
-      # `playwright.config.ts` fija `workers: CI ? 4 : undefined`, pero el «e2e 79/79» del cierre de
-      # la fase 3-C se midió EN LOCAL, donde `undefined` es la mitad de los núcleos: 2 workers.
-      # Nadie había medido nunca esta suite con 4. Medido aquí, en el runner, sobre el mismo commit:
-      #   · 4 workers → 5 fallos + 2 flaky (corrida 34052024407)
-      #   · 2 workers → 1 fallo  + 1 flaky (corrida 34052672869)
-      # Y el fallo que sobrevive NO es reloj: `editor-3c-evidencia.spec.ts` abre
-      # `invitacionSembrada()` —LA invitación compartida por ocho ficheros de pruebas— **sin**
-      # `conLockDeInvitacionSembrada`, el mutex entre procesos que `e2e/preparar.ts:110` creó
-      # justamente para eso. Dos pruebas del mismo fichero entran a la vez en la misma invitación y
-      # la segunda se queda sin lienzo. Es, palabra por palabra, el «fallo de aislamiento» que
-      # `06 §8.2` punto 4 describe; arreglarlo es trabajo de `frontend/**`, fuera de esta tarea.
-      # Mientras tanto el CI serializa: `--workers=1` hace imposible la interferencia entre procesos
-      # y de paso cubre `a11y-publico.spec.ts` (I-CI-01), que ya flakeaba con dos. Una sola
-      # invocación en vez de dos ahorra además un `next build` y un arranque de servidor enteros.
+      # I-CI-01 CERRADA — vuelve el paralelismo. El `--workers=1` que puso ADR-CI-01 era un parche
+      # sobre un fallo de AISLAMIENTO real, y `06 §8.2` punto 4 no lo admite («si una prueba solo
+      # pasa con `workers: 1`, es un fallo de aislamiento, no una excepción a conceder»). Arreglado
+      # el aislamiento en su sitio, `frontend/apps/web/e2e/`:
+      #   · `editor-3c-evidencia.spec.ts` ya NO abre la invitación SEMBRADA compartida: cada una de
+      #     sus dos pruebas crea su propia cuenta y su propia invitación y la borra al terminar
+      #     (`conEditorPropio`). Ese era el único fallo que sobrevivía a 2 workers (corrida
+      #     34052672869).
+      #   · `a11y-publico.spec.ts` no compartía datos: muestreaba `color-contrast` con el repintado
+      #     de la tipografía a medias (medido en `bitacora/3c-adv.md` §6.2, los mismos 4 nodos, 3 de
+      #     3 en verde ejecutándolo solo). Ahora espera al fotograma pintado y reintenta el análisis
+      #     con `expect.poll` — mide el estado estable, no oculta nada: una violación real sigue
+      #     rompiendo el job.
+      # `--timeout=60000` SE MANTIENE (enmienda de ADR-CI-01 que sigue viva): el presupuesto de 30 s
+      # de `06 §8.2` punto 8 es de diseño y se midió en local; el runner comparte 4 vCPU con la JVM
+      # del backend, `next start` y Postgres. Eso es máquina, no aislamiento.
       # NO se salta, omite ni pone en cuarentena ninguna prueba: corren las 79, y
       # `--fail-on-flaky-tests` sigue rompiendo el job si alguna pasa solo en el reintento.
-      - name: e2e + a11y (las 79, un solo worker — ADR-CI-01, I-CI-01)
-        run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=1 --timeout=60000
+      - name: e2e + a11y (las 79, en paralelo — I-CI-01 cerrada)
+        run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=2 --timeout=60000
         env:
           TPL_DEV_DB: templates2_e2e
           TPL_TEST_STATE_DIR: /tmp/templates2-pg
