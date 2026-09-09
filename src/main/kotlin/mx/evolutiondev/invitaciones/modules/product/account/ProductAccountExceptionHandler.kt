@@ -5,6 +5,7 @@ import mx.evolutiondev.invitaciones.modules.auth.service.DemasiadosIntentosExcep
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -51,6 +52,40 @@ class ProductAccountExceptionHandler(private val dateFormatter: DateFormatter) {
         return respuesta(AccountErrorCode.CUENTA_DATOS_INVALIDOS, detalle)
     }
 
+    /**
+     * Cuerpo ilegible: JSON roto, o una propiedad desconocida contra el `ObjectMapper` estricto que la
+     * aplicación usa entera (R1-09; `Templates2JsonConfig.kt:35-36`). Sale como `400` con `code`, no
+     * como `500`, y **el texto de Jackson no se reexpone**: cuenta nombres de clase y de campo.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun cuerpoIlegible(e: HttpMessageNotReadableException): ResponseEntity<AccountErrorResponse> =
+        respuesta(AccountErrorCode.CUENTA_DATOS_INVALIDOS, "Revisa los datos que enviaste")
+
+    /**
+     * **Trampa evitada**, igual que en `ProductInvitationsExceptionHandler.kt:71-72`: la red final de
+     * abajo se tragaría también la `AccessDeniedException` de `@PreAuthorize` y convertiría un `403` en
+     * un `500`. Se relanza **la misma instancia** para que la resuelva `InvitationsAccessDeniedHandler`
+     * en la cadena de filtros (`SecurityConfig.kt:35`), con el cuerpo de la plataforma y sin `code`.
+     */
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException::class)
+    fun relanzarDenegado(e: org.springframework.security.access.AccessDeniedException): Nothing = throw e
+
+    /**
+     * Red final (R1-08). Sin ella este advice **no tenía suelo**: una excepción que no fuese
+     * `AccountException`, `DemasiadosIntentosException` ni `MethodArgumentNotValidException` se escapaba
+     * al manejo genérico del núcleo, cuyo cuerpo depende de la configuración del entorno — con
+     * `include-message: always` (S-02) llega a devolver el mensaje de la excepción original. El caso
+     * concreto que lo motiva es la `DataIntegrityViolationException` del choque de correo al confirmar:
+     * su mensaje lleva el nombre de la restricción y **el valor en conflicto**, o sea el correo de otra
+     * clienta. Aquí el cuerpo es mudo y siempre el mismo.
+     *
+     * El patrón está copiado de `ProductInvitationsExceptionHandler.kt:79-88` a propósito: los dos
+     * advice del producto responden igual ante lo inesperado.
+     */
+    @ExceptionHandler(Exception::class)
+    fun inesperado(e: Exception): ResponseEntity<AccountErrorResponse> =
+        respuesta(AccountErrorCode.CUENTA_ERROR_INTERNO, MENSAJE_INTERNO)
+
     private fun respuesta(code: AccountErrorCode, message: String): ResponseEntity<AccountErrorResponse> =
         ResponseEntity.status(code.estado).body(
             AccountErrorResponse(
@@ -64,5 +99,8 @@ class ProductAccountExceptionHandler(private val dateFormatter: DateFormatter) {
     companion object {
         /** El mismo patrón que el resto del backend (`GeneralExceptionHandler.kt:35`). */
         const val PATRON_FECHA = "dd/MM/yyyy HH:mm:ss"
+
+        /** Texto único de la red final. Constante y mudo: no describe lo que pasó por dentro. */
+        const val MENSAJE_INTERNO = "No se pudo completar la operación. Inténtalo de nuevo."
     }
 }

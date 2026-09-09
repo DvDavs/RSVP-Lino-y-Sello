@@ -19,7 +19,12 @@ interface CustomerRepository : JpaRepository<CustomerEntity, Long>, JpaSpecifica
     /** Verificación de correo (fase 5, E3). Mismo patrón que [findByResetToken]. */
     fun findByEmailVerificationToken(emailVerificationToken: String): CustomerEntity?
     fun findByRoleIn(roles: List<Role>): List<CustomerEntity>
-    fun findByPhone(phone: String): CustomerEntity?
+    // R1-10 (`ADR-5-E3-C1-03`): `findByPhone` se elimina. Era una derivada de **resultado único** sobre
+    // una columna que NO tiene índice único (`V1__initial_schema.sql:1868-1869` es un índice normal y
+    // parcial): en cuanto dos cuentas compartían número —cosa que el alta pública permite desde
+    // `ADR-5-E3-05`— lanzaba `IncorrectResultSizeDataAccessException` y convertía un `400` en un `500`.
+    // Ningún flujo autentica, recupera ni identifica por teléfono, así que no hace falta ninguna
+    // sustituta; si algún día vuelve a hacer falta, tiene que ser `findFirstByPhone` o una lista.
     fun existsByPhone(phone: String): Boolean
     fun findAllByCreatedBy(createdBy: Long): List<CustomerEntity>
     fun findAllByCreatedBy(createdBy: Long, pageable: Pageable): Page<CustomerEntity>

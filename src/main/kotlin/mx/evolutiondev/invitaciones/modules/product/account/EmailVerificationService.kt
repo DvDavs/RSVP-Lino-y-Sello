@@ -13,6 +13,7 @@ import mx.evolutiondev.invitaciones.core.model.GeneralMessageResponse
 import mx.evolutiondev.invitaciones.modules.auth.service.AmbitoIntentos
 import mx.evolutiondev.invitaciones.modules.auth.service.AuthThrottleService
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -98,6 +99,12 @@ class EmailVerificationService(
             )
 
         if (customer.emailVerificationExpiry?.isBefore(Instant.now()) != false) {
+            // R1-06: al caducar el token se **borra también el cambio de correo pendiente**. Antes solo
+            // caducaba el token y `email_pending` se quedaba escrito para siempre, así que una petición
+            // abandonada (`ana@gmial.com`, un dedazo) seguía siendo una oferta de toma de cuenta viva:
+            // bastaba con volver a armarla. El pendiente y el token nacen juntos
+            // (`AccountService.pedirCambioDeCorreo`), así que mueren juntos.
+            limpiarVerificacionCaducada(customer)
             throw AccountException(
                 AccountErrorCode.CUENTA_TOKEN_CADUCADO,
                 "El enlace de verificación caducó. Pide uno nuevo.",
@@ -130,7 +137,21 @@ class EmailVerificationService(
         if (cambioDeCorreo) {
             refreshTokenRepository.deleteAllByCustomerId(customer.id)
         }
-        customerRepository.save(customer)
+        // R1-08: la comprobación de disponibilidad de arriba no es atómica —`email_pending` no tiene
+        // unicidad (`V41:13-14`)— así que dos confirmaciones simultáneas del mismo correo pasan las dos
+        // y una revienta contra el índice único de `customer.email`. Esa
+        // `DataIntegrityViolationException` se captura AQUÍ y se convierte en el error de dominio que
+        // ya existe para ese caso. Si se dejara escapar, saldría por el manejo genérico y, con
+        // `include-message: always` (S-02), el cuerpo podía llevar el nombre de la restricción y el
+        // valor en conflicto: **el correo de la otra clienta**.
+        try {
+            customerRepository.save(customer)
+        } catch (e: DataIntegrityViolationException) {
+            throw AccountException(
+                AccountErrorCode.CUENTA_CORREO_NO_DISPONIBLE,
+                "Ese correo ya no está disponible. Pide el cambio otra vez con otro.",
+            )
+        }
 
         return GeneralMessageResponse(
             message = if (cambioDeCorreo) MENSAJE_CORREO_CAMBIADO else MENSAJE_VERIFICADO,
@@ -150,14 +171,39 @@ class EmailVerificationService(
         authThrottleService.comprobar(AmbitoIntentos.VERIFICACION, email)
 
         val customer = customerRepository.findByEmail(email)
-        val pendiente = customer?.emailPending
-        if (customer != null && (!customer.emailVerified || !pendiente.isNullOrBlank())) {
-            val token = jwtUtil.generateSecureToken()
-            customer.emailVerificationToken = token
-            customer.emailVerificationExpiry = Instant.now().plusSeconds(horasDeValidez * 3600)
-            customerRepository.save(customer)
-            // Si hay un cambio pendiente, el enlace va al buzón NUEVO: es el que hay que probar.
-            enviarCorreoDeVerificacion(customer.name, pendiente ?: customer.email, token)
+        if (customer != null) {
+            val limpiado = limpiarVerificacionCaducada(customer)
+
+            // R1-06. **El reenvío ya no re-arma un cambio de correo pendiente.** Antes, cualquiera —sin
+            // autenticarse— llamaba a esta ruta con el correo ACTUAL de la víctima, se acuñaba un token
+            // nuevo y se mandaba **al buzón pendiente**; quien acabara controlando esa dirección se
+            // quedaba con la cuenta. Rearmar un cambio de correo exige probar quién eres, y eso solo lo
+            // hace `POST /user/account/email`, que pide la contraseña.
+            //
+            // Con un pendiente vivo esta ruta no hace nada en absoluto: tampoco manda el enlace al buzón
+            // de acceso, porque ese enlace **aplicaría el cambio pendiente** al abrirlo
+            // (`verificar`, arriba) y entonces el enlace no probaría la posesión del buzón nuevo, que es
+            // justo lo que tiene que probar. Cuando el pendiente caduca, `limpiarVerificacionCaducada`
+            // lo borra y el reenvío vuelve a funcionar.
+            val hayCambioPendiente = !customer.emailPending.isNullOrBlank()
+            val hayQueMandar = !customer.emailVerified && !hayCambioPendiente
+
+            // R1-14. El cubo por cuenta se indexa por el correo recibido, así que rotar la dirección en
+            // cada intento lo esquiva: con una lista de correos reales sin verificar, una petición por
+            // dirección es un correo por dirección. Este presupuesto **por IP y por ventana** cuenta los
+            // envíos que de verdad salen, no las peticiones, así que la rotación deja de amplificar.
+            // Se agota **en silencio**: la respuesta es la misma de siempre. Si el agotamiento
+            // respondiera `429` sería un oráculo nuevo —solo se agotaría con direcciones reales— y
+            // habríamos cambiado una fuga por otra.
+            if (hayQueMandar && authThrottleService.consumirEnvio(AmbitoIntentos.VERIFICACION)) {
+                val token = jwtUtil.generateSecureToken()
+                customer.emailVerificationToken = token
+                customer.emailVerificationExpiry = Instant.now().plusSeconds(horasDeValidez * 3600)
+                customerRepository.save(customer)
+                enviarCorreoDeVerificacion(customer.name, customer.email, token)
+            } else if (limpiado) {
+                customerRepository.save(customer)
+            }
         }
 
         // Cuenta SIEMPRE: si solo contaran los correos inexistentes, el límite se esquivaría pidiendo
@@ -165,6 +211,25 @@ class EmailVerificationService(
         authThrottleService.registrarIntento(AmbitoIntentos.VERIFICACION, email)
 
         return GeneralMessageResponse(message = MENSAJE_REENVIO)
+    }
+
+    /**
+     * Borra la verificación en curso —token, caducidad **y cambio de correo pendiente**— cuando la
+     * ventana ya pasó (R1-06). No guarda: devuelve `true` si tocó algo, y guarda quien la llame.
+     *
+     * Por qué el pendiente cae con el token: los dos se escriben en el mismo `save`
+     * (`AccountService.pedirCambioDeCorreo`) con la misma caducidad, así que un pendiente cuyo token
+     * caducó es un pendiente que ya nadie puede confirmar. Dejarlo escrito solo servía para que lo
+     * re-armara un tercero.
+     */
+    private fun limpiarVerificacionCaducada(customer: CustomerEntity): Boolean {
+        val caducidad = customer.emailVerificationExpiry ?: return false
+        if (!caducidad.isBefore(Instant.now())) return false
+        val habiaAlgo = customer.emailPending != null || customer.emailVerificationToken != null
+        customer.emailPending = null
+        customer.emailVerificationToken = null
+        customer.emailVerificationExpiry = null
+        return habiaAlgo
     }
 
     /** El enlace del correo, siempre desde `app.frontend.url`. Nunca escrito en el código (S-08). */

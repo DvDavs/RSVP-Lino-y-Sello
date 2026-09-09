@@ -37,6 +37,15 @@ enum class AccountErrorCode(val estado: HttpStatus) {
 
     /** Límite de intentos de `AuthThrottleService`. Cuerpo constante: no dice cuánto falta. */
     CUENTA_DEMASIADOS_INTENTOS(HttpStatus.TOO_MANY_REQUESTS),
+
+    /**
+     * Red final del advice (R1-08). Algo se rompió por dentro y **el cuerpo no cuenta qué**: mensaje
+     * constante y sin detalle. Existe porque sin ella una excepción inesperada —el choque contra el
+     * índice único de `customer.email` al confirmar dos cambios de correo a la vez, por ejemplo— caía
+     * en el manejo genérico del núcleo y, con `include-message: always` (S-02), el cuerpo podía llevar
+     * el nombre de la restricción y el valor en conflicto: el correo de otra clienta.
+     */
+    CUENTA_ERROR_INTERNO(HttpStatus.INTERNAL_SERVER_ERROR),
 }
 
 /**

@@ -128,6 +128,19 @@ class AuthThrottleService(
         @Value("\${auth.token.throttle.ventana-minutos:15}") private val ventanaMinutos: Long = 15,
         @Value("\${auth.token.throttle.max-entradas:50000}") private val maxEntradas: Int = 50_000,
         /**
+         * R1-14. Techo de **correos que de verdad salen** por IP y ventana, para los ámbitos que
+         * mandan correo sin autenticar. Existe porque el cubo por cuenta se indexa por el correo
+         * recibido y por tanto se esquiva rotando la dirección: con una lista de direcciones reales sin
+         * verificar, una petición por dirección era un correo por dirección y el único freno era el
+         * cubo de 20 por IP. Este presupuesto cuenta envíos, no peticiones, así que la rotación deja de
+         * amplificar.
+         *
+         * 5 y no 20 porque un buzón real casi nunca necesita más de un par de reenvíos en un cuarto de
+         * hora, y porque el coste de equivocarse a la baja lo paga un botón deshabilitado, no una
+         * cuenta perdida.
+         */
+        @Value("\${auth.token.throttle.max-envios-por-ip:5}") private val maxEnviosPorIp: Int = 5,
+        /**
          * ¿Se puede creer la cabecera `X-Forwarded-For`? **Por defecto NO**, y no es paranoia: la
          * cabecera la pone el cliente, así que confiar en ella sin un proxy delante convierte el
          * límite por IP en decoración —basta rotar el valor en cada intento— y además deja pegar a
@@ -145,6 +158,9 @@ class AuthThrottleService(
 
     private val porCuenta = ConcurrentHashMap<String, Ventana>()
     private val porIp = ConcurrentHashMap<String, Ventana>()
+
+    /** Presupuesto de envíos por IP y ámbito (R1-14). Separado de [porIp]: cuenta cosas distintas. */
+    private val porEnvio = ConcurrentHashMap<String, Ventana>()
 
     /** Inyectable **sólo** desde las pruebas, para avanzar la ventana sin dormir 15 minutos. */
     internal var reloj: () -> Long = System::currentTimeMillis
@@ -208,6 +224,40 @@ class AuthThrottleService(
 
     /** Un acceso correcto por `POST /auth/token`. */
     fun registrarExito(email: String) = registrarExito(AmbitoIntentos.ACCESO, email)
+
+    /**
+     * Pide permiso para **mandar un correo** en este ámbito desde esta IP (R1-14). Devuelve `true` y
+     * consume una unidad si queda presupuesto en la ventana; `false` si se agotó.
+     *
+     * Quien llama tiene que **callarse el `false`**: seguir respondiendo exactamente lo mismo y no
+     * mandar el correo. Un `429` aquí sería un oráculo de enumeración nuevo —el presupuesto solo se
+     * gasta con direcciones que existen y están sin verificar, así que el bloqueo delataría cuáles
+     * son—; el silencio no cuenta nada y corta la amplificación igual.
+     *
+     * Es el mismo mapa in-process que el resto del limitador, con la misma limitación: **con más de
+     * una instancia el techo se multiplica por el número de instancias**. Anotado en
+     * `preguntas-abiertas.md`; es un asunto de despliegue, no de este código.
+     */
+    fun consumirEnvio(ambito: AmbitoIntentos): Boolean {
+        val ahora = reloj()
+        val clave = claveIp(ambito)
+        var concedido = false
+        porEnvio.compute(clave) { _, actual ->
+            when {
+                actual == null || ahora >= actual.hasta -> {
+                    concedido = true
+                    Ventana(ahora + ventanaMs, 1)
+                }
+                actual.fallos < maxEnviosPorIp -> {
+                    concedido = true
+                    actual.copy(fallos = actual.fallos + 1)
+                }
+                else -> actual
+            }
+        }
+        podar(porEnvio, ahora)
+        return concedido
+    }
 
     /**
      * Gasta un bcrypt contra el hash señuelo. Se invoca en el camino «el correo no existe» para que

@@ -82,16 +82,13 @@ class AdminUsersService(
             }
         }
 
-        request.phone?.let { phone ->
-            if (customerRepository.existsByPhoneEvenIfDisabled(phone)) {
-                val phoneOwner = customerRepository.findByPhone(phone)
-                if (phoneOwner != null) {
-                    throw IllegalArgumentException(
-                            "Este número de teléfono no se encuentra disponible, por favor intenta con uno diferente"
-                    )
-                }
-            }
-        }
+        // R1-10 (`ADR-5-E3-C1-03`): sin comprobación de unicidad del teléfono. `customer.phone` no
+        // tiene índice único (`V1__initial_schema.sql:1868-1869` es un índice normal y parcial) y el
+        // alta pública dejó de comprobarla (`ADR-5-E3-05`), así que cualquiera podía registrar sin
+        // autenticarse dos cuentas con el mismo número y, a partir de ahí, `findByPhone` —derivada de
+        // resultado único— reventaba con `IncorrectResultSizeDataAccessException`: esta alta
+        // administrativa devolvía un `500` provocable desde fuera en vez de un `400`. Se retira la
+        // comprobación en las dos rutas a la vez y `findByPhone` desaparece del repositorio.
 
         val customerEntity = customerRepository.save(CustomerEntity(
                 name = request.name,
@@ -122,13 +119,7 @@ class AdminUsersService(
         creatorId: Long,
         targetRole: Role
     ): Customer {
-        request.phone?.let { phone ->
-            if (phone != existingUser.phone && customerRepository.existsByPhoneEvenIfDisabled(phone)) {
-                throw IllegalArgumentException(
-                        "Este número de teléfono no se encuentra disponible, por favor intenta con uno diferente"
-                )
-            }
-        }
+        // R1-10: sin comprobación de unicidad del teléfono, igual que en `createAdministrator`.
 
         existingUser.apply {
             name = request.name
@@ -197,11 +188,9 @@ class AdminUsersService(
             verifyIfEmailIsUniqueForUpdate(request.email)
         }
         
-        request.phone?.let { newPhone ->
-            if (customerEntity.phone != newPhone) {
-                verifyIfPhoneIsUniqueForUpdate(newPhone)
-            }
-        }
+        // R1-10: la unicidad del teléfono ya no se comprueba en ninguna ruta. El correo SÍ sigue
+        // comprobándose aquí: `customer.email` sí tiene índice único de verdad
+        // (`V1__initial_schema.sql:1605`) y sin la comprobación el choque saldría como `500`.
         
         customerEntity.name = request.name
         customerEntity.lastName = request.lastName
@@ -526,12 +515,6 @@ class AdminUsersService(
     private fun verifyIfEmailIsUniqueForUpdate(email: String) {
         customerRepository.findByEmailEvenIfDisabled(email)?.let {
             throw DuplicatedEmailException("Este correo no se encuentra disponible, por favor intenta con uno diferente")
-        }
-    }
-
-    private fun verifyIfPhoneIsUniqueForUpdate(phone: String) {
-        if (customerRepository.existsByPhoneEvenIfDisabled(phone)) {
-            throw IllegalArgumentException("Este número de teléfono no se encuentra disponible, por favor intenta con uno diferente")
         }
     }
 

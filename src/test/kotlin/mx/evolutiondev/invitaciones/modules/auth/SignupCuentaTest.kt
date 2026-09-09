@@ -1,8 +1,10 @@
 package mx.evolutiondev.invitaciones.modules.auth
 
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import mx.evolutiondev.invitaciones.core.auth.jwt.JwtUtil
 import mx.evolutiondev.invitaciones.core.auth.model.CustomerEntity
 import mx.evolutiondev.invitaciones.core.auth.model.Role
@@ -10,8 +12,10 @@ import mx.evolutiondev.invitaciones.core.auth.repository.CustomerRepository
 import mx.evolutiondev.invitaciones.core.auth.repository.RefreshTokenRepository
 import mx.evolutiondev.invitaciones.core.auth.service.HierarchyValidationService
 import mx.evolutiondev.invitaciones.core.email.EmailService
+import mx.evolutiondev.invitaciones.core.error.exception.DuplicatedEmailException
 import mx.evolutiondev.invitaciones.core.util.patterns.Patterns
 import mx.evolutiondev.invitaciones.modules.auth.presentation.model.response.UserRequest
+import mx.evolutiondev.invitaciones.modules.auth.service.AmbitoIntentos
 import mx.evolutiondev.invitaciones.modules.auth.service.AuthThrottleService
 import mx.evolutiondev.invitaciones.modules.auth.service.CustomerService
 import mx.evolutiondev.invitaciones.modules.product.account.EmailVerificationService
@@ -21,6 +25,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
@@ -110,9 +116,6 @@ class SignupCuentaTest {
         repositorioVacio()
         // Así estaba el mundo cuando el alta gritaba «ese número ya existe».
         whenever(repositorio.existsByPhoneEvenIfDisabled(any())).thenReturn(true)
-        whenever(repositorio.findByPhone(any())).thenReturn(
-            CustomerEntity(id = 99, email = "otra@ejemplo.mx", phone = "+525512345678"),
-        )
 
         val creada = servicio.signUp(alta("ana@ejemplo.mx", telefono = "+525512345678"))
 
@@ -130,5 +133,83 @@ class SignupCuentaTest {
         assert(Regex(Patterns.PHONE_NUMBER_PATTERN).matches("+525512345678")) {
             "el ejemplo del mensaje tiene que casar con el patrón real"
         }
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // R1-01 · el alta pública NO reactiva cuentas deshabilitadas
+    // ---------------------------------------------------------------------------------------
+
+    /** La cuenta que el atacante quiere robar: dada de baja, con su contraseña y su rastro. */
+    private fun cuentaDeshabilitada() = CustomerEntity(
+        id = 77,
+        name = "Ana",
+        lastName = "Ruiz",
+        email = "ana@ejemplo.mx",
+        password = encoder.encode("LaDeAna2024!"),
+        role = Role.USER,
+    ).apply {
+        isEnabled = false
+        deletedBy = 3L
+        emailVerified = true
+    }
+
+    @Test
+    @DisplayName("R1-01: el alta publica NO reactiva una cuenta deshabilitada ni le cambia la contrasena")
+    fun elAltaPublicaNoReactivaNiCambiaLaContrasena() {
+        val victima = cuentaDeshabilitada()
+        whenever(repositorio.findByEmailEvenIfDisabled("ana@ejemplo.mx")).thenReturn(victima)
+        whenever(jwtUtil.generateSecureToken()).thenReturn("token-de-alta")
+
+        // El atacante sólo sabe el correo y propone la contraseña que quiere.
+        assertFailsWith<DuplicatedEmailException> {
+            servicio.signUp(alta("ana@ejemplo.mx").copy(password = "DelAtacante1!"))
+        }
+
+        // Nada de la cuenta se movió...
+        assertFalse(victima.isEnabled, "la cuenta sigue deshabilitada")
+        assertEquals(3L, victima.deletedBy, "el rastro de la baja sigue ahí")
+        assertTrue(
+            encoder.matches("LaDeAna2024!", victima.password),
+            "la contrasena de Ana tiene que seguir siendo la suya",
+        )
+        assertFalse(
+            encoder.matches("DelAtacante1!", victima.password),
+            "la contrasena del atacante NO puede haber quedado escrita",
+        )
+        // ...ni se escribió, ni se acuñó token, ni salió correo.
+        verify(repositorio, never()).save(any<CustomerEntity>())
+        verify(jwtUtil, never()).generateSecureToken()
+    }
+
+    @Test
+    @DisplayName("R1-01: una cuenta deshabilitada responde EXACTAMENTE igual que una viva")
+    fun laCuentaDeshabilitadaRespondeExactamenteIgualQueUnaViva() {
+        val viva = CustomerEntity(id = 5, email = "ana@ejemplo.mx", password = encoder.encode("x"))
+        whenever(repositorio.findByEmailEvenIfDisabled("ana@ejemplo.mx")).thenReturn(viva)
+        val deUnaViva = assertFailsWith<DuplicatedEmailException> { servicio.signUp(alta("ana@ejemplo.mx")) }
+
+        limitador.registrarExito(AmbitoIntentos.REGISTRO, "ana@ejemplo.mx")
+
+        whenever(repositorio.findByEmailEvenIfDisabled("ana@ejemplo.mx")).thenReturn(cuentaDeshabilitada())
+        val deUnaMuerta = assertFailsWith<DuplicatedEmailException> { servicio.signUp(alta("ana@ejemplo.mx")) }
+
+        assertEquals(deUnaViva::class, deUnaMuerta::class, "el tipo de error tiene que ser el mismo")
+        assertEquals(deUnaViva.message, deUnaMuerta.message, "el texto tiene que ser el mismo, letra por letra")
+    }
+
+    @Test
+    @DisplayName("R1-01: el metodo que reactivaba desde el alta publica ya no existe")
+    fun elAltaPublicaNoTocaLaCuentaDeshabilitada() {
+        // Prueba estructural: mientras `reactivateDisabledUser` siga declarado, alguien lo volverá a
+        // llamar desde `signUp`. La reactivación por ADMIN sí sigue viva, con otro nombre y otra ruta.
+        val nombres = CustomerService::class.java.declaredMethods.map { it.name }
+        assertFalse(
+            nombres.any { it.startsWith("reactivateDisabledUser") && !it.contains("ByAdmin") },
+            "reactivateDisabledUser tiene que haber desaparecido; quedan: $nombres",
+        )
+        assertTrue(
+            nombres.any { it.contains("reactivateDisabledUserByAdmin") },
+            "la reactivacion por ADMIN sigue siendo la unica via de vuelta y tiene que seguir ahi",
+        )
     }
 }
