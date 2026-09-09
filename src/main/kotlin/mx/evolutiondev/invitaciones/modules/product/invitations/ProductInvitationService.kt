@@ -56,7 +56,7 @@ class ProductInvitationService(
         val ninos = peticion.childrenAllowed ?: true
         val jovenes = peticion.youngAllowed ?: true
 
-        limitador.comprobarYRegistrar(customerId)
+        limitador.comprobarYRegistrar(customerId, OperacionInvitacion.ALTA)
 
         val plantilla = repositorio.plantillaPuente(eventKind.wire)
             ?: throw PlantillaPuenteAusenteException(eventKind.wire)
@@ -117,7 +117,9 @@ class ProductInvitationService(
      */
     @Transactional
     fun eliminar(customerId: Long, invitationId: Long) {
-        limitador.comprobarYRegistrar(customerId)
+        // Cubo **propio** del borrado (R2-01/R2-04): agotar el alta no puede quitarle a nadie la
+        // salida que esta ruta existe para darle.
+        limitador.comprobarYRegistrar(customerId, OperacionInvitacion.BORRADO)
         repositorio.bloquearCliente(customerId)
 
         val propia = repositorio.buscarPropia(customerId, invitationId) ?: throw InvitacionNoEncontradaException()

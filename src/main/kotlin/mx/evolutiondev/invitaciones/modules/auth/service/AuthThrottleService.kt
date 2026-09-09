@@ -57,7 +57,15 @@ enum class AmbitoIntentos(val prefijo: String) {
     /** `POST /auth/request-password-reset` — **cada** petición cuenta; no hay «éxito» que limpie. */
     RECUPERACION("recuperacion"),
 
-    /** `POST /auth/signup` — cuenta el intento rechazado; un alta correcta limpia el contador. */
+    /**
+     * `POST /auth/signup` — **cada** petición cuenta, la rechazada y la que crea la cuenta (R2-02).
+     *
+     * Hasta la re-revisión, un alta correcta llamaba a [AuthThrottleService.registrarExito], que
+     * borra el contador de IP: las altas con éxito no se acumulaban nunca y el techo de 20/IP solo
+     * frenaba tanteos fallidos, de modo que cinco cuentas seguidas desde una IP no veían un solo
+     * `429`. Y el alta con éxito es precisamente la petición cara: escribe una fila de `customer` y
+     * encola **dos** correos. Aquí no hay «éxito» que limpie nada, igual que en [RECUPERACION].
+     */
     REGISTRO("registro"),
 
     /**
@@ -106,10 +114,12 @@ enum class AmbitoIntentos(val prefijo: String) {
  * Los límites, la ventana y el cuerpo del `429` son los mismos en los tres; lo que no se comparte es
  * el contador.
  *
- * ### Un acceso correcto limpia los contadores
- * `registrarExito` borra la entrada de la cuenta **y** la de la IP, dentro de su ámbito. Así, un usuario legítimo nunca
+ * ### Un acceso correcto limpia los contadores — **solo en `ACCESO`** (R2-02)
+ * `registrarExito` borra la entrada de la cuenta **y** la de la IP, dentro de su ámbito, y desde la
+ * re-revisión lo llama únicamente `/auth/token`. Así, un usuario legítimo nunca
  * queda bloqueado después de un `200`, y una oficina tras NAT no se autobloquea porque varios
- * compañeros hayan fallado. Contrapartida asumida y explícita: quien tenga unas credenciales
+ * compañeros hayan fallado. En los ámbitos donde la operación con éxito es la cara —el alta, la
+ * recuperación— limpiar con el éxito era tanto como no contar: ahí cuenta toda petición. Contrapartida asumida y explícita: quien tenga unas credenciales
  * válidas puede reiniciar su propio contador de IP; el control duro sigue siendo el de cuenta
  * (5/15 min), que **no** lo limpia el éxito de otra cuenta.
  *
@@ -214,10 +224,17 @@ class AuthThrottleService(
 
     /**
      * La operación salió bien: se borran los dos contadores **de ese ámbito**. Es lo que garantiza
-     * que un usuario legítimo no quede bloqueado justo después de un acceso —o de un alta— correcta.
-     * `RECUPERACION` nunca llama aquí: no hay «éxito» observable que pueda limpiar su contador.
+     * que un usuario legítimo no quede bloqueado justo después de un acceso correcto, y que una
+     * oficina tras NAT no se autobloquee.
+     *
+     * Lo llama **solo** [AmbitoIntentos.ACCESO], y con razón: ahí el éxito es una prueba de que
+     * quien llama tiene credenciales, y lo que se limpia es un contador de *fallos*. Donde el éxito
+     * es la operación cara —crear una cuenta y mandar dos correos ([AmbitoIntentos.REGISTRO]), o
+     * mandar un correo de recuperación ([AmbitoIntentos.RECUPERACION])— limpiar el contador con el
+     * éxito equivale a no tener contador: es lo que R2-02 encontró en el alta.
      */
     fun registrarExito(ambito: AmbitoIntentos, email: String) {
+        // Solo lo usa ACCESO. `REGISTRO` dejó de llamarlo en R2-02 y `RECUPERACION` nunca lo llamó.
         porCuenta.remove(claveCuenta(ambito, email))
         porIp.remove(claveIp(ambito))
     }
@@ -226,8 +243,9 @@ class AuthThrottleService(
     fun registrarExito(email: String) = registrarExito(AmbitoIntentos.ACCESO, email)
 
     /**
-     * Pide permiso para **mandar un correo** en este ámbito desde esta IP (R1-14). Devuelve `true` y
-     * consume una unidad si queda presupuesto en la ventana; `false` si se agotó.
+     * Pide permiso para **mandar un correo** en este ámbito desde esta IP (R1-14; extendido al alta
+     * en R2-02). Devuelve `true` y consume una unidad si queda presupuesto en la ventana; `false` si
+     * se agotó.
      *
      * Quien llama tiene que **callarse el `false`**: seguir respondiendo exactamente lo mismo y no
      * mandar el correo. Un `429` aquí sería un oráculo de enumeración nuevo —el presupuesto solo se

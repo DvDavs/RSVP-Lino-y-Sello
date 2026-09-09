@@ -17,6 +17,7 @@ import mx.evolutiondev.invitaciones.core.util.patterns.Patterns
 import mx.evolutiondev.invitaciones.modules.auth.presentation.model.response.UserRequest
 import mx.evolutiondev.invitaciones.modules.auth.service.AmbitoIntentos
 import mx.evolutiondev.invitaciones.modules.auth.service.AuthThrottleService
+import mx.evolutiondev.invitaciones.modules.auth.service.DemasiadosIntentosException
 import mx.evolutiondev.invitaciones.modules.auth.service.CustomerService
 import mx.evolutiondev.invitaciones.modules.product.account.EmailVerificationService
 import mx.evolutiondev.invitaciones.modules.product.account.ProductMailProperties
@@ -26,6 +27,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -195,6 +197,78 @@ class SignupCuentaTest {
 
         assertEquals(deUnaViva::class, deUnaMuerta::class, "el tipo de error tiene que ser el mismo")
         assertEquals(deUnaViva.message, deUnaMuerta.message, "el texto tiene que ser el mismo, letra por letra")
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // R2-02 · `/auth/signup` ya no es un amplificador de cuentas ni de correo
+    // ---------------------------------------------------------------------------------------
+
+    /** Un alta correcta, con su propio limitador y su propio servicio, para no gastar los de arriba. */
+    private fun servicioConLimitador(
+        limitadorPropio: AuthThrottleService,
+        verificacion: EmailVerificationService = this.verificacion,
+    ) = CustomerService(
+        customerRepository = repositorio,
+        passwordEncoder = encoder,
+        hierarchyValidationService = mock<HierarchyValidationService>(),
+        emailService = emailService,
+        authThrottleService = limitadorPropio,
+        emailVerificationService = verificacion,
+        mailProperties = ProductMailProperties(),
+    )
+
+    /**
+     * **R2-02, el hallazgo.** La revisora creó cinco cuentas seguidas desde una IP sin ver un solo
+     * `429`, porque cada alta con éxito llamaba a `registrarExito`, que **borra el contador de IP**:
+     * el techo no mordía nunca. Ahora el alta con éxito cuenta como cualquier otra petición.
+     *
+     * Correos distintos a propósito: así el cubo que tiene que frenar es el de IP, que es el único
+     * que un guion de altas en cadena no puede esquivar.
+     */
+    @Test
+    @DisplayName("R2-02: N altas seguidas desde la misma IP acaban en 429")
+    fun lasAltasSeguidasDesdeUnaIpTopan() {
+        repositorioVacio()
+        val limitadorPropio = AuthThrottleService(
+            passwordEncoder = encoder,
+            maxFallosPorCuenta = 5,
+            maxFallosPorIp = 3,
+            ventanaMinutos = 15,
+            maxEntradas = 50_000,
+        )
+        val servicioPropio = servicioConLimitador(limitadorPropio)
+
+        repeat(3) { i -> servicioPropio.signUp(alta("alta$i@ejemplo.mx")) }
+
+        assertFailsWith<DemasiadosIntentosException> { servicioPropio.signUp(alta("alta3@ejemplo.mx")) }
+    }
+
+    /**
+     * **R2-02, la otra mitad.** El alta manda **dos** correos por el mismo canal SMTP que R1-14 vino
+     * a proteger, y no pasaba por el presupuesto de envíos. Ahora sí, y cuando se agota el alta
+     * sigue funcionando —la cuenta se crea— pero **en silencio**: sin correo y sin `429`, que sería
+     * un oráculo nuevo.
+     */
+    @Test
+    @DisplayName("R2-02: agotado el presupuesto de envios, el alta crea la cuenta pero NO manda correo")
+    fun elAltaDejaDeMandarCorreoAlAgotarseElPresupuesto() {
+        repositorioVacio()
+        val verificacionSimulada: EmailVerificationService = mock()
+        whenever(verificacionSimulada.prepararVerificacionDeAlta(any())).thenReturn("token-de-alta")
+        val limitadorPropio = AuthThrottleService(
+            passwordEncoder = encoder,
+            maxFallosPorCuenta = 5,
+            maxFallosPorIp = 20,
+            ventanaMinutos = 15,
+            maxEntradas = 50_000,
+            maxEnviosPorIp = 2,
+        )
+        val servicioPropio = servicioConLimitador(limitadorPropio, verificacionSimulada)
+
+        val creadas = (0 until 4).map { i -> servicioPropio.signUp(alta("envio$i@ejemplo.mx")) }
+
+        assertEquals(4, creadas.size, "las cuatro cuentas se crean: el presupuesto no rompe el alta")
+        verify(verificacionSimulada, times(2)).enviarCorreoDeVerificacion(any(), any(), any())
     }
 
     @Test

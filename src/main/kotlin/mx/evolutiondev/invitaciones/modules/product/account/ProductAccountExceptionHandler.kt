@@ -83,8 +83,16 @@ class ProductAccountExceptionHandler(private val dateFormatter: DateFormatter) {
      * advice del producto responden igual ante lo inesperado.
      */
     @ExceptionHandler(Exception::class)
-    fun inesperado(e: Exception): ResponseEntity<AccountErrorResponse> =
-        respuesta(AccountErrorCode.CUENTA_ERROR_INTERNO, MENSAJE_INTERNO)
+    fun inesperado(e: Exception): ResponseEntity<AccountErrorResponse> {
+        // R2-06. La red se tragaba tambien los 4xx que Spring MVC ya sabe contestar —el caso medido
+        // es `Content-Type: text/plain`, que respondia `500 CUENTA_ERROR_INTERNO` en vez de `415`— y
+        // convertir un error del cliente en uno del servidor es mentirle a quien llama y ensuciar la
+        // alarma de errores del servidor. Los `ErrorResponse` de Spring (415, 405, 406, 400 de
+        // parametros...) traen su propio estado y su cuerpo ya es mudo: se relanzan, igual que la
+        // `AccessDeniedException` de arriba. Lo que no es de esa familia sigue saliendo mudo por aqui.
+        if (e is org.springframework.web.ErrorResponse) throw e
+        return respuesta(AccountErrorCode.CUENTA_ERROR_INTERNO, MENSAJE_INTERNO)
+    }
 
     private fun respuesta(code: AccountErrorCode, message: String): ResponseEntity<AccountErrorResponse> =
         ResponseEntity.status(code.estado).body(

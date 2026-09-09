@@ -1,6 +1,5 @@
 package mx.evolutiondev.invitaciones.core.auth.repository
 
-import mx.evolutiondev.invitaciones.core.auth.model.CustomerEntity
 import mx.evolutiondev.invitaciones.core.auth.model.RefreshTokenEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -11,8 +10,24 @@ import org.springframework.transaction.annotation.Transactional
 
 @Repository
 interface RefreshTokenRepository : JpaRepository<RefreshTokenEntity, Long> {
-    fun findByCustomer(customer: CustomerEntity): RefreshTokenEntity?
     fun findByToken(token: String): RefreshTokenEntity?
+
+    /**
+     * Quema **un** token de refresco y devuelve cuántas filas borró: 1 si este canje se lo llevó, 0
+     * si ya no estaba (R1-07).
+     *
+     * Ese número es la pieza que faltaba. `delete(entidad)` carga la fila y la borra sin mirar si
+     * seguía ahí, de modo que dos canjes simultáneos del mismo token pasaban los dos y emitían dos
+     * refrescos válidos. Con un `DELETE … WHERE token = ?` la base de datos serializa los dos
+     * canjes —la fila solo se puede borrar una vez— y el testigo de quién ganó es la cuenta de
+     * filas afectadas: solo quien recibe 1 tiene derecho a emitir token nuevo.
+     *
+     * Va en bloque (`@Modifying`) a propósito: no interesa la entidad, interesa el número.
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM RefreshTokenEntity r WHERE r.token = :token")
+    fun deleteByToken(@Param("token") token: String): Int
 
     /**
      * Revoca **todas** las sesiones de refresco de una cuenta y devuelve cuántas borró.

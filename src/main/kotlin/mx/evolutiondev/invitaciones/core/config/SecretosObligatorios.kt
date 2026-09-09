@@ -5,6 +5,7 @@ import org.springframework.boot.env.EnvironmentPostProcessor
 import org.springframework.core.Ordered
 import org.springframework.core.env.ConfigurableEnvironment
 import org.springframework.util.ClassUtils
+import kotlin.math.ln
 
 /**
  * Compuerta de arranque de los secretos de `application.yml` (fase 5, bloque E3-A3; ADR-5-E3-A3-01,
@@ -76,9 +77,94 @@ class SecretosObligatorios : EnvironmentPostProcessor, Ordered {
     override fun postProcessEnvironment(environment: ConfigurableEnvironment, application: SpringApplication) {
         if (!debeExigir(environment)) return
         val faltan = exigidas.filter { environment.getProperty(it.nombre).isNullOrBlank() }
-        if (faltan.isEmpty()) return
-        throw IllegalStateException(mensaje(faltan))
+        if (faltan.isNotEmpty()) throw IllegalStateException(mensaje(faltan))
+
+        val queja = quejaDeLaClave(environment.getProperty("JWT_SECRET")!!)
+        if (queja != null) throw IllegalStateException(mensajeDeClaveDebil(queja))
     }
+
+    /**
+     * R1-14, la mitad que faltaba: **la entropia de `JWT_SECRET`**.
+     *
+     * Lo que ya estaba cubierto: jjwt 0.11.5 rechaza con `WeakKeyException` cualquier clave HMAC de
+     * menos de 256 bits, y la compuerta de arriba rechaza la vacia y la que es toda espacios. Lo que
+     * nadie miraba: **32 caracteres iguales pasan las dos puertas**. `aaaaaaaa...` mide 256 bits de
+     * material y cero bits de secreto; con ella, firmar un token de MASTER es adivinar una palabra.
+     *
+     * Tres comprobaciones, y ninguna es un juicio de gusto:
+     *
+     *  1. **Longitud >= 32.** Es lo que exige HS256 leyendo la cadena como bytes UTF-8. Lo dice aqui,
+     *     con nombre y remedio, en vez de salir mas tarde como un fallo de creacion de bean —que es
+     *     el mensaje ilegible que esta compuerta existe para evitar—.
+     *  2. **Al menos [MINIMO_DISTINTOS] caracteres distintos.** Corta el caso del informe y todas sus
+     *     variantes (`aaaa...`, `abababab...`, un patron corto repetido).
+     *  3. **Entropia de Shannon total >= [MINIMO_BITS] bits.** La medida honesta de lo anterior: mide
+     *     la distribucion de caracteres de la propia cadena, asi que castiga la repeticion aunque el
+     *     alfabeto sea amplio. Una clave generada al azar la supera con muchisimo margen: 32
+     *     caracteres hexadecimales dan ~126 bits, y los 64 de `openssl rand -base64 48` pasan de 370.
+     *
+     * Ninguna de las tres puede aprobar una clave mala por accidente ni suspender una aleatoria de
+     * la longitud recomendada. Y esta clase **no genera claves**: dice como generarla y se niega a
+     * arrancar, que es exactamente lo que hace con las que faltan.
+     */
+    internal fun quejaDeLaClave(clave: String): String? {
+        if (clave.length < MINIMO_CARACTERES) {
+            return "tiene ${clave.length} caracteres y hacen falta al menos $MINIMO_CARACTERES " +
+                "(HS256 usa la cadena tal cual como clave HMAC: por debajo de 256 bits la libreria de " +
+                "firma la rechaza y la aplicacion se cae al crear el primer bean)"
+        }
+        val distintos = clave.toSet().size
+        if (distintos < MINIMO_DISTINTOS) {
+            return "solo usa $distintos caracteres distintos y hacen falta al menos $MINIMO_DISTINTOS: " +
+                "una clave larga hecha de un par de caracteres repetidos no es un secreto, es una palabra larga"
+        }
+        val bits = bitsDeEntropia(clave)
+        if (bits < MINIMO_BITS) {
+            return "su entropia estimada es de ${bits.toInt()} bits y hacen falta al menos $MINIMO_BITS: " +
+                "la cadena repite demasiado para ser aleatoria"
+        }
+        return null
+    }
+
+    /** Entropia de Shannon de la distribucion de caracteres, por el numero de caracteres. */
+    private fun bitsDeEntropia(clave: String): Double {
+        val total = clave.length.toDouble()
+        val porCaracter = clave.groupingBy { it }.eachCount().values.sumOf { repeticiones ->
+            val p = repeticiones / total
+            -p * (ln(p) / LN_2)
+        }
+        return porCaracter * total
+    }
+
+    private fun mensajeDeClaveDebil(queja: String): String = """
+        |
+        |*************************************************************************************
+        |LA APLICACION NO ARRANCA: JWT_SECRET NO ES UNA CLAVE ACEPTABLE
+        |*************************************************************************************
+        |
+        |El valor de JWT_SECRET $queja.
+        |
+        |Esta clave firma los tokens de TODAS las sesiones: quien la adivine o la reconstruya
+        |puede firmarse un token de cualquier usuario y de cualquier rol, MASTER incluido, sin
+        |credenciales y sin dejar rastro.
+        |
+        |COMO GENERAR UNA BUENA (una linea, y pega el resultado en tu gestor de secretos):
+        |
+        |  openssl rand -base64 48
+        |
+        |...o, si no tienes openssl a mano:
+        |
+        |  head -c 48 /dev/urandom | base64
+        |
+        |Aqui NO se genera ninguna clave ni se sugiere ningun valor concreto a proposito: una clave
+        |escrita en el repositorio deja de ser secreta, y una generada al vuelo en cada arranque
+        |invalidaria en silencio todas las sesiones vivas. Genera la tuya y guardala en el entorno.
+        |
+        |OJO AL CAMBIARLA EN UN ENTORNO QUE YA FUNCIONA: cambiar JWT_SECRET cierra la sesion de
+        |todo el mundo. Es lo correcto si la clave anterior era debil o se filtro; hazlo a sabiendas.
+        |*************************************************************************************
+        |
+    """.trimMargin()
 
     /**
      * Decide si la compuerta corre. El orden importa y el primero que gana es **el explicito**.
@@ -170,5 +256,16 @@ class SecretosObligatorios : EnvironmentPostProcessor, Ordered {
          * `-Dsecretos.obligatorios.exigir=false`. Ausente = heuristica de siempre.
          */
         const val PROPIEDAD_EXIGIR: String = "secretos.obligatorios.exigir"
+
+        /** HS256 lee la cadena como bytes UTF-8 y jjwt exige 256 bits (`JwtUtil.kt`). */
+        internal const val MINIMO_CARACTERES = 32
+
+        /** Ver [quejaDeLaClave]. Una cadena aleatoria de 32 caracteres los supera de sobra. */
+        internal const val MINIMO_DISTINTOS = 10
+
+        /** Ver [quejaDeLaClave]. 32 caracteres hexadecimales al azar rondan los 126. */
+        internal const val MINIMO_BITS = 112
+
+        private const val LN_2 = 0.6931471805599453
     }
 }

@@ -98,8 +98,8 @@ class CustomerService(
      * que se cierra es el **caudal**: el mismo limitador de I-02, en su propio ámbito
      * (`AmbitoIntentos.REGISTRO`), comprobado antes de tocar la base y registrado después.
      *
-     * Un alta correcta limpia el contador de ese ámbito: quien de verdad se está registrando nunca
-     * queda bloqueado por sus propios tanteos, y una red tras NAT no se autobloquea.
+     * **Toda** petición cuenta, la que sale bien también (R2-02): antes el alta correcta *limpiaba*
+     * el contador de IP y con eso el techo no mordía jamás. Ver el comentario del final del método.
      */
     fun signUp(userRequest: UserRequest): CustomerEntity {
         authThrottleService.comprobar(AmbitoIntentos.REGISTRO, userRequest.email)
@@ -156,23 +156,40 @@ class CustomerService(
         val tokenDeVerificacion = emailVerificationService.prepararVerificacionDeAlta(newUser)
         val savedUser = customerRepository.save(newUser)
 
-        coroutineScope.launch {
-            emailService.sendEmail(
-                to = savedUser.email,
-                templateName = "welcome",
-                variables = mapOf(
-                    "customerName" to "${savedUser.name} ${savedUser.lastName}",
-                    "companyName" to mailProperties.remitenteNombre
+        // R2-02, segunda mitad. El alta manda DOS correos —bienvenida y verificación— por el mismo
+        // canal SMTP de cuenta gratuita que R1-14 vino a proteger en el reenvío, y aquí no pasaban
+        // por ningún presupuesto: una petición sin autenticar, dos correos. Ahora los dos van detrás
+        // del mismo permiso, uno por alta: o salen los dos o no sale ninguno, porque los dos hablan
+        // del mismo buzón y mandar solo uno sería peor que no mandar ninguno.
+        //
+        // Se agota **en silencio**, como en el reenvío: la respuesta del alta es exactamente la
+        // misma y la cuenta se crea igual. Quien se quede sin correo de verificación tiene
+        // `POST /auth/verify-email:resend`, que lleva su propio presupuesto en otro ámbito.
+        if (authThrottleService.consumirEnvio(AmbitoIntentos.REGISTRO)) {
+            coroutineScope.launch {
+                emailService.sendEmail(
+                    to = savedUser.email,
+                    templateName = "welcome",
+                    variables = mapOf(
+                        "customerName" to "${savedUser.name} ${savedUser.lastName}",
+                        "companyName" to mailProperties.remitenteNombre
+                    )
                 )
+            }
+            emailVerificationService.enviarCorreoDeVerificacion(
+                    nombre = savedUser.name,
+                    destino = savedUser.email,
+                    token = tokenDeVerificacion
             )
         }
-        emailVerificationService.enviarCorreoDeVerificacion(
-                nombre = savedUser.name,
-                destino = savedUser.email,
-                token = tokenDeVerificacion
-        )
 
-        authThrottleService.registrarExito(AmbitoIntentos.REGISTRO, userRequest.email)
+        // R2-02, primera mitad. Aquí había un `registrarExito`, que **borra el contador de IP**: las
+        // altas correctas no se acumulaban nunca y el techo de 20/IP solo frenaba tanteos fallidos,
+        // así que cinco cuentas seguidas desde la misma IP no veían un solo `429` (reproducido en
+        // `5-E3-R2-seguridad.md §2`). El alta con éxito es justo la petición cara —una fila de
+        // `customer` y dos correos—, así que **cuenta como cualquier otra**, igual que en
+        // `RECUPERACION`: en este ámbito no hay «éxito» que limpie nada.
+        authThrottleService.registrarIntento(AmbitoIntentos.REGISTRO, userRequest.email)
         return savedUser
     }
 
