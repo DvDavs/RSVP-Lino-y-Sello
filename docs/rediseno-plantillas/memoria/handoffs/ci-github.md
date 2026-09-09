@@ -57,4 +57,8 @@ no tiene backend detrás.
 - **`scripts/ci-backend.sh`**: el backend del job arranca desde el **jar** (`bootJar` + `java -jar`)
   y no con `bootRun`. De cuatro procesos java vivos durante las pruebas a uno, y de paso el CI
   prueba el artefacto de producción. Arranque medido: 18,7 s en local, ~2 min con la compilación.
-- **Tiempos del job `e2e`** con un worker y el jar: ver la última corrida verde de la rama.
+- **Verde, dos corridas seguidas**: [34306781190](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34306781190) (`dbf4609`) y [34308150542](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34308150542)
+  (`6824be3`, entera a la primera). Tiempos de la segunda: **9 min 45 s** de reloj ·
+  `frontend` 5 m 51 s · `design` 6 m 13 s (279/279) · `e2e` **9 m 41 s**, repartido en backend
+  1 m 55 s + siembra 6 s + **las 79 pruebas en 2 m 57 s** (con UN worker, gracias al jar) + LHCI
+  2 m 10 s.

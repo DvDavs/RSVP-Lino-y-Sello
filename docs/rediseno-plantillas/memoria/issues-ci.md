@@ -33,6 +33,10 @@ ADR-1R-C-11) prohíbe la cuarentena sin issue, y aquí no hay ninguna prueba en 
 - **Verificado.** Los dos specs pasan en el runner con dos workers (34304958215) y la suite completa
   pasa **en local** con `--workers=4 --timeout=60000 --fail-on-flaky-tests`: 79/79 en 1,3 min, dos
   veces. Ninguna prueba saltada, omitida ni en cuarentena: siguen siendo 79.
+- **Corridas verdes con el aislamiento ya cerrado** (1 worker, `--fail-on-flaky-tests`, las 79):
+  [34306781190](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34306781190) (`dbf4609`; el job `e2e` verde a la primera, la corrida quedó en verde tras
+  relanzar el flake de la galería) y [34308150542](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34308150542) (`6824be3`, verde entera a la primera,
+  9 min 45 s de reloj; `e2e` 9 m 41 s, del que el paso de pruebas son **2 m 57 s**).
 - **Lo que NO se consiguió, y por qué está en I-CI-03.** Subir los workers del CI. Cerrado el
   aislamiento, el runner sigue en rojo con dos workers por otra causa medida: el lienzo del editor
   no pinta dentro de su presupuesto. Es reloj, no datos, y vive en pruebas fuera del territorio de

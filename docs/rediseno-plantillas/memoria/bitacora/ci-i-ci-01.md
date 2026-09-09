@@ -32,6 +32,8 @@ durante las pruebas a uno.
 | Runner | 2 workers, [34299786630](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34299786630) | capturas (lienzo en frío 30 s ×2) + `teclado-editor` E-10a (20 s; 5,2 s al reintentar) |
 | Runner | 2 workers, [34304958215](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34304958215) | 78/79: `editor-nucleo` E-N2 en el `expect` de 5 s. **Mis dos specs pasan** |
 | Runner | 2 workers + jar, [34305882574](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34305882574) | rojo igual |
+| Runner | **1 worker**, [34306781190](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34306781190) | `e2e` verde; la corrida cayó por un flake de axe en la galería y quedó verde al relanzarlo |
+| Runner | **1 worker**, [34308150542](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34308150542) | **verde entera a la primera**: 9 m 45 s; `e2e` 9 m 41 s, las 79 pruebas en 2 m 57 s |
 
 ## 4. Qué NO se consiguió
 Las dos corridas verdes **con paralelismo** no están. Cerrado el aislamiento, el runner sigue rojo
