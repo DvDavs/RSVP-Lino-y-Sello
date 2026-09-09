@@ -1,0 +1,10 @@
+# Compuerta de arranque de los secretos obligatorios (fase 5, E3-A3; ADR-5-E3-A3-01).
+# Se registra aqui y no con @Component porque un EnvironmentPostProcessor tiene que existir ANTES de
+# que haya contexto: es lo que permite que el fallo por variable ausente llegue antes que el
+# "Could not resolve placeholder" de Spring, y que la clase no entre en el escaneo de componentes ni
+# en los contextos acotados de las pruebas.
+# Spring Boot 3.4 carga los EnvironmentPostProcessor SOLO desde spring.factories
+# (SpringFactoriesEnvironmentPostProcessorsFactory); el fichero `.imports` de las autoconfiguraciones
+# no vale para esto (verificado: con `.imports` la clase no llega a ejecutarse).
+org.springframework.boot.env.EnvironmentPostProcessor=\
+mx.evolutiondev.invitaciones.core.config.SecretosObligatorios

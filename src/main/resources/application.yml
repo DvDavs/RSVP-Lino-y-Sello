@@ -6,19 +6,37 @@ server:
     include-message: always
 invitaciones:
   jwt:
-    secret: cS6VIG2F8ZnKPeTJs6Sl3uyXZl7UNMkRM0V0dTamzgkBq68d2zVGfCpKLsKoZ8LM
+    # SIN VALOR POR DEFECTO A PROPOSITO (ADR-5-E3-A3-01; hallazgo S-01 de `diseno/12 A3`).
+    # Esta clave firma los tokens de TODAS las sesiones: con un valor escrito aqui, cualquiera con
+    # acceso al repositorio (o a su historico) firma un token valido para cualquier usuario y
+    # cualquier rol, MASTER incluido, sin credenciales y sin dejar rastro. Sin `JWT_SECRET` la
+    # aplicacion NO arranca y explica que poner (`core/config/SecretosObligatorios.kt`).
+    # Tampoco se genera una al vuelo: una clave distinta por instancia invalidaria en silencio
+    # todas las sesiones vivas en cada reinicio, que es peor que no arrancar.
+    # Minimo 32 caracteres: `JwtUtil.kt:18` la usa tal cual como clave HMAC de HS256.
+    secret: ${JWT_SECRET}
     issuer: evolutiondevmx
     expiration: 3600000
 aws:
   region: us-east-2
   credentials:
-    access-key: AKIAQD24JOD45NZSYC3G
-    secret-key: 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
+    # SIN VALOR POR DEFECTO A PROPOSITO (ADR-5-E3-A3-01; S-01). Son las credenciales de la cuenta de
+    # AWS: quien las tiene escribe y borra en los buckets del producto. Los nombres son los estandar
+    # del SDK de AWS, asi que el mismo entorno sirve para `aws-cli` y para la cadena de proveedores
+    # por defecto. Sin ellas la aplicacion NO arranca y explica que poner.
+    # Para desarrollo, `scripts/dev-backend.sh` define un par evidentemente falso y trabaja con
+    # `TEMPLATES2_ASSETS_MODE=local`, que no llama a AWS.
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
 spring:
   application:
     name: Invitaciones
   datasource:
     driver-class-name: org.postgresql.Driver
+    # Estos dos SI conservan valor por defecto, a diferencia de los secretos de arriba
+    # (ADR-5-E3-A3-01): son las credenciales del Postgres de DESARROLLO que crean
+    # `scripts/pg-ephemeral.sh` y `docker-compose.yml` en la propia maquina, no una cuenta de
+    # produccion. Un despliegue real las trae del entorno y ese Postgres no acepta estas.
     password: ${SPRING_DATASOURCE_PASSWORD:evolution123}
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5501/invitaciones}
     username: ${SPRING_DATASOURCE_USERNAME:evolution}
@@ -62,8 +80,16 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 465
-    username: invitacionesdigitalesagape@gmail.com
-    password: dgeuepxerqqmfdgs
+    # SIN VALOR POR DEFECTO A PROPOSITO (ADR-5-E3-A3-01; S-01). Es la cuenta y la contrasena de
+    # aplicacion del buzon que manda TODO el correo transaccional: quien las tiene escribe correo
+    # como la empresa y lee el buzon donde caen los enlaces de recuperacion de contrasena.
+    # Sin ellas la aplicacion NO arranca y explica que poner.
+    # OJO: `core/email/MailConfig.kt` define un `@Bean @Primary JavaMailSender` con las credenciales
+    # escritas en el codigo, asi que hoy el transporte real NO lee estas dos propiedades. Sacarlas de
+    # aqui no basta: falta el mismo trabajo en `MailConfig.kt` (fuera del alcance de este encargo,
+    # anotado en `preguntas-abiertas.md`).
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:

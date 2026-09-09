@@ -32,6 +32,13 @@ scripts/seed/invitados.sh             # imprime las variables del caso
 eval "$(scripts/seed/invitados.sh)"   # y las deja en el entorno
 ```
 
+> **Arranque y secretos.** Desde `ADR-5-E3-A3-01` el backend **no arranca** sin `JWT_SECRET`,
+> `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `MAIL_USERNAME` y `MAIL_PASSWORD`: ya no tienen valor
+> por defecto en `application.yml`. En local no hay que hacer nada — `scripts/dev-backend.sh` las
+> define con valores de desarrollo evidentemente falsos —, pero si arrancas la aplicación **a mano**
+> (`./gradlew bootRun`) tienes que exportarlas tú: `export JWT_SECRET=...` (mínimo 32 caracteres) y
+> las otras cuatro. Si faltan, el arranque falla y el mensaje dice cuáles y cómo ponerlas.
+
 Cada script imprime `SEED_<AREA>_*` en formato `clave=valor` ya escapado, para poder hacer `eval`
 sin sorpresas. Ninguno reutiliza datos de una corrida anterior: cada llamada crea correos, teléfonos
 e invitaciones nuevos, derivados de un sufijo único por proceso.

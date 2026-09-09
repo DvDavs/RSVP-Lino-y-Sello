@@ -2,8 +2,16 @@
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:6003}"
-EMAIL="${EMAIL:-invitacionesdigitalesagape@gmail.com}"
-PASSWORD="${PASSWORD:-4dm1n1straT0r123$}"
+# Credenciales SIN valor por defecto (fase 5, ADR-5-E3-A3-01): este script traía escritos en claro
+# la cuenta y la contraseña de un usuario MASTER real. Ahora las exige del entorno:
+#   EMAIL=... PASSWORD=... scripts/create_complete_template.sh ...
+EMAIL="${EMAIL:-}"
+PASSWORD="${PASSWORD:-}"
+if [[ -z "$EMAIL" || -z "$PASSWORD" ]]; then
+  echo "create_complete_template: faltan EMAIL y/o PASSWORD (credenciales MASTER del backend)." >&2
+  echo "                          Exporta las tuyas: EMAIL=... PASSWORD=... $0 ..." >&2
+  exit 2
+fi
 
 if [[ $# -lt 7 ]]; then
   echo "Uso: $0 <name> <price> <image_url> <demo_url> <event_id> <plan_id> <visual_config_json_path> [content_config_json_path]"

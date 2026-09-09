@@ -25,6 +25,16 @@
 #                          o PW_PORT si tu `apps/web` escucha en otro puerto, p.ej. Playwright)
 #   TEMPLATES2_REVALIDATE_TOKEN  secreto compartido con `REVALIDATE_SECRET` de `apps/web`
 #                          (por defecto un valor DE DESARROLLO, nunca uses este valor en producción)
+#
+# Secretos que `application.yml` exige y ya NO tienen valor por defecto (fase 5, ADR-5-E3-A3-01):
+#   JWT_SECRET             clave de firma de los tokens de sesión
+#   AWS_ACCESS_KEY_ID      credencial de AWS
+#   AWS_SECRET_ACCESS_KEY  secreto de esa credencial
+#   MAIL_USERNAME          cuenta del buzón transaccional
+#   MAIL_PASSWORD          contraseña de aplicación de ese buzón
+# Este script las define con valores DE DESARROLLO, evidentemente falsos, para que arrancar en local
+# siga siendo un solo comando. Sin ellas el arranque falla y dice cuáles faltan
+# (`core/config/SecretosObligatorios.kt`). Exporta las tuyas antes de llamar si necesitas otras.
 set -euo pipefail
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -36,6 +46,28 @@ PIDFILE="${TPL_DEV_PIDFILE:-$RAIZ/build/dev/backend.pid}"
 TIMEOUT="${TPL_DEV_TIMEOUT:-300}"
 BASE="http://127.0.0.1:$PUERTO"
 DB="${TPL_DEV_DB:-invitaciones_dev}"
+
+# --- Secretos de `application.yml` (fase 5, ADR-5-E3-A3-01) -----------------------------------
+# Los cuatro secretos que estaban en claro en `application.yml` (clave JWT, par de AWS, cuenta y
+# contraseña del correo) son ahora `${VAR}` SIN valor por defecto: la aplicación no arranca sin
+# ellos. Aquí se declaran valores DE DESARROLLO y se eligen de forma que su falsedad se vea a
+# simple vista; ninguno se parece a un valor real ni funciona contra ningún servicio.
+#
+#   JWT_SECRET   es un valor FIJO, no uno generado en cada arranque: generarlo al vuelo invalidaría
+#                los tokens que las pruebas y los scripts de siembra acaban de obtener en cuanto el
+#                backend se reiniciara. 64 caracteres porque `JwtUtil.kt:18` lo usa tal cual como
+#                clave HMAC de HS256 (mínimo 32). Vale sólo para este entorno local.
+#   AWS_*        credenciales INSERVIBLES a propósito: este script trabaja con
+#                TEMPLATES2_ASSETS_MODE=local (ver abajo), que escribe en disco y no llama a AWS.
+#                Si fuerzas `s3`, exporta credenciales de verdad tú mismo — aquí nunca irán.
+#   MAIL_*       igual: no hay SMTP en este entorno. Ojo, hoy el transporte real lo fija
+#                `core/email/MailConfig.kt` con las credenciales escritas en el código, así que
+#                estas dos sólo satisfacen la compuerta de arranque (queda anotado como pendiente).
+export JWT_SECRET="${JWT_SECRET:-clave-jwt-solo-de-desarrollo-no-sirve-en-ningun-otro-sitio-0000}"
+export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-credencial-aws-de-desarrollo-inservible}"
+export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-secreto-aws-de-desarrollo-inservible}"
+export MAIL_USERNAME="${MAIL_USERNAME:-correo-de-desarrollo@ejemplo.invalido}"
+export MAIL_PASSWORD="${MAIL_PASSWORD:-contrasena-de-correo-de-desarrollo-inservible}"
 
 # --- Bucket de assets -------------------------------------------------------------------------
 # OBLIGATORIA y sin defecto en `application.yml` (ADR-2-ORQ-03) porque el único defecto natural era
