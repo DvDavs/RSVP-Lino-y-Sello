@@ -304,3 +304,109 @@ Un `Dialog`/`Sheet` de historia se expone dentro de `EscaparateSuperposicion`
 (`tablero.md` fase 3-C, fila «Cierre: revisiones, guía, memoria, handoff» = **pendiente**). El
 orquestador rellena este párrafo con sus hallazgos y cifras (contraste visual/UX, adversarial) citando
 el fichero de cada uno cuando los lance y cierre.
+
+## 14. Kit de autor de plantillas (fase 4)
+
+Contrato vigente de cómo se crea, se valida y se da de alta una plantilla. Sustituye a cualquier
+descripción anterior del alta de plantillas. Fuente: `frontend/packages/template-kit/`, la guía
+`guias/como-agregar-una-plantilla.md` y la lista `guias/checklist-plantilla.md`. **Objetivo de negocio
+de la fase, cumplido: agregar una plantilla no toca Kotlin, no reinicia nada y no exige saber el
+esquema** (P4).
+
+### 14.1 Dónde viven las plantillas y qué es un paquete
+
+Un **paquete de plantilla** es un directorio `<slug>/<version>/` con esta forma exacta
+(`diseno/01-dominio-y-esquema.md §2.1`). Cualquier fichero fuera de este árbol hace fallar el registro
+con `TPL_PACKAGE_UNEXPECTED_FILE` — **nada se ignora en silencio** (P1):
+
+| Ruta | Obligatorio | Qué es |
+|---|---|---|
+| `template.json` | sí | manifiesto: secciones, bloques con su `blockId`, `role` y `type`, `assets[]` declarados, `previewImage` |
+| `theme.json` | sí | paletas y conjuntos tipográficos del paquete, **solo ids y valores**, nunca CSS |
+| `defaults.json` | sí | contenido de demostración por `blockId`; su `templateSlug`/`templateVersion` deben igualar al manifiesto |
+| `assets/**` | no | los ficheros que `template.json` declara, ni uno más |
+| `migrations/<anterior>-to-<nueva>.json` | no | plan de migración de documento entre versiones |
+
+- **Las plantillas del repositorio viven en `frontend/templates/<slug>/<version>/`** y se registran
+  desde ahí. Las **capturas nunca** caen dentro de `<version>/`: van a `<slug>/capturas/`, hermano de
+  la versión (ADR-4-1B-05).
+- `frontend/templates/scripts/` (arte y armado de las dos plantillas de diseño) está **aislado a
+  propósito** del workspace pnpm y no forma parte del recorrido del autor (ADR-3-2d-01).
+- **Un `sha256`, unos `bytes` o un `package_hash` nunca se escriben a mano**: los **mide** `check`
+  (P5, ADR-4-1A-03). Esa es la razón de ser de la compuerta de digestos.
+
+### 14.2 Los ocho comandos
+
+Todos desde `frontend/`, con `pnpm plantilla <comando>`. El script es un lanzador sin dependencias
+(`bin/plantilla.mjs`) que **diagnostica el `pnpm install` que falta** antes de intentar arrancar, en
+vez de morir con `tsx: not found` (ADR-4-1C-03).
+
+| Comando | Para qué |
+|---|---|
+| `doctor` | comprueba el entorno (Node, pnpm, las cinco rutas del workspace, backend, cuenta MASTER, Chromium) y dice **cómo arreglar** cada cosa que falte |
+| `nueva <slug> --evento <tipo> [--secciones …] [--destino <dir>]` | andamio válido a la primera. `--destino` es la **carpeta contenedora**: el comando cuelga él solo `<slug>/<version>/` |
+| `secciones [<tipo>]` | el catálogo: variantes, huecos, roles y cuáles escribe el andamio |
+| `bloque [<tipo>]` | la **forma** de un tipo de bloque sin abrir código: el valor de `defaults.json` y el bloque de `template.json`, con ejemplo mínimo copiable (ADR-4-1C-02) |
+| `check <dir> [--no-escribir] [--estricto]` | valida y **mide y escribe** los digestos. `--no-escribir`: un digesto desviado pasa a ERROR. `--estricto`: los avisos cuentan como errores (para integración continua) |
+| `preview <dir>` | previsualizador local (Vite + `packages/sections`), móvil y escritorio a la vez, **se repinta al guardar** y **no termina**. No escribe nada dentro del paquete |
+| `capturas <dir>` | tres PNG (390/768/1280) con Chromium, **fuera** del directorio de la versión |
+| `registrar <dir>` | `check` y, si pasa, alta por HTTP con token MASTER |
+
+### 14.3 Compuertas `TPL_*` de `check`, con su severidad
+
+**ERROR** (rompe: el paquete no se registra) — forma del paquete: `TPL_PACKAGE_NOT_FOUND`,
+`TPL_PACKAGE_MISSING_FILE`, `TPL_PACKAGE_UNEXPECTED_FILE`, `TPL_PACKAGE_JSON_INVALID`,
+`TPL_PACKAGE_DEFAULTS_MISMATCH`; esquema: `TPL_MANIFEST_INVALID`, `TPL_THEME_INVALID`,
+`TPL_DEFAULTS_INVALID`, `TPL_BLOCK_TYPE_UNKNOWN`, `TPL_BLOCK_SPEC_INVALID`, `TPL_ROLE_UNKNOWN`,
+`TPL_SECTION_TYPE_UNKNOWN`; assets: `TPL_ASSET_PATH_INVALID`, `TPL_ASSET_FILE_MISSING`,
+`TPL_ASSET_DIGEST_MISMATCH`, `TPL_ASSET_CONTENT_TYPE_UNKNOWN`, `TPL_ASSET_ALIAS_DUPLICATE`,
+`TPL_PREVIEW_IMAGE_NOT_DECLARED`; migraciones: `TPL_MIGRATION_PLAN_MISSING`,
+`TPL_MIGRATION_PLAN_INVALID`, `TPL_MIGRATION_PLAN_MISMATCH`, `TPL_MIGRATION_PLAN_ORPHAN`;
+**calidad de frontera**: `TPL_PALETTE_CONTRAST_BELOW_AA` (WCAG 2.2 AA, misma fórmula que
+`packages/sections/src/theme/contrast.ts`, ADR-4-1A-04), `TPL_FONT_NOT_SELF_HOSTED` (lista **derivada**
+de `apps/web/app/(public)/publico.css`, no escrita a mano — ADR-4-6-02), `TPL_THIRD_PARTY_BRAND`,
+`TPL_THIRD_PARTY_LINK` (cualquier host que no sea `example.com`), `TPL_THIRD_PARTY_BANK_DATA`
+(≥ 10 dígitos seguidos sin la palabra «ejemplo» en el propio texto — ADR-4-8-01, ADR-4-9-01).
+
+**AVISO** (no impide registrar; `--estricto` los vuelve error): `TPL_LABEL_DE_ANDAMIO` (una etiqueta
+que sigue siendo la frase de ayuda del catálogo, y **el `label` se publica**: ADR-4-1C-01),
+`TPL_ROLE_SECTION_MISMATCH`, `TPL_VARIANT_UNKNOWN` (ADR-4-1A-01).
+
+**CORREGIDO** (el kit lo arregla y lo dice): `TPL_ASSET_DIGEST_MEDIDO`.
+
+Las cuatro compuertas de contenido (`BRAND`, `LINK`, `BANK_DATA` y la de etiquetas) corren sobre el
+**JSON crudo** de `defaults.json`, en paralelo al esquema, porque para Zod ese contenido es una cadena
+válida. Cada una tiene su **sabotaje** en `test/check-sabotajes.test.ts`: una compuerta cuyo rojo no
+está fijado con el mensaje literal es una compuerta que puede vaciarse sin que nadie se entere.
+
+### 14.4 Flujo de registro
+
+`POST /master/templates2/versions`, `multipart/form-data`, **rol `MASTER`**
+(`api/MasterTemplateRegistryController.kt:35-36`; `@PreAuthorize` de clase como defensa en profundidad
+sobre la regla de ruta, ADR-1R-B-10). Topes de cuerpo: `max-file-size` 15 MB, `max-request-size` 64 MB
+(`src/main/resources/application.yml:54-55`).
+
+| Respuesta | Qué significa |
+|---|---|
+| `201 created` | versión nueva publicada; ya se puede elegir desde el catálogo |
+| `200 noop_same_hash` | ya estaba registrada con **exactamente** el mismo `package_hash`: no se hace nada. Es el resultado correcto de repetir el registro (ADR-008), no un fallo |
+| `409 TPL_VERSION_HASH_MISMATCH` | ese `slug@version` ya está publicado **con otro contenido**. Una versión publicada **no se sobrescribe jamás**: se sube la versión |
+| `422 TPL_PACKAGE_ASSET_MISMATCH` / `TPL_PACKAGE_UNEXPECTED_FILE` / `TPL_PACKAGE_DEFAULTS_MISMATCH` | el paquete no casa con lo que declara |
+| `422 TPL_MANIFEST_BREAKING_CHANGE_NOT_MAJOR` | el diff estructural contra la versión anterior no está vacío y el bump no es mayor. **Lo rechaza aunque haya plan de migración** (ADR-028) |
+
+**La idempotencia es por `package_hash` del paquete entero** (manifiesto, tema, defaults, migraciones
+y assets), no por `slug@version`: por eso el hash debe cubrirlo todo. Medido en la fase: alta de una
+versión nueva en **1,39 s**, sin reiniciar nada y sin una línea de Kotlin (`handoffs/4-7.md`).
+
+### 14.5 Reglas que no se rompen
+
+1. **Una versión registrada es inmutable.** Para cambiar una plantilla se publica una versión nueva.
+2. **Cero presentación en el backend** (P3): colores, tipografías, tamaños e iconos viven en el
+   paquete; Kotlin no decide ninguno.
+3. **Los ids mandan** (P2): `blockId` estables y `itemId` ULID Crockford; el merge nunca es posicional.
+4. **Los digestos se miden, no se escriben.**
+5. **El `label` de un bloque no es un rótulo interno**: en una sección de familia se publica tal cual
+   (`FamilySection.tsx:71,198`). El andamio escribe rótulos presentables y `check` avisa si vuelve la
+   prosa de desarrollador.
+6. **El contenido de demostración no lleva datos de terceros**: enlaces solo a `example.com`, datos
+   bancarios marcados «(ejemplo)» en el propio texto, sin marcas ajenas.

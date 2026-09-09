@@ -68,3 +68,36 @@
   nuevo, para las pantallas que la fase 3-C todavía no había migrado. Es deuda intencional y
   retirable, no un segundo sistema: un componente nuevo nunca escribe un nombre de esta lista
   (`contratos.md §13.1`, antipatrón en `guias/identidad-visual.md §9`).
+
+## Añadido en la fase 4 (kit de autor de plantillas)
+
+- **Kit de autor**: `frontend/packages/template-kit`, invocado como `pnpm plantilla <comando>` desde
+  `frontend/`. Ocho comandos (`doctor`, `nueva`, `secciones`, `bloque`, `check`, `preview`,
+  `capturas`, `registrar`) que cubren el recorrido entero de crear una plantilla y darla de alta sin
+  escribir código ni conocer el esquema (`contratos.md §14`).
+- **Andamio (`plantilla nueva`)**: paquete de partida generado desde el catálogo de secciones, válido
+  a la primera. Sus **valores** son texto de relleno que el autor debe reescribir; sus **etiquetas**
+  son rótulos presentables curados por rol, porque una etiqueta sí se publica (ADR-4-1C-01).
+- **Compuerta (`TPL_*`)**: comprobación con nombre propio de `check`, con tres severidades — ERROR
+  (no se registra), AVISO (se registra; `--estricto` lo vuelve error) y CORREGIDO (el kit lo arregla y
+  lo dice). Catálogo y severidad de cada una en `contratos.md §14.3`.
+- **Sabotaje**: prueba que rompe a propósito lo que una compuerta protege y **fija su mensaje literal**
+  en rojo, antes de restaurarlo. Es la única prueba de que la compuerta no está vacía: sin ella, quitar
+  la comprobación deja la suite en verde. `test/check-sabotajes.test.ts`.
+- **`package_hash`**: hash del paquete **entero** y clave de idempotencia del registro. Repetir el alta
+  del mismo paquete es `200 noop_same_hash`; el mismo `slug@version` con otro contenido es `409`.
+- **`noop_same_hash`**: respuesta correcta —no un fallo— de volver a registrar un paquete idéntico.
+- **Prueba ciega**: prueba de usabilidad del kit hecha por un agente al que se le prohíbe leer el
+  código del kit, el esquema y las bitácoras previas; solo tiene la guía, el checklist y los README.
+  Se cronometra y su veredicto es «¿lo haría en 30 minutos alguien que no programa, sin adivinar
+  nada?». La ronda 1 (`bitacora/4-5.md`) respondió **no** y por eso existe la ronda de correcciones
+  4-1C.
+- **Plantilla convertida**: una de las nueve que salieron del catálogo antiguo con
+  `packages/migration-legacy`. Correctas, limpias y accesibles, pero **sin arte propio**: sus huecos de
+  imagen están pendientes porque en el origen eran URLs externas inalcanzables.
+- **Plantilla de diseño**: `boda-clasica` y `xv-jardin`, escritas a mano a partir de los ejemplos de
+  forma, con arte generado por `frontend/templates/scripts/build-art.mjs` (SVG autoral → WebP,
+  determinista).
+- **Asset del paquete vs. asset de la demostración**: los primeros van dentro de `<version>/assets/`,
+  entran en el `package_hash` y los sube el registro; los segundos viven en `<slug>/demo/<paleta>/`,
+  **no** entran en el paquete y los sube `scripts/seed-demo.sh` a la invitación de ejemplo.
