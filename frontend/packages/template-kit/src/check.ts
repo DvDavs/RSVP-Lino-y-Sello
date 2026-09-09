@@ -968,23 +968,50 @@ export function remapearAFamiliaAutoalojada(familia: string, rol: "heading" | "b
 
 interface CaraDeclarada { readonly family?: unknown; readonly weights?: unknown }
 
+/**
+ * Tipografías: familia Y PESO (ADR-4-1E-01). Antes de esto la compuerta comprobaba solo la
+ * familia: `theme.json` podía declarar `Inter` con un peso que `publico.css` no importa
+ * (`cumple-retro/1.0.0` declaró `body Inter 600`, y el producto sólo autoaloja 400/500) y el
+ * andamio lo daba por bueno — el invitado ve la pila de reserva exactamente igual que con una
+ * familia entera fuera de catálogo, así que es el MISMO error, no un aviso.
+ *
+ * Si la familia ya no está autoalojada, el hallazgo de familia (arriba) ya cubre TODO el `FontFace`
+ * — heading/body entero se sustituye — y comprobar además los pesos de una familia que de todos
+ * modos se va a cambiar sería ruido duplicado; por eso el peso sólo se mira cuando la familia SÍ
+ * está en la lista derivada de `publico.css`.
+ */
 function revisarFuentes(crudoTema: Json): readonly Hallazgo[] {
   const salida: Hallazgo[] = [];
   const disponibles = familiasAutoalojadas();
-  const catalogo = new Set(disponibles.map(f => f.family));
+  const catalogo = new Map(disponibles.map(f => [f.family, f.weights]));
   const lista = disponibles.map(f => `${f.family} (${f.weights.join(", ")})`).join(", ");
   const sets = (crudoTema["fontSets"] as Array<{ id?: unknown; heading?: CaraDeclarada; body?: CaraDeclarada }> | undefined) ?? [];
   for (const [i, fs] of sets.entries()) {
     for (const rol of ["heading", "body"] as const) {
-      const familia = fs[rol]?.family;
-      if (typeof familia !== "string" || catalogo.has(familia)) continue;
-      const sug = remapearAFamiliaAutoalojada(familia, rol);
-      salida.push({
-        severidad: "ERROR", codigo: "TPL_FONT_NOT_SELF_HOSTED",
-        puntero: puntero(TEMA, "fontSets", i, rol, "family"),
-        problema: `El fontSet "${String(fs.id)}" declara la familia "${familia}" en ${rol} y la superficie pública NO la autoaloja: esa invitación se pintaría con la pila de reserva (Georgia / la sans del sistema).`,
-        sugerencia: `Familias autoalojadas hoy, con sus pesos, en apps/web/app/(public)/publico.css: ${lista}. La más cercana a "${familia}" es "${sug.family}" con pesos [${sug.weights.join(", ")}] — ${sug.motivo} Escríbela en theme.json, o autoaloja la original (\`pnpm add @fontsource/${slugFontsource(familia)}\` en apps/web y su \`@import\` en publico.css): la superficie pública nunca pide una fuente a un tercero en tiempo de ejecución (ADR-1R-F-07).`,
-      });
+      const cara = fs[rol];
+      const familia = cara?.family;
+      if (typeof familia !== "string") continue;
+      const pesosAutoalojados = catalogo.get(familia);
+      if (pesosAutoalojados === undefined) {
+        const sug = remapearAFamiliaAutoalojada(familia, rol);
+        salida.push({
+          severidad: "ERROR", codigo: "TPL_FONT_NOT_SELF_HOSTED",
+          puntero: puntero(TEMA, "fontSets", i, rol, "family"),
+          problema: `El fontSet "${String(fs.id)}" declara la familia "${familia}" en ${rol} y la superficie pública NO la autoaloja: esa invitación se pintaría con la pila de reserva (Georgia / la sans del sistema).`,
+          sugerencia: `Familias autoalojadas hoy, con sus pesos, en apps/web/app/(public)/publico.css: ${lista}. La más cercana a "${familia}" es "${sug.family}" con pesos [${sug.weights.join(", ")}] — ${sug.motivo} Escríbela en theme.json, o autoaloja la original (\`pnpm add @fontsource/${slugFontsource(familia)}\` en apps/web y su \`@import\` en publico.css): la superficie pública nunca pide una fuente a un tercero en tiempo de ejecución (ADR-1R-F-07).`,
+        });
+        continue;
+      }
+      const pesosDeclarados = Array.isArray(cara?.weights) ? (cara!.weights as readonly unknown[]) : [];
+      for (const [k, p] of pesosDeclarados.entries()) {
+        if (typeof p !== "number" || pesosAutoalojados.includes(p)) continue;
+        salida.push({
+          severidad: "ERROR", codigo: "TPL_FONT_WEIGHT_NOT_SELF_HOSTED",
+          puntero: puntero(TEMA, "fontSets", i, rol, "weights", k),
+          problema: `El fontSet "${String(fs.id)}" declara el peso ${p} de "${familia}" en ${rol} y la superficie pública NO lo autoaloja (sólo ${pesosAutoalojados.join(", ")}): esa invitación se pintaría con la pila de reserva (Georgia / la sans del sistema).`,
+          sugerencia: `Pesos que "${familia}" autoaloja hoy en apps/web/app/(public)/publico.css: ${pesosAutoalojados.join(", ")}. Pon uno de esos en theme.json, o autoaloja el ${p} (añade \`@import "@fontsource/${slugFontsource(familia)}/${p}.css"\` a publico.css): la superficie pública nunca pide una fuente a un tercero en tiempo de ejecución (ADR-1R-F-07).`,
+        });
+      }
     }
   }
   return salida;

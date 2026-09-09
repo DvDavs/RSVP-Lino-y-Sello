@@ -19,6 +19,7 @@ import {
   blockIdFor, describeSection, scaffoldSlots, sectionCatalog,
   type CatalogSlot,
 } from "@invitaciones/sections/catalog";
+import { familiasAutoalojadas } from "./check.ts";
 import { fallosDeContraste, oscurecerHasta, type PaletteTokens } from "./contraste.ts";
 import { serializar } from "./paquete.ts";
 
@@ -96,6 +97,28 @@ export function paletaAA(semilla: SemillaDePaleta): PaletteTokens {
   return tokens;
 }
 
+/**
+ * Los pesos que la superficie pública autoaloja HOY para `familia` (ADR-4-1E-01): el andamio no
+ * fija una pareja de pesos a mano — la deriva del mismo origen que la compuerta `check` usa para
+ * rechazarlos (`familiasAutoalojadas()`, derivado de `publico.css`). Antes de esto `generarTema`
+ * escribía `weights: [400, 600]` para el cuerpo sin mirar qué pesos existen de verdad: con
+ * Cormorant Garamond coincidía por casualidad, pero con Inter (que sólo se autoaloja en 400/500) el
+ * andamio nacía roto — el paquete que `cumple-retro/1.0.0` dejó atrás es la prueba (bitácora 4-1e).
+ * Si mañana `publico.css` deja de autoalojar una de las dos familias de aquí, esto LANZA en vez de
+ * escribir un `theme.json` que `check` va a rechazar: el andamio prefiere reventar en generación a
+ * publicar un paquete roto (misma regla que `campoObligatorio`/`etiquetaPresentable`).
+ */
+function pesosAutoalojados(familia: string): readonly number[] {
+  const encontrada = familiasAutoalojadas().find(f => f.family === familia);
+  if (encontrada === undefined) {
+    throw new Error(
+      `andamio: "${familia}" ya no está entre las familias que apps/web/app/(public)/publico.css ` +
+      "autoaloja; actualiza la familia (o sus pesos) en generarTema(), packages/template-kit/src/nueva.ts.",
+    );
+  }
+  return encontrada.weights;
+}
+
 export function generarTema(): Json {
   return {
     palettes: SEMILLAS.map(s => ({
@@ -105,8 +128,8 @@ export function generarTema(): Json {
       id: "clasica", name: { "es-MX": "Clásica" },
       // `source: "bundled"`: el proxy de este entorno bloquea Google Fonts (CLAUDE.md, entorno
       // remoto) y las familias llegan por npm/Fontsource. Nunca `"google"` en un andamio.
-      heading: { family: "Cormorant Garamond", weights: [400, 600], source: "bundled" },
-      body: { family: "Inter", weights: [400, 600], source: "bundled" },
+      heading: { family: "Cormorant Garamond", weights: [...pesosAutoalojados("Cormorant Garamond")], source: "bundled" },
+      body: { family: "Inter", weights: [...pesosAutoalojados("Inter")], source: "bundled" },
     }],
     defaultPaletteId: SEMILLAS[0]!.id,
     defaultFontSetId: "clasica",

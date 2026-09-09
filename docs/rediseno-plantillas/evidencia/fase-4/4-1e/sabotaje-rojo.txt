@@ -1,0 +1,48 @@
+
+ RUN  v3.2.4 /home/user/wt/1e/frontend/packages/template-kit
+
+ ❯ test/check-peso-fuente.test.ts (4 tests | 2 failed) 69ms
+   × check: el PESO tipográfico, no sólo la familia (ADR-4-1E-01) > un peso que la familia autoalojada NO importa es ERROR, con los pesos que sí hay y cuál poner 36ms
+     → no hay ningún hallazgo TPL_FONT_WEIGHT_NOT_SELF_HOSTED; los que hay: (ninguno)
+   × check: el PESO tipográfico, no sólo la familia (ADR-4-1E-01) > el mismo fallo en el TITULAR (heading), con su propio puntero 8ms
+     → no hay ningún hallazgo TPL_FONT_WEIGHT_NOT_SELF_HOSTED; los que hay: (ninguno)
+   ✓ check: el PESO tipográfico, no sólo la familia (ADR-4-1E-01) > una familia NO autoalojada no dobla el hallazgo con el de peso: sólo se reporta la familia 11ms
+   ✓ check: el PESO tipográfico, no sólo la familia (ADR-4-1E-01) > los pesos reales de las plantillas publicadas no disparan la compuerta (regresión de cumple-retro/1.0.0) 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/check-peso-fuente.test.ts > check: el PESO tipográfico, no sólo la familia (ADR-4-1E-01) > un peso que la familia autoalojada NO importa es ERROR, con los pesos que sí hay y cuál poner
+Error: no hay ningún hallazgo TPL_FONT_WEIGHT_NOT_SELF_HOSTED; los que hay: (ninguno)
+ ❯ mensajeDe test/ayuda.ts:45:11
+     43|   const h = r.hallazgos.find((x: Hallazgo) => x.codigo === codigo);
+     44|   if (!h) {
+     45|     throw new Error(
+       |           ^
+     46|       `no hay ningún hallazgo ${codigo}; los que hay: ${r.hallazgos.ma…
+     47|     );
+ ❯ test/check-peso-fuente.test.ts:28:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/check-peso-fuente.test.ts > check: el PESO tipográfico, no sólo la familia (ADR-4-1E-01) > el mismo fallo en el TITULAR (heading), con su propio puntero
+Error: no hay ningún hallazgo TPL_FONT_WEIGHT_NOT_SELF_HOSTED; los que hay: (ninguno)
+ ❯ mensajeDe test/ayuda.ts:45:11
+     43|   const h = r.hallazgos.find((x: Hallazgo) => x.codigo === codigo);
+     44|   if (!h) {
+     45|     throw new Error(
+       |           ^
+     46|       `no hay ningún hallazgo ${codigo}; los que hay: ${r.hallazgos.ma…
+     47|     );
+ ❯ test/check-peso-fuente.test.ts:46:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  02:39:03
+   Duration  814ms (transform 338ms, setup 0ms, collect 477ms, tests 69ms, environment 0ms, prepare 63ms)
+
+undefined
+/home/user/wt/1e/frontend/packages/template-kit:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/check-peso-fuente.test.ts --no-coverage

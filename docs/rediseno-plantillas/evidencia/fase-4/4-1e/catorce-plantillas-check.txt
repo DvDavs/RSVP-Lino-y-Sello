@@ -1,0 +1,46 @@
+=== check en las 15 carpetas de frontend/templates/*/1.*/ tras el arreglo (cumple-retro incluida) ===
+-- /home/user/wt/1e/frontend/templates/bautizo-elegante/1.0.0/
+package_hash = sha256:d3982655f41385bb7eb1725b45e07737ae41322bd6ca4ceb5ac181ea025255a7
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/boda-basica/1.0.0/
+package_hash = sha256:1e4a5a43e4711557d1dbd7a57eafed22190200fe03d99e2137f96ff647f583db
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/boda-clasica/1.0.0/
+package_hash = sha256:cf0120182112711ac8137a465680c2ad0ba7b3196fd1a04e83d050775048e111
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/boda-clasica/1.0.1/
+package_hash = sha256:78e7a625026cc84695f2040351dd59b1196917c0c0652d6bcc90935583b84fd9
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/boda-clasica/1.0.2/
+package_hash = sha256:e069c76d5cde6664461f7d576191ffd26504d635f7d98faf6a36cbefba6a344a
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/boda-premium-2/1.0.0/
+package_hash = sha256:2d4caa899aaa9118ffbed3656a8a5146822b71307f23b4509b043f784e595b81
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/boda-premium/1.0.0/
+package_hash = sha256:f46e267fc25f47bb72db25a1851cce6365ecd2f61e2eb68bbda0f9c35f9fc354
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/comunion-elegante/1.0.0/
+package_hash = sha256:8d15b65289abf08a03c215954de2c85d71ea09660b04649be7ef5956f871fec9
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/confirmacion-elegante/1.0.0/
+package_hash = sha256:f01920e159e6982130377f2f85f48a2c119b52cc0d9ad89da3e41000fea5e9c1
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/cumple-retro/1.0.0/
+package_hash = sha256:583684a0c9ebc58e3fd1e57086e68743679fc819c6d692e6b72b0f35948fa81c
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/cumpleanos-elegante/1.0.0/
+package_hash = sha256:dd8cf34af1609d6647b2517e5e8b5a5b78a6c7dc1ecc6115198b7541e081a3e8
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/evento-elegante/1.0.0/
+package_hash = sha256:879fd363d7964d2a87146d82b9f7f11e07e3a37f16aa6d0194d1283f4f6772af
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/toga-y-sello/1.0.0/
+package_hash = sha256:94c7c0293790ef6da730a93877a2e422c9501c4981a827158e80fec5db93af6e
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/xv-elegance/1.0.0/
+package_hash = sha256:0a07d9fe3bacdd655fa0edd4d2a8d9eaf936b1afcf1eafae93cf09b430153f5d
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /home/user/wt/1e/frontend/templates/xv-jardin/1.0.0/
+package_hash = sha256:128c63473c87b7f7efac12b17301bf31fdb64558c0a0b7bfc39fa0681e9bf688
+0 error(es) · 0 aviso(s) · 0 corregido(s)

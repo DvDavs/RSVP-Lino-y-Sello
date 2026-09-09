@@ -1,0 +1,10 @@
+
+ RUN  v3.2.4 /home/user/wt/1e/frontend/packages/template-kit
+
+ ✓ test/check-peso-fuente.test.ts (4 tests) 65ms
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  02:39:10
+   Duration  797ms (transform 318ms, setup 0ms, collect 467ms, tests 65ms, environment 0ms, prepare 58ms)
+

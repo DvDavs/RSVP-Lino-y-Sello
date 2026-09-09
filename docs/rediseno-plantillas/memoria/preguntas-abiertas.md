@@ -1575,16 +1575,16 @@ Supuestos tomados para no bloquear el bloque; detalle y alternativas descartadas
   estas familias **por plantilla** en vez de en la hoja global (hoy `publico.css` las sirve a TODAS
   las invitaciones, use la familia o no), o se acepta el remapeo de ADR-4-6-01 como definitivo y la
   fase de arte trabaja con las cuatro autoalojadas?
-- [Fase 4 · 4-6] **La compuerta nueva del kit es de FAMILIA, no de peso, y hay un hueco medido.**
-  `TPL_FONT_NOT_SELF_HOSTED` rechaza una familia que `publico.css` no importe, pero no un PESO que
-  no importe. Motivo verificado [V]: `packages/template-kit/src/nueva.ts:108-109` anda el andamio
-  con `Inter 400/600` mientras `publico.css` importa `Inter 400/500`, así que gatear los pesos
-  pondría en rojo `test/nueva.test.ts:121` (exige **cero** hallazgos en el andamio recién creado) y
-  `nueva.ts` no es de este bloque. Consecuencia real: una plantilla creada hoy con `plantilla nueva`
-  y metida en `frontend/templates/` pone en rojo `fuentes-autoalojadas.test.ts` (le faltaría
-  `@fontsource/inter/600.css`). **Supuesto tomado:** la opción conservadora — gatear sólo la familia
-  y dejar escrito el hueco. ¿Se corrige `nueva.ts` a `Inter 400/500` (una línea) y se amplía la
-  compuerta a los pesos?
+- [Fase 4 · 4-6] **RESUELTA (4-1E, ADR-4-1E-01).** La compuerta nueva del kit era de FAMILIA, no de
+  peso: `TPL_FONT_NOT_SELF_HOSTED` rechazaba una familia que `publico.css` no importara, pero no un
+  PESO que no importara — y `nueva.ts:108-109` andaba el andamio con `Inter 400/600` mientras
+  `publico.css` importa `Inter 400/500`. Dejó de ser hipotético: la segunda plantilla nacida a
+  ciegas, `cumple-retro/1.0.0`, eligió justo esa pareja y `check` la dio por buena (0 errores);
+  `apps/web/test/fuentes-autoalojadas.test.ts` fue la única red que lo cazó. `check` gana
+  `TPL_FONT_WEIGHT_NOT_SELF_HOSTED` (ERROR, derivado de la misma `familiasAutoalojadas()` que ya
+  usaba la familia) y `nueva.ts` deriva sus pesos de ese mismo origen en vez de fijarlos —las dos
+  cosas a la vez, así que ninguna pone en rojo a la otra—; `cumple-retro/1.0.0` queda con
+  `body Inter [400,500]`. Detalle y verificación en `ADR-4-1E-01` y `bitacora/4-1e.md`.
 - [Fase 4 · 4-6] **`docs/rediseno-plantillas/memoria/decisiones.md` tiene marcadores de conflicto de
   Git SIN RESOLVER**, heredados del merge `da46c6e` («merge: 4-1B … en la rama de la fase 4»):
   `<<<<<<< HEAD` en la línea 1869, `=======` en la 1876 y `>>>>>>> wip/f4-41` en la 1918, con las
