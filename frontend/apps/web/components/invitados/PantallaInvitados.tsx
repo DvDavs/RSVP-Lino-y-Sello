@@ -48,6 +48,7 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
   const [cargandoMas, setCargandoMas] = useState(false);
   const [exportando, setExportando] = useState(false);
   const primerLoteHecho = useRef(false);
+  const tituloRef = useRef<HTMLHeadingElement>(null);
 
   const cargarPrimeraPagina = useCallback(async (): Promise<void> => {
     if (!primerLoteHecho.current) setEstado("cargando");
@@ -119,6 +120,12 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
   function alEliminarInvitado(guestId: number): void {
     setInvitados((anteriores) => anteriores.filter((g) => g.id !== guestId));
     void actualizarResumen();
+    // El diálogo de borrado se abre DESDE la fila que se acaba de borrar, así que su disparador
+    // desaparece con ella y Radix no tiene a dónde devolver el foco: se cae a `<body>` y quien navega
+    // con teclado o lector de pantalla se queda sin contexto. Se lleva al título de la pantalla, que
+    // siempre existe. En `setTimeout` porque el `onCloseAutoFocus` de Radix corre al desmontar el
+    // contenido, después de este manejador.
+    setTimeout(() => tituloRef.current?.focus(), 0);
   }
 
   function alImportarInvitados(creados: readonly GuestItem[]): void {
@@ -156,7 +163,11 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
   return (
     <main className="mx-auto w-full max-w-ui-page px-5 py-10 sm:px-8">
       <Toaster />
-      <h1 className="display-md text-ui-ink">{t.titulo}</h1>
+      {/* `tabIndex={-1}`: no entra en el orden de tabulación, pero puede recibir el foco por
+          programa cuando el elemento enfocado desaparece (ver `alEliminarInvitado`). */}
+      <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink outline-none">
+        {t.titulo}
+      </h1>
       <p className="mt-2 text-md text-ui-ink-muted">{t.subtitulo}</p>
 
       {estado === "cargando" ? (

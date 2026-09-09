@@ -43,6 +43,10 @@ export const textosInvitados = {
   },
 
   tabla: {
+    /** Nombre accesible de la tabla (`<caption class="sr-only">`): sin él solo se anuncia «tabla». */
+    leyenda: "Tus invitados, con sus pases, su estado y cómo mandarles su enlace",
+    /** Etiqueta del disparador de edición: dice QUÉ hace, no solo a quién. */
+    editarA: (nombre: string) => `Editar a ${nombre}`,
     columnaNombre: "Nombre",
     columnaPases: "Pases",
     columnaEstado: "Estado",

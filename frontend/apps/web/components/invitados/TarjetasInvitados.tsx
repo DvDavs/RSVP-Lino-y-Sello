@@ -1,4 +1,4 @@
-// components/invitados/TarjetasInvitados.tsx — la lista en móvil (< `md`): la tabla no existe
+// components/invitados/TarjetasInvitados.tsx — la lista en móvil (< `ed`, 900 px): la tabla no existe
 // (wireframe §B3.2). Cada invitado es una tarjeta apilada; compartir vive en un `Sheet` propio, una
 // acción a la vez, pulgar abajo.
 import { useState } from "react";
@@ -45,12 +45,14 @@ export interface TarjetasInvitadosProps {
 
 export function TarjetasInvitados({ invitationId, rules, invitados, onCambiado, onEliminado }: TarjetasInvitadosProps) {
   return (
-    <ul className="grid gap-3 md:hidden">
+    <ul className="grid gap-3 ed:hidden">
       {invitados.map((invitado) => (
         <li key={invitado.id} style={{ minHeight: ALTO_TARJETA_MOVIL }}>
           <Card variant="plana" className="flex h-full flex-col gap-3">
             <div>
-              <h3 className="heading-sm text-ui-ink">{nombreVisible(invitado.fullName)}</h3>
+              {/* `h2`, no `h3`: el único encabezado por encima es el `h1` de la pantalla, y saltarse
+                  el nivel es una violación de `heading-order` de axe (`ui-pantalla` §9). */}
+              <h2 className="heading-sm text-ui-ink">{nombreVisible(invitado.fullName)}</h2>
               <p className="text-sm text-ui-ink-muted">
                 {t.tabla.pases(invitado.adults, invitado.children, invitado.young)}
               </p>
@@ -82,7 +84,7 @@ export function TarjetasInvitados({ invitationId, rules, invitados, onCambiado, 
 
 export function EsqueletoTarjetasInvitados({ tarjetas = 6 }: { readonly tarjetas?: number }) {
   return (
-    <ul className="grid gap-3 md:hidden">
+    <ul className="grid gap-3 ed:hidden">
       {Array.from({ length: tarjetas }, (_, indice) => (
         <li key={indice} style={{ minHeight: ALTO_TARJETA_MOVIL }} className="rounded-ui-card bg-ui-surface-raised p-6 shadow-ui-1">
           <Skeleton variante="bloque" alto={112} etiqueta={indice === 0 ? t.cargando : ""} />

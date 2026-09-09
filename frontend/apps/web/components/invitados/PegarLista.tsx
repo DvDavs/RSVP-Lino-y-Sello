@@ -108,12 +108,17 @@ export function PegarLista({ invitationId, onImportados }: PegarListaProps) {
       }
     >
       {vista ? (
-        <div className="grid gap-4">
+        // `role="status"`: el resultado de la revisión sustituye al textarea, y sin esto un lector
+        // de pantalla no anuncia nada al pulsar «Revisar lista» (`ui-pantalla` §7/§9).
+        <div className="grid gap-4" role="status" aria-live="polite">
           <p className="label-md text-ui-ink">{t.pegarLista.vistaPrevia(vista.ready.length, vista.problems.length)}</p>
           {vista.problems.length > 0 ? (
             <ul className="grid gap-2">
               {vista.problems.map((problema) => (
-                <li key={`${problema.line}-${problema.raw}`} className="flex items-start gap-2 rounded-ui-control bg-ui-danger-soft p-3 text-sm text-ui-on-danger-soft">
+                // La clave es el número de renglón, no `problema.raw`: `raw` es el texto pegado por
+                // la clienta (nombre, teléfono, correo de un tercero) y no tiene por qué viajar a una
+                // clave de React. El backend da un problema por renglón, así que `line` ya es único.
+                <li key={problema.line} className="flex items-start gap-2 rounded-ui-control bg-ui-danger-soft p-3 text-sm text-ui-on-danger-soft">
                   <IconoAviso size={18} tone="mono" className="mt-0.5 shrink-0" aria-hidden />
                   <span>
                     <strong>{t.pegarLista.renglon(problema.line)}</strong> {problema.message} {problema.hint}
@@ -138,7 +143,7 @@ export function PegarLista({ invitationId, onImportados }: PegarListaProps) {
             aria-describedby={errorLocal ? "pegar-lista-error" : undefined}
           />
           {errorLocal ? (
-            <p id="pegar-lista-error" role="alert" className="text-[12.5px] font-semibold text-ui-danger-text">
+            <p id="pegar-lista-error" role="alert" className="text-sm font-semibold text-ui-danger-text">
               {errorLocal}
             </p>
           ) : null}

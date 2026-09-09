@@ -33,7 +33,7 @@ function useEnlaceInvitado(invitationId: number, guestId: number) {
       setEnlace(traido);
       return traido;
     } catch (error) {
-      toast({ variante: "error", descripcion: mensajeDeError(error) || t.compartir.errorEnlace });
+      toast({ variante: "error", descripcion: `${t.compartir.errorEnlace} ${mensajeDeError(error)}` });
       return null;
     } finally {
       setCargando(false);
@@ -101,7 +101,13 @@ export function BotonesCompartir({ invitationId, guest, disposicion = "fila" }: 
       return;
     }
     const traido = await asegurar();
-    if (!traido?.whatsappUrl) return;
+    if (!traido) return; // `asegurar` ya avisó del fallo de red.
+    // `whatsappUrl` puede NO venir en el JSON (`@JsonInclude(NON_NULL)` en `GuestPanelDtos.kt`).
+    // Antes esto era un `return` mudo: la clienta pulsaba WhatsApp y no pasaba absolutamente nada.
+    if (!traido.whatsappUrl) {
+      toast({ variante: "info", descripcion: t.compartir.sinTelefono });
+      return;
+    }
     window.open(traido.whatsappUrl, "_blank", "noreferrer");
   }
 

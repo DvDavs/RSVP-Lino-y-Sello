@@ -8,7 +8,14 @@
 // errores solo reconocen el prefijo `TPL_*`, así que este módulo trae su PROPIO fetch interno para
 // los códigos `GUEST_*`/`INVITATION_*`/`RSVP_*` del contrato — misma disciplina, mismas clases de
 // error (P1: toda respuesta no-2xx se clasifica y se lanza, nunca se devuelve `null`).
-import { ApiError, SessionError, UnknownApiError, getApiBaseUrl, getAuthToken } from "@/lib/api-client";
+import {
+  ApiError,
+  SessionError,
+  UnknownApiError,
+  clearAuthToken,
+  getApiBaseUrl,
+  getAuthToken,
+} from "@/lib/api-client";
 import type {
   GuestExportFile,
   GuestImportResponse,
@@ -49,8 +56,23 @@ function esCuerpoDeError(valor: unknown): valor is CuerpoDeError {
   return typeof valor === "object" && valor !== null && typeof (valor as CuerpoDeError).code === "string";
 }
 
+/**
+ * Un 401/403 significa que el token que llevábamos ya no vale. `lib/api-client.ts` tira el token en
+ * ese caso (`marcarSesionCaducada`, `:94-100`) y sin eso CADA ruta vuelve a fallar igual y la
+ * pantalla de acceso no sabe que hay que volver a entrar. Esa función es privada de aquel módulo y
+ * `lib/api-client.ts` es territorio compartido, así que aquí se replica la mitad que SÍ es pública
+ * (`clearAuthToken`). Queda pendiente para el orquestador exportar la señal `sesionCaducada`; ver la
+ * nota de la revisión.
+ */
+function olvidarSesionCaducada(): void {
+  // Solo es «caducada» si de verdad había token: sin token es «todavía no ha entrado».
+  if (getAuthToken() !== null) clearAuthToken();
+}
+
 /** Clasifica una respuesta no-2xx y la lanza. Nunca se descarta un error en silencio (P1). */
 function clasificarYLanzar(status: number, textoCrudo: string): never {
+  if (status === 401 || status === 403) olvidarSesionCaducada();
+
   let cuerpo: unknown;
   try {
     cuerpo = textoCrudo.length > 0 ? JSON.parse(textoCrudo) : undefined;
@@ -78,6 +100,19 @@ function clasificarYLanzar(status: number, textoCrudo: string): never {
   }
 
   throw new UnknownApiError(status, textoCrudo);
+}
+
+/**
+ * Toda ruta del §1 que promete un cuerpo 2xx tiene que traerlo. Si llega vacío (proxy que se comió
+ * la respuesta, 200 sin cuerpo), devolver `undefined` disfrazado con un `as T` sería exactamente lo
+ * que la cabecera de `lib/api-client.ts` prohíbe: «nunca se devuelve `null`/`undefined` en su
+ * lugar». Se lanza `UnknownApiError`, que es la clase para «respuesta no reconocida».
+ */
+function exigirCuerpo<T>(datos: T | undefined, ruta: string): T {
+  if (datos === undefined) {
+    throw new UnknownApiError(200, `${ruta} respondió 2xx sin cuerpo y esta ruta siempre trae uno.`);
+  }
+  return datos;
 }
 
 interface OpcionesPeticion {
@@ -119,7 +154,7 @@ export async function listGuests(invitationId: number, query?: GuestListQuery): 
     path: base(invitationId),
     query: query as Record<string, string | number | undefined> | undefined,
   });
-  return datos as GuestPage;
+  return exigirCuerpo(datos, `GET ${base(invitationId)}`);
 }
 
 // =============================================================================================
@@ -127,7 +162,7 @@ export async function listGuests(invitationId: number, query?: GuestListQuery): 
 // =============================================================================================
 export async function getGuestsSummary(invitationId: number): Promise<GuestSummary> {
   const datos = await peticionInvitados<GuestSummary>({ method: "GET", path: `${base(invitationId)}/summary` });
-  return datos as GuestSummary;
+  return exigirCuerpo(datos, `GET ${base(invitationId)}/summary`);
 }
 
 // =============================================================================================
@@ -135,7 +170,7 @@ export async function getGuestsSummary(invitationId: number): Promise<GuestSumma
 // =============================================================================================
 export async function createGuest(invitationId: number, body: GuestUpsertInput): Promise<GuestItem> {
   const datos = await peticionInvitados<GuestItem>({ method: "POST", path: base(invitationId), jsonBody: body });
-  return datos as GuestItem;
+  return exigirCuerpo(datos, `POST ${base(invitationId)}`);
 }
 
 // =============================================================================================
@@ -147,7 +182,7 @@ export async function updateGuest(invitationId: number, guestId: number, body: G
     path: `${base(invitationId)}/${guestId}`,
     jsonBody: body,
   });
-  return datos as GuestItem;
+  return exigirCuerpo(datos, `PUT ${base(invitationId)}/${guestId}`);
 }
 
 // =============================================================================================
@@ -166,7 +201,7 @@ export async function previewGuestsPaste(invitationId: number, text: string): Pr
     path: `${base(invitationId)}:preview`,
     jsonBody: { text },
   });
-  return datos as GuestPreviewResponse;
+  return exigirCuerpo(datos, `POST ${base(invitationId)}:preview`);
 }
 
 // =============================================================================================
@@ -178,7 +213,7 @@ export async function importGuestsPaste(invitationId: number, text: string): Pro
     path: `${base(invitationId)}:import`,
     jsonBody: { text },
   });
-  return datos as GuestImportResponse;
+  return exigirCuerpo(datos, `POST ${base(invitationId)}:import`);
 }
 
 // =============================================================================================
@@ -187,7 +222,7 @@ export async function importGuestsPaste(invitationId: number, text: string): Pro
 // =============================================================================================
 export async function getGuestLink(invitationId: number, guestId: number): Promise<GuestLink> {
   const datos = await peticionInvitados<GuestLink>({ method: "GET", path: `${base(invitationId)}/${guestId}/link` });
-  return datos as GuestLink;
+  return exigirCuerpo(datos, `GET ${base(invitationId)}/${guestId}/link`);
 }
 
 // =============================================================================================
