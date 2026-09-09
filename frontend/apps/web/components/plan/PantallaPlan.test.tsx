@@ -151,6 +151,32 @@ describe("sin pago — la oferta", () => {
     await waitFor(() => expect(window.location.assign).toHaveBeenCalledWith("https://checkout.stripe.com/cs_test_x"));
   });
 
+  it("un checkoutUrl que no es de checkout.stripe.com NO se navega: error en es-MX y nadie sale de la página", async () => {
+    const usuario = userEvent.setup();
+    obtenerPlanDeInvitacion.mockResolvedValue(planSinPagar());
+    crearCheckout.mockResolvedValue({ checkoutUrl: "https://malo.example/cobro", sessionId: "cs_x", paymentId: 3 });
+
+    render(<PantallaPlan invitationId="12" />);
+    await waitFor(() => expect(screen.getByTestId("plan-pagar")).not.toBeNull());
+
+    await usuario.click(screen.getByTestId("plan-pagar"));
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(es_MX.panel.plan.errores.generico));
+    expect(window.location.assign).not.toHaveBeenCalled();
+  });
+
+  it("un error de pago inesperado enseña el texto es-MX del producto, nunca el mensaje crudo del backend", async () => {
+    const usuario = userEvent.setup();
+    obtenerPlanDeInvitacion.mockResolvedValue(planSinPagar());
+    crearCheckout.mockRejectedValue(new ErrorDePago("PAY_STRIPE_UNAVAILABLE", 502, "Stripe connection reset by peer"));
+
+    render(<PantallaPlan invitationId="12" />);
+    await waitFor(() => expect(screen.getByTestId("plan-pagar")).not.toBeNull());
+
+    await usuario.click(screen.getByTestId("plan-pagar"));
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(es_MX.panel.plan.errores.generico));
+    expect(screen.queryByText(/connection reset/)).toBeNull();
+  });
+
   it("?plan=<codigo> preselecciona esa opción en vez de la recomendada", async () => {
     parametros.set("plan", "grande");
     obtenerPlanDeInvitacion.mockResolvedValue(planSinPagar());
@@ -214,6 +240,20 @@ describe("con pago", () => {
     expect(comprobante.getAttribute("target")).toBe("_blank");
 
     expect(screen.getByTestId("plan-ir-al-editor").getAttribute("href")).toBe("/editor/12");
+  });
+
+  it("un comprobanteUrl que no es https no se pinta (ni en la tarjeta ni en el historial)", async () => {
+    obtenerPlanDeInvitacion.mockResolvedValue(
+      planPagado({
+        pagos: [{ id: 7, estado: "PAGADO", planCodigo: "fiesta", planNombre: "Fiesta", importeCentavos: 89900, moneda: "MXN", creadoEn: "2026-03-03T18:20:00Z", pagadoEn: "2026-03-03T18:22:10Z", comprobanteUrl: "javascript:alert(1)" }],
+      }),
+    );
+    render(<PantallaPlan invitationId="12" />);
+
+    await waitFor(() => expect(screen.getByTestId("plan-con-pago")).not.toBeNull());
+    expect(screen.queryByTestId("plan-ver-comprobante")).toBeNull();
+    const fila = within(screen.getByTestId("plan-historial-fila-7"));
+    expect(fila.queryByRole("link")).toBeNull();
   });
 
   it("plan=null (marcada a mano): «Plan activo», sin importe, sin comprobante", async () => {

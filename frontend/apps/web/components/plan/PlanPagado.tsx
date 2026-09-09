@@ -10,6 +10,7 @@ import { Card } from "@invitaciones/ui/componentes/Card/index.ts";
 import { IconoExito } from "@invitaciones/icons";
 import { es_MX } from "@/lib/i18n";
 import { formatearImporte } from "@/lib/pagos/dinero";
+import { enlaceHttpsValido } from "@/lib/pagos/enlaces";
 import type { PlanDeInvitacion } from "@/lib/pagos/tipos";
 import { fechaLarga } from "./formato.ts";
 
@@ -20,6 +21,9 @@ export interface PropsPlanPagado {
 
 export function PlanPagado({ invitationId, plan }: PropsPlanPagado) {
   const t = es_MX.panel.plan.pagado;
+  // `comprobanteUrl` viene del backend y acaba en un `href`: solo se pinta si es `https:`
+  // (revisión 5-4-R1 · S-1). Un `javascript:` guardado en la base sería código al tocar el botón.
+  const comprobante = enlaceHttpsValido(plan.pagos[0]?.comprobanteUrl);
 
   return (
     <section data-testid="plan-con-pago" aria-labelledby="plan-con-pago-titulo">
@@ -55,9 +59,9 @@ export function PlanPagado({ invitationId, plan }: PropsPlanPagado) {
           <Button asChild size="md" data-testid="plan-ir-al-editor">
             <Link href={`/editor/${invitationId}`}>{t.irAMiInvitacion}</Link>
           </Button>
-          {plan.pagos[0]?.comprobanteUrl ? (
+          {comprobante !== null ? (
             <Button asChild variant="secundario" size="md" data-testid="plan-ver-comprobante">
-              <a href={plan.pagos[0].comprobanteUrl} target="_blank" rel="noreferrer">
+              <a href={comprobante} target="_blank" rel="noreferrer">
                 {t.verComprobante}
               </a>
             </Button>

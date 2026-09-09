@@ -108,6 +108,23 @@ describe("clasificación de errores no-2xx (nunca se descarta el cuerpo en silen
     expect(error).toBeInstanceOf(SessionError);
   });
 
+  it("un 401 CON code ajeno a `PAY_` (cadena de filtros) sigue siendo SessionError, no ErrorDePago", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(respuestaJson(401, { code: "ACCESS_DENIED", message: "Full authentication is required" })),
+    );
+    const error = await obtenerPlanDeInvitacion(12).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(SessionError);
+    expect((error as SessionError).statusCode).toBe(401);
+  });
+
+  it("un 500 con un code que no es `PAY_*` no se disfraza de error de pago conocido", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaJson(500, { code: "TPL_INTERNAL", message: "boom" })));
+    const error = await obtenerCatalogo().catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ErrorDePago);
+    expect((error as ErrorDePago).code).toBe("PAY_DESCONOCIDO");
+  });
+
   it("un cuerpo ilegible (HTML de un proxy, 502) se clasifica como ErrorDePago PAY_DESCONOCIDO", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("<html>502 Bad Gateway</html>", { status: 502 })));
     const error = await obtenerCatalogo().catch((e: unknown) => e);

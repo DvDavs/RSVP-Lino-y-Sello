@@ -5,6 +5,7 @@ import { Badge } from "@invitaciones/ui/componentes/Badge/index.ts";
 import type { TonoBadge } from "@invitaciones/ui/componentes/Badge/index.ts";
 import { es_MX } from "@/lib/i18n";
 import { formatearImporte } from "@/lib/pagos/dinero";
+import { enlaceHttpsValido } from "@/lib/pagos/enlaces";
 import type { EstadoDePago, Pago } from "@/lib/pagos/tipos";
 import { fechaCorta } from "./formato.ts";
 
@@ -57,7 +58,10 @@ export function HistorialDePagos({ pagos }: PropsHistorialDePagos) {
               </tr>
             </thead>
             <tbody>
-              {pagos.map((pago) => (
+              {pagos.map((pago) => {
+                // Igual que en la tarjeta: la URL del backend solo se pinta si es `https:`.
+                const comprobante = enlaceHttpsValido(pago.comprobanteUrl);
+                return (
                 <tr key={pago.id} data-testid={`plan-historial-fila-${pago.id}`} className="border-b border-ui-divider last:border-0">
                   <td className="py-2.5 pr-4 text-ui-ink">{fechaCorta(pago.creadoEn)}</td>
                   <td className="py-2.5 pr-4 text-ui-ink">{pago.planNombre}</td>
@@ -66,9 +70,9 @@ export function HistorialDePagos({ pagos }: PropsHistorialDePagos) {
                     <Badge tone={TONO_POR_ESTADO[pago.estado]}>{t.estados[pago.estado]}</Badge>
                   </td>
                   <td className="py-2.5">
-                    {pago.comprobanteUrl ? (
+                    {comprobante !== null ? (
                       <a
-                        href={pago.comprobanteUrl}
+                        href={comprobante}
                         target="_blank"
                         rel="noreferrer"
                         className="font-semibold text-ui-link hover:underline"
@@ -80,7 +84,8 @@ export function HistorialDePagos({ pagos }: PropsHistorialDePagos) {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

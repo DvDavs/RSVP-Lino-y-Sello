@@ -16,6 +16,7 @@ import { pagoEnLineaDisponible } from "@/lib/env";
 import { es_MX } from "@/lib/i18n";
 import { crearCheckout } from "@/lib/pagos/cliente";
 import { formatearImporte } from "@/lib/pagos/dinero";
+import { urlDeCheckoutDeStripe } from "@/lib/pagos/enlaces";
 import { ErrorDePago } from "@/lib/pagos/tipos";
 import type { CatalogoDePlanes, Plan } from "@/lib/pagos/tipos";
 import { SessionError } from "@/lib/errors";
@@ -59,7 +60,6 @@ export function OfertaDePlan({ invitationId, planQuery, catalogoEstado, onRecarg
     const deQuery = planQuery !== null && planes.some((p) => p.codigo === planQuery) ? planQuery : null;
     setSeleccion(deQuery ?? planes.find((p) => p.recomendado)?.codigo ?? planes[0]!.codigo);
     // Solo al llegar el catálogo (o cambiar de invitación): una vez elegida, la clienta manda.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [catalogo]);
 
   const pagoDisponible = !forzarSinLinea && catalogo?.pagoEnLinea === true && pagoEnLineaDisponible();
@@ -69,7 +69,15 @@ export function OfertaDePlan({ invitationId, planQuery, catalogoEstado, onRecarg
     setEstadoPago({ tipo: "abriendo" });
     try {
       const { checkoutUrl } = await crearCheckout(invitationId, seleccion);
-      window.location.assign(checkoutUrl);
+      // Frontera (revisión 5-4-R1 · S-2): se navega SOLO a `https://checkout.stripe.com/…`, que es
+      // lo que el contrato §2.4 promete. Cualquier otra cosa —un backend mal configurado, una
+      // respuesta manipulada— sería un redirector abierto desde una pantalla con sesión abierta.
+      const destino = urlDeCheckoutDeStripe(checkoutUrl);
+      if (destino === null) {
+        setEstadoPago({ tipo: "error", mensaje: es_MX.panel.plan.errores.generico });
+        return;
+      }
+      window.location.assign(destino);
       // No se restablece `estadoPago`: la pestaña está a punto de navegar a Stripe.
     } catch (e: unknown) {
       if (e instanceof SessionError) {
@@ -91,7 +99,9 @@ export function OfertaDePlan({ invitationId, planQuery, catalogoEstado, onRecarg
           onRecargarCatalogo();
           return;
         }
-        setEstadoPago({ tipo: "error", mensaje: e.message || es_MX.panel.plan.errores.generico });
+        // NUNCA `e.message`: es el texto crudo del backend (otro idioma, detalles de
+        // implementación, incluso lo que devuelva un proxy). La interfaz habla siempre en es-MX.
+        setEstadoPago({ tipo: "error", mensaje: es_MX.panel.plan.errores.generico });
         return;
       }
       setEstadoPago({ tipo: "error", mensaje: es_MX.panel.plan.errores.generico });

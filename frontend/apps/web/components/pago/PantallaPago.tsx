@@ -23,6 +23,7 @@ import { correoDeSoporteDelEntorno } from "@/lib/env";
 import { SessionError } from "@/lib/errors";
 import { es_MX } from "@/lib/i18n";
 import { obtenerPlanDeInvitacion } from "@/lib/pagos/cliente";
+import { enlaceHttpsValido } from "@/lib/pagos/enlaces";
 import { formatearImporte } from "@/lib/pagos/dinero";
 import type { PlanDeInvitacion } from "@/lib/pagos/tipos";
 import { CargaPago } from "./CargaPago.tsx";
@@ -79,9 +80,14 @@ export function PantallaPago() {
           setEstado({ tipo: "cancelado" });
           return;
         }
-        setEstado({ tipo: "esperando", tardando: false });
-        if (intervaloRef.current === null) {
-          sondeosHechos.current = 0;
+        // Funcional a propósito: una respuesta que llega TARDE (pedida antes de agotar el minuto)
+        // no puede devolver el bloque «está tardando» a su estado anterior.
+        setEstado((anterior) =>
+          anterior.tipo === "esperando" && anterior.tardando ? anterior : { tipo: "esperando", tardando: false },
+        );
+        // `sondeosHechos` NO se reinicia aquí (lo hacen el montaje y «volver a intentarlo»): si el
+        // minuto ya se agotó, una respuesta rezagada no puede reabrir el sondeo por su cuenta.
+        if (intervaloRef.current === null && sondeosHechos.current < SONDEOS_MAXIMOS) {
           intervaloRef.current = setInterval(() => {
             sondeosHechos.current += 1;
             if (sondeosHechos.current >= SONDEOS_MAXIMOS) {
@@ -101,7 +107,7 @@ export function PantallaPago() {
         }
         setEstado({ tipo: "error" });
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `detenerSondeo` es estable (useCallback sin deps).
+    // `detenerSondeo` no va en las dependencias a propósito: es estable (`useCallback` sin deps).
   }, [invitationId, sesion]);
 
   useEffect(() => {
@@ -110,12 +116,16 @@ export function PantallaPago() {
       return;
     }
     setEstado({ tipo: "cargando" });
+    sondeosHechos.current = 0;
     consultar();
     return () => detenerSondeo();
   }, [invitationId, cancelado, consultar, detenerSondeo]);
 
+  // El foco viaja al título CADA vez que la pantalla cambia de estado (no solo al confirmarse):
+  // quien navega con teclado o lector de pantalla se entera de que la página ya dice otra cosa, y
+  // el punto de partida vuelve a ser el encabezado, no el final del documento.
   useEffect(() => {
-    if (estado.tipo === "confirmado") {
+    if (estado.tipo !== "cargando") {
       tituloRef.current?.focus();
     }
   }, [estado.tipo]);
@@ -128,7 +138,9 @@ export function PantallaPago() {
   if (estado.tipo === "cancelado") {
     return (
       <Bloque testId="pago-cancelado">
-        <h1 className="display-md text-ui-ink">{es_MX.sitio.pago.cancelado.titulo}</h1>
+        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink focus:outline-none">
+          {es_MX.sitio.pago.cancelado.titulo}
+        </h1>
         <p className="text-md max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.cancelado.cuerpo}</p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Button asChild variant="primario" size="md" data-testid="pago-volver-a-intentar">
@@ -143,13 +155,17 @@ export function PantallaPago() {
   }
 
   if (estado.tipo === "sin-sesion") {
-    const siguiente = `/pago?inv=${String(invitationId)}${sesion !== null ? `&sesion=${sesion}` : ""}`;
+    // El valor de `sesion` viene de la URL: se codifica antes de meterlo en el `siguiente` para que
+    // un `&` o un `#` dentro del identificador no parta la ruta de vuelta al decodificarla.
+    const siguiente = `/pago?inv=${String(invitationId)}${sesion !== null ? `&sesion=${encodeURIComponent(sesion)}` : ""}`;
     return (
       <Bloque testId="pago-sin-sesion">
-        <h1 className="display-md text-ui-ink">{es_MX.sitio.pago.sinSesion.titulo}</h1>
+        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink focus:outline-none">
+          {es_MX.sitio.pago.sinSesion.titulo}
+        </h1>
         <p className="text-md max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.sinSesion.cuerpo}</p>
         <Button asChild variant="primario" size="md">
-          <Link href={`/acceso?siguiente=${encodeURIComponent(siguiente)}`}>{es_MX.sitio.pago.sinSesion.entrar}</Link>
+          <Link href={`/acceso?volver=${encodeURIComponent(siguiente)}`}>{es_MX.sitio.pago.sinSesion.entrar}</Link>
         </Button>
       </Bloque>
     );
@@ -158,7 +174,9 @@ export function PantallaPago() {
   if (estado.tipo === "error") {
     return (
       <Bloque testId="pago-error">
-        <h1 className="display-md text-ui-ink">{es_MX.sitio.pago.error.titulo}</h1>
+        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink focus:outline-none">
+          {es_MX.sitio.pago.error.titulo}
+        </h1>
         <p className="text-md max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.error.cuerpo}</p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Button
@@ -183,20 +201,44 @@ export function PantallaPago() {
     return (
       <Bloque testId="pago-esperando">
         <ProgressRing indeterminate label={es_MX.sitio.pago.esperando.progreso} size={96} />
-        <h1 className="display-md text-ui-ink">{es_MX.sitio.pago.esperando.titulo}</h1>
-        <p className="text-md max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.esperando.cuerpo}</p>
-        {estado.tardando ? (
-          <div data-testid="pago-tardando" className="flex flex-col items-center gap-3 rounded-ui-card bg-ui-surface-alt p-6">
-            <p className="heading-sm text-ui-ink">{es_MX.sitio.pago.tardando.titulo}</p>
-            <p className="text-sm max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.tardando.cuerpo}</p>
-            <BloqueSoporte />
-            {invitationId !== null ? (
-              <Button asChild variant="secundario" size="sm" data-testid="pago-ver-plan">
-                <Link href={`/editor/${invitationId}/plan`}>{es_MX.sitio.pago.confirmado.verPlan}</Link>
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
+        <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink focus:outline-none">
+          {es_MX.sitio.pago.esperando.titulo}
+        </h1>
+        {/* El sondeo cambia lo que dice esta zona sin que nadie toque nada: `role="status"` +
+            `aria-live="polite"` es lo que hace que un lector de pantalla se entere de que la espera
+            se alargó, en vez de dejar la página muda. Fuera del `h1`, que no cambia. */}
+        <div role="status" aria-live="polite" className="flex flex-col items-center gap-4">
+          <p className="text-md max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.esperando.cuerpo}</p>
+          {estado.tardando ? (
+            <div data-testid="pago-tardando" className="flex flex-col items-center gap-3 rounded-ui-card bg-ui-surface-alt p-6">
+              <p className="heading-sm text-ui-ink">{es_MX.sitio.pago.tardando.titulo}</p>
+              <p className="text-sm max-w-[48ch] text-ui-ink-muted">{es_MX.sitio.pago.tardando.cuerpo}</p>
+              <BloqueSoporte />
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {/* Sin esto la espera agotada es un callejón: el sondeo se detuvo y la única salida
+                    era abandonar la página. Vuelve a preguntar al backend (y reabre el sondeo). */}
+                <Button
+                  type="button"
+                  variant="primario"
+                  size="sm"
+                  data-testid="pago-comprobar-de-nuevo"
+                  onClick={() => {
+                    sondeosHechos.current = 0;
+                    setEstado({ tipo: "esperando", tardando: false });
+                    consultar();
+                  }}
+                >
+                  {es_MX.comun.reintentar}
+                </Button>
+                {invitationId !== null ? (
+                  <Button asChild variant="secundario" size="sm" data-testid="pago-ver-plan">
+                    <Link href={`/editor/${invitationId}/plan`}>{es_MX.sitio.pago.confirmado.verPlan}</Link>
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+        </div>
       </Bloque>
     );
   }
@@ -204,6 +246,7 @@ export function PantallaPago() {
   // estado.tipo === "confirmado"
   const { plan } = estado;
   const pagoReciente = plan.pagos[0] ?? null;
+  const comprobante = enlaceHttpsValido(pagoReciente?.comprobanteUrl);
   const subtitulo =
     plan.plan === null
       ? es_MX.sitio.pago.confirmado.sinPlan
@@ -224,10 +267,10 @@ export function PantallaPago() {
       {pagoReciente !== null ? (
         <p className="label-md text-ui-ink-muted">{formatearImporte(pagoReciente.importeCentavos, pagoReciente.moneda)}</p>
       ) : null}
-      {pagoReciente?.comprobanteUrl ? (
+      {comprobante !== null ? (
         <p className="text-sm max-w-[48ch] text-ui-ink-muted">
           {es_MX.sitio.pago.confirmado.comprobante}{" "}
-          <a href={pagoReciente.comprobanteUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-ui-link hover:underline">
+          <a href={comprobante} target="_blank" rel="noopener noreferrer" className="font-semibold text-ui-link hover:underline">
             {es_MX.sitio.pago.confirmado.verComprobante}
           </a>
         </p>

@@ -11,7 +11,10 @@ import { es_MX } from "@/lib/i18n";
 import { PantallaPlan } from "@/components/plan/PantallaPlan.tsx";
 
 export const metadata: Metadata = {
-  title: `${es_MX.panel.plan.metaTitulo} · Lino & Sello`,
+  // Sin marca a mano: el layout de `(chrome)` ya aplica su plantilla `"%s · Invitaciones"`, así que
+  // añadirla aquí la duplicaba («… · Lino & Sello · Invitaciones»). Mismo patrón que la ruta
+  // hermana `invitados/page.tsx`.
+  title: es_MX.panel.plan.metaTitulo,
   robots: { index: false, follow: false },
 };
 

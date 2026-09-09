@@ -104,7 +104,7 @@ describe("sin invitación en la URL (?inv ausente)", () => {
 
     const boton = screen.getByTestId("precios-elegir-fiesta");
     expect(boton.textContent).toBe(es_MX.sitio.precios.empezarGratis);
-    expect(boton.getAttribute("href")).toBe("/acceso?siguiente=%2Feditor");
+    expect(boton.getAttribute("href")).toBe("/acceso?volver=%2Feditor");
     expect(screen.getAllByText(es_MX.sitio.precios.notaEmpezarGratis).length).toBe(3);
   });
 });

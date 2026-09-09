@@ -20,15 +20,17 @@ interface OpcionesPeticion {
   readonly auth?: boolean;
 }
 
-/** `true` cuando `valor` tiene la forma `{code: string, message?: string, ...}` de un error `PAY_*`. */
+/**
+ * `true` cuando `valor` tiene la forma `{code: "PAY_…", message?: string, ...}` de un error del
+ * módulo de pagos. El prefijo es OBLIGATORIO, igual que `code.startsWith("TPL_")` en
+ * `lib/api-client.ts`: sin él, un `401` de la cadena de filtros de Spring Security que trajera
+ * cualquier `code` (`ACCESS_DENIED`, `invalid_token`…) se clasificaría como error de pago y la
+ * pantalla nunca mandaría a `/acceso`.
+ */
 function esCuerpoDeErrorDePago(valor: unknown): valor is { code: string; message?: string; details?: unknown } {
-  return (
-    typeof valor === "object" &&
-    valor !== null &&
-    "code" in valor &&
-    typeof (valor as Record<string, unknown>).code === "string" &&
-    (valor as Record<string, unknown>).code !== ""
-  );
+  if (typeof valor !== "object" || valor === null || !("code" in valor)) return false;
+  const code = (valor as Record<string, unknown>).code;
+  return typeof code === "string" && code.startsWith("PAY_");
 }
 
 async function peticion<T>(opciones: OpcionesPeticion): Promise<T> {

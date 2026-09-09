@@ -131,6 +131,31 @@ describe("confirmado directo", () => {
     expect(screen.getByText(es_MX.sitio.pago.confirmado.sinPlan)).not.toBeNull();
   });
 
+  it("pinta el enlace al comprobante cuando la URL es https", async () => {
+    setParametros({ inv: "12", sesion: "cs_123" });
+    obtenerPlanDeInvitacion.mockResolvedValue({
+      ...PLAN_PAGADO,
+      pagos: [{ ...PLAN_PAGADO.pagos[0], comprobanteUrl: "https://pay.stripe.com/receipts/abc" }],
+    });
+    render(<PantallaPago />);
+
+    const enlace = await screen.findByRole("link", { name: es_MX.sitio.pago.confirmado.verComprobante });
+    expect(enlace.getAttribute("href")).toBe("https://pay.stripe.com/receipts/abc");
+    expect(enlace.getAttribute("rel")).toContain("noreferrer");
+  });
+
+  it("un comprobanteUrl que no es https NO se pinta como enlace (nada de javascript:)", async () => {
+    setParametros({ inv: "12", sesion: "cs_123" });
+    obtenerPlanDeInvitacion.mockResolvedValue({
+      ...PLAN_PAGADO,
+      pagos: [{ ...PLAN_PAGADO.pagos[0], comprobanteUrl: "javascript:alert(1)" }],
+    });
+    render(<PantallaPago />);
+
+    expect(await screen.findByTestId("pago-confirmado")).not.toBeNull();
+    expect(screen.queryByRole("link", { name: es_MX.sitio.pago.confirmado.verComprobante })).toBeNull();
+  });
+
   it("mueve el foco al título al confirmarse", async () => {
     setParametros({ inv: "12", sesion: "cs_123" });
     obtenerPlanDeInvitacion.mockResolvedValue(PLAN_PAGADO);
@@ -143,14 +168,14 @@ describe("confirmado directo", () => {
 });
 
 describe("sin sesión (SessionError)", () => {
-  it("manda a /acceso?siguiente=… en vez de pintar el pago", async () => {
+  it("manda a /acceso?volver=… (el parámetro que AsistenteAcceso lee de verdad) en vez de pintar el pago", async () => {
     setParametros({ inv: "12", sesion: "cs_123" });
     obtenerPlanDeInvitacion.mockRejectedValue(new SessionError(401, ""));
     render(<PantallaPago />);
 
     expect(await screen.findByTestId("pago-sin-sesion")).not.toBeNull();
     const boton = screen.getByRole("link", { name: es_MX.sitio.pago.sinSesion.entrar });
-    expect(boton.getAttribute("href")).toBe(`/acceso?siguiente=${encodeURIComponent("/pago?inv=12&sesion=cs_123")}`);
+    expect(boton.getAttribute("href")).toBe(`/acceso?volver=${encodeURIComponent("/pago?inv=12&sesion=cs_123")}`);
   });
 });
 
@@ -232,5 +257,36 @@ describe("esperando (sondeo)", () => {
     });
     // el sondeo se detuvo: ninguna llamada nueva tras marcar "tardando".
     expect(obtenerPlanDeInvitacion.mock.calls.length).toBe(llamadasTrasTardar);
+  });
+
+  it("el estado de espera va en una región `aria-live`, no muda", async () => {
+    setParametros({ inv: "12", sesion: "cs_123" });
+    obtenerPlanDeInvitacion.mockResolvedValue(PLAN_NO_PAGADO);
+    render(<PantallaPago />);
+
+    const espera = await screen.findByTestId("pago-esperando");
+    const region = espera.querySelector('[aria-live="polite"]');
+    expect(region).not.toBeNull();
+    expect(region?.textContent).toContain(es_MX.sitio.pago.esperando.cuerpo);
+  });
+
+  it("tras agotarse el minuto, «volver a intentarlo» vuelve a preguntar y puede confirmar", async () => {
+    vi.useFakeTimers();
+    setParametros({ inv: "12", sesion: "cs_123" });
+    obtenerPlanDeInvitacion.mockResolvedValue(PLAN_NO_PAGADO);
+
+    render(<PantallaPago />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60_000);
+    });
+    expect(screen.getByTestId("pago-tardando")).not.toBeNull();
+
+    obtenerPlanDeInvitacion.mockResolvedValue(PLAN_PAGADO);
+    await act(async () => {
+      screen.getByTestId("pago-comprobar-de-nuevo").click();
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    expect(screen.getByTestId("pago-confirmado")).not.toBeNull();
   });
 });

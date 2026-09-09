@@ -26,7 +26,7 @@ export function TarjetaPlan({ plan, pagoDisponible, invitationId }: PropsTarjeta
     ? "#contacto"
     : conInvitacion
       ? `/editor/${invitationId}/plan?plan=${plan.codigo}`
-      : `/acceso?siguiente=${encodeURIComponent("/editor")}`;
+      : `/acceso?volver=${encodeURIComponent("/editor")}`;
   const etiquetaBoton =
     pagoDisponible && !conInvitacion ? es_MX.sitio.precios.empezarGratis : es_MX.sitio.precios.elegir(plan.nombre);
 
