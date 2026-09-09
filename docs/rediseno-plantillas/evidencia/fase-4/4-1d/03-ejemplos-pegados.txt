@@ -1,0 +1,6 @@
+=== A) ejemplo de `plantilla bloque richText` pegado tal cual ===
+0 error(es) · 0 aviso(s) · ok=true
+
+=== B) fragmento copiable de la sugerencia, pegado tal cual ===
+0 error(es) · 0 aviso(s) · ok=true
+
