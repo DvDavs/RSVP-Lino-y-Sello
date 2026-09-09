@@ -1783,3 +1783,161 @@ Todas con estado **propuesta**; solo el orquestador cambia el estado. Fecha 2026
 ## ADR-DUENO-02 — Marca, contacto, pagos e imágenes
 - Fecha: 2026-09-06 · Estado: aceptada · Autor: dueño
 - Decisión: marca Lino & Sello, dominio linoysello.com, correos hola@/soporte@/no-responder@linoysello.com, WhatsApp solo contacto (+52 951 470 9685, click-to-chat sin API), compra en línea con Stripe, imágenes por modelo de IA subidas por el dueño, tema oscuro en segundo plano. Se levanta la prohibición sobre `auth`, `guests`, `admin` y pagos para construir el producto completo (fase 5 nueva), con ADR, pruebas y revisor Opus.
+
+---
+
+# Fase 5 — producto completo (2026-09-09)
+
+Las ADR de la fase 5 se numeran `ADR-5-<bloque>-<n>`. Las que siguen nacen de la sesión **E1
+(cimientos)** y quedan en estado **propuesta**: las acepta o rechaza la sesión de integración E6,
+que es la única que cierra `contratos.md` y `00-INDICE.md`. El desarrollo completo, con
+wireframes, tablas y evidencia, vive en `docs/rediseno-plantillas/diseno/12-producto-completo.md`;
+el texto va también aquí íntegro para que este registro siga siendo autosuficiente.
+
+## ADR-5-0B-01 — La puerta de pago está en publicar, no en editar, y se comprueba en el backend
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: 5-0b-B
+- Contexto: la fase 5 introduce cobro (D-05: Stripe Checkout + webhook) sobre un producto cuyo valor
+  solo se ve **después** de trabajar un rato en él: elegir plantilla, escribir los datos y verla
+  compuesta. Poner el cobro antes de eso obliga a pagar a ciegas. Hay además tres hechos del código
+  que condicionan dónde puede vivir la puerta. (1) La invitación **no la crea el módulo nuevo**:
+  `templates2` aplica una plantilla a una invitación que ya existe (`MisInvitaciones.tsx:3-7`,
+  ADR-2-4-02) y la única alta es hoy `POST /admin/invitations/create`, con rol ADMIN
+  (`InvitationController.kt:52`). (2) El modelo ya tiene el estado de pago:
+  `InvitationEntity.isPaid` y `totalAmount` (`InvitationEntity.kt:47-51`) y un
+  `PUT /admin/invitations/{id}/mark-as-paid` (`InvitationController.kt:42`). (3) La publicación ya
+  tiene un punto de estrangulamiento único y **ya tiene el concepto de bloqueo**:
+  `POST /editor/invitations/{id}/release` y su gemelo de solo lectura
+  `GET /editor/invitations/{id}/release/preflight`, que devuelve
+  `PreflightResponse{canPublish, blockers[], warnings[]}` (`EditorReleaseController.kt:36-50`,
+  `Templates2EditorDtos.kt:192-208`), con la comprobación de bloqueos compartida entre los dos
+  (`ReleaseService.kt:64-92`). El riesgo conocido de cualquier puerta de pago dibujada solo en la
+  interfaz es que se salte con una petición directa; y el riesgo de una puerta mal contada es el
+  botón muerto que ya destapó G-01 en la fase 3-C (`lib/contacto.ts:1-12`): un camino que promete
+  una salida que no existe.
+- Decisión:
+  1. **Editar y previsualizar son gratis.** Crear la invitación, elegir plantilla, escribir todos los
+     campos, subir fotos, deshacer, ver el lienzo y `/preview/[invitationId]` no exigen pago.
+  2. **Publicar y compartir exigen plan pagado en esa invitación.** La comprobación vive en el
+     **backend**, dentro de `ReleaseService`, y se expresa como un `blocker` más del preflight con
+     código propio (`TPL_PLAN_UNPAID`), de modo que `GET …/release/preflight` devuelve
+     `canPublish=false` y `POST …/release` responde `402` con ese mismo código. La interfaz **no es**
+     la puerta: es su reflejo.
+  3. Con la puerta cerrada, el reparto de enlaces también lo está: sin release activo no hay
+     `publicToken` publicado, y `/r/[token]` de un invitado de una invitación sin publicar responde
+     con la misma pantalla indistinguible que un token inválido.
+  4. La pantalla **nunca** enseña un botón muerto: «Publicar» sigue existiendo y sigue siendo
+     pulsable; al pulsarlo, el diálogo de publicar enseña el bloqueo «Falta el plan» con el precio y
+     un botón que lleva a `/editor/[invitationId]/plan`, que es la pantalla que sí puede resolverlo.
+  5. **Consecuencia obligatoria** de (1): la invitación tiene que poder nacer **sin pagar**, así que
+     la fase 5 necesita un alta de invitación para el rol USER (hoy solo hay la de ADMIN), que la
+     cree con `is_paid = false`. Especificarla es de 5-0b-A; sin ella, «editar gratis» es imposible
+     porque no habría nada que editar antes de pagar.
+- Alternativas descartadas y por qué:
+  - **Cobrar antes de crear la invitación** (la forma que el producto tiene hoy de facto: la
+    invitación nace de una compra). Se descarta porque obliga a comprar sin haber visto nada y
+    porque contradice el objetivo de negocio de la fase, que quiere a la clienta dentro del editor
+    cuanto antes. Además deja el asistente y el editor sin ningún recorrido para quien todavía duda.
+  - **Poner la puerta solo en la interfaz** (ocultar el botón de publicar). Se descarta porque no es
+    una puerta: `POST …/release` seguiría aceptando la publicación de cualquiera con una sesión
+    válida, y el producto cobraría solo a quien no sabe usar la consola del navegador.
+  - **Poner la puerta en el render público** (publicar libre, pero `/i/[publicToken]` responde 402 si
+    no está pagado). Se descarta por tres motivos: le da la mala noticia al **invitado**, que no
+    tiene nada que ver; ensucia una ruta pública que hoy tiene exactamente tres estados bien
+    definidos (`page.tsx:20-27`); y deja rastro en la caché de la CDN de algo que sí llegó a estar
+    publicado.
+  - **Marca de agua en la invitación gratuita en lugar de puerta.** Se descarta para esta fase: es
+    una decisión de producto y de arte que nadie ha tomado (no hay logotipo todavía, D-02) y
+    convierte el criterio binario «está pagada / no lo está» en una negociación estética. Queda
+    anotada como pregunta abierta por si el dueño la prefiere más adelante.
+  - **Límite por número de invitados en vez de por publicación.** Se descarta como puerta principal:
+    el valor que la clienta compra es «mandarla», no «apuntar gente», y un límite de invitados
+    castiga justo el trabajo que ella ya hizo. Sí se conserva como **diferencia entre planes**.
+- Matriz de capacidades:
+
+  | Acción | Sin plan pagado | Con plan pagado |
+  |---|---|---|
+  | Crear la invitación desde `/editor` | Sí | Sí |
+  | Elegir y cambiar de plantilla | Sí | Sí |
+  | Escribir contenido, subir fotos, deshacer | Sí | Sí |
+  | Ver el lienzo y `/preview/[invitationId]` | Sí | Sí |
+  | `GET …/release/preflight` | Sí; devuelve `canPublish=false` con `TPL_PLAN_UNPAID` | Sí |
+  | `POST …/release` (publicar) | **No** · `402 TPL_PLAN_UNPAID` | Sí |
+  | Rotar el enlace público | **No** (no hay enlace que rotar) | Sí |
+  | Agregar invitados y repartir pases | Sí | Sí |
+  | Ver el enlace personal de un invitado | Sí, pero marcado «se activa al publicar» | Sí |
+  | Compartir por WhatsApp / correo desde la lista | **No** · el botón abre el plan | Sí |
+  | `/r/[token]` para un invitado | Pantalla indistinguible de token inválido | Funciona |
+  | Exportar la lista de invitados | Sí (sus datos son suyos) | Sí |
+  | `/editor/[invitationId]/plan` | Sí; es la pantalla que resuelve el bloqueo | Sí |
+
+- Qué pasa si el pago caduca o se reembolsa:
+  - **Caducidad.** Con pago único por invitación (la recomendación del prompt maestro, bloque 5-4) no
+    hay caducidad: se paga una vez y la invitación queda publicable para siempre. Si el dueño
+    prefiere suscripción, hace falta una fecha de vigencia por invitación, y entonces el vencimiento
+    se comporta igual que un reembolso pero avisando **antes** (dos correos: 7 días y 1 día). Es
+    pregunta abierta P-5-0B-3.
+  - **Reembolso o contracargo** (`charge.refunded`, `charge.dispute.created`): el webhook pone
+    `is_paid = false`, **retira el release activo** (equivalente a `DELETE …/release`: el enlace deja
+    de servir de inmediato en origen, con la ventana de 300 s de la CDN que ya está documentada en
+    `contratos.md §8`), y avisa por correo a la clienta con la razón y el camino para volver a pagar.
+    En `/editor/[invitationId]/plan` el estado pasa a «Pago devuelto» con el botón de pagar otra vez;
+    la invitación **no se borra** y los invitados **no se borran**: al volver a pagar y publicar, los
+    mismos enlaces personales vuelven a funcionar. El panel `/admin` lo ve en la lista de pagos.
+  - **Pago disputado y luego resuelto a favor:** vuelve a `is_paid = true` pero **no republica sola**;
+    la clienta pulsa publicar. Republicar en nombre de alguien sin que lo pida es una acción visible
+    para terceros que el sistema no debe tomar por su cuenta.
+- Consecuencias por pantalla:
+  - `/editor/[invitationId]`: el diálogo de publicar gana un bloqueo nuevo, con el mismo aspecto que
+    los que ya pinta (los de contenido de demostración sin sustituir); el texto dice qué falta y el
+    botón lleva al plan. El resto del editor no cambia.
+  - `/editor/[invitationId]/plan`: es la pantalla que **resuelve** el bloqueo y por eso su estado
+    vacío es la oferta, no un mensaje de error.
+  - `/editor/[invitationId]/invitados`: los botones de compartir están presentes y deshabilitados con
+    una razón visible («Se activan cuando publiques»), nunca ocultos; «Copiar enlace» sigue copiando
+    para que la clienta pueda probarlo ella misma, con el aviso de que todavía no abre para nadie más.
+  - `/precios` y `/pago`: son el camino de salida del bloqueo y por eso la ruta `/precios` acepta un
+    parámetro con la invitación de origen, para volver a ella tras pagar.
+  - `/admin`: la columna «Pago» de la lista de invitaciones es la misma verdad que la puerta; un
+    ADMIN que marque una invitación como pagada la habilita, y eso queda registrado.
+  - `/r/[token]` y `/i/[publicToken]`: no cambian. Un invitado nunca ve nada de esto.
+
+## ADR-5-0C-01 — Módulo nuevo `modules/product` con cuatro subpaquetes disjuntos, en vez de extender `modules/templates2`
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: 5-0c (esqueleto del módulo backend de la fase 5)
+- Contexto: la fase 5 la escriben **cuatro sesiones en paralelo** (E2 invitados/RSVP/compartir, E3 cuenta/marca/legal, E4 pagos, E5 admin) sobre un backend que ya tiene un módulo nuevo (`modules/templates2`, fases 1–3) y un montón de módulos viejos. ADR-DUENO-02 levantó la prohibición sobre `auth`, `guests`, `admin` y pagos para construir el producto completo; ADR-DUENO-01 fijó que no hay migración y que el módulo antiguo se retira en la fase de cierre. La pregunta abierta era **dónde** escribe ese código nuevo. Evidencia de lo que `templates2` es hoy, leída en el árbol: sus siete subpaquetes son `api`, `catalog`, `composition`, `domain`, `migration`, `persistence` y `schema`, y su superficie HTTP está **cerrada por una prueba de inventario** — `Templates2RouteInventoryTest.kt:19-46` afirma «las 20 rutas de `03 §2`, ninguna más y ninguna menos», con el argumento explícito de que «una ruta añadida sin contrato es superficie de ataque que nadie revisó». Además, `contratos.md §4` prohíbe `require`/`check`/`error()` en **todo** el código de producción de `templates2`, y `NoRequileOrCheckArchitectureTest` lo comprueba recorriendo el árbol de fuentes del módulo. Es decir: `templates2` no es una carpeta, es un módulo con contratos y compuertas propias.
+- Decisión: se crea `modules/product` con cuatro subpaquetes **disjuntos** —`account`, `guests`, `payments`, `admin`—, uno por sesión, más tres ficheros congelados en la raíz (`ProductHealthResponse.kt`, `ProductPropertiesConfig.kt`) que 5-0c entrega cerrados. Cada subpaquete estrena con un controlador de salud bajo `/product/<subpaquete>/health`, autenticado, con cuerpo mudo y una prueba que lo ejerce y afirma su `@PreAuthorize`. Las propiedades de entorno se exponen como tres `@ConfigurationProperties` tipadas para que **nadie tenga que reabrir `application.yml`**. Y se fija por escrito la regla de territorio: **`modules/user/invitations`, `modules/master/templates` y `MongoDataInitializer` siguen prohibidos para toda la fase 5; se retiran en la fase 7** (ADR-DUENO-01). Ninguna sesión de la fase 5 los lee, los edita ni depende de ellos.
+- Alternativas descartadas y por qué:
+  - **(a) Extender `modules/templates2` con subpaquetes nuevos.** `templates2` es el módulo de **plantillas e invitaciones-como-documento**: esquema (`schema`), composición (`composition`), catálogo y registro de paquetes (`catalog`), publicación y render público (`api`). Cuenta, invitados, pagos y administración son **otro dominio**: hablan de personas, dinero y permisos, no de documentos. Meterlos ahí obliga además a romper dos compuertas vivas: `Templates2RouteInventoryTest` tendría que pasar de 20 rutas a 20 + N y dejaría de significar «la superficie que el contrato revisó», y la prohibición de `require`/`check`/`error()` de `contratos.md §4` se extendería a código de pagos que no la ha acordado. La fase 7 quiere dejar una superficie limpia y auditable; mezclar los dos dominios en un módulo la ensucia justo antes de la limpieza.
+  - **(b) Un módulo nuevo por sesión (`modules/account`, `modules/guests`, `modules/payments`, `modules/admin2`).** Da el mismo aislamiento, pero cuatro módulos hermanos sin techo común no comparten ni la configuración ni el prefijo de ruta, y `modules/admin2` junto a `modules/admin` es un nombre que nadie querrá explicar en la fase 7. Un solo módulo con cuatro subpaquetes da el mismo aislamiento **y** un sitio natural para lo compartido.
+  - **(c) Repartir el código nuevo por los módulos viejos** (`modules/user/invitations` para invitados, `modules/admin` para administración). Choca de frente con ADR-DUENO-01: esos módulos se retiran; todo lo que se escriba ahí hay que volver a mudarlo o se pierde. Y `modules/user/invitations`, `modules/master/templates` y `MongoDataInitializer` están prohibidos por decisión del dueño.
+  - **(d) Sin subpaquetes: `modules/product` plano.** Cuatro sesiones en paralelo sobre un mismo paquete es conflicto de fusión garantizado en cada fichero de configuración, de rutas y de pruebas. Los subpaquetes disjuntos son precisamente el mecanismo que hace que las cuatro puedan escribir a la vez.
+  - **(e) Rutas de salud públicas.** Se descartó: aunque el cuerpo sea mudo, una ruta pública confirma qué módulos existen y a quién puede escanearlos le sirve. `anyRequest().authenticated()` (`SecurityConfig.kt:47`) ya las cierra sin tocar el núcleo, así que abrirlas habría sido trabajo extra para tener menos.
+- Consecuencias:
+  - Cada sesión tiene un territorio con frontera comprobable: `git diff --stat` debe caer entero dentro de su subpaquete. Los tres ficheros de la raíz están congelados y, si alguien necesita registrar una clase de propiedades nueva, es un cambio de una línea en `ProductPropertiesConfig.kt` que hay que anunciar al orquestador.
+  - El `@RestControllerAdvice` de `templates2` está acotado con `basePackages = ["…modules.templates2.api"]` (`Templates2ExceptionHandler.kt:55`) y **no alcanza** a `modules.product`: hoy los errores del módulo nuevo saldrían por `GeneralExceptionHandler`, sin `code` tipado. Quien necesite errores tipados en la fase 5 tendrá que declarar su propio advice acotado a su subpaquete, y eso merece su propia ADR.
+  - `templates2` conserva intactas sus dos compuertas (inventario de 20 rutas y prohibición de `require`/`check`), porque el código nuevo no entra en su árbol.
+  - La retirada de la fase 7 queda acotada: `modules/user/invitations`, `modules/master/templates`, `modules/master/*`, `MongoDataInitializer` y `modules/admin` se borran sin que nada de `modules/product` ni de `modules/templates2` dependa de ellos. Verificable por búsqueda: ningún fichero de `modules/product` los importa.
+  - Coste asumido: durante la fase 5 conviven un módulo administrativo viejo (`modules/admin`) y uno nuevo (`modules/product/admin`). Se mitiga con el nombre `ProductAdminHealthController` y con esta ADR; se resuelve en la fase 7.
+
+## ADR-5-E1-01 — El enlace personal del invitado es `/r/[token]`, con un solo token
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E1-orquestador
+- Contexto: el prompt maestro de la fase 5 deja abierta la forma del enlace que recibe el invitado, entre `/i/[publicToken]?g=<token>` y `/r/[token]`. Las dos partes del inventario llegaron a respuestas distintas: la parte B lo dibujó como `/r/[token]` y la parte A (§A4.4) propuso el puente de backend como `GET /public/i/{publicToken}/rsvp/{confirmationToken}`, es decir, con los dos tokens en la petición. Hay que cerrarlo antes de que E2 escriba nada, porque de ello dependen la ruta del frontend, la ruta pública del backend y el enlace que construyen los correos y el reparto por WhatsApp. Hechos del código que condicionan la decisión, verificados en la parte A: `invitation_guest` y `tpl_document` cuelgan las dos de la misma tabla `invitation` (`V8__create_invitation_guest_table.sql:7`, `V32__create_tpl_document.sql:7`), con `UNIQUE (invitation_id)` y `UNIQUE (public_token)` en `tpl_document`, así que la traducción entre un token y el otro es una unión de una línea en cualquiera de los dos sentidos. Y el hallazgo S-04 documenta que hoy `guestId` no se cruza nunca con `invitationId`: un token de invitado de otra invitación entra.
+- Decisión: el enlace personal es **`/r/[token]`**, con **solo el token del invitado**. La ruta pública del backend que lo sirve toma únicamente ese token, traduce `confirmation_token` → `invitation_id` → `tpl_document.public_token` y devuelve el invitado, las reglas del evento y el `publicToken` con el que la página pinta la invitación. Nunca devuelve la invitación entera, ni datos de otros invitados, ni el `cancellationToken` antes de que el invitado confirme. La ruta pública general `/i/[publicToken]` sigue existiendo para quien no tiene enlace personal.
+- Alternativas descartadas y por qué:
+  - **`/i/[publicToken]?g=<token>` (los dos tokens)**, que es la forma que propone §A4.4. Se descarta por tres motivos. (a) Obliga al invitado a conocer el `publicToken`, que no es suyo y no aporta nada a su recorrido. (b) Deja la comprobación de propiedad como un paso que hay que acordarse de escribir — cruzar los dos tokens —, y olvidarlo es exactamente el hallazgo S-04; con un solo token, la unión **es** la comprobación y no se puede omitir. (c) El token viaja en la cadena de consulta, que se filtra con más facilidad por `Referer` hacia cualquier recurso externo que la página cargue y se queda en registros de intermediarios.
+  - **Un token de invitado que sea el id, o derivado del id.** Se descarta de plano: es enumeración directa. La parte A verificó (S-12) que la generación actual sí tiene entropía suficiente; se conserva ese generador.
+  - **Una ruta con los dos tokens pero cruzándolos siempre en el servicio.** Es correcta en seguridad, pero paga (a) y (c) sin ganar nada frente a la decisión tomada.
+- Consecuencias: E2 escribe la ruta pública nueva en `modules/product/guests` y la pantalla en `app/(public)/r/[token]/`, que ya existe como marcador con su README. El enlace de los correos deja de apuntar al producto antiguo (hallazgo S-08, `EmailGuestNotifier.kt:68`) y pasa a construirse con `FRONTEND_URL` + `/r/{confirmationToken}`. La respuesta para token inexistente, caducado, ya usado o de una invitación sin publicar tiene que ser **indistinguible**, como ya hace `/i/[publicToken]` con sus cinco casos; distinguirlos sería un oráculo de enumeración de invitados.
+
+## ADR-5-E1-02 — `modules/product` tiene cuatro subpaquetes, y el RSVP vive en `guests`
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E1-orquestador
+- Contexto: `ADR-5-0C-01` fija el módulo nuevo `modules/product` con los subpaquetes `account`, `guests`, `payments` y `admin`, uno por sesión en paralelo. La parte A del inventario propone además un quinto, `modules/product/rsvp`, para el puente del enlace público del invitado.
+- Decisión: **cuatro subpaquetes, no cinco.** El RSVP vive en **`modules/product/guests`**.
+- Alternativas descartadas y por qué: un subpaquete `rsvp` propio separaría en dos árboles lo que escribe **una sola sesión** (E2 es dueña de invitados, RSVP y compartir) y lo que comparte **un solo modelo de datos** (`invitation_guest`, con sus tokens y sus contadores, es la misma tabla en los dos lados). La frontera solo añadiría un cruce de importaciones dentro del mismo encargo. La razón por la que existen los otros cuatro —que cuatro sesiones distintas escriban sin pisarse— no aplica aquí.
+- Consecuencias: la superficie pública del RSVP (`GET`/`PUT` del enlace del invitado) y la privada (lista de invitados de la clienta) conviven en `guests`, separadas por controlador, no por paquete. La regla de territorio no cambia: E2 sigue siendo la única que escribe ahí.
+
+## ADR-5-E1-03 — Cada spec e2e de la fase 5 crea sus propios datos
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E1-orquestador
+- Contexto: la issue **I-CI-01** dejó el job `e2e` del CI pasando solo con `--workers=1`. La causa no era el reloj sino el aislamiento: varios specs usaban la **misma** invitación sembrada por `scripts/seed-demo.sh` y se pisaban entre sí al correr en paralelo. Ya estaba documentado en `bitacora/3-cv.md §6` que la invitación sembrada se comparte entre sesiones, y la configuración de Playwright declara `fullyParallel: true` con 4 workers en CI (`playwright.config.ts`). La fase 5 va a multiplicar los specs: cuatro sesiones escribiendo e2e por rol sobre el mismo entorno.
+- Decisión: **cada spec e2e nuevo de la fase 5 crea su propia invitación, y su propio usuario si lo necesita, y ninguno usa la invitación sembrada compartida.** `fullyParallel` con 4 workers tiene que pasar; un spec que solo pase con `--workers=1` no se integra. La siembra por área vive en `scripts/seed/<area>.sh`, uno por sesión, y `scripts/seed-demo.sh` se queda como está: es la demostración que el dueño abre, no el andamio de las pruebas.
+- Alternativas descartadas y por qué: (a) **bajar los workers a 1**, que es lo que hace hoy el CI como parche — multiplica el reloj del job y esconde el defecto en vez de arreglarlo; (b) **serializar por fichero con `test.describe.serial`** — solo ordena los specs de un mismo fichero, no los de ficheros distintos, que es donde estaba la colisión; (c) **una invitación sembrada por worker** — obliga a saber cuántos workers hay y a repartirlos, y sigue compartiendo estado entre los specs de un mismo worker.
+- Consecuencias: la regla va escrita en el skill `pruebas-producto`, en `memoria/handoffs/5-0-cimientos.md` y en la sección 0 de `diseno/12-producto-completo.md`. Cuesta unos segundos por spec en preparar sus datos; se recupera con creces al no serializar el job. Es también lo que permite que las cuatro sesiones corran sus e2e sin coordinarse.
