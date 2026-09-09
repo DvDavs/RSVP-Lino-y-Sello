@@ -36,17 +36,18 @@ Con el catálogo completo, la suite e2e da **78 de 79**, y ésa es la única roj
 ## Los ocho `eventKind` y su plantilla
 | `eventKind` | plantillas |
 |---|---|
-| `wedding` | `boda-clasica`, `boda-basica`, `boda-premium`, `boda-premium-2` |
+| `wedding` | `boda-clasica` (**versión viva `1.0.2`**), `boda-basica`, `boda-premium`, `boda-premium-2` |
 | `quince` | `xv-jardin`, `xv-elegance` |
 | `baptism` | `bautizo-elegante` |
 | `communion` | `comunion-elegante` |
 | `confirmation` | `confirmacion-elegante` |
-| `birthday` | `cumpleanos-elegante` |
+| `birthday` | `cumpleanos-elegante`, `cumple-retro` |
 | `graduation` | `toga-y-sello` |
 | `generic` | `evento-elegante` |
 
 **Los ocho tipos del esquema tienen al menos una plantilla**: el asistente de creación no puede
-quedarse sin catálogo para ningún tipo de evento.
+quedarse sin catálogo para ningún tipo de evento. Verificado al cerrar la fase contra el backend real:
+**15 versiones registradas, 13 plantillas en el catálogo** (una por slug, la más alta de cada una).
 
 ## Sobre los identificadores de versión
 El `templateVersionId` (1, 2, 4…13 en la sesión de registro de `handoffs/4-7.md`) **es de la base

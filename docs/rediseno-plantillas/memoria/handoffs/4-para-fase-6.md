@@ -6,8 +6,9 @@ del kit y merece una issue.
 ## Lo que la fase 4 te deja
 Una plantilla es un **paquete versionado e inmutable** en `frontend/templates/<slug>/<version>/`. Se
 crea, se valida, se ve y se da de alta con `pnpm plantilla` (ocho comandos, `contratos.md §14.2`), sin
-tocar Kotlin y sin reiniciar nada. Alta medida: **1,39 s**. La prueba ciega de la fase creó una
-plantilla completa en **6 min 47 s**.
+tocar Kotlin y sin reiniciar nada. Alta medida: **1,39 s**. Dos agentes ajenos al kit crearon una
+plantilla entera siguiendo solo la guía: **6 min 47 s** el primero (con veredicto «no», que forzó una
+ronda de correcciones) y **2 min 44 s** el segundo, ya con veredicto «sí».
 
 ## El recorrido, en seis comandos (desde `frontend/`)
 ```bash
@@ -26,7 +27,10 @@ Dos que te ahorran abrir código: `pnpm plantilla secciones [<tipo>]` (qué huec
 Severidad completa en `contratos.md §14.3`. Las que más afectan al arte:
 - **`TPL_PALETTE_CONTRAST_BELOW_AA`** — toda pareja de color debe cumplir WCAG 2.2 AA. No es
   negociable y no hay bandera para saltárselo: la paleta bonita que no cumple **no se registra**.
-- **`TPL_FONT_NOT_SELF_HOSTED`** — solo las familias que el producto autoaloja. La lista **se deriva**
+- **`TPL_FONT_NOT_SELF_HOSTED`** y **`TPL_FONT_WEIGHT_NOT_SELF_HOSTED`** — solo las familias **y los
+  pesos** que el producto autoaloja. Lo segundo se añadió al cerrar la fase, porque la plantilla de la
+  segunda prueba ciega pedía un peso que no existe y `check` la daba por buena: la invitación se habría
+  pintado con la tipografía de reserva sin que nadie se enterara. La lista **se deriva**
   de `apps/web/app/(public)/publico.css`: para añadir una familia, se añade su `@import` ahí y la
   compuerta la acepta sola. Hoy son cuatro; las nueve convertidas se remapearon a ellas (ADR-4-6-01) y
   la familia original de cada una está en `evidencia/fase-4/<slug>/informe-de-perdidas.json`, lista
@@ -42,7 +46,7 @@ Severidad completa en `contratos.md §14.3`. Las que más afectan al arte:
 ## Qué plantillas existen hoy y en qué estado visual están
 | Plantilla | `eventKind` | Arte |
 |---|---|---|
-| `boda-clasica` | wedding | **con arte propio**: 9 assets, miniatura y juegos de demostración por paleta, generados por `frontend/templates/scripts/build-art.mjs` (SVG autoral → WebP, determinista) |
+| `boda-clasica` | wedding | **con arte propio**: 9 assets, miniatura y juegos de demostración por paleta, generados por `frontend/templates/scripts/build-art.mjs` (SVG autoral → WebP, determinista). **La versión viva es `1.0.2`**: `1.0.0` y `1.0.1` están congeladas y fuera del catálogo, con una miniatura vieja que llevaba un nombre real horneado en los píxeles (ADR-4-9C-01) |
 | `xv-jardin` | quince | **con arte propio**: 5 assets, miniatura, mismo generador |
 | `boda-basica`, `boda-premium`, `boda-premium-2` | wedding | convertidas: **0 assets, sin miniatura**, 13-14 huecos de imagen vacíos cada una |
 | `xv-elegance` | quince | convertida: 0 assets, 10 huecos |
@@ -51,13 +55,14 @@ Severidad completa en `contratos.md §14.3`. Las que más afectan al arte:
 | `confirmacion-elegante` | confirmation | convertida: 0 assets, 10 huecos |
 | `cumpleanos-elegante` | birthday | convertida: 0 assets, 10 huecos |
 | `evento-elegante` | generic | convertida: 0 assets, 11 huecos |
-| `toga-y-sello` | graduation | nacida de la prueba ciega: 0 assets, 2 huecos |
+| `toga-y-sello` | graduation | nacida de la 1.ª prueba ciega: 0 assets, 2 huecos |
+| `cumple-retro` | birthday | nacida de la 2.ª prueba ciega: **1 asset** (una foto prestada de `boda-clasica` que no pega con el tema, marcada así en su propio `alt`), sin miniatura |
 
-Los **ocho** `eventKind` del esquema tienen ya al menos una plantilla. Ninguna de las convertidas
+Los **ocho** `eventKind` del esquema tienen ya al menos una plantilla. El catálogo del cliente ofrece **13** (una por slug, la versión más alta de cada uno), verificado contra el backend real al cerrar la fase. Ninguna de las convertidas
 trae imágenes propias: en el catálogo de origen eran URLs externas que este entorno no alcanza.
 
 ## Qué falta de arte (el trabajo de la fase 6)
-1. **Miniatura (`previewImage`) en 11 de las 13 versiones**: hoy solo `boda-clasica` y `xv-jardin`
+1. **Miniatura (`previewImage`) en 12 de las 14 plantillas**: hoy solo `boda-clasica` y `xv-jardin`
    tienen. Sin miniatura, el catálogo del cliente enseña un hueco.
 2. **~103 huecos de imagen vacíos** repartidos por las convertidas: en el previsualizador salen con el
    marcador «imagen pendiente · `<blockId>`» del kit (ADR-4-1B-03), y así se ven en las capturas.
