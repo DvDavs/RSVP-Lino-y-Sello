@@ -23,7 +23,9 @@ export function PieSitio({ anio = 2026 }: { readonly anio?: number }) {
       />
       <div className="mx-auto flex w-full max-w-ui-page flex-col gap-6 px-5 pb-10 sm:px-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="heading-sm text-ui-ink">{es_MX.comun.marca}</p>
+          {/* Misma marca tipográfica temporal que `CabeceraSitio` (D-02): `display-sm`, no
+              `heading-sm` — el nombre es identidad, no el título de este bloque. */}
+          <p className="display-sm text-ui-ink">{es_MX.comun.marca}</p>
           <p className="text-sm mt-1 max-w-[42ch] text-ui-ink-muted">{es_MX.sitio.pie.lema}</p>
         </div>
         <nav aria-label={es_MX.sitio.navegacionPie} className="flex flex-wrap items-center gap-x-6 gap-y-1">
@@ -32,6 +34,14 @@ export function PieSitio({ anio = 2026 }: { readonly anio?: number }) {
           </Link>
           <Link href="/ayuda" className={CLASE_ENLACE}>
             {es_MX.comun.ayuda}
+          </Link>
+          {/* E3 las añade aquí (README de `/legal`): hasta ahora el pie no apuntaba a propósito a
+              ninguna de las dos, porque no había nada real detrás. Ya lo hay. */}
+          <Link href="/contacto" className={CLASE_ENLACE}>
+            {es_MX.comun.contacto}
+          </Link>
+          <Link href="/legal" className={CLASE_ENLACE}>
+            {es_MX.legal.indice.titulo}
           </Link>
           <Link href="/acceso" className={CLASE_ENLACE}>
             {es_MX.comun.entrar}

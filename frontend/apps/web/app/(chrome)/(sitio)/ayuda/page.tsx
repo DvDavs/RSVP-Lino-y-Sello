@@ -11,6 +11,7 @@ import type { Metadata } from "next";
 import { Composition, Rays } from "@invitaciones/ui/shapes";
 import { BuscadorAyuda } from "@/components/sitio/BuscadorAyuda";
 import { ContactoParaContratar } from "@/components/sitio/ContactoParaContratar";
+import { correoDeSoporteDelEntorno } from "@/lib/env";
 import { es_MX } from "@/lib/i18n";
 
 export const metadata: Metadata = {
@@ -19,6 +20,8 @@ export const metadata: Metadata = {
 };
 
 export default function PaginaAyuda() {
+  const correoSoporte = correoDeSoporteDelEntorno();
+
   return (
     <div className="mx-auto w-full max-w-ui-page px-5 pb-16 sm:px-8">
       <header className="pt-12">
@@ -49,6 +52,24 @@ export default function PaginaAyuda() {
         </h2>
         <p className="text-md mt-2 max-w-[56ch] text-ui-ink-muted">{es_MX.ayuda.contacto.texto}</p>
         <ContactoParaContratar className="mt-5 border-t border-ui-divider pt-5" />
+
+        {/* Otra bandeja y otro tono que el bloque de arriba (`NEXT_PUBLIC_SOPORTE_CORREO`, no
+            `NEXT_PUBLIC_CONTACTO_CORREO`): esto es para quien YA contrató y algo no le funciona,
+            no para quien todavía está decidiendo. Mismo criterio honesto si falta la variable. */}
+        <div className="mt-6 border-t border-ui-divider pt-5">
+          <h3 className="heading-sm text-ui-ink">{es_MX.ayuda.soporte.titulo}</h3>
+          {correoSoporte ? (
+            <p className="text-md mt-2 max-w-[56ch] text-ui-ink-muted">
+              {es_MX.ayuda.soporte.prefijo}{" "}
+              <a href={`mailto:${correoSoporte}`} className="font-semibold text-ui-link hover:underline">
+                {correoSoporte}
+              </a>
+              .
+            </p>
+          ) : (
+            <p className="text-md mt-2 max-w-[56ch] text-ui-ink-muted">{es_MX.ayuda.soporte.sinConfigurar}</p>
+          )}
+        </div>
 
         <p className="mt-6">
           {/* `inline-flex items-center py-1`: medía 160,6 x 18 px (3C-ADV), por debajo del mínimo

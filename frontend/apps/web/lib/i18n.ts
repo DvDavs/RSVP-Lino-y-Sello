@@ -1,11 +1,20 @@
 // lib/i18n.ts — cadenas es-MX del chrome, sin biblioteca (04 §2). Objeto tipado plano: cada clave es
 // una ruta con puntos, cada valor una cadena o una función que interpola parámetros.
+//
+// La marca (`comun.marca`, el pie) NO es un literal de este fichero: `lib/marca.ts` es su fuente
+// única (D-02) y aquí solo se consume. Antes de este cambio `comun.marca` valía literalmente
+// `"Invitaciones"` — el nombre GENÉRICO del producto, no el de una marca — y se repetía roto en
+// `sitio.pie.derechos`. Ver la cabecera de `lib/marca.ts` para la frontera completa (qué es
+// identidad literal y qué es configuración de entorno).
+import { NOMBRE_MARCA, derechosReservados } from "./marca.ts";
+
 export const es_MX = {
   comun: {
     cargando: "Cargando…",
     reintentar: "Reintentar",
     volver: "Volver",
     ayuda: "Ayuda",
+    contacto: "Contacto",
     miCuenta: "Mi cuenta",
     guardado: "Guardado",
     guardando: "Guardando…",
@@ -14,7 +23,8 @@ export const es_MX = {
     cerrarSesion: "Cerrar sesión",
     misInvitaciones: "Mis invitaciones",
     cancelar: "Cancelar",
-    marca: "Invitaciones",
+    /** D-02: el nombre de la marca, no una palabra genérica. Fuente única: `lib/marca.ts`. */
+    marca: NOMBRE_MARCA,
     entrar: "Entrar",
     crearCuenta: "Crear cuenta",
     irAlInicio: "Ir a la portada",
@@ -205,14 +215,41 @@ export const es_MX = {
       sinContacto:
         "Los planes se contratan con nuestro equipo; el contacto se publicará aquí en cuanto esté configurado. Si alguien ya te atendió, escríbele por ese mismo medio.",
     },
+    /**
+     * `/contacto` (`12-producto-completo.md §B3.8`). Los canales (WhatsApp, correo de venta) usan
+     * el mismo texto que `contactar` de arriba —mismo mensaje, mismo asunto— para que la conversación
+     * empiece igual sea cual sea la puerta por la que entró la clienta. Este bloque solo añade lo
+     * propio de esta pantalla: el encabezado y la caja de soporte para quien ya contrató.
+     */
+    paginaContacto: {
+      eyebrow: "Hablemos",
+      titulo: "¿Te ayudamos a decidir?",
+      subtitulo: "Contestamos personas, no un robot.",
+      tarjetaWhatsapp: { titulo: "WhatsApp", texto: "Para precios y para contratar." },
+      tarjetaCorreo: { titulo: "Correo", texto: "Para lo que prefieras por escrito." },
+      /**
+       * Otra bandeja y otro tono que el contacto de venta (`NEXT_PUBLIC_SOPORTE_CORREO`, distinto de
+       * `NEXT_PUBLIC_CONTACTO_CORREO`): esto es para quien YA contrató y algo no le funciona.
+       */
+      soporte: {
+        titulo: "¿Ya eres clienta y algo no funciona?",
+        /** Se parte en prefijo/sufijo para que la página pueda enlazar el correo de verdad. */
+        prefijo: "Escríbenos a",
+        sufijo: "y cuéntanos el nombre de tu invitación.",
+        sinConfigurar:
+          "El correo de soporte se publicará aquí en cuanto esté configurado. Mientras tanto, escríbenos por el contacto de arriba.",
+      },
+    },
     ctaFinal: {
       titulo: "¿Empezamos?",
       cuerpo: "Tu invitación puede estar lista esta misma tarde.",
       accion: "Empezar mi invitación",
     },
     pie: {
+      // «invitaciones» va en minúscula a propósito: aquí es el sustantivo común (lo que se manda),
+      // no la marca — la marca ya se lee arriba, en el `heading` del pie (`comun.marca`). D-02.
       lema: "Invitaciones digitales con RSVP, hechas en México.",
-      derechos: (anio: number) => `${anio} Invitaciones`,
+      derechos: (anio: number) => derechosReservados(anio),
     },
   },
   ayuda: {
@@ -233,6 +270,17 @@ export const es_MX = {
       // invitación») dejaba fuera justo a quien todavía no ha contratado nada, que es quien más
       // necesita esta caja. Ahora la caja ES el contacto (`ContactoParaContratar`).
       texto: "Escríbenos y te contestamos nosotros, hayas contratado ya o estés todavía preguntando precios.",
+    },
+    /**
+     * Fase 5: soporte para quien YA es clienta, otra bandeja que el contacto de venta de arriba
+     * (`NEXT_PUBLIC_SOPORTE_CORREO`, no `NEXT_PUBLIC_CONTACTO_CORREO`). Mismo criterio honesto de
+     * `lib/contacto.ts`: sin la variable, se dice y no se inventa una dirección.
+     */
+    soporte: {
+      titulo: "¿Ya eres clienta?",
+      prefijo: "Para dudas de tu cuenta o de una invitación ya contratada, escríbenos a",
+      sinConfigurar:
+        "El correo de soporte para clientas se publicará aquí en cuanto esté configurado.",
     },
   },
   /**
@@ -734,6 +782,152 @@ export const es_MX = {
         texto:
           "Aquí van a estar el aviso de privacidad, los términos del servicio y la política de cookies. Todavía no los publicamos.",
       },
+    },
+  },
+  /**
+   * `/legal` (`12-producto-completo.md §B3.9`). Borradores en es-MX, redactados a partir de lo que
+   * el producto guarda REALMENTE hoy (`InvitationGuestEntity`, `CustomerEntity`, D-02..D-05) — no
+   * una plantilla genérica. Cada documento lleva su aviso de borrador con fecha (regla dura del
+   * README de esta ruta): no se publica texto legal presentado como definitivo. La revisión de un
+   * abogado queda como pregunta abierta (`preguntas-abiertas.md`).
+   */
+  legal: {
+    fechaUltimaRevision: "9 de septiembre de 2026",
+    avisoBorrador: (fecha: string) => `Borrador pendiente de revisión legal. Última actualización: ${fecha}.`,
+    indice: {
+      titulo: "Avisos legales",
+      subtitulo: "Todavía no los ha revisado un abogado: son el punto de partida, no el texto final.",
+      enEstaPagina: "En esta página",
+      privacidad: {
+        enlace: "Aviso de privacidad",
+        resumen: "Qué guardamos de ti y de tus invitados, para qué y por cuánto tiempo.",
+        subtemas: ["Qué guardamos", "Tus invitados", "Tus derechos"],
+      },
+      terminos: {
+        enlace: "Términos del servicio",
+        resumen: "Qué incluye tu plan, cómo se publica y qué pasa si cancelas.",
+        subtemas: ["Qué incluye tu plan", "Devoluciones"],
+      },
+    },
+    volverAAvisos: "Volver a Avisos legales",
+    privacidad: {
+      titulo: "Aviso de privacidad",
+      intro:
+        "Este aviso explica qué datos guarda Lino & Sello, de quién, para qué los usa y qué puedes hacer al respecto.",
+      enEstaSeccion: "En este aviso",
+      secciones: [
+        {
+          id: "quien-trata-tus-datos",
+          titulo: "Quién trata tus datos",
+          parrafos: [
+            "Lino & Sello (linoysello.com) es responsable del tratamiento de los datos que recibe a través de este sitio y del editor de invitaciones.",
+          ],
+        },
+        {
+          id: "que-guardamos-de-ti",
+          titulo: "Qué guardamos de ti, la clienta",
+          parrafos: [
+            "Cuando creas una cuenta guardamos tu nombre, tu correo y tu teléfono, y la contraseña que elijas — cifrada, nunca en claro.",
+            "También guardamos el contenido de tus invitaciones: los datos del evento que escribes, las fotos que subes y las respuestas de tus invitados.",
+          ],
+        },
+        {
+          id: "tus-invitados",
+          titulo: "Los datos de tus invitados",
+          parrafos: [
+            "Cuando das de alta a un invitado guardamos su nombre, su correo, su teléfono, los cupos que le asignas (cuántos adultos, niños o jóvenes puede llevar) y su respuesta de confirmación: si va, cuántos confirma y, si aplica, su mensaje de felicitación.",
+            "Esos datos son tuyos, no nuestros: los guardamos para que puedas mandarle a cada invitado su enlace personal y llevar la cuenta de quién confirmó. No los usamos para nada distinto de operar tu invitación, y no se los vendemos ni se los cedemos a nadie más.",
+            "Si un invitado quiere que corrijamos o borremos sus datos, tiene que pedírtelo a través de ti — eres tú quien lo dio de alta. Si tú nos escribes pidiéndolo en su nombre, lo hacemos.",
+          ],
+        },
+        {
+          id: "para-que-los-usamos",
+          titulo: "Para qué los usamos",
+          parrafos: [
+            "Para darte de alta, dejarte entrar a tu cuenta y operar tu invitación: mostrarla a tus invitados, recibir sus confirmaciones y mandarte los correos del servicio (verificación de cuenta, avisos de tu invitación, soporte).",
+            "Todavía no usamos tus datos con fines de publicidad ni se los compartimos con nadie para ese fin.",
+          ],
+        },
+        {
+          id: "cuanto-tiempo",
+          titulo: "Cuánto tiempo los guardamos",
+          parrafos: [
+            "Mientras tu cuenta esté activa. Si la cancelas, borramos o anonimizamos tus datos y los de tus invitados en un plazo razonable, salvo lo que la ley nos obligue a conservar (por ejemplo, comprobantes de pago).",
+          ],
+        },
+        {
+          id: "con-quien-los-compartimos",
+          titulo: "Con quién los compartimos",
+          parrafos: [
+            "Con los proveedores que hacen posible el servicio: quien aloja el sitio y la base de datos, quien manda los correos transaccionales y, cuando esté activo el pago en línea, Stripe para procesar tu cobro. Ninguno los usa para nada distinto de prestarnos ese servicio.",
+          ],
+        },
+        {
+          id: "tus-derechos",
+          titulo: "Tus derechos",
+          parrafos: [
+            "Como titular de tus datos, en México tienes derecho a Acceder a ellos, Rectificarlos si están mal, Cancelarlos (pedir que los borremos) u Oponerte a un uso concreto — los derechos ARCO. Escríbenos a soporte@linoysello.com para ejercer cualquiera de ellos; te contestamos por el mismo correo.",
+          ],
+        },
+        {
+          id: "cambios-a-este-aviso",
+          titulo: "Cambios a este aviso",
+          parrafos: [
+            "Si lo cambiamos de forma importante, lo avisamos en esta misma página con la fecha de la nueva versión.",
+          ],
+        },
+      ],
+    },
+    terminos: {
+      titulo: "Términos del servicio",
+      intro:
+        "Estos términos explican qué ofrece Lino & Sello, qué puedes esperar de tu plan y qué pasa si algo cambia.",
+      enEstaSeccion: "En estos términos",
+      secciones: [
+        {
+          id: "que-incluye-tu-plan",
+          titulo: "Qué incluye tu plan",
+          parrafos: [
+            "Editar tu invitación es gratis: puedes elegir plantilla, escribir tus datos y previsualizarla sin pagar nada. Publicarla —que tus invitados puedan verla y confirmar— requiere un plan contratado.",
+            "Cada plan define cuántas plantillas puedes usar y cuántos invitados puedes registrar. Te decimos el detalle cuando contratas.",
+          ],
+        },
+        {
+          id: "pagos",
+          titulo: "Pagos",
+          parrafos: [
+            "El pago en línea, cuando esté activo, se procesa con Stripe; nosotros no vemos ni guardamos el número de tu tarjeta.",
+          ],
+        },
+        {
+          id: "devoluciones",
+          titulo: "Devoluciones",
+          parrafos: [
+            "Si algo salió mal con tu pago o tu plan, escríbenos a soporte@linoysello.com contándonos qué pasó; lo revisamos caso por caso.",
+          ],
+        },
+        {
+          id: "tu-contenido",
+          titulo: "El contenido de tu invitación",
+          parrafos: [
+            "Tú eres responsable de los textos, fotos y datos que subes: cuida que tengas derecho a usarlos y que la información de tus invitados sea correcta.",
+          ],
+        },
+        {
+          id: "disponibilidad",
+          titulo: "Disponibilidad del servicio",
+          parrafos: [
+            "Hacemos lo posible por mantener el sitio disponible, pero no lo garantizamos al cien por ciento: puede haber mantenimientos o fallos que lo interrumpan brevemente.",
+          ],
+        },
+        {
+          id: "cambios-a-estos-terminos",
+          titulo: "Cambios a estos términos",
+          parrafos: [
+            "Si los cambiamos de forma importante, lo avisamos en esta misma página con la fecha de la nueva versión.",
+          ],
+        },
+      ],
     },
   },
   revalidate: {

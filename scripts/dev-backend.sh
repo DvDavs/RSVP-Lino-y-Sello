@@ -60,9 +60,12 @@ DB="${TPL_DEV_DB:-invitaciones_dev}"
 #   AWS_*        credenciales INSERVIBLES a propósito: este script trabaja con
 #                TEMPLATES2_ASSETS_MODE=local (ver abajo), que escribe en disco y no llama a AWS.
 #                Si fuerzas `s3`, exporta credenciales de verdad tú mismo — aquí nunca irán.
-#   MAIL_*       igual: no hay SMTP en este entorno. Ojo, hoy el transporte real lo fija
-#                `core/email/MailConfig.kt` con las credenciales escritas en el código, así que
-#                estas dos sólo satisfacen la compuerta de arranque (queda anotado como pendiente).
+#   MAIL_*       igual: no hay SMTP en este entorno. Desde ADR-5-E3-A4-01 estas dos SÍ mandan de
+#                verdad: `core/email/MailConfig.kt` (que fijaba servidor y credenciales en el código
+#                y hacía que `spring.mail.*` no lo leyera nadie) ya no existe, y el `JavaMailSender`
+#                lo construye Spring Boot desde `application.yml`. Consecuencia deseada: con estos
+#                valores falsos un envío de correo desde este entorno FALLA en la autenticación en
+#                vez de salir de verdad desde el buzón de la empresa, que es lo que pasaba antes.
 export JWT_SECRET="${JWT_SECRET:-clave-jwt-solo-de-desarrollo-no-sirve-en-ningun-otro-sitio-0000}"
 export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID:-credencial-aws-de-desarrollo-inservible}"
 export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY:-secreto-aws-de-desarrollo-inservible}"

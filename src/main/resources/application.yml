@@ -78,27 +78,47 @@ spring:
     resources:
       add-mappings: false
   mail:
+    # DESDE ADR-5-E3-A4-01 ESTE BLOQUE ES LA UNICA FUENTE DEL TRANSPORTE SMTP. Antes no lo era:
+    # `core/email/MailConfig.kt` definia un `@Bean @Primary JavaMailSender` con el servidor, el
+    # puerto, la cuenta y la contrasena de aplicacion ESCRITOS EN EL CODIGO Kotlin. Al ser `@Primary`
+    # apagaba `MailSenderAutoConfiguration` (que es `@ConditionalOnMissingBean(MailSender)`), asi que
+    # el correo real no leia NADA de aqui y externalizar estas dos propiedades era cosmetico. Ese
+    # fichero ya no existe y el `JavaMailSender` lo construye Spring Boot con lo que hay debajo:
+    # todo lo que fijaba el codigo esta ahora escrito aqui y quitar cualquier linea CAMBIA el envio.
     host: smtp.gmail.com
     port: 465
+    protocol: smtp
     # SIN VALOR POR DEFECTO A PROPOSITO (ADR-5-E3-A3-01; S-01). Es la cuenta y la contrasena de
     # aplicacion del buzon que manda TODO el correo transaccional: quien las tiene escribe correo
     # como la empresa y lee el buzon donde caen los enlaces de recuperacion de contrasena.
-    # Sin ellas la aplicacion NO arranca y explica que poner.
-    # OJO: `core/email/MailConfig.kt` define un `@Bean @Primary JavaMailSender` con las credenciales
-    # escritas en el codigo, asi que hoy el transporte real NO lee estas dos propiedades. Sacarlas de
-    # aqui no basta: falta el mismo trabajo en `MailConfig.kt` (fuera del alcance de este encargo,
-    # anotado en `preguntas-abiertas.md`).
+    # Sin ellas la aplicacion NO arranca y explica que poner (`core/config/SecretosObligatorios.kt`).
+    # `MAIL_USERNAME` es ademas el remitente: `core/email/strategy/GoogleSmtpStrategy.kt` lo inyecta
+    # con `@Value` sobre `spring.mail.username` para la cabecera `From`. Hasta ADR-5-E3-A4-01 el
+    # remitente salia de aqui y la autenticacion del servidor de otro sitio: podian no coincidir.
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
+    # NOTACION DE CORCHETES A PROPOSITO, no es un capricho de estilo. `spring.mail.properties` se
+    # enlaza a un `Map<String, String>` y Spring Boot canonicaliza las claves de los mapas a
+    # minusculas salvo que vayan entre corchetes; los nombres de JavaMail son SENSIBLES A MAYUSCULAS,
+    # asi que en forma anidada `socketFactory` llegaria como `socketfactory` y JavaMail lo ignoraria
+    # en silencio: SSL sin fabrica de sockets explicita. Con corchetes la clave viaja literal.
+    # `MailSenderConfiguracionTest` comprueba los nombres exactos que se producen desde ESTE fichero.
     properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: false
-          ssl:
-            enable: true
-          debug: true
+      "[mail.transport.protocol]": smtp
+      "[mail.smtp.auth]": true
+      # SSL directo contra el 465 (SMTPS), no STARTTLS sobre el 587. Las cinco lineas siguientes van
+      # juntas y las cinco venian del codigo. `socketFactory.fallback: false` es deliberado: con
+      # `true`, si falla el canal SSL, JavaMail reintenta en claro y la contrasena viaja sin cifrar.
+      "[mail.smtp.starttls.enable]": false
+      "[mail.smtp.ssl.enable]": true
+      "[mail.smtp.socketFactory.port]": 465
+      "[mail.smtp.socketFactory.class]": javax.net.ssl.SSLSocketFactory
+      "[mail.smtp.socketFactory.fallback]": false
+      # ESTABA EN `true` Y ERA INOFENSIVO solo porque el `@Primary` ignoraba este bloque entero. Ahora
+      # se aplicaria de verdad y volcaria a la salida estandar la conversacion SMTP completa, incluida
+      # la linea `AUTH` con la credencial en base64: los registros del servidor pasarian a ser un
+      # sitio mas donde vive el secreto. Se queda en `false` (ADR-5-E3-A4-01).
+      "[mail.smtp.debug]": false
 email:
   provider: google # Options: google, mailersend
 app:

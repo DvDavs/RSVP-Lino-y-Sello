@@ -1588,3 +1588,37 @@ Están en `diseno/12-producto-completo.md §0` y en las ADR `ADR-5-E1-01` (ruta 
 - [Fase 5 · E3-A1] **¿Hace falta idempotencia de verdad (`Idempotency-Key`) en las altas del producto?** Hoy el alta no la tiene: contra el doble clic hay una ventana de 60 s que reconoce el reenvío idéntico y devuelve la misma invitación. Cuando E4 conecte el cobro, el mismo problema aparece con dinero de por medio y ahí la ventana no basta. **Supuesto tomado:** para un alta gratuita la ventana es suficiente y no se crea la tabla de claves. **¿Se aborda de una vez para todo `modules/product` cuando llegue el pago?**
 - [Fase 5 · E3-A1] **Falta una ruta para editar la invitación después de crearla.** Fecha, hora, `hashtag`, `childrenAllowed` y `youngAllowed` se fijan en el alta y **ninguna ruta los cambia** (la del módulo antiguo está prohibida). Una clienta que se equivoque de fecha solo puede crear otra invitación y gastar uno de sus tres borradores. **Supuesto tomado:** `childrenAllowed`/`youngAllowed` nacen en `true` para no encerrarla (en `false` el backend rechaza a los invitados con niños), y el `PUT` queda fuera del bloque 5-1b. **¿A quién se le asigna, a E2 (que es quien sufre los cupos de invitados) o a un bloque nuevo?**
 - [Fase 5 · E3-A1] **Los errores de `modules/product`: ¿se adopta el prefijo `PRD_` y la forma `{timestamp, statusCode, code, message, details}` para las cuatro sesiones?** El advice de `templates2` no alcanza al módulo nuevo (`ADR-5-0C-01`), así que cada subpaquete que quiera códigos estables declara el suyo; el del alta ya existe, acotado a su paquete. **Supuesto tomado:** misma forma que `TplErrorResponse` para que el frontend tenga un solo lector de errores, con prefijo distinto para saber qué módulo respondió. **Que E6 lo fije en `contratos.md` o lo cambie ahora, antes de que haya cuatro formas distintas.** Va con un aviso operativo que no es opinable: **todo DTO de petición de `modules/product` necesita `@JsonIgnoreProperties(ignoreUnknown = true)`**, porque el `ObjectMapper` que usa Spring MVC en la aplicación real es el **estricto** de `templates2` (su bean retira el de `JacksonAutoConfiguration`, que es `@ConditionalOnMissingBean`), y las pruebas con `standaloneSetup` no lo detectan porque su convertidor por defecto es laxo.
+
+## Fase 5 · E3 · datos personales y secretos que el dueño TIENE que atender (R1-02, R1-03, S-01)
+
+La revisión adversarial de seguridad de la sesión E3 (`bitacora/5-E3-R1-seguridad.md`, veredicto
+**NO CERRABLE**) destapó material que ninguna corrección de código puede cerrar, porque el problema
+no es lo que el repositorio hace sino lo que el repositorio **contiene** y ya ha publicado.
+
+1. **`invitaciones.sql` (raíz) se ha retirado del árbol en la sesión E3.** Era un volcado de la base
+   con **15 filas de `customer`** —correos de personas identificables, hashes bcrypt de sus
+   contraseñas y **dos `resettoken` no nulos**— y **10 filas de `refresh_tokens` con el token en
+   claro**. No lo usaba nada: el propio informe de auditoría ya había establecido que estaba
+   desactualizado y que **no es fuente de verdad**
+   (`docs/analisis-plantillas/ANALISIS-GENERACION-PLANTILLAS.md:537`).
+   **Borrarlo NO lo deshace: sigue entero en el histórico de git y el repositorio es remoto.**
+   Pregunta al dueño, y es urgente: ¿esas cuentas son de personas reales y siguen activas? Si lo
+   son, hay que **invalidar los tokens de recuperación y de refresco, forzar cambio de contraseña
+   de esas 15 cuentas**, y valorar si esto es una violación de datos personales que haya que
+   notificar. Un borrado de fichero no es una respuesta a una fuga.
+   *Efecto lateral aceptado*: varias citas de `docs/analisis-plantillas/**` apuntan a ese fichero
+   como evidencia y quedan colgando. Se prefiere la cita rota a conservar datos personales reales
+   en el árbol.
+
+2. **S-01 sigue ABIERTO.** El commit `8a16ebb` externalizó cuatro de los seis secretos que el
+   hallazgo enumera (`diseno/12-producto-completo.md:441-448`). Faltan el **token de Meta Graph**
+   (`application.yml`, `docker-compose.yml`) y el **`VERIFY_TOKEN` del webhook de WhatsApp**
+   (`WhatsAppWebhookController.kt`), que además es la pasarela abierta de S-06: con ese token
+   cualquiera manda WhatsApp desde el número de la empresa. Se cierran en esta misma sesión, pero
+   **la externalización no invalida nada**.
+
+3. **Rotación, que es lo único que cierra de verdad S-01 y R1-02, y que solo puede hacer el dueño**:
+   clave de firma del JWT (al rotarla se cierran todas las sesiones vivas: hay que avisar), par de
+   credenciales de AWS (crear el nuevo y **desactivar el viejo en IAM**, no solo dejar de usarlo),
+   contraseña de aplicación del Gmail (**al rotarla el envío de correo deja de funcionar hasta
+   poner la nueva en `MAIL_PASSWORD`**), y los dos tokens de WhatsApp en Meta.

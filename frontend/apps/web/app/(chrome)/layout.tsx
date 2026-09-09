@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 // el grafo de cada ruta del grupo: MEDIDO, 92,3 KB gz de JS propio en la portada, que solo usa
 // `Button`. Con la subruta, 8,9 KB (`bitacora/3c-5.md` §3).
 import { RUTAS_PRECARGA } from "@invitaciones/ui/fonts/preload.ts";
+import { es_MX } from "@/lib/i18n";
 import "./globals.css";
 
 /**
@@ -27,7 +28,13 @@ import "./globals.css";
  * anónimo, y sin el atributo aquí el preload no coincide con esa petición y la descarga se duplica.
  */
 export const metadata: Metadata = {
-  title: { default: "Editor de invitaciones", template: "%s · Invitaciones" },
+  // D-02: la marca, no el nombre genérico del producto (`lib/marca.ts` vía `es_MX.comun.marca`).
+  title: {
+    default: `${es_MX.comun.marca} · ${es_MX.sitio.hero.eyebrow}`,
+    template: `%s · ${es_MX.comun.marca}`,
+  },
+  description:
+    "Invitaciones digitales con confirmación de asistencia (RSVP): elige un diseño, escribe los datos de tu evento y comparte el enlace por WhatsApp.",
   // La web pública SÍ se indexa. El `noindex` es de `/i`, `/preview` y `/design`, y cada uno lo
   // declara en su propio `metadata`: aquí no puede ir, porque este layout también envuelve la
   // portada, `/acceso` y `/ayuda`.

@@ -21,7 +21,11 @@ export function CabeceraSitio() {
             (3C-ADV, `getBoundingClientRect`), 0,6 px por debajo del mínimo de 24 px de WCAG 2.2 AA
             2.5.8. El `py-1` no mueve un píxel de la cabecera — el botón «Entrar» de la derecha ya
             es más alto y es él quien fija la altura de la fila. */}
-        <Link href="/" className="heading-sm inline-flex items-center rounded-ui-control py-1 text-ui-ink">
+        {/* Marca tipográfica temporal (D-02: sin logotipo todavía): el nombre en la voz `display`
+            del sistema (Fraunces), nada más — ni un monograma, ni una forma que insinúe un
+            logotipo. `display-sm` y no `heading-sm`: la cabecera es el sitio donde el nombre
+            aparece como IDENTIDAD, no como título de bloque. */}
+        <Link href="/" className="display-sm inline-flex items-center rounded-ui-control py-1 text-ui-ink">
           {es_MX.comun.marca}
         </Link>
 
