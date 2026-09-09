@@ -21,6 +21,8 @@ const changePassword = vi.hoisted(() => vi.fn());
 const requestEmailChange = vi.hoisted(() => vi.fn());
 const authResendVerification = vi.hoisted(() => vi.fn());
 const logoutAccount = vi.hoisted(() => vi.fn());
+const clearAuthToken = vi.hoisted(() => vi.fn());
+const clearRefreshToken = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/api-client", async (importarReal) => {
   const real = await importarReal<typeof import("@/lib/api-client")>();
   return {
@@ -32,6 +34,8 @@ vi.mock("@/lib/api-client", async (importarReal) => {
     requestEmailChange,
     authResendVerification,
     logoutAccount,
+    clearAuthToken,
+    clearRefreshToken,
   };
 });
 
@@ -63,6 +67,8 @@ beforeEach(() => {
   requestEmailChange.mockReset();
   authResendVerification.mockReset();
   logoutAccount.mockReset();
+  clearAuthToken.mockReset();
+  clearRefreshToken.mockReset();
 });
 
 describe("sesión", () => {
@@ -223,7 +229,7 @@ describe("contraseña: avisa ANTES, cierra la sesión al terminar", () => {
     expect(screen.getByText(es_MX.perfil.contrasena.noCoincide)).not.toBeNull();
   });
 
-  it("al cambiarla con éxito, manda a /acceso?motivo=sesion (mismo aviso que ya usa AsistenteAcceso)", async () => {
+  it("al cambiarla con éxito, borra el token local (§2: el accessToken sigue vivo hasta que caduca) y manda a /acceso?motivo=sesion", async () => {
     getProfile.mockResolvedValue(perfilBase());
     changePassword.mockResolvedValue({ message: "..." });
     const persona = userEvent.setup();
@@ -235,6 +241,8 @@ describe("contraseña: avisa ANTES, cierra la sesión al terminar", () => {
     await persona.click(screen.getByRole("button", { name: es_MX.perfil.contrasena.cambiar }));
     expect(changePassword).toHaveBeenCalledWith({ currentPassword: "Actual1!", newPassword: "Nueva1!" });
     await waitFor(() => expect(router.push).toHaveBeenCalledWith("/acceso?motivo=sesion"));
+    expect(clearAuthToken).toHaveBeenCalled();
+    expect(clearRefreshToken).toHaveBeenCalled();
   });
 
   it("una contraseña actual incorrecta se marca EN el campo «Actual»", async () => {

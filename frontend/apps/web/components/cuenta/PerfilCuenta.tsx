@@ -10,10 +10,13 @@
 //    cambio, no después.
 //  - La verificación de correo NO bloquea nada hoy (§5.1): solo se enseña el estado y un reenvío.
 //  - Cambiar la contraseña cierra TODAS las sesiones (§2/§5.3): se avisa ANTES del botón, y al
-//    terminar se manda a `/acceso` (mismo `motivo=sesion` que ya usa `AsistenteAcceso`).
-//  - `POST /user/account/logout` no invalida el `accessToken` (sigue vivo hasta que caduca, §2):
-//    por eso `logoutAccount()` ya lo borra del cliente (`lib/api-client.ts`); aquí solo hace falta
-//    navegar a `/acceso` después.
+//    terminar se borra el token local (igual que el logout) y se manda a `/acceso` (mismo
+//    `motivo=sesion` que ya usa `AsistenteAcceso`).
+//  - Ni `POST /user/account/logout` ni `PUT /user/account/password` invalidan el `accessToken` en
+//    el servidor (sigue criptográficamente vivo hasta que caduca, §2: solo muere el `refreshToken`)
+//    — por eso esta pantalla lo borra ella misma en los dos casos (`clearAuthToken`/
+//    `clearRefreshToken`), para no mandar a `/acceso` mientras la app sigue "creyendo" que hay
+//    sesión.
 //  - Errores SIEMPRE junto al campo, nunca un banner genérico arriba (wireframe, fila «ERROR»).
 //
 // «Pedir que borren mi cuenta» (wireframe): no hay ruta para eso (`ADR-5-E3-B2-01`, ver la bitácora
@@ -38,6 +41,8 @@ import { EncabezadoSitio } from "@/components/editor/EncabezadoSitio";
 import {
   authResendVerification,
   changePassword,
+  clearAuthToken,
+  clearRefreshToken,
   getAuthToken,
   getProfile,
   logoutAccount,
@@ -419,8 +424,12 @@ function BloqueContrasena() {
     setEnviando(true);
     try {
       await changePassword({ currentPassword: actual, newPassword: nueva });
-      // Cierra todas las sesiones (contrato §2/§5.3): el `accessToken` de ESTA pestaña también deja
-      // de servir de nada útil. Mismo aviso que usa `AsistenteAcceso` para una sesión terminada.
+      // Cierra todas las sesiones (contrato §2/§5.3): el `refreshToken` ya murió en el servidor, y
+      // aunque el `accessToken` técnicamente sigue vivo hasta que caduque, dejarlo puesto aquí solo
+      // confundiría (la pantalla manda a /acceso pero la app seguiría "creyendo" que hay sesión).
+      // Mismo borrado que hace `logoutAccount()`, mismo aviso que usa `AsistenteAcceso`.
+      clearAuthToken();
+      clearRefreshToken();
       router.push("/acceso?motivo=sesion");
     } catch (error: unknown) {
       const code = codigoCuentaDeError(error);

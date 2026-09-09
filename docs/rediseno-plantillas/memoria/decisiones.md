@@ -2266,3 +2266,59 @@ el texto va también aquí íntegro para que este registro siga siendo autosufic
   - **Cambio de versión de la API de Meta en el webhook.** `WhatsAppWebhookController.sendWhatsAppMessage` construía la URL con `graph.facebook.com/v18.0` escrito a mano mientras `WhatsAppService` usaba `whatsapp.api-url` (`v19.0`). Ahora las dos salen de la misma propiedad, así que el webhook pasa de **v18 a v19**. Es deliberado —dos versiones de la misma API en el mismo módulo son un fallo latente— y queda dicho porque **no se ha podido comprobar contra Meta**.
   - **`WhatsAppService` deja de leer sus tres propiedades con `@Value`**: las recibe de `WhatsAppConfiguracion`. Cualquiera que construya el servicio a mano (pruebas incluidas) tiene que pasarle la configuración.
   - **S-01 sigue sin poder darse por cerrado**, y ahora por un solo motivo: la rotación. Todo lo que dependía de código está hecho; lo que queda es del dueño.
+
+## ADR-5-E3-B2-01 — «Pedir que borren mi cuenta»: correo de soporte, no un botón muerto
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E3-B2 (`/perfil`, `/verificar-correo`, `/acceso`)
+- Contexto: el wireframe de `/perfil` (`12-producto-completo.md` § «7 · /perfil») dibuja
+  «[ Pedir que borren mi cuenta ]  terciario, con diálogo de confirmación». El contrato de esta
+  sesión (`handoffs/5-E3-A2-contrato-cuenta.md`) no trae ninguna ruta para borrar o dar de baja una
+  cuenta propia — confirmado además contra el backend real: `modules/product/account` solo tiene
+  `logout`, `password` y `email`; no hay `DELETE`/`deactivate` de ningún tipo bajo `/user/**`. La
+  única baja que existe hoy es administrativa (`AdminUsersController`, rol ADMIN/MASTER). Pintar el
+  botón del wireframe tal cual sería un control que no hace nada al pulsarlo — la regla dura G-01 lo
+  prohíbe explícitamente.
+- Decisión: el bloque «Tu información» de `/perfil` (`components/cuenta/PerfilCuenta.tsx`,
+  `BloqueTuInformacion`) sustituye el botón de borrado por un enlace `mailto:` al correo de soporte
+  (`NEXT_PUBLIC_SOPORTE_CORREO`, ya definido en `lib/env.ts`), con el asunto precompuesto. El texto
+  dice explícitamente que hay que escribir desde el correo de la cuenta para que soporte pueda
+  identificarla. Si la variable de entorno no está configurada, no se pinta ningún enlace: se enseña
+  una frase honesta («Escríbenos desde el correo de tu cuenta…») en su lugar — mismo criterio que
+  `lib/contacto.ts` ya usa en el resto del sitio para no ofrecer un botón que no lleva a nadie.
+  Como es un `mailto:` y no una acción destructiva ejecutada por el frontend, no lleva el diálogo de
+  confirmación del wireframe: no hay nada que confirmar, solo redactar un correo.
+- Alternativas descartadas:
+  - **No pintar nada en absoluto.** Descartada: la clienta necesita SABER que puede pedir la baja
+    aunque el producto no la resuelva sola, y el wireframe explícitamente reserva el bloque para
+    esto.
+  - **Construir la ruta de baja en el backend.** Fuera de mi territorio (`src/` está prohibido para
+    esta sesión, y de cualquier forma es una decisión de producto — ¿baja inmediata o con periodo de
+    gracia?, ¿qué pasa con las invitaciones y los invitados de la cuenta?— que no me corresponde
+    tomar sin ADR del dueño). Queda como pregunta abierta.
+- Consecuencias: la clienta puede pedir la baja, pero no de forma autoservicio — alguien de soporte
+  tiene que tramitarla a mano. Si el dueño decide construir la ruta real más adelante, este bloque se
+  sustituye por el botón + diálogo del wireframe original sin tocar el resto de la pantalla.
+
+## ADR-5-E3-B2-02 — El aviso de que cambiar la contraseña cierra la sesión va SIEMPRE visible bajo el
+  formulario, no en un diálogo de confirmación aparte
+- Fecha: 2026-09-09 · Estado: propuesta · Autor: E3-B2
+- Contexto: el contrato (`handoffs/5-E3-A2-contrato-cuenta.md` §5.3) exige avisar ANTES de que la
+  clienta pulse «Cambiar contraseña», no después de que la sesión ya se cerró. Dos formas de
+  cumplirlo: (a) un texto fijo, siempre visible, bajo los campos; (b) un diálogo modal de
+  confirmación que se abre al pulsar el botón, con el aviso dentro, antes de confirmar de verdad.
+- Decisión: (a). `components/cuenta/PerfilCuenta.tsx` (`BloqueContrasena`) pinta el aviso
+  (`perfil.contrasena.avisoCierraSesion`) como un párrafo fijo entre los campos y el botón, visible
+  desde que se entra a la pantalla — nunca solo tras un error o dentro de un paso extra.
+- Alternativas descartadas:
+  - **Diálogo de confirmación.** Añade un clic extra a una acción que YA pide la contraseña actual
+    (que es, en sí misma, una confirmación de identidad) y dos pasos de confirmación seguidos —
+    contraseña actual + «¿seguro?»— es fricción sin ganancia real: el texto fijo ya cumple «avisar
+    antes de pulsar» sin inventar un paso que el wireframe de `/perfil` tampoco pide (el wireframe
+    solo reserva el diálogo de confirmación para «Pedir que borren mi cuenta», ver ADR-5-E3-B2-01).
+  - **Solo un `title`/tooltip en el botón.** Descartado: un texto que aparece solo al pasar el
+    cursor no es accesible por teclado ni por lector de pantalla sin foco explícito, y esta es
+    información que TODA persona necesita ver, no un detalle opcional.
+- Consecuencias: al terminar con éxito, la pantalla borra el token local
+  (`clearAuthToken`/`clearRefreshToken`, igual que hace `logoutAccount()`, porque el `accessToken`
+  sigue criptográficamente vivo hasta que caduca — contrato §2 — y dejarlo puesto confundiría) y
+  manda a `/acceso?motivo=sesion`, reutilizando el aviso que `AsistenteAcceso.tsx` ya pinta para una
+  sesión terminada, sin tocar ese archivo más de lo que ya se tocó para el registro (fase 5, E3).

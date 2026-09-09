@@ -1762,3 +1762,35 @@ para los cinco que la merecen, apagado limpio para los dos que no, y el desplieg
 vez en pie—. Lo que queda es **la rotación de los cinco valores de la tabla §3 y las contraseñas de
 las cuentas sembradas (§4.2)**, que es del dueño. S-01 se cierra cuando esa lista esté hecha, no
 antes.
+
+## E3-B2 — `/perfil`, `/verificar-correo`, `/acceso` (fase 5)
+
+1. **¿La clienta puede pedir la baja de su cuenta de forma autoservicio?** Hoy no existe ninguna
+   ruta para eso (confirmado contra `modules/product/account` real). El wireframe de `/perfil`
+   dibuja un botón «Pedir que borren mi cuenta»; lo resolví con un `mailto:` al correo de soporte
+   (`ADR-5-E3-B2-01`) en vez de un botón muerto. Si el dueño quiere una baja de verdad, hace falta
+   decidir: ¿inmediata o con periodo de gracia?, ¿qué pasa con sus invitaciones y los datos de sus
+   invitados?, ¿la borra ella misma o solo un ADMIN? Es una ruta nueva de backend, fuera de mi
+   territorio de esta sesión (`src/` prohibido).
+2. **`GET /user/profile` no expone si hay un cambio de correo pendiente.** El contrato (§5.5) dice
+   que, con un cambio de correo pendiente, `/perfil` debería ofrecer «volver a pedir el cambio» en
+   vez de «reenviar verificación» — pero `Profile.kt` no trae ningún campo (`emailPending`,
+   `hasPendingEmailChange`…) que permita distinguir ese caso desde el frontend. Hoy `/perfil` solo
+   sabe `emailVerified` y siempre ofrece el mismo botón «Reenviar», que llama a
+   `POST /auth/verify-email:resend`; el backend ya maneja ese caso con seguridad (no re-arma el
+   cambio pendiente, contrato §5.5), así que no hay agujero de seguridad — solo una pantalla menos
+   informativa de lo que el contrato imaginaba. Si se añade el campo a `Profile`, `/perfil` puede
+   mostrar el estado exacto y el botón correcto.
+3. **`lib/rutas-publicas.ts` no incluye `/verificar-correo`** en `RUTAS_PRIVADAS` (el `disallow` de
+   `robots.txt`). Ese archivo está fuera de mi territorio de esta sesión (dos agentes trabajando en
+   fase 5 lo tienen marcado como ajeno). La pantalla ya lleva su propio `metadata.robots:
+   {index:false}`, que es lo que de verdad impide la indexación, pero el crawl por prefijo queda
+   abierto. Quien toque `lib/rutas-publicas.ts` después puede sumar `"/verificar-correo"` al array.
+4. **No construí un flujo de refresco automático de sesión** (interceptor de 401 que canjee el
+   `refreshToken` por uno nuevo). El encargo pedía «guardar siempre el refreshToken de la última
+   respuesta» porque ahora rota (contrato §1), y eso ya está hecho (`lib/api-client.ts`,
+   `setRefreshToken`/`getRefreshToken`/`clearRefreshToken`, ejercido por `authLogin`/`authSignup`).
+   Pero nada en el frontend LLAMA a `POST /auth/token/refresh` todavía — hoy una sesión caducada
+   sigue resolviéndose con un `SessionError` que manda a `/acceso`, como antes. Construir el
+   interceptor completo es una pieza aparte, con superficie de prueba propia, y no estaba entre las
+   tres pantallas de este encargo.
