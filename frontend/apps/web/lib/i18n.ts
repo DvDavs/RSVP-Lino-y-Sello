@@ -398,9 +398,10 @@ export const es_MX = {
     },
     sinInvitaciones: {
       titulo: "Todavía no tienes invitaciones",
-      texto:
-        "Tu invitación se crea cuando contratas un plan. En cuanto exista, aparece aquí y podrás elegirle una plantilla.",
-      accion: "Ver planes",
+      // Fase 5, E3 (cierre de G-01): antes esto era literalmente falso — el alta por USER no
+      // existía y solo la creaba un ADMIN al vender un plan. Ahora la clienta la crea aquí mismo.
+      texto: "Créala aquí mismo: elige el tipo de evento, la fecha y la hora, y ya tienes dónde empezar a diseñar.",
+      accion: "Crear mi invitación",
       /** Título de la PÁGINA en ese caso: el del estado vacío es su propio encabezado (h2). */
       tituloDePagina: "Tus invitaciones",
     },
@@ -417,6 +418,55 @@ export const es_MX = {
       tituloUna: "Tu invitación ya tiene diseño",
       textoUna:
         "El diseño se cambia desde dentro de la invitación. Ábrela para seguir editándola o comparte su enlace.",
+    },
+    /**
+     * Alta desde el asistente (fase 5, E3; cierre de G-01, `handoffs/5-1b-contrato-alta.md`).
+     * `POST /product/invitations` exige `eventKind`+`eventDate`+`eventTime` los tres a la vez, así
+     * que este bloque pide exactamente esos tres (el resto se completa después, dentro del
+     * editor). Los `error*` se ordenan por `code` del contrato §4, nunca por el `message` del
+     * backend — el mismo criterio que `cuenta.verificarCorreo` de este archivo.
+     */
+    crear: {
+      titulo: "Crea tu invitación",
+      ayuda: "Con el tipo de evento, la fecha y la hora es suficiente para empezar. Los demás datos se completan después, dentro del editor.",
+      fecha: "Fecha del evento",
+      fechaAyuda: "No puede ser una fecha que ya pasó.",
+      hora: "Hora de inicio",
+      hashtag: "Hashtag (opcional)",
+      boton: "Crear mi invitación",
+      creando: "Creando tu invitación…",
+      // Validación local, ANTES de mandar la petición (mismo criterio que el resto del asistente:
+      // un `400` que el propio formulario ya podía evitar es una petición que no debió salir).
+      errorFaltaTipo: "Elige un tipo de evento para continuar.",
+      errorFechaFalta: "Escribe la fecha del evento.",
+      errorHoraFalta: "Escribe la hora del evento.",
+      // Errores que sí vienen del servidor (contrato §4, por `code`).
+      errorCampoFalta: "Falta un dato obligatorio. Revisa el tipo de evento, la fecha y la hora.",
+      errorTipoInvalido: "Ese tipo de evento no es válido. Elige uno de la lista.",
+      errorFechaInvalida: "Escribe la fecha del evento como día, mes y año.",
+      errorFechaPasada: "La fecha del evento no puede ser una que ya pasó.",
+      errorFechaLejana: "Esa fecha está demasiado lejos. Elige una dentro de los próximos 10 años.",
+      errorHoraInvalida: "Escribe la hora en formato de 24 horas, por ejemplo 17:30.",
+      errorHashtagLargo: "El hashtag es demasiado largo. Escribe cien caracteres como máximo.",
+      errorTope: (limite: number) =>
+        `Ya tienes ${limite} invitaciones sin publicar. Publica una o elimina la que no vayas a usar para crear otra.`,
+      errorTopeGenerico:
+        "Ya llegaste al máximo de invitaciones sin publicar. Publica una o elimina la que no vayas a usar para crear otra.",
+      errorCaudal: "Estás creando invitaciones muy rápido. Espera un momento y vuelve a intentarlo.",
+      // Borrado (§1 bis del contrato): destructivo y sin papelera, así que se pide confirmación
+      // explícita ANTES de llamar — nunca un borrado de un solo clic.
+      confirmarBorrar:
+        "Esto borra la invitación por completo: su diseño, sus invitados y sus confirmaciones. No se puede deshacer. ¿Quieres continuar?",
+      eliminar: "Eliminar",
+      eliminando: "Eliminando…",
+      errorBorradoNoEncontrada: "Ya no encontramos esa invitación. Puede que ya la hayas eliminado.",
+      errorBorradoNoBorrable: "Esta invitación ya no se puede eliminar.",
+      errorBorradoPagada: "Esta invitación ya está pagada y no se puede eliminar.",
+      errorBorradoPublicada: "Esta invitación llegó a publicarse y no se puede eliminar.",
+      // Plan 2 (contrato §7): toda invitación nace en el plan 1. Se dice ANTES de que la clienta
+      // elija una plantilla bloqueada, no después de que el servidor la rechace.
+      planAyuda:
+        "Tu invitación nace en el plan básico: puedes diseñarla y verla en vista previa sin costo. Publicarla para tus invitados pide contratar un plan; las plantillas marcadas «Requiere el plan 2» piden uno superior al básico.",
     },
   },
   /**

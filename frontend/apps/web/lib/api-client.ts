@@ -32,6 +32,8 @@ import type {
   ChangePasswordRequest,
   ChooseTemplateRequest,
   ChooseTemplateResponse,
+  CreateInvitationRequest,
+  CreateInvitationResponse,
   DeprecateTemplateVersionResponse,
   GetDocumentResponse,
   HistoryPageResponse,
@@ -742,6 +744,44 @@ export interface InvitacionDelCliente {
 export async function listarInvitaciones(): Promise<InvitacionDelCliente[]> {
   const r = await peticion<InvitacionDelCliente[]>({ method: "GET", path: "/user/invitations/all" });
   return (r.data ?? []) as InvitacionDelCliente[];
+}
+
+// =============================================================================================
+// Alta y borrado de invitaciones (fase 5, E3; `modules/product/invitations`). Contrato:
+// `docs/rediseno-plantillas/memoria/handoffs/5-1b-contrato-alta.md`. El alta es lo que le faltaba
+// al asistente para cerrar el agujero G-01: hasta ahora solo un ADMIN podía crear la fila que el
+// asistente aplica plantilla a. Sus cuerpos de error llevan `code` pero NO empiezan por `TPL_`
+// (son `PRD_*`), así que `peticion()` los clasifica como `UnknownApiError` — igual que las rutas de
+// cuenta de arriba, no `ApiError`. La traducción de esos `code` vive en
+// `components/asistente/crear-invitacion.ts` (fuera del territorio de este cliente HTTP a
+// propósito: aquí solo se tipa el transporte, P1).
+// =============================================================================================
+
+/**
+ * `POST /product/invitations` — crea **una** invitación vacía del dueño del token (§1). Responde
+ * `201` en un alta nueva y `200` en el reenvío EXACTO del mismo dueño dentro de la ventana de 60 s
+ * (contrato §3): no hay idempotencia por clave de cliente detrás de esa ventana, así que quien
+ * llama **debe** deshabilitar el botón al primer envío y no reintentar solo por un `5xx` — esta
+ * función no lo hace por ti, es responsabilidad de la pantalla que la invoca.
+ */
+export async function crearInvitacion(body: CreateInvitationRequest): Promise<CreateInvitationResponse> {
+  const r = await peticion<CreateInvitationResponse>({
+    method: "POST",
+    path: "/product/invitations",
+    jsonBody: body,
+    bodyLimitBytes: DEFAULT_JSON_BODY_LIMIT_BYTES,
+  });
+  return r.data as CreateInvitationResponse;
+}
+
+/**
+ * `DELETE /product/invitations/{invitationId}` — borra un borrador SUYO (§1 bis). `204` sin
+ * cuerpo. Es destructivo y sin papelera (se lleva documento, revisiones, releases, invitados y
+ * encola sus imágenes para borrar): quien llama **debe** pedir confirmación explícita antes de
+ * invocarla — esta función no la pide, solo hace la petición.
+ */
+export async function eliminarInvitacion(invitationId: number): Promise<void> {
+  await peticion<void>({ method: "DELETE", path: `/product/invitations/${invitationId}` });
 }
 
 // =============================================================================================

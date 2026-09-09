@@ -25,6 +25,21 @@ const AYUDA_PLANES = "/ayuda#planes";
 export interface MisInvitacionesProps {
   readonly invitaciones: readonly FilaInvitacion[];
   readonly idTitulo: string;
+  /**
+   * Fase 5, E3 (cierre de G-01): con la lista vacía, el estado vacío puede llevar a la clienta al
+   * formulario de alta que vive en la misma pantalla en vez de a `/ayuda#planes` (ya no es cierto
+   * que la invitación «se crea al contratar un plan»). `undefined` conserva el enlace a planes.
+   */
+  readonly alEmpezar?: () => void;
+  /**
+   * Fase 5, E3 (`DELETE /product/invitations/{id}`, R1-05): con esta prop presente, cada fila
+   * ofrece «Eliminar» de verdad — es la salida del tope de 3 borradores que el `409` ya prometía.
+   * Quien llama hace la petición HTTP real (con su propia confirmación y traducción de error);
+   * este componente solo pide el id y refleja qué fila está en curso con `borrandoId`.
+   */
+  readonly onBorrar?: (id: number) => void;
+  /** Id que se está borrando ahora mismo: deshabilita SU botón y enseña su estado de carga. */
+  readonly borrandoId?: number | null;
 }
 
 /** Fecha `YYYY-MM-DD` de negocio → texto es-MX; si viene vacía o rara, se devuelve tal cual. */
@@ -35,14 +50,18 @@ export function fechaLegible(iso: string | null | undefined): string {
   return fecha.toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
 }
 
-export function MisInvitaciones({ invitaciones, idTitulo }: MisInvitacionesProps) {
+export function MisInvitaciones({ invitaciones, idTitulo, alEmpezar, onBorrar, borrandoId }: MisInvitacionesProps) {
   if (invitaciones.length === 0) {
     return (
       <EmptyState
         ilustracion="sin-invitaciones"
         titulo={es_MX.asistente.sinInvitaciones.titulo}
         texto={es_MX.asistente.sinInvitaciones.texto}
-        accion={{ etiqueta: es_MX.asistente.sinInvitaciones.accion, href: AYUDA_PLANES }}
+        accion={
+          alEmpezar
+            ? { etiqueta: es_MX.asistente.sinInvitaciones.accion, onSelect: alEmpezar }
+            : { etiqueta: es_MX.asistente.sinInvitaciones.accion, href: AYUDA_PLANES }
+        }
       />
     );
   }
@@ -54,14 +73,30 @@ export function MisInvitaciones({ invitaciones, idTitulo }: MisInvitacionesProps
       </h2>
       <ul className="flex flex-col gap-2">
         {invitaciones.map((inv) => (
-          <FilaDeInvitacion key={inv.id} inv={inv} />
+          <FilaDeInvitacion
+            key={inv.id}
+            inv={inv}
+            onBorrar={onBorrar}
+            borrando={borrandoId === inv.id}
+            otraBorrando={borrandoId !== null && borrandoId !== undefined && borrandoId !== inv.id}
+          />
         ))}
       </ul>
     </section>
   );
 }
 
-function FilaDeInvitacion({ inv }: { readonly inv: FilaInvitacion }) {
+function FilaDeInvitacion({
+  inv,
+  onBorrar,
+  borrando,
+  otraBorrando,
+}: {
+  readonly inv: FilaInvitacion;
+  readonly onBorrar?: (id: number) => void;
+  readonly borrando: boolean;
+  readonly otraBorrando: boolean;
+}) {
   const enlace = inv.publicada && inv.publicToken !== null ? enlacePublico(inv.publicToken, inv.publicUrl) : null;
 
   return (
@@ -87,6 +122,25 @@ function FilaDeInvitacion({ inv }: { readonly inv: FilaInvitacion }) {
               </Link>
             </Button>
           )}
+          {/* Fase 5, E3 (R1-05): la salida real del tope de 3 borradores. Publicada o no, se
+              intenta siempre — el backend es quien sabe si de verdad es un borrador borrable
+              (`paid`/`published`/`legacy`, contrato §4) y su motivo se enseña tal cual si no lo es. */}
+          {onBorrar ? (
+            <Button
+              variant="terciario"
+              size="sm"
+              className="text-ui-danger-text hover:bg-ui-danger-soft"
+              loading={borrando}
+              loadingText={es_MX.asistente.crear.eliminando}
+              disabled={otraBorrando}
+              data-testid={`asistente-eliminar-${inv.id}`}
+              onClick={() => {
+                if (window.confirm(es_MX.asistente.crear.confirmarBorrar)) onBorrar(inv.id);
+              }}
+            >
+              {es_MX.asistente.crear.eliminar}
+            </Button>
+          ) : null}
         </span>
       </div>
       {enlace ? <EnlaceDeInvitadas enlace={enlace} idInvitacion={inv.id} /> : null}

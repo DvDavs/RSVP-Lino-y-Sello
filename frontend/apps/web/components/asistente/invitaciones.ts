@@ -44,7 +44,13 @@ export async function cargarInvitaciones(): Promise<readonly FilaInvitacion[]> {
   return Promise.all(recortada.map((inv) => filaDe(inv)));
 }
 
-async function filaDe(inv: InvitacionDelCliente): Promise<FilaInvitacion> {
+/**
+ * Estado real de UNA invitación. Se exporta (fase 5, E3) porque el asistente la reusa justo
+ * después de un alta (`POST /product/invitations`, `crear-invitacion.ts`): la fila que arma es
+ * IDÉNTICA a la que produciría un refresco completo de `cargarInvitaciones()`, sin repetir la
+ * lógica de qué `code` significa qué estado.
+ */
+export async function filaDe(inv: InvitacionDelCliente): Promise<FilaInvitacion> {
   const comun = {
     ...inv,
     eventKind: eventKindDeNombre(inv.event),

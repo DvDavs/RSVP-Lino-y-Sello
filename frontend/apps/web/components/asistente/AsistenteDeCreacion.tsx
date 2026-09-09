@@ -27,6 +27,8 @@ import {
   ApiError,
   SessionError,
   chooseTemplate,
+  crearInvitacion,
+  eliminarInvitacion,
   getAuthToken,
   getCatalog,
   getDocument,
@@ -35,7 +37,9 @@ import {
 } from "@/lib/api-client";
 import type { CatalogItem } from "@/lib/api-types";
 import { es_MX } from "@/lib/i18n";
+import { traducirErrorAlta, traducirErrorBorrado } from "./crear-invitacion.ts";
 import { MisInvitaciones } from "./MisInvitaciones.tsx";
+import { PasoCrearInvitacion } from "./PasoCrearInvitacion.tsx";
 import { PasoDatos } from "./PasoDatos.tsx";
 import { PasoListo } from "./PasoListo.tsx";
 import { PasoPlantilla } from "./PasoPlantilla.tsx";
@@ -50,7 +54,7 @@ import {
   type CampoDeDatos,
   type ValoresDeDatos,
 } from "./datos-basicos.ts";
-import { cargarInvitaciones, invitacionObjetivo, sinPlantilla, type FilaInvitacion } from "./invitaciones.ts";
+import { cargarInvitaciones, filaDe, invitacionObjetivo, sinPlantilla, type FilaInvitacion } from "./invitaciones.ts";
 import { eventKindDeParametro, nombreDeTipo, slugDeTipo } from "./tipos-de-evento.ts";
 
 const PASOS = ["evento", "plantilla", "datos", "listo"] as const;
@@ -58,6 +62,7 @@ export type PasoDelAsistente = (typeof PASOS)[number];
 
 const ID_TITULO = "asistente-titulo";
 const ID_MIS_INVITACIONES = "asistente-mis-invitaciones";
+const ID_TITULO_CREAR = "asistente-crear-titulo";
 const DESTINO_ACCESO = `/acceso?volver=${encodeURIComponent("/editor")}`;
 
 function esPaso(valor: string | null): valor is PasoDelAsistente {
@@ -111,6 +116,18 @@ export function AsistenteDeCreacion() {
   const [errorFecha, setErrorFecha] = useState<string | null>(null);
   const [errorGuardado, setErrorGuardado] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+
+  // ── Alta desde el asistente (fase 5, E3; cierre de G-01) ───────────────────────────────────
+  // Sin invitación disponible a la que aplicarle una plantilla, esto YA NO es un callejón sin
+  // salida: `crearInvitacion` es el alta real, `POST /product/invitations` (§1 del contrato).
+  const [fechaCrear, setFechaCrear] = useState("");
+  const [horaCrear, setHoraCrear] = useState("");
+  const [hashtagCrear, setHashtagCrear] = useState("");
+  const [creando, setCreando] = useState(false);
+  const [errorCrear, setErrorCrear] = useState<string | null>(null);
+  // Borrado (§1 bis): la salida real del tope de 3 borradores (`409 PRD_DRAFT_LIMIT_REACHED`).
+  const [borrandoId, setBorrandoId] = useState<number | null>(null);
+  const [errorBorrado, setErrorBorrado] = useState<string | null>(null);
 
   const titulo = useRef<HTMLHeadingElement>(null);
 
@@ -363,6 +380,94 @@ export function AsistenteDeCreacion() {
       setErrorGuardado(
         error instanceof TypeError ? es_MX.asistente.datos.errorGuardarSinRed : es_MX.asistente.datos.errorGuardar,
       );
+    }
+  }
+
+  /** El botón que lleva aquí solo hace `focus`: la sección ya está en pantalla, no hace falta scroll. */
+  function irAlFormularioDeAlta(): void {
+    document.getElementById(ID_TITULO_CREAR)?.focus();
+  }
+
+  /**
+   * `POST /product/invitations` (contrato §1-§3). El botón que llama a esto se deshabilita
+   * mientras `creando` es `true` — esa deshabilitación, y NO un reintento automático, es lo que
+   * cumple «doble clic» (contrato §3: sin idempotencia por clave de cliente detrás de la ventana
+   * de 60 s, así que dos envíos con datos distintos son dos invitaciones legítimas).
+   */
+  async function crearNuevaInvitacion(): Promise<void> {
+    if (creando) return;
+    if (tipoElegido === null) {
+      setErrorCrear(es_MX.asistente.crear.errorFaltaTipo);
+      return;
+    }
+    if (!esFechaIso(fechaCrear)) {
+      setErrorCrear(es_MX.asistente.crear.errorFechaFalta);
+      return;
+    }
+    if (!esHoraIso(horaCrear)) {
+      setErrorCrear(es_MX.asistente.crear.errorHoraFalta);
+      return;
+    }
+    setErrorCrear(null);
+    setCreando(true);
+    try {
+      const creada = await crearInvitacion({
+        eventKind: tipoElegido,
+        eventDate: fechaCrear,
+        eventTime: horaCrear,
+        ...(hashtagCrear.trim() ? { hashtag: hashtagCrear.trim() } : {}),
+      });
+      // Misma forma que produce `cargarInvitaciones()`: se reusa `filaDe` en vez de armar la fila
+      // a mano, así que el estado ("sin-plantilla") sale de la MISMA fuente que el resto de la
+      // lista y no de una suposición local.
+      const fila = await filaDe({
+        id: creada.invitationId,
+        status: "",
+        event: nombreDeTipo(tipoElegido),
+        plan: "",
+        date: creada.eventDate,
+        time: creada.eventTime,
+      });
+      setInvitaciones((previas) => [...(previas ?? []), fila]);
+      setCreando(false);
+      // ADR-5-E3-B3-01 (`decisiones.md`): la ruta de alta NO aplica plantilla (contrato §5); el
+      // paso 2, con esta URL, es la llamada YA EXISTENTE a `:choose-template` — si esa segunda
+      // llamada falla, la invitación recién creada queda como un borrador más en «Mis
+      // invitaciones» (con estado real, nunca huérfana en silencio: `errorEleccion` del paso 2 ya
+      // avisa y deja reintentar sobre la MISMA invitación).
+      irA("plantilla", { inv: String(creada.invitationId) });
+    } catch (error: unknown) {
+      setCreando(false);
+      if (error instanceof SessionError) {
+        setSesion("sin");
+        router.replace(DESTINO_ACCESO);
+        return;
+      }
+      setErrorCrear(traducirErrorAlta(error).mensaje);
+    }
+  }
+
+  /**
+   * `DELETE /product/invitations/{id}` (contrato §1 bis, §4). Es la salida real del tope de 3
+   * borradores: el `409 PRD_DRAFT_LIMIT_REACHED` dice «publica una o elimina la que no vayas a
+   * usar», y ahora «eliminar» es un botón de verdad en cada fila de «Mis invitaciones».
+   */
+  async function borrarInvitacionDesdeLista(id: number): Promise<void> {
+    if (borrandoId !== null) return; // §3, mismo criterio que el alta: un borrado a la vez
+    setErrorBorrado(null);
+    setBorrandoId(id);
+    try {
+      await eliminarInvitacion(id);
+      setInvitaciones((previas) => (previas ?? []).filter((f) => f.id !== id));
+    } catch (error: unknown) {
+      if (error instanceof SessionError) {
+        setSesion("sin");
+        router.replace(DESTINO_ACCESO);
+        return;
+      }
+      setErrorBorrado(traducirErrorBorrado(error));
+    } finally {
+      setBorrandoId(null);
     }
   }
 

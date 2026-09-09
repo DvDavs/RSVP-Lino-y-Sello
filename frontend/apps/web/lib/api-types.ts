@@ -434,3 +434,42 @@ export interface ChangeEmailRequest {
   email: string;
   password: string;
 }
+
+// ---------------------------------------------------------------------------------------------
+// `POST /product/invitations` y `DELETE /product/invitations/{id}` (fase 5, E3;
+// `docs/rediseno-plantillas/memoria/handoffs/5-1b-contrato-alta.md §2-§3`). El alta que faltaba
+// para el rol USER: hasta ahora una invitación solo la daba de alta un ADMIN (agujero G-01).
+// ---------------------------------------------------------------------------------------------
+
+/** §2 del contrato. Los dos `*Allowed` nacen en `true` si se omiten; `hashtag` en `""`. */
+export interface CreateInvitationRequest {
+  eventKind: EventKind;
+  /** `YYYY-MM-DD`, no anterior a hoy (`America/Mexico_City`) y ≤ 10 años. */
+  eventDate: string;
+  /** `HH:MM`, 24 h. */
+  eventTime: string;
+  childrenAllowed?: boolean;
+  youngAllowed?: boolean;
+  /** ≤ 100 caracteres; el backend lo recorta si se pasa. */
+  hashtag?: string;
+}
+
+/**
+ * §3 del contrato. `201` en un alta nueva; `200` en el reenvío exacto del mismo dueño dentro de la
+ * ventana de 60 s (mismo cuerpo entero) — la forma de la respuesta es idéntica en los dos casos: la
+ * fila tal como quedó en la base, nunca un eco de lo enviado.
+ */
+export interface CreateInvitationResponse {
+  invitationId: number;
+  eventKind: EventKind;
+  eventDate: string;
+  eventTime: string;
+  childrenAllowed: boolean;
+  youngAllowed: boolean;
+  hashtag: string;
+  isPaid: boolean;
+  isEnabled: boolean;
+  isFinished: boolean;
+  usesTemplates2: boolean;
+  createdAt: string;
+}
