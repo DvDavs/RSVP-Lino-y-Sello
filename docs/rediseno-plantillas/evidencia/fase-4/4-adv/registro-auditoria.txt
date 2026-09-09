@@ -1,0 +1,133 @@
+=== Auditoría del REGISTRO (TemplateRegistrar.kt, MasterTemplateRegistryController.kt, registrar.ts)
+=== con peticiones HTTP reales contra el backend levantado (build/dev/env.sh, puerto 6092) ===
+
+--- 1. AUTORIZACIÓN ---
+
+$ curl -X POST $TPL_DEV_BASE/master/templates2/versions  (sin token, con template/theme/defaults de boda-clasica/1.0.0)
+HTTP 401
+{"timestamp":"09/09/2026 02:13:41","statusCode":401,"errorsListed":null,
+ "errors":{"url":"Full authentication is required to access this resource"}}
+
+$ curl -X POST $TPL_DEV_BASE/master/templates2/versions  (con token de una cuenta USER recién creada por
+  /auth/signup + /auth/token, sin promover — igual que scripts/seed-demo.sh)
+HTTP 403
+{"timestamp":"09/09/2026 02:13:41","statusCode":403,"errorsListed":null,"errors":{"url":"Access Denied"}}
+
+Ninguno de los dos casos crea nada: ambos son un rechazo de Spring Security ANTES de que
+`MasterTemplateRegistryController.register` se ejecute (`@PreAuthorize("hasRole('MASTER')")` +
+`hasRole("MASTER")` en `SecurityConfig.kt:44`). Correcto.
+
+--- 2. INMUTABILIDAD ---
+
+Paquete de referencia: copia de frontend/templates/xv-jardin/1.0.0 con el slug cambiado a
+"adv4-auditoria" (para no chocar con lo ya sembrado), registrado en /tmp/adv/reg/pkg/1.0.0.
+
+$ POST .../master/templates2/versions  (paquete original)
+HTTP 201
+{"result":"created","alreadyRegistered":false,"templateVersionId":7,"slug":"adv4-auditoria",
+ "version":"1.0.0","packageHash":"sha256:b1330ab6bc...","assetsRegistered":5}
+
+Se cambia UN byte de defaults.json (content.cover.title.value: "Mis XV años" → "Mis XV años!"),
+SIN subir la versión (sigue siendo 1.0.0), y se registra otra vez:
+
+$ POST .../master/templates2/versions  (mismo slug@version, defaults.json mutado)
+HTTP 409
+{"timestamp":"09/09/2026 02:14:41","statusCode":409,"code":"TPL_VERSION_HASH_MISMATCH",
+ "message":"adv4-auditoria@1.0.0 ya está registrada con otro contenido; una versión publicada nunca se pisa",
+ "details":{"slug":"adv4-auditoria","version":"1.0.0",
+  "registeredHash":"sha256:b1330ab6bc4239c241c5a51937b8dfd5dc528fa4e778dc16f24393bf5a9b2d6e",
+  "requestedHash":"sha256:a5a9c5a9e351bd78c688753ce8d6dbf8bad6f273803a30c41ead4177147802f6"}}
+
+Exactamente el 409 TPL_VERSION_HASH_MISMATCH que pide el encargo. NO es una alta: se comporta como
+debe (TemplateRegistrar.kt:106-117).
+
+--- 3. IDEMPOTENCIA ---
+
+$ psql -Atqc "SELECT count(*) FROM tpl_template_version WHERE template_id = (slug='adv4-auditoria')"
+filas ANTES: 1        (tras el 201 de arriba)
+
+$ POST .../master/templates2/versions  (el MISMO paquete original, sin ningún cambio, dos veces)
+HTTP 200
+{"result":"noop_same_hash","alreadyRegistered":true,"templateVersionId":7,"slug":"adv4-auditoria",
+ "version":"1.0.0","packageHash":"sha256:b1330ab6bc...","assetsRegistered":0}
+
+$ psql -Atqc "SELECT count(*) ..."
+filas DESPUÉS: 1       (sin cambio: ninguna fila nueva)
+
+--- 4. NOMBRES DE ASSET MALICIOSOS ---
+
+Se intentó registrar (con el mismo template/theme/defaults válidos de xv-jardin, slug
+"adv4-malicioso") un asset con:
+
+  a) nombre de PARTE multipart "assets/../fuera.webp"
+  b) nombre de PARTE multipart "/etc/passwd"
+  c) parte "assets" (genérica) con `filename="..\win.webp"` (estilo Windows)
+
+Resultado de las tres, con salida literal:
+
+a) HTTP 422 TPL_MANIFEST_INVALID / TPL_PACKAGE_UNEXPECTED_FILE
+   "el paquete trae 1 archivo(s) fuera del árbol de 01 §2.1: assets/../fuera.webp (cover.webp)"
+
+b) HTTP 422 TPL_MANIFEST_INVALID / TPL_PACKAGE_UNEXPECTED_FILE
+   "el paquete trae 1 archivo(s) fuera del árbol de 01 §2.1: /etc/passwd (cover.webp)"
+
+c) HTTP 422 TPL_MANIFEST_INVALID / TPL_PACKAGE_ASSET_MISMATCH
+   "el manifiesto declara assets que no vienen en el paquete: assets/cover.webp, assets/divider.webp,
+   assets/portrait-a.webp, assets/preview.webp, assets/rsvp-bg.webp"
+   (`TemplatePackageReader.rutaDeParte` convierte "\" a "/" y se queda solo con el nombre de archivo
+   tras el último "/": "..\win.webp" → "win.webp" → "assets/win.webp", que el manifiesto no declara.)
+
+Los TRES casos se rechazan ANTES de llegar a `TemplateRegistrationService.subirAssets` (el rechazo es
+del `TemplatePackageParser`/`TemplatePackageReader`, en el paso 1 "fuera de transacción" de `02 §4`),
+así que NADA se sube a S3/disco.
+
+Comprobado EN EL DISCO (el almacén local de `LocalAssetStorage`, `build/templates2-assets/`, activo en
+este entorno con `templates2.assets.mode=local`, `bitacora/3-0a.md`/ADR-3-0a-02):
+
+$ find build/templates2-assets -type f
+  … solo `templates2/template/<slug>/<version>/<sha256>.<ext>` y `templates2/invitation/<id>/<sha256>.<ext>`,
+  ni un solo archivo llamado "fuera.webp", "win.webp" ni nada bajo /etc.
+$ find / -xdev -iname 'fuera.webp' -o -iname 'win.webp'
+  (sin resultados)
+
+No es una alta: la clave de almacenamiento SIEMPRE se deriva de `slug`/`version`/`sha256` declarados en
+el manifiesto (`Templates2S3KeyService.templateAssetKey`, `persistence/Templates2S3KeyService.kt:21-22`)
+— el nombre de archivo o de parte del asset NUNCA llega a formar parte de la ruta de almacenamiento — y
+además `TemplatePackageReader.esRutaDePaquete`/`PackageLimits.ASSET_NAME` (regex
+`^[a-z0-9][a-z0-9._-]{0,99}$`, sin "/") y el patrón de JSON Schema para `AssetEntry.path`
+(`^assets\/[a-z0-9][a-z0-9._-]{0,99}$`) ya cierran la puerta antes de que un nombre así llegue a
+`LocalAssetStorage.resolver` (que, de todos modos, también comprueba `..`/`.`/segmentos vacíos y que la
+ruta resuelta caiga dentro de su raíz).
+
+--- 5. VERSIONES ---
+
+a) "1.0.0 dos veces con contenido distinto" → cubierto arriba (caso 2): 409 TPL_VERSION_HASH_MISMATCH.
+
+b) Versión que NO es semver ("no-es-semver"):
+$ POST .../master/templates2/versions  (template.json con version:"no-es-semver")
+HTTP 422
+{"code":"TPL_MANIFEST_INVALID","message":"template-manifest: 1 violaciones de esquema",
+ "details":{"violations":[{"path":"$.version","code":"pattern",
+   "message":"$.version: does not match the regex pattern ^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"}]}}
+Rechazado por el JSON Schema, antes de llegar al registro. Correcto.
+
+c) Versión MENOR que la ya registrada (slug "adv4-version-menor": se registra 1.0.0 primero y LUEGO
+   0.9.0, mismo contenido salvo el número de versión):
+$ POST .../master/templates2/versions  (1.0.0)
+HTTP 201  {"result":"created", ..., "version":"1.0.0", "templateVersionId":8, ...}
+$ POST .../master/templates2/versions  (0.9.0, DESPUÉS de 1.0.0)
+HTTP 201  {"result":"created", ..., "version":"0.9.0", "templateVersionId":9,
+           "structuralDiff":{"removedBlocks":[],...(todo vacío)}}
+
+`comprobarDiff` compara contra la versión de mayor `(major,minor,patch)` ya publicada (`1.0.0`), no
+contra la última registrada por orden temporal: como el contenido es idéntico, el diff estructural sale
+vacío y ADR-028 no exige bump mayor ni `MigrationPlan`. El catálogo queda con 0.9.0 y 1.0.0, ambas
+`published` (`GET /master/templates2/versions?slug=adv4-version-menor` lo confirma). No se detectó
+ningún efecto de "0.9.0 pisa o esconde a 1.0.0": el catálogo (`TemplateCatalogService`) sigue ofreciendo
+la versión más alta a los documentos nuevos.
+
+No lo trato como alta (nada se pisa, nada se pierde, ninguna autorización se salta), pero SÍ es una
+superficie que vale la pena anotar como issue de severidad media: el registro no impide ni avisa que se
+está dando de alta una versión SEMVER más baja que una ya publicada del mismo slug, lo cual puede ser
+un error humano real (typo de versión) sin ninguna señal más que "201 created". Ver
+`memoria/issues-fase-4.md`.

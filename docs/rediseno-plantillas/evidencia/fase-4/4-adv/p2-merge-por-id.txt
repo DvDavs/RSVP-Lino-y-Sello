@@ -1,0 +1,52 @@
+=== merge/reducer: como se localiza una ficha de grupo (TS) ===
+35:  | { code: "TPL_ITEM_UNKNOWN"; groupId: string; itemId: string }
+174:      const itemId = ctx.newUlid();
+177:      nuevos.splice(op.index ?? nuevos.length, 0, { itemId, values: clone(op.values) });
+179:      return { ok: true, doc: d, idMap: { [op.tempId]: itemId } };
+186:      const i = items.findIndex(x => x.itemId === op.itemId);
+187:      if (i < 0) return fail({ code: "TPL_ITEM_UNKNOWN", groupId: op.groupId, itemId: op.itemId });
+200:      const i = items.findIndex(x => x.itemId === op.itemId);
+201:      if (i < 0) return fail({ code: "TPL_ITEM_UNKNOWN", groupId: op.groupId, itemId: op.itemId });
+217:      const i = items.findIndex(x => x.itemId === op.itemId);
+218:      if (i < 0) return fail({ code: "TPL_ITEM_UNKNOWN", groupId: op.groupId, itemId: op.itemId });
+221:      const e = checkScalar(ib, op.blockId, op.value, ctx, `content.${op.groupId}[${op.itemId}].${op.blockId}`);
+234:      const i = items.findIndex(x => x.itemId === op.itemId);
+235:      if (i < 0) return fail({ code: "TPL_ITEM_UNKNOWN", groupId: op.groupId, itemId: op.itemId });
+299:/** Sustituye `itemId: "tmp:…"` por el ULID que produjo un `addItem` anterior DEL MISMO LOTE. */
+302:  if (!esTempId(op.itemId)) return op;
+303:  const real = idMap[op.itemId];
+305:  if (real === undefined) return { code: "TPL_ITEM_UNKNOWN", groupId: op.groupId, itemId: op.itemId };
+306:  return { ...op, itemId: real };
+
+=== ¿algun acceso por INDICE a items[] en el reductor? ===
+177:      nuevos.splice(op.index ?? nuevos.length, 0, { itemId, values: clone(op.values) });
+191:      nuevos.splice(i, 1);
+207:      const [x] = nuevos.splice(i, 1);
+208:      nuevos.splice(op.toIndex, 0, x!);
+
+=== espejo Kotlin ===
+62:    data class ItemUnknown(val groupId: BlockId, val itemId: String) : OperationError {
+169:                val itemId = ItemId(ctx.newUlid())
+171:                nuevos.add(op.index ?: nuevos.size, GroupItem(itemId, op.values))
+174:                    mapOf(op.tempId to itemId.value),
+181:                val i = items.indexOfFirst { it.itemId.value == op.itemId }
+182:                if (i < 0) return falla(OperationError.ItemUnknown(op.groupId, op.itemId))
+191:                val i = items.indexOfFirst { it.itemId.value == op.itemId }
+192:                if (i < 0) return falla(OperationError.ItemUnknown(op.groupId, op.itemId))
+205:                val i = items.indexOfFirst { it.itemId.value == op.itemId }
+206:                if (i < 0) return falla(OperationError.ItemUnknown(op.groupId, op.itemId))
+209:                comprobarEscalar(ib, op.blockId, op.value, ctx, "content.${op.groupId.value}[${op.itemId}].${op.blockId.value}")
+212:                nuevos[i] = nuevos[i].copy(values = nuevos[i].values + (op.blockId to op.value))
+219:                val i = items.indexOfFirst { it.itemId.value == op.itemId }
+220:                if (i < 0) return falla(OperationError.ItemUnknown(op.groupId, op.itemId))
+223:                nuevos[i] = nuevos[i].copy(values = nuevos[i].values - op.blockId)
+229:                val i = doc.structure.sections.indexOfFirst { it.key == op.sectionKey }
+233:                nuevas[i] = nuevas[i].copy(visible = op.visible)
+239:                val i = doc.structure.sections.indexOfFirst { it.key == op.sectionKey }
+243:                nuevas[i] = nuevas[i].copy(variant = op.variant)
+304:        fun real(groupId: BlockId, itemId: String): Resuelta? {
+305:            if (!itemId.startsWith("tmp:")) return null
+306:            val r = idMap[itemId] ?: return Resuelta.Error(OperationError.ItemUnknown(groupId, itemId))
+309:                    is Operation.RemoveItem -> op.copy(itemId = r)
+310:                    is Operation.MoveItem -> op.copy(itemId = r)
+311:                    is Operation.SetItemBlock -> op.copy(itemId = r)

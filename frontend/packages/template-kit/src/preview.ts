@@ -22,7 +22,7 @@
 //     `/__preview/estado.json` y se repinta. Sin recarga de página: no se pierde el desplazamiento.
 //   · **Nunca `playwright install`** y nunca se escribe dentro del paquete: `preview` es de sólo
 //     lectura sobre `<dir>` (`check({escribir: false})`).
-import { existsSync, readFileSync, statSync, watch, type FSWatcher } from "node:fs";
+import { existsSync, readFileSync, realpathSync, statSync, watch, type FSWatcher } from "node:fs";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { IncomingMessage, ServerResponse } from "node:http";
@@ -78,20 +78,94 @@ export function tipoDe(ruta: string): string {
   return TIPOS[extname(ruta).toLowerCase()] ?? "application/octet-stream";
 }
 
-/** Sirve un archivo del disco, o `404`. Rechaza cualquier ruta que se salga de `raiz` (`..`). */
+/**
+ * Sirve un archivo bajo UNA raíz (un único directorio: `<paquete>/assets`), o `404`.
+ *
+ * Comprueba dos veces que `ruta` cae dentro de `raiz`: primero por texto (`resolve()` normaliza
+ * `..`; rechaza también una `relativa` absoluta, porque `resolve(raiz, "/etc/passwd")` IGNORA
+ * `raiz` y devuelve `/etc/passwd` tal cual — el rechazo real es la comparación de después, no
+ * `resolve` en sí) y después por `fs.realpathSync`, para que un enlace simbólico dentro de `raiz`
+ * que apunte fuera (un asset de plantilla podría serlo) tampoco se sirva.
+ */
 export function servirArchivo(res: ServerResponse, raiz: string, relativa: string): void {
-  const ruta = resolve(raiz, relativa);
-  // `resolve("/")` es `"/"`, y `"/" + "/"` sería `"//"`: sin este caso, servir desde la raíz del
-  // sistema de ficheros rechazaba TODO (medido: los `.woff2` de las tipografías daban 404).
-  const prefijo = resolve(raiz) === "/" ? "/" : resolve(raiz) + "/";
-  if (!ruta.startsWith(prefijo) || !existsSync(ruta) || !statSync(ruta).isFile()) {
+  const raizAbs = resolve(raiz);
+  const ruta = resolve(raizAbs, relativa);
+  const prefijo = raizAbs === "/" ? "/" : raizAbs + "/";
+  if ((ruta !== raizAbs && !ruta.startsWith(prefijo)) || !existsSync(ruta) || !statSync(ruta).isFile()) {
     res.statusCode = 404;
     res.end("no encontrado");
     return;
   }
-  res.setHeader("Content-Type", tipoDe(ruta));
+  let real: string;
+  let raizReal: string;
+  try {
+    real = realpathSync(ruta);
+    raizReal = realpathSync(raizAbs);
+  } catch {
+    res.statusCode = 404;
+    res.end("no encontrado");
+    return;
+  }
+  const prefijoReal = raizReal === "/" ? "/" : raizReal + "/";
+  if (real !== raizReal && !real.startsWith(prefijoReal)) {
+    res.statusCode = 403; // enlace simbólico que apunta fuera de la raíz
+    res.end("prohibido");
+    return;
+  }
+  res.setHeader("Content-Type", tipoDe(real));
   res.setHeader("Cache-Control", "no-store");
-  res.end(readFileSync(ruta));
+  res.end(readFileSync(real));
+}
+
+/**
+ * Sirve un archivo por RUTA ABSOLUTA si (y solo si) cae dentro de alguna de `raices` — usado
+ * exclusivamente por `/__preview/fs/`, la ruta de las tipografías `@fontsource` resueltas desde
+ * `node_modules` (ADR-4-1B-06). `hojaDeFuentes` fabrica esas URLs con `abs => "/__preview/fs" + abs`,
+ * donde `abs` YA es la ruta absoluta completa del `.woff2/.css` en disco: no hay una única raíz
+ * contra la que "unir" `relativa` (`raicesModulos` tiene tres, y pnpm reparte entre ellas), así que
+ * aquí se reconstruye la ruta absoluta (con `resolve("/", relativa)`, que también normaliza `..`) y
+ * LUEGO se comprueba que caiga dentro de alguna raíz permitida — nunca al revés.
+ *
+ * Este es el ALTA que corrige el encargo (`preview-lectura-fuera-del-paquete.txt`): sin esta
+ * comprobación de pertenencia, cualquier ruta absoluta del sistema se servía entera (`/etc/passwd`,
+ * `/proc/self/environ`, certificados, variables de entorno del proceso). Igual que en
+ * `servirArchivo`, la ruta real (enlaces simbólicos resueltos) también tiene que caer dentro de la
+ * raíz real: un paquete de `node_modules` gestionado por pnpm suele SER un enlace simbólico hacia
+ * `node_modules/.pnpm/…` — que sigue cayendo dentro de la misma raíz, así que las fuentes legítimas
+ * se siguen sirviendo — pero un enlace que apuntara fuera de todas las raíces no se sirve.
+ */
+export function servirArchivoAbsoluto(res: ServerResponse, raices: readonly string[], relativa: string): void {
+  const ruta = resolve("/", relativa);
+  if (!existsSync(ruta) || !statSync(ruta).isFile()) {
+    res.statusCode = 404;
+    res.end("no encontrado");
+    return;
+  }
+  let real: string;
+  try {
+    real = realpathSync(ruta);
+  } catch {
+    res.statusCode = 404;
+    res.end("no encontrado");
+    return;
+  }
+  for (const raizPedida of raices) {
+    let raizReal: string;
+    try {
+      raizReal = realpathSync(raizPedida);
+    } catch {
+      continue; // la raíz (un `node_modules` que no existe en este monorepo) no cuenta.
+    }
+    const prefijoReal = raizReal === "/" ? "/" : raizReal + "/";
+    if (real === raizReal || real.startsWith(prefijoReal)) {
+      res.setHeader("Content-Type", tipoDe(real));
+      res.setHeader("Cache-Control", "no-store");
+      res.end(readFileSync(real));
+      return;
+    }
+  }
+  res.statusCode = 403; // fuera de toda raíz permitida — nunca 200 con el fichero
+  res.end("prohibido");
 }
 
 /** El estado que se enseña cuando ni siquiera se pueden leer los `.json` (editor a medio guardar). */
@@ -245,7 +319,10 @@ export async function preview(opts: OpcionesPreview): Promise<ServidorPreview> {
       return;
     }
     if (ruta.startsWith("/__preview/fs/")) {
-      servirArchivo(res, "/", decodeURIComponent(ruta.slice("/__preview/fs/".length)));
+      // Solo lo que de verdad hace falta para resolver tipografías `@fontsource` (ADR-4-1B-06): los
+      // `node_modules` desde los que `hojaDeFuentes` las busca. NUNCA la raíz del sistema de
+      // ficheros — ese era el ALTA (`preview-lectura-fuera-del-paquete.txt`).
+      servirArchivoAbsoluto(res, raicesModulos, decodeURIComponent(ruta.slice("/__preview/fs/".length)));
       return;
     }
     if (ruta.startsWith("/__preview/asset/")) {

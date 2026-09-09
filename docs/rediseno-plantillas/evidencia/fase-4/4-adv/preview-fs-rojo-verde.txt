@@ -1,0 +1,42 @@
+=== Prueba automatizada que fija el arreglo: test/preview-seguridad-fs.test.ts ===
+
+Sabotaje aplicado a mano: en frontend/packages/template-kit/src/preview.ts, la línea
+
+  servirArchivoAbsoluto(res, raicesModulos, decodeURIComponent(ruta.slice("/__preview/fs/".length)));
+
+se sustituyó por el código de ANTES del arreglo:
+
+  servirArchivo(res, "/", decodeURIComponent(ruta.slice("/__preview/fs/".length)));
+
+--- ROJO (con el sabotaje) ---
+$ pnpm --filter @invitaciones/template-kit exec vitest run test/preview-seguridad-fs.test.ts
+
+ RUN  v3.2.4 /home/user/wt/adv/frontend/packages/template-kit
+
+ ❯ test/preview-seguridad-fs.test.ts (3 tests | 2 failed) 509ms
+   × un archivo de fuera de toda raíz permitida (/etc/passwd) NUNCA se sirve 255ms
+     → esperaba 403/404 para /__preview/fs/etc/passwd, llegó 200: expected [ 403, 404 ] to include 200
+   × un enlace simbólico que apunta fuera de las raíces permitidas tampoco se sirve 63ms
+     → expected [ 403, 404 ] to include 200
+   ✓ una tipografía legítima (@fontsource, resuelta vía enlace simbólico de pnpm) SÍ se sirve 121ms
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+
+--- restaurado el arreglo (cp del fichero previo al sabotaje) ---
+
+--- VERDE ---
+$ pnpm --filter @invitaciones/template-kit exec vitest run test/preview-seguridad-fs.test.ts
+
+ RUN  v3.2.4 /home/user/wt/adv/frontend/packages/template-kit
+
+ ✓ test/preview-seguridad-fs.test.ts (3 tests) 530ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+
+--- suite completa del kit, tras restaurar (todas verdes) ---
+$ pnpm --filter @invitaciones/template-kit test
+
+ Test Files  10 passed (10)
+      Tests  176 passed (176)   (173 previas + 3 nuevas de preview-seguridad-fs.test.ts)

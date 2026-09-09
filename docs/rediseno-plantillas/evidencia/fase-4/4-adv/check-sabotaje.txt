@@ -1,0 +1,95 @@
+=============================================
+### b1-terceros-en-template
+plantilla check /tmp/adv/sab/b1-terceros-en-template
+
+package_hash = sha256:2a5fbeb134289c7a603af63015c318c82fd8bbfc5aeedbc02fa19752d8a33bb6
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+=============================================
+### b10-svg-con-script
+plantilla check /tmp/adv/sab/b10-svg-con-script
+
+CORREGIDO TPL_ASSET_DIGEST_MEDIDO  template.json#/assets/0
+  Los datos declarados de "assets/fondo.svg" no coincidían con el archivo real y se han medido de nuevo.
+  Sugerencia: Escrito sha256:a7be2bb0d9b53d20… bytes:138 contentType:image/svg+xml. Los digestos NUNCA se teclean (P5): los mide `plantilla check`.
+
+Reescrito: template.json (digestos medidos, P5).
+
+package_hash = sha256:565d71247fe9490672bb922af148d29ba51c40e4ffa1868a0ac4e925e0750a85
+
+0 error(es) · 0 aviso(s) · 1 corregido(s)
+=============================================
+### b2-url-mayusculas
+plantilla check /tmp/adv/sab/b2-url-mayusculas
+
+ERROR TPL_THIRD_PARTY_BRAND  defaults.json#/content/amenities.items/items/0/values/name/value
+  El contenido de demostración del bloque "amenities.items" menciona el nombre o usuario de una persona real ajena al producto («Marck Luga»): "Sguenos en HTTPS://www.facebook.com/marck.luga".
+  Sugerencia: Lino & Sello es la marca del producto (D-02): quita la mención al proveedor anterior o al negocio/persona real. Escribe un texto neutro y ficticio verosímil, por ejemplo "Todos los derechos reservados" en un pie, o "Hotel Los Encinos" en una recomendación.
+
+package_hash = sha256:8ce06cb1ab8c950319e92265567e98f7bca774cbae71c5d08f12c0c1c9bcc266
+
+1 error(es) · 0 aviso(s) · 0 corregido(s)
+=============================================
+### b3-url-sin-esquema
+plantilla check /tmp/adv/sab/b3-url-sin-esquema
+
+package_hash = sha256:ad9bc34861d3de3a5ce3adad09b9d675a490dc59e2a56a3d38cb6b021f28b454
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+=============================================
+### b4-clabe-con-puntos
+plantilla check /tmp/adv/sab/b4-clabe-con-puntos
+
+package_hash = sha256:f5fd7aa5aced5b84259508a19d3e2557b23e468b56891e453b16f5e5357d5c9f
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+=============================================
+### b5-clabe-con-la-palabra-ejemplo
+plantilla check /tmp/adv/sab/b5-clabe-con-la-palabra-ejemplo
+
+package_hash = sha256:08b3b7ca84b6668cfcd5f9c5ca070212acc13deb59c4736f6e0371cc9dd46d47
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+=============================================
+### b6-clabe-partida
+plantilla check /tmp/adv/sab/b6-clabe-partida
+
+ERROR TPL_THIRD_PARTY_BANK_DATA  defaults.json#/content/amenities.items/items/0/values/detail/items/1
+  El contenido de demostración del bloque "amenities.items" lleva un número largo sin marcar como ejemplo, con pinta de CLABE, cuenta o tarjeta real: "110412345678".
+  Sugerencia: Usa una cifra evidentemente ficticia (ceros o una secuencia 0123…) y dilo en el propio texto, por ejemplo "Cuenta CLABE: 000000000000000000 (ejemplo, sustitúyela por la tuya)". Nunca repitas un CLABE, cuenta o tarjeta reales, aunque vengan de la migración legada.
+
+package_hash = sha256:ae67f6ea63dd7ad098bdc9f99bcb44d03ede35aba5852652d361215a4fe91479
+
+1 error(es) · 0 aviso(s) · 0 corregido(s)
+=============================================
+### b7-peso-no-autoalojado
+plantilla check /tmp/adv/sab/b7-peso-no-autoalojado
+
+package_hash = sha256:ab2db7bb0850715a8e6b13618c61cdfa5b621079cefe2985da8db5616449a6d5
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+=============================================
+### b8-surface-igual-a-bg
+plantilla check /tmp/adv/sab/b8-surface-igual-a-bg
+
+package_hash = sha256:30628c43bbc07f9fe810796537a6af5d60b03fad6bff2236d2605c683f419783
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+=============================================
+### b9-webp-que-es-svg
+plantilla check /tmp/adv/sab/b9-webp-que-es-svg
+
+CORREGIDO TPL_ASSET_DIGEST_MEDIDO  template.json#/assets/0
+  Los datos declarados de "assets/fondo.webp" no coincidían con el archivo real y se han medido de nuevo.
+  Sugerencia: Escrito sha256:0ebfb6c974684de2… bytes:111 contentType:image/webp. Los digestos NUNCA se teclean (P5): los mide `plantilla check`.
+
+Reescrito: template.json (digestos medidos, P5).
+
+package_hash = sha256:c3d12dd70fe881a1d671abae58e6e5c71bfc14ccb019a32b642b9bc93dbda2f0
+
+0 error(es) · 0 aviso(s) · 1 corregido(s)
+plantilla check /tmp/adv/sab/b2b-url-mayusculas-neutra
+
+package_hash = sha256:3b7572b7204a7ae0ff73261c25cf67ad16e1cc8de89315d7ec61ecac88c1a5bc
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
