@@ -14,5 +14,12 @@ TOKEN="$(seed_usuario "$CORREO" "Lucía")"
 SIN_PAGAR="$(seed_invitacion "$TOKEN" false)"
 PAGADA="$(seed_invitacion "$TOKEN" true)"
 
-printf 'SEED_PLAN_EMAIL=%q\nSEED_PLAN_TOKEN=%q\nSEED_PLAN_SIN_PAGAR=%q\nSEED_PLAN_PAGADA=%q\n' \
-  "$CORREO" "$TOKEN" "$SIN_PAGAR" "$PAGADA"
+# Codigo del plan recomendado del catalogo real (`GET /public/plans`, sembrado por V42). Se consulta
+# y NO se escribe aqui: si el dueno cambia el catalogo, esta siembra le sigue sin tocar el script.
+# Si el backend aun no tiene la ruta, queda vacio y quien lo use decide que hacer.
+CODIGO="$(curl -sS --max-time 5 "$SEED_BASE/public/plans" 2>/dev/null \
+  | jq -r '[.planes[]? | select(.recomendado)][0].codigo // (.planes[0]?.codigo // "")' 2>/dev/null)"
+[ "$CODIGO" = null ] && CODIGO=""
+
+printf 'SEED_PLAN_EMAIL=%q\nSEED_PLAN_TOKEN=%q\nSEED_PLAN_SIN_PAGAR=%q\nSEED_PLAN_PAGADA=%q\nSEED_PLAN_CODIGO=%q\n' \
+  "$CORREO" "$TOKEN" "$SIN_PAGAR" "$PAGADA" "$CODIGO"

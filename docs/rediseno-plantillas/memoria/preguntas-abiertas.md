@@ -1580,3 +1580,50 @@ Están en `diseno/12-producto-completo.md §0` y en las ADR `ADR-5-E1-01` (ruta 
   `setInterval` sin límite en una pestaña que alguien deja abierta toda la tarde). Si el dueño
   prefiere que el sondeo siga (más lento, cada 10-15 s por ejemplo) en vez de detenerse, es un cambio
   pequeño en `components/pago/PantallaPago.tsx`.
+
+## Fase 5 · sesión E4 (5-4-A)
+
+- [Fase 5 · E4 · 5-4-A] **¿Cuáles son los precios reales de los tres planes?**
+  `V42` siembra `sencillo` 49900, `fiesta` 89900 (recomendado) y `grande` 149900 centavos MXN, que
+  son los del contrato de la sesión y están marcados ahí como ejemplo. También son de invención los
+  topes de invitados (60 / 150 / sin límite) y las viñetas de `incluye`. **Supuesto tomado:** los del
+  contrato, tal cual. Cambiarlos es un `UPDATE` en una migración nueva (`V4x`), no una edición de
+  `V42`, que ya estará aplicada. Mientras el dueño no los confirme, `/precios` enseña precios que no
+  son los suyos.
+
+- [Fase 5 · E4 · 5-4-A] **¿`stripe_price_id` por plan o `price_data` en cada sesión?**
+  La columna `product_plan.stripe_price_id` existe y nace `NULL`; con `NULL`, el checkout manda
+  `price_data` con el importe del servidor, y con valor manda `price`. **Supuesto tomado:** `NULL`,
+  porque no hay cuenta de Stripe configurada y no se puede inventar un `price_...`. Tener el importe
+  en dos sistemas (Postgres y Stripe) los desincroniza en cuanto alguien edite uno; si el dueño
+  quiere llevar el catálogo desde el panel de Stripe, hay que rellenar la columna y decidir cuál
+  manda. Hoy manda Postgres.
+
+- [Fase 5 · E4 · 5-4-A] **Política de reembolso: ¿quién puede pedirlo, hasta cuándo, y qué se avisa?**
+  Está implementado el **efecto** que fija `ADR-5-0B-01`: `charge.refunded` y `charge.dispute.created`
+  ponen el cobro en `REEMBOLSADO`, `is_paid = false` y retiran el release activo (el enlace deja de
+  servir en origen). No está la **política**: si hay ventana de devolución, si la clienta puede
+  pedirlo desde el producto o solo escribiendo, y si se le avisa por correo. El aviso por correo que
+  menciona el ADR **no** lo escribe esta sesión (el transporte de marca es de E3). **Supuesto
+  tomado:** ningún reembolso se origina en el producto; solo se reacciona al que llegue desde Stripe.
+
+- [Fase 5 · E4 · 5-4-A] **Un cobro con `amount_total` distinto del guardado queda anotado, ¿y luego?**
+  El webhook registra `resultado = 'IMPORTE_DISTINTO'` en `product_stripe_event`, no marca pagada y
+  responde `200`. Nadie lo ve: no hay pantalla ni aviso. Hace falta decidir si `/admin` (sesión E5)
+  lista esos eventos o si basta con revisar la tabla a mano. **Supuesto tomado:** queda registrado y
+  se revisa a mano, que es lo conservador; lo contrario sería marcar pagada una invitación por la que
+  se cobró otra cosa.
+
+## Fase 5 · sesión E4 (5-4-B2)
+
+- [Fase 5 · E4 · 5-4-B2] **`AsistenteAcceso.tsx` solo lee `?volver=`, pero `TarjetaPlan.tsx` (5-4-B1,
+  fuera de mi territorio) construye `/acceso?siguiente=…`.** Comprobado en el código: `/acceso/page.tsx`
+  monta `AsistenteAcceso`, que hace `parametros.get("volver")` (`destinoSeguro`); no lee `siguiente`
+  en ningún sitio. El botón «Empieza gratis» de `/precios` (sin `?inv`) y el flujo de
+  `notaEmpezarGratis` navegan con `?siguiente=%2Feditor`, que `/acceso` ignora, así que tras entrar
+  la clienta vuelve siempre a `/editor` (el valor por defecto de `destinoSeguro`) y no al plan del
+  que salió. **Supuesto tomado en mi pantalla** (`/editor/[invitationId]/plan`, estado sin sesión):
+  uso `?volver=/editor/<id>/plan`, que sí funciona (mismo patrón que
+  `app/(chrome)/editor/[invitationId]/page.tsx`), en vez del `?siguiente=` que traía mi propio
+  encargo. No toqué `TarjetaPlan.tsx` (fuera de mi territorio); si nadie lo corrige, «Empieza gratis»
+  sigue sin devolver a la clienta a donde estaba.

@@ -49,14 +49,24 @@ abstract class IntegrationTestBase {
         }
     }
 
-    protected fun insertInvitation(customerId: Long, usesTemplates2: Boolean = false): Long = conn().use { c ->
+    /**
+     * `pagada = true` por defecto (ADR-5-4-02): la puerta de publicación de la fase 5 exige
+     * `invitation.is_paid = true`, y la columna es NULLABLE (un `NULL` cuenta como **no pagada**).
+     * Se escribe explícitamente para que ninguna prueba de persistencia dependa del defecto.
+     */
+    protected fun insertInvitation(
+        customerId: Long,
+        usesTemplates2: Boolean = false,
+        pagada: Boolean = true,
+    ): Long = conn().use { c ->
         c.prepareStatement(
-            "INSERT INTO invitation (customer_id, template_id, is_enabled, is_finished, all_events_same_location, uses_templates2) " +
-                "VALUES (?, ?, true, false, false, ?) RETURNING id",
+            "INSERT INTO invitation (customer_id, template_id, is_enabled, is_finished, all_events_same_location, uses_templates2, is_paid) " +
+                "VALUES (?, ?, true, false, false, ?, ?) RETURNING id",
         ).use { ps ->
             ps.setLong(1, customerId)
             ps.setLong(2, legacyTemplateId())
             ps.setBoolean(3, usesTemplates2)
+            ps.setBoolean(4, pagada)
             ps.executeQuery().use { rs -> rs.next(); rs.getLong(1) }
         }
     }

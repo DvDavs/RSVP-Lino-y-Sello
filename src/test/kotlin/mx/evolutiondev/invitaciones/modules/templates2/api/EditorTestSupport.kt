@@ -302,10 +302,23 @@ abstract class EditorTestSupport : SpringPersistenceTestSupport() {
         "t2-4-${UUID.randomUUID()}@example.test",
     )
 
-    protected fun nuevaInvitacion(customerId: Long, usaTemplates2: Boolean = true): Long = ejecutar(
-        "INSERT INTO invitation (customer_id, template_id, is_enabled, is_finished, all_events_same_location, uses_templates2) " +
-            "VALUES (?, ?, true, false, false, ?) RETURNING id",
-        customerId, plantillaLegacy(), usaTemplates2,
+    /**
+     * `pagada = true` por defecto (ADR-5-4-02): desde la fase 5 la publicación exige plan pagado
+     * (`TPL_PLAN_UNPAID`, `ReleaseService.bloqueos`). Sin este parámetro, cada prueba que publica
+     * estaría midiendo la puerta de pago en vez de lo que quiere medir. La prueba que sí quiere
+     * medir la puerta pasa `pagada = false` — es lo que hace `PuertaDePagoIntegrationTest`.
+     *
+     * La columna es NULLABLE en el esquema del módulo antiguo y un `NULL` cuenta como **no pagada**,
+     * así que se escribe explícitamente en vez de dejarla al valor por defecto.
+     */
+    protected fun nuevaInvitacion(
+        customerId: Long,
+        usaTemplates2: Boolean = true,
+        pagada: Boolean = true,
+    ): Long = ejecutar(
+        "INSERT INTO invitation (customer_id, template_id, is_enabled, is_finished, all_events_same_location, uses_templates2, is_paid) " +
+            "VALUES (?, ?, true, false, false, ?, ?) RETURNING id",
+        customerId, plantillaLegacy(), usaTemplates2, pagada,
     )
 
     protected fun registrarVersion(

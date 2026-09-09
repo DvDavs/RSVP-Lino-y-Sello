@@ -82,6 +82,10 @@ dependencies {
     // Excel Generation
     implementation("org.apache.poi:poi-ooxml:5.2.3")
 
+    // Pagos (fase 5, sesion E4): SDK oficial de Stripe. Version FIJADA: el checkout y la
+    // verificacion de firma del webhook dependen de la API de esta version exacta.
+    implementation("com.stripe:stripe-java:29.5.0")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.security:spring-security-test")

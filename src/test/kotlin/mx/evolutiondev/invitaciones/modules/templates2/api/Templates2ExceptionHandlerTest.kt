@@ -124,6 +124,11 @@ class Templates2ExceptionHandlerTest {
         },
         TplErrorCode.TPL_RELEASE_NOT_FOUND to { throw ReleaseNotFoundException("no") },
         TplErrorCode.TPL_INVITATION_UNAVAILABLE to { throw InvitationUnavailableException("no") },
+        // Puerta de publicación de la fase 5 (ADR-5-0B-01, ADR-5-4-02): la lanza `ReleaseService`
+        // cuando `invitation.is_paid` no es `true`, con el mismo tipo que el resto de bloqueos.
+        TplErrorCode.TPL_PLAN_UNPAID to {
+            throw PublishBlockedException(TplErrorCode.TPL_PLAN_UNPAID, "no")
+        },
         TplErrorCode.TPL_MANIFEST_INVALID to { throw Templates2Exception.ManifestInvalid("no") },
         TplErrorCode.TPL_PACKAGE_ASSET_MISMATCH to { throw PackageAssetMismatchException("no") },
         TplErrorCode.TPL_MANIFEST_BREAKING_CHANGE_NOT_MAJOR to { throw BreakingChangeNotMajorException("no") },

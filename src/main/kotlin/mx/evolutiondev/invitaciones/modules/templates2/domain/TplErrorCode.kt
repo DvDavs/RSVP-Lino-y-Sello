@@ -40,6 +40,12 @@ enum class TplErrorCode(val httpStatus: Int) {
     TPL_PUBLISH_BLOCKED_INVALID_VALUES(422),
     TPL_RELEASE_NOT_FOUND(404),
     TPL_INVITATION_UNAVAILABLE(403),
+    /**
+     * `402` — la invitacion no tiene plan pagado (ADR-5-0B-01, ADR-5-4-02). Es la puerta de
+     * publicacion de la fase 5: editar y previsualizar son gratis; publicar y compartir, no.
+     * Lo emite `ReleaseService` como bloqueo del preflight y como excepcion en `POST …/release`.
+     */
+    TPL_PLAN_UNPAID(402),
     TPL_MANIFEST_INVALID(422),
     TPL_PACKAGE_ASSET_MISMATCH(422),
     TPL_MANIFEST_BREAKING_CHANGE_NOT_MAJOR(422),

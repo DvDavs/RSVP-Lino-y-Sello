@@ -442,6 +442,7 @@ Todos los códigos del módulo, su HTTP y su origen. La fuente única en código
 | `TPL_PUBLISH_BLOCKED_INVALID_VALUES` | 422 | `report.invalidValues` no vacío al publicar |
 | `TPL_RELEASE_NOT_FOUND` | 404 | Render público sin release activo, o `publicToken` inexistente/rotado (misma respuesta para todos) |
 | `TPL_INVITATION_UNAVAILABLE` | 403 | Invitación deshabilitada, o su dueño deshabilitado o baneado (render público y publicación) |
+| `TPL_PLAN_UNPAID` | 402 | Publicar (o su preflight) una invitación sin plan pagado: `invitation.is_paid` no es `true` (ADR-5-0B-01, ADR-5-4-02). Editar y previsualizar siguen siendo gratis; lo resuelve `/editor/[invitationId]/plan` |
 | `TPL_MANIFEST_INVALID` | 422 | Registro: violaciones de `validateManifest` o del JSON Schema (lista completa en `details`) |
 | `TPL_PACKAGE_ASSET_MISMATCH` | 422 | Registro: `sha256`/`bytes`/`contentType` de un asset no coincide con lo declarado en el manifiesto |
 | `TPL_MANIFEST_BREAKING_CHANGE_NOT_MAJOR` | 422 | Registro: diff estructural no vacío sin bump mayor, o mayor sin plan que lo cubra (ADR-028) |

@@ -129,6 +129,13 @@ data class InvitationAvailability(
     val invitationEnabled: Boolean,
     val customerEnabled: Boolean,
     val customerBanned: Boolean,
+    /**
+     * `invitation.is_paid` (ADR-5-4-02). La columna es NULLABLE en el esquema del modulo antiguo y
+     * un `NULL` significa **no pagada**: la puerta de publicacion se cierra ante la duda, nunca se
+     * abre. Quien la escribe es el webhook de pagos con firma verificada
+     * (`modules/product/payments/InvitationPaymentFlagRepository`), o un ADMIN por la ruta heredada.
+     */
+    val isPaid: Boolean = false,
 ) {
     /** Las mismas tres comprobaciones que `PublicGuestInfoController.kt:65-75`, en un solo predicado. */
     val disponible: Boolean get() = invitationEnabled && customerEnabled && !customerBanned
@@ -151,7 +158,7 @@ class InvitationAvailabilityReader(
 ) {
 
     private val sql = """
-        SELECT i.is_enabled, c.is_enabled, c.is_banned
+        SELECT i.is_enabled, c.is_enabled, c.is_banned, i.is_paid
         FROM invitation i JOIN customer c ON c.id = i.customer_id
         WHERE i.id = :invitationId
     """.trimIndent()
@@ -167,6 +174,8 @@ class InvitationAvailabilityReader(
             invitationEnabled = fila[0] as? Boolean ?: false,
             customerEnabled = fila[1] as? Boolean ?: false,
             customerBanned = fila[2] as? Boolean ?: false,
+            // `NULL` -> `false`: sin dato, no esta pagada.
+            isPaid = fila[3] as? Boolean ?: false,
         )
     }
 }

@@ -71,7 +71,11 @@ class ReleaseService(
         )
         val hash = ContentHasher.contentHash(resultado)
         val activo = releases.active(invitationId)
-        val bloqueos = bloqueos(resultado, version.pkg)
+        // ADR-5-4-02: el preflight es el espejo de la puerta, asi que tiene que leer lo mismo que
+        // `publish`. Sin plan pagado, `canPublish` es `false` y el editor ensena el bloqueo con el
+        // camino que lo resuelve (`/editor/[invitationId]/plan`), nunca un boton muerto.
+        val pagada = availability.read(invitationId)?.isPaid ?: false
+        val bloqueos = bloqueos(resultado, version.pkg, pagada)
         return PreflightResponse(
             canPublish = bloqueos.isEmpty(),
             blockers = bloqueos,
@@ -90,9 +94,19 @@ class ReleaseService(
      * publicar contenido de demostración como real y no puede depender de que otra clase mantenga esa
      * garantía.
      */
-    private fun bloqueos(resultado: CompositionResult, pkg: TemplatePackage): List<PreflightFinding> {
+    private fun bloqueos(
+        resultado: CompositionResult,
+        pkg: TemplatePackage,
+        pagada: Boolean,
+    ): List<PreflightFinding> {
         val specs: Map<String, BlockSpec> = pkg.manifest.topLevelBlocks().mapKeys { it.key.value }
         val salida = mutableListOf<PreflightFinding>()
+        // PRIMER bloqueo (ADR-5-0B-01 / ADR-5-4-02): sin plan pagado da igual como este el
+        // contenido. Va delante para que el editor ensene la razon que la clienta puede resolver,
+        // en vez de mandarla a rellenar campos de una invitacion que aun no podria publicar.
+        if (!pagada) {
+            salida.add(PreflightFinding(code = TplErrorCode.TPL_PLAN_UNPAID.name))
+        }
         if (resultado.report.missingRequired.isNotEmpty()) {
             salida.add(
                 PreflightFinding(
@@ -172,7 +186,9 @@ class ReleaseService(
         val version = editor.versionDe(fila)
         val documento = editor.decodificar(fila)
         val resultado = editor.componer(documento, version, negocio, invitationId)
-        val bloqueos = bloqueos(resultado, version.pkg)
+        // La puerta se comprueba en el BACKEND (ADR-5-0B-01 decision 2): la interfaz es su reflejo,
+        // no la puerta. `disponibilidad` ya se leyo en el paso 3 y trae `isPaid` de la misma fila.
+        val bloqueos = bloqueos(resultado, version.pkg, disponibilidad.isPaid)
         bloqueos.firstOrNull()?.let { bloqueo ->
             throw PublishBlockedException(
                 TplErrorCode.valueOf(bloqueo.code),

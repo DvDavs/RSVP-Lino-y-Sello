@@ -150,3 +150,34 @@ Cuerpo **crudo** (no `@RequestBody` parseado: la firma se calcula sobre los byte
   `401/403` sin código como sesión caducada (mismo criterio que `api-client.ts`).
 - `lib/pagos/dinero.ts`: `formatearImporte(centavos, moneda)` → `$899.00 MXN` con `Intl.NumberFormat("es-MX")`.
 - Nada calcula ni muestra un precio que no venga del backend.
+
+---
+
+## Nota del backend (5-4-A, 2026-09-09) — cinco apartamientos, todos menores
+
+Implementado el §1–§4 completo. Lo que **no** salió exactamente como estaba escrito:
+
+1. **`moneda` es `varchar(3)`, no `char(3)`** (V42 y V43). Postgres implementa `char(n)` como
+   `bpchar` y `ddl-auto: validate` se niega a arrancar contra un campo `String`: «wrong column type
+   encountered in column [moneda] in table [product_payment]; found [bpchar (Types#CHAR)], but
+   expecting [varchar(3) (Types#VARCHAR)]». Comprobado. Sin efecto en el JSON.
+2. **`product_payment` gana `comprobante_url varchar(500)`.** El §2.2 pide `comprobanteUrl` en la
+   respuesta pero la tabla del §1 no tenía columna donde guardarla. Se rellena con la `receipt_url`
+   del cargo cuando llega en `charge.refunded`; en `checkout.session.completed` la sesión no la trae.
+3. **Dos códigos más de los siete del §3**: `PAY_INTERNAL(500)` —el advice declara un handler de
+   `Exception` y ninguna respuesta puede salir sin `code`— y `PAY_MALFORMED_JSON` cubriendo además un
+   caso nuevo: un cuerpo **firmado correctamente** pero que no es un evento de Stripe (cuerpo vacío o
+   que no es un objeto JSON) revienta dentro de `Webhook.constructEvent` tras verificar la firma.
+   Eso no es firma inválida y no debe salir como `500`.
+4. **`POST …/checkout` no es transaccional**, y las escrituras de `product_payment` viven en un bean
+   aparte (`PaymentWriteService`). Dos motivos: mantener abierta una transacción de Postgres mientras
+   se espera a Stripe agota el pool, y `@Transactional(REQUIRES_NEW)` llamado desde la misma clase no
+   pasa por el proxy — el `FALLIDO` se habría escrito dentro de la transacción que la excepción
+   revierte, es decir, nunca.
+5. **Todos los DTO de lectura llevan `@JsonInclude(ALWAYS)`.** El `ObjectMapper` de la aplicación es
+   el de `templates2` (`Templates2JsonConfig.kt:35`; un bean de tipo `ObjectMapper` desactiva el de
+   Spring Boot por `@ConditionalOnMissingBean`) y trae `serializationInclusion(NON_NULL)`. Sin la
+   anotación, `invitadosMax`, `plan` y `pagadoEn` **desaparecían** del JSON en vez de viajar como
+   `null`, y el §2.1/§2.2 se apoya en que `null` significa algo. Verificado contra el backend vivo.
+   **Es información que el frontend debe conocer**: cualquier campo nullable nuevo de cualquier
+   sesión necesita la anotación o se cae de la respuesta.
