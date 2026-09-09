@@ -44,3 +44,17 @@ worker por reloj» y una I-CI-03 nueva (flake de axe en la galería). Se evaluar
 
 ## Adenda común a E2–E5 (se pega debajo del prompt del repositorio)
 Ver `2026-09-09-b-adendas.md`.
+
+## Evaluación B — I-CI-01 (reporte recibido después)
+**ACEPTADO con el paralelismo NO conseguido y documentado.** Head `acc83fa`. Aislamiento cerrado
+(axe con cuenta e invitación propias; capturas con la sembrada bajo mutex por razones medidas;
+`a11y-publico` ya no purga la caché ISR compartida). Dos corridas verdes consecutivas (34306781190,
+34308150542) con `--fail-on-flaky-tests`, 79 pruebas, pero con **1 worker**: el criterio de ≥ 2
+workers no se cumplió por una causa distinta y medida tres veces (el lienzo no pinta bajo
+contención de CPU en el runner dentro de los presupuestos de la config y de otros ficheros), fuera
+del territorio del encargo → **I-CI-03** con tres salidas propuestas. Disparadores ampliados a
+`claude/fase-4-kit-de-autor` y `claude/fase-5-producto`. Se acepta la retirada porque es honesta,
+con evidencia y sin cuarentena. I-CI-03 pasa a la fase 7 (o a E6 si le sobra presupuesto).
+**No cambia los prompts E2–E5**: la regla 8 (4 workers) se verifica en local, donde la suite pasa
+en 1,3 min; el CI sigue en 1 worker hasta cerrar I-CI-03. Para E6: mergear `acc83fa` o posterior,
+no subir `workers` en `playwright.config.ts`.
