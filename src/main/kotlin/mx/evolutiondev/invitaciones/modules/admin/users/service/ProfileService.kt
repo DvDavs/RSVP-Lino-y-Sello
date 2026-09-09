@@ -25,25 +25,18 @@ class ProfileService(
             throw IllegalArgumentException("No se encontro un usuario asociado al id: $userId")
         }
 
-        request.phone?.let {
-            val existingPhone = customerRepository.findByPhone(it)
-            if (existingPhone != null && existingPhone.id != userId) {
-                throw IllegalArgumentException(
-                        "Actualmente este número telefónico no se encuentra disponible intenta con uno diferente"
-                )
-            }
-        }
-
-        val existingMail = customerRepository.findByEmail(request.email)
-        if (existingMail != null && existingMail.isEnabled && existingMail.id != userId) {
-            throw IllegalArgumentException(
-                    "Actualmente este correo electrónico no se encuentra disponible intenta con uno diferente"
-            )
-        }
+        // Fase 5, E3 (`ADR-5-E3-05` y `ADR-5-E3-06`). Aquí se quitaron dos comprobaciones:
+        //
+        // 1. La de unicidad del **teléfono**: decía «este número no está disponible», que es el mismo
+        //    oráculo de enumeración del alta, y defendía una unicidad que la base nunca tuvo
+        //    (`customer.phone` solo tiene un índice normal, `V1__initial_schema.sql:1868-1869`).
+        // 2. La del **correo**, porque el correo ya no se cambia desde aquí: `request` no lo trae.
+        //    Solo miraba las cuentas habilitadas (`existingMail.isEnabled`), así que el correo de una
+        //    cuenta deshabilitada llegaba al índice único y salía como `500`. El flujo nuevo
+        //    (`AccountService.pedirCambioDeCorreo`) compara contra `findByEmailEvenIfDisabled`.
 
         customer.name = request.name
         customer.lastName = request.lastName
-        customer.email = request.email
         customer.phone = request.phone
         customer.birthdate = request.birthdate
         customer.address = request.address

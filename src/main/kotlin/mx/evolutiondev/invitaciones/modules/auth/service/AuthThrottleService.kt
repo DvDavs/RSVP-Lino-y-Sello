@@ -59,6 +59,23 @@ enum class AmbitoIntentos(val prefijo: String) {
 
     /** `POST /auth/signup` — cuenta el intento rechazado; un alta correcta limpia el contador. */
     REGISTRO("registro"),
+
+    /**
+     * `POST /auth/verify-email:resend` (fase 5, E3; `12-producto-completo.md §A6.4` punto 5).
+     * **Cada** petición cuenta, como en [RECUPERACION]: la respuesta es genérica siempre, así que no
+     * hay «éxito» observable que pueda limpiar el contador. Sin este ámbito el reenvío sería un
+     * amplificador de correo —una petición sin autenticar, un correo enviado— sobre un canal SMTP de
+     * cuenta gratuita.
+     */
+    VERIFICACION("verificacion"),
+
+    /**
+     * `PUT /user/account/password` y `POST /user/account/email` (fase 5, E3). Ámbito **propio** y no
+     * [ACCESO] a propósito: si compartieran contador, quien robase una sesión podría dejar a la
+     * persona legítima sin poder **entrar** fallando adrede el cambio de contraseña. Con ámbito
+     * propio, agotar el cambio de contraseña agota exactamente el cambio de contraseña.
+     */
+    CAMBIO_CUENTA("cambio-cuenta"),
 }
 
 /**

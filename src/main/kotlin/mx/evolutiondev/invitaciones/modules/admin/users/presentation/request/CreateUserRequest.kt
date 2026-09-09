@@ -23,7 +23,7 @@ data class CreateUserRequest(
         val password: String,
         @field:ValueOfEnum(enumClass = Role::class, acceptedValues = ["USER"], message = "Solo puedes crear usuarios con rol USER")
         val role: String = "USER",
-        @field:Pattern(regexp = Patterns.PHONE_NUMBER_PATTERN, message = "Debes proporcinar un número telefónico válido de 10 digitos numéricos")
+        @field:Pattern(regexp = Patterns.PHONE_NUMBER_PATTERN, message = Patterns.PHONE_NUMBER_MESSAGE)
         val phone: String?,
         // @field:OptionalValidDateFormat(
         //         format = "yyyy-MM-dd",

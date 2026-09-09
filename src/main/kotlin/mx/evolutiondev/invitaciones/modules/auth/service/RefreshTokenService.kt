@@ -35,6 +35,36 @@ class RefreshTokenService(
         return refreshTokenRepository.save(refreshToken)
     }
 
+    /**
+     * Canje del token de refresco **con rotación** (`12-producto-completo.md §A2.1`, `ADR-5-E3-01`).
+     *
+     * Antes, `POST /auth/token/refresh` validaba el token y devolvía **el mismo**
+     * (`AuthController.kt:44-49`): un token robado servía los siete días completos
+     * ([refreshTokenValidityMillis]) y el uso legítimo no lo delataba en ningún momento. Ahora cada
+     * canje quema el token usado y emite uno nuevo, así que:
+     *
+     * - el token robado deja de valer en cuanto la persona legítima refresca, y
+     * - el segundo canje del mismo token falla, que es la señal de que hubo copia.
+     *
+     * El contrato de la respuesta **no cambia**: mismos campos, con un `refreshToken` distinto.
+     * El borrado y el alta van en dos transacciones distintas (cada método del repositorio abre la
+     * suya), así que no hay riesgo de que Hibernate ordene el `insert` antes del `delete`; aun así
+     * `refresh_tokens` solo tiene índice único por `token` (`V1__initial_schema.sql:1611`), nunca por
+     * cuenta, de modo que un solapamiento tampoco chocaría.
+     */
+    fun rotateRefreshToken(token: String): RefreshTokenEntity {
+        val actual = validateRefreshToken(token)
+        val customer = actual.customer
+        refreshTokenRepository.delete(actual)
+
+        val nuevo = RefreshTokenEntity(
+                token = jwtUtil.generateSecureToken(),
+                expiryDate = Instant.now().plusMillis(refreshTokenValidityMillis),
+                customer = customer
+        )
+        return refreshTokenRepository.save(nuevo)
+    }
+
     fun validateRefreshToken(token: String): RefreshTokenEntity {
         val refreshToken = refreshTokenRepository.findByToken(token)
                 ?: throw IllegalArgumentException("El token de refresco no es válido")

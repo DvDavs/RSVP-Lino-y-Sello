@@ -15,6 +15,9 @@ import org.springframework.stereotype.Repository
 interface CustomerRepository : JpaRepository<CustomerEntity, Long>, JpaSpecificationExecutor<CustomerEntity> {
     fun findByEmail(email: String): CustomerEntity?
     fun findByResetToken(resetToken: String): CustomerEntity?
+
+    /** Verificación de correo (fase 5, E3). Mismo patrón que [findByResetToken]. */
+    fun findByEmailVerificationToken(emailVerificationToken: String): CustomerEntity?
     fun findByRoleIn(roles: List<Role>): List<CustomerEntity>
     fun findByPhone(phone: String): CustomerEntity?
     fun existsByPhone(phone: String): Boolean

@@ -55,6 +55,17 @@ object Patterns {
      */
     const val PHONE_NUMBER_PATTERN = "^\\+52\\d{10}$"
 
+    /**
+     * Mensaje de [PHONE_NUMBER_PATTERN], en un solo sitio (fase 5, E3; `ADR-5-E3-05`).
+     *
+     * El texto anterior —«un número telefónico válido de 10 digitos numéricos»— **omitía el prefijo**
+     * que el patrón exige desde que se le añadió `+52`, así que el intento evidente («5512345678»)
+     * fallaba sin decir por qué. Ahora dice el formato completo y trae un ejemplo. Es `const` para que
+     * pueda usarse dentro de `@Pattern`, que solo admite constantes de compilación.
+     */
+    const val PHONE_NUMBER_MESSAGE =
+            "El teléfono debe llevar la lada de México: +52 y 10 dígitos, sin espacios ni guiones. Por ejemplo: +525512345678"
+
     const val TAX_PAYER_ID_PATTERN = "^[a-zA-Z0-9]{12,13}$"
 
     const val USER_ID_PATTERN = "^[a-zA-Z0-9]{18}$"

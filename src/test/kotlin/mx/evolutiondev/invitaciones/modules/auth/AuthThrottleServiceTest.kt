@@ -72,7 +72,9 @@ class AuthThrottleServiceTest {
             passwordEncoder = encoder,
             hierarchyValidationService = mock<HierarchyValidationService>(),
             emailService = mock<EmailService>(),
-            authThrottleService = limitador
+            authThrottleService = limitador,
+            emailVerificationService = mock<mx.evolutiondev.invitaciones.modules.product.account.EmailVerificationService>(),
+            mailProperties = mx.evolutiondev.invitaciones.modules.product.account.ProductMailProperties()
     )
 
     // =============================================================================================

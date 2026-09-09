@@ -11,6 +11,7 @@ import mx.evolutiondev.invitaciones.core.auth.model.CustomerEntity
 import mx.evolutiondev.invitaciones.core.auth.model.Role
 import mx.evolutiondev.invitaciones.core.auth.repository.CustomerRepository
 import mx.evolutiondev.invitaciones.core.auth.service.HierarchyValidationService
+import mx.evolutiondev.invitaciones.core.auth.repository.RefreshTokenRepository
 import mx.evolutiondev.invitaciones.core.email.EmailService
 import mx.evolutiondev.invitaciones.core.error.GeneralExceptionHandler
 import mx.evolutiondev.invitaciones.core.util.formatter.DateFormatterImpl
@@ -66,6 +67,8 @@ class RequestPasswordResetContractTest {
     private val jwtUtil: JwtUtil = mock()
     private val repositorio: CustomerRepository = mock()
     private val emailService: EmailService = mock()
+    private val refreshTokenRepository: RefreshTokenRepository = mock()
+    private val verificacion: mx.evolutiondev.invitaciones.modules.product.account.EmailVerificationService = mock()
     private val limitador = AuthThrottleService(
             passwordEncoder = encoder,
             maxFallosPorCuenta = 5,
@@ -80,6 +83,7 @@ class RequestPasswordResetContractTest {
             jwtUtil = jwtUtil,
             emailService = emailService,
             authThrottleService = limitador,
+            refreshTokenRepository = refreshTokenRepository,
             frontendUrl = "https://invitaciones.mx"
     )
 
@@ -88,7 +92,9 @@ class RequestPasswordResetContractTest {
             passwordEncoder = encoder,
             hierarchyValidationService = mock<HierarchyValidationService>(),
             emailService = emailService,
-            authThrottleService = limitador
+            authThrottleService = limitador,
+            emailVerificationService = verificacion,
+            mailProperties = mx.evolutiondev.invitaciones.modules.product.account.ProductMailProperties()
     )
 
     private val mvc: MockMvc = MockMvcBuilders

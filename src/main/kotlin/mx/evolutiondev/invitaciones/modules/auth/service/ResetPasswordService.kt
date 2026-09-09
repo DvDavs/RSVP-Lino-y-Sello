@@ -6,6 +6,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import mx.evolutiondev.invitaciones.core.auth.jwt.JwtUtil
 import mx.evolutiondev.invitaciones.core.auth.repository.CustomerRepository
+import mx.evolutiondev.invitaciones.core.auth.repository.RefreshTokenRepository
 import mx.evolutiondev.invitaciones.core.email.EmailService
 import mx.evolutiondev.invitaciones.core.model.GeneralMessageResponse
 import mx.evolutiondev.invitaciones.modules.auth.presentation.model.request.UpdatePasswordResetRequest
@@ -37,6 +38,7 @@ class ResetPasswordService(
         private val jwtUtil: JwtUtil,
         private val emailService: EmailService,
         private val authThrottleService: AuthThrottleService,
+        private val refreshTokenRepository: RefreshTokenRepository,
         @Value("\${app.frontend.url}") private val frontendUrl: String
 ) {
     private val resetTokenValidityMillis: Long = 15 * 60 * 1000 // 15 minutes validity
@@ -93,13 +95,38 @@ class ResetPasswordService(
         return RecoveryPasswordSentResponse(message = MENSAJE_RECUPERACION)
     }
 
+    /**
+     * Endurecido en la fase 5 (`12-producto-completo.md §A2.1`, `ADR-5-E3-01`). Tenía dos huecos que
+     * sus dos hermanos de `/auth/` + `**` no tienen:
+     *
+     * 1. **Ningún límite de intentos.** Ahora entra por [AmbitoIntentos.RECUPERACION], igual que
+     *    `request-password-reset`. La clave de cuenta es el **token**, no el correo, porque al entrar
+     *    todavía no se sabe de quién es el token —y averiguarlo antes de comprobar el límite sería
+     *    justo la consulta que el límite quiere ahorrar—. Consecuencia honesta: el cubo por cuenta
+     *    solo frena la repetición del **mismo** token; quien pruebe tokens al azar lo frena el cubo
+     *    por IP (20 en 15 min), que es el que aplica aquí. Contra un token de 128 bytes de
+     *    `SecureRandom` (`JwtUtil.kt:59-64`) eso es de sobra.
+     * 2. **No invalidaba las sesiones vivas.** Quien tuviera un token de refresco robado seguía
+     *    dentro después de que la víctima «recuperase» su cuenta: el gesto que se hace precisamente
+     *    para echar al intruso no lo echaba. Ahora se borran **antes** de guardar la contraseña
+     *    nueva, así que si el borrado falla la contraseña no llega a cambiar.
+     */
     fun resetPassword(withRequest: UpdatePasswordResetRequest) : GeneralMessageResponse {
+        authThrottleService.comprobar(AmbitoIntentos.RECUPERACION, withRequest.resetToken)
+
         val customer = customerRepository.findByResetToken(withRequest.resetToken)
-                ?: throw IllegalArgumentException("El token proporcionado es inválido o ha expirado")
+        if (customer == null) {
+            authThrottleService.registrarIntento(AmbitoIntentos.RECUPERACION, withRequest.resetToken)
+            throw IllegalArgumentException("El token proporcionado es inválido o ha expirado")
+        }
 
         if (customer.resetTokenExpiry?.isBefore(Instant.now()) == true) {
+            authThrottleService.registrarIntento(AmbitoIntentos.RECUPERACION, withRequest.resetToken)
             throw IllegalArgumentException("El token proporcionado ha expirado")
         }
+
+        // Fuera todas las sesiones de refresco ANTES de escribir la contraseña nueva.
+        refreshTokenRepository.deleteAllByCustomerId(customer.id)
 
         customer.password = passwordEncoder.encode(withRequest.newPassword)
         customer.resetToken = null

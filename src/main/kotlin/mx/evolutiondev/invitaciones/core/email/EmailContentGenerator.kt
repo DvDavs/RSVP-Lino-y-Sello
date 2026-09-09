@@ -1,5 +1,7 @@
 package mx.evolutiondev.invitaciones.core.email
 
+import mx.evolutiondev.invitaciones.modules.product.account.ProductContactProperties
+import mx.evolutiondev.invitaciones.modules.product.account.ProductMailProperties
 import org.springframework.stereotype.Service
 
 data class EmailContent(
@@ -8,8 +10,25 @@ data class EmailContent(
     val textBody: String
 )
 
+/**
+ * Marca de los correos (fase 5, E3; D-02 y `ADR-5-E3-07`).
+ *
+ * Los datos de marca —nombre, correo de soporte— entran **por configuración**
+ * ([ProductMailProperties], [ProductContactProperties]), no escritos en el código: es lo que pedía
+ * ADR-5-0C-01 al dejar esas dos clases creadas y sin consumidor. Los valores por defecto de los
+ * parámetros permiten construir el generador sin contexto de Spring en las pruebas.
+ *
+ * **El arte de las plantillas no se rehace aquí**: solo cambian el nombre de la marca y las
+ * direcciones. Rehacerlo con la identidad de Lino & Sello es otro encargo.
+ */
 @Service
-class EmailContentGenerator {
+class EmailContentGenerator(
+    private val mailProperties: ProductMailProperties = ProductMailProperties(),
+    private val contactProperties: ProductContactProperties = ProductContactProperties(),
+) {
+
+    /** «Lino & Sello» salvo que `producto.correo.remitente-nombre` diga otra cosa. */
+    private val marca: String get() = mailProperties.remitenteNombre
 
     fun generate(emailType: String, variables: Map<String, Any>): EmailContent {
         return when (emailType) {
@@ -22,13 +41,15 @@ class EmailContentGenerator {
             "guest-decline-confirmation" -> generateGuestDeclineConfirmationContent(variables)
             "host-guest-confirmed-notification" -> generateHostGuestConfirmedNotificationContent(variables)
             "host-guest-declined-notification" -> generateHostGuestDeclinedNotificationContent(variables)
+            "email-verification" -> generateEmailVerificationContent(variables)
+            "email-change-notice" -> generateEmailChangeNoticeContent(variables)
             else -> throw IllegalArgumentException("Unknown email type: $emailType")
         }
     }
 
     private fun generateWelcomeContent(variables: Map<String, Any>): EmailContent {
         val customerName = variables["customerName"] as? String ?: "Usuario"
-        val companyName = variables["companyName"] as? String ?: "Invitaciones"
+        val companyName = variables["companyName"] as? String ?: marca
         val isAdminCreated = variables["isAdminCreated"] as? Boolean ?: false
         val temporaryPassword = variables["temporaryPassword"] as? String
         val userEmail = variables["userEmail"] as? String
@@ -258,7 +279,7 @@ class EmailContentGenerator {
             ¡Gracias por elegirnos para tu evento especial!
             
             Saludos,
-            El equipo de Invitaciones
+            El equipo de $marca
         """.trimIndent()
         
         return EmailContent(subject, buildHtmlTemplate(subject, htmlBody), textBody)
@@ -387,7 +408,7 @@ class EmailContentGenerator {
             Si no solicitaste este restablecimiento, puedes ignorar este correo de forma segura.
             
             Saludos,
-            El equipo de Invitaciones
+            El equipo de $marca
         """.trimIndent()
 
         return EmailContent(subject, buildHtmlTemplate(subject, htmlBody), textBody)
@@ -632,7 +653,7 @@ class EmailContentGenerator {
             
             <p style="font-size: 16px;">Puedes revisar el estado de todos tus invitados en tu panel de control.</p>
             
-            <p style="font-size: 14px; color: #999; margin-top: 20px;">Saludos,<br>El equipo de Invitaciones</p>
+            <p style="font-size: 14px; color: #999; margin-top: 20px;">Saludos,<br>El equipo de $marca</p>
         """.trimIndent()
         
         val textBody = """
@@ -647,7 +668,7 @@ class EmailContentGenerator {
             Puedes revisar el estado de todos tus invitados en tu panel de control.
             
             Saludos,
-            El equipo de Invitaciones
+            El equipo de $marca
         """.trimIndent()
         
         return EmailContent(subject, buildHtmlTemplate(subject, htmlBody), textBody)
@@ -704,7 +725,7 @@ class EmailContentGenerator {
             
             <p style="font-size: 16px; margin-top: 30px;"><strong>¡Cada confirmación nos acerca más al gran día!</strong></p>
             
-            <p style="font-size: 14px; color: #999; margin-top: 20px;">Saludos,<br>El equipo de Invitaciones</p>
+            <p style="font-size: 14px; color: #999; margin-top: 20px;">Saludos,<br>El equipo de $marca</p>
         """.trimIndent()
         
         val textBody = """
@@ -727,10 +748,93 @@ class EmailContentGenerator {
             ¡Cada confirmación nos acerca más al gran día!
             
             Saludos,
-            El equipo de Invitaciones
+            El equipo de $marca
         """.trimIndent()
         
         return EmailContent(subject, buildHtmlTemplate(subject, htmlBody), textBody)
+    }
+
+    /**
+     * Verificación del correo de acceso (fase 5, E3). Sirve para el alta y para el cambio de correo:
+     * los dos prueban lo mismo, que quien abre el enlace lee ese buzón.
+     *
+     * `verificationUrl` viene ya construida con `app.frontend.url`
+     * (`EmailVerificationService.urlDeVerificacion`): esta clase **no** arma URLs, que es como nació
+     * el hallazgo S-08.
+     */
+    private fun generateEmailVerificationContent(variables: Map<String, Any>): EmailContent {
+        val customerName = variables["customerName"] as? String ?: "Usuario"
+        val companyName = variables["companyName"] as? String ?: marca
+        val verificationUrl = variables["verificationUrl"] as? String ?: ""
+
+        val subject = "Confirma tu correo en $companyName"
+
+        val html = """
+            <h1>Hola, $customerName</h1>
+            <p>Confirma que este correo es tuyo para terminar de activar tu cuenta en <strong>$companyName</strong>.</p>
+            <p style="margin: 28px 0;">
+                <a href="$verificationUrl" style="background-color: #1f1f1f; color: #ffffff; padding: 12px 22px; border-radius: 6px; text-decoration: none; display: inline-block;">Confirmar mi correo</a>
+            </p>
+            <p style="font-size: 13px; color: #666;">Si el botón no funciona, copia y pega esta dirección en tu navegador:<br>$verificationUrl</p>
+            <p style="font-size: 13px; color: #666;">El enlace caduca en 24 horas. Si no creaste esta cuenta, ignora este correo.</p>
+        """.trimIndent()
+
+        val text = """
+            Hola, $customerName
+
+            Confirma que este correo es tuyo para terminar de activar tu cuenta en $companyName.
+
+            $verificationUrl
+
+            El enlace caduca en 24 horas. Si no creaste esta cuenta, ignora este correo.
+
+            Saludos,
+            El equipo de $companyName
+        """.trimIndent()
+
+        return EmailContent(subject, buildHtmlTemplate(subject, html), text)
+    }
+
+    /**
+     * Aviso al correo **anterior** cuando alguien pide cambiar el correo de acceso. Es la mitad que
+     * faltaba: sin este correo, un cambio de correo es silencioso para quien pierde la cuenta.
+     */
+    private fun generateEmailChangeNoticeContent(variables: Map<String, Any>): EmailContent {
+        val customerName = variables["customerName"] as? String ?: "Usuario"
+        val companyName = variables["companyName"] as? String ?: marca
+        val newEmail = variables["newEmail"] as? String ?: ""
+        val supportEmail = variables["supportEmail"] as? String ?: contactProperties.soporte
+
+        val subject = "Pidieron cambiar el correo de tu cuenta en $companyName"
+
+        // El contacto de soporte solo se pinta si está configurado: un correo de ayuda inventado es
+        // peor que no poner ninguno (`ProductContactProperties`).
+        val ayudaHtml = if (supportEmail.isBlank()) "" else
+            """<p style="font-size: 13px; color: #666;">Si no fuiste tú, escríbenos a <a href="mailto:$supportEmail">$supportEmail</a> y cambia tu contraseña.</p>"""
+        val ayudaTexto = if (supportEmail.isBlank()) "" else
+            "Si no fuiste tú, escríbenos a $supportEmail y cambia tu contraseña."
+
+        val html = """
+            <h1>Hola, $customerName</h1>
+            <p>Se pidió cambiar el correo de acceso de tu cuenta de <strong>$companyName</strong> a <strong>$newEmail</strong>.</p>
+            <p>El cambio <strong>todavía no se ha hecho</strong>: solo ocurrirá cuando se confirme desde ese buzón.</p>
+            $ayudaHtml
+        """.trimIndent()
+
+        val text = """
+            Hola, $customerName
+
+            Se pidió cambiar el correo de acceso de tu cuenta de $companyName a $newEmail.
+
+            El cambio todavía no se ha hecho: solo ocurrirá cuando se confirme desde ese buzón.
+
+            $ayudaTexto
+
+            Saludos,
+            El equipo de $companyName
+        """.trimIndent()
+
+        return EmailContent(subject, buildHtmlTemplate(subject, html), text)
     }
 
     private fun buildHtmlTemplate(title: String, content: String): String {

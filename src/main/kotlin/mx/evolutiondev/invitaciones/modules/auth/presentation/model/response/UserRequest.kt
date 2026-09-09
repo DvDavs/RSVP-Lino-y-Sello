@@ -14,7 +14,7 @@ data class UserRequest(
         @field:Email(message = "Debes proporcinar un correo electrónico válido")
         @field:Pattern(regexp = Patterns.EMAIL_PATTERN, message = "Debes proporcinar un correo electrónico válido")
         val email: String,
-        @field:Pattern(regexp = Patterns.PHONE_NUMBER_PATTERN, message = "Debes proporcinar un número telefónico válido de 10 digitos numéricos")
+        @field:Pattern(regexp = Patterns.PHONE_NUMBER_PATTERN, message = Patterns.PHONE_NUMBER_MESSAGE)
         val phone: String?,
         // @field:OptionalValidDateFormat(
         //         format = "yyyy-MM-dd",

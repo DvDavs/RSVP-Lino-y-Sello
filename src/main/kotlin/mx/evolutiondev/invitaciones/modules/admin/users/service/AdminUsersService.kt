@@ -169,7 +169,10 @@ class AdminUsersService(
             templateName = "welcome",
             variables = mapOf(
                 "customerName" to "${customerEntity.name} ${customerEntity.lastName}",
-                "companyName" to "AGAPE",
+                // Marca: D-02 («Lino & Sello»). Se **omite** la variable a propósito en vez de
+                // escribir el nombre aquí: `EmailContentGenerator` cae en `producto.correo.remitente-nombre`
+                // cuando falta (`ADR-5-E3-07`). Así este fichero —territorio de E5— no gana una
+                // dependencia nueva en el constructor por un cambio de marca.
                 "isAdminCreated" to true,
                 "temporaryPassword" to password,
                 "userEmail" to customerEntity.email,

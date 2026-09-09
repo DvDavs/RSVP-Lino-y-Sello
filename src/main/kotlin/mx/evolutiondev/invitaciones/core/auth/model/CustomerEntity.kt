@@ -39,6 +39,29 @@ data class CustomerEntity(
         var resetToken: String? = null,
         var resetTokenExpiry: Instant? = null,
 
+        /**
+         * Verificación del correo de acceso (fase 5, E3; `12-producto-completo.md §A6.4`, migración
+         * `V41`). Nace en `true` para no invalidar las cuentas que ya existían; las altas nuevas se
+         * guardan con `false`. **Hoy no bloquea el acceso**: la decisión de bloquear es de producto y
+         * todavía no se toma (§A2.1).
+         */
+        @Column(name = "email_verified", nullable = false)
+        var emailVerified: Boolean = true,
+
+        /** Mismo patrón que [resetToken]: token de un solo uso, acuñado con `JwtUtil.generateSecureToken()`. */
+        @Column(name = "email_verification_token")
+        var emailVerificationToken: String? = null,
+
+        @Column(name = "email_verification_expiry")
+        var emailVerificationExpiry: Instant? = null,
+
+        /**
+         * Correo al que la persona pidió mudarse y que todavía no ha confirmado. Mientras esté puesto,
+         * [email] —el correo con el que se entra— **no cambia**.
+         */
+        @Column(name = "email_pending")
+        var emailPending: String? = null,
+
         @Column(name = "created_by")
         var createdBy: Long? = null,
 

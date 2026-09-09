@@ -17,7 +17,7 @@ data class AdministratorUpdateRequest(
         val email: String,
         @field:ValueOfEnum(enumClass = Role::class, acceptedValues = ["USER", "ADMIN", "MASTER"], message = "Solo puedes editar usuarios con rol USER, ADMIN o MASTER")
         val role: String,
-        @field:Pattern(regexp = Patterns.PHONE_NUMBER_PATTERN, message = "Debes proporcinar un número telefónico válido de 10 digitos numéricos")
+        @field:Pattern(regexp = Patterns.PHONE_NUMBER_PATTERN, message = Patterns.PHONE_NUMBER_MESSAGE)
         val phone: String?,
         // @field:OptionalValidDateFormat(
         //         format = "yyyy-MM-dd",

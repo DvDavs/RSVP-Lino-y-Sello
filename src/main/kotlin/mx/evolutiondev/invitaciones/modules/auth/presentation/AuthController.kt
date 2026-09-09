@@ -43,8 +43,13 @@ class AuthController(
 
     @PostMapping("/token/refresh")
     @ResponseStatus(HttpStatus.OK)
+    /**
+     * Rotación en cada canje (`ADR-5-E3-01`): el token que llega se quema y la respuesta trae uno
+     * nuevo. Mismos campos que antes; lo único que cambia es que el `refreshToken` del cuerpo ya no
+     * es el que mandó el cliente.
+     */
     fun attemptRefreshToken(@Valid @RequestBody refreshTokenRequest: RefreshTokenRequest): TokenResponse {
-        val refreshToken = refreshTokenService.validateRefreshToken(refreshTokenRequest.refreshToken)
+        val refreshToken = refreshTokenService.rotateRefreshToken(refreshTokenRequest.refreshToken)
         return generateTokenResponse(refreshToken.customer, refreshToken)
     }
 

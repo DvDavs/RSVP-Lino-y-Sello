@@ -32,6 +32,7 @@ fun CustomerEntity.toProfile(
         postalCode = postalCode,
         state = state,
         photo = photoUrl,
-        isSurveyAnswered = isSurveyAnswered
+        isSurveyAnswered = isSurveyAnswered,
+        emailVerified = emailVerified
     )
 }
