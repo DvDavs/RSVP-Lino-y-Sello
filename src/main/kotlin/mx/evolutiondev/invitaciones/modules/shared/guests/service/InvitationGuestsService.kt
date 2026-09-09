@@ -119,7 +119,7 @@ class InvitationGuestsService(
             request: GuestsCreationRequest
     ) {
         val invitation = validateInvitation(userId, appRole, invitationId)
-        val guest = findGuestById(guestId)
+        val guest = findGuestByIdInInvitation(guestId, invitationId)
 
         if (appRole == AppRole.USER && !guest.isEnabled) {
             throw GuestNotFoundException("El invitado con el id: $guestId no existe")
@@ -149,13 +149,20 @@ class InvitationGuestsService(
         )
     }
 
+    /**
+     * Baja **física** de un invitado (`hardDeleteById`, borrado irreversible).
+     *
+     * Endurecido por el hallazgo **S-05** (`12-producto-completo.md §A3`): antes la única
+     * comprobación era `appRole == USER && guest.invitation.customer.id != userId`, de modo que un
+     * `ADMIN` borraba invitados de clientes ajenos a su jerarquía recorriendo ids. Ahora la
+     * pertenencia la decide [validateInvitation], que aplica la jerarquía correcta para los tres
+     * roles y es la misma puerta que usa el resto del servicio.
+     */
     @Transactional
     fun deleteGuest(userId: Long, appRole: AppRole, guestId: Long) {
         val guest = findGuestById(guestId)
 
-        if (appRole == AppRole.USER && guest.invitation.customer.id != userId) {
-            throw IllegalArgumentException("No tienes permisos para eliminar este invitado")
-        }
+        validateInvitation(userId, appRole, guest.invitation.id)
 
         invitationGuestsRepository.hardDeleteById(guestId)
     }
@@ -257,8 +264,8 @@ class InvitationGuestsService(
             invitationId: Long
     ): InvitationGuestEntity {
         validateInvitation(userId, appRole, invitationId)
-        val guest = findGuestById(guestId)
-        
+        val guest = findGuestByIdInInvitation(guestId, invitationId)
+
         if (appRole == AppRole.USER && !guest.isEnabled) {
             throw GuestNotFoundException("El invitado con el id: $guestId no existe")
         }
@@ -284,7 +291,7 @@ class InvitationGuestsService(
             guestId: Long
     ) {
         validateInvitation(userId, appRole, invitationId)
-        val guest = findGuestById(guestId)
+        val guest = findGuestByIdInInvitation(guestId, invitationId)
 
         if (guest.attendanceStatus != AttendanceStatus.CONFIRMED) {
             throw IllegalArgumentException("Este invitado no tiene asistencia confirmada")
@@ -393,7 +400,17 @@ class InvitationGuestsService(
     }
 
 
-    private fun validateInvitation(
+    /**
+     * Única puerta de propiedad de una invitación para los tres roles: comprueba que exista, que
+     * el solicitante la alcance según la jerarquía (`HierarchyValidationService`) y que un `USER`
+     * no llegue a una invitación deshabilitada.
+     *
+     * Es **pública** para que la superficie del panel de la clienta
+     * (`modules/product/guests/panel`) la reutilice en vez de escribir una comprobación paralela
+     * (contrato `5-2` §0.1). Sigue siendo la misma comprobación que ya usaban `/admin/` + `**` y el
+     * módulo antiguo: no cambia ni su lógica ni sus mensajes.
+     */
+    fun validateInvitation(
             userId: Long,
             appRole: AppRole,
             invitationId: Long
@@ -416,6 +433,27 @@ class InvitationGuestsService(
     private fun findGuestById(guestId: Long): InvitationGuestEntity {
         return invitationGuestsRepository.findById(guestId)
                 .orElseThrow { GuestNotFoundException("El invitado con el id: $guestId no existe") }
+    }
+
+    /**
+     * Igual que [findGuestById] pero **cruzando el invitado con la invitación** de la ruta.
+     *
+     * Cierra el hallazgo **S-04** (IDOR, severidad ALTA, `12-producto-completo.md §A3`): hasta ahora
+     * `updateGuest`, `getGuest` y `cancelAttendanceFromDashboard` validaban la invitación y después
+     * cargaban el invitado por id suelto, así que quien tuviera **una** invitación propia leía y
+     * modificaba invitados de cualquier otra recorriendo ids.
+     *
+     * El literal del fallo es **exactamente** el de [findGuestById] para no crear un oráculo nuevo:
+     * «no es tuyo» y «no existe» tienen que ser indistinguibles desde fuera.
+     */
+    private fun findGuestByIdInInvitation(guestId: Long, invitationId: Long): InvitationGuestEntity {
+        val guest = findGuestById(guestId)
+
+        if (guest.invitation.id != invitationId) {
+            throw GuestNotFoundException("El invitado con el id: $guestId no existe")
+        }
+
+        return guest
     }
 
     private fun validateGuestCounts(
