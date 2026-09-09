@@ -1,25 +1,34 @@
-// app/(chrome)/(sitio)/precios/page.tsx — MARCADOR de la página de planes y precios.
-// Dueña: sesión E4 (pagos con Stripe). Se sustituye entera (ver `README.md` de esta carpeta).
+// app/(chrome)/(sitio)/precios/page.tsx — el catálogo real de planes (fase 5, sesión E4).
+// Sustituye ENTERO el marcador de 5-0d (ver `README.md` de esta carpeta).
+//
+// Server component: solo metadatos y el límite de `Suspense` que `useSearchParams` exige en el App
+// Router (mismo patrón que `/acceso`, verificado en next@16.3.4 — sin él el build falla con
+// «useSearchParams should be wrapped in a suspense boundary»). Todo el catálogo se pide al backend
+// DESDE EL NAVEGADOR (`PantallaPrecios`, `"use client"`): esta página no hace ningún fetch.
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import { Marcador } from "@/lib/panel/Marcador";
+import { CargaDePlanes } from "@/components/precios/CargaDePlanes";
+import { PantallaPrecios } from "@/components/precios/PantallaPrecios";
 import { es_MX } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: es_MX.panel.secciones.precios.titulo,
-  description: es_MX.panel.secciones.precios.texto,
-  // Mientras no haya precios que publicar, fuera de los buscadores: una página indexada que dice
-  // «todavía no los publicamos» es peor que ninguna. E4 quita esta línea cuando ponga los planes
-  // reales — `/precios` SÍ debe indexarse el día que venda.
-  robots: { index: false, follow: false },
+  title: { absolute: es_MX.sitio.precios.tituloDocumento },
+  description: es_MX.sitio.precios.descripcionDocumento,
+  // Página de venta: a diferencia del marcador que sustituye, esta SÍ se indexa (README de esta
+  // carpeta, sección «Notas del andamio»).
+  robots: { index: true, follow: true },
 };
 
-export default function MarcadorPrecios() {
+export default function PaginaPrecios() {
   return (
-    <Marcador
-      contenedor="div"
-      titulo={es_MX.panel.secciones.precios.titulo}
-      texto={es_MX.panel.secciones.precios.texto}
-      accion={{ href: "/ayuda#planes", etiqueta: es_MX.panel.marcador.verLaAyuda }}
-    />
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-ui-page px-5 pb-16 pt-12 sm:px-8">
+          <CargaDePlanes />
+        </div>
+      }
+    >
+      <PantallaPrecios />
+    </Suspense>
   );
 }

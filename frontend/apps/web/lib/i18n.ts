@@ -214,6 +214,49 @@ export const es_MX = {
       lema: "Invitaciones digitales con RSVP, hechas en México.",
       derechos: (anio: number) => `${anio} Invitaciones`,
     },
+    /**
+     * `/precios` (fase 5, sesión E4): el catálogo real de planes, sustituyendo el marcador de
+     * `panel.secciones.precios`. Un pago único por invitación (contrato §0); ningún precio se
+     * calcula ni se inventa aquí, todos vienen del backend.
+     */
+    precios: {
+      /** Metadatos del documento (`<title>`/descripción): esta página SÍ se indexa. */
+      tituloDocumento: "Planes y precios · Lino & Sello",
+      descripcionDocumento:
+        "Un pago único por invitación: elige entre Sencillo, Fiesta o Grande y ve lo que incluye cada plan.",
+      eyebrow: "Planes",
+      titulo: "Un pago por invitación. Sin mensualidades.",
+      intro: "Escribes y ves tu invitación gratis; pagas cuando la quieras mandar.",
+      recomendado: "Recomendado",
+      pagoUnico: "Pago único",
+      elegir: (nombre: string) => `Elegir ${nombre}`,
+      empezarGratis: "Empieza gratis",
+      notaEmpezarGratis: "Eliges el plan cuando tu invitación esté lista.",
+      pagoNoDisponible: "El pago en línea todavía no está disponible; escríbenos.",
+      vacio: {
+        titulo: "Escríbenos y te pasamos los precios",
+        texto:
+          "Todavía no pudimos cargar el catálogo de planes. Escríbenos y te decimos precios y cuál te conviene.",
+      },
+      preguntas: {
+        titulo: "Preguntas de compra",
+        uno: {
+          pregunta: "¿Puedo probar antes de pagar?",
+          respuesta: "Sí: escribes y ves tu invitación gratis; pagas cuando la quieras mandar.",
+        },
+        dos: {
+          pregunta: "¿Puedo cambiar de plan?",
+          respuesta: "Sí, mientras no hayas publicado. Escríbenos y te cambiamos al plan que necesites.",
+        },
+        tres: {
+          pregunta: "¿Qué pasa si cancelo?",
+          respuesta: "Si no llegas a publicar, no se te cobra nada. Si ya publicaste, escríbenos y lo revisamos contigo.",
+        },
+      },
+      contacto: {
+        titulo: "¿Prefieres que te lo expliquemos?",
+      },
+    },
   },
   ayuda: {
     titulo: "¿En qué te ayudamos?",
