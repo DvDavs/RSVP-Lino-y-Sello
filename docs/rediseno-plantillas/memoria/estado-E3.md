@@ -1,8 +1,10 @@
 # Estado de la sesión E3 (cuenta, marca, contacto y legal) — fase 5
 
 **Rama**: `claude/fase-5-cuenta-whlhhq`, desde el commit de cimientos `9a4cd56`.
-**Última actualización**: 2026-09-09 12:15 UTC.
-**Veredicto vigente de seguridad: NO CERRABLE** (`bitacora/5-E3-R1-seguridad.md`). Ver §4.
+**Última actualización**: 2026-09-09 15:15 UTC. **Sesión terminada.**
+**Veredicto de seguridad: CERRABLE**, tras cuatro revisiones adversariales encadenadas
+(`5-E3-R1-seguridad.md` → `R2` → `R3-verificacion.md` → `R4-cierre.md`) y seis tandas de corrección.
+Queda abierto lo que no cierra ningún código: ver §4.
 
 Este documento existe porque la sesión perdió agentes **dos veces** por el límite de uso de la API
 (a las 07:00 y a las 12:00 UTC). Sirve para retomar sin depender del chat.
@@ -90,3 +92,55 @@ Leer, en este orden: `bitacora/5-E3-R1-seguridad.md` (el acta) → los contratos
   `<meta>` sigue diciendo `index,follow` (es de otra sesión); no hay auditoría de quién da de baja
   una cuenta; el limitador de intentos es en memoria y se divide entre instancias; la reactivación
   autoservicio de una cuenta deshabilitada no existe (hoy solo un ADMIN).
+
+---
+
+# ACTUALIZACIÓN FINAL (2026-09-09, 15:15 UTC) — la sesión termina aquí
+
+Lo escrito arriba es de media sesión y se conserva como registro. Esto lo corrige.
+
+## Todo lo de §3 «qué NO está empezado» quedó hecho
+`/perfil`, `/acceso` y `/verificar-correo` (`7d4b8e4`) · asistente conectado al alta (`ecdea48`) ·
+e2e con 4 workers · **25 capturas enviadas al dueño** (`5691fd3`).
+
+## Cifras finales, medidas por el orquestador y no por los agentes
+- **Kotlin: 1443 pruebas · 0 fallos · 0 errores · 0 saltadas**, sobre 107 XML (`./gradlew cleanTest test`).
+- **Web: 713/714.** El único rojo es `components/sitio/portada.test.tsx`, **ajeno**: verificado con
+  `git log 9a4cd56..HEAD` que ni esa prueba ni `Hero.tsx` se tocaron en esta rama. Lo cierra E6 al
+  mergear las imágenes. Sin ese fichero, 713/713.
+- **`typecheck` 6/6.** **e2e**: `cuenta.spec.ts` 9/9 (verificado `--workers=4 --repeat-each=2` → 18/18),
+  `registro-alta.spec.ts` 4/4 con 4 workers, suite completa **90/90**.
+
+## Las cuatro revisiones, y por qué importan
+Cada una encontró algo real **después** del visto bueno parcial de la anterior:
+R1 (15 hallazgos, NO CERRABLE) → R2 (CERRABLE CON CORRECCIONES; 11 nuevos, y detectó que el
+orquestador había omitido R1-07 al repartir) → R3 (2 nuevos, uno de ellos causado por un arreglo
+anterior) → R4 (R4-01 ALTA, que además **falsificaba una afirmación de una bitácora**).
+Los 26 hallazgos de código están cerrados con prueba en rojo antes y verde después.
+
+## §4 se sustituye por esto: lo que queda, y NO lo cierra ningún código
+1. **Datos personales en `V1` y `V2`.** Retirar `invitaciones.sql` no bastó: `V1` trae nueve
+   personas reales con sus hashes y ocho tokens de refresco, y **`V2` cuatro contraseñas en claro de
+   cuentas MASTER/ADMIN, vivas**. Recomendación de R2, por orden: (a) hoy, cambiar esas cuatro
+   contraseñas desde la aplicación, que es lo único que corta el acceso; (b) un `V45` que borre los
+   tokens y anonimice las filas; (c) solo con fecha, reescribir el histórico junto con los secretos
+   de S-01, con `flyway repair` en cada entorno. Editar `V1`/`V2` sin (c) no saca nada del histórico
+   y deja los entornos nuevos sin MASTER de arranque.
+2. **Rotación de S-01.** Los seis secretos están fuera del código pero **siguen en el histórico y
+   siguen siendo válidos**. Tabla de qué rotar y qué se rompe al rotar cada uno, en `preguntas-abiertas.md`.
+3. **Revisión legal** del aviso de privacidad y los términos: son borradores y lo dicen en pantalla.
+4. **Decisiones de despliegue**: `forward-headers-strategy` (sin proxy declarado, el techo global del
+   registro es una denegación de servicio barata: 0,33 pet/s cierran el alta para todos), el
+   limitador en memoria si se despliega más de una instancia, y el proveedor de correo (hoy un Gmail
+   personal por SMTP con cuota de cuenta gratuita).
+5. **Anotados y sin arreglar, por severidad**: R2-03 (bloqueo de cuenta ajena con contraseñas malas,
+   deuda declarada fuera de alcance desde la fase 3-C), R4-02 (bcrypt sin techo en `/auth/token`),
+   R4-03 y R3-03/R3-04 (BAJA), y que `CustomerEntity` es una `data class` cuyo `toString()` arrastra
+   hash y tokens — **verificado que hoy no es explotable**, pero es munición cargada.
+
+## Para E6, además de §6
+Migraciones de E3: **`V41`, `V42`, `V44`**. **`V43` nunca existió: la siguiente debe ser `V45`**, o
+una `V43` posterior quedaría pendiente y sin aplicar.
+Contratos publicados que consumen otras sesiones: `handoffs/5-1b-contrato-alta.md` (E2 y E4) y
+`handoffs/5-E3-C2-para-E4.md` — **al cobrar hay que repuntar `template_id`; `is_paid` por sí solo no
+desbloquea plan 2**.
