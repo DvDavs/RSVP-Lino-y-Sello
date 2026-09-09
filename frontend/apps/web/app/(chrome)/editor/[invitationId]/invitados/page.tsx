@@ -1,24 +1,19 @@
-// app/(chrome)/editor/[invitationId]/invitados/page.tsx — MARCADOR de la sección «Invitados».
-// Dueña: sesión E2. Se sustituye entera (ver `README.md` de esta carpeta).
+// app/(chrome)/editor/[invitationId]/invitados/page.tsx — la lista de invitados de la clienta
+// (wireframe `12-producto-completo.md` §B3.2). Sesión E2. Server Component delgado a propósito: el
+// `invitationId` numérico ya lo valida el `layout.tsx` del padre (`notFound()` si no es dígitos), y
+// toda la interacción real (contadores en vivo, búsqueda, pegado de lista…) vive en
+// `PantallaInvitados`, que SÍ necesita estado de cliente y por eso es "use client".
 import type { Metadata } from "next";
-import { Marcador } from "@/lib/panel/Marcador";
+import { PantallaInvitados } from "@/components/invitados/PantallaInvitados";
 import { es_MX } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: es_MX.panel.secciones.invitados.titulo,
-  // Mientras sea un marcador, fuera de los buscadores: nadie debe llegar aquí desde Google a leer
-  // que algo no está. E2 lo cambia (o lo deja) cuando ponga la pantalla real, que además vive
-  // detrás de sesión.
+  // Detrás de sesión: nadie debe llegar aquí desde un buscador.
   robots: { index: false, follow: false },
 };
 
-export default async function MarcadorInvitados({ params }: { params: Promise<{ invitationId: string }> }) {
+export default async function PaginaInvitados({ params }: { params: Promise<{ invitationId: string }> }) {
   const { invitationId } = await params;
-  return (
-    <Marcador
-      titulo={es_MX.panel.secciones.invitados.titulo}
-      texto={es_MX.panel.secciones.invitados.texto}
-      accion={{ href: `/editor/${encodeURIComponent(invitationId)}`, etiqueta: es_MX.panel.marcador.volverAlEditor }}
-    />
-  );
+  return <PantallaInvitados invitationId={Number(invitationId)} />;
 }
