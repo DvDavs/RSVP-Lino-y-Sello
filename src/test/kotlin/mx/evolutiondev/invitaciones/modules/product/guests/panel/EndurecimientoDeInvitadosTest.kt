@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -142,6 +143,79 @@ class EndurecimientoDeInvitadosTest {
     }
 
     // =============================================================================================
+    // Reactivación de bajas (hallazgo de la revisión adversarial de E2)
+    // =============================================================================================
+
+    /**
+     * **El ataque, tal cual se reprodujo contra el backend vivo**: con rol `MASTER`, un alta en la
+     * invitación 7 sobrescribía al invitado 12 de la invitación **6**, de otra clienta —nombre,
+     * cupos, `is_enabled`, estado y `confirmation_token` rotado— y la invitación de destino se
+     * quedaba sin el alta.
+     *
+     * La causa: `findByEmailAndPhoneAndIsEnabledFalse` recorre la tabla entera, sin `invitation_id`.
+     * Que hoy no le ocurriera a un `USER` era un accidente —`HibernateFilterAspect.kt:26-36` activa
+     * `enabledFilter` para ese rol y la consulta sale contradictoria— y no una comprobación.
+     */
+    @Test
+    fun `un alta no reactiva un invitado dado de baja de otra invitacion`() {
+        conInvitacionPropia(MIA)
+        val bajaAjena = invitadoDe(ID_AJENO, AJENA)
+        whenever(invitados.findByEmailAndPhoneAndIsEnabledFalse(CORREO, TELEFONO)).doReturn(bajaAjena)
+
+        servicio.appendGuest(DUENA, AppRole.USER, MIA, peticion(CORREO, TELEFONO))
+
+        // Se da de alta un invitado nuevo en la invitación de quien lo pidió, y **no** se escribe
+        // sobre la baja ajena: lo que se guarda es una entidad sin id, no la copia de la otra.
+        val guardado = argumentCaptor<InvitationGuestEntity>()
+        verify(invitados).save(guardado.capture())
+        assertEquals(0L, guardado.firstValue.id, "no se escribió sobre el invitado de otra invitación")
+    }
+
+    /**
+     * Sin correo **ni** teléfono no hay forma de afirmar que sea la misma persona: la clave `("","")`
+     * casa con cualquier baja anónima del sistema. Las rutas nuevas del panel permiten dar de alta
+     * con solo el nombre (contrato §1), así que esta es la puerta ancha del hallazgo.
+     */
+    @Test
+    fun `sin correo ni telefono no se reactiva nada, ni siquiera de la misma invitacion`() {
+        conInvitacionPropia(MIA)
+        val bajaPropia = invitadoDe(ID_PROPIO, MIA)
+        whenever(invitados.findByEmailAndPhoneAndIsEnabledFalse("", "")).doReturn(bajaPropia)
+
+        servicio.appendGuest(DUENA, AppRole.USER, MIA, peticion())
+
+        val guardado = argumentCaptor<InvitationGuestEntity>()
+        verify(invitados).save(guardado.capture())
+        assertEquals(0L, guardado.firstValue.id, "con la clave vacía se da de alta, no se reactiva")
+    }
+
+    /**
+     * Lo que sí sigue funcionando: recuperar una baja **de la misma invitación** por su contacto. La
+     * entidad es real, no un doble, porque este camino usa `copy()` de la `data class`.
+     */
+    @Test
+    fun `una baja de la misma invitacion con correo si se reactiva`() {
+        conInvitacionPropia(MIA)
+        val bajaPropia = InvitationGuestEntity(
+            id = ID_PROPIO,
+            invitation = invitacion(MIA),
+            fullName = "La De Antes",
+            email = CORREO,
+            phone = TELEFONO,
+            isEnabled = false,
+        )
+        whenever(invitados.findByEmailAndPhoneAndIsEnabledFalse(CORREO, TELEFONO)).doReturn(bajaPropia)
+
+        servicio.appendGuest(DUENA, AppRole.USER, MIA, peticion(CORREO, TELEFONO))
+
+        val guardado = argumentCaptor<InvitationGuestEntity>()
+        verify(invitados).save(guardado.capture())
+        assertEquals(ID_PROPIO, guardado.firstValue.id, "se reutiliza la misma fila")
+        assertEquals("Quien Sea", guardado.firstValue.fullName, "con los datos nuevos")
+        assertEquals(true, guardado.firstValue.isEnabled, "y vuelve a estar de alta")
+    }
+
+    // =============================================================================================
     // Ayudas
     // =============================================================================================
 
@@ -185,11 +259,11 @@ class EndurecimientoDeInvitadosTest {
         return invitado
     }
 
-    private fun peticion() = GuestsCreationRequest(
+    private fun peticion(correo: String = "", telefono: String = "") = GuestsCreationRequest(
         fullName = "Quien Sea",
-        email = "",
+        email = correo,
         graduatesName = "",
-        phone = "",
+        phone = telefono,
         adultsCount = 1,
         childrenCount = 0,
         youngCount = 0,
@@ -206,5 +280,7 @@ class EndurecimientoDeInvitadosTest {
         const val ID_PROPIO = 11L
         const val ID_AJENO = 55L
         const val ID_INEXISTENTE = 56L
+        const val CORREO = "quien.sea@example.com"
+        const val TELEFONO = "5512345678"
     }
 }

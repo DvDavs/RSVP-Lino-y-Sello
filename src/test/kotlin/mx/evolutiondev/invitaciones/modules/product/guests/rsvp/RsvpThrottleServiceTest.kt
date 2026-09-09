@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 
 /**
  * El limitador del RSVP público, con la disciplina de `AuthThrottleService` pero **ámbito propio**.
@@ -94,6 +97,52 @@ class RsvpThrottleServiceTest {
             RsvpThrottleService::class.java.declaredFields.none { it.name.contains("token", true) && it.type == String::class.java },
             "no debe haber ningun campo String con el token dentro",
         )
+    }
+
+    // =============================================================================================
+    // El cubo del token es por **par token + IP** (hallazgo de la revisión adversarial de E2)
+    // =============================================================================================
+
+    /**
+     * **El ataque**: medido contra el backend vivo, cuarenta peticiones bastaban para que la dueña de
+     * un enlace recibiera `429` en su propio RSVP durante quince minutos. Y el enlace no es un
+     * secreto: viaja por WhatsApp y se reenvía en capturas. Con la clave por par, quien agota el
+     * enlace desde su IP **solo se bloquea a sí mismo**.
+     */
+    @Test
+    fun `agotar un enlace desde una IP no bloquea a su duena, que llega desde otra`() {
+        val limitador = RsvpThrottleService(maxPorToken = 3, maxPorIp = 10_000)
+
+        desde("203.0.113.7") {
+            repeat(3) { limitador.registrarIntento(TOKEN) }
+            assertThrows<RsvpException.TooManyAttempts> { limitador.comprobar(TOKEN) }
+        }
+
+        desde("198.51.100.22") {
+            assertDoesNotThrow { limitador.comprobar(TOKEN) }
+        }
+    }
+
+    /** Lo que el par **no** afloja: un mismo origen sigue sin poder martillear un enlace concreto. */
+    @Test
+    fun `el mismo origen sigue limitado sobre el mismo enlace`() {
+        val limitador = RsvpThrottleService(maxPorToken = 3, maxPorIp = 10_000)
+
+        desde("203.0.113.7") {
+            repeat(3) { limitador.registrarIntento(TOKEN) }
+            assertThrows<RsvpException.TooManyAttempts> { limitador.comprobar(TOKEN) }
+        }
+    }
+
+    /** Ejecuta el bloque como si la petición en curso viniera de esa IP. */
+    private fun desde(ip: String, bloque: () -> Unit) {
+        val peticion = MockHttpServletRequest().apply { remoteAddr = ip }
+        RequestContextHolder.setRequestAttributes(ServletRequestAttributes(peticion))
+        try {
+            bloque()
+        } finally {
+            RequestContextHolder.resetRequestAttributes()
+        }
     }
 
     private companion object {

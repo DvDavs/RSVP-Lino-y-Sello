@@ -16,20 +16,74 @@
 // Verificado contra el backend vivo (`http://127.0.0.1:6003`) antes de tipar nada: el cuerpo de
 // éxito de `GET`/`PUT` es exactamente el del contrato, y el cuerpo de error es `{code, message}` —
 // SIN `timestamp` ni `statusCode` (a diferencia de `TplErrorResponse`, que sí los lleva). `ApiError`
-// exige esos dos campos por tipo; se rellenan aquí con el estado HTTP real y la hora de recepción,
-// nunca inventando el `code`/`message`, que son los únicos que importan para clasificar.
+// exige esos dos campos por tipo; se rellenan aquí con el estado HTTP real, nunca inventando el
+// `code`/`message`, que son los únicos que importan para clasificar.
 //
-// Las clases de error se importan de `@/lib/errors` y NO de `@/lib/api-client`: ese módulo hace, en
-// su cabecera, `import { OperationBatch } from "@invitaciones/schema"` (el esquema de operaciones
-// del editor, con Zod) — importar CUALQUIER cosa de ahí arrastra ese módulo entero al bundle del
-// cliente. Medido con `pnpm run build && pnpm run budget`: ~87 KB gz de más en el primer JS de esta
-// ruta pública, que no usa el editor ni Zod para nada (ver también `./renderPublico.ts`, mismo
-// motivo para el otro fetch de esta pantalla). `getApiBaseUrl` se duplica aquí (una línea) por el
-// mismo motivo: es la única función de `api-client.ts` que esta ruta necesita.
-import { ApiError, SessionError, UnknownApiError } from "@/lib/errors";
-
+// `getApiBaseUrl` y las clases de error (`ApiError`/`SessionError`/`UnknownApiError`) se DEFINEN
+// aquí, en vez de importarse de `@/lib/api-client` o de `@/lib/errors`. Medido con `pnpm run build
+// && pnpm run build && pnpm run budget` (README de la ruta hermana, §Presupuesto):
+//   1. `@/lib/api-client` hace, en su cabecera, `import { OperationBatch } from
+//      "@invitaciones/schema"` (el esquema de operaciones del editor) — importar CUALQUIER cosa de
+//      ahí arrastra ese módulo entero al bundle del cliente (~6 KB gz de eso solo, pero abre la
+//      puerta a mucho más si el editor crece).
+//   2. `@/lib/errors`, aunque no toca el editor, hace `import { z } from "zod"` para un solo schema
+//      (`TplErrorResponse`) que esta ruta pública no necesita — el cuerpo de error aquí se valida a
+//      mano, sin Zod (`esCuerpoDeError` más abajo). Esta SOLA importación metía ~84 KB gz en el
+//      primer JS de `/r/[token]` — casi TODO el exceso sobre los 150 KB gz de la ruta hermana.
+// Las tres clases de aquí tienen la MISMA forma pública (`code`, `statusCode`, `message`, `rawBody`)
+// que las de `@/lib/errors`; solo cambia dónde viven. `./renderPublico.ts` reutiliza estas mismas
+// clases (importándolas de este módulo) por el mismo motivo, para el otro fetch de esta pantalla.
 function getApiBaseUrl(): string {
   return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:6003";
+}
+
+interface RsvpErrorBody {
+  readonly code: string;
+  readonly message: string;
+}
+
+export class ApiError extends Error {
+  readonly kind = "api-error" as const;
+  readonly code: string;
+  readonly statusCode: number;
+
+  constructor(response: RsvpErrorBody, httpStatus: number) {
+    super(response.message);
+    this.name = "ApiError";
+    this.code = response.code;
+    this.statusCode = httpStatus;
+  }
+}
+
+/** `401`/`403` sin `code` — defensivo: esta superficie no tiene sesión (`permitAll`), así que no
+ *  debería producirse nunca, pero si un proxy intermedio lo devolviera, se clasifica aparte en vez
+ *  de mentir con un `code` inventado. */
+export class SessionError extends Error {
+  readonly kind = "session-error" as const;
+  readonly statusCode: 401 | 403;
+  readonly rawBody: string;
+
+  constructor(statusCode: 401 | 403, rawBody: string) {
+    super(statusCode === 401 ? "Sesión inválida o token ausente/expirado." : "Rol insuficiente para esta ruta.");
+    this.name = "SessionError";
+    this.statusCode = statusCode;
+    this.rawBody = rawBody;
+  }
+}
+
+/** Cualquier respuesta no-2xx cuyo cuerpo no es un `{code, message}` reconocible. Conserva el
+ *  cuerpo crudo: "nada se descarta en silencio" (P1) también vale para lo inesperado. */
+export class UnknownApiError extends Error {
+  readonly kind = "unknown-api-error" as const;
+  readonly statusCode: number;
+  readonly rawBody: string;
+
+  constructor(statusCode: number, rawBody: string) {
+    super(`Respuesta no reconocida del servidor (HTTP ${statusCode}).`);
+    this.name = "UnknownApiError";
+    this.statusCode = statusCode;
+    this.rawBody = rawBody;
+  }
 }
 
 // -------------------------------------------------------------------------------------------
@@ -110,13 +164,7 @@ function clasificarYLanzar(status: number, textoCrudo: string): never {
 
   if (esCuerpoDeError(cuerpo)) {
     throw new ApiError(
-      {
-        timestamp: new Date().toISOString(),
-        statusCode: status,
-        code: cuerpo.code as string,
-        message: typeof cuerpo.message === "string" ? cuerpo.message : "",
-        details: undefined,
-      },
+      { code: cuerpo.code as string, message: typeof cuerpo.message === "string" ? cuerpo.message : "" },
       status,
     );
   }
@@ -185,5 +233,3 @@ export async function enviarRsvp(token: string, input: RsvpRespuestaInput): Prom
   };
   return peticionRsvp<RsvpEstado>(token, { method: "PUT", jsonBody: cuerpo });
 }
-
-export { ApiError, SessionError, UnknownApiError } from "@/lib/errors";

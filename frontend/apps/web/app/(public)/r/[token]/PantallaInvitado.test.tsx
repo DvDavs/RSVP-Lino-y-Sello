@@ -198,7 +198,7 @@ describe("estado 2 — ya respondió, en los dos sentidos", () => {
 describe("estado 3 — enlace que no resuelve", () => {
   it("RSVP_LINK_NOT_FOUND muestra una sola pantalla genérica, sin oferta de «buscar tu invitación»", async () => {
     obtenerRsvpMock.mockRejectedValue(
-      new ApiError({ timestamp: "x", statusCode: 404, code: "RSVP_LINK_NOT_FOUND", message: "Este enlace ya no funciona" }, 404),
+      new ApiError({ code: "RSVP_LINK_NOT_FOUND", message: "Este enlace ya no funciona" }, 404),
     );
     render(<PantallaInvitado token="token-cualquiera" />);
 
@@ -208,7 +208,7 @@ describe("estado 3 — enlace que no resuelve", () => {
 
   it("un token mal formado produce la MISMA pantalla que uno inexistente (mismo code del backend)", async () => {
     obtenerRsvpMock.mockRejectedValue(
-      new ApiError({ timestamp: "x", statusCode: 404, code: "RSVP_LINK_NOT_FOUND", message: "Este enlace ya no funciona" }, 404),
+      new ApiError({ code: "RSVP_LINK_NOT_FOUND", message: "Este enlace ya no funciona" }, 404),
     );
     render(<PantallaInvitado token="!!!" />);
     expect(await screen.findByText(/este enlace ya no funciona/i)).toBeTruthy();
@@ -218,7 +218,7 @@ describe("estado 3 — enlace que no resuelve", () => {
 describe("límite de intentos", () => {
   it("429 en la carga inicial pide esperar, sin decir si el token era válido", async () => {
     obtenerRsvpMock.mockRejectedValue(
-      new ApiError({ timestamp: "x", statusCode: 429, code: "RSVP_TOO_MANY_ATTEMPTS", message: "Espera" }, 429),
+      new ApiError({ code: "RSVP_TOO_MANY_ATTEMPTS", message: "Espera" }, 429),
     );
     render(<PantallaInvitado token="tok-7" />);
 
@@ -251,7 +251,7 @@ describe("errores desconocidos al enviar", () => {
     await screen.findByRole("heading", { level: 1, name: NOMBRE_INVITADO });
 
     enviarRsvpMock.mockRejectedValueOnce(
-      new ApiError({ timestamp: "x", statusCode: 422, code: "GUEST_QUOTA_EXCEEDED", message: "No puedes confirmar más" }, 422),
+      new ApiError({ code: "GUEST_QUOTA_EXCEEDED", message: "No puedes confirmar más" }, 422),
     );
     await usuario.click(screen.getByRole("button", { name: /confirmar mi asistencia/i }));
 

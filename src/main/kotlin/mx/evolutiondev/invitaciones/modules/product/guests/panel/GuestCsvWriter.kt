@@ -69,8 +69,8 @@ class GuestCsvWriter {
      * la clienta.
      *
      * El arreglo es el estándar: se antepone un apóstrofo, que las tres hojas de cálculo tratan como
-     * «esto es texto» y no pintan en la celda. Se cubren también el tabulador y el retorno de carro,
-     * que algunas versiones aceptan como preámbulo de fórmula.
+     * «esto es texto» y no pintan en la celda. Se cubre también el tabulador, que algunas versiones
+     * aceptan como preámbulo de fórmula.
      */
     private fun neutralizarFormula(valor: String): String =
         if (valor.isNotEmpty() && valor.first() in PREFIJOS_DE_FORMULA) "'$valor" else valor
@@ -88,8 +88,11 @@ class GuestCsvWriter {
         const val SEPARADOR = ","
         const val SALTO = "\r\n"
 
-        /** Caracteres con los que una hoja de cálculo empieza a leer una fórmula. Ver [celda]. */
-        val PREFIJOS_DE_FORMULA = setOf('=', '+', '-', '@', '\t', '\r')
+        /**
+         * Caracteres con los que una hoja de cálculo empieza a leer una fórmula. Ver [celda]. El
+         * retorno de carro no está porque [celda] ya lo convierte en espacio antes de llegar aquí.
+         */
+        val PREFIJOS_DE_FORMULA = setOf('=', '+', '-', '@', '\t')
 
         val ENCABEZADOS = listOf(
             "Nombre",
