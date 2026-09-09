@@ -360,13 +360,21 @@ jobs:
       #     3 en verde ejecutándolo solo). Ahora espera al fotograma pintado y reintenta el análisis
       #     con `expect.poll` — mide el estado estable, no oculta nada: una violación real sigue
       #     rompiendo el job.
+      # Y AUN ASÍ el CI sigue con UN worker, ahora por un motivo distinto y MEDIDO tres veces aquí:
+      # con `--workers=2` el fallo que queda es siempre el LIENZO del editor sin pintar a tiempo, en
+      # pruebas de OTROS ficheros (fuera del territorio de esta tarea) y contra presupuestos que fija
+      # la configuración: `teclado-editor` E-10a a 20 s y verde en el reintento a solas en 5,2 s
+      # (34299786630), `editor-nucleo` E-N2 en el `expect` de 5 s (34304958215), y una tercera con el
+      # backend ya arrancado desde el jar (34305882574). No es aislamiento —los dos specs de I-CI-01
+      # pasan— y en local la MISMA suite pasa con 4 workers en 1,3 min: es la máquina. Queda como
+      # issue **I-CI-03** con las tres salidas posibles, todas fuera de este encargo.
+      # El worker único ya no tapa un defecto de aislamiento: tapa un presupuesto de reloj.
       # `--timeout=60000` SE MANTIENE (enmienda de ADR-CI-01 que sigue viva): el presupuesto de 30 s
-      # de `06 §8.2` punto 8 es de diseño y se midió en local; el runner comparte 4 vCPU con la JVM
-      # del backend, `next start` y Postgres. Eso es máquina, no aislamiento.
+      # de `06 §8.2` punto 8 es de diseño y se midió en local.
       # NO se salta, omite ni pone en cuarentena ninguna prueba: corren las 79, y
       # `--fail-on-flaky-tests` sigue rompiendo el job si alguna pasa solo en el reintento.
-      - name: e2e + a11y (la suite completa, en paralelo — I-CI-01)
-        run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=2 --timeout=60000
+      - name: e2e + a11y (la suite completa — I-CI-01 cerrada, paralelismo en I-CI-03)
+        run: pnpm --filter web exec playwright test --fail-on-flaky-tests --workers=1 --timeout=60000
         env:
           TPL_DEV_DB: templates2_e2e
           TPL_TEST_STATE_DIR: /tmp/templates2-pg

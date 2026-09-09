@@ -32,7 +32,16 @@ export default defineConfig({
   // de `RefreshTokenService.kt:20` (módulo `auth` antiguo, ajeno — `preguntas-abiertas.md` § P-3-3b-8).
   globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
-  workers: process.env.CI ? 4 : undefined,
+  // I-CI-01 / I-CI-03, medido en el runner de GitHub (no en local): con 2 workers la suite falla,
+  // pero YA NO por aislamiento —eso se arregló en `editor-3c-evidencia.spec.ts` y se verificó— sino
+  // porque el LIENZO del editor no pinta dentro de su presupuesto cuando dos Chromium comparten los
+  // 4 vCPU con el backend, `next start` y Postgres: `teclado-editor` E-10a a 20 s (corrida
+  // 34299786630) y `editor-nucleo` E-N2 en el `expect` de 5 s de aquí abajo (34304958215). En LOCAL,
+  // en cambio, la suite entera pasa con 4 workers en 1,3 min. El `4` de antes nunca se midió en CI
+  // y ponía en la configuración un número que el runner no sostiene; el `1` dice la verdad y es el
+  // único con verde repetido. Subirlo exige cerrar I-CI-03, no tocar esta línea.
+  // El job `design` (`playwright.design.config.ts`, sin backend) conserva sus 4: ahí sí caben.
+  workers: process.env.CI ? 1 : undefined,
   // 06 §8.2.1: un reintento en CI, solo para arranques lentos del servidor; una prueba que solo
   // pasa en el reintento se reporta "flaky" y el job falla igual con `--fail-on-flaky-tests`.
   retries: process.env.CI ? 1 : 0,

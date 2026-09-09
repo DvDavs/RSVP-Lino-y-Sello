@@ -91,3 +91,11 @@ corren de verdad en GitHub Actions y quedan en verde sobre esta rama: corrida
 llevaba 19 corridas seguidas en rojo sin que nadie leyera el log: el job `e2e` moría en 0 s y ninguna
 prueba de extremo a extremo se había ejecutado jamás en el runner. Correcciones, tiempos por job y lo
 que quedó abierto: `handoffs/ci-github.md`, `bitacora/ci-github.md` e `issues-ci.md` (I-CI-01 e I-CI-02).
+
+## I-CI-01 cerrada el 2026-09-09 (aislamiento e2e)
+Las dos pruebas de `editor-3c-evidencia.spec.ts` ya no se pisan sobre la invitación sembrada y
+`a11y-publico.spec.ts` dejó de escribir en la caché ISR compartida; la suite sigue siendo 79 y pasa
+en local con 4 workers. El CI se queda en **1 worker** de todos modos: con 2, el runner falla porque
+el LIENZO del editor no pinta dentro de su presupuesto, en pruebas fuera del alcance de esa tarea —
+issue **I-CI-03**, con tres salidas propuestas. Ver `bitacora/ci-i-ci-01.md`, `issues-ci.md` y la
+enmienda de ADR-CI-01.

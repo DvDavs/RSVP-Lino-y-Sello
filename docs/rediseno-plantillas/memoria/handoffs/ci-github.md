@@ -39,3 +39,22 @@ sin backend ni Postgres, `webServer` propio en el 3133) pasa a job propio `desig
 se recorta: cambian de job, no desaparecen. Verde: `backend` 5 m 57 s · `frontend` 6 m 04 s ·
 `design` 6 m 09 s (279/279) · `e2e` 10 m 11 s (79/79 contra el backend real + LHCI).
 Anti-flake: `--fail-on-flaky-tests` en la única invocación, sin `skip` ni `fixme` en el árbol.
+
+## 3. Tarea I-CI-01 (2026-09-09) — aislamiento cerrado, paralelismo NO
+**Workers finales: 1** (`--workers=1 --timeout=60000`, y `playwright.config.ts` dice ahora
+`workers: CI ? 1` para no prometer un 4 que el runner no sostiene). El job `design` conserva sus 4:
+no tiene backend detrás.
+- **Cerrado**: I-CI-01. `editor-3c-evidencia.spec.ts` ya no comparte la invitación sembrada sin
+  protección (su prueba de `axe` crea la suya; la de capturas toma el mutex y se queda con la
+  sembrada a propósito: es evidencia versionada y el lienzo ya está caliente).
+  `a11y-publico.spec.ts` dejó de purgar la caché ISR compartida y muestrea `axe` con la página
+  quieta. Detalle y medidas en `bitacora/ci-i-ci-01.md`.
+- **Abierto**: **I-CI-03**. Con 2 workers el runner sigue rojo, y ya no por datos: el lienzo del
+  editor no pinta dentro de su presupuesto (`expect` 5 s de la config; 20 s en `teclado-editor`).
+  Tres corridas lo miden. En local la misma suite pasa con 4 workers en 1,3 min.
+- **Disparadores**: se añaden a `push` `claude/fase-4-kit-de-autor` y `claude/fase-5-producto` (sin
+  ellas la fase 5 no tendría CI). Sin comodines: ~28 min de Actions por corrida (`issues-ci.md`).
+- **`scripts/ci-backend.sh`**: el backend del job arranca desde el **jar** (`bootJar` + `java -jar`)
+  y no con `bootRun`. De cuatro procesos java vivos durante las pruebas a uno, y de paso el CI
+  prueba el artefacto de producción. Arranque medido: 18,7 s en local, ~2 min con la compilación.
+- **Tiempos del job `e2e`** con un worker y el jar: ver la última corrida verde de la rama.

@@ -1776,7 +1776,7 @@ Todas con estado **propuesta**; solo el orquestador cambia el estado. Fecha 2026
 ---
 
 ## ADR-CI-01 — En CI, el job `e2e` corre con UN worker y 60 s de tope por prueba
-- Fecha: 2026-09-06 · Estado: propuesta · Autor: tarea «CI real en GitHub Actions»
+- Fecha: 2026-09-06 · Estado: **enmendada el 2026-09-09** (ver la enmienda al final) · Autor: tarea «CI real en GitHub Actions»
 - Contexto: `contratos.md §6` remite a `06 §8.2` (ADR-1R-C-11), que fija `fullyParallel: true` con
   **`workers: 4` en CI** y `timeout: 30_000`. Al ejecutar por primera vez el job `e2e` en un runner
   de GitHub (corrida [34052024407](https://github.com/DvDavs/RSVP---Lino-Sello/actions/runs/34052024407))
@@ -1812,3 +1812,25 @@ Todas con estado **propuesta**; solo el orquestador cambia el estado. Fecha 2026
   presupuesto de 30 s por prueba sigue vigente como criterio de diseño en local. Si la fase 6 mueve
   el CI a un runner mayor, esta ADR debe revisarse — pero subir los workers **exige antes cerrar
   I-CI-01**: con la invitación sembrada compartida sin mutex, más paralelismo vuelve a romper.
+
+### Enmienda del 2026-09-09 (tarea «I-CI-01») — el worker único se queda, pero por OTRO motivo
+- Estado: **aceptada, con el motivo corregido**. La decisión operativa no cambia (`--workers=1
+  --timeout=60000`); cambia lo que la justifica, y eso importa porque el motivo anterior era una
+  causa que ya no existe.
+- Qué cambió: **I-CI-01 está cerrada**. `editor-3c-evidencia.spec.ts` ya no comparte la invitación
+  sembrada sin protección (su prueba de `axe` crea la suya; la de capturas toma el mutex) y
+  `a11y-publico.spec.ts` dejó de escribir en la caché ISR compartida. La frase «subir los workers
+  exige antes cerrar I-CI-01» queda cumplida.
+- Y sin embargo el paralelismo NO vuelve, porque lo impide algo distinto y medido tres veces en el
+  runner con `--workers=2`: el LIENZO del editor no pinta dentro de su presupuesto cuando dos
+  Chromium comparten los 4 vCPU con la JVM del backend, `next start` y Postgres —`teclado-editor`
+  E-10a agotó 20 s y pasó a solas en 5,2 s (34299786630); `editor-nucleo` E-N2 agotó el `expect` de
+  5 s (34304958215); y siguió rojo tras reducir de cuatro procesos java a uno arrancando el backend
+  desde el jar (34305882574)—. En LOCAL, la misma suite pasa con **4 workers** en 1,3 min, dos
+  veces: no es el código, es la máquina. Queda como issue **I-CI-03**.
+- Consecuencia para quien lea esto luego: el `1` ya no tapa un fallo de aislamiento (eso está
+  arreglado y verificado); tapa un presupuesto de reloj de `06 §8.2` (puntos 8 y `expect` 5 s) que
+  este runner no sostiene con paralelismo. `playwright.config.ts` pasa a `workers: CI ? 1` para que
+  la configuración diga lo mismo que el CI. Subirlo exige cerrar I-CI-03 — y ahí la decisión es del
+  dueño: subir los topes de esas pruebas, dejar de grabar vídeo en CI, o arreglar el primer pintado
+  del lienzo en el producto.
