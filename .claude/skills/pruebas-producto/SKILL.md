@@ -118,6 +118,37 @@ test("mi verbo nuevo", async ({ page }) => {
 - Si tu prueba necesita el manifiesto real de `boda-clasica` montado (panel de contenido,
   `ThemePicker`), añade `await sembrarManifiesto(page, invitationId)` DESPUÉS de `page.goto` (usa el
   gancho `window.__seedManifestFixture` de `NEXT_PUBLIC_E2E_HOOKS=1`, igual que `__editorStore`).
+
+### Cuando necesitas ROL o INVITADOS, no solo una invitación
+Los ayudantes de TypeScript de arriba cubren la clienta y su invitación. Para lo que la fase 5 añade
+—un MASTER, una clienta ajena, invitados con cupos, una invitación pagada frente a otra sin pagar—
+usa la biblioteca de shell `scripts/seed/`, que se creó para esto (**ADR-5-E1-03**, README en
+`scripts/seed/README.md`):
+
+```bash
+scripts/dev-backend.sh start
+eval "$(scripts/seed/invitados.sh)"   # SEED_INVITADOS_TOKEN, _INVITACION, _TOTAL…
+```
+
+| Script | Dueña | Qué deja |
+|---|---|---|
+| `scripts/seed/invitados.sh` | E2 | clienta + invitación + tres invitados con cupos distintos |
+| `scripts/seed/cuenta.sh` | E3 | clienta recién registrada y **sin** invitaciones |
+| `scripts/seed/plan.sh` | E4 | dos invitaciones de la misma clienta: una sin pagar y otra pagada |
+| `scripts/seed/admin.sh` | E5 | un MASTER y una clienta **ajena** con invitación, para probar ruta x rol |
+
+**Edita solo el fichero de tu área. `comun.sh` no se toca**: es el único punto compartido y por eso
+es el que no puede tener conflictos. Cada llamada crea correos, teléfonos e invitaciones nuevos;
+verificado que cuatro corridas simultáneas producen cuatro invitaciones distintas.
+
+Tres cosas del backend que te van a morder si no las sabes, y que ya están resueltas ahí dentro:
+1. El **teléfono es único por cuenta** y su formato real es `+52` más diez dígitos
+   (`Patterns.kt:56`); el mensaje de error dice «10 digitos numéricos» y **omite el prefijo**.
+2. **Una clienta no puede dar de alta a sus propios invitados**: la única superficie está bajo
+   `/admin/**`, reservada a ADMIN y MASTER (`SecurityConfig.kt:42`), y la gemela para USER vive en
+   el módulo prohibido. Por eso la siembra usa un MASTER. Esa ruta la construye **E2** en
+   `modules/product/guests`.
+3. Una invitación con `children_allowed = false` **rechaza** invitados con niños.
 - Si tu prueba necesita una cuenta entera propia (no solo una invitación), usa `cuentaNueva()` —
   cada llamada genera un correo distinto, así que dos pruebas en paralelo nunca comparten cuenta.
 - Limpieza con `borrarInvitacion(id)` en un `finally` (o `test.afterEach`), siempre, incluso si la

@@ -1547,3 +1547,24 @@ las que exigen decisión tuya, en orden de impacto:
 
 ## Respuestas del dueño (2026-09-06)
 Ver `memoria/decisiones-dueno.md` (D-01…D-08): sin migración; marca Lino & Sello / linoysello.com; correos hola@, soporte@, no-responder@; WhatsApp +52 951 470 9685 solo contacto; Stripe; imágenes por IA; tema oscuro en segundo plano; producto completo antes de publicar.
+
+## Fase 5 · sesión E1 (cimientos, 2026-09-09)
+
+Ninguna de estas bloqueó los cimientos: en cada una se tomó la opción conservadora y se siguió.
+Las cuatro sesiones en paralelo (E2–E5) **no deben volver a decidirlas por su cuenta**.
+
+### Lo que hay que decidir con el dueño
+
+- [Fase 5 · E1] **Secretos en claro en el repositorio.** `src/main/resources/application.yml` trae escritos, sin variable de entorno y versionados en git, la clave de firma del JWT (`invitaciones.jwt.secret`), un par de credenciales de AWS (`aws.credentials.access-key`/`secret-key`) y la contraseña de la cuenta de correo (`spring.mail.password`). Con la clave del JWT se puede firmar un token de cualquier cuenta, MASTER incluida; con las de AWS se llega al bucket de producción. Está en el histórico, así que **moverlas a variables de entorno no las saca de ahí: el arreglo de verdad es rotarlas**, y eso solo lo puede hacer el dueño. **Supuesto tomado:** no se tocan en esta fase para no romper el entorno de las otras sesiones ni dar una falsa sensación de arreglo; queda como hallazgo alto S-01 del inventario (`diseno/12-producto-completo.md`, parte A §A3) y como requisito de la fase 7 (despliegue). ¿Rotamos ahora o al desplegar?
+- [Fase 5 · E1] **Pago único por invitación o suscripción.** El prompt maestro recomienda pago único y la ADR de la puerta de publicación (ADR-5-0B-01) se escribió sobre esa recomendación; con suscripción haría falta una fecha de vigencia por invitación y dos avisos por correo antes del vencimiento. **Supuesto tomado:** pago único. ¿Se confirma?
+- [Fase 5 · E1] **Marca de agua como alternativa a la puerta de publicación.** Se descartó para esta fase porque no hay logotipo todavía (D-02) y porque convierte un criterio binario en una negociación estética. **Supuesto tomado:** puerta de publicación, sin marca de agua. Queda anotada por si el dueño la prefiere más adelante.
+
+### Hallazgos que E2 y E3 heredan (no son preguntas, son trabajo)
+
+- [Fase 5 · E1] **Una clienta no puede dar de alta a sus propios invitados.** Verificado contra el backend real: `POST /admin/invitations/{id}/guests/append` devuelve `403` con un token de USER, porque `SecurityConfig.kt:42` reserva `/admin/**` a ADMIN y MASTER; la ruta gemela para USER vive en `/user/invitations/{id}/guests`, es decir, dentro de `modules/user/invitations`, que es **área prohibida** (`AdminGuestsController.kt:30-31` lo dice por escrito). **Supuesto tomado:** construir esa superficie para USER en `modules/product/guests` es trabajo de **E2**; mientras no exista, `scripts/seed/invitados.sh` siembra con un MASTER y lo deja anotado.
+- [Fase 5 · E1] **El mensaje de error del teléfono miente.** El patrón real del registro es `^\\+52\\d{10}$` (`Patterns.kt:56`) y el mensaje dice «Debes proporcinar un número telefónico válido de 10 digitos numéricos»: omite el prefijo obligatorio y además tiene una errata («proporcinar»). Un formulario que enseñe ese mensaje deja a la clienta sin saber qué corregir, que es exactamente lo que el skill `ui-formulario` prohíbe. **Supuesto tomado:** lo arregla **E3** al construir el registro, junto con el resto del endurecimiento de la cuenta.
+- [Fase 5 · E1] **El teléfono es único por cuenta y lo dice.** El registro responde «Este número de teléfono no se encuentra disponible» ante un duplicado, que es un oráculo de enumeración de teléfonos equivalente al de correos que la fase 3-B cerró en N-01. **Supuesto tomado:** entra en el endurecimiento de registro de **E3** (mensajes genéricos, sin enumeración), junto con el de correos.
+
+### Contradicciones entre agentes que resolvió el orquestador de E1
+
+Están en `diseno/12-producto-completo.md §0` y en las ADR `ADR-5-E1-01` (ruta `/r/[token]` con un solo token, frente a los dos tokens que proponía el inventario) y `ADR-5-E1-02` (cuatro subpaquetes en `modules/product`, no cinco). No se reabren.

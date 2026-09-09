@@ -135,3 +135,29 @@ suite completa tras cada merge; commit y push por bloque.
 | Cierre · revisión de calidad visual (3 viewports, 18 pantallas, 51 capturas) | 3c-cv | Opus | **CUMPLE** tras 4 altas corregidas (`1b978ba`) | iconos `mono` macizos (82 regenerados), panel de secciones, `WizardProgress`, error en inglés; galería 279/279 con referencias regeneradas; e2e 70/70 |
 | Cierre · recorrido de UX sin instrucciones (móvil y escritorio, 64 capturas) | 3c-ux → UX-A/B/C | Opus → Opus + relevos Sonnet | **NO al llegar** (6 graves) → corregidas | G-01 contacto configurable (UX-C, `70e58ca`), G-02/G-03/G-06b asistente (UX-A, `b27297b`), G-04/G-05/G-06a editor (UX-B, `a330081`); relevos Sonnet con encargos mínimos tras el límite de uso y el corte de contexto; cierre en `0f68f4d`: e2e 79/79, galería 279/279 |
 | Cierre · adversarial de a11y y rendimiento | 3c-adv | Opus | **CERRABLE** tras A-01/A-02 (`ece4069`) | fuentes daban 404 en los tres caminos (ahora copiadas en el build de `web` con compuerta HTTP); objetivos < 24 px en marca, salto y volver; contraste 0 fallos en 9 pantallas con sabotaje; 2 585 pruebas, e2e 71/71 |
+
+## Fase 5 — producto completo · sesión E1 (cimientos), 2026-09-09
+
+Rama `claude/fase-5-cimientos-adenda-u150eq`, creada desde `origin/claude/fase-5-producto` (`6535114`).
+La fase se reparte en seis sesiones: **E1 cimientos** (esta), E2 invitados/RSVP/compartir, E3
+cuenta/marca/legal, E4 pagos, E5 admin, E6 integración y cierre. E2–E5 arrancan **desde el commit de
+cimientos de esta sesión**.
+
+| Bloque | Agente | Modelo | Estado | Verificación del orquestador |
+|---|---|---|---|---|
+| 5-0a · seis skills (`ui-componente`, `ui-pantalla`, `ui-formulario`, `ui-flujo-asistente`, `ui-icono`, `pruebas-producto`) | 5-0a | Sonnet | **aceptada** con añadido del orquestador | las seis cargan (`ListSkills` las lista); 56 rutas citadas comprobadas con `ls`, 0 fallos; 0 emojis por code point; el orquestador añadió a `pruebas-producto` la biblioteca `scripts/seed/`, que no existía cuando se escribió |
+| 5-0b-A · inventario del backend heredado | 5-0b-A | Opus | **aceptada** | 119 rutas inventariadas, 43 en la tabla de decisión (17 reutilizar · 14 endurecer · 12 crear), 13 hallazgos de seguridad con `fichero:línea`; respondió la pregunta crítica (los invitados SÍ se alcanzan desde la invitación nueva: las dos tablas cuelgan de `invitation`) |
+| 5-0b-B · mapa de producto, wireframes y ADR de la puerta | 5-0b-B | Opus | **aceptada** | 9 wireframes ASCII, tabla pantalla × rol con dueña por sesión, `ADR-5-0B-01` completa con matriz de pago y comportamiento ante reembolso |
+| 5-0c · esqueleto `modules/product` | 5-0c | Opus | **aceptada** | `./gradlew compileKotlin` limpio; `./gradlew test --tests '*product*'` **12/12**; las cuatro rutas de salud responden `401` sin token contra el backend real, que es lo correcto: `SecurityConfig` cierra por defecto |
+| 5-0d · enganches del frontend | 5-0d | Opus | **aceptada** con 7 rutas completadas por el orquestador | el agente se cortó tras dejar 2 de 9 rutas; el orquestador escribió las 7 restantes siguiendo sus convenciones. `typecheck` 6/6 · `web test` **598** (566 antes) · `build` lista las 9 rutas |
+| 5-0e · siembra por área | orquestador | — | **aceptada** | los cuatro scripts corren contra el backend real y salen con 0; **4 corridas simultáneas → 4 invitaciones distintas** (ids 9-12), que es la propiedad que I-CI-01 echaba en falta |
+
+**Incidencia de la sesión.** Los cinco agentes de la primera ola murieron a la vez por el límite de
+sesión de la API (429, «resets 2am UTC»), con el trabajo ya en disco pero sin bitácoras y con 5-0d a
+medias. El orquestador no relanzó (habría vuelto a chocar): verificó lo que había, completó lo que
+faltaba y ensambló. Es la razón de que no haya `bitacora/5-0a.md`, `5-0b-B.md`, `5-0c.md` ni
+`5-0d.md`: su contenido está en `bitacora/5-0-cimientos.md`.
+
+**Rojo conocido y ajeno:** `components/sitio/portada.test.tsx` falla desde `bfdcbaa` (integración de
+la imagen de portada sin pruebas ejecutadas). Comprobado con `git stash` que falla igual sin ninguno
+de los cambios de esta sesión. Lo arregla E6 al mergear la rama de las imágenes.
