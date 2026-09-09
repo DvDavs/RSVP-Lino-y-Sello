@@ -106,15 +106,25 @@ class CustomerService(
 
         val existingUser = customerRepository.findByEmailEvenIfDisabled(userRequest.email)
         
+        // R1-01 (`ADR-5-E3-C1-01`). **El alta pública NO reactiva.** Antes, un correo que existía pero
+        // estaba deshabilitado caía en `reactivateDisabledUser`, que reescribía la contraseña con la
+        // que venía en el cuerpo, ponía `isEnabled = true` y borraba `deletedBy`: cualquiera que
+        // supiera el correo de una cuenta dada de baja se quedaba con ella —y con sus invitaciones,
+        // invitados y RSVP— desde una ruta `permitAll`, sin contraseña anterior, sin token y sin aviso
+        // al titular.
+        //
+        // Los dos casos —correo tomado por una cuenta viva y correo tomado por una cuenta
+        // deshabilitada— responden ahora **exactamente lo mismo**: la misma excepción, el mismo texto,
+        // el mismo `400`. Y cuestan lo mismo: una consulta, un `registrarIntento` y el lanzamiento;
+        // ninguna de las dos ramas hace bcrypt, ni acuña token, ni escribe, ni encola correo, así que
+        // el tiempo de respuesta tampoco distingue una cuenta deshabilitada de una viva.
+        //
+        // La vuelta de una cuenta dada de baja queda **sólo** en manos de un ADMIN/MASTER
+        // (`createUserByAdmin` → `reactivateDisabledUserByAdmin`, ruta autenticada y con jerarquía).
+        // Queda anotado en `preguntas-abiertas.md`: hoy no hay reactivación autoservicio.
         if (existingUser != null) {
-            if (existingUser.isEnabled) {
-                authThrottleService.registrarIntento(AmbitoIntentos.REGISTRO, userRequest.email)
-                throw DuplicatedEmailException("Este correo no se encuentra disponible, por favor intenta con uno diferente")
-            } else {
-                val reactivado = reactivateDisabledUser(existingUser, userRequest)
-                authThrottleService.registrarExito(AmbitoIntentos.REGISTRO, userRequest.email)
-                return reactivado
-            }
+            authThrottleService.registrarIntento(AmbitoIntentos.REGISTRO, userRequest.email)
+            throw DuplicatedEmailException("Este correo no se encuentra disponible, por favor intenta con uno diferente")
         }
 
         // El teléfono YA NO se comprueba por unicidad en el alta pública (`ADR-5-E3-05`). El mensaje
@@ -166,48 +176,6 @@ class CustomerService(
         return savedUser
     }
 
-    private fun reactivateDisabledUser(existingUser: CustomerEntity, userRequest: UserRequest): CustomerEntity {
-        // Sin comprobación de unicidad del teléfono, por la misma razón que en `signUp` (`ADR-5-E3-05`):
-        // este camino lo alcanza cualquiera desde `/auth/signup`, así que respondía al mismo sondeo.
-
-        existingUser.apply {
-            name = userRequest.name
-            lastName = userRequest.lastName
-            password = passwordEncoder.encode(userRequest.password)
-            isEnabled = true
-            deletedBy = null
-            birthdate = userRequest.birthdate
-            phone = userRequest.phone
-            address = userRequest.address
-            postalCode = userRequest.postalCode
-            city = userRequest.city
-            state = userRequest.state
-            howKnow = userRequest.howKnow
-        }
-
-        // Una cuenta que vuelve a nacer se verifica como cualquier alta nueva.
-        val tokenDeVerificacion = emailVerificationService.prepararVerificacionDeAlta(existingUser)
-        val savedUser = customerRepository.save(existingUser)
-
-        coroutineScope.launch {
-            emailService.sendEmail(
-                to = savedUser.email,
-                templateName = "welcome",
-                variables = mapOf(
-                    "customerName" to "${savedUser.name} ${savedUser.lastName}",
-                    "companyName" to mailProperties.remitenteNombre
-                )
-            )
-        }
-        emailVerificationService.enviarCorreoDeVerificacion(
-                nombre = savedUser.name,
-                destino = savedUser.email,
-                token = tokenDeVerificacion
-        )
-
-        return savedUser
-    }
-
     fun createUserByAdmin(creatorId: Long, userRequest: UserRequest): CustomerEntity {
         val creator = customerRepository.findById(creatorId).orElseThrow {
             IllegalArgumentException("No se encontró un usuario asociado al id: $creatorId")
@@ -232,16 +200,15 @@ class CustomerService(
             }
         }
 
-        userRequest.phone?.let { phone ->
-            if (customerRepository.existsByPhoneEvenIfDisabled(phone)) {
-                val phoneOwner = customerRepository.findByPhone(phone)
-                if (phoneOwner != null) {
-                    throw IllegalArgumentException(
-                            "Este número de teléfono no se encuentra disponible, por favor intenta con uno diferente"
-                    )
-                }
-            }
-        }
+        // R1-10 (`ADR-5-E3-C1-03`): aquí **tampoco** se comprueba la unicidad del teléfono, por la
+        // misma razón que en `signUp` y por una añadida. La razón vieja: `customer.phone` no tiene
+        // índice único en la base (`V1__initial_schema.sql:1868-1869` es un índice normal y parcial),
+        // así que la comprobación no defendía ninguna restricción real. La añadida: desde que el alta
+        // pública dejó de comprobarla, cualquiera puede registrar sin autenticarse dos cuentas con el
+        // mismo número — y entonces `findByPhone`, que es una derivada de **resultado único**, lanzaba
+        // `IncorrectResultSizeDataAccessException` y esta alta administrativa pasaba de un `400`
+        // explicativo a un `500` provocable desde fuera. La comprobación se retira en los dos lados a
+        // la vez para que el comportamiento sea el mismo; `findByPhone` se elimina del repositorio.
 
         val newUser = CustomerEntity(
                 name = userRequest.name,
@@ -282,13 +249,9 @@ class CustomerService(
         userRequest: UserRequest,
         creatorId: Long
     ): CustomerEntity {
-        userRequest.phone?.let { phone ->
-            if (phone != existingUser.phone && customerRepository.existsByPhoneEvenIfDisabled(phone)) {
-                throw IllegalArgumentException(
-                        "Este número de teléfono no se encuentra disponible, por favor intenta con uno diferente"
-                )
-            }
-        }
+        // R1-10: sin comprobación de unicidad del teléfono, igual que en `createUserByAdmin`. Aquí no
+        // había `findByPhone`, así que no había `500`, pero sí un `400` que bloqueaba a la ADMIN por un
+        // número que el alta pública deja repetir libremente. Coherencia en los dos lados.
 
         existingUser.apply {
             name = userRequest.name
