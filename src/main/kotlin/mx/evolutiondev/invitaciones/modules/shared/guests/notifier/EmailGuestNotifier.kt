@@ -11,6 +11,7 @@ import mx.evolutiondev.invitaciones.modules.shared.guests.notifier.repository.In
 import mx.evolutiondev.invitaciones.modules.shared.guests.notifier.repository.model.InvitationGuestNotification
 import mx.evolutiondev.invitaciones.modules.shared.guests.notifier.repository.model.NotificationTemplate
 import mx.evolutiondev.invitaciones.modules.shared.guests.repository.model.InvitationGuestEntity
+import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2FlagRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -19,6 +20,8 @@ class EmailGuestNotifier(
         private val emailService: EmailService,
         private val invitationGuestsNotificationRepository: InvitationGuestNotificationRepository,
         private val invitationRepository: InvitationRepository,
+        /** Solo lectura de `invitation.uses_templates2` para S-08; ver [buildInvitationUrl]. */
+        private val templates2FlagRepository: Templates2FlagRepository,
         @Value("\${app.frontend.url}") private val frontendUrl: String
 ) : GuestAppNotifier {
 
@@ -55,18 +58,47 @@ class EmailGuestNotifier(
         }
     }
 
+    /**
+     * Enlace personal que viaja en el correo del invitado.
+     *
+     * ### S-08 (severidad ALTA, funcional), cerrado
+     * Esta función devolvía una URL **escrita en el código** apuntando al producto antiguo
+     * (`https://invitaciones-digitales-agape.cloud/...`), con la línea que usaba `frontendUrl`
+     * comentada justo debajo. Consecuencia: **todo** correo que el backend mandaba a un invitado lo
+     * llevaba al producto viejo, no al nuevo. Además la URL se componía con
+     * `invitation.template.eventType.name` y `invitation.people`, datos del módulo antiguo que una
+     * invitación de `templates2` puede no tener.
+     *
+     * Ahora: cuando `invitation.uses_templates2` es `true`, el enlace es
+     * `<frontendUrl>/r/<confirmationToken>` — la ruta del invitado que fijó §0.3, con **un solo**
+     * token, construida con `app.frontend.url`, que ya estaba inyectada. Fíjese que ese camino
+     * **retorna antes** de tocar `template` y `people`: son asociaciones del módulo antiguo que una
+     * invitación nueva no tiene por qué poder resolver.
+     *
+     * Para el resto (invitaciones que no son de `templates2`) se conserva el comportamiento actual,
+     * salvo que el origen deja de estar escrito en el código y sale de `frontendUrl`. **Ningún
+     * dominio literal queda en este fichero.**
+     *
+     * La bandera se lee con `Templates2FlagRepository` (`Templates2FlagRepository.kt:44-45`), que es
+     * el **único** acceso a esa columna en todo el repositorio; `InvitationEntity` no la mapea. Es
+     * una consulta nativa de solo lectura, no se toca `modules/templates2`.
+     */
     private fun buildInvitationUrl(
         frontendUrl: String,
         invitation: InvitationEntity,
         token: String
     ): String {
+        val base = frontendUrl.trimEnd('/')
+
+        if (templates2FlagRepository.usesTemplates2(invitation.id) == true) {
+            return "$base/r/$token"
+        }
+
         val eventTypeSlug = invitation.template.eventType.name.slugify()
-            .let { if (it == "quince-anos") "xv" else it } 
-        val templateId = invitation.template.id
+            .let { if (it == "quince-anos") "xv" else it }
         val peopleNamesSlug = formatPeopleNames(invitation.people)
-        
-        return "https://invitaciones-digitales-agape.cloud/invitaciones/${invitation.id}/$eventTypeSlug/$peopleNamesSlug?token=$token"
-        //return "$frontendUrl/invitaciones/${invitation.id}/$eventTypeSlug/$peopleNamesSlug?token=$token"
+
+        return "$base/invitaciones/${invitation.id}/$eventTypeSlug/$peopleNamesSlug?token=$token"
     }
 
     override fun notifyAll(

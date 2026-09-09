@@ -2,9 +2,8 @@ package mx.evolutiondev.invitaciones.modules.shared.guests.service
 
 import mx.evolutiondev.invitaciones.core.auth.jwt.JwtUtil
 import mx.evolutiondev.invitaciones.core.util.formatter.isAtLeastOneDayBefore
-import mx.evolutiondev.invitaciones.core.util.formatter.isValidEmail
+import mx.evolutiondev.invitaciones.core.util.formatter.toDate
 import mx.evolutiondev.invitaciones.core.util.formatter.valueOrZero
-import mx.evolutiondev.invitaciones.modules.admin.invitations.repository.model.eventDate
 import mx.evolutiondev.invitaciones.modules.shared.guests.exception.GuestNotFoundException
 import mx.evolutiondev.invitaciones.modules.shared.guests.notifier.EmailGuestNotifier
 import mx.evolutiondev.invitaciones.modules.shared.guests.repository.InvitationGuestsRepository
@@ -30,26 +29,21 @@ class GuestAttendanceService(
 
         validateGuestForConfirmation(guest)
 
-        var updatedGuest = guest
+        // S-07 (severidad MEDIA), cerrado: aquí se guardaba `request.email` en el invitado cuando el
+        // cuerpo traía uno distinto, sin confirmarlo y sin avisar al correo anterior. Bastaba tener
+        // el enlace —un reenvío de WhatsApp, una captura— para redirigir a otro buzón todos los
+        // avisos posteriores, incluido el que lleva el `cancellationToken`
+        // (`EmailGuestNotifier.kt:241`, `:251-252`), y con eso tomar el control de ese RSVP.
+        //
+        // El RSVP **no** cambia el correo del invitado. `request.email` se ignora por completo y sin
+        // error: el cuerpo se sigue aceptando tal cual para no romper a los clientes heredados que lo
+        // mandan, pero no tiene ningún efecto. La superficie nueva (`/public/` + `r/{token}`) ni
+        // siquiera declara el campo. Si algún día el producto quiere recoger un correo de contacto
+        // declarado por el invitado, va en una columna aparte que no reemplace el destino de las
+        // notificaciones (arreglo mínimo propuesto en el hallazgo).
+        val updatedGuest = guest
 
-        if (!request.email.isNullOrBlank() && request.email != guest.email) {
-            if (!request.email.isValidEmail()) {
-                throw IllegalArgumentException("El formato del correo electrónico es inválido")
-            }
-
-            val existingEmail = invitationGuestsRepository.findByInvitationIdAndEmailAndIsEnabledTrue(
-                guest.invitation.id,
-                request.email
-            )
-            if (existingEmail != null && existingEmail.id != guest.id) {
-                throw IllegalArgumentException("Este correo electrónico ya está registrado para otro invitado en este evento.")
-            }
-
-            updatedGuest = invitationGuestsRepository.save(guest.copy(email = request.email))
-        }
-
-        val eventDate = updatedGuest.invitation.eventDate()
-        if (!Date().isAtLeastOneDayBefore(eventDate)) {
+        if (eventoCerrado(updatedGuest.invitation.date, updatedGuest.invitation.time)) {
             throw IllegalArgumentException("La fecha del evento ya pasó, no puedes confirmar tu asistencia")
         }
 
@@ -181,6 +175,31 @@ class GuestAttendanceService(
         if (!invitation.youngAllowed && youngCount > 0) {
             throw IllegalArgumentException("No se permiten confirmar invitados con jóvenes en este evento")
         }
+    }
+
+    companion object {
+
+        /** El mismo formato que arma `InvitationEntity.eventDate()` (`_InvitationKtx.kt:7-9`). */
+        const val FORMATO_FECHA_EVENTO = "yyyy-MM-dd HH:mm"
+
+        /**
+         * **La única definición de «este evento ya cerró».**
+         *
+         * Se extrajo a una función pública porque la superficie pública nueva del RSVP necesita
+         * decirlo **antes** de enseñar el formulario (`event.closed` del contrato 5-2 §2), y la
+         * alternativa era escribir la misma condición en dos sitios y que un día dejaran de coincidir:
+         * la página ofrecería confirmar y el `PUT` lo rechazaría.
+         *
+         * Toma la fecha y la hora crudas de `invitation` en vez de la entidad, para que quien solo ha
+         * leído dos columnas con una consulta nativa no tenga que montar el grafo del módulo antiguo
+         * únicamente para preguntar esto.
+         *
+         * Semántica conservada exactamente: `"$fecha $hora".toDate()` es lo que hacía
+         * `eventDate()`, y `isAtLeastOneDayBefore` compara por día natural en la zona del servidor
+         * (`StringUtilsKtx.kt:34-38`), así que el día del evento ya cuenta como cerrado.
+         */
+        fun eventoCerrado(fecha: String, hora: String, ahora: Date = Date()): Boolean =
+                !ahora.isAtLeastOneDayBefore("$fecha $hora".toDate(FORMATO_FECHA_EVENTO))
     }
 }
 
