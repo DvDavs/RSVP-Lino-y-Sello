@@ -1620,3 +1620,24 @@ Ninguna bloqueó la sesión: en cada una se tomó la opción conservadora y se s
   `EmptyState` para la ilustración y el texto, y los dos botones fuera de su propiedad de acción, en
   vez de cambiar un componente compartido del sistema desde una sesión de producto. ¿Debe
   `EmptyState` admitir una acción secundaria, o el wireframe debe bajar a un solo botón?
+
+### Observado al capturar las pantallas de E2 (fase 5, cierre de la sesión)
+
+- [Fase 5 · E2] **Nadie pinta todavía el registro de navegación del panel.** `lib/panel/nav.ts` y las
+  entradas por área (`nav.invitados.ts`, `nav.compartir.ts`, `nav.plan.ts`) existen, tienen su prueba
+  de orden e ids únicos, y `nav.test.ts` pasa; pero **ningún componente los consume**: verificado con
+  `grep` sobre `app/**` y `components/**`, cero resultados. La consecuencia se ve en las capturas: la
+  pantalla de invitados sale **sin la barra `Invitación · Invitados · Plan`** que dibuja el wireframe
+  `diseno/12-producto-completo.md §B3.2`. **Supuesto tomado:** E2 no lo construye — el sitio natural
+  es el `layout.tsx` del editor, que es de otra fase y territorio ajeno, y las cuatro sesiones de la
+  fase 5 aportan entradas al mismo registro, así que un consumidor escrito por una sola sería una
+  decisión tomada por todas. ¿Lo pinta la sesión de integración al juntar las cuatro áreas, o se
+  asigna a quien sea dueño del chrome del editor?
+- [Fase 5 · E2] **La portada de la invitación no aparece sobre la tarjeta de identidad.** El
+  wireframe §B3.1 abre `/r/[token]` con la portada enmascarada (`FORMA: Seal`) y la tarjeta opaca
+  encima; lo construido pone la tarjeta arriba del todo y la invitación entera —portada incluida—
+  justo debajo. **Supuesto tomado:** se deja así. Repetir la portada arriba obligaría a que la ruta
+  personal leyera y recompusiera el documento de la invitación **en el servidor** para extraer esa
+  imagen, y eso choca con la regla que sostiene toda la pantalla: el HTML del servidor no lleva nada
+  personal y la ruta no comparte caché con `/i/[publicToken]`. ¿Se acepta la composición actual, o
+  el dueño prefiere la portada arriba y se paga con una segunda petición en cliente?
