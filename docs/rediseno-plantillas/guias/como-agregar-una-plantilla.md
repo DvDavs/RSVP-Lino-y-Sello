@@ -200,6 +200,37 @@ admiten ese tipo.) `pnpm plantilla bloque` sin nada enseña los 14 tipos con su 
 línea, y `pnpm plantilla secciones <tipo>` te dice de qué tipo es cada hueco de una sección: los dos
 comandos juntos responden «qué escribo aquí» sin abrir una sola línea de código.
 
+`richText` es también el único tipo con **marcas** (negrita, cursiva) y enlaces: se escriben como una
+**lista de cadenas** —`"marks": ["bold"]`— nunca como objetos con `type` (`"marks":
+[{"type": "bold"}]`), aunque los demás nodos del propio `richText` sí llevan `type` y tienta calcarlos; un
+enlace no es una marca, es el campo `"href"` del fragmento. La ficha de arriba ya lo trae completo:
+sección «LAS MARCAS…» con la regla y un segundo ejemplo con negrita, cursiva y enlace, copiable tal
+cual.
+
+### Cuando el hueco que necesitas no está en tu andamio
+
+El andamio de tu tipo de evento sólo trae los huecos típicos. Si te falta uno —por ejemplo un
+`richText` con el mensaje del festejado en una plantilla de cumpleaños, y `celebrant` no lo trae por
+defecto—, no lo inventes: `pnpm plantilla secciones celebrant` te dice que esa sección admite el rol
+`honoreeMessage` (tipo `richText`, hoy sin usar), y `pnpm plantilla bloque richText` te da, en su
+sección «EL BLOQUE, en template.json…», el bloque ya armado para pegar en `celebrant.blocks` —sólo
+cambias `id`, `role` y `label`—:
+
+```json
+{ "id": "celebrant.message", "type": "richText", "role": "honoreeMessage",
+  "label": { "es-MX": "Mensaje para el festejado" } }
+```
+
+… y en `defaults.json`, bajo esa misma clave, el valor CON marcas y enlace que imprime `pnpm plantilla
+bloque richText` (sección «EL VALOR CON MARCAS Y ENLACE…»), con los textos cambiados por los tuyos.
+Hecho así —sin tocar nada más—, `pnpm plantilla check` de ese paquete real da:
+
+```
+package_hash = sha256:f28f36b3430dcf56b1ac6ebb9043f640266941284581c0aa6bb3a9884341667c
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+```
+
 ### Los `label` de `template.json` también los lee el invitado
 
 En `template.json`, cada bloque tiene un `label`: el rótulo del hueco. **No es sólo un rótulo del

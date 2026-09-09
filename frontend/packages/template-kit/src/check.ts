@@ -18,6 +18,7 @@ import {
   validateManifest, type Violation,
 } from "@invitaciones/schema";
 import { describeSection, sectionCatalog, type CatalogSection, type CatalogSlot } from "@invitaciones/sections/catalog";
+import { fragmentoConMarca, fraseDeMarcas } from "./bloques.ts";
 import { ETIQUETA_POR_ROL, itemIdDeterminista, textoDeRelleno } from "./nueva.ts";
 import { fallosDeContraste, oscurecerHasta, type PaletteTokens } from "./contraste.ts";
 import { ordenar, puntero, type Hallazgo } from "./formato.ts";
@@ -544,6 +545,16 @@ export function sugerenciaDeDefaults(camino: readonly string[], manifiesto: Json
       "en la entrada de `assets` de template.json; si no está declarado ahí, la imagen no resuelve (I-09).";
   }
   const resuelto = tipoDelValor(manifiesto, camino);
+  // Marcas de un `richText`: la bitácora 4-5b midió que el mensaje ubicaba el fallo pero NO daba la
+  // forma correcta («bastó a medias»), porque el ejemplo mínimo del valor es un párrafo pelado y la
+  // forma —lista de cadenas, no objetos con `type`— sólo salía por tanteo. Se dice aquí, con la
+  // lista de marcas derivada del esquema (ADR-4-1D-01).
+  if (camino.includes("marks")) {
+    return `${resuelto === undefined ? "" : `El bloque "${resuelto.id}" es de tipo \`${resuelto.tipo}\`. `}` +
+      `${fraseDeMarcas()} ` +
+      `Fragmento copiable tal cual, dentro del \`content\` de un párrafo: ${JSON.stringify(fragmentoConMarca())}. ` +
+      "El párrafo entero, con marcas y enlace: `pnpm plantilla bloque richText`.";
+  }
   if (resuelto === undefined) return forma;
   const info = describeBlockType(resuelto.tipo);
   return `El bloque "${resuelto.id}" es de tipo \`${resuelto.tipo}\`: ${info.summary} ` +

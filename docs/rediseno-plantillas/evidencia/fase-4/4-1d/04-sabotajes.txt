@@ -1,0 +1,115 @@
+=== SABOTAJE 1: se quita la rama de marcas de sugerenciaDeDefaults (check.ts) ===
+
+ RUN  v3.2.4 /home/user/wt/1d/frontend/packages/template-kit
+
+ ❯ test/usabilidad-4-1d.test.ts (7 tests | 2 failed) 65ms
+   × 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > una marca escrita como objeto: el mensaje da la FORMA correcta, no sólo el sitio 40ms
+     → expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+   ✓ 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > el fragmento que da el mensaje, pegado tal cual, deja el paquete en verde 4ms
+   × 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > una marca que no existe también recibe la forma correcta y la lista de marcas 11ms
+     → expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+   ✓ 2. `plantilla bloque richText` enseña un ejemplo CON marcas (bitácora 4-5b §recomendación) > la ficha trae la regla de las marcas y un segundo ejemplo con negrita, cursiva y enlace 2ms
+   ✓ 2. `plantilla bloque richText` enseña un ejemplo CON marcas (bitácora 4-5b §recomendación) > el ejemplo con marcas de la ficha, copiado de la terminal y pegado, deja el paquete en verde 4ms
+   ✓ 3. la lista de marcas se DERIVA del esquema, no se teclea (ADR-4-1D-01, patrón de ADR-4-6-02) > las marcas que anuncia el kit son EXACTAMENTE las del enum `RichSpan.marks` 1ms
+   ✓ 3. la lista de marcas se DERIVA del esquema, no se teclea (ADR-4-1D-01, patrón de ADR-4-6-02) > el ejemplo con marcas es un `RichTextValue` válido para el propio esquema 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/usabilidad-4-1d.test.ts > 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > una marca escrita como objeto: el mensaje da la FORMA correcta, no sólo el sitio
+AssertionError: expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/celebrant.message/doc/content/0/content/1/marks/0[22m
+[2m    Invalid option: expected one of "bold"|"italic" (invalid_value).[22m
+[32m-   Sugerencia: El bloque "celebrant.message" es de tipo `richText`[7m. Las marcas de un fragmento de `richText` son una LISTA DE CADENAS, no objetos: se escribe "marks": ["bold"] y NUNCA "marks": [{"type": "bold"}]. Marcas que admite el esquema: bold, italic (máximo 2 por fragmento). Un enlace no es una marca: es el campo "href" del propio fragmento, con http(s). Fragmento copiable tal cual, dentro del `content` de un párrafo: {"type":"text","text":"14 de noviembre","marks":["bold"]}. El párrafo entero, con marcas y enlace[27m: `pnpm plantilla bloque richText`.[39m
+[31m+   Sugerencia: El bloque "celebrant.message" es de tipo `richText`[7m: Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre. Campos obligatorios del valor: kind, doc. Ejemplo mínimo, copiable tal cual en defaults.json: {"kind":"richText","doc":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hola"}]}]}}. La forma de cualquier tipo de bloque, sin abrir código[27m: `pnpm plantilla bloque richText`.[39m
+
+ ❯ test/usabilidad-4-1d.test.ts:70:52
+     68|       { type: "text", text: "30", marks: [{ type: "bold" }] },
+     69|     ]);
+     70|     expect(mensajeDe(dir, "TPL_DEFAULTS_INVALID")).toBe(
+       |                                                    ^
+     71|       "ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/celebrant.me…
+     72|       '  Invalid option: expected one of "bold"|"italic" (invalid_valu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/usabilidad-4-1d.test.ts > 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > una marca que no existe también recibe la forma correcta y la lista de marcas
+AssertionError: expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/celebrant.message/doc/content/0/content/0/marks/0[22m
+[2m    Invalid option: expected one of "bold"|"italic" (invalid_value).[22m
+[32m-   Sugerencia: El bloque "celebrant.message" es de tipo `richText`[7m. Las marcas de un fragmento de `richText` son una LISTA DE CADENAS, no objetos: se escribe "marks": ["bold"] y NUNCA "marks": [{"type": "bold"}]. Marcas que admite el esquema: bold, italic (máximo 2 por fragmento). Un enlace no es una marca: es el campo "href" del propio fragmento, con http(s). Fragmento copiable tal cual, dentro del `content` de un párrafo: {"type":"text","text":"14 de noviembre","marks":["bold"]}. El párrafo entero, con marcas y enlace[27m: `pnpm plantilla bloque richText`.[39m
+[31m+   Sugerencia: El bloque "celebrant.message" es de tipo `richText`[7m: Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre. Campos obligatorios del valor: kind, doc. Ejemplo mínimo, copiable tal cual en defaults.json: {"kind":"richText","doc":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hola"}]}]}}. La forma de cualquier tipo de bloque, sin abrir código[27m: `pnpm plantilla bloque richText`.[39m
+
+ ❯ test/usabilidad-4-1d.test.ts:98:52
+     96|     const dir = paqueteConRichText();
+     97|     ponerParrafo(dir, [{ type: "text", text: "Cumplo 30", marks: ["sub…
+     98|     expect(mensajeDe(dir, "TPL_DEFAULTS_INVALID")).toBe(
+       |                                                    ^
+     99|       "ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/celebrant.me…
+    100|       '  Invalid option: expected one of "bold"|"italic" (invalid_valu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+
+=== SABOTAJE 2: la ficha de  deja de imprimir el ejemplo con marcas (bloques.ts) ===
+
+ RUN  v3.2.4 /home/user/wt/1d/frontend/packages/template-kit
+
+ ❯ test/usabilidad-4-1d.test.ts (7 tests | 3 failed) 77ms
+   ✓ 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > una marca escrita como objeto: el mensaje da la FORMA correcta, no sólo el sitio 24ms
+   ✓ 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > el fragmento que da el mensaje, pegado tal cual, deja el paquete en verde 8ms
+   ✓ 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > una marca que no existe también recibe la forma correcta y la lista de marcas 4ms
+   × 2. `plantilla bloque richText` enseña un ejemplo CON marcas (bitácora 4-5b §recomendación) > la ficha trae la regla de las marcas y un segundo ejemplo con negrita, cursiva y enlace 36ms
+     → expected 'richText — Texto con párrafos y marca…' to contain '  LAS MARCAS (negrita, cursiva) Y LOS…'
+   × 2. `plantilla bloque richText` enseña un ejemplo CON marcas (bitácora 4-5b §recomendación) > el ejemplo con marcas de la ficha, copiado de la terminal y pegado, deja el paquete en verde 1ms
+     → no aparece el encabezado «EL VALOR CON MARCAS Y ENLACE»: expected -1 to be greater than or equal to 0
+   × 3. la lista de marcas se DERIVA del esquema, no se teclea (ADR-4-1D-01, patrón de ADR-4-6-02) > las marcas que anuncia el kit son EXACTAMENTE las del enum `RichSpan.marks` 2ms
+     → falta la marca bold: expected 'richText — Texto con párrafos y marca…' to contain '"bold"'
+   ✓ 3. la lista de marcas se DERIVA del esquema, no se teclea (ADR-4-1D-01, patrón de ADR-4-6-02) > el ejemplo con marcas es un `RichTextValue` válido para el propio esquema 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/usabilidad-4-1d.test.ts > 2. `plantilla bloque richText` enseña un ejemplo CON marcas (bitácora 4-5b §recomendación) > la ficha trae la regla de las marcas y un segundo ejemplo con negrita, cursiva y enlace
+AssertionError: expected 'richText — Texto con párrafos y marca…' to contain '  LAS MARCAS (negrita, cursiva) Y LOS…'
+
+
+=== SABOTAJE 3: la lista de marcas se teclea (sólo "bold") en vez de derivarse del esquema ===
+
+ RUN  v3.2.4 /home/user/wt/1d/frontend/packages/template-kit
+
+ ❯ test/usabilidad-4-1d.test.ts (7 tests | 4 failed) 69ms
+   × 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > una marca escrita como objeto: el mensaje da la FORMA correcta, no sólo el sitio 32ms
+     → expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+   ✓ 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > el fragmento que da el mensaje, pegado tal cual, deja el paquete en verde 4ms
+   × 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > una marca que no existe también recibe la forma correcta y la lista de marcas 4ms
+     → expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+   × 2. `plantilla bloque richText` enseña un ejemplo CON marcas (bitácora 4-5b §recomendación) > la ficha trae la regla de las marcas y un segundo ejemplo con negrita, cursiva y enlace 19ms
+     → expected 'richText — Texto con párrafos y marca…' to contain '  LAS MARCAS (negrita, cursiva) Y LOS…'
+   ✓ 2. `plantilla bloque richText` enseña un ejemplo CON marcas (bitácora 4-5b §recomendación) > el ejemplo con marcas de la ficha, copiado de la terminal y pegado, deja el paquete en verde 4ms
+   × 3. la lista de marcas se DERIVA del esquema, no se teclea (ADR-4-1D-01, patrón de ADR-4-6-02) > las marcas que anuncia el kit son EXACTAMENTE las del enum `RichSpan.marks` 3ms
+     → expected [ 'bold' ] to deeply equal [ 'bold', 'italic' ]
+   ✓ 3. la lista de marcas se DERIVA del esquema, no se teclea (ADR-4-1D-01, patrón de ADR-4-6-02) > el ejemplo con marcas es un `RichTextValue` válido para el propio esquema 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/usabilidad-4-1d.test.ts > 1. las marcas de un `richText` (bitácora 4-5b, «cosas que tuve que adivinar» #1) > una marca escrita como objeto: el mensaje da la FORMA correcta, no sólo el sitio
+AssertionError: expected 'ERROR TPL_DEFAULTS_INVALID  defaults.…' to be 'ERROR TPL_DEFAULTS_INVALID  defaults.…' // Object.is equality
+
+=== RESTAURADO: los tres sabotajes deshechos ===
+
+ ✓ test/usabilidad-4-1d.test.ts (7 tests) 42ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  01:41:53
+   Duration  919ms (transform 389ms, setup 0ms, collect 580ms, tests 42ms, environment 0ms, prepare 80ms)
+

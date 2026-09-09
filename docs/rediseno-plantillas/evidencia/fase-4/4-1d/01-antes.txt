@@ -1,0 +1,40 @@
+=== check (marks como objeto, el fallo de 4-5b) ===
+ERROR TPL_DEFAULTS_INVALID  defaults.json#/content/celebrant.message/doc/content/0/content/1/marks/0
+  Invalid option: expected one of "bold"|"italic" (invalid_value).
+  Sugerencia: El bloque "celebrant.message" es de tipo `richText`: Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre. Campos obligatorios del valor: kind, doc. Ejemplo mínimo, copiable tal cual en defaults.json: {"kind":"richText","doc":{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Hola"}]}]}}. La forma de cualquier tipo de bloque, sin abrir código: `pnpm plantilla bloque richText`.
+
+1 error(es)
+
+=== pnpm plantilla bloque richText (hoy) ===
+richText — Texto con párrafos y marcas cerradas (negrita, cursiva, enlace); nunca HTML libre.
+
+  EL VALOR, en defaults.json bajo "<blockId>" (campos obligatorios: kind, doc):
+    {
+      "kind": "richText",
+      "doc": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Hola"
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+  EL BLOQUE, en template.json dentro de `sections[].blocks` (campos obligatorios: id, role, label, type):
+    {
+      "id": "seccion.relato",
+      "type": "richText",
+      "role": "sectionIntro",
+      "label": {
+        "es-MX": "Introducción"
+      }
+    }
+
+  Roles que admiten este tipo: celebrantAText, celebrantBText, honoreeMessage, familyIntro, galleryIntro, giftOptionDetail, storyBody, rsvpNote, footerNote, sectionIntro, celebrantsMessage.
