@@ -122,4 +122,29 @@ class RegistroSinDatosSensiblesTest {
         // Y el registro de la aplicación sigue encendido: esto no es «apagar los logs».
         assertEquals("info", porDefecto(valor("logging.level.root")).lowercase())
     }
+
+    /**
+     * R4-01 (`bitacora/5-E3-R4-cierre.md`): la **segunda** línea del hallazgo, la que no vive en
+     * ningún manejador. Spring Boot le pone categoría de aviso a `ExceptionHandlerExceptionResolver`
+     * (`WebMvcAutoConfiguration.EnableWebMvcConfiguration.createExceptionResolver`), y ese resolutor
+     * escribe un `WARN` `Resolved [<excepción>]` con el `toString()` entero de cada excepción que
+     * atiende un `@ControllerAdvice` — para una `MethodArgumentNotValidException`, el valor rechazado.
+     * No se puede filtrar por tipo de excepción: o sale con todo, o no sale.
+     *
+     * La prueba de comportamiento que enseña la fuga está en
+     * `core/error/ManejadorSinValoresRechazadosTest`; ésta fija que el nivel siga puesto, porque es
+     * una línea de `application.yml` y se borra sin querer.
+     */
+    @Test
+    @DisplayName("R4-01: el `Resolved [...]` de Spring MVC no sale con la configuración por defecto")
+    fun elResolutorDeExcepcionesNoVuelcaLaExcepcionEntera() {
+        val clave = "logging.level.org.springframework.web.servlet.mvc.method.annotation." +
+                "ExceptionHandlerExceptionResolver"
+        val nivel = porDefecto(valor(clave)).lowercase()
+        assertTrue(
+                nivel in setOf("error", "off"),
+                "`$clave` está en `$nivel`: a `warn` o por debajo, cada 400 de validación escribe el " +
+                        "valor rechazado en el registro (R4-01)",
+        )
+    }
 }

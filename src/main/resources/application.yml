@@ -230,6 +230,19 @@ logging:
     org.hibernate.orm.jdbc.extract: ${LOG_HIBERNATE_PARAMETROS:info}
     org.hibernate.internal.util.EntityPrinter: ${LOG_HIBERNATE_ENTIDADES:info}
     org.springframework: info
+    # R4-01 (`bitacora/5-E3-R4-cierre.md`). Spring Boot le pone categoria de aviso a este resolutor
+    # (`WebMvcAutoConfiguration.EnableWebMvcConfiguration.createExceptionResolver`), asi que por cada
+    # excepcion que atiende un `@ControllerAdvice` escribe un WARN `Resolved [<excepcion>]` con el
+    # `toString()` ENTERO de la excepcion. Para una `MethodArgumentNotValidException` eso incluye el
+    # valor rechazado -o sea, la contrasena que la clienta acaba de teclear-, y sale con la
+    # configuracion de fabrica: era la SEGUNDA de las dos lineas del hallazgo, y la que no se arregla
+    # tocando ningun manejador. No se puede filtrar por tipo de excepcion, asi que la linea se apaga
+    # y el diagnostico lo da cada manejador con lo que puede decir sin valores: los nombres de los
+    # campos en `core/error/InternalExceptionHandler.kt` y la clase y el origen del fallo en las redes
+    # finales de `product/account` y `product/invitations`.
+    # LOG_EXCEPCIONES_RESUELTAS=warn la vuelve a encender -y vuelve a volcar valores-: solo en
+    # desarrollo, nunca por defecto.
+    org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver: ${LOG_EXCEPCIONES_RESUELTAS:error}
 # --- Modulo product (fase 5, bloque 5-0c; ver diseno/_12c-modulo-product.md y ADR-5-0C-01) ---
 # Estas variables las consumen E4 (pagos: producto.pagos.*) y E3 (cuenta y marca: producto.correo.* y
 # producto.contacto.*); un despliegue real las debe traer del ENTORNO, nunca escritas aqui en claro.

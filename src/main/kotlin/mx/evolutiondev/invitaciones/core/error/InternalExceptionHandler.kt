@@ -25,11 +25,17 @@ class InternalExceptionHandler(
             status: HttpStatusCode,
             request: WebRequest
     ): ResponseEntity<Any>? {
-        appLogger.error("Argument error: {}", ex.message)
         val errors = mutableMapOf<String, String?>()
         ex.bindingResult.fieldErrors.forEach { error ->
             errors[error.field] = error.defaultMessage
         }
+        // R4-01 (`bitacora/5-E3-R4-cierre.md`; ADR-5-E3-C6-01). Aqui se registraba `ex.message`, y ese
+        // mensaje lleva DENTRO el valor que fallo: `rejected value [...]`. Un alta con una contrasena
+        // que no pasa `@StrongPassword` dejaba la contrasena entera en el registro de cualquier
+        // despliegue, sin que nadie atacara nada. Se registran los NOMBRES de los campos: es lo que
+        // hace falta para diagnosticar («fallo password, fallo email») y es lo unico que no puede
+        // traer un valor pegado. El texto de cada regla ya viaja en la respuesta, a quien la pidio.
+        appLogger.warn("Validacion rechazada en {}: campos {}", ex.bindingResult.objectName, errors.keys.sorted())
         return ResponseEntity(
                 ErrorMessage(
                         timestamp = dateFormatter.parseCurrentDate("dd/MM/yyyy HH:mm:ss"),

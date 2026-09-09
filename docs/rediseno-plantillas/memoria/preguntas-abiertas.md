@@ -1928,3 +1928,47 @@ antes.
    todo sería sobrescribir `toString()` en la entidad para que no imprima `password`, `emailVerificationToken`
    ni `resetToken` — un cambio pequeño, pero en una entidad compartida con el módulo antiguo, así que no se
    hizo en este encargo. **Pregunta al orquestador: ¿se autoriza tocar `CustomerEntity` para eso?**
+
+## Agente 5-E3-C6 (2026-09-09) — lo que R4 deja anotado y este encargo no arregla
+
+1. **R4-02 · MEDIA · `/auth/token` ya no le pone techo al trabajo de bcrypt de nadie.** Cuando el despliegue
+   **no** declara un proxy de confianza —que es el estado de hoy— el cubo por IP no se aplica
+   (`modules/auth/service/AuthThrottleService.kt:316`), y como cada intento sin autenticar paga igualmente un
+   bcrypt —el hash señuelo de `AuthThrottleService.kt:434` con el coste 10 de `SecurityConfig.kt:54`— cada
+   petición cuesta CPU sin ningún límite. Medido por la revisora: **48 peticiones con 8 en paralelo consumieron
+   1,21 s de las cuatro CPU** de esta máquina (~40/s, 185 ms de latencia media frente a 3,8 ms de una ruta sin
+   bcrypt). No es la pulverización de contraseñas, que ya está declarada en `ADR-5-E3-C4-02` y en el punto 1
+   del bloque de C5: es **agotamiento de CPU barato desde fuera**, y no estaba dicho. Antes lo acotaba el cubo
+   por IP —mal, porque su efecto era el apagón del acceso para todos—; ahora no lo acota nada. **No se pide
+   reabrir la decisión**: se pide que la pregunta 1 del bloque de C5 se responda sabiendo también esto, porque
+   cambia el peso de su opción (c). El arreglo de verdad sigue siendo de despliegue (proxy declarado, o un
+   límite por delante del backend).
+
+2. **R4-03 · BAJA · el presupuesto de envíos no cubre la recuperación de contraseña.**
+   `modules/auth/service/ResetPasswordService.kt:78-88` manda el correo **sin** pasar por `consumirEnvio`; los
+   dos únicos sitios que lo llaman son `CustomerService.kt:171` y `EmailVerificationService.kt:206`. O sea que
+   el ataque que el KDoc de `maxEnviosGlobales` dice parar —una lista de direcciones reales, una petición por
+   dirección— sigue abierto por esa puerta: hasta 300 correos por ventana a buzones de clientas reales
+   (el tope global del ámbito), frente a los 60 del alta. Es preexistente, no lo trae ningún encargo de esta
+   sesión, y el arreglo es una línea: pasar el envío de recuperación por el mismo presupuesto. Se deja anotado
+   porque tocar el ámbito de recuperación cambia el comportamiento de un flujo que nadie de esta sesión tenía
+   asignado.
+
+3. **`CustomerEntity` como `data class`: sigue siendo munición cargada, y ahora está verificado que hoy no
+   dispara.** Es el punto 5 del bloque de C5 y **no se ha tocado**. R4 lo comprobó de verdad: barrió `src/main`
+   y no hay una sola interpolación de `customer`/`user` dentro de un `logger`, no hay filtro de registro de
+   peticiones y no hay `printStackTrace` en esa cadena, así que **no es explotable hoy**. Lo que queda es el
+   riesgo de la línea que alguien escriba mañana: `log.info("$customer")` vuelca el hash y los dos tokens sin
+   tocar `application.yml`. C6 ha quitado la única línea que registraba un objeto entero de la petición
+   (`core/auth/security/JwtTokenFilter.kt:32`, que registraba el `request`), pero **no** ha puesto un
+   `toString()` propio en la entidad: es una entidad compartida con el módulo antiguo y la decisión es del
+   dueño. **Pregunta al orquestador / al dueño, la misma que dejó C5: ¿se autoriza sobrescribir `toString()` en
+   `CustomerEntity` para que no imprima `password`, `emailVerificationToken` ni `resetToken`?**
+
+4. **Comprobado de paso, y sin tocar: R3-03 y R3-04 siguen anotados y sin resolver.** Son los puntos **2** (el
+   rastro de tokens de refresco consumidos, en memoria) y **4** (el `415` de `ProductInvitationsExceptionHandler`
+   y su cuerpo de plataforma con `include-message: always`) del bloque «Del agente E3-C4» de este mismo fichero.
+   C6 no los ha tocado. Un matiz que C6 sí puede aportar al punto 4, medido contra un backend real: ese `415`
+   sale hoy como `ProblemDetail` (`detail` = «Content-Type '…' is not supported»), sin eco de la petición, y el
+   cuerpo ilegible tampoco devuelve el JSON recibido porque Jackson lo emite como `REDACTED`
+   (`INCLUDE_SOURCE_IN_LOCATION` desactivado). O sea que S-02 sigue siendo un riesgo de forma, no de valores.

@@ -2594,3 +2594,59 @@ el texto va también aquí íntegro para que este registro siga siendo autosufic
   la IP. Se pierde el freno de pulverización de `/auth/token` mientras no haya proxy (punto 3). Los seis cubos
   siguen siendo in-process: con más de una instancia los techos se multiplican por el número de instancias,
   como ya estaba anotado para los tres limitadores.
+
+## ADR-5-E3-C6-01 — Un fallo de validación se registra por NOMBRE de campo, nunca con el mensaje de la excepción (estado: propuesta)
+
+**Contexto.** R4-01 (`bitacora/5-E3-R4-cierre.md`) reprodujo contra un backend real que un alta con una
+contraseña débil dejaba **la contraseña entera en el registro, dos veces, con la configuración por defecto**.
+Las dos líneas tenían orígenes distintos:
+
+1. `core/error/InternalExceptionHandler.kt:28` registraba `appLogger.error("Argument error: {}", ex.message)`.
+   El `message` de una `MethodArgumentNotValidException` **contiene los valores rechazados**: Spring lo compone
+   como `Field error in object 'userRequest' on field 'password': rejected value [<valor>]; …`.
+2. Spring Boot le pone categoría de aviso al resolutor de excepciones
+   (`WebMvcAutoConfiguration.EnableWebMvcConfiguration.createExceptionResolver()`), y ese resolutor escribe un
+   `WARN` `Resolved [<excepción>]` con el `toString()` **entero** de cada excepción que atiende un
+   `@ControllerAdvice`. Esa línea no vive en ningún manejador y no se arregla tocando código de la aplicación.
+
+Es especialmente serio porque la tanda anterior acababa de apagar el volcado de Hibernate para evitar
+exactamente esto, y su bitácora declaraba —por inspección incompleta— que ningún cuerpo de petición llegaba al
+registro. La frase está corregida en `bitacora/5-E3-C5.md §3`.
+
+**Decisión.**
+
+1. **Un fallo de validación se registra con los nombres de los campos que fallaron, y con nada más.**
+   `InternalExceptionHandler` emite `Validacion rechazada en <objeto>: campos [a, b]` a nivel `WARN` (un `400`
+   es un error de quien llama, no del servidor). El nombre del campo es lo que hace falta para diagnosticar
+   —«falló `password`, falló `phone`»— y es lo único de un `FieldError` que no puede traer un valor pegado: el
+   `rejectedValue` es el valor, y el `defaultMessage` ya viaja en la respuesta, a quien la pidió. Registrar el
+   valor no aporta diagnóstico: para reproducir un fallo de fortaleza de contraseña no hace falta la contraseña,
+   hace falta saber que fue esa regla.
+2. **El `WARN` `Resolved [...]` del resolutor se apaga por configuración**
+   (`application.yml`, `logging.level.…ExceptionHandlerExceptionResolver: ${LOG_EXCEPCIONES_RESUELTAS:error}`).
+   No hay forma de filtrarlo por tipo de excepción: o sale con el `toString()` de todas, o no sale. Queda la
+   palanca `LOG_EXCEPCIONES_RESUELTAS=warn` para desarrollo, con el valor seguro por defecto, igual que las
+   cuatro de Hibernate de R3-02.
+3. **Lo que ese `WARN` sí aportaba —que un `500` inesperado dejara rastro— se sustituye donde faltaba.** Las
+   dos redes finales del producto (`ProductAccountExceptionHandler`, `ProductInvitationsExceptionHandler`) no
+   registraban nada, así que apagar el aviso las habría dejado mudas. Ahora registran **la clase de la
+   excepción y el fotograma donde saltó**, deliberadamente **sin** el mensaje ni la traza: el caso que motiva
+   la red de `account` es la `DataIntegrityViolationException` del choque de correo, cuyo mensaje trae el
+   correo de otra clienta. Clase y línea bastan para ir al código.
+
+**Alternativas descartadas.** (a) Registrar `ex.message` recortado: el valor rechazado sale al principio del
+mensaje, así que recortar no protege. (b) Enmascarar sólo los campos que «parezcan» contraseñas: una lista de
+nombres sensibles se queda corta el día que alguien añade un campo, y el correo y el teléfono también son datos
+personales. (c) Un `ExceptionHandlerExceptionResolver` propio que sobrescriba `logException`: obliga a
+sustituir un bean del núcleo de Spring MVC para no ganar nada frente a una línea de configuración reversible.
+
+**Consecuencias.** Un `400` de validación deja hoy exactamente una línea de registro, con el objeto y los
+nombres de campo. Ningún manejador de errores de la aplicación escribe valores de la petición. Se pierde el
+`Resolved [...]` de las excepciones que sí atiende un advice: para `templates2` no cambia nada (ya registra lo
+suyo, y su rama de validación es `debug` sin excepción adjunta) y para el producto lo sustituye el rastro sin
+valores del punto 3; las rutas heredadas que resuelve `GeneralExceptionHandler` se quedan sin ese aviso, que es
+el precio explícito de esta decisión. La respuesta al cliente **no cambia**: ya devolvía nombre de campo y
+texto de la regla, y `include-message: always` (S-02) no la toca porque el cuerpo lo escribe el propio advice y
+no `BasicErrorController`. Verificado contra un backend real: con la configuración por defecto el valor aparece
+**0** veces en el registro; con `LOG_EXCEPCIONES_RESUELTAS=warn`, **1** vez y sólo en el `Resolved [...]`, que
+es lo que demuestra que el silencio lo produce esta configuración y no que el flujo no pase por ahí.

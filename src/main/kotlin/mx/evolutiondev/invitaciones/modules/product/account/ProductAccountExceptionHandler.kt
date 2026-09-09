@@ -1,6 +1,7 @@
 package mx.evolutiondev.invitaciones.modules.product.account
 
 import mx.evolutiondev.invitaciones.core.util.formatter.DateFormatter
+import org.slf4j.LoggerFactory
 import mx.evolutiondev.invitaciones.modules.auth.service.DemasiadosIntentosException
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice(basePackages = ["mx.evolutiondev.invitaciones.modules.product.account"])
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class ProductAccountExceptionHandler(private val dateFormatter: DateFormatter) {
+
+    private val log = LoggerFactory.getLogger(ProductAccountExceptionHandler::class.java)
 
     @ExceptionHandler(AccountException::class)
     fun cuenta(e: AccountException): ResponseEntity<AccountErrorResponse> =
@@ -91,6 +94,13 @@ class ProductAccountExceptionHandler(private val dateFormatter: DateFormatter) {
         // parametros...) traen su propio estado y su cuerpo ya es mudo: se relanzan, igual que la
         // `AccessDeniedException` de arriba. Lo que no es de esa familia sigue saliendo mudo por aqui.
         if (e is org.springframework.web.ErrorResponse) throw e
+        // R4-01. Hasta ahora el unico rastro de un 500 de estas rutas era el WARN `Resolved [...]` de
+        // `ExceptionHandlerExceptionResolver`, que se apago en `application.yml` porque volcaba los
+        // valores rechazados. Este lo sustituye, y a proposito SIN el mensaje ni la traza de la
+        // excepcion: el caso que motiva esta red es la `DataIntegrityViolationException` del choque de
+        // correo, cuyo mensaje trae el correo de otra clienta. La clase y la linea donde salto bastan
+        // para ir al codigo.
+        log.error("cuenta: 500 no previsto ({}) en {}", e.javaClass.name, e.stackTrace.firstOrNull())
         return respuesta(AccountErrorCode.CUENTA_ERROR_INTERNO, MENSAJE_INTERNO)
     }
 

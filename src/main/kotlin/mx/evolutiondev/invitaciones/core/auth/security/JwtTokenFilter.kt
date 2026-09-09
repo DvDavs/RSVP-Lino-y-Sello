@@ -29,7 +29,12 @@ class JwtTokenFilter(
     private val appLogger: Logger = LoggerFactory.getLogger(JwtTokenFilter::class.java)
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
-        appLogger.info("authenticated urls: {}", request)
+        // R4-01. Aqui se registraba el objeto `request` entero. Hoy no filtra nada porque el
+        // `HeaderWriterRequest` que llega hereda el `toString()` de `Object` (clase y hash), pero es
+        // munición cargada: el dia que un envoltorio de la cadena de filtros traiga un `toString()`
+        // propio, esta linea empieza a volcar cabeceras -la `Authorization` incluida- en cada
+        // peticion. Se registra lo unico que hacia falta: el metodo y la ruta, sin cadena de consulta.
+        appLogger.info("authenticated urls: {} {}", request.method, request.requestURI)
 
         val path = request.requestURI
         if (path == "/webhook") {

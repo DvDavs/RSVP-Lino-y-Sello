@@ -1,5 +1,6 @@
 package mx.evolutiondev.invitaciones.modules.product.invitations
 
+import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
@@ -31,6 +32,8 @@ import java.time.format.DateTimeFormatter
 @RestControllerAdvice(basePackages = ["mx.evolutiondev.invitaciones.modules.product.invitations"])
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class ProductInvitationsExceptionHandler {
+
+    private val log = LoggerFactory.getLogger(ProductInvitationsExceptionHandler::class.java)
 
     @ExceptionHandler(ProductInvitationException::class)
     fun manejar(ex: ProductInvitationException): ResponseEntity<ProductErrorResponse> =
@@ -95,8 +98,13 @@ class ProductInvitationsExceptionHandler {
      * llegar a devolver el mensaje de la excepción original. Aquí es mudo y siempre igual.
      */
     @ExceptionHandler(Exception::class)
-    fun manejarInesperado(ex: Exception): ResponseEntity<ProductErrorResponse> =
-        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+    fun manejarInesperado(ex: Exception): ResponseEntity<ProductErrorResponse> {
+        // R4-01. Mismo motivo y misma forma que en `ProductAccountExceptionHandler.kt`: el WARN
+        // `Resolved [...]` que hasta ahora era el unico rastro de estos 500 se apago en
+        // `application.yml` por volcar los valores rechazados. Se registra la clase y el origen, sin
+        // mensaje ni traza, porque el mensaje de una excepcion puede traer datos de la peticion.
+        log.error("invitaciones: 500 no previsto ({}) en {}", ex.javaClass.name, ex.stackTrace.firstOrNull())
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
             ProductErrorResponse(
                 timestamp = ahora(),
                 statusCode = HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -104,6 +112,7 @@ class ProductInvitationsExceptionHandler {
                 message = "No se pudo completar la operación. Inténtalo de nuevo.",
             ),
         )
+    }
 
     /** Mismo patrón de fecha que el resto del backend (`GeneralExceptionHandler.kt:34`). */
     private fun ahora(): String = LocalDateTime.now().format(FORMATO)
