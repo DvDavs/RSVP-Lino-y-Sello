@@ -1,5 +1,6 @@
 package mx.evolutiondev.invitaciones.modules.product.guests.panel
 
+import mx.evolutiondev.invitaciones.core.auth.model.AppRole
 import mx.evolutiondev.invitaciones.core.auth.model.CustomerDetails
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -259,11 +260,31 @@ class GuestPanelControllerTest {
     // Errores
     // =============================================================================================
 
+    /**
+     * La ruta ya no está en `501`: se construyó en esta sesión. `202` porque el correo se encola y
+     * sale en segundo plano — la respuesta promete que se aceptó, no que se entregó.
+     */
     @Test
-    fun `el envio por correo responde 501 con su codigo y sin mandar nada`() {
+    fun `el envio por correo responde 202 y delega en el servicio`() {
         mvc.perform(post("/product/invitations/4/guests/12:send-email").principal(clienta))
-            .andExpect(status().isNotImplemented)
-            .andExpect(jsonPath("$.code").value("GUEST_EMAIL_UNAVAILABLE"))
+            .andExpect(status().isAccepted)
+
+        verify(servicio).enviarCorreo(7L, AppRole.USER, 4L, 12L)
+    }
+
+    /**
+     * Y cuando no se puede mandar —sin publicar, sin correo del invitado, o agotada la cuota del
+     * día— es `409 RSVP_CLOSED` con el motivo, como fija el contrato §1.
+     */
+    @Test
+    fun `el envio imposible responde 409 RSVP_CLOSED con el motivo`() {
+        whenever(servicio.enviarCorreo(any(), any(), any(), any()))
+            .doThrow(GuestPanelException.RsvpClosed("Publica tu invitación antes de enviarla"))
+
+        mvc.perform(post("/product/invitations/4/guests/12:send-email").principal(clienta))
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.code").value("RSVP_CLOSED"))
+            .andExpect(jsonPath("$.message").value("Publica tu invitación antes de enviarla"))
     }
 
     @Test

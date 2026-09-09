@@ -27,6 +27,20 @@ class GuestPasteReader {
     /** Un renglón entendido, con el número de renglón por si la clienta quiere localizarlo. */
     data class Fila(val line: Int, val raw: String, val draft: GuestDraft)
 
+    /**
+     * ### Topes de tamaño — hallazgo de la revisión adversarial de E2
+     * Este método no tenía ninguno, y el coste no es lineal. Medido contra el backend vivo:
+     * `:preview` con **200 000** renglones (3,9 MB de cuerpo) devolvía `200` con **12,9 MB** de JSON,
+     * y `:import` de **1 500** renglones ocupaba **26,6 segundos** de un hilo de petición, porque el
+     * panel relee todos los invitados de la invitación por cada renglón dado de alta
+     * (`GuestPanelService.recienGuardado`). Con un cuerpo de unos pocos megas, cualquier cuenta
+     * registrada —el alta es pública— dejaba el backend ocupado durante minutos.
+     *
+     * Por eso el texto se acota **antes** de analizarlo, en dos ejes: longitud total y número de
+     * renglones. Los dos topes están muy por encima de una lista de boda real (500 renglones son unas
+     * 1 500 personas) y lo que sobra no se descarta en silencio: sale como **un** problema, con el
+     * número del primer renglón ignorado, para que la clienta sepa que tiene que pegar por partes.
+     */
     fun leer(texto: String?): Resultado {
         val contenido = texto.orEmpty()
         if (contenido.isBlank()) return Resultado(emptyList(), emptyList())
@@ -35,7 +49,21 @@ class GuestPasteReader {
         val problemas = mutableListOf<GuestProblem>()
         val correosVistos = mutableMapOf<String, Int>()
 
-        contenido.split(SALTOS).forEachIndexed { indice, renglon ->
+        val recortado = contenido.length > MAX_TEXTO
+        val renglones = contenido.take(MAX_TEXTO).split(SALTOS)
+        val sobran = renglones.size > MAX_RENGLONES
+
+        if (recortado || sobran) {
+            problemas += problema(
+                minOf(renglones.size, MAX_RENGLONES + 1),
+                "",
+                GuestPanelErrorCode.GUEST_INVALID,
+                "La lista es demasiado larga y no la pudimos leer entera.",
+                "Pega hasta $MAX_RENGLONES renglones cada vez; el resto, en una segunda tanda.",
+            )
+        }
+
+        renglones.take(MAX_RENGLONES).forEachIndexed { indice, renglon ->
             val numero = indice + 1
             if (renglon.isBlank()) return@forEachIndexed
 
@@ -223,6 +251,19 @@ class GuestPasteReader {
 
         /** Lo que se devuelve de `raw`: suficiente para que la clienta localice el renglón. */
         const val MAX_RAW = 200
+
+        /**
+         * Renglones que se analizan como mucho. 500 renglones son del orden de 1 500 personas: por
+         * encima de cualquier lista real y por debajo de lo que convierte `:import` en una petición
+         * de minutos. Ver la nota de [leer].
+         */
+        const val MAX_RENGLONES = 500
+
+        /**
+         * Caracteres del pegado que se analizan como mucho: 500 renglones muy generosos. Acota el
+         * trabajo aunque el cuerpo venga en un solo renglón enorme. Ver la nota de [leer].
+         */
+        const val MAX_TEXTO = 200_000
 
         internal val SALTOS = Regex("\\r\\n|\\r|\\n")
         internal val TELEFONO = Regex("^[+]?[0-9][0-9 ()\\-.]{4,24}$")

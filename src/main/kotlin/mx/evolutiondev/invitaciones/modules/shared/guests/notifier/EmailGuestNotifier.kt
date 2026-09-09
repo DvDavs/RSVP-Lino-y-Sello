@@ -12,6 +12,7 @@ import mx.evolutiondev.invitaciones.modules.shared.guests.notifier.repository.mo
 import mx.evolutiondev.invitaciones.modules.shared.guests.notifier.repository.model.NotificationTemplate
 import mx.evolutiondev.invitaciones.modules.shared.guests.repository.model.InvitationGuestEntity
 import mx.evolutiondev.invitaciones.modules.templates2.persistence.Templates2FlagRepository
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -24,6 +25,8 @@ class EmailGuestNotifier(
         private val templates2FlagRepository: Templates2FlagRepository,
         @Value("\${app.frontend.url}") private val frontendUrl: String
 ) : GuestAppNotifier {
+
+    private val log = LoggerFactory.getLogger(EmailGuestNotifier::class.java)
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -184,7 +187,12 @@ class EmailGuestNotifier(
                     )
                 }
             } catch (e: Exception) {
-                println("Error sending invitation notification to guest ${guest.email}: ${e.message}")
+                // Sin el correo del invitado dentro, y sin `println`: el mensaje llevaba la dirección
+                // del invitado a la salida estándar, es decir al log de la aplicación, cada vez que un
+                // envío fallaba. Un registro no es sitio para datos personales (hallazgo de la
+                // revisión adversarial de E2); para arreglar un fallo basta con el tipo de la
+                // excepción y el id del invitado.
+                log.warn("guests: no se pudo enviar la notificacion al invitado {} ({})", guest.id, e.javaClass.simpleName)
             }
         }
     }
@@ -235,7 +243,7 @@ class EmailGuestNotifier(
                     )
                 }.await()
             } catch (e: Exception) {
-                println("Error sending decline notifications: ${e.message}")
+                log.warn("guests: no se pudieron enviar los avisos de baja ({})", e.javaClass.simpleName)
             }
         }
     }
@@ -304,7 +312,7 @@ class EmailGuestNotifier(
                     )
                 }.await()
             } catch (e: Exception) {
-                println("Error sending confirmation notifications: ${e.message}")
+                log.warn("guests: no se pudieron enviar los avisos de confirmacion ({})", e.javaClass.simpleName)
             }
         }
     }

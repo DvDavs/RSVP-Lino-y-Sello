@@ -190,27 +190,29 @@ class GuestPanelController(private val servicio: GuestPanelService) {
     }
 
     /**
-     * Enviar a un invitado su enlace por correo. **Todavía no está construida**: responde `501` con
-     * `GUEST_EMAIL_UNAVAILABLE` y no manda nada.
+     * Enviar a **ese** invitado su enlace personal por correo (contrato `5-2` §1).
      *
-     * TODO(E2): el único camino corto pasa por
-     * `modules/shared/guests/notifier/EmailGuestNotifier.kt` —`notifySingle` (`:129`) ya arma el
-     * correo del invitado— y ese fichero es territorio de la sesión hermana que está arreglando
-     * justo ahí el hallazgo **S-08**: hoy `EmailGuestNotifier.kt:68` no usa `app.frontend.url` sino
-     * un dominio del producto antiguo escrito en el código, así que reutilizarlo tal cual mandaría
-     * a la invitada a la página equivocada. Escribir aquí un segundo emisor de correos duplicaría
-     * también el límite por invitación y día de `EmailGuestNotifier.kt:79-84`. Cuando ese arreglo
-     * aterrice, esta ruta se conecta a él y devuelve `202`.
+     * `202` porque el correo se encola y sale en segundo plano, como el resto de los avisos del
+     * backend: la respuesta significa «lo aceptamos y lo vamos a mandar», no «ya está en su bandeja».
+     * Prometer la entrega sería mentir sobre algo que depende de un servidor de correo ajeno.
      *
-     * Mientras tanto la clienta no se queda sin compartir: [link] le da la URL y el enlace de
-     * WhatsApp.
+     * Las comprobaciones —propiedad de la invitación, pertenencia del invitado, correo del invitado,
+     * release activo y tope por invitación y día— están en [GuestPanelService.enviarCorreo], con el
+     * motivo de cada una. El enlace es el mismo que devuelve [link] y se arma con `app.frontend.url`
+     * (arreglo de **S-08**): ningún dominio escrito en el código.
      */
     @PostMapping("/guests/{guestId}:send-email")
+    @ResponseStatus(HttpStatus.ACCEPTED)
     fun sendEmail(
         @PathVariable invitationId: Long,
         @PathVariable guestId: Long,
         authentication: Authentication,
-    ): Nothing = throw GuestPanelException.EmailUnavailable()
+    ) = servicio.enviarCorreo(
+        userId = authentication.userId(),
+        appRole = authentication.role(),
+        invitationId = invitationId,
+        guestId = guestId,
+    )
 
     companion object {
         const val TIPO_CSV = "text/csv; charset=utf-8"

@@ -179,4 +179,46 @@ class GuestPasteReaderTest {
 
         assertTrue(problema.raw.length <= GuestPasteReader.MAX_RAW)
     }
+
+    // =============================================================================================
+    // Topes de tamaño (hallazgo de la revisión adversarial de E2)
+    // =============================================================================================
+
+    /**
+     * Sin tope, `:preview` con 200 000 renglones devolvía 12,9 MB de JSON y `:import` de 1 500
+     * ocupaba 26,6 segundos de un hilo de petición —medido contra el backend vivo—, porque el panel
+     * relee todos los invitados de la invitación por cada alta. Con cuerpos de pocos megas eso es una
+     * denegación de servicio al alcance de cualquier cuenta registrada.
+     */
+    @Test
+    fun `un pegado con mas renglones de la cuenta se corta y lo dice`() {
+        val enorme = (1..GuestPasteReader.MAX_RENGLONES + 250).joinToString("\n") { "Invitada $it, 1" }
+
+        val leido = lector.leer(enorme)
+
+        assertEquals(GuestPasteReader.MAX_RENGLONES, leido.listos.size, "no se analiza más allá del tope")
+        assertTrue(
+            leido.problemas.any { it.message.contains("demasiado larga") },
+            "y la clienta se entera de que su lista se cortó, en vez de perder renglones en silencio",
+        )
+    }
+
+    /** El tope de longitud acota el trabajo aunque el pegado venga en un solo renglón gigantesco. */
+    @Test
+    fun `un texto larguisimo en un solo renglon tambien se corta`() {
+        val leido = lector.leer("Ana Ruiz, 1\n" + "x".repeat(GuestPasteReader.MAX_TEXTO + 5_000))
+
+        assertTrue(leido.problemas.any { it.message.contains("demasiado larga") })
+    }
+
+    /** Y una lista de boda de verdad —cientos de renglones— sigue entrando entera. */
+    @Test
+    fun `una lista real cabe de sobra`() {
+        val real = (1..300).joinToString("\n") { "Invitada $it, 2, 0, 0" }
+
+        val leido = lector.leer(real)
+
+        assertEquals(300, leido.listos.size)
+        assertTrue(leido.problemas.isEmpty())
+    }
 }

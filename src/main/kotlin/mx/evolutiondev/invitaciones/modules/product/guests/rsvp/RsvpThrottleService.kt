@@ -9,7 +9,8 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
 /**
- * Límite de intentos de `/public/` + `r/{token}`, por **IP** y por **token** (contrato 5-2 §2).
+ * Límite de intentos de `/public/` + `r/{token}`, por **IP** y por **enlace y origen** (el par
+ * token + IP; contrato 5-2 §2 y la nota de [maxPorToken]).
  *
  * ### Instancia propia, no la de `/auth`
  * Copia la **disciplina** de `AuthThrottleService` —ventana fija en un `ConcurrentHashMap`, dos
@@ -38,9 +39,9 @@ import org.springframework.web.context.request.ServletRequestAttributes
  * tampoco se delata por el tiempo que tarda.
  *
  * ### Ningún token en memoria en claro, ninguno en un log
- * La clave del cubo por token es el **SHA-256** del token, no el token. Es un cambio barato que
- * quita los enlaces personales de un volcado de memoria, y hace imposible que un `toString()`
- * descuidado los escriba. Esta clase no registra jamás un token, una IP concreta, un nombre ni un
+ * La clave del cubo del par es el **SHA-256** del token más la IP, nunca el token en claro. Es un
+ * cambio barato que quita los enlaces personales de un volcado de memoria, y hace imposible que un
+ * `toString()` descuidado los escriba. Esta clase no registra jamás un token, una IP concreta, un nombre ni un
  * correo: su único `log` es el resumen de arranque y el aviso de mapa lleno, ninguno con datos de
  * nadie.
  *
@@ -52,9 +53,26 @@ import org.springframework.web.context.request.ServletRequestAttributes
 @Service
 class RsvpThrottleService(
     /**
-     * Peticiones por token y ventana. 40 deja de sobra para abrir la página, confirmar, cambiar de
-     * opinión y recargar unas cuantas veces; un enlace que recibe 40 peticiones en 15 minutos no lo
-     * está usando la persona a la que se lo mandaron.
+     * Peticiones por **enlace y origen** (el par token + IP) y ventana. 40 deja de sobra para abrir la
+     * página, confirmar, cambiar de opinión y recargar unas cuantas veces desde el mismo teléfono.
+     *
+     * ### Por qué el par, y no el token a secas — hallazgo de la revisión adversarial de E2
+     * Este cubo contaba **solo por token**, sumando las peticiones de todos los orígenes. Medido
+     * contra el backend vivo: 40 peticiones bastan para que la invitada reciba `429` durante quince
+     * minutos **en su propio enlace**. Y el enlace no es un secreto guardado: viaja por WhatsApp y se
+     * reenvía en capturas de pantalla, que es el modelo de amenaza que la propia clase describe. Es
+     * decir, el límite se convertía en un arma contra la persona a la que pretende servir: quien vea
+     * el enlace deja a su dueña fuera de su RSVP con cuarenta peticiones.
+     *
+     * A cambio no protegía nada. La confidencialidad la dan los 128 bits de `SecureRandom`
+     * (`JwtUtil.kt:66-71`, S-12), no el contador; un atacante que rotara IP nunca lo pisaba, y el
+     * único efecto que conseguía era el bloqueo de la dueña. El coste, que es el motivo declarado del
+     * límite, lo acota el cubo por IP.
+     *
+     * Con la clave por par, un origen sigue sin poder martillear un enlace concreto —el coste queda
+     * acotado igual— pero solo se bloquea a sí mismo: la dueña, que llega desde otra IP, entra. El
+     * contrato §2 pide límite «por IP y por token» y esto lo sigue cumpliendo; lo que cambia es que la
+     * dimensión del token deja de ser global.
      */
     @Value("\${producto.rsvp.throttle.max-por-token:40}") private val maxPorToken: Int = 40,
     /**
@@ -89,7 +107,7 @@ class RsvpThrottleService(
 
     init {
         log.info(
-            "rsvp: limite de intentos activo — {} por token, {} por IP, ventana {} min, tope {} entradas",
+            "rsvp: limite de intentos activo — {} por enlace y origen, {} por IP, ventana {} min, tope {} entradas",
             maxPorToken, maxPorIp, ventanaMinutos, maxEntradas,
         )
     }
@@ -147,14 +165,15 @@ class RsvpThrottleService(
     }
 
     /**
-     * SHA-256 del token en hexadecimal. Ver la nota de la clase: el enlace personal no se guarda en
-     * claro ni siquiera como clave de un mapa. El token se recorta antes de hashear para que una URL
-     * de megabytes no cueste nada.
+     * SHA-256 del token en hexadecimal, **más la IP de origen**: la clave es el par enlace + origen,
+     * por el motivo que explica [maxPorToken]. Ver también la nota de la clase: el enlace personal no
+     * se guarda en claro ni siquiera como clave de un mapa. El token se recorta antes de hashear para
+     * que una URL de megabytes no cueste nada.
      */
     private fun claveToken(tokenCrudo: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
             .digest(tokenCrudo.take(MAX_LONGITUD_CLAVE).toByteArray(Charsets.UTF_8))
-        return digest.joinToString("") { "%02x".format(it) }
+        return digest.joinToString("") { "%02x".format(it) } + "|" + ipCliente()
     }
 
     /** Misma lógica y mismo defecto desconfiado que `AuthThrottleService.kt:258-273`. */

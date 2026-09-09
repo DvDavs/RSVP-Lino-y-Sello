@@ -66,6 +66,7 @@ class InvitationGuestsService(
 
         invitationGuestsRepository
                 .findByEmailAndPhoneAndIsEnabledFalse(request.email, request.phone)
+                ?.takeIf { reactivable(it, invitationId, request) }
                 ?.let { deletedGuest ->
                     val cancellationToken = jwtUtil.generateSecureToken()
                     
@@ -428,6 +429,41 @@ class InvitationGuestsService(
         }
 
         return invitation
+    }
+
+    /**
+     * ¿Se puede reutilizar esta baja lógica como alta nueva?
+     *
+     * Cierra un hallazgo de la revisión adversarial de E2, **medido** contra el backend vivo. La
+     * búsqueda de [InvitationGuestsRepository.findByEmailAndPhoneAndIsEnabledFalse] recorre la tabla
+     * **entera**: no lleva `invitation_id`. Con rol `ADMIN` o `MASTER` —para los que
+     * `HibernateFilterAspect.kt:30-32` **desactiva** `enabledFilter`, así que la consulta sí devuelve
+     * filas— dar de alta un invitado en una invitación reactivaba y **sobrescribía** un invitado dado
+     * de baja de **otra**: nombre, cupos, estado a `PENDING` y `confirmation_token` rotado, es decir,
+     * el enlace personal de esa persona destruido. La invitación de destino se quedaba sin el alta,
+     * porque el camino termina en `return`. Reproducido: alta en la invitación 7, escritura en el
+     * invitado 12 de la invitación 6.
+     *
+     * Con rol `USER` no ocurría hoy, pero **no por diseño**: para ese rol el aspecto activa el filtro y
+     * la consulta sale como `is_enabled = true AND NOT is_enabled`, contradictoria. Eso es un
+     * accidente de configuración, no una comprobación de propiedad.
+     *
+     * Dos condiciones, las dos necesarias:
+     *
+     * 1. **Misma invitación.** Una baja de otra invitación no es «el mismo invitado» bajo ningún
+     *    criterio: es de otra clienta.
+     * 2. **Clave de contacto real.** Las rutas nuevas del panel solo exigen el nombre (contrato `5-2`
+     *    §1) y mandan `""` en correo y teléfono, así que la clave `("", "")` casa con **cualquier**
+     *    baja anónima. Sin correo ni teléfono no hay forma de afirmar que sea la misma persona, así
+     *    que se da de alta un invitado nuevo, que es lo que la clienta pidió.
+     */
+    private fun reactivable(
+            candidate: InvitationGuestEntity,
+            invitationId: Long,
+            request: GuestsCreationRequest
+    ): Boolean {
+        val tieneClaveDeContacto = request.email.isNotBlank() || request.phone.isNotBlank()
+        return tieneClaveDeContacto && candidate.invitation.id == invitationId
     }
 
     private fun findGuestById(guestId: Long): InvitationGuestEntity {

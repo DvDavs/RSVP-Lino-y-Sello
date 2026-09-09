@@ -36,12 +36,17 @@ class GuestPanelServiceTest {
 
     private val motor: InvitationGuestsService = mock()
     private val repositorio: InvitationGuestsRepository = mock()
+    private val correos = MensajeroDePrueba()
+    private val releases: GuestReleaseReader = mock()
     private val servicio = GuestPanelService(
         motor,
         repositorio,
         GuestPasteReader(),
         GuestShareLinkBuilder("https://linoysello.test"),
         GuestCsvWriter(),
+        correos,
+        releases,
+        GuestEmailDailyLimit(),
     )
 
     // Los dobles se arman **antes** de cualquier `whenever`: construir un mock dentro de la
