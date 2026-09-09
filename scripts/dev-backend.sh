@@ -73,6 +73,15 @@ fi
 # declarado; con Playwright, pásalo (o exporta PW_PORT) para que el webhook golpee ESE servidor.
 TPL_DEV_FRONTEND_URL="${TPL_DEV_FRONTEND_URL:-http://127.0.0.1:${PW_PORT:-3000}}"
 export TEMPLATES2_REVALIDATE_URL="${TEMPLATES2_REVALIDATE_URL:-$TPL_DEV_FRONTEND_URL/api/revalidate}"
+# `FRONTEND_URL` es de lo que cuelgan los enlaces que se COMPARTEN: el `/r/<token>` del correo al
+# invitado (`EmailGuestNotifier`) y el que devuelve `GET .../guests/{id}/link` para WhatsApp.
+# `application.yml:80` lo deja en `http://localhost` cuando falta, es decir, el puerto 80, donde en
+# desarrollo no escucha nada: el enlace se genera y no abre. Lo detectaron los e2e de la fase 5
+# (E2) al seguir el enlace personal y aterrizar en `chrome-error://chromewebdata/`.
+# Se reutiliza el origen que este script YA calcula arriba en vez de declarar un segundo: dos
+# variables para el mismo origen darían enlaces distintos según quién los construyera, que es el
+# defecto que cerró N-02.
+export FRONTEND_URL="${FRONTEND_URL:-$TPL_DEV_FRONTEND_URL}"
 # Mismo valor por defecto que `playwright.config.ts` ya usa para `REVALIDATE_SECRET`
 # (`app/api/revalidate/route.ts`): así el backend y `apps/web` quedan cableados con el MISMO
 # secreto sin que nadie tenga que exportar nada a mano para que las e2e midan el webhook real.
