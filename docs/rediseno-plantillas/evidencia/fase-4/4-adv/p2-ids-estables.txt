@@ -1,0 +1,18 @@
+bautizo-elegante/1.0.0                 bloques= 37 secciones=11 itemIds= 16
+boda-basica/1.0.0                      bloques= 44 secciones=12 itemIds= 23
+boda-clasica/1.0.0                     bloques= 42 secciones=12 itemIds= 13
+boda-clasica/1.0.1                     bloques= 42 secciones=12 itemIds= 13
+boda-premium-2/1.0.0                   bloques= 43 secciones=12 itemIds= 25
+boda-premium/1.0.0                     bloques= 45 secciones=12 itemIds= 29
+comunion-elegante/1.0.0                bloques= 37 secciones=11 itemIds= 16
+confirmacion-elegante/1.0.0            bloques= 37 secciones=11 itemIds= 16
+cumpleanos-elegante/1.0.0              bloques= 37 secciones=11 itemIds= 18
+evento-elegante/1.0.0                  bloques= 38 secciones=12 itemIds= 17
+toga-y-sello/1.0.0                     bloques= 18 secciones= 8 itemIds= 10
+xv-elegance/1.0.0                      bloques= 37 secciones=11 itemIds= 19
+xv-jardin/1.0.0                        bloques= 23 secciones= 9 itemIds=  2
+
+13 paquetes revisados
+Sin blockId duplicados, sin section.key duplicadas, sin itemBlocks duplicados,
+todos los itemId cumplen ^[0-9A-HJKMNP-TV-Z]{26}$ y son unicos dentro de su grupo,
+y toda clave de defaults.content es un blockId declarado.

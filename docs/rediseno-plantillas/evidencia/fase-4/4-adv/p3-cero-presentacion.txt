@@ -1,0 +1,53 @@
+=== 1. hexadecimales #rrggbb / #rgb ===
+(sin resultados)
+
+=== 2. rgb( / hsl( ===
+(sin resultados)
+
+=== 3. tamaños px/rem/em/vh/vw en literales ===
+(sin resultados)
+
+=== 4. nombres de familia tipográfica ===
+(sin resultados)
+
+=== 5. nombres de icono ===
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/catalog/MagicBytes.kt:19:        AssetContentType.IMAGE_SVG -> esSvg(bytes)
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/catalog/MagicBytes.kt:41:    /** SVG es texto: se acepta si el primer elemento no vacío abre `svg` o una declaración XML. */
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/catalog/MagicBytes.kt:42:    private fun esSvg(bytes: ByteArray): Boolean {
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/catalog/MagicBytes.kt:44:        return cabecera.startsWith("<?xml") || cabecera.startsWith("<svg") || cabecera.startsWith("<!DOCTYPE svg")
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/persistence/Templates2S3KeyService.kt:34:        AssetContentType.IMAGE_SVG -> "svg"
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/api/EditorAssetService.kt:314:         * aceptarlo aquí sería aceptar un archivo inservible. Y `image/svg+xml`/`font/woff2`, que sí
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/api/EditorAssetService.kt:316:         * (rutas MASTER), y un SVG subido por un cliente y servido desde un bucket público es un vector
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/Catalogos.kt:85:    IMAGE_SVG("image/svg+xml"), AUDIO_MPEG("audio/mpeg"), FONT_WOFF2("font/woff2");
+
+=== 6. literales de cadena en el paquete de COMPOSICION (lo que llega al invitado) ===
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/AssetUrlResolver.kt:62:                "tpl_asset.public_id=$assetId está en el bucket \"$bucketDeLaFila\" y este módulo " +
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/AssetUrlResolver.kt:63:                    "direcciona \"$bucketEsperado\": la URL pública no resolvería (02 §10.4, ADV-10)",
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/DateFormatting.kt:77:        return if (pe[0] == ps[0]) "$cabeza – " + h12(pe[1])
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/DateFormatting.kt:78:        else "$cabeza – " + largo(pe[0], locale) + ", " + h12(pe[1])
+
+=== 7. defaults de presentacion: paleta/fuente/variante por omision en Kotlin ===
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/catalog/TemplatePackageReader.kt:108:            if (ruta == null || !esRutaDePaquete(ruta)) { inesperados.add(p.partName + (p.fileName?.let { " ($it)" } ?: "")); continue }
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/catalog/TemplatePackageReader.kt:125:            nombre == "defaults" -> RawTemplatePackage.DEFAULTS
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/BusinessProjector.kt:28:                ResolvedDate(it, DateFormatting.formatDate(it, ValueResolver.formatIdDe(spec) ?: "long", locale))
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/BusinessProjector.kt:31:                ResolvedTime(it, DateFormatting.formatDate(it, ValueResolver.formatIdDe(spec) ?: "h12", locale))
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/ValueResolver.kt:70:                value.value, DateFormatting.formatDate(value.value, formatIdDe(spec) ?: "long", locale),
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/ValueResolver.kt:73:                value.value, DateFormatting.formatDate(value.value, formatIdDe(spec) ?: "h12", locale),
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/ValueResolver.kt:78:                formatted = DateFormatting.formatRange(value.start, value.end, formatIdDe(spec) ?: "long-h12", locale),
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/Catalogos.kt:170:    fun resolve(locale: Locale): String = byLocale[locale] ?: byLocale[Locale.ES_MX] ?: ""
+
+=== 8. ETIQUETA/TITULO/LABEL por omision en Kotlin ===
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/schema/DomainJson.kt:995:        val label = o.texto("label")
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/api/RevalidationNotifier.kt:188:        const val ETIQUETA = "invitation:"
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/composition/DefaultComposer.kt:101:            val label = b.label.resolve(locale)
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/BlockValue.kt:55:data class LinkValue(val href: String, val label: String? = null) : ScalarValue {
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/BlockSpec.kt:15:    val label: LocalizedText,
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/BlockSpec.kt:32:    val label: LocalizedText get() = base.label
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/BlockSpec.kt:48:data class ChoiceOption(val id: String, val label: LocalizedText)
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/TemplateManifest.kt:7:    val title: LocalizedText,
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/ComposedDocument.kt:33:data class ResolvedLink(val href: String, val label: String? = null) : ResolvedValue {
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/ComposedDocument.kt:39:data class ResolvedChoice(val optionId: String, val label: String) : ResolvedValue {
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/ComposedDocument.kt:54:    val label: String
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/ComposedDocument.kt:62:    override val label: String,
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/ComposedDocument.kt:72:    override val label: String,
+src/main/kotlin/mx/evolutiondev/invitaciones/modules/templates2/domain/ComposedDocument.kt:84:    val title: String,

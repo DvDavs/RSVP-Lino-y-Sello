@@ -1,0 +1,65 @@
+=== ALTA corregida: /__preview/fs/ servía cualquier fichero del disco ===
+
+Causa (frontend/packages/template-kit/src/preview.ts, versión anterior al arreglo):
+  if (ruta.startsWith("/__preview/fs/")) {
+    servirArchivo(res, "/", decodeURIComponent(ruta.slice("/__preview/fs/".length)));
+    return;
+  }
+`servirArchivo` comprobaba que la ruta resuelta cayera DENTRO de la raíz que se le pasaba — pero la
+raíz aquí era "/", la raíz del sistema de ficheros entero, así que la comprobación era un no-op:
+CUALQUIER ruta absoluta "cae dentro de /".
+
+Arreglo: dos funciones distintas.
+  - `servirArchivo(res, raiz, relativa)` — una única raíz (usada por `/__preview/asset/` con
+    `join(dir, "assets")`). Comprueba por texto (`resolve` + `startsWith`) y además por
+    `fs.realpathSync` de la ruta Y de la raíz, para que un enlace simbólico dentro de la raíz que
+    apunte fuera tampoco se sirva.
+  - `servirArchivoAbsoluto(res, raices, relativa)` — usada SOLO por `/__preview/fs/`. Reconstruye la
+    ruta absoluta (`resolve("/", relativa)`, que también colapsa `..`) y comprueba que el REAL PATH
+    resultante caiga dentro de alguna de `raicesModulos` (los tres `node_modules` desde los que se
+    resuelven las tipografías `@fontsource`: `KIT_DIR/node_modules`,
+    `FRONTEND_DIR/apps/web/node_modules`, `FRONTEND_DIR/node_modules`) — con los enlaces simbólicos ya
+    resueltos en ambos lados. Si no cae en ninguna, 403.
+
+=== Comprobación manual: servidor real levantado sobre boda-clasica/1.0.1 ===
+
+$ node --experimental-strip-types manual-preview.mjs   (script ad-hoc, preview({dir, puerto:5399}))
+
+Previsualizador de boda-clasica@1.0.1 en http://127.0.0.1:5399 — Ctrl+C para salir.
+  7 hueco(s) de imagen sin valor se pintan con el marcador del kit...
+  Fecha y hora son de DEMOSTRACIÓN...
+OK= true
+
+--- peticiones maliciosas (las mismas de preview-lectura-fuera-del-paquete.txt, más variantes) ---
+GET /__preview/fs/etc/passwd -> 403 (9 B)
+GET /__preview/fs/root/.ccr/ca-bundle.crt -> 403 (9 B)
+GET /__preview/fs/proc/self/environ -> 403 (9 B)
+GET /__preview/fs/etc/../etc/passwd -> 403 (9 B)
+GET /__preview/fs/%2e%2e%2fetc%2fpasswd -> 403 (9 B)
+GET /__preview/fs//etc/passwd -> 403 (9 B)
+GET /__preview/fs/%2Fetc%2Fpasswd -> 403 (9 B)
+
+--- el previsualizador SIGUE funcionando: las tipografías se resuelven ---
+GET /__preview/fuentes.css -> 200 (14511 B)
+/* Tipografías del paquete, autoalojadas por npm (@fontsource). Resueltas: Cormorant Garamond, Inter.
+Sin autoalojar: (ninguna). */
+/* Cormorant Garamond — /home/user/wt/adv/frontend/apps/web/node_modules/@fontsource/cormorant-garamond/400.css */
+...
+
+(Nota sobre `apps/web/node_modules/@fontsource/cormorant-garamond`: es un ENLACE SIMBÓLICO de pnpm
+hacia `FRONTEND_DIR/node_modules/.pnpm/@fontsource+cormorant-garamond@5.3.0/node_modules/@fontsource/
+cormorant-garamond` — sigue cayendo dentro de una raíz permitida (FRONTEND_DIR/node_modules), así que
+`fs.realpathSync` no lo rechaza. Es justo el caso que la prueba automatizada
+"una tipografía legítima... SÍ se sirve" fija.)
+
+--- `pnpm plantilla capturas` sigue produciendo sus tres PNG ---
+$ node bin/plantilla.mjs capturas .../boda-clasica/1.0.1 --destino /tmp/adv/capturas-verificacion
+3 captura(s) de boda-clasica@1.0.1 a 390, 768, 1280 px (x2; Chromium: /opt/pw-browsers/chromium).
+  .../boda-clasica@1.0.1-390.png  1078.1 KB
+  .../boda-clasica@1.0.1-768.png  2112.0 KB
+  .../boda-clasica@1.0.1-1280.png  2310.9 KB
+
+$ ls -la /tmp/adv/capturas-verificacion
+-rw-r--r-- boda-clasica@1.0.1-1280.png  2366392
+-rw-r--r-- boda-clasica@1.0.1-390.png   1103958
+-rw-r--r-- boda-clasica@1.0.1-768.png   2162662
