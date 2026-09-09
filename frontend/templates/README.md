@@ -17,6 +17,11 @@ Checklist antes de darla por buena: `docs/rediseno-plantillas/guias/checklist-pl
   ejemplos de forma de `docs/rediseno-plantillas/diseno/ejemplos/`. Su arte lo genera
   `scripts/build-art.mjs` (SVG autoral → WebP) y sus digestos los cose `scripts/build-packages.mjs` —
   ninguno de los dos dibuja ni inventa contenido, sólo miden lo que ya existe.
+- **`toga-y-sello` (graduación) y `cumple-retro` (cumpleaños)** nacieron de las dos **pruebas
+  ciegas** del kit: las creó, con `pnpm plantilla` y sin ver el código, un agente que sólo tenía la
+  guía y el checklist delante (`memoria/bitacora/4-5.md` y `4-5b.md`). Son la demostración de que
+  agregar una plantilla no toca Kotlin: la segunda salió en 2 min 44 s. Su arte está pendiente, como
+  el de las convertidas.
 - **El resto** (`bautizo-elegante`, `boda-basica`, `boda-premium`, `boda-premium-2`,
   `comunion-elegante`, `confirmacion-elegante`, `cumpleanos-elegante`, `evento-elegante`,
   `xv-elegance`) son el resultado de **convertir el catálogo antiguo** con
