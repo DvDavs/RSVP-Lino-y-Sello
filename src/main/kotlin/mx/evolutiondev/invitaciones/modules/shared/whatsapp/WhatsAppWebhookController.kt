@@ -4,21 +4,27 @@ package mx.evolutiondev.invitaciones.modules.shared.whatsapp
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
-import org.springframework.beans.factory.annotation.Value
 
+/**
+ * Webhook de Meta para WhatsApp.
+ *
+ * Fase 5, E3-C3 (ADR-5-E3-C3-01, hallazgo **S-01**): el `hub.verify_token` estaba **escrito en el
+ * codigo** en la linea 13 de este fichero. Ahora sale del entorno
+ * (`WHATSAPP_WEBHOOK_VERIFY_TOKEN`, via [WhatsAppConfiguracion]) y **vacio significa apagado**: sin
+ * token configurado la ruta responde `503` y NUNCA compara contra una cadena vacia, que aceptaria
+ * el alta de cualquiera.
+ *
+ * LO QUE ESTE FICHERO **SIGUE SIN HACER**, y queda dicho para que nadie lo de por cerrado:
+ * el `POST` no comprueba `X-Hub-Signature-256` (hallazgo **S-09**). Un tercero que conozca la URL
+ * puede seguir provocando un envio a un numero que el elija mientras el canal este encendido.
+ * Cerrarlo exige el *app secret* de Meta, que es un tercer secreto que hoy no existe en ninguna
+ * parte del repositorio ni del entorno: es un encargo propio, no un retoque de este.
+ */
 @RestController
 @RequestMapping("/webhook")
-class WhatsAppWebhookController {
-
-    private val VERIFY_TOKEN = "whatsapp_webhook_agape_26"
-    // private val ACCESS_TOKEN = "TU_TOKEN_DE_META"
-    // private val PHONE_NUMBER_ID = "TU_PHONE_NUMBER_ID"
-
-    @Value("\${whatsapp.phone-number-id}")
-    private lateinit var PHONE_NUMBER_ID: String
-
-    @Value("\${whatsapp.access-token}")
-    private lateinit var ACCESS_TOKEN: String
+class WhatsAppWebhookController(
+    private val configuracion: WhatsAppConfiguracion,
+) {
 
     // 🔹 1. Verificación webhook
     @GetMapping
@@ -28,7 +34,12 @@ class WhatsAppWebhookController {
         @RequestParam("hub.challenge") challenge: String
     ): ResponseEntity<String> {
 
-        return if (mode == "subscribe" && token == VERIFY_TOKEN) {
+        if (!configuracion.webhookHabilitado) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(WhatsAppConfiguracion.MOTIVO_APAGADO)
+        }
+
+        return if (mode == "subscribe" && configuracion.verificaTokenDeWebhook(token)) {
             ResponseEntity.ok(challenge)
         } else {
             ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error")
@@ -38,6 +49,14 @@ class WhatsAppWebhookController {
     // 🔹 2. Recepción de mensajes
     @PostMapping
     fun receiveMessage(@RequestBody payload: Map<String, Any>): ResponseEntity<String> {
+
+        // CANAL APAGADO: no se procesa nada y se dice por que. Meta reintenta ante un no-2xx, pero
+        // si el canal esta apagado no hay ningun webhook dado de alta en Meta que pueda reintentar;
+        // responder 200 aqui seria afirmar que se proceso un evento que se tiro a la basura.
+        if (!configuracion.envioHabilitado) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(WhatsAppConfiguracion.MOTIVO_APAGADO)
+        }
 
         try {
             val entry = (payload["entry"] as List<Map<String, Any>>)[0]
@@ -64,13 +83,15 @@ class WhatsAppWebhookController {
     // 🔹 3. Enviar mensaje
     fun sendWhatsAppMessage(to: String) {
 
-        val url = "https://graph.facebook.com/v18.0/$PHONE_NUMBER_ID/messages"
+        if (!configuracion.envioHabilitado) return
+
+        val url = "${configuracion.apiUrl}/${configuracion.phoneNumberId}/messages"
 
         val restTemplate = RestTemplate()
 
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
-            setBearerAuth(ACCESS_TOKEN)
+            setBearerAuth(configuracion.accessToken)
         }
 
         val body = """

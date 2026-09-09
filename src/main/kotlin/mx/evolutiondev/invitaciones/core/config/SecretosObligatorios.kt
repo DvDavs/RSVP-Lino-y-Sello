@@ -29,6 +29,15 @@ import org.springframework.util.ClassUtils
  *    en silencio todas las sesiones vivas, y un fallo silencioso en produccion es peor que un
  *    arranque que se niega y explica por que.
  *
+ * LO QUE ESTA LISTA NO TIENE, Y ES DELIBERADO (fase 5, E3-C3; ADR-5-E3-C3-01): los dos secretos de
+ * WhatsApp (`WHATSAPP_ACCESS_TOKEN` y `WHATSAPP_WEBHOOK_VERIFY_TOKEN`). Salieron del repositorio en
+ * el mismo bloque, pero **no impiden el arranque**. Los cinco de aqui son de sistemas sin los cuales
+ * el producto no existe (firma de sesion, bucket de assets, correo transaccional); WhatsApp hoy es
+ * solo click-to-chat (`decisiones-dueno.md` D-04) y exigir su token romperia todo despliegue que no
+ * lo usa, empujando al operador a inventarse un valor —el defecto que este bloque vino a quitar—.
+ * En su lugar el modulo se apaga solo y sus rutas responden `503`
+ * (`modules/shared/whatsapp/WhatsAppConfiguracion.kt`).
+ *
  * No se registra por `@Component`: los `EnvironmentPostProcessor` se declaran en
  * `META-INF/spring.factories`, que es la UNICA via que Spring Boot 3.4 admite para ellos
  * (`SpringFactoriesEnvironmentPostProcessorsFactory`); con el fichero `.imports` de las
@@ -65,10 +74,41 @@ class SecretosObligatorios : EnvironmentPostProcessor, Ordered {
     )
 
     override fun postProcessEnvironment(environment: ConfigurableEnvironment, application: SpringApplication) {
-        if (enPruebas()) return
+        if (!debeExigir(environment)) return
         val faltan = exigidas.filter { environment.getProperty(it.nombre).isNullOrBlank() }
         if (faltan.isEmpty()) return
         throw IllegalStateException(mensaje(faltan))
+    }
+
+    /**
+     * Decide si la compuerta corre. El orden importa y el primero que gana es **el explicito**.
+     *
+     * R1-13 de la revision adversarial (`bitacora/5-E3-R1-seguridad.md`) objeta —con razon— que
+     * decidir esto por la **presencia de una clase** ([enPruebas]) es fragil: es una condicion que
+     * el operador no controla. Objeta tambien, y lo verifico, que hoy **no es explotable** (sin
+     * `JWT_SECRET` Spring falla igual al resolver el placeholder), asi que la severidad es BAJA.
+     *
+     * Arreglo (ADR-5-E3-C3-01): se anade `$PROPIEDAD_EXIGIR`, que **manda sobre todo lo demas**.
+     *  - `true`  -> la compuerta corre SIEMPRE, este o no `spring-boot-test` en el classpath. Es la
+     *               pieza que faltaba: un despliegue puede exigir la comprobacion por si mismo, sin
+     *               depender de que nadie haya metido una dependencia de pruebas en el empaquetado.
+     *  - `false` -> la compuerta no corre. Para un arranque acotado que declara sus propiedades.
+     *  - ausente -> se cae a la heuristica de siempre.
+     *
+     * La heuristica **se conserva** como valor por defecto, y no por descuido: sustituirla por un
+     * perfil o una propiedad obligaria a declararla en cada contexto de prueba que arranca por
+     * `SpringApplication`, que es exactamente lo que tumbo 216 pruebas cuando esta compuerta se
+     * escribio (ver [enPruebas]). Cambiar el defecto es una mejora de robustez de severidad BAJA y
+     * no vale romper la suite por ella; lo que si hacia falta —darle al
+     * operador un control explicito— esta hecho.
+     */
+    private fun debeExigir(environment: ConfigurableEnvironment): Boolean {
+        val explicito = environment.getProperty(PROPIEDAD_EXIGIR)?.trim()?.lowercase()
+        return when (explicito) {
+            "true" -> true
+            "false" -> false
+            else -> !enPruebas()
+        }
     }
 
     /**
@@ -122,4 +162,13 @@ class SecretosObligatorios : EnvironmentPostProcessor, Ordered {
     // Ultimo: para entonces `systemEnvironment` y `systemProperties` ya estan en el entorno y los
     // ficheros de configuracion tambien, asi que vale cualquier via de las que Spring admite.
     override fun getOrder(): Int = Ordered.LOWEST_PRECEDENCE
+
+    companion object {
+        /**
+         * Interruptor explicito de la compuerta (ADR-5-E3-C3-01, R1-13). Como variable de entorno:
+         * `SECRETOS_OBLIGATORIOS_EXIGIR=true`. Como propiedad de la JVM:
+         * `-Dsecretos.obligatorios.exigir=false`. Ausente = heuristica de siempre.
+         */
+        const val PROPIEDAD_EXIGIR: String = "secretos.obligatorios.exigir"
+    }
 }

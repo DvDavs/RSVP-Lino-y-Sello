@@ -40,6 +40,15 @@ services:
       args:
         - GRADLE_USER_HOME=/cache
     container_name: spring-app
+    # SECRETOS (fase 5: ADR-5-E3-A3-01 y ADR-5-E3-C3-01). NINGUN VALOR SE ESCRIBE AQUI: todos se
+    # leen del entorno del operador con `${VAR}`, que en Compose falla ruidosamente si la variable
+    # no esta definida, o de un fichero `.env` junto a este `docker-compose.yml` (que NO se versiona).
+    #
+    # Por que esta lista existe: `8a16ebb` saco cinco secretos de `application.yml` a `${VAR}` SIN
+    # valor por defecto y no los anadio aqui, asi que este despliegue dejo de arrancar
+    # (R1-13 de `memoria/bitacora/5-E3-R1-seguridad.md`). Las cinco de arriba son OBLIGATORIAS: sin
+    # ellas la aplicacion se niega a arrancar y dice cuales faltan
+    # (`core/config/SecretosObligatorios.kt`).
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/invitaciones
       SPRING_DATASOURCE_USERNAME: evolution
@@ -49,8 +58,23 @@ services:
       MAILERSEND_API_TOKEN: ${MAILERSEND_API_TOKEN}
       MAILERSEND_FROM_EMAIL: ${MAILERSEND_FROM_EMAIL}
       MAILERSEND_FROM_NAME: ${MAILERSEND_FROM_NAME}
-      WHATSAPP_PHONE_NUMBER_ID: 1257270407463833
-      WHATSAPP_ACCESS_TOKEN: EAALnnvKeQRwBRGrNQ02tZBZBlv83z0Xrk5vhKhhmOuEJX5m04ntH6PJOlnEPy7PY4xATNXZA0RAeZCRPiiZAj5cnGsorjH7FQbCPr7mCN1ZC8SmZCRur3RmuIlCj5gNOBHsM9g68bGLOqd4gwNBb7bOiNZAsZCIHDXe51ZBeEZAFMUxZCVxfQMyp7JiJryro4urvMuTZA8AZDZD
+      # --- Los cinco OBLIGATORIOS (ADR-5-E3-A3-01). Sin ellos no arranca, a proposito. ---
+      JWT_SECRET: ${JWT_SECRET:?define JWT_SECRET en el entorno o en .env (minimo 32 caracteres)}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?define AWS_ACCESS_KEY_ID en el entorno o en .env}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?define AWS_SECRET_ACCESS_KEY en el entorno o en .env}
+      MAIL_USERNAME: ${MAIL_USERNAME:?define MAIL_USERNAME en el entorno o en .env}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:?define MAIL_PASSWORD en el entorno o en .env}
+      # --- WhatsApp: OPCIONAL, vacio = canal apagado (ADR-5-E3-C3-01). ---
+      # El token de acceso estaba ESCRITO EN CLARO en este fichero hasta ADR-5-E3-C3-01. Sacarlo de
+      # aqui NO lo invalida: sigue en el historico de git y hay que ROTARLO en Meta. Mientras no se
+      # rote, cualquiera que tenga una copia del repositorio manda WhatsApp desde el numero de la
+      # empresa (hallazgo S-06). Si estas tres se dejan vacias, `/api/whatsapp/**` y `/webhook`
+      # responden 503 y no se llama a Meta; la aplicacion arranca igual.
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN:-}
+      WHATSAPP_WEBHOOK_VERIFY_TOKEN: ${WHATSAPP_WEBHOOK_VERIFY_TOKEN:-}
+      # --- templates2: el bucket es obligatorio y sin defecto (ADR-2-ORQ-03). ---
+      TEMPLATES2_ASSETS_BUCKET: ${TEMPLATES2_ASSETS_BUCKET:?define TEMPLATES2_ASSETS_BUCKET (nunca el bucket de produccion sin querer)}
     depends_on:
       postgres-db:
         condition: service_healthy

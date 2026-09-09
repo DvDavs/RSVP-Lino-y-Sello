@@ -129,9 +129,29 @@ mailersend:
   fromEmail: ${MAILERSEND_FROM_EMAIL:info@domain.com}
   fromName: ${MAILERSEND_FROM_NAME:Invitaciones}
 whatsapp:
-  api-url: https://graph.facebook.com/v19.0
-  phone-number-id: 1257270407463833
-  access-token: EAALnnvKeQRwBRGrNQ02tZBZBlv83z0Xrk5vhKhhmOuEJX5m04ntH6PJOlnEPy7PY4xATNXZA0RAeZCRPiiZAj5cnGsorjH7FQbCPr7mCN1ZC8SmZCRur3RmuIlCj5gNOBHsM9g68bGLOqd4gwNBb7bOiNZAsZCIHDXe51ZBeEZAFMUxZCVxfQMyp7JiJryro4urvMuTZA8AZDZD
+  # WhatsApp NO ES UN SECRETO OBLIGATORIO, a diferencia del JWT, AWS y el correo (ADR-5-E3-C3-01;
+  # hallazgo S-01 de `diseno/12-producto-completo.md A3`). Aqui vale la convencion que este mismo
+  # fichero ya usa para Stripe y para templates2.revalidate: VACIO = FUNCION DESACTIVADA, no "usa el
+  # valor de siempre". Motivo: hoy WhatsApp es SOLO click-to-chat (`decisiones-dueno.md` D-04,
+  # ADR-DUENO-02); no hay envio automatico y la API de Meta se decide mas adelante. Exigir estos dos
+  # tokens para arrancar romperia todo despliegue que no los necesita y empujaria al operador a
+  # inventarse un valor, que es justo el defecto que ADR-5-E3-A3-01 vino a quitar. Sin ellos el
+  # modulo se apaga: `/api/whatsapp/send-masivo` y `/webhook` responden 503 con un cuerpo honesto
+  # (`modules/shared/whatsapp/WhatsAppConfiguracion.kt`), nunca un 500 ni una llamada a Meta.
+  api-url: ${WHATSAPP_API_URL:https://graph.facebook.com/v19.0}
+  # NO es un secreto: es el identificador publico del numero dentro de la URL de Meta Graph. Se
+  # externaliza solo para que un despliegue pueda apuntar a otro numero sin tocar el codigo.
+  phone-number-id: ${WHATSAPP_PHONE_NUMBER_ID:}
+  # SECRETO. Estaba ESCRITO EN CLARO en esta linea hasta ADR-5-E3-C3-01. Con el, cualquiera manda
+  # WhatsApp desde el numero de la empresa (hallazgo S-06, pasarela abierta). Sacarlo de aqui NO lo
+  # invalida: sigue en el historico de git y sigue siendo valido hasta que el dueno lo ROTE en Meta.
+  access-token: ${WHATSAPP_ACCESS_TOKEN:}
+  webhook:
+    # SECRETO. Estaba escrito en el codigo (`WhatsAppWebhookController.kt:13`) hasta ADR-5-E3-C3-01.
+    # Es el `hub.verify_token` del alta del webhook en Meta. VACIO = el webhook no se da de alta:
+    # la verificacion responde 503 y NUNCA compara contra una cadena vacia.
+    verify-token: ${WHATSAPP_WEBHOOK_VERIFY_TOKEN:}
+
 # templates2 (contratos.md 8, ADR-1R-F-09; anadido por el bloque 2-6, ADR-2-6-01). Invalidacion de la
 # cache del render publico tras publicar, despublicar o rotar el enlace: el backend hace
 # POST {url} con la cabecera x-revalidate-token y el handler de Next.js ejecuta

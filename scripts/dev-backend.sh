@@ -35,6 +35,13 @@
 # Este script las define con valores DE DESARROLLO, evidentemente falsos, para que arrancar en local
 # siga siendo un solo comando. Sin ellas el arranque falla y dice cuáles faltan
 # (`core/config/SecretosObligatorios.kt`). Exporta las tuyas antes de llamar si necesitas otras.
+#
+# WhatsApp NO se define aquí a propósito (fase 5, ADR-5-E3-C3-01). Sus dos secretos
+# —WHATSAPP_ACCESS_TOKEN y WHATSAPP_WEBHOOK_VERIFY_TOKEN— también salieron del repositorio, pero
+# **no impiden el arranque**: vacío significa canal apagado, y en desarrollo apagado es lo correcto
+# (hoy WhatsApp es solo click-to-chat, `decisiones-dueno.md` D-04). Con el canal apagado
+# `/api/whatsapp/send-masivo` y `/webhook` responden 503 y no se llama a Meta. Si necesitas
+# ejercitarlo contra Meta, expórtalos tú: este script nunca llevará valores de WhatsApp escritos.
 set -euo pipefail
 
 RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
