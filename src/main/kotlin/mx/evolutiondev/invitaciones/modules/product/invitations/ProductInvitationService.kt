@@ -31,15 +31,21 @@ data class ResultadoAlta(val respuesta: InvitacionCreadaResponse, val creada: Bo
 @Service
 class ProductInvitationService(
     private val repositorio: ProductInvitationRepository,
+    private val limitador: ProductInvitationThrottle = ProductInvitationThrottle(),
 ) {
 
     /**
      * [customerId] sale **siempre** de `authentication.userId()`; la petición no puede influir en él.
      *
-     * Transaccional: el conteo de borradores y la inserción tienen que ver la misma foto. No hay
-     * bloqueo pesimista, así que dos peticiones simultáneas de la misma clienta podrían dejar cuatro
-     * borradores en lugar de tres; es un tope de producto, no una compuerta de seguridad, y el coste
-     * de bloquear su fila en cada alta no lo vale (anotado en `preguntas-abiertas.md`).
+     * **Orden de los pasos, y por qué es ese** (R1-05):
+     * 1. Validar. No toca la base y no gasta cupo del freno: un cuerpo mal formado no puede ser una
+     *    palanca para dejar sin altas a nadie.
+     * 2. [ProductInvitationThrottle]. Antes de escribir nada, porque su trabajo es que no se escriba.
+     * 3. `SELECT … FOR UPDATE` sobre la fila de la clienta ([ProductInvitationRepository.bloquearCliente]).
+     *    Es lo **primero** que se hace contra la base, así que serializa por clienta las tres
+     *    consultas que vienen detrás: la red del doble clic, el conteo y la inserción. Antes iban las
+     *    tres sin bloqueo, y con `READ COMMITTED` N peticiones simultáneas contaban todas cero y
+     *    todas insertaban: el tope no era tres, era N.
      */
     @Transactional
     fun crear(customerId: Long, peticion: CrearInvitacionRequest): ResultadoAlta {
@@ -50,24 +56,29 @@ class ProductInvitationService(
         val ninos = peticion.childrenAllowed ?: true
         val jovenes = peticion.youngAllowed ?: true
 
+        limitador.comprobarYRegistrar(customerId)
+
         val plantilla = repositorio.plantillaPuente(eventKind.wire)
             ?: throw PlantillaPuenteAusenteException(eventKind.wire)
 
+        repositorio.bloquearCliente(customerId)
+
         val ahora = Instant.now(reloj)
 
-        // Red del doble clic: mismo dueño, mismos tres campos, borrador sin documento y menos de un
-        // minuto. Se devuelve la que ya existe con `200`, en vez de gastarle un hueco de los tres.
+        // Red del doble clic: mismo dueño, **mismo cuerpo entero**, borrador sin documento y menos de
+        // un minuto. Se devuelve la fila tal como está en la base, con `200`, en vez de gastarle un
+        // hueco de los tres.
         repositorio.borradorIdenticoReciente(
             customerId = customerId,
             templateId = plantilla,
             fecha = fecha,
             hora = hora,
+            hashtag = hashtag,
+            childrenAllowed = ninos,
+            youngAllowed = jovenes,
             desde = ahora.minusSeconds(VENTANA_DOBLE_CLIC_SEGUNDOS),
         )?.let { previa ->
-            return ResultadoAlta(
-                respuesta(previa, eventKind, fecha, hora, hashtag, ninos, jovenes),
-                creada = false,
-            )
+            return ResultadoAlta(respuesta(previa, eventKind), creada = false)
         }
 
         val borradores = repositorio.contarBorradores(customerId)
@@ -89,6 +100,52 @@ class ProductInvitationService(
         )
         return ResultadoAlta(respuesta(creada, eventKind, fecha, hora, hashtag, ninos, jovenes), creada = true)
     }
+
+    /**
+     * `DELETE /product/invitations/{id}` — la clienta borra **un borrador suyo**.
+     *
+     * **Por qué existe** (R1-05): el único borrado de invitaciones del sistema exigía rol MASTER, así
+     * que una `USER` que llegaba al tope de tres no tenía ninguna salida… mientras el mensaje del
+     * `409` le decía «elimina la que no vayas a usar». O el mensaje mentía o faltaba la ruta; falta la
+     * ruta.
+     *
+     * **Qué protege.** Solo se borra lo que es un borrador de verdad: suya (el `WHERE` lleva
+     * `customer_id`), sin pagar y **sin haber llegado a publicarse nunca**. Una invitación que llegó a
+     * tener un release —aunque hoy esté retirado— ya tuvo enlaces repartidos entre invitados: eso no
+     * lo borra una petición, lo atiende una persona. Y `uses_templates2` acota el borrado a las
+     * invitaciones nacidas de este módulo: las del módulo antiguo no se tocan desde aquí.
+     */
+    @Transactional
+    fun eliminar(customerId: Long, invitationId: Long) {
+        limitador.comprobarYRegistrar(customerId)
+        repositorio.bloquearCliente(customerId)
+
+        val propia = repositorio.buscarPropia(customerId, invitationId) ?: throw InvitacionNoEncontradaException()
+        if (propia.isPaid) throw InvitacionNoBorrableException("paid")
+        if (propia.publicadaAlgunaVez) throw InvitacionNoBorrableException("published")
+        if (!propia.usaTemplates2) throw InvitacionNoBorrableException("legacy")
+
+        if (repositorio.borrar(customerId, invitationId) == 0) throw InvitacionNoEncontradaException()
+    }
+
+    /**
+     * Respuesta del camino del doble clic: **la fila tal como está en la base** (R1-11). Ni un solo
+     * campo sale de la petición nueva, porque de la petición nueva no se guardó nada.
+     */
+    private fun respuesta(fila: InvitacionExistente, eventKind: EventKind) = InvitacionCreadaResponse(
+        invitationId = fila.id,
+        eventKind = eventKind.wire,
+        eventDate = fila.fecha,
+        eventTime = fila.hora,
+        childrenAllowed = fila.childrenAllowed,
+        youngAllowed = fila.youngAllowed,
+        hashtag = fila.hashtag,
+        isPaid = fila.isPaid,
+        isEnabled = fila.isEnabled,
+        isFinished = fila.isFinished,
+        usesTemplates2 = true,
+        createdAt = fila.creadaEn.toString(),
+    )
 
     private fun respuesta(
         fila: InvitacionCreada,

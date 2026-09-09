@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -205,4 +206,95 @@ class ProductInvitationsControllerTest {
             "SecurityConfig no debe declarar reglas para /product: $reglas",
         )
     }
+
+    // ------------------------------------------------------------------------------------------
+    // DELETE /product/invitations/{id} — la salida que el 409 del tope promete (R1-05)
+    // ------------------------------------------------------------------------------------------
+
+    @Test
+    fun `la clienta borra un borrador suyo y responde 204 sin cuerpo`() {
+        val id = crearYDevolverId(7)
+
+        val respuesta = mvc.perform(delete("/product/invitations/$id").principal(tokenDe(7)))
+            .andExpect(status().isNoContent)
+            .andReturn().response
+
+        assertEquals("", respuesta.contentAsString)
+        assertEquals(listOf(id), repositorio.borradas)
+    }
+
+    /** Ajena e inexistente son **el mismo** 404 con el mismo cuerpo: no sirve para sondear ids. */
+    @Test
+    fun `borrar una invitacion ajena responde el mismo 404 que una inexistente`() {
+        val id = crearYDevolverId(7)
+
+        val ajena = mvc.perform(delete("/product/invitations/$id").principal(tokenDe(8)))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("$.code").value("PRD_INVITATION_NOT_FOUND"))
+            .andReturn().response.contentAsString
+        val fantasma = mvc.perform(delete("/product/invitations/424242").principal(tokenDe(8)))
+            .andExpect(status().isNotFound)
+            .andReturn().response.contentAsString
+
+        assertEquals(sinMarcaDeTiempo(ajena), sinMarcaDeTiempo(fantasma))
+        assertTrue(repositorio.borradas.isEmpty(), "no se borro nada ajeno")
+    }
+
+    @Test
+    fun `una invitacion pagada no se borra y responde 409 con codigo estable`() {
+        val id = crearYDevolverId(7)
+        repositorio.propias[id] = repositorio.propias.getValue(id).copy(isPaid = true)
+
+        mvc.perform(delete("/product/invitations/$id").principal(tokenDe(7)))
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.code").value("PRD_INVITATION_NOT_DELETABLE"))
+
+        assertTrue(repositorio.borradas.isEmpty())
+    }
+
+    /** El freno de caudal sale por HTTP con el `429` y el codigo del contrato (R1-05). */
+    @Test
+    fun `la rafaga de altas responde 429 con codigo estable`() {
+        val repo = FakeProductInvitationRepository()
+        val conFreno = ProductInvitationService(repo, ProductInvitationThrottle(maxPorCuenta = 1, maxPorIp = 1000))
+        val mvcConFreno = MockMvcBuilders
+            .standaloneSetup(ProductInvitationsController(conFreno))
+            .setControllerAdvice(ProductInvitationsExceptionHandler())
+            .setMessageConverters(convertidorEstricto)
+            .build()
+
+        mvcConFreno.perform(
+            post("/product/invitations").principal(tokenDe(7))
+                .contentType("application/json").content(cuerpoValido),
+        ).andExpect(status().isCreated)
+
+        mvcConFreno.perform(
+            post("/product/invitations").principal(tokenDe(7))
+                .contentType("application/json").content(cuerpoValido),
+        )
+            .andExpect(status().isTooManyRequests)
+            .andExpect(jsonPath("$.code").value("PRD_TOO_MANY_REQUESTS"))
+
+        assertEquals(1, repo.insertadas.size)
+    }
+
+
+    @Test
+    fun `un identificador de ruta que no es numero responde 400 y no 500`() {
+        mvc.perform(delete("/product/invitations/abc").principal(tokenDe(7)))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.code").value("PRD_PATH_PARAM_INVALID"))
+    }
+
+    private fun crearYDevolverId(cliente: Long): Long {
+        mvc.perform(
+            post("/product/invitations").principal(tokenDe(cliente))
+                .contentType("application/json").content(cuerpoValido),
+        ).andExpect(status().isCreated)
+        return repositorio.propias.keys.last()
+    }
+
+    /** El `timestamp` cambia entre dos respuestas; lo demas tiene que ser identico. */
+    private fun sinMarcaDeTiempo(cuerpo: String): String =
+        cuerpo.replace(Regex("\"timestamp\":\"[^\"]*\""), "\"timestamp\":\"-\"")
 }

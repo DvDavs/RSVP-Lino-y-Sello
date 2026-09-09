@@ -178,4 +178,167 @@ class ProductInvitationServiceTest {
         assertTrue(ajena.respuesta.invitationId != propia.respuesta.invitationId)
         assertEquals(listOf(9L, 10L), repositorio.insertadas.map { it.customerId })
     }
+
+    // ------------------------------------------------------------------------------------------
+    // R1-11 · la ventana de 60 s ya no responde datos que no se guardaron
+    // ------------------------------------------------------------------------------------------
+
+    /**
+     * El hallazgo, tal cual: dos altas legitimas del mismo evento con hashtag distinto colapsaban en
+     * una sola fila y la respuesta afirmaba que se habia guardado el hashtag nuevo, que no se
+     * escribia en ninguna parte. Ahora la igualdad del doble clic mira el cuerpo entero.
+     */
+    @Test
+    fun `dos altas del mismo evento con hashtag distinto son dos invitaciones`() {
+        val primera = servicio.crear(9L, peticion(hashtag = "#Ana"))
+        val segunda = servicio.crear(9L, peticion(hashtag = "#AnaYLuis"))
+
+        assertTrue(segunda.creada, "un hashtag distinto es un alta distinta, no un doble clic")
+        assertEquals(2, repositorio.insertadas.size)
+        assertEquals("#Ana", repositorio.insertadas[0].hashtag)
+        assertEquals("#AnaYLuis", repositorio.insertadas[1].hashtag)
+        assertEquals("#AnaYLuis", segunda.respuesta.hashtag)
+        assertTrue(primera.respuesta.invitationId != segunda.respuesta.invitationId)
+    }
+
+    /** Lo mismo con los dos permisos, que tampoco se escribian en el camino del doble clic. */
+    @Test
+    fun `cambiar childrenAllowed tampoco se deduplica`() {
+        servicio.crear(9L, peticion())
+        val segunda = servicio.crear(9L, peticion(childrenAllowed = false))
+
+        assertTrue(segunda.creada)
+        assertEquals(false, segunda.respuesta.childrenAllowed)
+        assertEquals(false, repositorio.insertadas[1].childrenAllowed)
+    }
+
+    /**
+     * Y cuando el doble clic si se reconoce, la respuesta sale **de la fila guardada**. El doble de
+     * abajo devuelve a proposito una fila que no se parece a la peticion: si algun campo de la
+     * respuesta viniera del cuerpo, esta prueba lo caza.
+     */
+    @Test
+    fun `el doble clic responde la fila que hay en la base, no el eco de la peticion`() {
+        val guardada = InvitacionExistente(
+            id = 77L,
+            fecha = "2027-12-31",
+            hora = "23:59",
+            hashtag = "#LoQueSeGuardo",
+            childrenAllowed = false,
+            youngAllowed = false,
+            isPaid = true,
+            isEnabled = true,
+            isFinished = true,
+            creadaEn = Instant.parse("2026-09-09T17:59:30Z"),
+        )
+        val conFilaPrevia = object : ProductInvitationRepository by repositorio {
+            override fun borradorIdenticoReciente(
+                customerId: Long,
+                templateId: Long,
+                fecha: String,
+                hora: String,
+                hashtag: String,
+                childrenAllowed: Boolean,
+                youngAllowed: Boolean,
+                desde: Instant,
+            ): InvitacionExistente = guardada
+        }
+        val servicioConPrevia = ProductInvitationService(conFilaPrevia).apply { reloj = servicio.reloj }
+
+        val resultado = servicioConPrevia.crear(9L, peticion(hashtag = "#LoQuePedi", childrenAllowed = true))
+
+        assertFalse(resultado.creada)
+        assertEquals(77L, resultado.respuesta.invitationId)
+        assertEquals("#LoQueSeGuardo", resultado.respuesta.hashtag)
+        assertEquals("2027-12-31", resultado.respuesta.eventDate)
+        assertEquals("23:59", resultado.respuesta.eventTime)
+        assertFalse(resultado.respuesta.childrenAllowed)
+        assertFalse(resultado.respuesta.youngAllowed)
+        assertTrue(resultado.respuesta.isPaid)
+        assertTrue(resultado.respuesta.isFinished)
+        assertEquals("2026-09-09T17:59:30Z", resultado.respuesta.createdAt)
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // R1-05 · el bloqueo, el freno de caudal y la salida
+    // ------------------------------------------------------------------------------------------
+
+    /**
+     * El bloqueo de fila tiene que ser lo **primero** que toca la base: si se tomara despues de
+     * contar, la carrera seguiria abierta. Aqui se comprueba que se pide siempre y con el dueno del
+     * token; que de verdad serializa lo demuestra `ProductInvitationConcurrenciaTest`.
+     */
+    @Test
+    fun `el alta bloquea la fila de la clienta antes de contar e insertar`() {
+        servicio.crear(42L, peticion())
+
+        assertEquals(listOf(42L), repositorio.bloqueadas)
+    }
+
+    @Test
+    fun `el freno de caudal corta la rafaga de altas de una misma clienta`() {
+        val freno = ProductInvitationThrottle(maxPorCuenta = 3, maxPorIp = 1000)
+        val conFreno = ProductInvitationService(FakeProductInvitationRepository(), freno)
+            .apply { reloj = servicio.reloj }
+
+        repeat(3) { conFreno.crear(1L, peticion(eventTime = "1$it:00")) }
+        val e = assertThrows<DemasiadasInvitacionesException> { conFreno.crear(1L, peticion(eventTime = "20:00")) }
+
+        assertEquals("PRD_TOO_MANY_REQUESTS", e.code)
+        assertEquals(429, e.estado.value())
+    }
+
+    @Test
+    fun `el freno no gasta cupo con un cuerpo invalido`() {
+        val freno = ProductInvitationThrottle(maxPorCuenta = 1, maxPorIp = 1000)
+        val conFreno = ProductInvitationService(FakeProductInvitationRepository(), freno)
+            .apply { reloj = servicio.reloj }
+
+        assertThrows<CampoRequeridoException> { conFreno.crear(1L, peticion(eventKind = null)) }
+
+        assertTrue(conFreno.crear(1L, peticion()).creada, "el rechazo por validacion no puede gastar el unico cupo")
+    }
+
+    @Test
+    fun `la clienta borra un borrador suyo y recupera el hueco`() {
+        val ids = (0 until ProductInvitationService.MAXIMO_BORRADORES).map {
+            servicio.crear(5L, peticion(eventTime = "1$it:00")).respuesta.invitationId
+        }
+        assertThrows<LimiteDeBorradoresException> { servicio.crear(5L, peticion(eventTime = "20:00")) }
+
+        servicio.eliminar(5L, ids.first())
+
+        assertEquals(listOf(ids.first()), repositorio.borradas)
+        assertTrue(servicio.crear(5L, peticion(eventTime = "20:00")).creada, "el hueco liberado se puede usar")
+    }
+
+    @Test
+    fun `una invitacion que no existe y una ajena responden lo mismo`() {
+        val mia = servicio.crear(5L, peticion()).respuesta.invitationId
+
+        val ajena = assertThrows<InvitacionNoEncontradaException> { servicio.eliminar(6L, mia) }
+        val fantasma = assertThrows<InvitacionNoEncontradaException> { servicio.eliminar(6L, 999_999L) }
+
+        assertEquals(ajena.code, fantasma.code)
+        assertEquals(ajena.message, fantasma.message)
+        assertEquals(ajena.details, fantasma.details)
+        assertTrue(repositorio.borradas.isEmpty())
+    }
+
+    @Test
+    fun `una invitacion pagada o publicada no se borra`() {
+        val pagada = servicio.crear(5L, peticion(eventTime = "10:00")).respuesta.invitationId
+        val publicada = servicio.crear(5L, peticion(eventTime = "11:00")).respuesta.invitationId
+        repositorio.propias[pagada] = repositorio.propias.getValue(pagada).copy(isPaid = true)
+        repositorio.propias[publicada] = repositorio.propias.getValue(publicada).copy(publicadaAlgunaVez = true)
+
+        val porPago = assertThrows<InvitacionNoBorrableException> { servicio.eliminar(5L, pagada) }
+        val porPublicacion = assertThrows<InvitacionNoBorrableException> { servicio.eliminar(5L, publicada) }
+
+        assertEquals("PRD_INVITATION_NOT_DELETABLE", porPago.code)
+        assertEquals(409, porPago.estado.value())
+        assertEquals("paid", porPago.details?.get("reason"))
+        assertEquals("published", porPublicacion.details?.get("reason"))
+        assertTrue(repositorio.borradas.isEmpty())
+    }
 }

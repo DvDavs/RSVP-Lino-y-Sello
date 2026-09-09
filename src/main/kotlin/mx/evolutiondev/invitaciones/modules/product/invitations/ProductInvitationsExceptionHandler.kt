@@ -61,6 +61,24 @@ class ProductInvitationsExceptionHandler {
         )
 
     /**
+     * Un `{invitationId}` que no es un número (`/product/invitations/abc`). Sin esto caería en la red
+     * final y saldría como `500 PRD_INTERNAL`, que le echaría a la aplicación la culpa de un error de
+     * quien llama. Mensaje constante y sin eco del valor recibido.
+     */
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException::class)
+    fun manejarRutaInvalida(
+        ex: org.springframework.web.method.annotation.MethodArgumentTypeMismatchException,
+    ): ResponseEntity<ProductErrorResponse> =
+        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ProductErrorResponse(
+                timestamp = ahora(),
+                statusCode = HttpStatus.BAD_REQUEST.value(),
+                code = "PRD_PATH_PARAM_INVALID",
+                message = "El identificador de la ruta no es válido.",
+            ),
+        )
+
+    /**
      * **Trampa evitada.** Un `@ExceptionHandler(Exception)` se traga también la
      * `AccessDeniedException` que lanza `@PreAuthorize` y convierte un `403` en un `500`. Aquí se
      * relanza **la misma instancia** para que la resuelva quien debe: `InvitationsAccessDeniedHandler`

@@ -100,3 +100,38 @@ class PlantillaPuenteAusenteException(eventKind: String) : ProductInvitationExce
     "No se pudo crear la invitación. Inténtalo de nuevo en unos minutos.",
     mapOf("eventKind" to eventKind),
 )
+
+/**
+ * Freno de caudal de las rutas de escritura de este subpaquete ([ProductInvitationThrottle], R1-05).
+ * `429` y no `409`: aquí sí se arregla esperando. El cuerpo es **constante**: no dice si el bloqueo
+ * fue por cuenta o por IP ni cuánto falta, mismo criterio que `DemasiadosIntentosException`
+ * (`AuthThrottleService.kt:28-31`).
+ */
+class DemasiadasInvitacionesException : ProductInvitationException(
+    HttpStatus.TOO_MANY_REQUESTS,
+    "PRD_TOO_MANY_REQUESTS",
+    "Demasiadas peticiones. Espera unos minutos e inténtalo de nuevo.",
+)
+
+/**
+ * La invitación no existe **o no es suya**: un solo estado y un solo cuerpo para los dos casos, que
+ * es lo que impide usar el borrado como sonda de existencia de invitaciones ajenas. `details` va
+ * vacío a propósito: el id ya lo trae quien pregunta y cualquier otra cosa sería regalar estado.
+ */
+class InvitacionNoEncontradaException : ProductInvitationException(
+    HttpStatus.NOT_FOUND,
+    "PRD_INVITATION_NOT_FOUND",
+    "No encontramos esa invitación.",
+)
+
+/**
+ * Es suya, pero no es un borrador: está pagada o llegó a publicarse. `409` porque es un conflicto con
+ * el estado, y el mensaje dice **qué** la protege sin nombrar nada que ella no sepa ya de su propia
+ * invitación.
+ */
+class InvitacionNoBorrableException(motivo: String) : ProductInvitationException(
+    HttpStatus.CONFLICT,
+    "PRD_INVITATION_NOT_DELETABLE",
+    "Esta invitación ya no es un borrador: no se puede eliminar.",
+    mapOf("reason" to motivo),
+)
