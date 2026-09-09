@@ -78,6 +78,42 @@ pendiente»). Falla desde `bfdcbaa`, que integró la imagen de portada sin ejecu
 Comprobado con `git stash`: falla igual sin ninguno de los cambios de esta sesión. No se arregla
 aquí porque su arreglo vive en la rama de las imágenes, que mergea E6.
 
+## 5b. La verificación de los skills, que es lo que el prompt pedía
+
+El prompt exige que «un agente Sonnet de prueba construya un componente trivial siguiendo
+`ui-componente` sin ayuda adicional». Se hizo: a un agente Sonnet se le pidió **un componente `Kbd`**
+(la tecla que aparece dentro de un texto) diciéndole solo que cargara el skill y lo siguiera, sin
+ninguna otra instrucción.
+
+**Resultado: el skill funciona.** El agente entregó `Kbd.tsx`, su `index.ts`, sus pruebas y su
+historia, lo exportó por el barril y lo registró en la galería, con `pnpm --filter @invitaciones/ui
+test` en **661/661**, `typecheck` y `lint` limpios, y la regresión visual de la galería en verde
+(288 capturas tras regenerarlas).
+
+**El componente se revirtió**: existía para probar el skill, nadie lo pidió, y dejarlo habría metido
+superficie no solicitada en el sistema de diseño y tocado tres ficheros compartidos
+(`componentes/index.ts`, `historias/registro.ts`, `historias/metadatos.ts`) que las cuatro sesiones
+en paralelo van a tocar. También se restauraron las cuatro capturas de referencia del índice de la
+galería que la corrida con `--update-snapshots` había regenerado.
+
+**Lo que sí se quedó son los cuatro huecos que el agente encontró, ya corregidos en el skill:**
+
+1. El paso 0 traía una lista congelada de «25 componentes» que ya estaba desactualizada (hay 26: le
+   faltaba `Stepper`). Quien confíe en esa cifra concluye que algo no existe cuando sí existe. Ahora
+   el skill manda **contar** el inventario, no copiar una cifra. Mismo tratamiento en `ui-pantalla` y
+   en el `279/279` de `pruebas-producto`, que sube con cada componente nuevo.
+2. Los pasos 3 y 4 daban por hecho que todo componente es **interactivo** y mandaban a `Button.tsx`.
+   Para uno presentacional como `Kbd` no aplica ningún estado, y forzar un `hover` en algo que no se
+   pulsa promete una interacción que no existe. El skill ahora hace elegir primero entre
+   presentacional e interactivo, y manda a `Badge.tsx` en el primer caso.
+3. **Ningún paso decía qué voz tipográfica usar.** El agente tuvo que abrir los tokens por su cuenta
+   para descubrir que no todas las variantes de `label` se comportan igual (unas fuerzan mayúsculas y
+   otras no). Añadido al paso 3, con el aviso.
+4. El comando de regresión visual del paso 7 tarda unos **3 minutos** y excede el tiempo de espera por
+   defecto de una orden de shell: escrito tal cual, se corta. El skill ahora lo avisa.
+
+Los pasos 1, 2, 6 y 8 funcionaron literales y a la primera, según el propio agente.
+
 ## 6. Riesgos que quedan
 
 - **La ADR de la puerta de publicación tiene una consecuencia que nadie ha implementado**: si editar

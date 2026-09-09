@@ -56,7 +56,7 @@ Server Component por defecto. Sube a `"use client"` solo lo que de verdad necesi
 del navegador (formularios, cualquier `Button`/control interactivo del sistema ya es cliente por su
 cuenta). Importa componentes por su **subruta directa**
 (`@invitaciones/ui/componentes/Button/index.ts`) en vez del barril `@invitaciones/ui` cuando la
-página es mayormente estática: el barril reexporta los 25 componentes —mitad con Radix dentro— y
+página es mayormente estática: el barril reexporta el catálogo entero —mitad con Radix dentro— y
 eso infla el JS propio de la ruta (medido: 92,3 KB → 8,9 KB en la portada al cambiar el import,
 `bitacora/3c-5.md §3`). Ver el presupuesto real de tu ruta en §8 antes de decidir.
 

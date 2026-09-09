@@ -9,11 +9,13 @@ Antes de nada, carga `identidad-visual` (`.claude/skills/identidad-visual/SKILL.
 asume ya cargado ese contexto y solo añade los pasos mecánicos de `packages/ui`.
 
 ## 0. Comprueba que no exista ya
-`ls frontend/packages/ui/src/componentes/` (25 componentes hoy: Avatar, Badge, Breadcrumb, Button,
-Card, Checkbox, Chip, Combobox, Dialog, EmptyState, Field, Image, Input, ProgressRing, RadioGroup,
-Select, Sheet, Skeleton, Switch, Tabs, Textarea, Toast, Tooltip, WizardProgress). Si lo que
-necesitas es una variante nueva de uno de estos, edita ese componente y su fichero de historias —
-no crees uno nuevo con otro nombre para lo mismo.
+**Cuenta el inventario, no te fíes de una lista escrita aquí**: crece cada fase y una cifra vieja
+hace creer que algo no existe cuando sí existe.
+```bash
+ls frontend/packages/ui/src/componentes/
+```
+Si lo que necesitas es una variante o un estado nuevo de uno de los que hay, **edita ese componente**
+y su fichero de historias — no crees uno nuevo con otro nombre para lo mismo.
 
 ## 1. Dónde va el fichero
 Dos formas conviven en el paquete, sigue la que ya use el componente más parecido:
@@ -39,13 +41,32 @@ Nunca un hex ni un paso de escala (`bg-primary-600` no existe como utilidad, a p
 `bg-ui-<rol>` / `text-ui-<rol>` / `ring-ui-<rol>` / `border-ui-<rol>` de los 46 roles de
 `packages/tokens/src/semantica.ts` (`ROLES_COLOR`), tipografía `font-ui-{display,text,label}` con
 sus roles de tamaño (`text-ui-display-*`/`heading-*`/`text-*`/`label-*`), radios
-`rounded-ui-{control,card,media,hero,pill}`. Mira `Button.tsx` para el patrón de anillo de foco: el
+`rounded-ui-{control,card,media,hero,pill}`.
+
+**Qué voz tipográfica te toca** (esto no se adivina, y la respuesta está en
+`packages/tokens/src/tipografia.ts` y `packages/ui/src/styles/typography.css` — ábrelos si dudas):
+- `display-*` — titulares. Nunca dentro de un componente pequeño.
+- `text-*` — cuerpo, párrafos, contenido.
+- `label-*` — etiquetas de control, insignias, metadatos, texto de interfaz corto. **Cuidado:** no
+  todas las variantes de `label` se comportan igual; algunas fuerzan mayúsculas y otras no. Mira cuál
+  usa el componente más parecido antes de elegir, y no supongas que las tres son intercambiables.
+
+Para el anillo de foco, mira `Button.tsx`: el
 alto y el `box-shadow` de foco se fijan como `style` en línea (medible con `getComputedStyle` en
 jsdom, donde no hay Tailwind compilado), el resto del aspecto va en clases de `cva`.
 
 ## 4. Estados obligatorios
-Todo componente interactivo cubre, según lo que aplique a su tipo (mira cómo lo hace el componente
-más parecido de los 25 existentes):
+
+**Primero decide si tu componente es interactivo o presentacional**, porque de eso depende todo este
+paso y el modelo que debes copiar:
+
+- **Presentacional** (no recibe foco, no se pulsa, no cambia de estado: una insignia, un separador,
+  una tecla dentro de un texto, un contenedor). **Ninguno de los estados de abajo aplica**, y forzarlos
+  es peor que no ponerlos: un `hover` en algo que no se puede pulsar promete una interacción que no
+  existe. Tu modelo es **`Badge.tsx`**, no `Button.tsx`. Lo que sí sigue siendo obligatorio: tokens,
+  la voz tipográfica correcta (paso 3), contraste medido, y la historia en la galería.
+- **Interactivo** (recibe foco, se pulsa, se escribe en él, se abre). Sigue la lista completa, según
+  lo que aplique a su tipo, mirando cómo lo hace el componente más parecido del inventario:
 - **reposo**
 - **hover** (si es un puntero; nunca el único indicador de estado en móvil)
 - **foco visible**: nunca solo el `outline` del navegador ni solo color — anillo con offset medible
@@ -99,6 +120,11 @@ Cada componente nuevo (o variante nueva) necesita una historia para entrar en
    la maquetación de la ficha.
 
 ## 7. Regresión visual, contraste y a11y — reales, no opcionales
+**Aviso de tiempo, para que no te corte el intento**: esta corrida construye Next y pasa la suite
+entera de la galería; tarda del orden de **3 minutos**, por encima del tiempo de espera por defecto
+de una orden de shell. Lánzala en segundo plano, o súbele el tiempo de espera, en vez de darla por
+rota cuando se corte.
+
 ```bash
 cd frontend
 pnpm --filter web exec playwright test --config=playwright.design.config.ts --project=design --update-snapshots

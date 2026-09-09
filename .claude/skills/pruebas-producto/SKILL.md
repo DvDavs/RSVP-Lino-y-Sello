@@ -175,7 +175,7 @@ cifras como si fueran el estado actual):
 | `pnpm --filter web run test` | Vitest de `apps/web` | 567/567 |
 | `pnpm -r run typecheck` (o `pnpm run typecheck` desde `frontend/`, que hace `turbo run typecheck`) | `tsc --noEmit` en cada paquete | 10/10 tareas turbo en verde |
 | `pnpm --filter web exec playwright test` (config por defecto, backend real) | e2e del producto | 79/79 |
-| `pnpm --filter web exec playwright test --config=playwright.design.config.ts --project=design` | galería `/design`, sin backend | 279/279 |
+| `pnpm --filter web exec playwright test --config=playwright.design.config.ts --project=design` | galería `/design`, sin backend | 279/279 al cierre de la fase 3-C; **sube** con cada componente nuevo (4 capturas por historia). Lo que importa es 0 fallos, no la cifra |
 | `./gradlew check` | Kotlin: tests + `verifyJsonSchemaEmitted` (compuerta de deriva del esquema) + JaCoCo | 1 184–1 195 pruebas Kotlin (dos cierres distintos de fase 2/3; **desactualizado para fase 5**, vuelve a contar) |
 | `scripts/smoke.sh` (con backend arriba) | 19 rutas HTTP reales de `handoffs/2-5.md` | 19/19 OK |
 | `pnpm --filter web run budget` (`node scripts/check-budget.mjs`, tras `pnpm run build`) | presupuesto de JS por ruta | `/i/[publicToken]` ≤ 150 KB, `/editor/[id]` ≤ 600 KB |
