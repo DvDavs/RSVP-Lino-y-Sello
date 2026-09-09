@@ -1,0 +1,56 @@
+==============================================================================
+ smoke templates2 — 19 rutas sobre Tomcat real
+ base: http://127.0.0.1:6093   postgres: 127.0.0.1:33197/invitaciones_f4_9c   2026-09-09T02:20:03Z
+==============================================================================
+
+-- Preparación --------------------------------------------------------------
+  customer USER id=16 (JWT por POST /auth/token), customer MASTER promovido por SQL
+  invitación id=4 (template_id=6, uses_templates2=true) creada por SQL
+
+-- Las 19 rutas -------------------------------------------------------------
+  [OK ] 1    GET    /editor/templates2/catalog                                 esperado 200     obtenido 200
+         catálogo = [boda-clasica,xv-jardin]
+  [OK ] 2    POST   /editor/invitations/4/document:choose-template             esperado 201     obtenido 201
+         revision=0 publicToken=pub_PKGDC2XN2PPD20W2WG8ECS3HMP
+  [OK ] 3    GET    /editor/invitations/4/document                             esperado 200     obtenido 200
+  [OK ] 7    POST   /editor/invitations/4/assets                               esperado 201|200 obtenido 201
+         assetId=as_01M21ZE5WNB9AVYBDYPP203690 previewUrl=http://127.0.0.1:6093/public/templates2-assets/templates2/invitation/4/91672579ac235a56110ec0a9b93887b6c813f3ca31b4aed244042259740947c9.webp
+  [OK ] 7b   POST   /editor/invitations/4/assets                               esperado 201|200 obtenido 201
+  [OK ] 4    POST   /editor/invitations/4/document/operations                  esperado 200     obtenido 200
+         revision=1 applied=true
+  [OK ] 5    GET    /editor/invitations/4/document/history?limit=10            esperado 200     obtenido 200
+         revisiones en el historial: 2,1,0
+  [OK ] 6    POST   /editor/invitations/4/document/restore                     esperado 200     obtenido 200
+         revision=3 (restaurada la 1)
+  [OK ] 8    GET    /editor/invitations/4/assets?limit=10                      esperado 200     obtenido 200
+         assets = as_01M21ZE5XXWKF6BQVWS9GHYQV2,as_01M21ZE5WNB9AVYBDYPP203690
+  [OK ] 10   GET    /editor/invitations/4/release/preflight                    esperado 200     obtenido 200
+         canPublish=true missingRequired=0
+  [OK ] 11   POST   /editor/invitations/4/release                              esperado 201     obtenido 201
+         contentHash=sha256:1a43e26defb4dc5b9c3810ac275e319aff3814ff9b16562ccee2286400f4bd01
+  [OK ] 15   GET    /public/i/pub_PKGDC2XN2PPD20W2WG8ECS3HMP/render            esperado 200     obtenido 200
+         ETag: "sha256:1a43e26defb4dc5b9c3810ac275e319aff3814ff9b16562ccee2286400f4bd01"
+         Cache-Control: public, max-age=300, stale-while-revalidate=3600
+  [OK ] 15b  GET    /public/i/{token}/render (If-None-Match)                   esperado 304     obtenido 304 (cuerpo 0 B)
+  [OK ] 16   GET    /public/i/pub_PKGDC2XN2PPD20W2WG8ECS3HMP/exists            esperado 200     obtenido 200
+         cuerpo: {"published":true}
+  [OK ] 13   GET    /editor/invitations/4/releases?limit=10                    esperado 200     obtenido 200
+  [OK ] 14   POST   /editor/invitations/4/public-token:rotate                  esperado 200     obtenido 200
+         publicToken pub_PKGDC2XN2PPD20W2WG8ECS3HMP → pub_824VY7PHWNKVH809PWEJWAMRB4
+  [OK ] 12   DELETE /editor/invitations/4/release                              esperado 204     obtenido 204
+  [OK ] 9    DELETE /editor/invitations/4/assets/as_01M21ZE5XXWKF6BQVWS9GHYQV2 esperado 204     obtenido 204
+  [OK ] 17   POST   /master/templates2/versions                                esperado 200|201 obtenido 200
+         result=noop_same_hash alreadyRegistered=true
+  [OK ] 17b  POST   /master/templates2/versions                                esperado 200|201 obtenido 201
+         xv-jardin@1.0.99 id=4 alreadyRegistered=false
+  [OK ] 18   GET    /master/templates2/versions?limit=20                       esperado 200     obtenido 200
+         versiones = xv-jardin@1.0.99:published, xv-jardin@1.0.0:published, boda-clasica@1.0.0:published, boda-clasica@1.0.2:published
+  [OK ] 19   POST   /master/templates2/versions/4:deprecate                    esperado 200     obtenido 200
+         status=deprecated documentsUsing=0
+
+-- Extras -------------------------------------------------------------------
+  previewUrl del asset (http://127.0.0.1:6093/public/templates2-assets/templates2/invitation/4/91672579ac235a56110ec0a9b93887b6c813f3ca31b4aed244042259740947c9.webp) → HTTP 200
+
+==============================================================================
+ 19/19 OK   ·   0 comprobación(es) fallida(s)
+==============================================================================

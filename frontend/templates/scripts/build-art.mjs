@@ -10,7 +10,9 @@
 //   node frontend/templates/scripts/build-art.mjs --check    no escribe; sale 1 si hay deriva
 //
 // Dónde cae cada cosa, y por qué:
-//   · `<slug>/1.0.0/assets/`  ASSETS DEL PAQUETE. Van dentro del `package_hash`, los sube el
+//   · `<slug>/<versionArte>/assets/`  ASSETS DEL PAQUETE (`versionArte` está en `PLANTILLAS`: es la
+//     versión EN CONSTRUCCIÓN, no siempre `1.0.0` — las ya registradas están congeladas, ver
+//     ADR-4-9C-01). Van dentro del `package_hash`, los sube el
 //     registro (`POST /master/templates2/versions`) y los sirve el backend. Aquí SÓLO lo que la
 //     plantilla declara en su manifiesto: `preview.webp`, `rsvp-bg.webp`, `divider.webp`. Un
 //     archivo de más en esta carpeta hace fallar el registro con `TPL_PACKAGE_UNEXPECTED_FILE`.
@@ -63,16 +65,31 @@ function paletaDe(slug, theme, paletaId) {
   return { id: pal.id, ...pigmentoArte(slug, pal.id, pal.tokens), theme };
 }
 
+/**
+ * `versionArte` — LA VERSIÓN DEL PAQUETE EN LA QUE CAE EL ARTE, y por qué no es siempre `1.0.0`.
+ *
+ * 4-9C: `1.0.0/assets/preview.webp` llevaba HORNEADO EN PÍXELES el nombre de una hacienda de bodas
+ * real. 4-9B corrigió la fuente (`muestra.lugar`, aquí abajo) pero no podía regenerar la imagen, así
+ * que el fichero versionado quedó desactualizado respecto de su fuente. Regenerarlo SOBRE `1.0.0`
+ * habría pisado los bytes de una versión ya registrada y publicada, que es justo lo que ADR-008
+ * prohíbe (`409 TPL_VERSION_HASH_MISMATCH`, medido en `bitacora/4-0a.md §2.6`). La salida no es
+ * pisar la versión: es publicar una nueva (ADR-4-9C-01). Por eso el arte de `boda-clasica` cae ya en
+ * `1.0.2` y `1.0.0`/`1.0.1` quedan CONGELADAS: nadie vuelve a escribir en ellas, ni este generador
+ * ni `build-packages.mjs` (ver `DERIVADAS` allí).
+ *
+ * Quien publique una versión nueva de una plantilla sube este número Y añade la derivada en
+ * `build-packages.mjs`. Las dos listas se comprueban entre sí al arrancar.
+ */
 const PLANTILLAS = [
   {
-    slug: 'boda-clasica', familia: 'boda',
+    slug: 'boda-clasica', familia: 'boda', versionArte: '1.0.2',
     // `floral` no es un token del tema: es un color derivado del acento, para las flores de XV.
     // En `boda-clasica` no hay flores rellenas, así que no se usa.
     muestra: { titulo: 'Ana & Diego', subtitulo: 'NUESTRA BODA', fecha: '18 · IV · 2027', lugar: 'Hacienda Los Naranjos · Morelos' },
     inicialA: 'D', inicialB: 'A',
   },
   {
-    slug: 'xv-jardin', familia: 'xv',
+    slug: 'xv-jardin', familia: 'xv', versionArte: '1.0.0',
     muestra: { titulo: 'Renata', subtitulo: 'MIS XV AÑOS', fecha: '09 · X · 2027', lugar: 'Jardín Los Fresnos · Puebla' },
     inicialA: 'R', inicialB: 'R',
   },
@@ -96,7 +113,7 @@ const PLANTILLAS = [
  *     paleta que aplica. Son las TRECE imágenes que 3-CV vio rosas sobre un fondo azul (`O-07`).
  */
 function piezas(t, p) {
-  const A = (nombre) => path.join(TEMPLATES, t.slug, '1.0.0/assets', nombre);
+  const A = (nombre) => path.join(TEMPLATES, t.slug, t.versionArte, 'assets', nombre);
   const D = (nombre) => path.join(TEMPLATES, t.slug, 'demo', p.id, nombre);
   const l = [];
   if (p.id === p.theme.defaultPaletteId) {
@@ -145,7 +162,7 @@ const paletaMala = [];
 
 for (const t of PLANTILLAS) {
   const theme = temaDe(t.slug);
-  console.log(`\n== ${t.slug}@1.0.0 — ${theme.palettes.length} paleta(s), por defecto "${theme.defaultPaletteId}" ==`);
+  console.log(`\n== ${t.slug}@${t.versionArte} — ${theme.palettes.length} paleta(s), por defecto "${theme.defaultPaletteId}" ==`);
 
   // Contraste de la PALETA (las cinco parejas de `04 §17.1`). Es la comprobación que I-31 hará en
   // el registro cuando el orquestador acepte ADR-1R-F-06; aquí se deja a la vista desde ya.

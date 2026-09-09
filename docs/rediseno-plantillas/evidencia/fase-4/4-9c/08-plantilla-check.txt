@@ -1,0 +1,44 @@
+=== pnpm plantilla check ../frontend/templates/boda-clasica/1.0.0 ===
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/49c/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- check ../frontend/templates/boda-clasica/1.0.0
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/49c/frontend/packages/template-kit
+> node bin/plantilla.mjs -- check ../frontend/templates/boda-clasica/1.0.0
+
+plantilla check /home/user/wt/49c/frontend/templates/boda-clasica/1.0.0
+
+package_hash = sha256:cf0120182112711ac8137a465680c2ad0ba7b3196fd1a04e83d050775048e111
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== pnpm plantilla check ../frontend/templates/boda-clasica/1.0.1 ===
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/49c/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- check ../frontend/templates/boda-clasica/1.0.1
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/49c/frontend/packages/template-kit
+> node bin/plantilla.mjs -- check ../frontend/templates/boda-clasica/1.0.1
+
+plantilla check /home/user/wt/49c/frontend/templates/boda-clasica/1.0.1
+
+package_hash = sha256:78e7a625026cc84695f2040351dd59b1196917c0c0652d6bcc90935583b84fd9
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+
+=== pnpm plantilla check ../frontend/templates/boda-clasica/1.0.2 ===
+
+> invitaciones-frontend@0.0.0 plantilla /home/user/wt/49c/frontend
+> pnpm --filter @invitaciones/template-kit run plantilla -- check ../frontend/templates/boda-clasica/1.0.2
+
+
+> @invitaciones/template-kit@0.0.0 plantilla /home/user/wt/49c/frontend/packages/template-kit
+> node bin/plantilla.mjs -- check ../frontend/templates/boda-clasica/1.0.2
+
+plantilla check /home/user/wt/49c/frontend/templates/boda-clasica/1.0.2
+
+package_hash = sha256:e069c76d5cde6664461f7d576191ffd26504d635f7d98faf6a36cbefba6a344a
+
+0 error(es) · 0 aviso(s) · 0 corregido(s)

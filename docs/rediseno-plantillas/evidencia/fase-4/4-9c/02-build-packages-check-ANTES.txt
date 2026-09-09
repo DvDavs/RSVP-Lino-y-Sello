@@ -1,0 +1,44 @@
+
+   paleta "blush" (corregida: accent #B05555→#B05555, muted #7B6E6B→#7B6E6B)
+      ink/bg 12.33 · ink/surface 13.07 · accentInk/accent 4.91 · muted/bg 4.62 · accent/bg 4.62 · muted/bg (1.4.3) 4.62 · muted/surface (1.4.3) 4.90 · accent/bg (1.4.3) 4.62 · accent/surface (1.4.3) 4.91
+   paleta "olive" (corregida: accent #657446→#657446, muted #6C715D→#6C715D)
+      ink/bg 10.93 · ink/surface 11.92 · accentInk/accent 5.07 · muted/bg 4.63 · accent/bg 4.64 · muted/bg (1.4.3) 4.63 · muted/surface (1.4.3) 5.05 · accent/bg (1.4.3) 4.64 · accent/surface (1.4.3) 5.07
+   paleta "navy" (corregida: muted #647087→#647087)
+      ink/bg 13.20 · ink/surface 14.28 · accentInk/accent 8.77 · muted/bg 4.61 · accent/bg 8.11 · muted/bg (1.4.3) 4.61 · muted/surface (1.4.3) 4.98 · accent/bg (1.4.3) 8.11 · accent/surface (1.4.3) 8.77
+== boda-clasica@1.0.0 — paleta por defecto "blush" (#FDF7F5 / #B05555) ==
+   assets/cover.webp          46544 B  image/webp  sha256:ebaf89d6cc6943fa…  as_01J8DEM000000000000000C0V1
+   assets/divider.webp        31002 B  image/webp  sha256:3960f97e40e54783…  (sin alias)
+   assets/gallery-1.webp      34620 B  image/webp  sha256:6ec126113ff8abc3…  as_01J8DEM0000000000000000GA1
+   assets/gallery-2.webp      39670 B  image/webp  sha256:f7fe272e3c100145…  as_01J8DEM0000000000000000GA2
+   assets/portrait-a.webp     42822 B  image/webp  sha256:5b6c30d9d1ae3cfa…  as_01J8DEM000000000000000N0V1
+   assets/portrait-b.webp     41268 B  image/webp  sha256:3d4dc174847a3831…  as_01J8DEM000000000000000N0V2
+   assets/preview.webp        70120 B  image/webp  sha256:5edcd64d402752bb…  (sin alias)
+   assets/rsvp-bg.webp        43340 B  image/webp  sha256:2f62262e765cef18…  as_01J8DEM000000000000000RSV1
+   assets/story-1.webp        37046 B  image/webp  sha256:7dd2bf5a62fade3a…  as_01J8DEM000000000000000H1S1
+DERIVA: frontend/templates/boda-clasica/1.0.0/defaults.json
+   template.json / theme.json / defaults.json  →  frontend/templates/boda-clasica/1.0.0
+   huella local del paquete (no es el package_hash del backend): sha256:ca81ac8d47e511a0e86bd856e08f6edb…
+
+   paleta "garden" (corregida: accent #5D7944→#5D7944, muted #647757→#647757)
+      ink/bg 11.22 · ink/surface 11.85 · accentInk/accent 4.90 · muted/bg 4.60 · accent/bg 4.64 · muted/bg (1.4.3) 4.60 · muted/surface (1.4.3) 4.86 · accent/bg (1.4.3) 4.64 · accent/surface (1.4.3) 4.90
+   paleta "lilac" (corregida: accent #835FB0→#835FB0, muted #7D6798→#7D6798)
+      ink/bg 12.20 · ink/surface 13.09 · accentInk/accent 4.96 · muted/bg 4.58 · accent/bg 4.62 · muted/bg (1.4.3) 4.58 · muted/surface (1.4.3) 4.92 · accent/bg (1.4.3) 4.62 · accent/surface (1.4.3) 4.96
+== xv-jardin@1.0.0 — paleta por defecto "garden" (#F6FAF3 / #5D7944) ==
+   assets/cover.webp          39664 B  image/webp  sha256:9f7a852eb1da1701…  as_01J8YQYX1HD63EACDQ55S8368N
+   assets/divider.webp        25714 B  image/webp  sha256:6079e415349dba6f…  (sin alias)
+   assets/portrait-a.webp     35438 B  image/webp  sha256:6614ef5f504ebf6b…  as_01J8R6MAHKEW2GFM9QG29Z4N21
+   assets/preview.webp        60648 B  image/webp  sha256:91672579ac235a56…  (sin alias)
+   assets/rsvp-bg.webp        36354 B  image/webp  sha256:02a1a186fd4132c3…  (sin alias)
+DERIVA: frontend/templates/xv-jardin/1.0.0/defaults.json
+   template.json / theme.json / defaults.json  →  frontend/templates/xv-jardin/1.0.0
+   huella local del paquete (no es el package_hash del backend): sha256:72583ef53a929dfc0ff7ff20c1b7b33d…
+
+== boda-clasica: 1.0.0 → 1.0.1 (versión derivada) ==
+   diff estructural contra 1.0.0: VACÍO
+   migrations/1.0.0-to-1.0.1.json: 0 operación(es)
+   package_hash boda-clasica@1.0.0 = sha256:cf0120182112711ac8137a465680c2ad0ba7b3196fd1a04e83d050775048e111
+   package_hash boda-clasica@1.0.1 = sha256:78e7a625026cc84695f2040351dd59b1196917c0c0652d6bcc90935583b84fd9
+   frontend/templates/boda-clasica/1.0.1
+
+2 archivo(s) con deriva: vuelve a ejecutar sin --check.
+exit=1

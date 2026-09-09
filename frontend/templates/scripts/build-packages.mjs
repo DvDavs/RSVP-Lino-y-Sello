@@ -228,8 +228,23 @@ for (const t of PLANTILLAS) {
 // Uso:  node frontend/templates/scripts/build-packages.mjs            (construye)
 //       node frontend/templates/scripts/build-packages.mjs --check    (falla si hay deriva)
 
+//
+// `arteRegenerado` (4-9C) — CUANDO LA VERSIÓN NUEVA EXISTE JUSTAMENTE PARA CAMBIAR UN ASSET.
+//
+// La derivación normal copia los assets byte a byte porque la versión nueva publica el mismo arte.
+// `boda-clasica@1.0.2` es el caso contrario: nace porque `preview.webp` llevaba HORNEADO EN PÍXELES
+// el nombre de una hacienda de bodas real, y el arreglo es una imagen distinta (ADR-4-9C-01). Esas
+// rutas NO se copian de `desde`: las escribe `build-art.mjs` directamente en `hasta`
+// (`PLANTILLAS[].versionArte` allí), y aquí sólo se comprueba que estén y se MIDEN para el
+// manifiesto. Lo demás —los seis assets de demostración— sí se copia de `desde`, así que la versión
+// nueva sigue siendo idéntica a la anterior en todo lo que nadie decidió cambiar.
+//
+// Las dos listas se mantienen a mano y se vigilan entre sí: la comprobación de más abajo falla si
+// `build-art.mjs` no ha dejado el archivo, que es exactamente el orden que documenta su cabecera
+// (`build-art.mjs` primero, `build-packages.mjs` después).
 const DERIVADAS = [
   { slug: 'boda-clasica', desde: '1.0.0', hasta: '1.0.1' },
+  { slug: 'boda-clasica', desde: '1.0.1', hasta: '1.0.2', arteRegenerado: ['assets/preview.webp'] },
 ];
 
 /** `canonicalJson` de `01 §5.5`, idéntico a `packages/schema/src/compose.ts:228` y a `CanonicalJson.kt`. */
@@ -361,9 +376,29 @@ for (const d of DERIVADAS) {
   }
   const anterior = leerPaquete(dirDesde);
 
-  // 1. assets, byte a byte. No se dibuja nada: la versión nueva publica el mismo arte.
+  // 1. assets. Los que la versión nueva NO cambia se copian byte a byte de `desde` (no se dibuja
+  //    nada); los de `arteRegenerado` ya los dejó `build-art.mjs` en `hasta` y aquí sólo se exige
+  //    que estén. `origenAsset` es la MISMA función que usa el paso 2 para medir, así que
+  //    `--check` mide lo mismo que escribe la corrida real: no hay verdes falsos.
+  const arteRegenerado = new Set(d.arteRegenerado ?? []);
+  const origenAsset = (ruta) => path.join(arteRegenerado.has(ruta) ? dirHasta : dirDesde, ruta);
   for (const nombre of fs.readdirSync(path.join(dirDesde, 'assets')).sort()) {
-    escribir(path.join(dirHasta, 'assets', nombre), fs.readFileSync(path.join(dirDesde, 'assets', nombre)));
+    const ruta = `assets/${nombre}`;
+    if (arteRegenerado.has(ruta)) {
+      if (!fs.existsSync(origenAsset(ruta))) {
+        console.error(`   FALTA ${path.relative(RAIZ, origenAsset(ruta))}: lo escribe \`build-art.mjs\` ` +
+          `(PLANTILLAS[].versionArte = "${d.hasta}"); ejecútalo antes que este script`);
+        process.exit(2);
+      }
+      continue;
+    }
+    escribir(path.join(dirHasta, ruta), fs.readFileSync(origenAsset(ruta)));
+  }
+  for (const ruta of arteRegenerado) {
+    if (!anterior.manifiesto.assets.some((e) => e.path === ruta)) {
+      console.error(`   arteRegenerado declara "${ruta}", que no es un asset de ${d.slug}@${d.desde}`);
+      process.exit(2);
+    }
   }
 
   // 2. manifiesto: versión nueva, `migrationsFrom` y `assets[]` MEDIDOS de los archivos reales.
@@ -371,7 +406,7 @@ for (const d of DERIVADAS) {
   manifiesto.version = d.hasta;
   manifiesto.migrationsFrom = [d.desde];
   manifiesto.assets = anterior.manifiesto.assets.map((e) => {
-    const bytes = fs.readFileSync(path.join(SOLO_COMPROBAR ? dirDesde : dirHasta, e.path));
+    const bytes = fs.readFileSync(origenAsset(e.path));
     return { ...e, sha256: sha256(bytes), bytes: bytes.length };
   });
   escribir(path.join(dirHasta, 'template.json'), JSON.stringify(manifiesto, null, 2) + '\n');
