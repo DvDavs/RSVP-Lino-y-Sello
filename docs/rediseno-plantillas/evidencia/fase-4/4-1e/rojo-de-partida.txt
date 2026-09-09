@@ -1,0 +1,14 @@
+$ cd frontend && pnpm --filter web test test/fuentes-autoalojadas.test.ts
+     × cumple-retro/1.0.0 fontSets[clasica].body = "Inter" 600 → @fontsource/inter/600.css 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/fuentes-autoalojadas.test.ts > A4 (3-9) — toda familia del catálogo de plantillas está autoalojada en publico.css > cumple-retro/1.0.0 fontSets[clasica].body = "Inter" 600 → @fontsource/inter/600.css
+AssertionError: Falta `@import "@fontsource/inter/600.css"` en app/(public)/publico.css. Sin él, esa invitación se pinta con la pila de reserva (Georgia / sans del sistema).: expected false to be true // Object.is equality
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 75 passed (76)
+
+(reproducido en este cierre revirtiendo temporalmente frontend/templates/cumple-retro/1.0.0/theme.json
+ a su body.weights original [400,600] con `git stash`, y restaurado a [400,500] a continuación — ver
+ diff en decisiones.md/ADR-4-1E-01 y bitacora/4-1e.md)

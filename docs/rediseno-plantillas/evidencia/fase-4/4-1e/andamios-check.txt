@@ -1,0 +1,28 @@
+=== plantilla nueva (cada pareja tipográfica que el kit ofrece hoy: la única, Cormorant Garamond + Inter) → check, para cada tipo de evento y para las 12 secciones a la vez ===
+-- /tmp/claude-0/-home-user-RSVP-Lino-y-Sello/083fe5fb-1766-5379-812f-78306dc31b0d/scratchpad/andamios/andamio-baptism/1.0.0/
+ fontSet: Cormorant Garamond [400, 600] / Inter [400, 500]
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /tmp/claude-0/-home-user-RSVP-Lino-y-Sello/083fe5fb-1766-5379-812f-78306dc31b0d/scratchpad/andamios/andamio-birthday/1.0.0/
+ fontSet: Cormorant Garamond [400, 600] / Inter [400, 500]
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /tmp/claude-0/-home-user-RSVP-Lino-y-Sello/083fe5fb-1766-5379-812f-78306dc31b0d/scratchpad/andamios/andamio-communion/1.0.0/
+ fontSet: Cormorant Garamond [400, 600] / Inter [400, 500]
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /tmp/claude-0/-home-user-RSVP-Lino-y-Sello/083fe5fb-1766-5379-812f-78306dc31b0d/scratchpad/andamios/andamio-confirmation/1.0.0/
+ fontSet: Cormorant Garamond [400, 600] / Inter [400, 500]
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /tmp/claude-0/-home-user-RSVP-Lino-y-Sello/083fe5fb-1766-5379-812f-78306dc31b0d/scratchpad/andamios/andamio-generic/1.0.0/
+ fontSet: Cormorant Garamond [400, 600] / Inter [400, 500]
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /tmp/claude-0/-home-user-RSVP-Lino-y-Sello/083fe5fb-1766-5379-812f-78306dc31b0d/scratchpad/andamios/andamio-graduation/1.0.0/
+ fontSet: Cormorant Garamond [400, 600] / Inter [400, 500]
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /tmp/claude-0/-home-user-RSVP-Lino-y-Sello/083fe5fb-1766-5379-812f-78306dc31b0d/scratchpad/andamios/andamio-quince/1.0.0/
+ fontSet: Cormorant Garamond [400, 600] / Inter [400, 500]
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /tmp/claude-0/-home-user-RSVP-Lino-y-Sello/083fe5fb-1766-5379-812f-78306dc31b0d/scratchpad/andamios/andamio-todas/1.0.0/
+ fontSet: Cormorant Garamond [400, 600] / Inter [400, 500]
+0 error(es) · 0 aviso(s) · 0 corregido(s)
+-- /tmp/claude-0/-home-user-RSVP-Lino-y-Sello/083fe5fb-1766-5379-812f-78306dc31b0d/scratchpad/andamios/andamio-wedding/1.0.0/
+ fontSet: Cormorant Garamond [400, 600] / Inter [400, 500]
+0 error(es) · 0 aviso(s) · 0 corregido(s)

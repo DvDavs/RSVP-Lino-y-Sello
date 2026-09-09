@@ -1,0 +1,18 @@
+=== 1. pnpm --filter @invitaciones/template-kit test ===
+ Test Files  12 passed (12)
+      Tests  187 passed (187)
+
+=== 2. pnpm --filter web test test/fuentes-autoalojadas.test.ts ===
+ Test Files  1 passed (1)
+      Tests  76 passed (76)
+
+=== 3. pnpm -r typecheck ===
+Scope: 8 of 9 workspace projects
+packages/tokens typecheck: Done
+packages/icons typecheck: Done
+packages/schema typecheck: Done
+packages/sections typecheck: Done
+packages/ui typecheck: Done
+packages/template-kit typecheck: Done
+apps/web typecheck: Done
+packages/migration-legacy typecheck: Done
