@@ -1622,3 +1622,19 @@ no es lo que el repositorio hace sino lo que el repositorio **contiene** y ya ha
    credenciales de AWS (crear el nuevo y **desactivar el viejo en IAM**, no solo dejar de usarlo),
    contraseña de aplicación del Gmail (**al rotarla el envío de correo deja de funcionar hasta
    poner la nueva en `MAIL_PASSWORD`**), y los dos tokens de WhatsApp en Meta.
+
+- [Fase 5 · E3-A4] **Cerrada la precondición técnica de la rotación del Gmail; sigue abierta la rotación, que es lo único que invalida el secreto.** La nota de E3-A3 (arriba) avisaba de que «rotar la de Gmail antes de arreglar `core/email/MailConfig.kt` rompe el envío de correo» y pedía «un encargo corto que haga ahí lo mismo que se hizo en el `yml`». Hecho: `ADR-5-E3-A4-01` borra ese fichero y el transporte lo construye Spring Boot desde `spring.mail.*`, así que **ya se puede rotar** y `MAIL_PASSWORD` es el único sitio donde hay que poner la nueva. Lo que **no** cambia y sigue siendo la pregunta de verdad: la contraseña de aplicación **sigue en el histórico de git y sigue siendo válida** (recuperable de `8a16ebb^` hacia atrás), el histórico no se reescribe, y rotarla **corta el envío de correo** hasta que la nueva esté puesta en el entorno del despliegue — que es justo lo que la otra pregunta abierta de E3-A3 («dónde viven estas variables en producción») todavía no sabe responder. **¿Quién rota y en qué orden respecto a poner el valor nuevo en el entorno?** Siguen sin tocar, con la misma severidad y ya sin ninguna precondición técnica: el token de Meta/WhatsApp (`application.yml:134` tras este bloque, `docker-compose.yml:53`) y el `VERIFY_TOKEN` de `modules/shared/whatsapp/WhatsAppWebhookController.kt:13`. **Aviso de lectura:** las referencias `MailConfig.kt:19-30` y `application.yml:63-66` de las dos notas anteriores de E3 ya no son válidas (el fichero no existe y el bloque `spring.mail` se movió); no se reescriben porque estas notas no se tocan, se añaden.
+
+### Nota de higiene del histórico de esta rama (para E6, al mergear)
+
+El commit `d138590`, cuyo mensaje habla **solo** de retirar `invitaciones.sql`, arrastra además
+trabajo **a medio hacer** de otros dos bloques de esta sesión, porque el orquestador usó `git add -A`
+con dos agentes escribiendo en el árbol: el bloque de marca, contacto y legal (`frontend/apps/web/**`,
+`lib/i18n.ts`, `robots.ts`, `sitemap.ts`) y el del transporte de correo (borrado de
+`core/email/MailConfig.kt`, `application.yml`, `MailSenderConfiguracionTest.kt`).
+
+**Ese contenido no estaba verificado en ese punto**: es una foto intermedia, no un entregable. Los
+commits posteriores de cada bloque son los que traen el estado terminado y sus cifras de pruebas
+medidas. No se reescribe el histórico —la rama ya está empujada y E6 la mergea—, pero al leer el
+registro hay que saberlo: **`d138590` no es la entrega de esos dos bloques, es ruido dentro de un
+commit de datos personales.**
