@@ -102,7 +102,10 @@ describe("PantallaInvitados — búsqueda y filtro van al backend", () => {
     const listar = vi.spyOn(invitadosApi, "listGuests").mockResolvedValue(pagina([invitado()]));
     const usuario = userEvent.setup();
     render(<PantallaInvitados invitationId={7} />);
-    await screen.findByRole("button", { name: "María Fernanda Cruz" });
+    // Ancla de espera: la lista ya está pintada. El nombre accesible del disparador de edición es
+    // «Editar a <nombre>» (dice QUÉ hace, `TablaInvitados.test.tsx`), y en jsdom se pintan a la vez
+    // la tabla y las tarjetas — de ahí `findAllByRole` con expresión regular sobre el nombre.
+    await screen.findAllByRole("button", { name: /María Fernanda Cruz/ });
 
     await usuario.type(screen.getByLabelText("Buscar por nombre"), "Rocío");
 
@@ -117,7 +120,10 @@ describe("PantallaInvitados — búsqueda y filtro van al backend", () => {
     const listar = vi.spyOn(invitadosApi, "listGuests").mockResolvedValue(pagina([invitado()]));
     const usuario = userEvent.setup();
     render(<PantallaInvitados invitationId={7} />);
-    await screen.findByRole("button", { name: "María Fernanda Cruz" });
+    // Ancla de espera: la lista ya está pintada. El nombre accesible del disparador de edición es
+    // «Editar a <nombre>» (dice QUÉ hace, `TablaInvitados.test.tsx`), y en jsdom se pintan a la vez
+    // la tabla y las tarjetas — de ahí `findAllByRole` con expresión regular sobre el nombre.
+    await screen.findAllByRole("button", { name: /María Fernanda Cruz/ });
 
     const disparador = screen.getByRole("combobox", { name: "Filtrar por estado" });
     disparador.focus();
@@ -137,10 +143,63 @@ describe("PantallaInvitados — cupos de niños/jóvenes en el alta", () => {
     vi.spyOn(invitadosApi, "listGuests").mockResolvedValue(pagina([invitado()]));
     const usuario = userEvent.setup();
     render(<PantallaInvitados invitationId={7} />);
-    await screen.findByRole("button", { name: "María Fernanda Cruz" });
+    // Ancla de espera: la lista ya está pintada. El nombre accesible del disparador de edición es
+    // «Editar a <nombre>» (dice QUÉ hace, `TablaInvitados.test.tsx`), y en jsdom se pintan a la vez
+    // la tabla y las tarjetas — de ahí `findAllByRole` con expresión regular sobre el nombre.
+    await screen.findAllByRole("button", { name: /María Fernanda Cruz/ });
 
     await usuario.click(screen.getAllByText("Agregar invitado")[0]!);
     expect(await screen.findByLabelText(/Niños/i)).toBeTruthy();
     expect(screen.queryByLabelText(/Jóvenes/i)).toBeNull();
+  });
+});
+
+// -------------------------------------------------------------------------------------------
+// Arreglos de la revisión Opus. Cada caso cae si se deshace el arreglo.
+// -------------------------------------------------------------------------------------------
+
+describe("PantallaInvitados — una respuesta que llega tarde no pisa la búsqueda en curso", () => {
+  it("la lista enseña lo que pidió la ÚLTIMA búsqueda, aunque la anterior conteste después", async () => {
+    vi.spyOn(invitadosApi, "getGuestsSummary").mockResolvedValue(resumen());
+    let resolverLenta: (() => void) | undefined;
+    const lenta = new Promise<GuestPage>((resuelve) => {
+      resolverLenta = () => resuelve(pagina([invitado({ id: 9, fullName: "Rosa Vieja" })]));
+    });
+    const listar = vi
+      .spyOn(invitadosApi, "listGuests")
+      .mockResolvedValueOnce(pagina([invitado({ id: 1, fullName: "Ana Primera" })])) // carga inicial
+      .mockReturnValueOnce(lenta) // «Ro»: se queda colgada a propósito
+      .mockResolvedValue(pagina([invitado({ id: 2, fullName: "Rocío Nueva" })])); // «Rocío»
+
+    const usuario = userEvent.setup();
+    render(<PantallaInvitados invitationId={7} />);
+    await screen.findAllByRole("button", { name: /Ana Primera/ });
+
+    const buscador = screen.getByLabelText("Buscar por nombre");
+    await usuario.type(buscador, "Ro");
+    await waitFor(() => expect(listar).toHaveBeenCalledTimes(2), { timeout: 2000 });
+    await usuario.type(buscador, "cío");
+    await waitFor(() => expect(listar).toHaveBeenCalledTimes(3), { timeout: 2000 });
+    await screen.findAllByRole("button", { name: /Rocío Nueva/ });
+
+    // Ahora contesta la búsqueda vieja. Sin el guardia de `ultimaPeticion` esto repinta la lista con
+    // «Rosa Vieja» debajo de un buscador que dice «Rocío».
+    resolverLenta?.();
+    await lenta;
+    await waitFor(() => expect(screen.queryAllByRole("button", { name: /Rosa Vieja/ })).toHaveLength(0));
+    expect(screen.getAllByRole("button", { name: /Rocío Nueva/ }).length).toBeGreaterThan(0);
+  });
+});
+
+describe("PantallaInvitados — el esqueleto no deja saltar la maquetación", () => {
+  it("reserva el hueco de la fila de búsqueda y filtro mientras carga", async () => {
+    vi.spyOn(invitadosApi, "getGuestsSummary").mockImplementation(() => new Promise(() => {}));
+    vi.spyOn(invitadosApi, "listGuests").mockResolvedValue(pagina([]));
+    const { container } = render(<PantallaInvitados invitationId={7} />);
+    await screen.findAllByRole("status", { name: "Cargando invitados" });
+    // Mismo ancho que el campo real de búsqueda (`sm:w-64`): sin este hueco, la fila entera aparecía
+    // de golpe al terminar la carga y empujaba la tabla hacia abajo.
+    expect(container.querySelectorAll('[class*="sm:w-64"]').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('[class*="sm:w-44"]').length).toBeGreaterThan(0);
   });
 });

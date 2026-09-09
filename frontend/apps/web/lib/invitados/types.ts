@@ -112,10 +112,18 @@ export interface GuestImportResponse {
   readonly problems: readonly GuestProblem[];
 }
 
-/** `GET …/guests/{guestId}/link` — la única ruta que revela un token, ya montado en la URL. */
+/**
+ * `GET …/guests/{guestId}/link` — la única ruta que revela un token, ya montado en la URL.
+ *
+ * `whatsappUrl` es OPCIONAL, no `string | null`: el DTO Kotlin lleva
+ * `@JsonInclude(JsonInclude.Include.NON_NULL)` (`GuestPanelDtos.kt`, [GuestLinkResponse]), así que
+ * cuando el invitado no tiene teléfono la clave **no viene en el JSON** y aquí llega `undefined`,
+ * nunca `null`. Tiparlo `string | null` invitaba a escribir `whatsappUrl !== null`, que es `true`
+ * para `undefined` y abriría `window.open(undefined)`.
+ */
 export interface GuestLink {
   readonly url: string;
-  readonly whatsappUrl: string | null;
+  readonly whatsappUrl?: string | null;
   readonly shareText: string;
 }
 

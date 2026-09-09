@@ -26,6 +26,10 @@ import { EsqueletoTarjetasInvitados, TarjetasInvitados } from "./TarjetasInvitad
 
 const TAMANO_PAGINA = 25;
 const RETRASO_BUSQUEDA_MS = 300;
+/** Alto real del `Input` de búsqueda y del `Select`/`Button` de la fila de filtros (`packages/ui`).
+ *  El esqueleto reserva EXACTAMENTE ese hueco para que nada salte al terminar la carga. */
+const ALTO_CAMPO_FILTRO = 46;
+const ALTO_CONTROL_FILTRO = 44;
 
 type EstadoCarga = "cargando" | "listo" | "error";
 type FiltroEstado = GuestStatus | "TODOS";
@@ -48,8 +52,16 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
   const [cargandoMas, setCargandoMas] = useState(false);
   const [exportando, setExportando] = useState(false);
   const primerLoteHecho = useRef(false);
+  const tituloRef = useRef<HTMLHeadingElement>(null);
+  // Número de la última búsqueda pedida. El rebote de 300 ms no evita que dos peticiones convivan:
+  // basta con que la de «Ro» tarde más que la de «Rocío» para que la lista termine enseñando los
+  // resultados de «Ro» bajo el texto «Rocío». Se atiende SOLO a la última pedida; las que llegan
+  // tarde se descartan sin tocar la pantalla.
+  const ultimaPeticion = useRef(0);
 
   const cargarPrimeraPagina = useCallback(async (): Promise<void> => {
+    const miPeticion = ultimaPeticion.current + 1;
+    ultimaPeticion.current = miPeticion;
     if (!primerLoteHecho.current) setEstado("cargando");
     setErrorMensaje(null);
     try {
@@ -62,6 +74,7 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
           size: TAMANO_PAGINA,
         }),
       ]);
+      if (miPeticion !== ultimaPeticion.current) return;
       primerLoteHecho.current = true;
       setResumen(resumenNuevo);
       setInvitados([...listaNueva.content]);
@@ -69,6 +82,9 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
       setTotalPaginas(listaNueva.totalPages);
       setEstado("listo");
     } catch (error) {
+      // Un fallo de una búsqueda ya superada tampoco puede pintar de rojo la pantalla de la búsqueda
+      // que sí está en curso.
+      if (miPeticion !== ultimaPeticion.current) return;
       setErrorMensaje(mensajeDeError(error));
       setEstado("error");
     }
@@ -119,6 +135,12 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
   function alEliminarInvitado(guestId: number): void {
     setInvitados((anteriores) => anteriores.filter((g) => g.id !== guestId));
     void actualizarResumen();
+    // El diálogo de borrado se abre DESDE la fila que se acaba de borrar, así que su disparador
+    // desaparece con ella y Radix no tiene a dónde devolver el foco: se cae a `<body>` y quien navega
+    // con teclado o lector de pantalla se queda sin contexto. Se lleva al título de la pantalla, que
+    // siempre existe. En `setTimeout` porque el `onCloseAutoFocus` de Radix corre al desmontar el
+    // contenido, después de este manejador.
+    setTimeout(() => tituloRef.current?.focus(), 0);
   }
 
   function alImportarInvitados(creados: readonly GuestItem[]): void {
@@ -156,12 +178,28 @@ export function PantallaInvitados({ invitationId }: { readonly invitationId: num
   return (
     <main className="mx-auto w-full max-w-ui-page px-5 py-10 sm:px-8">
       <Toaster />
-      <h1 className="display-md text-ui-ink">{t.titulo}</h1>
+      {/* `tabIndex={-1}`: no entra en el orden de tabulación, pero puede recibir el foco por
+          programa cuando el elemento enfocado desaparece (ver `alEliminarInvitado`). */}
+      <h1 ref={tituloRef} tabIndex={-1} className="display-md text-ui-ink outline-none">
+        {t.titulo}
+      </h1>
       <p className="mt-2 text-md text-ui-ink-muted">{t.subtitulo}</p>
 
       {estado === "cargando" ? (
         <div className="mt-8 grid gap-6">
           <Skeleton variante="bloque" alto={104} etiqueta={t.cargando} />
+          {/* La fila de búsqueda, filtro y acciones también ocupa sitio. Sin su hueco, al terminar
+              la carga aparecía de golpe y empujaba la tabla hacia abajo: justo el salto de
+              maquetación que `ui-pantalla` §7 prohíbe. Mismo contenedor y mismas medidas que la fila
+              real (`sm:w-64` / `sm:w-44` / los tres botones), y sin etiqueta propia: el estado de
+              carga ya lo anuncia el bloque de contadores de arriba, una vez. */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <Skeleton variante="bloque" alto={ALTO_CAMPO_FILTRO} className="w-full sm:w-64" etiqueta="" />
+              <Skeleton variante="bloque" alto={ALTO_CONTROL_FILTRO} className="w-full sm:w-44" etiqueta="" />
+            </div>
+            <Skeleton variante="bloque" alto={ALTO_CONTROL_FILTRO} className="w-full sm:w-80" etiqueta="" />
+          </div>
           <EsqueletoTablaInvitados />
           <EsqueletoTarjetasInvitados />
         </div>

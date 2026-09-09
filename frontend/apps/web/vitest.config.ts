@@ -44,6 +44,9 @@ export default defineConfig({
         "app/(public)/_componentes/composed-lectura.ts",
         // Bloque 3-5: los 14 campos del panel de contenido y sus pruebas (U-17 y una por tipo de bloque).
         "components/fields/**/*.{ts,tsx}",
+        // Fase 5 (E2): la pantalla de invitados vive entera en componentes (la página de ruta
+        // sigue fuera, como todas); sus pruebas tienen que contar para el umbral.
+        "components/invitados/**/*.{ts,tsx}",
         // Fase 3-C (3C-5): la web pública entera vive en componentes, no en las páginas de ruta
         // (que siguen fuera de cobertura), así que `components/sitio/**` sí entra: portada,
         // cabecera y pie, asistente de acceso, buscador de ayuda y los dos estados de error.

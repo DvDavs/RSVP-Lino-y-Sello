@@ -34,6 +34,10 @@ describe("formatoRelativo", () => {
     expect(formatoRelativo("no-es-una-fecha", ahora)).toBe("");
   });
 
+  it("menos de un minuto también lleva el «hace», como los otros tres tramos", () => {
+    expect(formatoRelativo("2026-03-03T18:21:40Z", ahora)).toBe("hace un momento");
+  });
+
   it("minutos, horas y días", () => {
     expect(formatoRelativo("2026-03-03T18:20:10Z", ahora)).toBe("hace 2 minutos");
     expect(formatoRelativo("2026-03-03T15:22:10Z", ahora)).toBe("hace 3 horas");

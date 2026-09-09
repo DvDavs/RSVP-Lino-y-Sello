@@ -2,7 +2,7 @@
 // ruta, cada código de error documentado, que `Authorization` viaja y que el 401/403 sin `code` se
 // clasifica como `SessionError` (nunca como un `ApiError` inventado).
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, SessionError, UnknownApiError, clearAuthToken, setAuthToken } from "@/lib/api-client";
+import { ApiError, SessionError, UnknownApiError, clearAuthToken, getAuthToken, setAuthToken } from "@/lib/api-client";
 import {
   createGuest,
   deleteGuest,
@@ -315,5 +315,82 @@ describe("clasificación de errores (P1: nada se descarta en silencio)", () => {
     const error = await listGuests(7).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(UnknownApiError);
     expect((error as UnknownApiError).rawBody).toContain("502 Bad Gateway");
+  });
+});
+
+// -------------------------------------------------------------------------------------------
+// Arreglos de la revisión Opus. Cada caso cae si se deshace el arreglo.
+// -------------------------------------------------------------------------------------------
+
+describe("un 2xx sin cuerpo NO se devuelve como `undefined` disfrazado (cabecera de api-client)", () => {
+  it.each([
+    ["listGuests", () => listGuests(7)],
+    ["getGuestsSummary", () => getGuestsSummary(7)],
+    ["getGuestLink", () => getGuestLink(7, 12)],
+    ["createGuest", () => createGuest(7, { fullName: "Ana" })],
+    ["updateGuest", () => updateGuest(7, 12, { fullName: "Ana" })],
+    ["previewGuestsPaste", () => previewGuestsPaste(7, "Ana")],
+    ["importGuestsPaste", () => importGuestsPaste(7, "Ana")],
+  ])("%s lanza UnknownApiError si el 200 llega sin cuerpo", async (_nombre, llamada) => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 200 })));
+    // Lo que NO puede pasar: resolver con `undefined` y que la pantalla reviente después con un
+    // «cannot read property of undefined» que ya no dice de dónde vino.
+    await expect(llamada()).rejects.toBeInstanceOf(UnknownApiError);
+  });
+});
+
+describe("401/403 tiran el token muerto (paridad con `marcarSesionCaducada` de api-client)", () => {
+  it("un 401 deja la sesión sin token, para que la pantalla de acceso sepa que hay que entrar", async () => {
+    setAuthToken("jwt-caducado");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("", { status: 401 })));
+    await expect(listGuests(7)).rejects.toBeInstanceOf(SessionError);
+    expect(getAuthToken()).toBeNull();
+  });
+
+  it("un 403 hace lo mismo", async () => {
+    setAuthToken("jwt-sin-rol");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("", { status: 403 })));
+    await expect(getGuestsSummary(7)).rejects.toBeInstanceOf(SessionError);
+    expect(getAuthToken()).toBeNull();
+  });
+
+  it("un 404 con `code` NO toca el token: la sesión sigue siendo buena", async () => {
+    setAuthToken("jwt-bueno");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaJson(404, errorDe("GUEST_NOT_FOUND"))));
+    await expect(getGuestLink(7, 12)).rejects.toBeInstanceOf(ApiError);
+    expect(getAuthToken()).toBe("jwt-bueno");
+  });
+});
+
+describe("un 2xx cuyo cuerpo NO es JSON se clasifica, no revienta con un SyntaxError pelado", () => {
+  it("listGuests lanza UnknownApiError si el 200 trae HTML (proxy, página de mantenimiento)", async () => {
+    const html = "<!doctype html><html><body>502 desde el proxy</body></html>";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(html, { status: 200, headers: { "Content-Type": "text/html" } })),
+    );
+    // El fallo tiene que ser una de las TRES clases del proyecto: la pantalla decide qué enseñar con
+    // `error instanceof ApiError | SessionError`, y un `SyntaxError` de `JSON.parse` no es ninguna.
+    const error = await listGuests(7).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(UnknownApiError);
+    expect((error as UnknownApiError).rawBody).toContain("502 desde el proxy");
+  });
+});
+
+describe("el token solo se tira cuando el 401/403 NO trae `code` (criterio de api-client)", () => {
+  it("un 403 CON `code` del módulo deja la sesión intacta: es un fallo de la ruta, no de la sesión", async () => {
+    setAuthToken("jwt-bueno");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaJson(403, errorDe("GUEST_NOT_FOUND"))));
+    // Si esto tirara el token, un error de permisos sobre UN invitado echaría a la clienta de la
+    // aplicación entera y perdería lo que estuviera escribiendo.
+    await expect(getGuestLink(7, 12)).rejects.toBeInstanceOf(ApiError);
+    expect(getAuthToken()).toBe("jwt-bueno");
+  });
+
+  it("un 401 CON `code` tampoco la tira", async () => {
+    setAuthToken("jwt-bueno");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaJson(401, errorDe("INVITATION_NOT_FOUND"))));
+    await expect(listGuests(7)).rejects.toBeInstanceOf(ApiError);
+    expect(getAuthToken()).toBe("jwt-bueno");
   });
 });

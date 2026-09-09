@@ -8,7 +8,14 @@
 // errores solo reconocen el prefijo `TPL_*`, así que este módulo trae su PROPIO fetch interno para
 // los códigos `GUEST_*`/`INVITATION_*`/`RSVP_*` del contrato — misma disciplina, mismas clases de
 // error (P1: toda respuesta no-2xx se clasifica y se lanza, nunca se devuelve `null`).
-import { ApiError, SessionError, UnknownApiError, getApiBaseUrl, getAuthToken } from "@/lib/api-client";
+import {
+  ApiError,
+  SessionError,
+  UnknownApiError,
+  getApiBaseUrl,
+  getAuthToken,
+  marcarSesionCaducada,
+} from "@/lib/api-client";
 import type {
   GuestExportFile,
   GuestImportResponse,
@@ -74,10 +81,28 @@ function clasificarYLanzar(status: number, textoCrudo: string): never {
   // 401/403 de la cadena de filtros de Spring Security, sin `code` reconocible (mismo criterio que
   // `lib/api-client.ts`: la sesión terminó o el rol no alcanza, y esa distinción solo la sabe aquí).
   if (status === 401 || status === 403) {
+    // El olvido de la sesión va AQUÍ y no antes de leer el cuerpo: un 401/403 CON `code` del módulo
+    // es un fallo de la ruta, no de la sesión, y tirar el token en ese caso echaría a la clienta de
+    // la aplicación por un error de permisos de un recurso concreto. Es el mismo criterio que
+    // `lib/api-client.ts` (`marcarSesionCaducada` solo corre cuando no hay código reconocible).
+    marcarSesionCaducada();
     throw new SessionError(status, textoCrudo);
   }
 
   throw new UnknownApiError(status, textoCrudo);
+}
+
+/**
+ * Toda ruta del §1 que promete un cuerpo 2xx tiene que traerlo. Si llega vacío (proxy que se comió
+ * la respuesta, 200 sin cuerpo), devolver `undefined` disfrazado con un `as T` sería exactamente lo
+ * que la cabecera de `lib/api-client.ts` prohíbe: «nunca se devuelve `null`/`undefined` en su
+ * lugar». Se lanza `UnknownApiError`, que es la clase para «respuesta no reconocida».
+ */
+function exigirCuerpo<T>(datos: T | undefined, ruta: string): T {
+  if (datos === undefined) {
+    throw new UnknownApiError(200, `${ruta} respondió 2xx sin cuerpo y esta ruta siempre trae uno.`);
+  }
+  return datos;
 }
 
 interface OpcionesPeticion {
@@ -107,7 +132,18 @@ async function peticionInvitados<T>(opciones: OpcionesPeticion): Promise<T | und
 
   if (!respuesta.ok) clasificarYLanzar(respuesta.status, textoCrudo);
 
-  return textoCrudo.length > 0 ? (JSON.parse(textoCrudo) as T) : undefined;
+  if (textoCrudo.length === 0) return undefined;
+
+  try {
+    return JSON.parse(textoCrudo) as T;
+  } catch {
+    // Un 2xx cuyo cuerpo NO es JSON (una página de error de un proxy, un HTML de mantenimiento) se
+    // escapaba de aquí como un `SyntaxError` pelado: ninguna de las tres clases de error del
+    // proyecto, así que `error instanceof ApiError|SessionError` fallaba y la pantalla enseñaba el
+    // mensaje genérico sin saber siquiera qué ruta se rompió. Se clasifica como lo que es: una
+    // respuesta que no reconocemos.
+    throw new UnknownApiError(respuesta.status, textoCrudo);
+  }
 }
 
 // =============================================================================================
@@ -119,7 +155,7 @@ export async function listGuests(invitationId: number, query?: GuestListQuery): 
     path: base(invitationId),
     query: query as Record<string, string | number | undefined> | undefined,
   });
-  return datos as GuestPage;
+  return exigirCuerpo(datos, `GET ${base(invitationId)}`);
 }
 
 // =============================================================================================
@@ -127,7 +163,7 @@ export async function listGuests(invitationId: number, query?: GuestListQuery): 
 // =============================================================================================
 export async function getGuestsSummary(invitationId: number): Promise<GuestSummary> {
   const datos = await peticionInvitados<GuestSummary>({ method: "GET", path: `${base(invitationId)}/summary` });
-  return datos as GuestSummary;
+  return exigirCuerpo(datos, `GET ${base(invitationId)}/summary`);
 }
 
 // =============================================================================================
@@ -135,7 +171,7 @@ export async function getGuestsSummary(invitationId: number): Promise<GuestSumma
 // =============================================================================================
 export async function createGuest(invitationId: number, body: GuestUpsertInput): Promise<GuestItem> {
   const datos = await peticionInvitados<GuestItem>({ method: "POST", path: base(invitationId), jsonBody: body });
-  return datos as GuestItem;
+  return exigirCuerpo(datos, `POST ${base(invitationId)}`);
 }
 
 // =============================================================================================
@@ -147,7 +183,7 @@ export async function updateGuest(invitationId: number, guestId: number, body: G
     path: `${base(invitationId)}/${guestId}`,
     jsonBody: body,
   });
-  return datos as GuestItem;
+  return exigirCuerpo(datos, `PUT ${base(invitationId)}/${guestId}`);
 }
 
 // =============================================================================================
@@ -166,7 +202,7 @@ export async function previewGuestsPaste(invitationId: number, text: string): Pr
     path: `${base(invitationId)}:preview`,
     jsonBody: { text },
   });
-  return datos as GuestPreviewResponse;
+  return exigirCuerpo(datos, `POST ${base(invitationId)}:preview`);
 }
 
 // =============================================================================================
@@ -178,7 +214,7 @@ export async function importGuestsPaste(invitationId: number, text: string): Pro
     path: `${base(invitationId)}:import`,
     jsonBody: { text },
   });
-  return datos as GuestImportResponse;
+  return exigirCuerpo(datos, `POST ${base(invitationId)}:import`);
 }
 
 // =============================================================================================
@@ -187,7 +223,7 @@ export async function importGuestsPaste(invitationId: number, text: string): Pro
 // =============================================================================================
 export async function getGuestLink(invitationId: number, guestId: number): Promise<GuestLink> {
   const datos = await peticionInvitados<GuestLink>({ method: "GET", path: `${base(invitationId)}/${guestId}/link` });
-  return datos as GuestLink;
+  return exigirCuerpo(datos, `GET ${base(invitationId)}/${guestId}/link`);
 }
 
 // =============================================================================================

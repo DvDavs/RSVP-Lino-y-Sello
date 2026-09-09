@@ -6,7 +6,7 @@
 // trampa. El borrado vive AQUÍ, como una segunda pantalla del mismo diálogo (nunca un tercer botón
 // suelto en la tabla/tarjeta que el wireframe §B3.2 no dibuja).
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useForm, type FieldErrors } from "react-hook-form";
 import { z } from "zod";
 import { Button, Dialog, Field, Input, toast } from "@invitaciones/ui";
@@ -77,6 +77,16 @@ export function FormularioInvitado({ invitationId, rules, guest, trigger, onGuar
   const [confirmandoBorrado, setConfirmandoBorrado] = useState(false);
   const [eliminando, setEliminando] = useState(false);
   const esEdicion = Boolean(guest);
+  const cancelarBorradoRef = useRef<HTMLButtonElement>(null);
+
+  // Al pasar al paso de confirmación, el botón que se acaba de pulsar («Eliminar invitado») se
+  // desmonta y el foco se cae a `<body>`: quien navega con teclado pierde el hilo dentro de un
+  // diálogo abierto y un lector de pantalla no anuncia el aviso. Se lleva el foco a «Cancelar», que
+  // además es la opción segura — el botón destructivo del paso de confirmación cae justo donde
+  // estaba «Guardar cambios», y un segundo clic por inercia no puede ser el que borra.
+  useEffect(() => {
+    if (confirmandoBorrado) cancelarBorradoRef.current?.focus();
+  }, [confirmandoBorrado]);
 
   const { register, handleSubmit, formState, setFocus, reset } = useForm<Valores>({
     resolver: zodResolver(esquema),
@@ -151,7 +161,12 @@ export function FormularioInvitado({ invitationId, rules, guest, trigger, onGuar
       footer={
         confirmandoBorrado ? (
           <>
-            <Button variant="secundario" onClick={() => setConfirmandoBorrado(false)} disabled={eliminando}>
+            <Button
+              ref={cancelarBorradoRef}
+              variant="secundario"
+              onClick={() => setConfirmandoBorrado(false)}
+              disabled={eliminando}
+            >
               {es_MX.comun.cancelar}
             </Button>
             <Button variant="peligro" loading={eliminando} loadingText={t.formulario.eliminando} onClick={() => void alConfirmarBorrado()}>

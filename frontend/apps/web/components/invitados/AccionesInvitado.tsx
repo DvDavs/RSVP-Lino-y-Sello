@@ -33,7 +33,7 @@ function useEnlaceInvitado(invitationId: number, guestId: number) {
       setEnlace(traido);
       return traido;
     } catch (error) {
-      toast({ variante: "error", descripcion: mensajeDeError(error) || t.compartir.errorEnlace });
+      toast({ variante: "error", descripcion: `${t.compartir.errorEnlace} ${mensajeDeError(error)}` });
       return null;
     } finally {
       setCargando(false);
@@ -56,6 +56,8 @@ export function BotonesEnlace({ invitationId, guest, disposicion = "fila" }: Acc
   const apilado = disposicion === "apilado";
   const tamano = apilado ? "lg" : "sm";
   const clase = apilado ? "w-full justify-start" : undefined;
+  // De quién es el enlace: estos botones se repiten en cada fila y su texto visible es idéntico.
+  const nombre = nombreVisible(guest.fullName);
 
   async function copiar(): Promise<void> {
     const traido = await asegurar();
@@ -76,11 +78,25 @@ export function BotonesEnlace({ invitationId, guest, disposicion = "fila" }: Acc
 
   return (
     <div className={apilado ? "grid gap-2" : "flex flex-wrap gap-2"}>
-      <Button variant="terciario" size={tamano} className={clase} loading={cargando} onClick={() => void copiar()}>
+      <Button
+        variant="terciario"
+        size={tamano}
+        className={clase}
+        loading={cargando}
+        aria-label={t.compartir.copiarEnlaceDe(nombre)}
+        onClick={() => void copiar()}
+      >
         <IconoCopiar size={16} tone="mono" aria-hidden />
         {t.compartir.copiarEnlace}
       </Button>
-      <Button variant="terciario" size={tamano} className={clase} loading={cargando} onClick={() => void ver()}>
+      <Button
+        variant="terciario"
+        size={tamano}
+        className={clase}
+        loading={cargando}
+        aria-label={t.compartir.verEnlaceDe(nombre)}
+        onClick={() => void ver()}
+      >
         <IconoVer size={16} tone="mono" aria-hidden />
         {t.compartir.verEnlace}
       </Button>
@@ -94,6 +110,7 @@ export function BotonesCompartir({ invitationId, guest, disposicion = "fila" }: 
   const apilado = disposicion === "apilado";
   const tamano = apilado ? "lg" : "sm";
   const clase = apilado ? "w-full justify-start" : undefined;
+  const nombre = nombreVisible(guest.fullName);
 
   async function porWhatsapp(): Promise<void> {
     if (!guest.phone) {
@@ -101,7 +118,13 @@ export function BotonesCompartir({ invitationId, guest, disposicion = "fila" }: 
       return;
     }
     const traido = await asegurar();
-    if (!traido?.whatsappUrl) return;
+    if (!traido) return; // `asegurar` ya avisó del fallo de red.
+    // `whatsappUrl` puede NO venir en el JSON (`@JsonInclude(NON_NULL)` en `GuestPanelDtos.kt`).
+    // Antes esto era un `return` mudo: la clienta pulsaba WhatsApp y no pasaba absolutamente nada.
+    if (!traido.whatsappUrl) {
+      toast({ variante: "info", descripcion: t.compartir.sinTelefono });
+      return;
+    }
     window.open(traido.whatsappUrl, "_blank", "noreferrer");
   }
 
@@ -113,7 +136,7 @@ export function BotonesCompartir({ invitationId, guest, disposicion = "fila" }: 
     setEnviandoCorreo(true);
     try {
       await sendGuestEmail(invitationId, guest.id);
-      toast({ variante: "exito", descripcion: t.compartir.correoEnviado(nombreVisible(guest.fullName)) });
+      toast({ variante: "exito", descripcion: t.compartir.correoEnviado(nombre) });
     } catch (error) {
       toast({ variante: "error", descripcion: mensajeDeError(error) });
     } finally {
@@ -123,11 +146,25 @@ export function BotonesCompartir({ invitationId, guest, disposicion = "fila" }: 
 
   return (
     <div className={apilado ? "grid gap-2" : "flex flex-wrap gap-2"}>
-      <Button variant="terciario" size={tamano} className={clase} loading={cargando} onClick={() => void porWhatsapp()}>
+      <Button
+        variant="terciario"
+        size={tamano}
+        className={clase}
+        loading={cargando}
+        aria-label={t.compartir.whatsappA(nombre)}
+        onClick={() => void porWhatsapp()}
+      >
         <IconoChat size={16} tone="mono" aria-hidden />
         {t.compartir.botonWhatsapp}
       </Button>
-      <Button variant="terciario" size={tamano} className={clase} loading={enviandoCorreo} onClick={() => void porCorreo()}>
+      <Button
+        variant="terciario"
+        size={tamano}
+        className={clase}
+        loading={enviandoCorreo}
+        aria-label={t.compartir.correoA(nombre)}
+        onClick={() => void porCorreo()}
+      >
         <IconoCorreo size={16} tone="mono" aria-hidden />
         {t.compartir.botonCorreo}
       </Button>
