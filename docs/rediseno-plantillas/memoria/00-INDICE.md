@@ -54,10 +54,31 @@ Rama de trabajo: `claude/agent-network-invitation-41nx5y` (sustituye a `claude/r
   Guía de 15 minutos en `guias/identidad-visual.md`; contrato en `contratos.md §13`. 24 ADR-3C
   aceptadas. Regla nueva del dueño: contexto por agente ≤ 300k con handoff parcial y relevo.
   Estado por bloque en `tablero.md`; arranque de la siguiente fase en `handoffs/3c-para-siguiente.md`.
-- **Fase siguiente: 4 — kit de autor de plantillas.** Arranca leyendo `handoffs/3-para-fase-4.md` y
-  `handoffs/3c-para-siguiente.md` (N-01 y N-02 ya están resueltas en la 3-C).
+- **Fase 4 — kit de autor de plantillas: CERRADA el 2026-09-09** en `claude/fase-4-kit-de-autor`.
+  El objetivo se cumplió y está **medido, no afirmado**: agregar una plantilla no toca Kotlin, no
+  reinicia nada y no exige saber el esquema. Dos **pruebas ciegas** lo demostraron con agentes a los
+  que se prohibió leer el kit, el esquema y las bitácoras: la primera dijo «no» (se atascaba en un
+  tipo de bloque sin documentar) y forzó una ronda de correcciones; **la segunda dijo «sí» en 2 min
+  44 s** contra los 30 del objetivo, con `check` en verde y registro `201`.
+  **Cifras del cierre**: frontend **3 377 pruebas** en 8 paquetes y `typecheck` 8/8; backend
+  **1 271 pruebas, 0 fallos**; `smoke.sh` **19/19**; e2e **78/79** (la roja no es del producto: una
+  prueba del asistente con un localizador sin acotar, `issues-fase-4.md` I-4CIERRE-06);
+  **15 versiones registradas** contra el backend real, las 15 con `200 noop_same_hash` en la segunda
+  pasada y sin una fila duplicada; **catálogo con 13 plantillas** y **los ocho `eventKind` cubiertos**.
+  El kit son ocho comandos y **31 compuertas `TPL_*`** con su severidad (`contratos.md §14`).
+  **Revisión adversarial: cerrable.** Encontró y corrigió una alta —el previsualizador servía
+  cualquier fichero del disco, incluidas las variables de entorno del proceso— y el registro aguantó
+  los cinco ataques (autorización, inmutabilidad, idempotencia, nombres de asset con `../`, semver).
+  Quedan 6 issues medias y bajas, ninguna bloqueante. **18 ADR-4 aceptadas** (las 14 que quedaban en
+  propuesta, cinco con enmienda salida de algo medido en este cierre).
+  Estado por bloque en `tablero.md`; el relato del cierre, con lo que verificó el orquestador con sus
+  propias manos, en `bitacora/4-cierre.md`.
+- **Siguiente: la fase 5 (producto completo) está EN CURSO en `claude/fase-5-producto`**; arranca por
+  `handoffs/4-para-fase-5.md`. **La fase 6 (arte) usa el kit**: arranca por `handoffs/4-para-fase-6.md`.
+  La integración de esta rama la hará la sesión E6 de la fase 5; desde la fase 4 no se mergeó ninguna
+  otra rama.
 - **Rama de la fase 2: `claude/fase-2-backend-orchestration-ksyuzi`**, creada desde `claude/agent-network-invitation-41nx5y` en `88238b2` (fase 1 cerrada en `4681b2c` + el prompt de la fase 2). El entorno de esta sesión obliga a trabajar sobre una rama propia por fase; `contratos.md §1` y `brief-comun.md` siguen nombrando la rama de la fase 1, que es la base, no la de trabajo actual.
-- Fases: 0 Preparación (cerrada) · 1 Diseño (cerrada) · 2 Backend (**cerrada**) · **3 Frontend (siguiente)** · 4 Plantillas y kit · 5 Migración · 6 Calidad y entrega.
+- Fases (según `hoja-de-ruta.md`, reescrita tras las decisiones del dueño): 0 Preparación, 1 Diseño, 2 Backend, 3 Frontend, 3-C sistema de diseño y **4 Kit de autor**, todas **cerradas** · **5 Producto completo (en curso)** · 6 Arte de plantillas e imágenes · 7 Cierre y lanzamiento. La antigua «fase 5 de migración» quedó **cancelada** por D-01.
 - Nota de entorno: en este entorno los sub-agentes **no** pueden lanzar sub-agentes. El orquestador de cada fase lanza todos los agentes directamente (red de un solo nivel).
 
 ## Fase 1 cerrada — qué leer para empezar la fase 2, en este orden
