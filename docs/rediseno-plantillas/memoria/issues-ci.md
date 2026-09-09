@@ -76,6 +76,12 @@ ADR-1R-C-11) prohíbe la cuarentena sin issue, y aquí no hay ninguna prueba en 
     ([34305882574](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34305882574)).
   El job se queda por tanto en `--workers=1`, ahora por RELOJ y no por aislamiento, y
   `playwright.config.ts` dice `workers: CI ? 1` para no mentir sobre lo que el runner sostiene.
+- **No es solo el job `e2e`.** El job `design` corre 279 pruebas con **4 workers** en su propia
+  config (sin backend ni Postgres) y ahí también apareció una prueba de temporización: `design-axe`
+  «componente-tabs · light» reportó `focusable-content`/`focusable-element` sobre el `tablist` del
+  panel del editor —el nodo aún sin hijos enfocables— y pasó en el reintento
+  ([34306781190](https://github.com/DvDavs/RSVP-Lino-y-Sello/actions/runs/34306781190), 278 + 1
+  flaky). Misma familia: aserciones sensibles al instante en un runner saturado.
 - **Qué falta decidir.** Tres caminos, todos fuera de esta tarea: (a) subir el tope del
   `toBeVisible` del lienzo en las pruebas afectadas (es máquina, no producto); (b) dejar de grabar
   vídeo en CI y quedarse con la traza del reintento, que exige enmendar `06 §8.2` punto 7;
