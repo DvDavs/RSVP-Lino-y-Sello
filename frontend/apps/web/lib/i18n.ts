@@ -106,6 +106,11 @@ export const es_MX = {
       ayudaContrasena: "Al menos 8 caracteres, con una mayúscula, una minúscula y un símbolo.",
       nombre: "Nombre",
       apellidos: "Apellidos",
+      // Fase 5, E3: teléfono opcional en el paso 3. El aviso va ANTES de escribir, no después de
+      // que el servidor lo rechace (`Patterns.kt:56`: `+52` y 10 dígitos, sin espacios ni guiones).
+      telefono: "Teléfono (opcional)",
+      ayudaTelefono: "Con la lada de México: +52 y 10 dígitos, sin espacios ni guiones. Por ejemplo: +525512345678.",
+      telefonoInvalido: "Ese teléfono no tiene el formato correcto: +52 y 10 dígitos, sin espacios ni guiones.",
       continuar: "Continuar",
       atras: "Atrás",
       crear: "Crear mi cuenta",
@@ -116,6 +121,10 @@ export const es_MX = {
       contrasenaCorta: "Tu contraseña necesita al menos 8 caracteres, una mayúscula, una minúscula y un símbolo.",
       correoInvalido: "Ese correo no parece válido. Revísalo.",
       correoOcupado: "Ya hay una cuenta con ese correo. Entra con tu contraseña o recupérala.",
+      // Fase 5, E3 (contrato §5.1/§A2.1): la cuenta nace sin verificar y ENTRA igual — nada bloquea
+      // el uso del producto. Se dice antes de crear la cuenta, junto al correo, para que la persona
+      // no se sorprenda con un correo de confirmación que no esperaba.
+      avisoSinVerificar: "Te mandamos un correo para confirmar esta dirección. Mientras tanto puedes usar tu cuenta sin ningún límite.",
     },
   },
 
@@ -408,6 +417,137 @@ export const es_MX = {
       tituloUna: "Tu invitación ya tiene diseño",
       textoUna:
         "El diseño se cambia desde dentro de la invitación. Ábrela para seguir editándola o comparte su enlace.",
+    },
+  },
+  /**
+   * `/verificar-correo` (fase 5, E3; `handoffs/5-E3-A2-contrato-cuenta.md §3-§4`). Ruta pública,
+   * SIN sesión: quien llega aquí viene de su buzón. Los textos de error se ordenan por `code`
+   * (nunca por `message`, el contrato lo dice explícito) — cada clave de abajo corresponde a un
+   * `code` estable, no a la redacción que hoy manda el servidor.
+   */
+  cuenta: {
+    verificarCorreo: {
+      titulo: "Confirma tu correo",
+      verificando: "Confirmando tu correo…",
+      sinToken: {
+        titulo: "Este enlace no trae el código de confirmación",
+        cuerpo: "Ábrelo directo desde el correo que te mandamos, sin cambiarle nada a la dirección.",
+      },
+      // El texto del éxito es el que ya manda el servidor (`message`): distingue verificación
+      // simple de confirmación de un cambio de correo con la MISMA frase confiable, sin que el
+      // frontend tenga que adivinar el caso (contrato §5.3: "puede hacer falta mandar a /acceso").
+      verificado: {
+        titulo: "Listo",
+        entrar: "Entrar a mi cuenta",
+      },
+      tokenInvalido: {
+        titulo: "Ese enlace ya no sirve",
+        cuerpo: "Puede que ya lo hayas usado, o que se haya cortado algo al copiarlo. Pide uno nuevo con tu correo.",
+      },
+      tokenCaducado: {
+        titulo: "Ese enlace caducó",
+        cuerpo: "Los enlaces de confirmación duran 24 horas. Pide uno nuevo con tu correo.",
+      },
+      reenvio: {
+        correo: "Correo electrónico",
+        enviar: "Mandar un enlace nuevo",
+        enviando: "Mandando…",
+        // Literal del contrato §5.7: un reenvío puede no mandar nada aunque responda 200 (tope por
+        // IP, en silencio, a propósito). No se puede prometer «te lo acabamos de mandar».
+        enviado: "Si el correo corresponde a una cuenta sin verificar, te mandamos un enlace nuevo.",
+      },
+      demasiadosIntentos: "Espera unos minutos antes de volver a intentarlo.",
+      error: {
+        titulo: "No pudimos confirmar tu correo",
+        cuerpo: "Vuelve a intentarlo en un momento; si sigue pasando, pide un enlace nuevo.",
+      },
+    },
+  },
+  /**
+   * `/perfil` (fase 5, E3; `12-producto-completo.md §7` del wireframe, `handoffs/5-E3-A2-contrato-cuenta.md`).
+   * Cuatro bloques: datos, contraseña, sesiones, estado del correo. Errores SIEMPRE junto al campo
+   * (`§B3.7`: «nunca un banner genérico arriba»).
+   */
+  perfil: {
+    titulo: "Tu cuenta",
+    correoSinVerificar: "Correo sin verificar",
+    reenviarVerificacion: "Reenviar",
+    reenviando: "Mandando…",
+    verificacionReenviada: "Si tu cuenta todavía no está verificada, te mandamos un enlace nuevo.",
+    cambioDeCorreoPendiente: (correo: string) => `Tienes un cambio de correo pendiente a ${correo}. Confírmalo desde tu buzón.`,
+    volverAPedirCambio: "Volver a pedir el cambio",
+
+    datos: {
+      titulo: "Tus datos",
+      nombre: "Nombre",
+      apellidos: "Apellidos",
+      correo: "Correo",
+      // El correo se ve pero no se edita aquí (contrato §1: `PUT /user/profile` lo ignora).
+      correoNota: "Para cambiarlo, usa «Cambiar correo» abajo: pide verificar el nuevo antes de aplicarlo.",
+      cambiarCorreo: "Cambiar correo",
+      telefono: "Teléfono",
+      guardar: "Guardar cambios",
+      guardando: "Guardando…",
+      guardado: "Guardado",
+      faltaNombre: "Escribe tu nombre.",
+      faltaApellidos: "Escribe tus apellidos.",
+      telefonoInvalido: "Ese teléfono no tiene el formato correcto: +52 y 10 dígitos, sin espacios ni guiones.",
+    },
+
+    cambiarCorreoDialogo: {
+      titulo: "Cambiar tu correo",
+      descripcion: "Te mandamos un enlace de confirmación a la nueva dirección. Tu correo de acceso no cambia hasta que lo abras.",
+      nuevoCorreo: "Nuevo correo",
+      contrasenaActual: "Tu contraseña actual",
+      pedir: "Pedir el cambio",
+      pidiendo: "Pidiendo…",
+      // Genérico a propósito (contrato §2: la respuesta no dice si el correo estaba tomado).
+      pedido: "Si los datos son correctos, te mandamos un enlace de confirmación a la nueva dirección.",
+      faltaCorreo: "Escribe el nuevo correo.",
+      correoInvalido: "Ese correo no tiene un formato válido.",
+      faltaContrasena: "Escribe tu contraseña actual.",
+      contrasenaIncorrecta: "Tu contraseña actual no coincide.",
+      cerrar: "Cancelar",
+    },
+
+    contrasena: {
+      titulo: "Contraseña",
+      actual: "Actual",
+      nueva: "Nueva",
+      repite: "Repite la nueva",
+      ayuda: "Al menos 8 caracteres, con mayúscula, minúscula y un símbolo.",
+      // Se avisa ANTES de enviar (el botón lleva este texto al lado), no después de que ya cerró
+      // la sesión: contrato §5.3, "avisarlo antes de que pulse".
+      avisoCierraSesion: "Al cambiarla, cerramos tu sesión en todos los dispositivos y tendrás que volver a entrar.",
+      cambiar: "Cambiar contraseña",
+      cambiando: "Cambiando…",
+      faltaActual: "Escribe tu contraseña actual.",
+      faltaNueva: "Escribe la nueva contraseña.",
+      noCoincide: "Las dos contraseñas nuevas no son iguales.",
+      actualIncorrecta: "Tu contraseña actual no coincide.",
+    },
+
+    sesiones: {
+      titulo: "Sesiones",
+      intro: "Si usaste tu cuenta en un equipo prestado, ciérralas todas.",
+      cerrarTodas: "Cerrar sesión en todos los dispositivos",
+      cerrando: "Cerrando…",
+    },
+
+    tuInformacion: {
+      titulo: "Tu información",
+      // ADR-5-E3-B2-01: no hay ruta de baja autoservicio (`preguntas-abiertas.md`), así que el
+      // botón del wireframe se resuelve con el correo de soporte que ya existe (`lib/env.ts`) en
+      // vez de pintar un control muerto (regla G-01).
+      pedirBaja: "Pedir que borren mi cuenta",
+      pedirBajaTexto: (correo: string) => `Escríbenos a ${correo} desde el correo de tu cuenta y la damos de baja.`,
+      sinSoporte: "Escríbenos desde el correo de tu cuenta para pedir que la demos de baja.",
+    },
+
+    errores: {
+      demasiadosIntentos: "Espera unos minutos antes de volver a intentarlo.",
+      generico: "No pudimos completar esto. Inténtalo de nuevo.",
+      cargando: "No pudimos cargar tu perfil.",
     },
   },
   editor: {

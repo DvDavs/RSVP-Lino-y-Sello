@@ -5,7 +5,10 @@ import { ApiError, SessionError, UnknownApiError } from "@/lib/api-client";
 import { es_MX } from "@/lib/i18n";
 import {
   camposConError,
+  codigoCuenta,
+  codigoCuentaDeError,
   destinoSeguro,
+  mensajeCuentaDeError,
   soloTexto,
   traducirErrorAcceso,
   traducirErrorRegistro,
@@ -107,6 +110,65 @@ describe("registro", () => {
   it("un cuerpo que no es JSON no rompe nada", () => {
     expect(camposConError("<html>502</html>")).toEqual({});
     expect(traducirErrorRegistro(respuesta({}))).toEqual({ mensaje: es_MX.errores.generico });
+  });
+
+  // Fase 5, E3: teléfono opcional, con el mensaje que ya manda el servidor
+  // (`Patterns.PHONE_NUMBER_MESSAGE`, trae el formato completo y un ejemplo).
+  it("un phone inválido devuelve al paso 3 con el error EN el campo, usando el texto del servidor", () => {
+    const mensajeServidor =
+      "El teléfono debe llevar la lada de México: +52 y 10 dígitos, sin espacios ni guiones. Por ejemplo: +525512345678";
+    expect(traducirErrorRegistro(respuesta({ phone: mensajeServidor }))).toEqual({
+      mensaje: mensajeServidor,
+      paso: 3,
+      campo: "phone",
+    });
+  });
+
+  it("si el mensaje del servidor no es legible (traza, marcado), cae a la frase propia", () => {
+    expect(traducirErrorRegistro(respuesta({ phone: "<script>x</script>" }))).toEqual({
+      mensaje: es_MX.acceso.registro.telefonoInvalido,
+      paso: 3,
+      campo: "phone",
+    });
+  });
+});
+
+describe("codigoCuenta / codigoCuentaDeError / mensajeCuentaDeError (fase 5, E3, contrato §4)", () => {
+  const cuerpoCuenta = {
+    timestamp: "09/09/2026 10:00:00",
+    statusCode: 400,
+    code: "CUENTA_TOKEN_CADUCADO",
+    message: "El enlace de verificación caducó. Pide uno nuevo.",
+  };
+
+  it("lee el code de un rawBody de cuenta, nunca el message", () => {
+    expect(codigoCuenta(JSON.stringify(cuerpoCuenta))).toBe("CUENTA_TOKEN_CADUCADO");
+  });
+
+  it("un cuerpo que no es JSON, o sin `code`, da null", () => {
+    expect(codigoCuenta("<html>502</html>")).toBeNull();
+    expect(codigoCuenta(JSON.stringify({ timestamp: "x", statusCode: 400, errors: {} }))).toBeNull();
+  });
+
+  it("codigoCuentaDeError solo reconoce UnknownApiError; cualquier otro error da null", () => {
+    expect(codigoCuentaDeError(new UnknownApiError(400, JSON.stringify(cuerpoCuenta)))).toBe("CUENTA_TOKEN_CADUCADO");
+    expect(codigoCuentaDeError(new SessionError(401, ""))).toBeNull();
+    expect(codigoCuentaDeError(new TypeError("Failed to fetch"))).toBeNull();
+  });
+
+  it("mensajeCuentaDeError lee el `message` PARA PERSONAS del cuerpo, no el `.message` de la excepción JS", () => {
+    const error = new UnknownApiError(400, JSON.stringify(cuerpoCuenta));
+    // El `.message` de la excepción es el texto fijo del cliente, no el del servidor.
+    expect(error.message).not.toBe(cuerpoCuenta.message);
+    expect(mensajeCuentaDeError(error)).toBe(cuerpoCuenta.message);
+  });
+
+  it("mensajeCuentaDeError descarta lo que no parece una frase para una persona (soloTexto)", () => {
+    const conTraza = new UnknownApiError(
+      400,
+      JSON.stringify({ ...cuerpoCuenta, message: "java.lang.Exception: boom" }),
+    );
+    expect(mensajeCuentaDeError(conTraza)).toBeNull();
   });
 });
 

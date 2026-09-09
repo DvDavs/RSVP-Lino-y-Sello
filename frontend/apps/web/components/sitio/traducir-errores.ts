@@ -15,8 +15,13 @@ import { es_MX } from "@/lib/i18n";
 /** Paso del asistente de registro al que hay que devolver a la persona para corregir. */
 export type PasoRegistro = 1 | 2 | 3;
 
-/** Los cuatro campos del registro. Cualquier otra clave del cuerpo NO se pinta (ver `soloTexto`). */
-export type CampoRegistro = "email" | "password" | "name" | "lastName";
+/**
+ * Los campos del registro. `phone` es opcional (fase 5, E3): el DTO del alta lo acepta pero no lo
+ * exige, así que solo aparece un error de este campo si la persona escribió algo y no cumplió el
+ * formato (`+52` y 10 dígitos, `Patterns.kt:56`). Cualquier otra clave del cuerpo NO se pinta (ver
+ * `soloTexto`).
+ */
+export type CampoRegistro = "email" | "password" | "name" | "lastName" | "phone";
 
 export interface ErrorTraducido {
   readonly mensaje: string;
@@ -128,9 +133,62 @@ export function traducirErrorRegistro(error: unknown): ErrorTraducido {
     }
     if (campos["name"]) return { mensaje: es_MX.acceso.registro.faltaNombre, paso: 3, campo: "name" };
     if (campos["lastName"]) return { mensaje: es_MX.acceso.registro.faltaApellidos, paso: 3, campo: "lastName" };
+    // Teléfono: opcional, y el ÚNICO de los cinco campos cuya frase también viene del servidor
+    // (`Patterns.PHONE_NUMBER_MESSAGE`, `ADR-5-E3-05`): ya trae el formato completo y un ejemplo, y
+    // duplicarla aquí sería la misma trampa H-27 que ya se evitó con la contraseña.
+    if (campos["phone"]) {
+      return {
+        mensaje: soloTexto(campos["phone"]) ?? es_MX.acceso.registro.telefonoInvalido,
+        paso: 3,
+        campo: "phone",
+      };
+    }
     if (generico) return { mensaje: es_MX.errores.generico };
   }
   return { mensaje: es_MX.errores.generico };
+}
+
+/**
+ * `code` de una de las cinco rutas de cuenta (fase 5, E3; `handoffs/5-E3-A2-contrato-cuenta.md
+ * §4`). Esas rutas llevan `{timestamp, statusCode, code, message}`, pero `code` no empieza por
+ * `TPL_`, así que `lib/api-client.ts` las clasifica como `UnknownApiError` (nunca `ApiError`, que
+ * es solo de `templates2`) con el cuerpo crudo en `rawBody`. Aquí se lee ESE `code` — nunca el
+ * `message`, que puede cambiar de redacción sin avisar (el contrato lo dice explícito: "ordena por
+ * code, nunca por message"). `null` si el cuerpo no tiene esa forma.
+ */
+export function codigoCuenta(rawBody: string): string | null {
+  try {
+    const json: unknown = JSON.parse(rawBody);
+    if (typeof json !== "object" || json === null) return null;
+    const code = (json as { code?: unknown }).code;
+    return typeof code === "string" && code.length > 0 ? code : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Igual que `codigoCuenta`, pero parte de lo que atrapa un `catch` en vez de un `rawBody` suelto. */
+export function codigoCuentaDeError(error: unknown): string | null {
+  if (error instanceof UnknownApiError) return codigoCuenta(error.rawBody);
+  return null;
+}
+
+/**
+ * El `message` para PERSONAS que trae el cuerpo de una de las rutas de cuenta — nunca el `.message`
+ * de la excepción de JS, que en un `UnknownApiError` es un texto fijo del cliente
+ * («Respuesta no reconocida…»), no lo que escribió el servidor. Pasado por `soloTexto`: mismo
+ * criterio que el resto de este archivo, nunca se reexpone una traza o un volcado tal cual.
+ */
+export function mensajeCuentaDeError(error: unknown): string | null {
+  if (!(error instanceof UnknownApiError)) return null;
+  try {
+    const json: unknown = JSON.parse(error.rawBody);
+    if (typeof json !== "object" || json === null) return null;
+    const mensaje = (json as { message?: unknown }).message;
+    return typeof mensaje === "string" ? soloTexto(mensaje) : null;
+  } catch {
+    return null;
+  }
 }
 
 /**

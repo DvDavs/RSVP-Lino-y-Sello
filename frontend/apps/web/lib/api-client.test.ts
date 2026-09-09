@@ -9,16 +9,27 @@ import {
   SessionError,
   UnknownApiError,
   authLogin,
+  authResendVerification,
+  authSignup,
+  authVerifyEmail,
+  changePassword,
   chooseTemplate,
   clearAuthToken,
+  clearRefreshToken,
   deleteAsset,
   getAuthToken,
   getCatalog,
+  getProfile,
   getPublicExists,
   getPublicRender,
+  getRefreshToken,
+  logoutAccount,
   postOperations,
+  requestEmailChange,
   restoreRevision,
   setAuthToken,
+  setRefreshToken,
+  updateProfile,
   uploadAsset,
 } from "./api-client.ts";
 
@@ -38,6 +49,7 @@ const ERROR_TPL_FORBIDDEN = {
 
 beforeEach(() => {
   clearAuthToken();
+  clearRefreshToken();
   vi.unstubAllGlobals();
 });
 
@@ -339,5 +351,154 @@ describe("getPublicExists (03 §3.16)", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaJson(200, { published: false })));
     const resultado = await getPublicExists("token-que-no-existe");
     expect(resultado.published).toBe(false);
+  });
+});
+
+// ── Cuenta (fase 5, E3) — `handoffs/5-E3-A2-contrato-cuenta.md` ──────────────────────────────────
+
+describe("refreshToken (contrato §1: rota en cada canje, se guarda SIEMPRE el de la última respuesta)", () => {
+  it("setRefreshToken/getRefreshToken/clearRefreshToken funcionan sin red", () => {
+    expect(getRefreshToken()).toBeNull();
+    setRefreshToken("r-suelto");
+    expect(getRefreshToken()).toBe("r-suelto");
+    clearRefreshToken();
+    expect(getRefreshToken()).toBeNull();
+  });
+
+  it("authLogin guarda accessToken Y refreshToken de la MISMA respuesta", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        respuestaJson(200, { accessToken: "jwt-1", refreshToken: "r-1", role: "USER", isSurveyAnswered: false }),
+      ),
+    );
+    await authLogin({ email: "a@b.com", password: "x" });
+    expect(getAuthToken()).toBe("jwt-1");
+    expect(getRefreshToken()).toBe("r-1");
+  });
+
+  it("authSignup guarda también el refreshToken (mismo patrón que authLogin)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        respuestaJson(200, { accessToken: "jwt-2", refreshToken: "r-2", role: "USER", isSurveyAnswered: false }),
+      ),
+    );
+    await authSignup({ name: "Ana", lastName: "Torres", email: "a@b.com", password: "Secreta1!" });
+    expect(getRefreshToken()).toBe("r-2");
+  });
+});
+
+describe("rutas de cuenta: /auth/verify-email* y /user/account/** (§2)", () => {
+  it("authVerifyEmail es pública: no manda Authorization aunque haya token", async () => {
+    setAuthToken("jwt-xyz");
+    const fetchMock = vi.fn().mockResolvedValue(respuestaJson(200, { message: "Tu correo quedó verificado" }));
+    vi.stubGlobal("fetch", fetchMock);
+    const resultado = await authVerifyEmail({ token: "tok" });
+    expect(resultado.message).toBe("Tu correo quedó verificado");
+    const cabeceras = fetchMock.mock.calls[0][1].headers as Headers;
+    expect(cabeceras.has("Authorization")).toBe(false);
+    expect(fetchMock.mock.calls[0][0]).toContain("/auth/verify-email");
+  });
+
+  it("un CUENTA_TOKEN_INVALIDO se clasifica como UnknownApiError (code no empieza por TPL_, nunca ApiError)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        respuestaJson(400, {
+          timestamp: "09/09/2026 10:00:00",
+          statusCode: 400,
+          code: "CUENTA_TOKEN_INVALIDO",
+          message: "El enlace de verificación no es válido o ya se usó. Pide uno nuevo.",
+        }),
+      ),
+    );
+    const error = await authVerifyEmail({ token: "tok-usado" }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(UnknownApiError);
+    expect(error).not.toBeInstanceOf(ApiError);
+    expect((error as UnknownApiError).rawBody).toContain("CUENTA_TOKEN_INVALIDO");
+  });
+
+  it("authResendVerification es pública y manda el correo tal cual", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(respuestaJson(200, { message: "..." }));
+    vi.stubGlobal("fetch", fetchMock);
+    await authResendVerification({ email: "ana@correo.mx" });
+    const cabeceras = fetchMock.mock.calls[0][1].headers as Headers;
+    expect(cabeceras.has("Authorization")).toBe(false);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body as string)).toEqual({ email: "ana@correo.mx" });
+  });
+
+  it("getProfile/updateProfile mandan Authorization (rutas de USER+)", async () => {
+    setAuthToken("jwt-perfil");
+    const perfil = {
+      name: "Ana",
+      lastName: "Torres",
+      email: "ana@correo.mx",
+      isSurveyAnswered: false,
+      emailVerified: false,
+    };
+    const fetchMock = vi.fn().mockResolvedValue(respuestaJson(200, perfil));
+    vi.stubGlobal("fetch", fetchMock);
+    const resultado = await getProfile();
+    expect(resultado.emailVerified).toBe(false);
+    const cabeceras = fetchMock.mock.calls[0][1].headers as Headers;
+    expect(cabeceras.get("Authorization")).toBe("Bearer jwt-perfil");
+  });
+
+  it("updateProfile NUNCA manda email en el cuerpo (contrato §1: el backend lo ignora si se manda)", async () => {
+    setAuthToken("jwt-perfil");
+    const fetchMock = vi.fn().mockResolvedValue(
+      respuestaJson(200, { name: "Ana", lastName: "T", email: "a@b.mx", isSurveyAnswered: false, emailVerified: true }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await updateProfile({ name: "Ana", lastName: "T" });
+    const cuerpo = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+    expect(cuerpo).not.toHaveProperty("email");
+  });
+
+  it("changePassword: un CUENTA_PASSWORD_INCORRECTA se lee por code, no por message", async () => {
+    setAuthToken("jwt-perfil");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        respuestaJson(400, {
+          timestamp: "x",
+          statusCode: 400,
+          code: "CUENTA_PASSWORD_INCORRECTA",
+          message: "La contraseña actual no coincide.",
+        }),
+      ),
+    );
+    const error = await changePassword({ currentPassword: "mala", newPassword: "Secreta1!" }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(UnknownApiError);
+    expect((error as UnknownApiError).rawBody).toContain("CUENTA_PASSWORD_INCORRECTA");
+  });
+
+  it("requestEmailChange manda email y password juntos, con Authorization", async () => {
+    setAuthToken("jwt-perfil");
+    const fetchMock = vi.fn().mockResolvedValue(respuestaJson(200, { message: "..." }));
+    vi.stubGlobal("fetch", fetchMock);
+    await requestEmailChange({ email: "nuevo@correo.mx", password: "actual" });
+    const cabeceras = fetchMock.mock.calls[0][1].headers as Headers;
+    expect(cabeceras.get("Authorization")).toBe("Bearer jwt-perfil");
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body as string)).toEqual({
+      email: "nuevo@correo.mx",
+      password: "actual",
+    });
+  });
+
+  it("logoutAccount llama a la ruta Y borra accessToken/refreshToken locales (§2: el accessToken sigue vivo hasta caducar)", async () => {
+    setAuthToken("jwt-vivo");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaJson(200, { message: "sesión cerrada" })));
+    await logoutAccount();
+    expect(getAuthToken()).toBeNull();
+    expect(getRefreshToken()).toBeNull();
+  });
+
+  it("logoutAccount NO borra el token si la petición falla (red o servidor)", async () => {
+    setAuthToken("jwt-vivo");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("", { status: 500 })));
+    await expect(logoutAccount()).rejects.toBeInstanceOf(UnknownApiError);
+    expect(getAuthToken()).toBe("jwt-vivo");
   });
 });

@@ -21,11 +21,15 @@ import type {
   AssetUploadResponse,
   AuthPasswordResetRequest,
   AuthPasswordResetResponse,
+  AuthResendVerificationRequest,
   AuthSignupRequest,
   AuthTokenRequest,
   AuthTokenResponse,
+  AuthVerifyEmailRequest,
   CatalogQuery,
   CatalogResponse,
+  ChangeEmailRequest,
+  ChangePasswordRequest,
   ChooseTemplateRequest,
   ChooseTemplateResponse,
   DeprecateTemplateVersionResponse,
@@ -34,9 +38,11 @@ import type {
   HistoryQuery,
   ListTemplateVersionsQuery,
   ListTemplateVersionsResponse,
+  MessageResponse,
   OperationBatchRequest,
   OperationBatchResponse,
   PreflightResponse,
+  Profile,
   PublicExistsResponse,
   PublicRenderResult,
   PublishRequest,
@@ -49,6 +55,7 @@ import type {
   RotateTokenResponse,
   SetEventRequest,
   SetEventResponse,
+  UpdateProfileRequest,
 } from "./api-types.ts";
 
 // -------------------------------------------------------------------------------------------
@@ -135,6 +142,47 @@ export function clearAuthToken(): void {
   tokenEnMemoria = null;
   try {
     sessionStorageSiDisponible()?.removeItem(TOKEN_STORAGE_KEY);
+  } catch {
+    // nada que limpiar si el almacenamiento no está disponible
+  }
+}
+
+// -------------------------------------------------------------------------------------------
+// Token de refresco — fase 5, E3. `AuthTokenResponse.refreshToken` viajaba en la respuesta desde
+// siempre pero nadie lo guardaba (no había flujo de refresco en el frontend). Desde el contrato
+// `handoffs/5-E3-A2-contrato-cuenta.md §1` **rota en cada canje y el anterior deja de valer**, así
+// que hay que conservar SIEMPRE el de la última respuesta: quien construya el refresco más
+// adelante (no es parte de este encargo) necesita partir del correcto, no del primero que hubo.
+// Mismo patrón que el `accessToken` (P8): un único sitio lo escribe y lo lee.
+// -------------------------------------------------------------------------------------------
+
+const REFRESH_TOKEN_STORAGE_KEY = "invitaciones.auth.refreshToken";
+let refreshTokenEnMemoria: string | null = null;
+
+export function setRefreshToken(token: string): void {
+  refreshTokenEnMemoria = token;
+  try {
+    sessionStorageSiDisponible()?.setItem(REFRESH_TOKEN_STORAGE_KEY, token);
+  } catch {
+    // Cuota excedida u otro fallo de almacenamiento: el token sigue vivo en memoria para esta pestaña.
+  }
+}
+
+export function getRefreshToken(): string | null {
+  if (refreshTokenEnMemoria) return refreshTokenEnMemoria;
+  try {
+    const guardado = sessionStorageSiDisponible()?.getItem(REFRESH_TOKEN_STORAGE_KEY) ?? null;
+    refreshTokenEnMemoria = guardado;
+    return guardado;
+  } catch {
+    return null;
+  }
+}
+
+export function clearRefreshToken(): void {
+  refreshTokenEnMemoria = null;
+  try {
+    sessionStorageSiDisponible()?.removeItem(REFRESH_TOKEN_STORAGE_KEY);
   } catch {
     // nada que limpiar si el almacenamiento no está disponible
   }
@@ -615,6 +663,10 @@ export async function authLogin(credenciales: AuthTokenRequest): Promise<AuthTok
   if (typeof data.accessToken === "string" && data.accessToken.length > 0) {
     setAuthToken(data.accessToken);
   }
+  // El refreshToken rota en cada canje (contrato §1): se guarda el de ESTA respuesta siempre.
+  if (typeof data.refreshToken === "string" && data.refreshToken.length > 0) {
+    setRefreshToken(data.refreshToken);
+  }
   return data;
 }
 
@@ -638,6 +690,9 @@ export async function authSignup(datos: AuthSignupRequest): Promise<AuthTokenRes
   const data = r.data as AuthTokenResponse;
   if (typeof data.accessToken === "string" && data.accessToken.length > 0) {
     setAuthToken(data.accessToken);
+  }
+  if (typeof data.refreshToken === "string" && data.refreshToken.length > 0) {
+    setRefreshToken(data.refreshToken);
   }
   return data;
 }
@@ -687,6 +742,115 @@ export interface InvitacionDelCliente {
 export async function listarInvitaciones(): Promise<InvitacionDelCliente[]> {
   const r = await peticion<InvitacionDelCliente[]>({ method: "GET", path: "/user/invitations/all" });
   return (r.data ?? []) as InvitacionDelCliente[];
+}
+
+// =============================================================================================
+// Cuenta (fase 5, E3) — `modules/product/account`. Contrato:
+// `handoffs/5-E3-A2-contrato-cuenta.md §2`. Las cinco funciones siguen el patrón de arriba
+// (`peticion()`, misma clasificación de error): sus cuerpos de error llevan `code` pero NO
+// empiezan por `TPL_`, así que `peticion()` los clasifica como `UnknownApiError` (nunca como
+// `ApiError`, reservado a `templates2`) con el cuerpo crudo intacto en `rawBody`. Quien traduzca
+// el error lee ese `code` con `codigoCuenta()` (`components/sitio/traducir-errores.ts`) — nunca el
+// `message`, que puede cambiar de redacción sin avisar (contrato §4: "ordena por code").
+// =============================================================================================
+
+/**
+ * `POST /auth/verify-email` — pública, SIN sesión (`EmailVerificationController.kt:35`). Confirma
+ * el correo y, si había un cambio de correo pendiente, lo aplica y cierra todas las sesiones de la
+ * cuenta (contrato §5.3): la pantalla que llama a esto decide si manda a `/acceso` después.
+ */
+export async function authVerifyEmail(body: AuthVerifyEmailRequest): Promise<MessageResponse> {
+  const r = await peticion<MessageResponse>({
+    method: "POST",
+    path: "/auth/verify-email",
+    jsonBody: body,
+    bodyLimitBytes: DEFAULT_JSON_BODY_LIMIT_BYTES,
+    auth: false,
+  });
+  return r.data as MessageResponse;
+}
+
+/**
+ * `POST /auth/verify-email:resend` — pública, respuesta **siempre igual** exista o no la cuenta y
+ * esté o no verificada (contrato §2). No re-arma un cambio de correo pendiente (contrato §5.5): si
+ * hay uno, la vía es `requestEmailChange`, que pide la contraseña.
+ */
+export async function authResendVerification(body: AuthResendVerificationRequest): Promise<MessageResponse> {
+  const r = await peticion<MessageResponse>({
+    method: "POST",
+    path: "/auth/verify-email:resend",
+    jsonBody: body,
+    bodyLimitBytes: DEFAULT_JSON_BODY_LIMIT_BYTES,
+    auth: false,
+  });
+  return r.data as MessageResponse;
+}
+
+/**
+ * `GET /user/profile` — es la ruta de estado de `/perfil` entera (no hay una ruta nueva de
+ * lectura, contrato §1): trae `emailVerified` desde la fase 5.
+ */
+export async function getProfile(): Promise<Profile> {
+  const r = await peticion<Profile>({ method: "GET", path: "/user/profile" });
+  return r.data as Profile;
+}
+
+/**
+ * `PUT /user/profile` — el correo NO va en este cuerpo (contrato §1, `ADR-5-E3-06`): el backend lo
+ * ignora si se manda. El cambio de correo es `requestEmailChange`, más abajo.
+ */
+export async function updateProfile(body: UpdateProfileRequest): Promise<Profile> {
+  const r = await peticion<Profile>({
+    method: "PUT",
+    path: "/user/profile",
+    jsonBody: body,
+    bodyLimitBytes: DEFAULT_JSON_BODY_LIMIT_BYTES,
+  });
+  return r.data as Profile;
+}
+
+/**
+ * `PUT /user/account/password` — exige la contraseña actual y **cierra todas las sesiones**
+ * (contrato §2/§5.3): quien llama a esto debe avisar ANTES de enviar, no después, y mandar a
+ * `/acceso` cuando la respuesta llega bien.
+ */
+export async function changePassword(body: ChangePasswordRequest): Promise<MessageResponse> {
+  const r = await peticion<MessageResponse>({
+    method: "PUT",
+    path: "/user/account/password",
+    jsonBody: body,
+    bodyLimitBytes: DEFAULT_JSON_BODY_LIMIT_BYTES,
+  });
+  return r.data as MessageResponse;
+}
+
+/**
+ * `POST /user/account/email` — pide el cambio de correo (con la contraseña actual). Respuesta
+ * genérica siempre (contrato §2): no dice si el correo ya estaba tomado. No cambia nada hasta que
+ * se confirma el enlace con `authVerifyEmail`.
+ */
+export async function requestEmailChange(body: ChangeEmailRequest): Promise<MessageResponse> {
+  const r = await peticion<MessageResponse>({
+    method: "POST",
+    path: "/user/account/email",
+    jsonBody: body,
+    bodyLimitBytes: DEFAULT_JSON_BODY_LIMIT_BYTES,
+  });
+  return r.data as MessageResponse;
+}
+
+/**
+ * `POST /user/account/logout` — borra todos los tokens de refresco de quien llama. El `accessToken`
+ * **sigue vivo hasta que caduque** (contrato §2): por eso esta función lo borra del cliente
+ * (`clearAuthToken`/`clearRefreshToken`) además de llamar a la ruta — es el único sitio que lo hace,
+ * igual que `authLogin`/`authSignup` son los únicos que lo escriben (P8). Solo se limpia tras un
+ * `200`: si la petición falla (red, `500`), la sesión local se conserva.
+ */
+export async function logoutAccount(): Promise<MessageResponse> {
+  const r = await peticion<MessageResponse>({ method: "POST", path: "/user/account/logout" });
+  clearAuthToken();
+  clearRefreshToken();
+  return r.data as MessageResponse;
 }
 
 export { ApiError, ApiClientValidationError, SessionError, UnknownApiError } from "./errors.ts";

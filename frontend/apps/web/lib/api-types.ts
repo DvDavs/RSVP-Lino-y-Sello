@@ -362,3 +362,75 @@ export interface AuthPasswordResetRequest {
 export interface AuthPasswordResetResponse {
   message: string;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Cuenta (fase 5, E3) — `modules/product/account` y `modules/product/account` (verificación).
+// Contrato: `handoffs/5-E3-A2-contrato-cuenta.md`. Las cinco rutas nuevas responden
+// `GeneralMessageResponse` (`{message: string}`) salvo `GET`/`PUT /user/profile`, que devuelven
+// `Profile`. Ninguna de las cinco lleva su cuerpo de error aquí: los errores viajan como
+// `UnknownApiError` (no son `TPL_*`) y se leen con `codigoCuenta()` en `traducir-errores.ts`.
+// ---------------------------------------------------------------------------------------------
+
+/** Cuerpo de respuesta común a las rutas de cuenta que no devuelven un recurso (`AccountRequests.kt`). */
+export interface MessageResponse {
+  message: string;
+}
+
+/** `POST /auth/verify-email` (`EmailVerificationController.kt:35`, público). */
+export interface AuthVerifyEmailRequest {
+  token: string;
+}
+
+/** `POST /auth/verify-email:resend` (`EmailVerificationController.kt:48`, público, respuesta siempre igual). */
+export interface AuthResendVerificationRequest {
+  email: string;
+}
+
+/**
+ * `GET /user/profile` y `PUT /user/profile` (`Profile.kt`). `emailVerified` es nuevo en la fase 5:
+ * `false` solo en cuentas recién creadas o con un cambio de correo a medias — no bloquea nada hoy.
+ */
+export interface Profile {
+  name: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  birthdate?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  state?: string;
+  photo?: string;
+  isSurveyAnswered: boolean;
+  emailVerified: boolean;
+}
+
+/**
+ * `PUT /user/profile` (`UpdateProfileRequest.kt`). El correo **no** va aquí (R1-09/`ADR-5-E3-06`):
+ * el DTO del backend lo ignora si se manda, así que ni se tipa ni se envía.
+ */
+export interface UpdateProfileRequest {
+  name: string;
+  lastName: string;
+  phone?: string;
+  birthdate?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  state?: string;
+}
+
+/** `PUT /user/account/password` (`AccountRequests.kt`). Cierra todas las sesiones al terminar. */
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/**
+ * `POST /user/account/email` (`AccountRequests.kt`). No cambia el correo de acceso hasta que se
+ * confirma el enlace con `POST /auth/verify-email`; la respuesta es genérica siempre.
+ */
+export interface ChangeEmailRequest {
+  email: string;
+  password: string;
+}

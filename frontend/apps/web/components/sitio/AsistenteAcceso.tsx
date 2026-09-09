@@ -256,6 +256,7 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
   const [contrasena, setContrasena] = useState("");
   const [nombre, setNombre] = useState("");
   const [apellidos, setApellidos] = useState("");
+  const [telefono, setTelefono] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<ErrorDelRegistro | null>(null);
 
@@ -306,11 +307,15 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
     setEnviando(true);
     setError(null);
     try {
+      const telefonoLimpio = telefono.trim();
       await authSignup({
         name: nombre.trim(),
         lastName: apellidos.trim(),
         email: correo.trim(),
         password: contrasena,
+        // Opcional (contrato §1): se omite del cuerpo si está vacío, nunca se manda "" — el
+        // `@Pattern` del servidor solo deja pasar `null`, no una cadena vacía.
+        phone: telefonoLimpio.length > 0 ? telefonoLimpio : undefined,
       });
       onCreada();
     } catch (e: unknown) {
@@ -334,16 +339,21 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
 
       <form className="mt-6 flex flex-col gap-4" onSubmit={(e) => void crear(e)} noValidate>
         {paso === 1 ? (
-          <Field label={es_MX.acceso.correo} hint={es_MX.acceso.registro.ayudaCorreo} error={errorDe("email")}>
-            <Input
-              name="email"
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-            />
-          </Field>
+          <>
+            <Field label={es_MX.acceso.correo} hint={es_MX.acceso.registro.ayudaCorreo} error={errorDe("email")}>
+              <Input
+                name="email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                value={correo}
+                onChange={(e) => setCorreo(e.target.value)}
+              />
+            </Field>
+            {/* Contrato §5.1/§A2.1: la cuenta nace sin verificar y ENTRA igual — se dice antes de
+                crear la cuenta, no después de que llegue el correo que no se esperaba. */}
+            <p className="text-sm text-ui-ink-muted">{es_MX.acceso.registro.avisoSinVerificar}</p>
+          </>
         ) : null}
 
         {paso === 2 ? (
@@ -373,6 +383,22 @@ function PanelRegistro({ onCreada }: { readonly onCreada: () => void }) {
                 autoComplete="family-name"
                 value={apellidos}
                 onChange={(e) => setApellidos(e.target.value)}
+              />
+            </Field>
+            {/* Opcional (contrato §1). El formato se dice ANTES de que falle: `Patterns.kt:56`
+                exige `+52` y 10 dígitos, y el mensaje del servidor ahora trae un ejemplo. */}
+            <Field
+              label={es_MX.acceso.registro.telefono}
+              hint={es_MX.acceso.registro.ayudaTelefono}
+              error={errorDe("phone")}
+            >
+              <Input
+                name="tel"
+                type="tel"
+                autoComplete="tel"
+                inputMode="tel"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
               />
             </Field>
           </>

@@ -172,6 +172,91 @@ describe("crear cuenta", () => {
     expect(document.getElementById(descrito as string)?.textContent).toContain(politica);
   });
 
+  // Fase 5, E3 (contrato §5.1/§A2.1): la cuenta nace sin verificar y ENTRA igual — se dice antes de
+  // crear la cuenta, junto al correo del paso 1.
+  it("avisa, en el paso 1, de que la cuenta nace sin verificar y aun así entra", async () => {
+    const persona = userEvent.setup();
+    render(<AsistenteAcceso />);
+    await abrirRegistro(persona);
+    expect(screen.getByText(es_MX.acceso.registro.avisoSinVerificar)).not.toBeNull();
+  });
+
+  // Fase 5, E3: teléfono opcional en el paso 3, con el formato dicho ANTES de que falle.
+  it("el paso 3 ofrece un teléfono opcional con el formato dicho de antemano", async () => {
+    const persona = userEvent.setup();
+    render(<AsistenteAcceso />);
+    await abrirRegistro(persona);
+    await persona.type(screen.getByLabelText(es_MX.acceso.correo), "ana@correo.mx");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    await persona.type(screen.getByLabelText(es_MX.acceso.contrasena), "Secreta1!");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    expect(screen.getByText(es_MX.acceso.registro.ayudaTelefono)).not.toBeNull();
+  });
+
+  it("crea la cuenta SIN teléfono si se deja vacío: nunca manda phone: \"\"", async () => {
+    const persona = userEvent.setup();
+    authSignup.mockResolvedValue({ accessToken: "t" });
+    render(<AsistenteAcceso />);
+    await abrirRegistro(persona);
+    await persona.type(screen.getByLabelText(es_MX.acceso.correo), "ana@correo.mx");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    await persona.type(screen.getByLabelText(es_MX.acceso.contrasena), "Secreta1!");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.nombre), "Ana");
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.apellidos), "Torres");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.crear }));
+    expect(authSignup).toHaveBeenCalledWith({
+      name: "Ana",
+      lastName: "Torres",
+      email: "ana@correo.mx",
+      password: "Secreta1!",
+      phone: undefined,
+    });
+  });
+
+  it("crea la cuenta CON el teléfono cuando se escribe", async () => {
+    const persona = userEvent.setup();
+    authSignup.mockResolvedValue({ accessToken: "t" });
+    render(<AsistenteAcceso />);
+    await abrirRegistro(persona);
+    await persona.type(screen.getByLabelText(es_MX.acceso.correo), "ana@correo.mx");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    await persona.type(screen.getByLabelText(es_MX.acceso.contrasena), "Secreta1!");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.nombre), "Ana");
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.apellidos), "Torres");
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.telefono), "+525512345678");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.crear }));
+    expect(authSignup).toHaveBeenCalledWith(
+      expect.objectContaining({ phone: "+525512345678" }),
+    );
+  });
+
+  it("un teléfono rechazado por el servidor vuelve al paso 3 con el error EN el campo", async () => {
+    const persona = userEvent.setup();
+    const { UnknownApiError } = await import("@/lib/api-client");
+    const mensajeServidor =
+      "El teléfono debe llevar la lada de México: +52 y 10 dígitos, sin espacios ni guiones. Por ejemplo: +525512345678";
+    authSignup.mockRejectedValue(
+      new UnknownApiError(400, JSON.stringify({ timestamp: "x", statusCode: 400, errors: { phone: mensajeServidor } })),
+    );
+    render(<AsistenteAcceso />);
+    await abrirRegistro(persona);
+    await persona.type(screen.getByLabelText(es_MX.acceso.correo), "ana@correo.mx");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    await persona.type(screen.getByLabelText(es_MX.acceso.contrasena), "Secreta1!");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.continuar }));
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.nombre), "Ana");
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.apellidos), "Torres");
+    await persona.type(screen.getByLabelText(es_MX.acceso.registro.telefono), "5512345678");
+    await persona.click(screen.getByRole("button", { name: es_MX.acceso.registro.crear }));
+
+    expect(screen.getByText(/Paso 3 de 3/)).not.toBeNull();
+    const campo = screen.getByLabelText(es_MX.acceso.registro.telefono);
+    expect(campo.getAttribute("aria-invalid")).toBe("true");
+    expect(screen.getByRole("alert").textContent).toContain(mensajeServidor);
+  });
+
   it("el error del correo se pinta en el campo del correo, no al pie del formulario", async () => {
     const persona = userEvent.setup();
     const { UnknownApiError } = await import("@/lib/api-client");
