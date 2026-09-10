@@ -66,11 +66,30 @@ async function peticionAdmin<T>(method: "GET" | "PUT", path: string, query?: Rec
   const token = getAuthToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const respuesta = await fetch(url, { method, headers, cache: "no-store" });
+  let respuesta: Response;
+  try {
+    respuesta = await fetch(url, { method, headers, cache: "no-store" });
+  } catch (error) {
+    // `fetch` rechaza (red caída, DNS, CORS…): `TypeError` crudo ("Failed to fetch"), ninguno de
+    // los tres tipos de `./errors.ts`. Se reclasifica para que un `catch (e) { if (e instanceof
+    // SessionError) … }` no se quede sin pintar nada (5-E5-R1 MEDIA-2; mismo hueco sin cerrar en
+    // `peticion()` de `api-client.ts:259`, aquí sí hay margen para cerrarlo). Sin `statusCode` HTTP
+    // real que conservar: se usa `0` como marca de "no hubo respuesta".
+    throw new UnknownApiError(0, error instanceof Error ? error.message : String(error));
+  }
   const textoCrudo = await respuesta.text();
 
   if (respuesta.ok) {
-    return (textoCrudo.length > 0 ? (JSON.parse(textoCrudo) as T) : (undefined as T));
+    if (textoCrudo.length === 0) return undefined as T;
+    try {
+      return JSON.parse(textoCrudo) as T;
+    } catch {
+      // 2xx con cuerpo que no es JSON (p. ej. HTML de un proxy delante del backend): `SyntaxError`
+      // crudo de `JSON.parse`, ninguno de los tres tipos de `./errors.ts`. Las siete rutas del
+      // contrato siempre responden JSON en 2xx, así que esto es una anomalía de transporte, no un
+      // caso normal (5-E5-R1 MEDIA-2).
+      throw new UnknownApiError(respuesta.status, textoCrudo);
+    }
   }
 
   let cuerpoParseado: unknown;

@@ -13,7 +13,7 @@ import { textosAdmin } from "./textos.ts";
 // puntuación tipográfica normal (guiones, comillas, signos de interrogación en español) para no
 // generar falsos positivos con los propios textos de interfaz.
 const RANGO_EMOJI =
-  /[\u{1F000}-\u{1FAFF}\u{2300}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\u{2190}-\u{21FF}]|\u{FE0F}/u;
+  /[\u{1F000}-\u{1FAFF}\u{2300}-\u{23FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\u{2190}-\u{21FF}]|\u{25B6}|\u{FE0F}/u;
 
 function recorrer(valor: unknown, ruta: string, visitar: (ruta: string, texto: string) => void): void {
   if (typeof valor === "string") {

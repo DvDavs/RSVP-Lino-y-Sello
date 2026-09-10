@@ -14,10 +14,14 @@ const FICHEROS = readdirSync(CARPETA)
   .filter((nombre) => !/\.test\.tsx?$/.test(nombre))
   .sort();
 
-// Bloques Unicode de emoji (pictogramas, símbolos misceláneos, dingbats, banderas regionales,
-// suplementarios) y el selector de variación que fuerza representación emoji (U+FE0F).
+// Bloques Unicode de emoji (pictogramas, mahjong/naipes, símbolos misceláneos, símbolos técnicos
+// —relojes «⏰⌚⏳»—, formas geométricas —«▶»—, dingbats, banderas regionales, suplementarios) y el
+// selector de variación que fuerza representación emoji (U+FE0F, el que convierte «▶» en «▶️»),
+// sacado de la clase de caracteres y puesto como alternativa
+// (`eslint(no-misleading-character-class)`: un selector de variación dentro de `[...]` se trata
+// como carácter combinado y lo rechaza).
 const EMOJI =
-  /[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}️]/u;
+  /[\u{1F000}-\u{1FFFF}\u{2300}-\u{23FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}]|\u{25B6}|\u{FE0F}/u;
 
 // Un color hex de verdad: `#` seguido de 3, 4, 6 u 8 dígitos hexadecimales y NADA más pegado detrás
 // (así no cae un id de invitación tipo `#a1b2c3d` de 7 dígitos, que no es un hex válido de CSS).
@@ -31,6 +35,12 @@ describe("reglas duras de identidad — _componentes de /admin", () => {
   it.each(FICHEROS)("%s no contiene emojis", (fichero) => {
     const contenido = readFileSync(path.join(CARPETA, fichero), "utf8");
     expect(EMOJI.test(contenido)).toBe(false);
+  });
+
+  it("el rango también caza los emojis que quedaban fuera antes de esta revisión (5-E5-R1 MEDIA-5)", () => {
+    for (const emoji of ["⏰", "⌚", "⏳", "▶", "🀄"]) {
+      expect(EMOJI.test(emoji)).toBe(true);
+    }
   });
 
   it.each(FICHEROS)("%s no contiene un color en hexadecimal (color solo desde tokens)", (fichero) => {

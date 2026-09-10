@@ -37,6 +37,14 @@ export const textosAdmin = {
     abrir: "Abrir",
     sinDato: "—",
     estadoDesconocido: "Sin clasificar",
+    // El fallo más común de una consola — el wifi — no tenía copia propia (5-E5-R1 MEDIA-2);
+    // mismo tono que `lib/i18n.ts:28` (`errores.sinRed`), con título + cuerpo + acción como el
+    // resto de los bloques de error de este fichero.
+    sinRed: {
+      titulo: "No hay conexión",
+      cuerpo: "Parece que se cayó tu internet. Vuelve a intentarlo cuando regrese la señal.",
+      accion: "Volver a intentarlo",
+    },
     // Añadido por E5-D: falta un «Cancelar» genérico para el diálogo de confirmación de
     // `AccionDeFila` (deshabilitar/habilitar una invitación) — ningún bloque existente lo traía.
     cancelar: "Cancelar",

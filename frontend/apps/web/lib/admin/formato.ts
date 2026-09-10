@@ -45,33 +45,44 @@ export function formatearFechaCorta(fechaIso: string | null | undefined): string
  * `contrato-admin.md §3`, dos campos sueltos, no un ISO combinado). Cualquiera de los dos puede
  * venir vacío — una invitación recién creada todavía no tiene fecha de evento — y en ese caso se
  * omite esa parte; si las dos faltan, el resultado es el guion largo, nunca "Invalid Date".
+ *
+ * Una `fecha` que SÍ viene pero no es un `YYYY-MM-DD` real (forma inválida, o rango que desborda
+ * como `"2026-13-45"`) es distinta de una `fecha` ausente: es un dato corrupto, no información que
+ * falta. `new Date(2026, 12, 45)` no lanza ni da `Invalid Date` — desborda en silencio a una fecha
+ * válida pero FALSA (14 feb 2027), que en una consola de administración es peor que no enseñar
+ * nada. Por eso, ante ese caso, la función devuelve el guion largo del sistema completo (no solo
+ * la parte de fecha con la hora al lado): mostrar una hora real junto a una fecha que no existe
+ * sugeriría que el evento tiene fecha cuando el dato está corrupto (5-E5-R1 MEDIA-1).
  */
 export function formatearFechaEvento(fecha: string | null | undefined, hora: string | null | undefined): string {
   const fechaLimpia = fecha && fecha.trim().length > 0 ? fecha.trim() : null;
   const horaLimpia = hora && hora.trim().length > 0 ? hora.trim() : null;
 
-  if (!fechaLimpia && !horaLimpia) return GUION_LARGO;
+  if (!fechaLimpia) return horaLimpia ?? GUION_LARGO;
 
-  let fechaFormateada = fechaLimpia;
-  if (fechaLimpia) {
-    // `YYYY-MM-DD` se parsea a mano: `new Date("YYYY-MM-DD")` lo interpreta en UTC y puede mover
-    // el día en zonas al oeste de Greenwich (la fecha del evento nunca lleva hora en esa cadena).
-    const coincide = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaLimpia);
-    if (coincide) {
-      const [, anio, mes, dia] = coincide;
-      const fechaLocal = new Date(Number(anio), Number(mes) - 1, Number(dia));
-      if (!Number.isNaN(fechaLocal.getTime())) {
-        fechaFormateada = new Intl.DateTimeFormat("es-MX", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }).format(fechaLocal);
-      }
-    }
-  }
+  // `YYYY-MM-DD` se parsea a mano: `new Date("YYYY-MM-DD")` lo interpreta en UTC y puede mover el
+  // día en zonas al oeste de Greenwich (la fecha del evento nunca lleva hora en esa cadena).
+  const coincide = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaLimpia);
+  if (!coincide) return GUION_LARGO;
 
-  if (fechaFormateada && horaLimpia) return `${fechaFormateada}, ${horaLimpia}`;
-  return fechaFormateada ?? horaLimpia ?? GUION_LARGO;
+  const [, anio, mes, dia] = coincide;
+  const fechaLocal = new Date(Number(anio), Number(mes) - 1, Number(dia));
+  // El regex de arriba solo valida la FORMA; aquí se valida el RANGO comprobando que el ida y
+  // vuelta cuadra con lo que se pidió — si no cuadra, la cadena no era una fecha real.
+  const cuadra =
+    !Number.isNaN(fechaLocal.getTime()) &&
+    fechaLocal.getFullYear() === Number(anio) &&
+    fechaLocal.getMonth() === Number(mes) - 1 &&
+    fechaLocal.getDate() === Number(dia);
+  if (!cuadra) return GUION_LARGO;
+
+  const fechaFormateada = new Intl.DateTimeFormat("es-MX", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(fechaLocal);
+
+  return horaLimpia ? `${fechaFormateada}, ${horaLimpia}` : fechaFormateada;
 }
 
 // -------------------------------------------------------------------------------------------

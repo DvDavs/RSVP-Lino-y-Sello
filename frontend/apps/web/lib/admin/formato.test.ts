@@ -88,6 +88,17 @@ describe("formatearFechaEvento (fecha YYYY-MM-DD + hora HH:mm, las dos pueden ve
     expect(() => resultado).not.toThrow();
     expect(resultado).not.toContain("Invalid");
   });
+
+  it("una fecha que desborda el rango (mes/día fuera de lo real) no se inventa una fecha creíble (5-E5-R1 MEDIA-1)", () => {
+    // Antes de esta corrección: "14 feb 2027, 18:00" — una fecha FALSA pero creíble, peor que
+    // no enseñar nada en una consola de administración.
+    expect(formatearFechaEvento("2026-13-45", "18:00")).toBe(GUION_LARGO);
+  });
+
+  it("una cadena que no tiene forma de fecha no se enseña cruda en pantalla (5-E5-R1 MEDIA-1)", () => {
+    // Antes de esta corrección: "no-fecha" — el dato crudo del backend, tal cual, en pantalla.
+    expect(formatearFechaEvento("no-fecha", "")).toBe(GUION_LARGO);
+  });
 });
 
 describe("etiquetaEstadoInvitacion", () => {

@@ -55,7 +55,14 @@ export interface PaginaClientas {
   elementos: ClientaAdmin[];
 }
 
-/** `tamano` se acota a `[1,100]` en el backend; aquí solo se omite si viene `undefined`. */
+/**
+ * `tamano` fuera de `[1,100]` NO se acota en el backend: se rechaza con 400 (comprobado contra el
+ * backend real, `5-E5-R1` MEDIA-3: `?tamano=500` y `?tamano=0` devuelven
+ * `{"errors":{"error":"El parámetro 'tamano' está entre 1 y 100; se recibió …"}}`). Aquí solo se
+ * omite el parámetro de la query si viene `undefined`; un valor fuera de rango se manda tal cual y
+ * `peticionAdmin()` lo clasifica como `UnknownApiError`, nunca como una página recortada en
+ * silencio.
+ */
 export interface ClientasQuery {
   pagina?: number;
   tamano?: number;

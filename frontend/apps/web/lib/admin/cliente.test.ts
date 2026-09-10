@@ -241,3 +241,24 @@ describe("cuerpo vacío en 2xx no revienta el parseo (defensivo, aunque el contr
     await expect(obtenerMetricas()).resolves.toBeUndefined();
   });
 });
+
+describe("caminos de fallo que antes salían sin clasificar (5-E5-R1 MEDIA-2)", () => {
+  it("un 200 con cuerpo que no es JSON (p. ej. HTML de un proxy) se clasifica como UnknownApiError, nunca SyntaxError crudo", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("<html>502 Bad Gateway</html>", { status: 200 })),
+    );
+    const error = await obtenerMetricas().catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(UnknownApiError);
+    expect(error).not.toBeInstanceOf(SyntaxError);
+    expect((error as UnknownApiError).rawBody).toContain("502 Bad Gateway");
+  });
+
+  it("un `fetch` que rechaza (red caída) se clasifica como UnknownApiError, nunca TypeError crudo", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+    const error = await obtenerMetricas().catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(UnknownApiError);
+    expect(error).not.toBeInstanceOf(TypeError);
+    expect((error as UnknownApiError).rawBody).toContain("Failed to fetch");
+  });
+});
