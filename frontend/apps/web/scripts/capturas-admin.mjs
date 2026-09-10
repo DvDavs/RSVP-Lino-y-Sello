@@ -25,10 +25,8 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { chromium } from "@playwright/test";
 
-const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const RUTA_CHROMIUM = process.env.PW_CHROMIUM_PATH ?? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:6003";
 const PGBIN = process.env.TPL_TEST_PGBIN ?? "/usr/lib/postgresql/16/bin";
