@@ -59,7 +59,15 @@ class ProductAdminConsolaController(
     ): PaginaDeClientas =
         servicio.clientas(AlcanceDeAdministracion.de(authentication), pagina, tamano, buscar)
 
-    /** §3 `GET /product/admin/invitaciones`. */
+    /**
+     * §3 `GET /product/admin/invitaciones`.
+     *
+     * `plan` **es el id** del plan (`GET /product/admin/planes` lo devuelve junto al nombre), llega
+     * como texto para poder responder `400` con cuerpo tanto si no es un número como si es un id que
+     * no existe. Lo pide el wireframe de `12-producto-completo.md §B3.6`, que dibuja la barra de la
+     * tabla como `[ Buscar ] [ Estado v ] [ Plan v ]`. Una invitación sin plan no casa con ningún
+     * `plan=<id>`: ver [ParametrosDeAdministracion.planSolicitado].
+     */
     @GetMapping("/invitaciones")
     fun invitaciones(
         @RequestParam(defaultValue = "0") pagina: Int,
@@ -67,9 +75,10 @@ class ProductAdminConsolaController(
         @RequestParam(required = false) buscar: String?,
         @RequestParam(required = false) estado: String?,
         @RequestParam(required = false) pago: String?,
+        @RequestParam(required = false) plan: String?,
         authentication: Authentication,
     ): PaginaDeInvitaciones =
-        servicio.invitaciones(AlcanceDeAdministracion.de(authentication), pagina, tamano, buscar, estado, pago)
+        servicio.invitaciones(AlcanceDeAdministracion.de(authentication), pagina, tamano, buscar, estado, pago, plan)
 
     /** §5 `GET /product/admin/pagos`. */
     @GetMapping("/pagos")

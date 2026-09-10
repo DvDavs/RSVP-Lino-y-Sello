@@ -64,6 +64,38 @@ object ParametrosDeAdministracion {
         return valor
     }
 
+    /**
+     * Filtro `plan` de §3: **el id numérico** de `invitation_plan`, no su nombre.
+     *
+     * **Por qué el id y no el nombre.** `invitation_plan.name` es texto libre y editable en caliente
+     * por `PUT /master/plans/{id}` (`…/modules/master/plans/presentation/MasterPlansController.kt`):
+     * renombrar «Premium» a «Fiesta» rompería en silencio cualquier enlace guardado, cualquier marcador
+     * y cualquier prueba que filtrara por nombre. El id es estable, es único —`name` no tiene `UNIQUE`
+     * en la tabla (`V1__initial_schema.sql`, `public.invitation_plan`), así que dos planes podrían
+     * llamarse igual y el filtro por nombre sería ambiguo— y no obliga a decidir si la comparación es
+     * sensible a mayúsculas o a acentos («Básico» con y sin tilde). Además la pantalla ya tiene lo que
+     * necesita: `GET /product/admin/planes` devuelve `id` **y** `nombre`, así que el desplegable enseña
+     * el nombre y manda el id.
+     *
+     * Dos errores distintos, los dos **400 con cuerpo**:
+     * - no es un número → el parámetro está mal formado;
+     * - es un número que no está en el catálogo → el plan no existe.
+     * Ninguno de los dos se ignora en silencio, que es la regla del contrato.
+     */
+    fun planSolicitado(valor: String?): Long? {
+        if (valor.isNullOrBlank()) return null
+        val id = valor.trim().toLongOrNull()
+        require(id != null && id > 0) {
+            "El parámetro 'plan' es el id numérico de un plan del catálogo " +
+                "(los devuelve GET /product/admin/planes); se recibió '$valor'"
+        }
+        return id
+    }
+
+    /** Mensaje del `plan` que sí es un número pero no está en el catálogo. */
+    fun planDesconocido(id: Long): String =
+        "El parámetro 'plan' no corresponde a ningún plan del catálogo; se recibió '$id'"
+
     /** Texto de búsqueda → patrón `LIKE` en minúsculas. Vacío o ausente = `%`, que casa con todo. */
     fun patron(buscar: String?): String = "%" + (buscar?.trim()?.lowercase() ?: "") + "%"
 }

@@ -48,6 +48,7 @@ class ConsolaDeAdministracionService(
         buscar: String?,
         estado: String?,
         pago: String?,
+        plan: String?,
     ): PaginaDeInvitaciones {
         val p = ParametrosDeAdministracion.pagina(pagina)
         val t = ParametrosDeAdministracion.tamano(tamano)
@@ -63,11 +64,17 @@ class ConsolaDeAdministracionService(
             ParametrosDeAdministracion.PAGO_PENDIENTE -> 2
             else -> 0
         }
+        // El plan se valida contra el catálogo ANTES de consultar: un id que no existe es 400, no una
+        // lista vacía. Una lista vacía sería indistinguible de «ese plan no tiene invitaciones», y
+        // quien mira la consola se creería el cero.
+        val codigoPlan = ParametrosDeAdministracion.planSolicitado(plan)?.also {
+            require(consultas.planExiste(it)) { ParametrosDeAdministracion.planDesconocido(it) }
+        } ?: ConsultasDeAdministracion.SIN_FILTRO_DE_PLAN
         return PaginaDeInvitaciones(
-            total = consultas.contarInvitaciones(alcance, patron, codigoEstado, codigoPago),
+            total = consultas.contarInvitaciones(alcance, patron, codigoEstado, codigoPago, codigoPlan),
             pagina = p,
             tamano = t,
-            elementos = consultas.invitaciones(alcance, patron, codigoEstado, codigoPago, t, p * t),
+            elementos = consultas.invitaciones(alcance, patron, codigoEstado, codigoPago, t, p * t, codigoPlan),
         )
     }
 

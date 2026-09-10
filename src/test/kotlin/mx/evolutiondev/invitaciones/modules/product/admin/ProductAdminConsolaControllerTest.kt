@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.core.annotation.AnnotatedElementUtils
@@ -127,8 +128,8 @@ class ProductAdminConsolaControllerTest {
 
     @Test
     fun `invitaciones devuelve las claves del contrato y enlacePublico nulo se serializa como null`() {
-        whenever(consultas.contarInvitaciones(any(), any(), any(), any())).thenReturn(2)
-        whenever(consultas.invitaciones(any(), any(), any(), any(), any(), any())).thenReturn(
+        whenever(consultas.contarInvitaciones(any(), any(), any(), any(), any())).thenReturn(2)
+        whenever(consultas.invitaciones(any(), any(), any(), any(), any(), any(), any())).thenReturn(
             listOf(
                 InvitacionDeAdministracion(
                     id = 7, evento = "Boda", fecha = "2026-11-14", hora = "18:00",
@@ -159,13 +160,80 @@ class ProductAdminConsolaControllerTest {
 
     @Test
     fun `los filtros de estado y pago viajan traducidos a la consulta`() {
-        whenever(consultas.contarInvitaciones(any(), any(), any(), any())).thenReturn(0)
-        whenever(consultas.invitaciones(any(), any(), any(), any(), any(), any())).thenReturn(emptyList())
+        whenever(consultas.contarInvitaciones(any(), any(), any(), any(), any())).thenReturn(0)
+        whenever(consultas.invitaciones(any(), any(), any(), any(), any(), any(), any())).thenReturn(emptyList())
 
         mvc.perform(get("/product/admin/invitaciones?estado=deshabilitada&pago=pendiente").principal(master))
             .andExpect(status().isOk)
 
-        verify(consultas).contarInvitaciones(any(), any(), eq(3), eq(2))
+        verify(consultas).contarInvitaciones(any(), any(), eq(3), eq(2), eq(0L))
+    }
+
+    // ------------------------------------------------------------------ §3 · filtro «Plan»
+
+    /**
+     * El filtro `plan` del wireframe (`12-producto-completo.md §B3.6`: `[ Buscar ] [ Estado v ]
+     * [ Plan v ]`). **Viaja el id, no el nombre** (el porqué está en
+     * `ParametrosDeAdministracion.planSolicitado`).
+     */
+    @Test
+    fun `el filtro de plan viaja como id a la consulta y solo tras comprobar que existe`() {
+        whenever(consultas.planExiste(eq(2L))).thenReturn(true)
+        whenever(consultas.contarInvitaciones(any(), any(), any(), any(), any())).thenReturn(0)
+        whenever(consultas.invitaciones(any(), any(), any(), any(), any(), any(), any())).thenReturn(emptyList())
+
+        mvc.perform(get("/product/admin/invitaciones?plan=2").principal(master))
+            .andExpect(status().isOk)
+
+        verify(consultas).planExiste(2L)
+        verify(consultas).contarInvitaciones(any(), any(), any(), any(), eq(2L))
+        verify(consultas).invitaciones(any(), any(), any(), any(), any(), any(), eq(2L))
+    }
+
+    @Test
+    fun `sin plan en la peticion no se comprueba el catalogo y no hay filtro`() {
+        whenever(consultas.contarInvitaciones(any(), any(), any(), any(), any())).thenReturn(0)
+        whenever(consultas.invitaciones(any(), any(), any(), any(), any(), any(), any())).thenReturn(emptyList())
+
+        mvc.perform(get("/product/admin/invitaciones").principal(master))
+            .andExpect(status().isOk)
+
+        verify(consultas, never()).planExiste(any())
+        verify(consultas).contarInvitaciones(any(), any(), any(), any(), eq(0L))
+    }
+
+    /**
+     * Las dos formas de que `plan` esté mal son **400 con cuerpo**, nunca una lista vacía: una lista
+     * vacía sería indistinguible de «ese plan no tiene invitaciones» y quien mire la consola se
+     * creería el cero.
+     */
+    @Test
+    fun `un plan que no es numero y un plan que no existe son 400 con cuerpo`() {
+        whenever(consultas.planExiste(eq(99L))).thenReturn(false)
+
+        mvc.perform(get("/product/admin/invitaciones?plan=Premium").principal(master))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.statusCode").value(400))
+            .andExpect(jsonPath("$.errors.error").value(org.hamcrest.Matchers.containsString("id numérico")))
+
+        mvc.perform(get("/product/admin/invitaciones?plan=99").principal(master))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.statusCode").value(400))
+            .andExpect(jsonPath("$.errors.error").value(org.hamcrest.Matchers.containsString("ningún plan del catálogo")))
+
+        // Y no se consulta nada en ninguno de los dos casos.
+        verify(consultas, never()).contarInvitaciones(any(), any(), any(), any(), any())
+        verify(consultas, never()).invitaciones(any(), any(), any(), any(), any(), any(), any())
+    }
+
+    @Test
+    fun `un plan cero o negativo tambien es 400, no un centinela colado desde fuera`() {
+        listOf("0", "-1").forEach { valor ->
+            mvc.perform(get("/product/admin/invitaciones?plan=$valor").principal(master))
+                .andExpect(status().isBadRequest)
+                .andExpect(jsonPath("$.errors.error").isNotEmpty)
+        }
+        verify(consultas, never()).planExiste(any())
     }
 
     // ------------------------------------------------------------------ §5, §6, §7

@@ -116,7 +116,7 @@ class MatrizRutaRolProductAdminTest {
         whenever(servicio.metricas(any())).thenReturn(MetricasDeAdministracion(0, 0, 0, 0, 0))
         whenever(servicio.clientas(any(), any(), any(), anyOrNull()))
             .thenReturn(PaginaDeClientas(0, 0, 20, emptyList()))
-        whenever(servicio.invitaciones(any(), any(), any(), anyOrNull(), anyOrNull(), anyOrNull()))
+        whenever(servicio.invitaciones(any(), any(), any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()))
             .thenReturn(PaginaDeInvitaciones(0, 0, 20, emptyList()))
         whenever(servicio.pagos(any(), any(), any(), anyOrNull()))
             .thenReturn(PaginaDePagos(0, 0, 20, PagosDesdeInvitaciones.ORIGEN, emptyList()))

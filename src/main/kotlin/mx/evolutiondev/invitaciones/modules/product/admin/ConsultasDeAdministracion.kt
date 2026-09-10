@@ -199,6 +199,14 @@ class ConsultasDeAdministracion(
      *   gana sobre las otras dos, tal como pide el contrato: por eso las tres ramas son excluyentes
      *   y las dos primeras exigen `is_enabled = true`.
      * - `pago`: `1` pagada, `2` pendiente, `0` sin filtro.
+     * - `plan`: **el id** de `invitation_plan`, o `0` para «sin filtro». `0` es seguro como centinela
+     *   porque `invitation_plan.id` es `BIGSERIAL` y empieza en 1 (`V1__initial_schema.sql:1091-1094`
+     *   siembra las filas 1 y 2): ningún plan real puede valer 0. La condición casa contra `p.id` —el
+     *   `LEFT JOIN` a `invitation_plan`— y no contra `t.invitation_plan_id`, para que sea coherente
+     *   con la validación del parámetro, que comprueba existencia en `invitation_plan` ([planExiste]).
+     *   **Consecuencia deliberada: una invitación sin plan (`plan: null` en la respuesta) nunca casa
+     *   con ningún `plan=<id>`**, que es lo correcto —no tiene ese plan— y queda documentado para
+     *   quien escriba la pantalla.
      * - `buscar` casa contra el nombre y el correo de la clienta y contra el nombre del tipo de evento.
      */
     private val filtroDeInvitacion = """
@@ -210,6 +218,7 @@ class ConsultasDeAdministracion(
         AND (:pago = 0
              OR (:pago = 1 AND coalesce(i.is_paid, false) = true)
              OR (:pago = 2 AND coalesce(i.is_paid, false) = false))
+        AND (:plan = 0 OR p.id = :plan)
         AND (lower(coalesce(c.name, '') || ' ' || coalesce(c.lastname, '')) LIKE :patron
              OR lower(c.email) LIKE :patron
              OR lower(coalesce(et.name, '')) LIKE :patron)
@@ -220,13 +229,31 @@ class ConsultasDeAdministracion(
         patron: String,
         estado: Int,
         pago: Int,
+        plan: Long = SIN_FILTRO_DE_PLAN,
     ): Long = (
         consulta("SELECT count(*) $desdeInvitacion WHERE $filtroDeInvitacion", alcance)
             .setParameter("patron", patron)
             .setParameter("estado", estado)
             .setParameter("pago", pago)
+            .setParameter("plan", plan)
             .singleResult as Tuple
         ).entero(0)
+
+    /**
+     * ¿Existe ese plan en el catálogo heredado? Es lo que convierte un `plan` desconocido en **400** en
+     * vez de en una lista vacía silenciosa.
+     *
+     * **Sin alcance por rol, a propósito.** El catálogo de planes es del sistema: `GET
+     * /product/admin/planes` ya lo devuelve entero a cualquier administrador (solo acota el
+     * *recuento* de cada plan), y `GET /public/invitations/plan`
+     * (`…/modules/user/invitations/presentation/PublicInvitationInfoController.kt:53-62`) lo publica
+     * **sin autenticar**. Así que confirmar que el plan 2 existe no revela nada que no sea ya público:
+     * no es un oráculo de los de S-02.
+     */
+    fun planExiste(id: Long): Boolean =
+        (em.createNativeQuery("SELECT count(*) FROM invitation_plan WHERE id = :id", Tuple::class.java)
+            .setParameter("id", id)
+            .singleResult as Tuple).entero(0) > 0
 
     /**
      * Contrato §3. Orden de columnas: 0 id · 1 evento · 2 fecha · 3 hora · 4 clienta id · 5 name ·
@@ -247,6 +274,7 @@ class ConsultasDeAdministracion(
         pago: Int,
         tamano: Int,
         desplazamiento: Int,
+        plan: Long = SIN_FILTRO_DE_PLAN,
     ): List<InvitacionDeAdministracion> {
         val sql = """
             SELECT i.id, et.name, i.date, i."time",
@@ -265,6 +293,7 @@ class ConsultasDeAdministracion(
             .setParameter("patron", patron)
             .setParameter("estado", estado)
             .setParameter("pago", pago)
+            .setParameter("plan", plan)
             .setParameter("tamano", tamano)
             .setParameter("desplazamiento", desplazamiento)
             .filas()
@@ -455,6 +484,11 @@ class ConsultasDeAdministracion(
         is Timestamp -> v.toInstant()
         is java.util.Date -> v.toInstant()
         else -> null
+    }
+
+    companion object {
+        /** «Sin filtro de plan». Vale 0 porque `invitation_plan.id` es `BIGSERIAL` y empieza en 1. */
+        const val SIN_FILTRO_DE_PLAN = 0L
     }
 
     /** Expuesto para [PagosDesdeInvitaciones], que lee las mismas filas de [pagos]. */

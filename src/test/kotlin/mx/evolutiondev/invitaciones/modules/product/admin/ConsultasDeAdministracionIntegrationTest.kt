@@ -243,6 +243,39 @@ class ConsultasDeAdministracionIntegrationTest : SpringPersistenceTestSupport() 
         assertEquals(0, consultas.contarInvitaciones(alcanceDelAdmin, "%%", 2, 0), "tampoco en-edicion")
     }
 
+    /**
+     * El filtro `plan` del wireframe (`12-producto-completo.md §B3.6`), contra la base real: viaja el
+     * **id**, se aplica en el `WHERE` junto al alcance por rol, y una invitación **sin plan** no casa
+     * con ningún `plan=<id>`.
+     */
+    @Test
+    fun `el filtro de plan va por id, respeta el alcance y deja fuera lo que no tiene plan`() {
+        val plantilla: Long = unaFila("SELECT id FROM invitation_template ORDER BY id LIMIT 1")
+        val planDeEsaPlantilla: Long = unaFila("SELECT invitation_plan_id FROM invitation_template WHERE id = ?", plantilla)
+        val otroPlan: Long = unaFila("SELECT id FROM invitation_plan WHERE id <> ? ORDER BY id LIMIT 1", planDeEsaPlantilla)
+
+        assertTrue(consultas.planExiste(planDeEsaPlantilla))
+        assertFalse(consultas.planExiste(999_999L), "un id que no está en el catálogo")
+
+        // Las dos invitaciones sembradas usan la misma plantilla, y por tanto el mismo plan.
+        assertEquals(1, consultas.contarInvitaciones(alcanceDelAdmin, "%%", 0, 0, planDeEsaPlantilla))
+        assertEquals(
+            listOf(invPropia),
+            consultas.invitaciones(alcanceDelAdmin, "%%", 0, 0, 100, 0, planDeEsaPlantilla).map { it.id },
+            "el ADMIN filtrando por plan sigue sin ver la invitación ajena",
+        )
+
+        // El MASTER, con el mismo filtro, ve las dos: el alcance sigue vivo dentro del filtro.
+        val delMaster = consultas.invitaciones(alcanceDelMaster, "%%", 0, 0, 500, 0, planDeEsaPlantilla).map { it.id }
+        assertTrue(invPropia in delMaster && invAjena in delMaster)
+
+        // Otro plan: ninguna de las dos.
+        assertEquals(0, consultas.contarInvitaciones(alcanceDelAdmin, "%%", 0, 0, otroPlan))
+
+        // Sin filtro (centinela 0) todo vuelve a salir.
+        assertEquals(1, consultas.contarInvitaciones(alcanceDelAdmin, "%%", 0, 0, ConsultasDeAdministracion.SIN_FILTRO_DE_PLAN))
+    }
+
     @Test
     fun `el filtro de pago se aplica en la consulta`() {
         val alcanceAmplio = AlcanceDeAdministracion(yo = idAjena, todo = 0)
