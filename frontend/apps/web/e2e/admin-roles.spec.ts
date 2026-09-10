@@ -43,7 +43,7 @@ test("MASTER: entra a /admin y ve la consola con sus cinco pestañas", async ({ 
     await expect(page.getByRole("tab", { name: nombre })).toBeVisible();
   }
   // Nunca el estado de «sin permiso»: un MASTER no es una historia de 403.
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: textosAdmin.sesion.sinPermiso.titulo })).toHaveCount(0);
 });
 
 test("ADMIN: entra a /admin y ve la consola", async ({ page }) => {
@@ -57,7 +57,7 @@ test("ADMIN: entra a /admin y ve la consola", async ({ page }) => {
   for (const nombre of NOMBRES_PESTANAS) {
     await expect(page.getByRole("tab", { name: nombre })).toBeVisible();
   }
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: textosAdmin.sesion.sinPermiso.titulo })).toHaveCount(0);
 });
 
 test("USER: no ve la consola — un estado honesto ante el 403, no una consola vacía ni un esqueleto eterno", async ({
@@ -70,8 +70,9 @@ test("USER: no ve la consola — un estado honesto ante el 403, no una consola v
 
   // La pantalla lo cuenta con todas las letras: título + cuerpo + UNA salida real
   // (`textosAdmin.sesion.sinPermiso`), sustituyendo las pestañas ENTERAS — no un panel vacío
-  // disimulado entre tablas que sí «funcionan».
-  const aviso = page.getByRole("alert");
+  // disimulado entre tablas que sí «funcionan». Se acota por el título propio del estado (no basta
+  // `getByRole("alert")` a secas: Next.js monta su propio anunciador de ruta con el mismo rol).
+  const aviso = page.getByRole("alert").filter({ has: page.getByRole("heading", { name: textosAdmin.sesion.sinPermiso.titulo }) });
   await expect(aviso).toBeVisible({ timeout: 15_000 });
   await expect(aviso.getByRole("heading", { name: textosAdmin.sesion.sinPermiso.titulo })).toBeVisible();
   await expect(aviso.getByText(textosAdmin.sesion.sinPermiso.cuerpo)).toBeVisible();
@@ -79,7 +80,7 @@ test("USER: no ve la consola — un estado honesto ante el 403, no una consola v
 
   // Nunca una consola vacía ni cinco tablas rotas: las pestañas desaparecen del todo, no se quedan
   // ahí mostrando nada.
-  await expect(page.getByRole("tablist")).toHaveCount(0);
+  await expect(page.getByRole("tablist", { name: textosAdmin.pagina.titulo })).toHaveCount(0);
   for (const nombre of NOMBRES_PESTANAS) {
     await expect(page.getByRole("tab", { name: nombre })).toHaveCount(0);
   }
@@ -94,6 +95,8 @@ test("anónimo: sin sesión, /admin nunca llega a mostrar la consola — manda a
   await page.goto("/admin");
 
   await expect(page).toHaveURL(/\/acceso\?volver=%2Fadmin/, { timeout: 10_000 });
-  await expect(page.getByRole("tablist")).toHaveCount(0);
-  await expect(page.getByRole("alert")).toHaveCount(0); // tampoco es la historia del 403: nunca llegó a pedir nada
+  // Ni la consola (con sesión) ni el estado de «sin permiso» (sin sesión no hay ni petición que
+  // devuelva 403): la pantalla a la que llega es /acceso, no una versión rota de /admin.
+  await expect(page.getByRole("tablist", { name: textosAdmin.pagina.titulo })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: textosAdmin.sesion.sinPermiso.titulo })).toHaveCount(0);
 });
