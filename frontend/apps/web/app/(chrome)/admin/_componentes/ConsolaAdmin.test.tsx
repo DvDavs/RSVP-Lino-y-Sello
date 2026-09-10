@@ -145,3 +145,99 @@ describe("ConsolaAdmin — el error de un bloque no tumba los demás (regla dura
     expect(screen.queryByText(textosAdmin.sesion.sinPermiso.titulo)).toBeNull();
   });
 });
+
+describe("ConsolaAdmin — pestañas: montadas las cinco, visible SOLO una (compuerta del defecto 1)", () => {
+  // Esta es la prueba que faltaba. `forceMount` mantiene las cinco `TabsContent` montadas (y por eso
+  // las cinco piden su dato en paralelo desde el primer render), pero Radix calcula
+  // `hidden = !(forceMount || isSelected)`: con `forceMount` eso es SIEMPRE `false`, así que ningún
+  // panel inactivo recibía `hidden` y los cinco se pintaban apilados a la vez, en los tres anchos
+  // (`bitacora/5-E5-I.md §1`, capturas `admin-bug-pestanas-apiladas-*`). Ni las pruebas de unidad ni
+  // los e2e caían: todas acotaban sus aserciones al panel que les interesaba (por nombre accesible o
+  // por `section[aria-labelledby]`), y ninguna afirmaba «solo uno visible».
+  //
+  // En jsdom esto SÍ se puede afirmar, y sale barato, porque el arreglo pone un ATRIBUTO (`hidden`)
+  // y no una clase de CSS: `*ByRole` de Testing Library excluye por defecto lo que no está en el
+  // árbol de accesibilidad (`hidden`, `aria-hidden`, `display:none`), así que «cuántos tabpanel hay»
+  // y «cuántos se ven» son dos cuentas distintas y comparables.
+  async function consolaLista() {
+    getAuthToken.mockReturnValue("jwt-master");
+    obtenerMetricas.mockResolvedValue({ clientas: 0, invitaciones: 0, publicadas: 0, pagadas: 0, rsvpUltimos7Dias: 0 });
+    listarClientas.mockResolvedValue(PAGINA_VACIA);
+    listarInvitaciones.mockResolvedValue(PAGINA_VACIA);
+    listarPagos.mockResolvedValue({ ...PAGINA_VACIA, origen: "invitaciones" });
+    listarPlantillas.mockResolvedValue({ total: 0, elementos: [] });
+    render(<ConsolaAdmin />);
+    await screen.findByRole("tab", { name: textosAdmin.pestanas.resumen });
+  }
+
+  const NOMBRES = [
+    textosAdmin.pestanas.resumen,
+    textosAdmin.pestanas.clientas,
+    textosAdmin.pestanas.invitaciones,
+    textosAdmin.pestanas.pagos,
+    textosAdmin.pestanas.plantillas,
+  ];
+
+  it("de entrada: los cinco paneles están en el documento, pero solo «Resumen» se ve", async () => {
+    await consolaLista();
+
+    // Montados los cinco (la mitad que `forceMount` sí daba y que hay que conservar).
+    expect(document.querySelectorAll('[role="tabpanel"]')).toHaveLength(5);
+
+    // Visible exactamente uno, y es el de la pestaña activa.
+    // `apps/web` no carga `jest-dom`: aquí se afirma con el propio DOM y con el filtro de
+    // accesibilidad que `*ByRole` ya trae de serie.
+    const visibles = screen.getAllByRole("tabpanel");
+    expect(visibles).toHaveLength(1);
+    expect(visibles[0]).toBe(screen.getByRole("tabpanel", { name: textosAdmin.pestanas.resumen }));
+
+    // Y los otros cuatro llevan `hidden` de verdad: fuera del árbol accesible y del tabulador — no
+    // un `opacity-0` ni un `visibility` a medias, que dejarían el panel alcanzable con el teclado.
+    const ocultos = [...document.querySelectorAll<HTMLElement>('[role="tabpanel"]')].filter(
+      (panel) => panel !== visibles[0],
+    );
+    expect(ocultos).toHaveLength(4);
+    for (const panel of ocultos) {
+      expect(panel.hidden).toBe(true);
+      expect(panel.hasAttribute("hidden")).toBe(true);
+    }
+  });
+
+  it.each(NOMBRES)("al abrir «%s» sigue habiendo UN solo panel visible, y es el suyo", async (nombre) => {
+    const usuario = userEvent.setup();
+    await consolaLista();
+
+    await usuario.click(screen.getByRole("tab", { name: nombre }));
+
+    const visibles = screen.getAllByRole("tabpanel");
+    expect(visibles).toHaveLength(1);
+    expect(visibles[0]).toBe(screen.getByRole("tabpanel", { name: nombre }));
+    expect(document.querySelectorAll('[role="tabpanel"]')).toHaveLength(5);
+  });
+
+  it("cambiar de pestaña NO vuelve a pedir el dato: el panel que se deja atrás sigue montado", async () => {
+    const usuario = userEvent.setup();
+    await consolaLista();
+    await waitFor(() => expect(listarClientas).toHaveBeenCalled());
+    const peticionesIniciales = listarClientas.mock.calls.length;
+
+    await usuario.click(screen.getByRole("tab", { name: textosAdmin.pestanas.clientas }));
+    await usuario.click(screen.getByRole("tab", { name: textosAdmin.pestanas.resumen }));
+    await usuario.click(screen.getByRole("tab", { name: textosAdmin.pestanas.clientas }));
+
+    // La otra mitad de la propiedad: ocultar no es desmontar. Si alguien "arreglara" el defecto 1
+    // quitando `forceMount`, cada ida y vuelta volvería a montar el panel y a pedir la lista.
+    expect(listarClientas.mock.calls.length).toBe(peticionesIniciales);
+  });
+
+  it("los cinco bloques piden su dato desde el primer render, sin abrir ninguna pestaña", async () => {
+    await consolaLista();
+    await waitFor(() => {
+      expect(obtenerMetricas).toHaveBeenCalled();
+      expect(listarClientas).toHaveBeenCalled();
+      expect(listarInvitaciones).toHaveBeenCalled();
+      expect(listarPagos).toHaveBeenCalled();
+      expect(listarPlantillas).toHaveBeenCalled();
+    });
+  });
+});

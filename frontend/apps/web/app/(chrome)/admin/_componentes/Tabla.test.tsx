@@ -2,7 +2,7 @@
 // accesibles, y la regla de "cero filas nunca pinta una tabla vacía".
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Tabla, type ColumnaTabla } from "./Tabla.tsx";
 
 interface FilaInvitacion {
@@ -212,5 +212,71 @@ describe("Tabla", () => {
     );
     const caption = screen.getByText("Invitaciones", { selector: "caption" });
     expect(caption.className).toMatch(/sr-only/);
+  });
+});
+
+describe("Tabla — pista de desborde horizontal (defecto 3 de 5-E5-J)", () => {
+  // AVISO DE ALCANCE, léelo antes de fiarte de estas dos pruebas: jsdom NO CALCULA LAYOUT.
+  // `scrollWidth`, `clientWidth` y `getBoundingClientRect()` valen 0 siempre, así que aquí es
+  // IMPOSIBLE comprobar el defecto de verdad («a 768 px la columna Acciones queda fuera de vista»):
+  // eso solo se ve con un motor que maquete, es decir, en el e2e o en una captura. Lo que estas dos
+  // pruebas sí cubren es el MECANISMO: dado un contenedor que declara desborde, el velo aparece; sin
+  // desborde, no. Si el velo dejara de pintarse o de medirse, caen. Si el ancho de las columnas
+  // creciera hasta desbordar a 768 px otra vez, NO caen — para eso hace falta la comprobación en
+  // navegador que propone `bitacora/5-E5-J.md §«qué no es cazable en jsdom»`.
+  function fingirDesborde(scrollWidth: number, clientWidth: number): void {
+    for (const propiedad of ["scrollWidth", "clientWidth"] as const) {
+      Object.defineProperty(HTMLElement.prototype, propiedad, {
+        configurable: true,
+        get(this: HTMLElement) {
+          return this.getAttribute("role") === "group" ? (propiedad === "scrollWidth" ? scrollWidth : clientWidth) : 0;
+        },
+      });
+    }
+  }
+
+  // Se sobreescribe `HTMLElement.prototype`: hay que devolverlo, o la siguiente prueba del fichero
+  // heredaría el desborde fingido.
+  afterEach(() => {
+    Reflect.deleteProperty(HTMLElement.prototype, "scrollWidth");
+    Reflect.deleteProperty(HTMLElement.prototype, "clientWidth");
+  });
+
+  function pintar() {
+    return render(
+      <Tabla
+        titulo="Invitaciones"
+        columnas={columnas}
+        filas={filas}
+        estado="listo"
+        claveFila={claveFila}
+        vacio={vacio}
+        error={error()}
+        etiquetaCargando="Cargando"
+      />,
+    );
+  }
+
+  it("sin desborde no hay velo: la pista no es un adorno permanente", () => {
+    fingirDesborde(600, 600);
+    pintar();
+    expect(screen.queryByTestId("tabla-desborde-derecha")).toBeNull();
+  });
+
+  it("con desborde aparece el velo, decorativo y fuera del árbol accesible", () => {
+    fingirDesborde(1200, 600);
+    pintar();
+    const velo = screen.getByTestId("tabla-desborde-derecha");
+    expect(velo.getAttribute("aria-hidden")).toBe("true");
+    expect(velo.className).toMatch(/pointer-events-none/);
+
+    // Lo que NO puede cambiar (arreglo de accesibilidad de 5-E5-H): el contenedor desplazable sigue
+    // siendo el mismo `role="group"` con nombre accesible y alcanzable por teclado, y el desborde
+    // sigue viviendo dentro de la tabla — la página nunca se desplaza en horizontal.
+    const grupo = screen.getByRole("group", { name: "Invitaciones" });
+    expect(grupo.getAttribute("tabindex")).toBe("0");
+    expect(grupo.className).toMatch(/overflow-x-auto/);
+    expect(grupo.contains(velo)).toBe(false);
+    expect(grupo.parentElement?.className).toMatch(/relative/);
   });
 });

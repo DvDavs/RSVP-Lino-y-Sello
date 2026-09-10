@@ -17,6 +17,25 @@
 //     infinito. Basta que UN bloque lo reporte para que la pantalla entera cambie de estado — con el
 //     mismo rol, los demás bloques van a fallar igual, así que no tiene sentido dejarlos "cargando".
 //
+// PESTAÑAS — las dos propiedades que hay que conservar A LA VEZ (5-E5-J, defecto 1):
+//   (a) CADA BLOQUE CARGA POR SU CUENTA: los cinco paneles se montan desde el primer render y piden
+//       su dato en paralelo, así que el resumen no espera a las tablas ni al revés, un 403 aparece
+//       aunque nadie abra esa pestaña, y cambiar de pestaña NO vuelve a pedir nada ni pierde el
+//       estado local (filtros, página) del panel que se deja atrás. Eso lo da `forceMount`.
+//   (b) SOLO UNA PESTAÑA VISIBLE. Y esto `forceMount` NO lo da: Radix calcula
+//       `present = forceMount || isSelected` y luego `hidden = !present`, de modo que con
+//       `forceMount` la expresión es SIEMPRE `false` y NINGÚN panel recibe nunca `hidden` — las
+//       cinco secciones se pintaban apiladas a la vez en los tres anchos (`bitacora/5-E5-I.md §1`).
+// Por eso `Tabs` va CONTROLADO (`value`/`onValueChange`) y cada `TabsContent` recibe su propio
+// `hidden` calculado aquí (`panel()`): Radix pone su `hidden` ANTES de esparcir el resto de props
+// (`react-tabs/dist/index.mjs`: `hidden: !present, ...contentProps`), así que el nuestro gana.
+// `hidden` a secas y no `opacity-0`/`visibility` ni una clase de Tailwind: el atributo `hidden` da
+// `display:none` por hoja de agente de usuario, que es lo único que saca el panel del árbol de
+// accesibilidad Y del orden de tabulación (el `tabIndex={0}` que Radix pone en todo `tabpanel`
+// dejaría el panel oculto alcanzable con el tabulador con cualquier otra técnica). Además es un
+// ATRIBUTO, no CSS: se puede afirmar en jsdom, donde no hay hojas de estilo — de ahí la compuerta
+// «solo un tabpanel visible a la vez» de `ConsolaAdmin.test.tsx`.
+//
 // El chequeo de `getAuthToken()` al montar es SÍNCRONO (sin red): si no hay token, ni siquiera se
 // dispara la primera petición de ningún panel — nunca hay una consola visible sin sesión, ni por un
 // instante.
@@ -51,11 +70,23 @@ const PanelPagos = dynamic(() => import("./PanelPagos.tsx").then((m) => m.PanelP
 
 type EstadoSesion = "verificando" | "sin-token" | "sin-permiso" | "activa";
 
+/** Las cinco pestañas de la consola, en el orden en que se pintan. */
+type Pestana = "resumen" | "clientas" | "invitaciones" | "pagos" | "plantillas";
+
+const PESTANA_INICIAL: Pestana = "resumen";
+
 const DESTINO_ACCESO = `/acceso?volver=${encodeURIComponent("/admin")}`;
 
 export function ConsolaAdmin(): JSX.Element {
   const router = useRouter();
   const [sesion, setSesion] = useState<EstadoSesion>("verificando");
+  const [pestana, setPestana] = useState<Pestana>(PESTANA_INICIAL);
+
+  /** Props de un `TabsContent`: montado siempre (`forceMount`), visible solo si es el activo. */
+  const panel = (valor: Pestana): { forceMount: true; hidden: boolean } => ({
+    forceMount: true,
+    hidden: valor !== pestana,
+  });
 
   useEffect(() => {
     if (getAuthToken() === null) {
@@ -109,7 +140,7 @@ export function ConsolaAdmin(): JSX.Element {
           />
         </div>
       ) : (
-        <Tabs defaultValue="resumen">
+        <Tabs value={pestana} onValueChange={(valor) => setPestana(valor as Pestana)}>
           <TabsList aria-label={textosAdmin.pagina.titulo}>
             <TabsTrigger value="resumen">{textosAdmin.pestanas.resumen}</TabsTrigger>
             <TabsTrigger value="clientas">{textosAdmin.pestanas.clientas}</TabsTrigger>
@@ -117,25 +148,25 @@ export function ConsolaAdmin(): JSX.Element {
             <TabsTrigger value="pagos">{textosAdmin.pestanas.pagos}</TabsTrigger>
             <TabsTrigger value="plantillas">{textosAdmin.pestanas.plantillas}</TabsTrigger>
           </TabsList>
-          {/* `forceMount`: las cinco pestañas cargan su dato EN PARALELO desde el primer render, no
-              solo la que esté activa (regla del encargo: «el resumen no espera a las tablas ni al
-              revés» — con montaje perezoso, cambiar de pestaña dispararía la petición justo
-              entonces, y un 403 en una pestaña que la clienta nunca abrió tardaría en descubrirse).
-              Radix pinta las pestañas inactivas con el atributo `hidden` en vez de desmontarlas: el
-              texto sigue en el documento para pruebas/búsqueda, pero no se ve ni se anuncia. */}
-          <TabsContent value="resumen" forceMount>
+          {/* `forceMount` + `hidden` PROPIO (`panel()`), las dos cosas a la vez. Ver el bloque
+              «PESTAÑAS» de la cabecera: `forceMount` solo mantiene las cinco montadas y pidiendo su
+              dato en paralelo; el `hidden` que Radix calcularía (`hidden = !(forceMount ||
+              isSelected)`) queda anulado por el propio `forceMount`, así que lo ponemos nosotros a
+              partir de la pestaña activa. `hidden` (no `opacity`, no `visibility`) es lo que saca de
+              verdad el panel del árbol accesible y del orden de tabulación. */}
+          <TabsContent value="resumen" {...panel("resumen")}>
             <PanelResumen onSesionInvalida={manejarSesionInvalida} />
           </TabsContent>
-          <TabsContent value="clientas" forceMount>
+          <TabsContent value="clientas" {...panel("clientas")}>
             <PanelClientas onSesionInvalida={manejarSesionInvalida} />
           </TabsContent>
-          <TabsContent value="invitaciones" forceMount>
+          <TabsContent value="invitaciones" {...panel("invitaciones")}>
             <PanelInvitaciones onSesionInvalida={manejarSesionInvalida} />
           </TabsContent>
-          <TabsContent value="pagos" forceMount>
+          <TabsContent value="pagos" {...panel("pagos")}>
             <PanelPagos onSesionInvalida={manejarSesionInvalida} />
           </TabsContent>
-          <TabsContent value="plantillas" forceMount>
+          <TabsContent value="plantillas" {...panel("plantillas")}>
             <PanelPlantillas onSesionInvalida={manejarSesionInvalida} />
           </TabsContent>
         </Tabs>

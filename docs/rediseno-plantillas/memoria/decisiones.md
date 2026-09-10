@@ -2308,3 +2308,93 @@ segunda. El hallazgo salió de la comprobación que el encargo de E5-G pedía tr
   salida ya está escrita arriba —revertir este fichero y su prueba en un solo commit— y el hallazgo
   sobrevive igual en `preguntas-abiertas.md`. La corrección del fallo no depende de este ADR; lo que
   depende es si entra por esta rama o por la de su dueño.
+
+## ADR-5-E5-07 — `forceMount` **más** un `hidden` propio en `/admin`, y el e2e que afirmaba el defecto
+
+- **Estado**: aplicada la parte de código (`ConsolaAdmin.tsx`); **propuesta** la parte que toca
+  `e2e/**`, que esta sesión no puede escribir.
+- **Fecha**: 2026-09-10. **Sesión**: E5, agente E5-J. **Rama**: `claude/fase-5-admin-vq1fjm`.
+- **Enmienda a**: el comentario de `ConsolaAdmin.tsx` que decía «Radix pinta las pestañas inactivas
+  con el atributo `hidden` en vez de desmontarlas». Eso describe `forceMount` **sin** combinarlo con
+  `isSelected`; con `forceMount` puesto es falso, y de ahí salió el defecto.
+
+**Contexto.** `/admin` montaba las cinco `TabsContent` con `forceMount` para cumplir la regla del
+wireframe «cada bloque carga por su cuenta, el resumen no espera a las tablas». Radix calcula
+`present = forceMount || isSelected` y `hidden = !present`: con `forceMount`, `present` es siempre
+`true`, así que **ningún panel inactivo recibía `hidden`** y las cinco secciones se pintaban apiladas
+en los tres anchos (`bitacora/5-E5-I.md §1`, capturas). Quitar `forceMount` arregla lo visual y rompe
+lo funcional: los paneles inactivos se desmontan, pierden su estado y vuelven a pedir datos.
+
+**Decisión.** Conservar `forceMount` y poner **nosotros** el `hidden`, a partir de la pestaña activa,
+con el `Tabs` controlado (`ConsolaAdmin.tsx:83-89, 143, 157-171`). Radix escribe su `hidden` **antes**
+de esparcir el resto de props, así que el nuestro gana. Se elige el **atributo** `hidden` y no una
+clase de CSS por dos razones: (a) `display:none` de la hoja de agente de usuario es lo único que saca
+el panel del árbol de accesibilidad **y** del orden de tabulación —Radix pone `tabIndex={0}` en todo
+`tabpanel`, así que `opacity`/`visibility` dejarían los cuatro paneles ocultos alcanzables con el
+tabulador—; (b) un atributo se puede afirmar en **jsdom**, donde no hay hojas de estilo, y eso hace
+que la compuerta cueste céntimos.
+
+**Compuerta.** `ConsolaAdmin.test.tsx:149-243`: cinco paneles en el documento, **uno** visible,
+`it.each` por las cinco pestañas, y las dos pruebas que vigilan el otro lado (no se vuelve a pedir el
+dato al cambiar de pestaña; los cinco bloques piden desde el primer render). Comprobado que caen:
+volviendo `hidden` a `false` fallan 6; quitando `forceMount` fallan 4.
+
+**Consecuencia que hay que decidir fuera de esta sesión.**
+`e2e/admin-consola.spec.ts:92-93` afirma, estando en «Resumen», que el esqueleto de **Clientas** esté
+**visible**. Eso solo era cierto porque el defecto existía: la línea **codificaba el defecto**. Con el
+arreglo, esa prueba cae (18/20 verdes; las 2 rojas son esa misma prueba repetida). `e2e/**` es
+territorio prohibido para E5-J y **no se ha tocado**. La primera mitad de la prueba —la que mide de
+verdad «el resumen no espera a las tablas», `:85-88`— sigue pasando.
+
+Dos maneras de arreglar esa línea sin perder su intención (la segunda es la recomendada):
+
+1. **Mínima**: abrir la pestaña antes de mirar su esqueleto —
+   `await page.getByRole("tab", { name: textosAdmin.pestanas.clientas }).click();` y después
+   `await expect(panelDe(page, textosAdmin.pestanas.clientas).getByRole("status").first()).toBeVisible();`
+   Depende de que el retardo de 4 s no haya vencido todavía: es correcta pero queda ajustada de
+   tiempo.
+2. **Recomendada, sin depender de la visibilidad ni del reloj**: afirmar que las cuatro peticiones de
+   tabla **ya salieron** antes de que el resumen resolviera, contando peticiones
+   (`page.on("request", …)` sobre `/product/admin/{clientas,invitaciones,pagos,plantillas}`). Mide
+   exactamente la propiedad del wireframe —cinco bloques cargando en paralelo— en vez de un efecto
+   lateral de cómo se pintan las pestañas.
+
+Mientras eso no se aplique, la propiedad no queda huérfana: las pruebas 3 y 4 de la compuerta nueva
+la cubren en jsdom.
+
+**Alternativas descartadas.** (a) Quitar `forceMount`: pierde la carga en paralelo y el estado de los
+paneles. (b) Ocultar con una clase de Tailwind (`data-[state=inactive]:hidden`): funciona en el
+navegador pero es **invisible para jsdom**, así que la compuerta barata dejaría de existir. (c)
+`visibility`/`opacity`: el panel sigue ocupando sitio y/o sigue siendo alcanzable por teclado.
+
+## ADR-5-E5-08 — **PROPUESTA, NO aplicada**: fijar la columna de acciones de `Tabla` en anchos intermedios
+
+- **Estado**: propuesta al dueño. **Fecha**: 2026-09-10. **Sesión**: E5, agente E5-J.
+
+**Contexto.** A 768 px la tabla de Invitaciones desborda y el botón Deshabilitar/Habilitar queda
+**154 px más allá del borde derecho de la ventana** (medido en Chromium con el build de partida). El
+encargo de E5-J daba tres salidas posibles; se aplicó la pista visual de desbordamiento
+(`Tabla.tsx`, velo medido en el borde derecho) porque es la única que no cambia el contrato de las
+cuatro tablas de la consola. Las otras dos se descartaron con razón escrita en `bitacora/5-E5-J.md`:
+bajar el corte de tarjetas a 768 px convertiría una acción **usable** en una **deshabilitada con su
+razón** (regla del wireframe para móvil), y quitar `min-w-max` por debajo de `lg` —probado y medido—
+deja el botón todavía 40 px fuera y parte los nombres de clienta en tres líneas.
+
+**Propuesta.** Añadir a `ColumnaTabla<T>` una prop `fija?: boolean` y, cuando esté puesta, pegar esa
+columna al borde derecho del contenedor desplazable (`position: sticky; right: 0`, fondo opaco
+`--ui-surface` en el cuerpo y `--ui-surface-alt` en el encabezado, borde izquierdo de separación).
+`PanelInvitaciones.tsx` marcaría `fija: true` en su columna «acciones». Con eso la acción de cada fila
+está **siempre** a la vista en cualquier ancho ≥ 640 px, sin perder ninguna columna y sin partir
+ningún texto.
+
+**Por qué no la aplica esta sesión.** (a) Exige cambiar la tabla a `border-separate` y mover los
+separadores de fila de `<tr>` a cada celda —`position: sticky` sobre `<th>`/`<td>` con
+`border-collapse: collapse` pierde los bordes en Chromium—, lo que altera el aspecto de las **cuatro**
+tablas de la consola, no solo la de Invitaciones. (b) Introduce API nueva en un componente genérico.
+(c) Es una decisión de diseño de producto, y E5-J es una sesión de arreglo de tres defectos con
+territorio acotado: hacerlo por su cuenta sería exactamente el tipo de cambio que un ADR existe para
+no colar de tapadillo.
+
+**Si se aprueba**, la compuerta natural no es jsdom (no calcula layout) sino la comprobación en
+navegador que `bitacora/5-E5-J.md` deja escrita: a 768 px, `boundingBox()` del botón de la primera
+fila cabe dentro de `window.innerWidth`.

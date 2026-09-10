@@ -59,7 +59,21 @@ export function FilaDeMetricas({ metricas, estado, etiquetaCargando, error, clas
           </Card>
         ))}
       </dl>
-      <Stripes tone="support-2-soft" angle={-24} gap={18} width={9} className="h-4 w-full sm:h-5" />
+      {/* La banda va dentro de un contenedor con ALTO PROPIO, y `Stripes` lo rellena al 100 %.
+          `<Stripes className="h-4 sm:h-5">` a secas NO vale (5-E5-J, defecto 2): `Stripes` lleva la
+          clase `.ui-forma` de `packages/ui/src/shapes/shapes.css`, que declara `height: 100%`, y en
+          la hoja ya compilada esa regla queda DESPUÉS de las utilidades `h-4`/`sm:h-5` con la misma
+          especificidad (una clase), así que gana la cascada. Con `height` resuelto a `auto` sobre un
+          padre de alto automático y sin atributo `height` en el `<svg>`, el navegador cae al ratio
+          intrínseco del `viewBox` (200×150) y la banda medía 864 px de alto a 1280 px de ancho.
+          Envolviéndola, `height: 100%` resuelve contra un alto REAL de 16/20 px y `.ui-forma` deja
+          de ser un problema: es el mismo patrón que ya usa `components/sitio/CtaFinal.tsx`
+          (contenedor con `h-16 md:h-full`, `Stripes` con `h-full w-full`). No se toca `packages/**`.
+          `preserveAspectRatio="xMidYMid slice"` del propio `Stripes` recorta el patrón sin
+          deformarlo, que es justo lo que una banda decorativa necesita. */}
+      <div className="h-4 w-full sm:h-5">
+        <Stripes tone="support-2-soft" angle={-24} gap={18} width={9} className="h-full w-full" />
+      </div>
     </div>
   );
 }
