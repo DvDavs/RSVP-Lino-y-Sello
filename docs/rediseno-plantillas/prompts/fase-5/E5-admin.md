@@ -1,3 +1,10 @@
+# E5 — Panel de administración (bloque 5-5 de la fase 5)
+
+Copia literal del encargo recibido por la sesión E5, con sus dos adendas, tal y como manda el
+punto 10 de la adenda común del orquestador. Es la fuente de verdad del alcance de esta sesión.
+
+---
+
 Eres el ORQUESTADOR RAÍZ de la sesión E5 (panel de administración) de la fase 5 de Lino & Sello. Rama propia: `claude/fase-5-admin` desde `claude/fase-5-producto` (tras el commit de cimientos).
 
 # REGLAS COMUNES DE LA FASE 5 (léelas enteras)
@@ -11,5 +18,36 @@ Eres el ORQUESTADOR RAÍZ de la sesión E5 (panel de administración) de la fase
 
 # TERRITORIO
 `apps/web/app/(chrome)/admin/**`, `apps/web/lib/admin/**`, `modules/product/admin/**`, lo estrictamente necesario de `modules/admin/**` con ADR (endurecer, no rehacer), `scripts/seed/admin.sh`, `e2e/admin*.spec.ts`.
+
 # TAREA
 Bloque 5-5 del prompt maestro de la fase, íntegro: `/admin` para MASTER/ADMIN con clientes, invitaciones (estado, plan, pago, enlace, deshabilitar), pagos (lectura de lo que registre `modules/product/payments`: si E4 aún no ha cerrado, consume el contrato descrito en `12-producto-completo.md` y deja la vista con datos de siembra), planes, catálogo de plantillas registradas (lectura), métricas básicas. Tabla ruta × rol probada (MASTER, ADMIN, USER, anónimo). Revisión Opus de autorización (escalada, IDOR) antes de cerrar.
+
+# ADENDA COMÚN DEL ORQUESTADOR (2026-09-09) — manda sobre el prompt anterior donde discrepen
+
+1. **Eres orquestador de tus propios agentes.** No programas: repartes con la herramienta Agent, revisas, integras, commiteas. Elige el modelo por tarea, no por defecto: `opus` para arquitectura, autorización y seguridad, código con lógica entrelazada y TODA revisión; `sonnet` para pantallas a partir de los skills `ui-*`, formularios, pruebas a partir de una especificación y textos es-MX; `haiku` para verificaciones mecánicas (que cada enlace o ruta citada exista, formato, listados). Todo entregable Sonnet que toque backend, autorización, datos personales o esquema pasa por un revisor Opus antes de aceptarse. Ante un 529 espera 60 s y reanuda el mismo agente.
+2. **Máximo 3 agentes en paralelo** y cada agente escribe su bitácora parcial a mitad de su trabajo: en E1 los cinco murieron a la vez por límite de la API antes de escribir nada.
+3. **Rama**: `git fetch origin claude/fase-5-producto && git checkout -b claude/fase-5-admin 9a4cd56` (commit de cimientos verificado por el orquestador). Empuja tu rama con `git push -u origin`. No empujes a `claude/fase-5-producto`.
+4. **Lee además**, antes que nada: `memoria/handoffs/5-0-cimientos.md` completo (§2 territorio, §5 regla e2e, §7 «tres cosas que te van a morder»), `diseno/12-producto-completo.md §0` y las secciones que §1 del handoff te asigna, el `README.md` de tu carpeta de ruta, y `handoffs/4-para-fase-5.md` de la rama `claude/fase-4-kit-de-autor` (cómo se siembran plantillas, `eventKind` con plantilla; léelo con `git show origin/claude/fase-4-kit-de-autor:docs/rediseno-plantillas/memoria/handoffs/4-para-fase-5.md`, no mergees esa rama).
+5. **Rutas y territorio**: los de `5-0-cimientos.md §2` (`[invitationId]`, `app/(public)/r/[token]`, grupo `(sitio)`) mandan sobre los del prompt original. Compartido que nadie edita: `lib/panel/nav.ts`, `lib/panel/tipos.ts`, `Marcador.tsx`, `scripts/seed/comun.sh`, `seed-demo.sh`, `application.yml` (salvo la excepción concedida a E3). `contratos.md` y `00-INDICE.md` solo E6.
+6. **Rojo conocido y ajeno**: `components/sitio/portada.test.tsx` falla desde `bfdcbaa`. No lo arregles ni lo cuentes como tuyo: lo cierra E6 con el merge de las imágenes. Reporta tus cifras excluyéndolo y diciéndolo.
+7. **Secretos**: ningún valor en claro en ningún fichero, ni en pruebas ni en documentación; solo nombres de variable con `${VAR:}`.
+8. **Regla e2e** (ADR-5-E1-03): cada spec crea su propia invitación y su propio usuario si hace falta; nunca la sembrada compartida; debe pasar con `fullyParallel` y 4 workers. Un spec que solo pasa con 1 worker no se integra.
+9. **Capturas al dueño** de cada pantalla nueva en tres anchos (390, 768, 1280) con `display: "render"`, `status: "proactive"`.
+10. En tu primer commit copia el prompt completo (original + adendas) sobre `docs/rediseno-plantillas/prompts/fase-5/E5-admin.md`.
+11. **Reporte final (≤ 25 líneas)**: rama y hash empujado · pantallas y rutas · endpoints reutilizados / endurecidos / nuevos · pruebas medidas con salida real (web test, typecheck, Kotlin si tocaste, e2e de tu área con número de workers) · veredicto del revisor Opus de seguridad · ADR propuestas · preguntas abiertas · qué debe saber E6 al mergear tu rama (conflictos previsibles, orden).
+
+# ADENDA E5 — panel de administración
+- `/admin` sobre `modules/product/admin/**`, **endureciendo** `modules/admin/**` solo donde haga falta (ADR por cambio). Autorización revisada por Opus: escalada de rol y IDOR en cada ruta. Tabla ruta × rol probada para MASTER, ADMIN, USER y anónimo, con salida real.
+- Pagos: E4 corre en paralelo; consume el contrato de `12-producto-completo.md` (§B3.6 y §B4) y muestra datos de siembra; si E4 publica antes, no lo integres tú, anótalo para E6.
+- Catálogo de plantillas registradas: **solo lectura** por la API de `templates2` (el alta es por el kit de la fase 4). En tu entorno habrá pocas registradas (la siembra base trae `boda-clasica` y `xv-jardin`); tras el merge de la fase 4 serán 15 versiones. La vista debe funcionar con ambas cifras.
+- Métricas básicas (invitaciones creadas, publicadas, pagadas, RSVP) desde consultas de lectura; nada de agregados en el frontend.
+- Sin emojis, sin tipografía ni controles genéricos: todo con `@invitaciones/ui` siguiendo `ui-pantalla` y `ui-formulario`.
+
+---
+
+## Nota del orquestador de E5 sobre la rama
+
+El entorno remoto de esta sesión impone la rama `claude/fase-5-admin-vq1fjm`. Se usa esa,
+creada desde el commit de cimientos `9a4cd56` verificado en `origin/claude/fase-5-producto`
+(punto 3 de la adenda común), y no `claude/fase-5-admin`. Es el único punto en que esta
+sesión se aparta de la letra del encargo, y queda anotado aquí para E6.
