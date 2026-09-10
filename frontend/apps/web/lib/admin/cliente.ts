@@ -4,10 +4,12 @@
 //
 // EL TOKEN DE SESIÓN VIVE SOLO EN `lib/api-client.ts` (P8, `contratos.md §8 C4`). Este fichero NO
 // lee ni escribe `sessionStorage` ni memoria propia: importa el accesor ya exportado
-// `getAuthToken()` y la base `getApiBaseUrl()` de `./api-client.ts` y los usa tal cual. Es el
-// mismo trato que ya tiene el resto de `apps/web` — un solo sitio toca el token para que un 401
-// clasificado aquí y uno clasificado en el editor cuenten la misma historia (`haySesionCaducada`
-// de `api-client.ts` sigue siendo la única fuente de verdad de «la sesión caducó»).
+// `getAuthToken()` y la base `getApiBaseUrl()` de `./api-client.ts` y los usa tal cual. Un 401/403
+// clasificado aquí llama a `marcarSesionCaducada()` (exportada de `./api-client.ts` para esto),
+// igual que hace `peticion()` en la línea equivalente — es el mismo sitio, por eso un 401
+// clasificado aquí y uno clasificado en el editor cuentan la misma historia: `haySesionCaducada()`
+// de `api-client.ts` es la única fuente de verdad de «la sesión caducó», y `clearAuthToken()` tira
+// el token muerto para que la pantalla de acceso sepa que hay que volver a entrar (ADR-5-E5-02).
 //
 // Ninguna función de aquí se traga un error: toda respuesta no-2xx se clasifica y se lanza, nunca
 // se devuelve `null`/`undefined` en su lugar — se reutilizan `ApiError`, `SessionError` y
@@ -21,7 +23,7 @@
 // tipa `./tipos.ts`, sin sumar, promediar ni derivar nada en TypeScript — las métricas y los
 // contadores ya vienen calculados del servidor (encargo de E5-B, regla dura).
 import { ApiError, SessionError, TplErrorResponseSchema, UnknownApiError } from "../errors.ts";
-import { getApiBaseUrl, getAuthToken } from "../api-client.ts";
+import { getApiBaseUrl, getAuthToken, marcarSesionCaducada } from "../api-client.ts";
 import type {
   AlternarEstadoInvitacionResponse,
   ClientasQuery,
@@ -84,8 +86,13 @@ async function peticionAdmin<T>(method: "GET" | "PUT", path: string, query?: Rec
   }
 
   // 401/403 de la cadena de filtros de Spring Security, o del `ErrorMessage` heredado sin `code`
-  // TPL_* (p. ej. `UnauthorizedAccessException` en `toggleInvitationStatus`): SessionError.
+  // TPL_* (p. ej. `UnauthorizedAccessException` en `toggleInvitationStatus`): SessionError. Se
+  // marca la sesión como caducada ANTES de lanzar (misma línea que `peticion()` en
+  // `api-client.ts`), para que `haySesionCaducada()` — la única fuente de verdad de P8 — se
+  // encienda y `clearAuthToken()` tire el token muerto; si no se hace esto aquí, `/acceso` cree
+  // que sigue habiendo sesión válida (ADR-5-E5-02).
   if (respuesta.status === 401 || respuesta.status === 403) {
+    marcarSesionCaducada();
     throw new SessionError(respuesta.status, textoCrudo);
   }
 

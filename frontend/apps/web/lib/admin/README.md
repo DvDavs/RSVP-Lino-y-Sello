@@ -36,8 +36,11 @@ estado (ver el comentario de cabecera de `cliente.ts`).
 
 1. **El token de sesión vive solo en `lib/api-client.ts`** (P8, `contratos.md §8 C4`). Este
    directorio no lee ni escribe `sessionStorage` ni guarda el token en memoria propia: importa
-   `getAuthToken()` y `getApiBaseUrl()` de `../api-client.ts` tal cual, para que un 401 clasificado
-   aquí y uno clasificado en el editor cuenten la misma historia.
+   `getAuthToken()` y `getApiBaseUrl()` de `../api-client.ts` tal cual, y en un 401/403 llama a
+   `marcarSesionCaducada()` (también importada de ahí, exportada para esto) antes de lanzar
+   `SessionError` — igual que hace `peticion()` en `api-client.ts`, para que un 401 clasificado
+   aquí y uno clasificado en el editor cuenten la misma historia: `haySesionCaducada()` se enciende
+   y el token muerto se tira los dos casos igual (ADR-5-E5-02).
 2. **Los textos de `/admin` NO entran en `lib/i18n.ts`.** Partir `i18n.ts` por áreas es trabajo de
    la sesión E2; tocarlo en paralelo desde aquí habría sido un conflicto de fusión garantizado.
    `textosAdmin` ya tiene la forma (`textosAdmin.<sección>.<clave>`) que tendría dentro de

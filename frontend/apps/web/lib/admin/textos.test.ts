@@ -4,13 +4,16 @@
 import { describe, expect, it } from "vitest";
 import { textosAdmin } from "./textos.ts";
 
-// Rango de pictogramas Unicode (emoticones, símbolos y pictogramas variados, transporte, símbolos
-// y pictogramas suplementarios, extensión A, dingbats, banderas por indicador regional, y el
-// selector de variación que convierte un carácter de texto en su versión "emoji"). No incluye
+// Rango de pictogramas Unicode (emoticones, símbolos y pictogramas variados, mahjong/naipes,
+// transporte, símbolos técnicos —relojes «⏰⌚⏳»—, formas geométricas —«▶»—, símbolos y
+// pictogramas suplementarios, extensión A, dingbats, banderas por indicador regional, flechas) más
+// el selector de variación (`\u{FE0F}`, el que convierte «▶» en «▶️»), sacado de la clase de
+// caracteres y puesto como alternativa (`eslint(no-misleading-character-class)`: un selector de
+// variación dentro de `[...]` se trata como carácter combinado y lo rechaza). No incluye
 // puntuación tipográfica normal (guiones, comillas, signos de interrogación en español) para no
 // generar falsos positivos con los propios textos de interfaz.
 const RANGO_EMOJI =
-  /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\u{2190}-\u{21FF}\u{FE0F}]/u;
+  /[\u{1F000}-\u{1FAFF}\u{2300}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\u{2190}-\u{21FF}]|\u{FE0F}/u;
 
 function recorrer(valor: unknown, ruta: string, visitar: (ruta: string, texto: string) => void): void {
   if (typeof valor === "string") {
@@ -44,6 +47,12 @@ describe("textosAdmin — compuerta de identidad visual (nunca emojis, nunca tex
       if (RANGO_EMOJI.test(texto)) conEmoji.push(ruta);
     });
     expect(conEmoji).toEqual([]);
+  });
+
+  it("el rango también caza los emojis que quedaban fuera antes de esta revisión (5-E5-R1 MEDIA-5)", () => {
+    for (const emoji of ["⏰", "⌚", "⏳", "▶", "🀄"]) {
+      expect(RANGO_EMOJI.test(emoji)).toBe(true);
+    }
   });
 
   it("el recorrido visitó una cantidad real de textos (el objeto no está vacío ni el recorrido roto)", () => {

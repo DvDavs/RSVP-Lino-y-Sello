@@ -91,7 +91,7 @@ export function haySesionCaducada(): boolean {
 }
 
 /** Se llama desde `peticion()`/`uploadAsset()` al clasificar un 401/403 sin código `TPL_*`. */
-function marcarSesionCaducada(): void {
+export function marcarSesionCaducada(): void {
   // Solo es «caducada» si de verdad había token: sin token es «todavía no ha entrado».
   sesionCaducada = getAuthToken() !== null;
   // El token que ya no vale se tira: dejarlo puesto hace que cada ruta vuelva a fallar igual y que

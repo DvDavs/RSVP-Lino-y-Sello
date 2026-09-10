@@ -3,7 +3,7 @@
 // correctas por ruta, `Authorization: Bearer …` cuando hay token, y que TODA respuesta no-2xx se
 // LANZA (nunca `null`) clasificada como `ApiError` | `SessionError` | `UnknownApiError`.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { clearAuthToken, setAuthToken } from "../api-client.ts";
+import { clearAuthToken, getAuthToken, haySesionCaducada, setAuthToken } from "../api-client.ts";
 import { ApiError, SessionError, UnknownApiError } from "../errors.ts";
 import {
   alternarEstadoInvitacion,
@@ -216,6 +216,22 @@ describe("clasificación de errores: nunca se devuelve null, siempre se lanza", 
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(respuestaJson(400, cuerpoHeredado)));
     const error = await alternarEstadoInvitacion(999999).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(UnknownApiError);
+  });
+
+  it("un 401 marca la sesión como caducada y tira el token muerto (ALTA-1, paridad con peticion())", async () => {
+    setAuthToken("jwt-muerto");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("", { status: 401 })));
+    await obtenerMetricas().catch(() => {});
+    expect(haySesionCaducada()).toBe(true);
+    expect(getAuthToken()).toBeNull();
+  });
+
+  it("un 403 (sin jerarquía en la ruta heredada) también marca la sesión como caducada", async () => {
+    setAuthToken("jwt-sin-jerarquia");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("Access Denied", { status: 403 })));
+    await alternarEstadoInvitacion(7).catch(() => {});
+    expect(haySesionCaducada()).toBe(true);
+    expect(getAuthToken()).toBeNull();
   });
 });
 

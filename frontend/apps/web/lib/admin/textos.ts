@@ -19,6 +19,15 @@ export const textosAdmin = {
   pagina: {
     titulo: "Administración",
     cerrarSesion: "Cerrar sesión",
+    // Añadido por E5-D (ensamblado de pantalla, `5-E5-D.md`): frontera de error de la propia ruta
+    // (`error.tsx`, `ui-pantalla §7`). No existía un texto genérico de página completa: los siete
+    // bloques ya tienen el suyo, pero un fallo de RENDER (no de red) tumba la pantalla entera y
+    // necesita su propio título/cuerpo/acción, nunca "algo salió mal" a secas.
+    errorInesperado: {
+      titulo: "Algo salió mal en la administración",
+      cuerpo: "No pudimos mostrar esta pantalla. Vuelve a intentarlo; si sigue fallando, escribe a soporte.",
+      accion: "Volver a intentarlo",
+    },
   },
 
   comun: {
@@ -28,6 +37,21 @@ export const textosAdmin = {
     abrir: "Abrir",
     sinDato: "—",
     estadoDesconocido: "Sin clasificar",
+    // Añadido por E5-D: falta un «Cancelar» genérico para el diálogo de confirmación de
+    // `AccionDeFila` (deshabilitar/habilitar una invitación) — ningún bloque existente lo traía.
+    cancelar: "Cancelar",
+    // Añadido por E5-D: título genérico de un estado vacío de tabla. Cada tabla sigue enseñando su
+    // propio cuerpo (`<tabla>.vacio.sinFiltro`/`conFiltro`); esto es solo el encabezado corto que
+    // pide `EmptyState.titulo` y que ningún bloque definía por separado.
+    sinResultados: "Nada que mostrar",
+    // Añadido por E5-D: paginación de las tres tablas con `PaginaX` (clientas, invitaciones,
+    // pagos) — no existía ningún texto de paginador en el encargo de `lib/admin`.
+    paginador: {
+      etiqueta: "Paginación",
+      anterior: "Anterior",
+      siguiente: "Siguiente",
+      paginaDe: (pagina: number, total: number) => `Página ${pagina} de ${total}`,
+    },
   },
 
   pestanas: {
@@ -134,6 +158,19 @@ export const textosAdmin = {
       cuerpo: "El cambio no se guardó. Revisa tu conexión e inténtalo de nuevo.",
       accion: "Volver a intentarlo",
     },
+    // Añadido por E5-D: el diálogo de confirmación de `AccionDeFila` (`_componentes/AccionDeFila.tsx`)
+    // pide un título y una descripción propios, distintos del texto del botón (`acciones.deshabilitar`/
+    // `.habilitar`) — ninguno de los dos existía todavía.
+    confirmacionDeshabilitar: {
+      titulo: "¿Deshabilitar esta invitación?",
+      descripcion: "Dejará de verse en internet hasta que la vuelvas a habilitar. La clienta no pierde su contenido.",
+      confirmando: "Deshabilitando…",
+    },
+    confirmacionHabilitar: {
+      titulo: "¿Habilitar esta invitación?",
+      descripcion: "Vuelve a verse en internet con el enlace que ya tenía.",
+      confirmando: "Habilitando…",
+    },
   },
 
   pagos: {
@@ -164,6 +201,10 @@ export const textosAdmin = {
       cuerpo: "Inténtalo de nuevo; si sigue sin cargar, el resto del panel funciona con normalidad.",
       accion: "Volver a intentarlo",
     },
+    // Añadido por E5-D: nota informativa de origen del dato (contrato §5, `origen: "invitaciones"`
+    // mientras E4 no entregue su propia fuente de pagos). Reutiliza vocabulario ya presente en el
+    // fichero (invitaciones, pagos) — no introduce un término nuevo.
+    fuenteDatos: "Estos importes salen de tus invitaciones; cuando el módulo de pagos esté listo, la tabla no cambia de forma.",
   },
 
   planes: {
@@ -212,6 +253,9 @@ export const textosAdmin = {
     sinPermiso: {
       titulo: "Tu cuenta no tiene acceso a la administración",
       cuerpo: "Esta consola es solo para el equipo. Si crees que es un error, escribe a soporte.",
+      // Añadido por E5-D: el estado honesto de un 403 necesita una salida (regla del encargo:
+      // "ofrece una salida, no cinco tablas rotas"). No había ninguna acción asociada a este texto.
+      accion: "Ir a mis invitaciones",
     },
   },
 } as const;
