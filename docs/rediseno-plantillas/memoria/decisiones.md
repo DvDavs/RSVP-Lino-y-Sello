@@ -1941,3 +1941,93 @@ el texto va también aquí íntegro para que este registro siga siendo autosufic
 - Decisión: **cada spec e2e nuevo de la fase 5 crea su propia invitación, y su propio usuario si lo necesita, y ninguno usa la invitación sembrada compartida.** `fullyParallel` con 4 workers tiene que pasar; un spec que solo pase con `--workers=1` no se integra. La siembra por área vive en `scripts/seed/<area>.sh`, uno por sesión, y `scripts/seed-demo.sh` se queda como está: es la demostración que el dueño abre, no el andamio de las pruebas.
 - Alternativas descartadas y por qué: (a) **bajar los workers a 1**, que es lo que hace hoy el CI como parche — multiplica el reloj del job y esconde el defecto en vez de arreglarlo; (b) **serializar por fichero con `test.describe.serial`** — solo ordena los specs de un mismo fichero, no los de ficheros distintos, que es donde estaba la colisión; (c) **una invitación sembrada por worker** — obliga a saber cuántos workers hay y a repartirlos, y sigue compartiendo estado entre los specs de un mismo worker.
 - Consecuencias: la regla va escrita en el skill `pruebas-producto`, en `memoria/handoffs/5-0-cimientos.md` y en la sección 0 de `diseno/12-producto-completo.md`. Cuesta unos segundos por spec en preparar sus datos; se recupera con creces al no serializar el job. Es también lo que permite que las cuatro sesiones corran sus e2e sin coordinarse.
+
+## ADR-5-E5-02 — `lib/admin/cliente.ts` reimplementa su propio `peticionAdmin()`, y clasifica el `ErrorMessage` heredado como `SessionError` en 401/403
+- Fecha: 2026-09-10 · Estado: propuesta · Autor: E5-B (capa de datos y textos de `/admin`)
+- Contexto: el encargo de E5-B fija que `lib/api-client.ts` es intocable desde esta sesión (para no
+  chocar con el resto de `apps/web`) y que el token de sesión vive solo ahí (P8, `contratos.md §8
+  C4`). Las siete rutas del contrato (`scratchpad/contrato-admin.md`) necesitan el mismo trato que
+  ya da `peticion()` en `api-client.ts`: URL con base + query, cabecera `Authorization` si hay
+  token, y clasificación de toda respuesta no-2xx en `ApiError` | `SessionError` |
+  `UnknownApiError`. Una de las siete, `alternarEstadoInvitacion` (§4 del contrato), no llama a
+  `/product/admin/**` sino a la ruta heredada `PUT /admin/invitations/{id}/toggle-status`
+  (`InvitationController.kt:127-141`), cuyos errores no usan `TplErrorResponse` (`code`, `message`)
+  sino `ErrorMessage` (`core/error/model/ErrorMessage.kt`: `timestamp`, `statusCode`, `errors`/
+  `errorsListed`) — verificado en `GeneralExceptionHandler.kt`, que envuelve
+  `UnauthorizedAccessException` (403, sin jerarquía) e `IllegalArgumentException` (400, id
+  inexistente) con esa forma.
+- Decisión: `lib/admin/cliente.ts` define una función interna `peticionAdmin()`, deliberadamente
+  más pequeña que `peticion()` de `api-client.ts` (sin `jsonBody`, sin límites de cuerpo, sin
+  `ETag`: ninguna de las siete rutas los necesita), que **importa** `getAuthToken()` y
+  `getApiBaseUrl()` de `../api-client.ts` en vez de reimplementar el almacenamiento del token, y
+  reutiliza `ApiError`/`SessionError`/`UnknownApiError`/`TplErrorResponseSchema` de `../errors.ts`
+  con la MISMA regla de clasificación: un cuerpo que valida contra `TplErrorResponseSchema` con
+  `code` que empieza por `TPL_` es `ApiError`; cualquier 401/403 que no cumpla eso —incluido el
+  `ErrorMessage` heredado, que no tiene campo `code`— es `SessionError`; cualquier otra cosa no-2xx
+  es `UnknownApiError` con el cuerpo crudo intacto. El efecto práctico: un 403 de
+  `toggleInvitationStatus` por `UnauthorizedAccessException` (jerarquía) se clasifica igual que un
+  403 de Spring Security sin rol — como `SessionError`, nunca como `ApiError` con un `code`
+  inventado. Se documenta con `fichero:línea` en el comentario de cabecera de
+  `alternarEstadoInvitacion` en `cliente.ts`.
+- Alternativas descartadas y por qué:
+  - **Añadir las siete funciones directamente a `lib/api-client.ts`.** Es lo que haría un cliente
+    HTTP único de verdad, pero el encargo de E5-B prohíbe tocar ese fichero explícitamente (evita
+    el conflicto de fusión de E6 con las otras tres sesiones que sí lo tocan) y las rutas de
+    `/product/admin/**` no son de `03-api.md` (el contrato que `api-client.ts` implementa), sino
+    de `contrato-admin.md`: son dos superficies distintas aunque compartan patrón.
+  - **Un `ErrorMessageSchema` de Zod nuevo para dar a la ruta heredada un `ApiError` con `code`
+    inventado** (p. ej. `"LEGACY_FORBIDDEN"`). Se descarta: inventar un `code` que el backend nunca
+    mandó es mentir sobre su origen, el mismo argumento que ya usa el comentario de `SessionError`
+    en `errors.ts` para no fabricar códigos de Spring Security. `SessionError` en 401/403 es
+    exactamente la información honesta que hay: «no tienes acceso», sin fingir más estructura.
+  - **Dejar que las siete llamadas usen `fetch` suelto en cada función**, sin una `peticionAdmin()`
+    compartida. Se descarta por duplicar la clasificación de errores siete veces, que es
+    precisamente el defecto que `peticion()` evita en `api-client.ts`.
+- Consecuencias: quien escriba la pantalla de `/admin` recibe el mismo vocabulario de errores que
+  ya conoce del resto de `apps/web` (los tres tipos de `errors.ts`), sin tener que aprender una
+  cuarta forma para esta consola. Si el backend de `/product/admin/**` adopta más adelante
+  `TplErrorResponse` con códigos propios (p. ej. `TPL_ADMIN_*`), `peticionAdmin()` ya los clasifica
+  como `ApiError` sin cambios — la compuerta es el prefijo `TPL_`, no una lista cerrada de rutas.
+  Coste asumido: dos funciones de "petición" casi iguales en el árbol de `apps/web`
+  (`peticion()` y `peticionAdmin()`); se acepta porque fusionarlas exige tocar `api-client.ts`, que
+  está fuera del territorio de E5.
+
+## ADR-5-E5-03 — Los componentes de presentación de `/admin` viven locales a la consola, no en `packages/ui`
+- Fecha: 2026-09-10 · Estado: propuesta · Autor: E5-C (componentes de presentación de `/admin`)
+- Contexto: el skill `ui-componente` (`.claude/skills/ui-componente/SKILL.md`) fija que un componente
+  del sistema de diseño que falte se crea en `frontend/packages/ui/src/componentes`, con historia en
+  `/design` y regresión visual de Playwright. El encargo de esta sesión (`FilaDeMetricas`, `Tabla`,
+  `BloqueConError`, `EtiquetaDeEstado`, `AccionDeFila`) pide explícitamente la excepción: escribirlos
+  en `frontend/apps/web/app/(chrome)/admin/_componentes/`, porque `packages/ui` es territorio
+  compartido de otra sesión en paralelo (fase 3-C/bloques posteriores) y tocarlo — el fichero público
+  `componentes/index.ts` tiene tres bloques F1/F2/F3 que distintos agentes escriben en worktrees
+  separados — arriesga un conflicto de fusión que no aporta nada a este encargo.
+- Decisión: los cinco componentes son **locales de la consola de administración**, no entran en
+  `packages/ui` ni en la galería `/design`, y se construyen **sobre** el inventario que sí es público
+  (`Card`, `Badge`, `Skeleton`, `EmptyState`, `Dialog`, `Button`, `@invitaciones/ui/shapes`),
+  importado siempre por subruta directa (`@invitaciones/ui/componentes/<Nombre>/index.ts` o
+  `.../componentes/<Nombre>.tsx` para los sueltos), nunca por el barril `@invitaciones/ui` ni por
+  `@invitaciones/ui/componentes` — misma regla de presupuesto de JS que ya aplica el resto del chrome
+  (`ui-pantalla §5`: 92,3 KB → 8,9 KB medidos en la portada). Los cinco siguen todas las demás reglas
+  del skill `ui-componente` que sí aplican fuera de `packages/ui`: tokens (`bg-ui-*`/`text-ui-*`,
+  voces `display`/`text`/`label`, radios `rounded-ui-*`), Radix como base de lo interactivo
+  (`Dialog` en `AccionDeFila`), foco visible, texto siempre por props (ningún literal de interfaz en
+  el JSX: lo escribe `lib/admin/textos.ts`, que redacta la sesión E5-B en paralelo), y un
+  `*.test.tsx` junto a cada componente con sus estados. Lo que se omite a propósito, por no aplicar
+  fuera de `packages/ui`: la historia `.historias.tsx`/`registro.ts` de la galería `/design` y la
+  regresión visual de Playwright (`design.spec.ts`) — no hay galería que los enseñe, y crearla ahí
+  obligaría a tocar el mismo `packages/ui` que el encargo prohíbe.
+- Alternativas descartadas y por qué:
+  - **Crearlos en `packages/ui` de todas formas**, ganándose la galería y la regresión visual
+    gratis. Se descarta: es exactamente el conflicto de fusión que el encargo pide evitar, y ninguno
+    de los cinco tiene uso previsto fuera de `/admin` hoy (no son parte del vocabulario general del
+    producto — `Tabla`/`AccionDeFila` son de consola de equipo, no de la web de la clienta).
+  - **Un barril `index.ts` en `_componentes/` que reexporte los cinco.** Se descarta por la misma
+    lógica que ya prohíbe el barril de `@invitaciones/ui`: aquí el barril sería inofensivo en tamaño
+    (cinco ficheros locales, no un catálogo entero), pero no aporta nada sobre importar cada fichero
+    por su ruta directa, y evita cualquier ambigüedad de qué exporta qué mientras la pantalla real
+    (otro agente) todavía no existe para confirmarlo con un uso real.
+- Consecuencias: si un componente de esta lista resulta útil fuera de `/admin` en una fase futura,
+  promoverlo a `packages/ui` es un corte-y-pega con historia nueva y regresión visual nueva — no hay
+  atajo porque nunca compartieron infraestructura. Mientras tanto, la consola de administración no
+  bloquea ni es bloqueada por quien trabaje en `packages/ui` en paralelo.
