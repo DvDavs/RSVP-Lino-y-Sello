@@ -70,11 +70,31 @@ test("el resumen no espera a que las tablas terminen de cargar", async ({ page }
     await new Promise((resolver) => setTimeout(resolver, RETARDO_MS));
     await route.continue();
   };
+  const RUTA_METRICAS = "/product/admin/metricas";
+  const RUTAS_TABLA = [
+    "/product/admin/clientas",
+    "/product/admin/invitaciones",
+    "/product/admin/pagos",
+    "/product/admin/plantillas",
+  ];
   const esRuta = (fragmento: string) => (url: URL) => url.href.includes(fragmento);
-  await page.route(esRuta("/product/admin/clientas"), retardar);
-  await page.route(esRuta("/product/admin/invitaciones"), retardar);
-  await page.route(esRuta("/product/admin/pagos"), retardar);
-  await page.route(esRuta("/product/admin/plantillas"), retardar);
+  for (const fragmento of RUTAS_TABLA) {
+    await page.route(esRuta(fragmento), retardar);
+  }
+
+  // ADR-5-E5-07: hasta el arreglo de `ConsolaAdmin.tsx` (5-E5-J), esta prueba afirmaba la propiedad
+  // mirando si el esqueleto de Clientas —un panel FUERA de la pestaña activa— estaba `visible`. Eso
+  // solo era cierto porque las cinco pestañas se pintaban apiladas a la vez: la aserción codificaba
+  // el defecto, no la propiedad. Ahora que solo el panel activo se ve (el resto lleva `hidden`,
+  // `bitacora/5-E5-J.md`), la propiedad real —"las cinco peticiones salen en paralelo, el resumen no
+  // espera a las tablas"— se mide contando peticiones de verdad, nunca mirando si un panel oculto se
+  // pinta en pantalla.
+  const peticionesLanzadas = new Set<string>();
+  page.on("request", (peticion) => {
+    for (const fragmento of [RUTA_METRICAS, ...RUTAS_TABLA]) {
+      if (peticion.url().includes(fragmento)) peticionesLanzadas.add(fragmento);
+    }
+  });
 
   await sesionDemo(page, token);
   await page.goto("/admin");
@@ -87,10 +107,38 @@ test("el resumen no espera a que las tablas terminen de cargar", async ({ page }
   await expect(resumen.getByText(textosAdmin.resumen.tarjetas.clientas)).toBeVisible();
   await expect(resumen.getByRole("alert")).toHaveCount(0);
 
-  // Mientras tanto, Clientas (con el retardo todavía activo) SIGUE cargando: no es una coincidencia
-  // de tiempos del resumen, son peticiones de verdad independientes entre sí.
-  const clientas = page.locator('section[aria-labelledby="admin-clientas-titulo"]');
-  await expect(clientas.getByRole("status").first()).toBeVisible();
+  // Con el resumen ya pintado y las cuatro rutas de tabla TODAVÍA retenidas por `retardar` (no han
+  // respondido), las CINCO peticiones ya salieron — es la prueba directa del paralelismo: si el
+  // resumen esperara su turno tras las tablas, o las tablas solo se pidieran al abrir su pestaña,
+  // aquí faltaría alguna. No depende de qué panel esté visible ni de cuándo termine el retardo.
+  await expect
+    .poll(() => peticionesLanzadas.size, {
+      message: "las cinco peticiones (metricas + las cuatro de tabla) deberían haber salido ya, en paralelo",
+    })
+    .toBe(1 + RUTAS_TABLA.length);
+});
+
+test("la página nunca se desplaza en horizontal, en los tres anchos del wireframe", async ({ page }) => {
+  // Compuerta de navegador para algo que jsdom no puede ver (`bitacora/5-E5-J.md` § Compuertas
+  // nuevas — defectos 2 y 3): `getBoundingClientRect`/`scrollWidth` valen 0 o el declarado en jsdom,
+  // nunca el resuelto tras layout real. `<=` en vez de `===` a propósito: el ancho exacto ya se
+  // midió a mano en Chromium (390/390, 768/768, 1280/1280), pero fijar la igualdad aquí ataría la
+  // prueba a que ni una barra de scroll ni un redondeo de subpíxel muevan el número en 1px — la
+  // propiedad que importa es "no aparece una barra de desplazamiento horizontal", no el valor exacto.
+  const { token } = await cuentaMaster();
+  await sesionDemo(page, token);
+
+  for (const ancho of [390, 768, 1280]) {
+    await page.setViewportSize({ width: ancho, height: 900 });
+    await page.goto("/admin");
+    const resumen = panelDe(page, textosAdmin.pestanas.resumen);
+    await expect(resumen.getByRole("status")).toHaveCount(0, { timeout: 15_000 });
+
+    const anchoDocumento = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(anchoDocumento, `a ${ancho}px la página no debería poder desplazarse en horizontal`).toBeLessThanOrEqual(
+      ancho,
+    );
+  }
 });
 
 test("la tabla de invitaciones filtra por texto y por estado", async ({ page }) => {
