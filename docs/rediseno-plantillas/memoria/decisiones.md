@@ -2151,3 +2151,81 @@ el texto va también aquí íntegro para que este registro siga siendo autosufic
 - Consecuencias: hasta que `/admin` tenga su propia entrada en `LIMITES_BASE`, no hay compuerta
   automática de presupuesto que corra en CI para esta ruta — riesgo real, anotado aquí y en
   `5-E5-D.md` para que el revisor y el orquestador lo vean antes de dar la sesión por cerrada.
+
+## Corrección de seguimiento a ADR-5-E5-04 §1 — el filtro «Plan» pasa a ser del SERVIDOR
+- Fecha: 2026-09-10 · Estado: propuesta · Autor: E5-D (arreglo de seguimiento tras la integración de `f7384a0`)
+- La §1 de este ADR ("El filtro «Plan» de Invitaciones se resuelve en el CLIENTE") queda
+  **superada, no borrada** (se deja el texto original arriba para que quede el porqué de la decisión
+  de entonces). Mientras esta sesión montaba la pantalla, el agente del backend añadió el parámetro
+  `plan=<id>` a `GET /product/admin/invitaciones` (commit `de79915`, `bitacora/5-E5-A.md §1.1.bis`,
+  reparto en paralelo) y esa señal no llegó a tiempo de evitar la decisión original.
+- El coordinador señaló, correctamente, que filtrar en cliente sobre un conjunto PAGINADO no es una
+  simplificación aceptable: es un fallo de corrección — esconde en silencio filas que sí casan y
+  están en otra página, y quien administra cree que el total es el que ve.
+- Decisión corregida: `filtroPlan` viaja como `plan=<id>` en la petición a
+  `GET /product/admin/invitaciones` (`InvitacionesQuery.plan: number`, `lib/admin/tipos.ts`,
+  `PanelInvitaciones.tsx`), exactamente igual que `estado` y `pago` — con reinicio de página al
+  cambiar de plan y sin ningún filtrado adicional en el cliente sobre la respuesta. El desplegable
+  sigue poblado por `GET /product/admin/planes`, ahora usando `id` como `value` del `Select` (antes
+  usaba el nombre) y `nombre` como etiqueta visible. `lib/admin/tipos.ts` y `lib/admin/cliente.ts`
+  se editaron para esto — autorizado explícitamente por el coordinador para este arreglo puntual.
+- Prueba de que no vuelve a pasar: `PanelInvitaciones.test.tsx` planta una fila devuelta por el
+  "servidor" con un plan que NO coincide con el filtro elegido y comprueba que sigue en pantalla —
+  si alguien reintroduce un `.filter()` en el cliente, esa prueba cae.
+- Detalle completo, incluida la corrección del 403 de jerarquía (hallazgo MEDIA-1) que se resolvió
+  en el mismo arreglo de seguimiento: `docs/rediseno-plantillas/memoria/bitacora/5-E5-D.md`.
+
+## ADR-5-E5-05 — El desplazamiento de página se calcula en `Long` en un solo sitio, y una invitación deshabilitada deja de enseñar su `enlacePublico`
+- Fecha: 2026-09-10 · Estado: **propuesta** · Autor: E5-G (arreglo de las objeciones de `bitacora/5-E5-R2-revision-autorizacion.md`)
+- Detalle completo, con la salida real de Gradle y de los `curl`: `docs/rediseno-plantillas/memoria/bitacora/5-E5-G.md`.
+
+**§1. `pagina × tamano` se calcula y se valida en `ParametrosDeAdministracion.desplazamiento()` (objeción ALTA-1).**
+- Problema: `pagina` (`>= 0`) y `tamano` (`[1,100]`) pasaban cada uno su rango, pero **su producto no
+  lo comprobaba nadie**, y era el producto lo que llegaba al `OFFSET`. En `Int`, `21474837 * 100`
+  desborda y sale negativo; PostgreSQL responde `OFFSET must not be negative` y las **tres** rutas
+  paginadas devolvían **500 con 20 901 bytes de traza** que, con `server.error.include-message:
+  always`, publicaban el `SELECT` entero **incluido el predicado de alcance por rol**. Es el oráculo
+  del hallazgo S-02 servido desde código nuevo, y viola la regla dura del contrato («un parámetro
+  fuera de rango es 400 con cuerpo, nunca un 500»).
+- Decisión: una sola función, `ParametrosDeAdministracion.desplazamiento(pagina, tamano)`, que
+  multiplica en `Long`, revalida los dos parámetros y rechaza con el **mismo 400 con cuerpo** del
+  resto (`require` → `GeneralExceptionHandler`) cuando el producto pasa de `Int.MAX_VALUE`. Las tres
+  llamadas (`ConsolaDeAdministracionService.clientas`, `.invitaciones`, `PagosDesdeInvitaciones.pagina`)
+  pasan por ella, **antes** de tocar la base. El KDoc de la interfaz `FuenteDePagosDeAdministracion`
+  obliga a lo mismo a la futura implementación de E4.
+- Alternativa descartada: acotar `pagina` a un máximo del contrato (p. ej. `0..1_000_000`). Más barata
+  de razonar, pero es un número de la nada: con `tamano=1` prohibiría páginas servibles y con
+  `tamano=100` seguiría dejando pasar desplazamientos enormes. `Int.MAX_VALUE` es la frontera real.
+- **Cambio observable**: `GET /product/admin/{clientas,invitaciones,pagos}` con `pagina × tamano >
+  2147483647` pasa de **500** (con traza) a **400** con `{"statusCode":400,"errors":{"error":"…"}}`.
+  Ningún caso que antes respondía 200 cambia: el mayor desplazamiento válido
+  (`pagina=21474836&tamano=100`) sigue en 200, medido.
+- Prueba que lo sujeta: `ProductAdminConsolaControllerTest.kt:311-362` exige el 400 **y** que el cuerpo
+  no contenga `SELECT`/`OFFSET`/`trace`/`Exception` **y** que no se consulte la base.
+
+**§2. `enlacePublico` es `null` cuando la invitación está deshabilitada (objeción BAJA-4).**
+- Criterio aplicado: `enlacePublico` significa «la URL que **hoy sirve** esta invitación», no «la URL
+  que tiene asignada». Con `invitation.is_enabled = false` el render público responde **403
+  TPL_INVITATION_UNAVAILABLE** (`PublicRenderService.kt:74` sobre `disponible = invitationEnabled &&
+  customerEnabled && !customerBanned`), así que la consola enseñaba —y ofrecía copiar— una URL muerta.
+  La condición se añade al `CASE` **en SQL** (`ConsultasDeAdministracion.kt:309-310`), no en un `if` de
+  Kotlin. Invariante nuevo: `enlacePublico != null` implica `estado == "publicada"`.
+- No se pierde nada: `toggle-status` no toca el release ni rota el `public_token`, así que rehabilitar
+  devuelve **el mismo enlace** (medido).
+- **La pregunta abierta «¿deshabilitar debe retirar la publicación?» (`preguntas-abiertas.md`, entrada
+  de E5-A) sigue abierta y no la cierra este ADR**: aquí solo se decide qué **enseña la consola**, no
+  qué se sirve ni qué escribe `toggle-status` (eso tocaría `templates2`, ajeno a esta sesión). La
+  decisión es compatible con las dos salidas posibles de esa pregunta.
+- Asimetría **preexistente** que queda medida y sin tocar: `metricas.publicadas` cuenta
+  `tpl_release.is_active = true` sin mirar `is_enabled`, así que puede valer 1 mientras el listado no
+  tiene ninguna fila en estado `publicada`. Alinearla cambiaría la definición de §1 del contrato, que
+  ninguna objeción pide tocar; es material para la misma pregunta abierta.
+- **Cambio observable**: `GET /product/admin/invitaciones` devuelve `enlacePublico: null` (antes: el
+  token) para una invitación con `estado: "deshabilitada"`. El frontend ya trata ese campo como
+  nullable.
+
+**§3. `buscar` escapa los comodines del `LIKE` (objeción BAJA-2).** `patron()` escapa `\`, `%` y `_`
+(la barra primero) y las cinco cláusulas `LIKE` llevan `ESCAPE '\'`. No era una fuga —el predicado de
+alcance sigue en el `AND` y todo viaja vinculado— sino un resultado incorrecto: `buscar=%` devolvía
+todo el alcance de quien pregunta. **Cambio observable**: una búsqueda con `%` o `_` deja de casar de
+más y pasa a buscar esos caracteres literalmente; la búsqueda vacía sigue devolviendo todo el alcance.
