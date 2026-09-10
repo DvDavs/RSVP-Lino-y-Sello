@@ -104,7 +104,25 @@ class InvitationAdminService(
         )
     }
 
+    /**
+     * Hallazgo **S-03** (`12-producto-completo.md §A3`, severidad ALTA de negocio), cerrado por
+     * **ADR-5-E5-01**: este método NO comprobaba jerarquía, así que cualquier cuenta con rol ADMIN
+     * marcaba como pagada cualquier invitación del sistema —incluidas las de clientas de otros
+     * administradores— recorriendo ids. Con la puerta de publicación de ADR-5-0B-01, eso equivale a
+     * regalar el producto.
+     *
+     * El arreglo es la **misma llamada, en el mismo orden**, que ya hacen sus rutas hermanas de este
+     * mismo servicio: `getInvitationById` (`:464-466`) y `toggleInvitationStatus` (`:479-481`).
+     * `HierarchyValidationService.validateInvitationAccess`
+     * (`core/auth/service/HierarchyValidationService.kt:42-71`) devuelve `true` siempre para MASTER,
+     * y para ADMIN solo si la invitación es suya, de una clienta que él creó o creada por él: **un
+     * MASTER sigue pudiendo todo**.
+     */
     fun markAsPaid(id: Long, updatedBy: Long) {
+        if (!hierarchyValidationService.validateInvitationAccess(updatedBy, id)) {
+            throw UnauthorizedAccessException("No tienes permisos para modificar esta invitación")
+        }
+
         val invitation = invitationRepository.findById(id)
                 .orElseThrow { IllegalArgumentException("La invitación con id $id no existe") }
 
