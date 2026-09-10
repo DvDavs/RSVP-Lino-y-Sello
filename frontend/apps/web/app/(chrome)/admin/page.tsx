@@ -1,26 +1,22 @@
-// app/(chrome)/admin/page.tsx — MARCADOR del panel de administración.
-// Dueña: sesión E5 (admin). Se sustituye entera (ver `README.md` de esta carpeta).
+// app/(chrome)/admin/page.tsx — la consola de administración (MASTER/ADMIN), sustituye el marcador
+// del andamio 5-0d entero (ver `README.md` de esta carpeta y `12-producto-completo.md §B3.6`).
 //
-// NO comprueba rol, y no lo necesita: no lee nada, no llama al backend y no enseña ni un dato de
-// ninguna cuenta. La comprobación de rol la añade E5 CON la pantalla real, en el mismo commit; la
-// autorización de verdad vive en el backend (`modules/product/admin` + `modules/admin/**`), que es
-// quien tiene que negar, no esta página.
+// Server Component: no lee nada por sí mismo (`lib/admin/cliente.ts` lee el token de
+// `sessionStorage`, así que toda la carga de datos vive del lado del cliente, en `ConsolaAdmin` y
+// sus paneles — comentario de cabecera de `ConsolaAdmin.tsx`). Esta página solo fija los metadatos y
+// monta el armazón.
 import type { Metadata } from "next";
-import { Marcador } from "@/lib/panel/Marcador";
 import { es_MX } from "@/lib/i18n";
+import { textosAdmin } from "@/lib/admin/textos";
+import { ConsolaAdmin } from "./_componentes/ConsolaAdmin.tsx";
 
 export const metadata: Metadata = {
-  title: es_MX.panel.secciones.admin.titulo,
-  // Permanente: una consola de administración no se indexa nunca.
+  title: { absolute: `${es_MX.comun.marca} · ${textosAdmin.pagina.titulo}` },
+  description: "Clientas, invitaciones, pagos y plantillas registradas del equipo.",
+  // Permanente: una consola de administración no se indexa nunca (README de esta carpeta).
   robots: { index: false, follow: false },
 };
 
-export default function MarcadorAdmin() {
-  return (
-    <Marcador
-      titulo={es_MX.panel.secciones.admin.titulo}
-      texto={es_MX.panel.secciones.admin.texto}
-      accion={{ href: "/editor", etiqueta: es_MX.panel.marcador.verMisInvitaciones }}
-    />
-  );
+export default function PaginaAdmin() {
+  return <ConsolaAdmin />;
 }
