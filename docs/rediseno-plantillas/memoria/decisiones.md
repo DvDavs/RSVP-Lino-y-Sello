@@ -2052,3 +2052,102 @@ el texto va también aquí íntegro para que este registro siga siendo autosufic
   - **Esperar a que E4 sustituya el marcado manual por el webhook de Stripe.** Se descarta: el marcado manual seguirá existiendo (pagos fuera de línea, transferencia) y hasta entonces el agujero queda abierto en producción.
   - **Arreglar de paso S-04, S-05 y S-13**, que están a la vista en `modules/shared/guests/service/InvitationGuestsService.kt:121-122`, `:153-161`, `:259-260`, `:286-287` y `GuestResponseItem.kt:36-37`. Se descarta **deliberadamente**: viven en el servicio compartido de invitados, cuya superficie nueva construye la sesión **E2** en paralelo; tocarlo desde aquí rompería su rama. Quedan anotados como vistos y no tocados.
 - Consecuencias: un ADMIN que hoy marcara como pagada una invitación fuera de su jerarquía empieza a recibir `403` con `{"errors":{"access":"No tienes permisos para modificar esta invitación"}}` (`core/error/GeneralExceptionHandler.kt:178-188`). Si alguna operación real dependía de que un ADMIN cobrara invitaciones de clientas de otro administrador, deja de funcionar y hay que resolverla con un MASTER o creando la clienta bajo ese ADMIN: es exactamente el caso que el hallazgo describe como abuso, así que la regresión es intencionada y hay que avisarla al dueño. `GET /admin/invitations/unpaid` (`InvitationController.kt:30-40`) ya filtraba por jerarquía, así que la lista y la acción vuelven a estar de acuerdo: antes se podía pagar lo que ni siquiera se podía listar.
+
+## ADR-5-E5-04 — Ensamblado de `/admin`: filtro de plan en cliente, `AccionDeFila` solo para lo destructivo, y el presupuesto de 150 KB es estructuralmente inalcanzable
+- Fecha: 2026-09-10 · Estado: propuesta · Autor: E5-D (ensamblado de la pantalla `/admin`)
+- Contexto: al construir `app/(chrome)/admin/page.tsx` sobre `lib/admin/` (E5-B) y los cinco
+  componentes de `_componentes/` (E5-C), aparecieron cuatro decisiones que el encargo no fijaba por
+  nombre y que no encajan en ningún ADR anterior de la fase.
+
+### 1. El filtro «Plan» de Invitaciones se resuelve en el CLIENTE, no en el servidor
+- `InvitacionesQuery` (`lib/admin/tipos.ts`) solo trae `pagina`/`tamano`/`buscar`/`estado`/`pago` —
+  ningún parámetro `plan`. El wireframe (`12-producto-completo.md §B3.6`) pinta `[ Plan v ]` como
+  tercer filtro, y `textosAdmin.invitaciones.filtros.plan`/`.planTodos` (E5-B) ya existen, separados
+  de `pago`/`.pagoTodos` — alguien previó el filtro sin que el contrato de red lo soportara todavía.
+- Decisión: `GET /product/admin/planes` (que no tiene pestaña propia en el wireframe: cinco pestañas,
+  no seis) se pide solo para alimentar las opciones de este selector, y el filtrado ocurre sobre la
+  PÁGINA ya cargada (`fila.plan === filtroPlan`) — nunca sobre el total del backend. Si
+  `listarPlanes()` falla, el selector de plan simplemente no aparece (degradación silenciosa de una
+  comodidad, no de un dato: la tabla de invitaciones sigue completa y utilizable sin él).
+- Alternativas descartadas: (a) fingir que `pago` y `plan` son el mismo filtro y quedarse solo con
+  `pago` — descartado porque `textosAdmin` ya distingue los dos con textos propios, y el wireframe
+  muestra tres controles, no dos; (b) pedir el contrato ampliado a E5-B — descartado por presupuesto
+  de tiempo del encargo y porque `lib/admin/**` es territorio ajeno de esta sesión.
+- Consecuencias: el filtro de plan solo ve los planes presentes en la página actual (20 filas); con
+  más de una página, cambiar de plan sin cambiar de página puede no encontrar coincidencias aunque
+  existan en otra página. Aceptable para una consola de equipo con paginación de 20; si duele en el
+  uso real, la solución correcta es sumar `plan` a `InvitacionesQuery` en el backend, no compensarlo
+  en el cliente con más lógica.
+
+### 2. `AccionDeFila` es SOLO para la acción destructiva; «Habilitar» es un botón simple
+- `AccionDeFila` (E5-C) es, por diseño y nombre, la pieza de una acción destructiva con
+  confirmación y con el control de móvil deshabilitado-con-razón. Alternar una invitación es
+  bidireccional (`textosAdmin.invitaciones.acciones.deshabilitar` **y** `.habilitar` ya existían
+  los dos), pero habilitar de nuevo una invitación no es destructivo: no pierde nada, no necesita
+  diálogo de confirmación ni el botón siempre-rojo (`variant="peligro"`) que `AccionDeFila` fija sin
+  parámetro.
+- Decisión: una invitación `estado === "deshabilitada"` ofrece un `Button` normal (`variant`
+  `"secundario"`) que llama a `alternarEstadoInvitacion` directo, sin diálogo. Una invitación en
+  cualquier otro estado ofrece `AccionDeFila` con la etiqueta «Deshabilitar». Los dos casos son
+  mutuamente excluyentes por fila (nunca los dos botones en la misma celda).
+- Alternativas descartadas: forzar «Habilitar» a través de `AccionDeFila` de todas formas (un diálogo
+  de confirmación rojo para una acción no destructiva) — descartado por engañoso: pinta como
+  peligrosa una acción que no lo es, y el propio comentario de cabecera de `AccionDeFila.tsx` la
+  reserva para «la acción destructiva de una fila».
+- Consecuencias: quien lea la columna Acciones ve una semántica consistente (rojo+confirmación =
+  destructivo; sin adorno = no destructivo) en vez de aprenderse una excepción por fila.
+
+### 3. Ilustración `sin-invitaciones` reutilizada en TODAS las tablas vacías del panel
+- El catálogo de `NombreIlustracion` (`packages/ui/src/ilustraciones/tipos.ts`) tiene exactamente
+  tres entradas: `sin-invitaciones`, `sin-fotos`, `error-generico`. Ninguna encaja literalmente con
+  «sin clientas» o «sin pagos», y crear ilustraciones nuevas es trabajo de `ui-icono`/`packages/ui`,
+  fuera del alcance de esta sesión (no se tocó `packages/ui`).
+- Decisión: las cuatro tablas del panel (Clientas, Invitaciones, Pagos, Plantillas) usan
+  `ilustracion="sin-invitaciones"` en su `EmptyState`; lo que distingue cada vacío es el TEXTO propio
+  de `textosAdmin.<tabla>.vacio.*` (`titulo` común: `textosAdmin.comun.sinResultados`, «Nada que
+  mostrar», también añadido por esta sesión — ver `5-E5-D.md`). Se prefiere una ilustración genérica
+  reutilizada y honesta sobre inventar una ilustración específica en un fichero de `packages/ui` que
+  no toca esta sesión.
+- Consecuencias: si una fase futura añade ilustraciones para «sin clientas»/«sin pagos»/«sin
+  plantillas», el cambio es local a cada `Panel*.tsx` (una prop), sin tocar textos ni lógica.
+
+### 4. El presupuesto de 150 KB (`ui-pantalla §8`) es estructuralmente inalcanzable para `/admin` con las piezas de hoy — no se fuerza, se documenta
+- Medido tras `pnpm run build` (script equivalente a `scripts/check-budget.mjs`, ver `5-E5-D.md`
+  para el detalle completo): `/admin` pesa **273,7 KB gz de primera carga** (127,6 KB de runtime
+  común de Next, igual en TODA la aplicación, + 146,0 KB propios de la ruta), incluso después de
+  sacar `PanelInvitaciones` y `PanelPagos` del grafo estático de la página con `next/dynamic`
+  (`ConsolaAdmin.tsx`) — la optimización bajó el peso propio de 173,2 a 146,0 KB, pero no acerca la
+  ruta a 150 KB.
+- La causa no es evitable desde esta sesión: `lib/admin/cliente.ts` (E5-B, fuera de mi territorio)
+  importa `TplErrorResponseSchema` de `lib/errors.ts`, que define sus esquemas con `zod` en el
+  ámbito del módulo — y `ConsolaAdmin.tsx` necesita `getAuthToken`/`clearAuthToken` de
+  `lib/api-client.ts` (que también importa `errors.ts`) para el chequeo SÍNCRONO de sesión que el
+  propio encargo exige («ni siquiera se dispara la primera petición sin token»). El resultado es un
+  chunk de ~87,2 KB gz dominado por `zod` (confirmado: contiene `ZodError`/`ZodObject`/`ZodString`)
+  que entra en el grafo de la página en cuanto se usa CUALQUIER función de esos dos ficheros — no
+  hay forma de "importar solo un poco" de un módulo que hace `import { z } from "zod"` en su
+  primera línea.
+- Prueba de que esto no es un defecto de esta pantalla sino un límite estructural conocido y ya
+  aceptado por el proyecto: la MISMA medición aplicada a `/acceso` (ruta ya en producción, de la
+  fase 3-C, con el mismo patrón de `getAuthToken`) da **275,8 KB gz** — y `/acceso` **no está en
+  `LIMITES_BASE`** de `scripts/check-budget.mjs`. El propio `/editor/[invitationId]` carga el MISMO
+  chunk de 87,2 KB (`40fqtkp3wl470.js`, idéntico hash) y por eso tiene un presupuesto propio de 600
+  KB en vez de 150. `/admin` es, en forma, el mismo tipo de ruta: una consola autenticada que
+  necesita la clasificación de sesión de `api-client.ts`/`errors.ts`.
+- Decisión: NO se toca `scripts/check-budget.mjs` (fuera de mi territorio, lo administra otra
+  sesión) ni se persigue 150 KB con más recortes de JS propio (ya se aplicó `next/dynamic` a las dos
+  piezas más pesadas, `Select`+`Dialog`; no queda margen razonable sin tocar `lib/errors.ts`/
+  `lib/api-client.ts`, prohibido). Se documenta la cifra real, con su causa, y se propone que quien
+  administre `check-budget.mjs` añada `"/admin"` a `LIMITES_BASE` con un techo comparable al de
+  `/editor/[invitationId]` (la misma familia de ruta: consola autenticada con `zod`+`api-client` en
+  el camino crítico), no con el de `/`/`/i/[publicToken]` (páginas públicas sin sesión).
+- Alternativas descartadas: (a) mover la comprobación de sesión a un efecto diferido / quitar el
+  chequeo síncrono de token para no importar `api-client.ts` en el primer render — descartado: viola
+  la regla dura del propio encargo («nunca hay una consola visible sin sesión, ni por un instante») a
+  cambio de una cifra que de todas formas no bajaría de ~150 KB solo con eso, porque el primer panel
+  que carga datos (`PanelResumen`, necesario de entrada) igual importa `lib/admin/cliente.ts`; (b)
+  forzar el número por debajo de 150 quitando `Tabs` (usar botones sueltos en su lugar) — descartado
+  porque el encargo pide explícitamente pestañas «sobre el `Tabs` de `@invitaciones/ui`».
+- Consecuencias: hasta que `/admin` tenga su propia entrada en `LIMITES_BASE`, no hay compuerta
+  automática de presupuesto que corra en CI para esta ruta — riesgo real, anotado aquí y en
+  `5-E5-D.md` para que el revisor y el orquestador lo vean antes de dar la sesión por cerrada.
