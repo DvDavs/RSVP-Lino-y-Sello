@@ -58,3 +58,11 @@ con evidencia y sin cuarentena. I-CI-03 pasa a la fase 7 (o a E6 si le sobra pre
 **No cambia los prompts E2–E5**: la regla 8 (4 workers) se verifica en local, donde la suite pasa
 en 1,3 min; el CI sigue en 1 worker hasta cerrar I-CI-03. Para E6: mergear `acc83fa` o posterior,
 no subir `workers` en `playwright.config.ts`.
+
+## Evaluación E3 — cuenta, marca, legal (2026-09-10)
+**ACEPTADO.** `origin/claude/fase-5-cuenta-whlhhq` = `18713d1`, 22 commits desde `9a4cd56`; contratos
+`5-1b-contrato-alta.md` y `5-E3-C2-para-E4.md` presentes. 26 hallazgos de seguridad cerrados con
+prueba, entre ellos una toma de cuenta preexistente vía signup. Deudas para E6: migraciones
+`V42`/`V44` chocan con E4 (renumerar a V45/V46); `d138590` arrastró trabajo ajeno (revisar);
+tocó `modules/admin/users/**` (conflicto probable con E5). Volumen: 22 .md nuevos, 5 018 líneas
+(anterior al protocolo ligero). E5 sigue sin rama en el remoto.
