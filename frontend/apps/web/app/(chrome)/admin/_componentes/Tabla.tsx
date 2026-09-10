@@ -6,7 +6,14 @@
 // `<table>` real, con `<caption>` accesible y `<thead><th scope="col">` — nunca una rejilla de
 // `div`s que no dice nada a un lector de pantalla. El desbordamiento horizontal vive SOLO dentro de
 // la tabla, en su propio contenedor `overflow-x-auto` con `tabIndex={0}` (desplazable por teclado);
-// la página nunca se desplaza en horizontal. En móvil (< 640 px, breakpoint `sm` de Tailwind) la
+// la página nunca se desplaza en horizontal. Ese contenedor lleva `role="group"`: un `<div>` sin
+// `role` tiene rol implícito "generic", que prohíbe nombrarlo con `aria-label` (ARIA en HTML) — axe
+// lo marca `aria-prohibited-attr`, serio (`bitacora/5-E5-F.md §3`, mismo defecto que
+// `packages/ui/src/componentes/Skeleton.tsx` ya documentó y arregló con `role="status"` en su propio
+// contenedor). Ni "status" (no es una espera con progreso) ni "region" (cada `Tabla` vive dentro de
+// un `<section aria-labelledby>` con el MISMO nombre accesible — probado, `region` duplicado choca
+// con `landmark-unique`, axe otra vez): "group" nombra el contenedor sin crear un landmark nuevo.
+// En móvil (< 640 px, breakpoint `sm` de Tailwind) la
 // tabla se sustituye por tarjetas apiladas — una por fila, etiqueta y valor por columna — como pide
 // el wireframe; ambas vistas conviven en el documento y `sm:`/`hidden` decide cuál se ve, mismo
 // patrón que ya usa el resto del chrome (`components/editor/PublishDialog.tsx`, `ed:hidden`).
@@ -110,6 +117,7 @@ export function Tabla<T,>({
       <div
         className="hidden overflow-x-auto rounded-ui-card border border-ui-divider sm:block"
         tabIndex={0}
+        role="group"
         aria-label={titulo}
       >
         <table className="w-full min-w-max border-collapse text-sm">

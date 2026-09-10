@@ -173,6 +173,30 @@ describe("Tabla", () => {
     expect(contenedor?.getAttribute("tabindex")).toBe("0");
   });
 
+  it("el contenedor de scroll horizontal tiene role=group y nombre accesible (aria-prohibited-attr, bitacora/5-E5-F.md §3)", () => {
+    render(
+      <Tabla
+        titulo="Invitaciones"
+        columnas={columnas}
+        filas={filas}
+        estado="listo"
+        claveFila={claveFila}
+        vacio={vacio}
+        error={error()}
+        etiquetaCargando="Cargando"
+      />,
+    );
+    // `aria-label` en un <div> sin `role` es inválido (rol implícito "generic", que prohíbe
+    // nombrarlo) — axe lo marca `aria-prohibited-attr`, serio. Sin `role="group"` aquí,
+    // `getByRole("group", ...)` no encontraría nada y esta prueba caería, exactamente lo que
+    // debe pasar si el contrato de accesibilidad del componente se rompe en un refactor. No
+    // "region": cada `Tabla` vive dentro de un `<section aria-labelledby>` con el MISMO nombre
+    // accesible, y un `region` duplicado choca con `landmark-unique` (axe, verificado).
+    const grupo = screen.getByRole("group", { name: "Invitaciones" });
+    expect(grupo.getAttribute("tabindex")).toBe("0");
+    expect(grupo.contains(screen.getByRole("table"))).toBe(true);
+  });
+
   it("tituloVisible=false: el título solo llega por <caption> accesible (sr-only)", () => {
     render(
       <Tabla
