@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController
  * §4 del contrato —deshabilitar y rehabilitar una invitación— **no está aquí y no se crea**: se
  * reutiliza tal cual `PUT /admin/invitations/{id}/toggle-status`
  * (`modules/admin/invitations/presentation/InvitationController.kt:127-140`), que ya comprueba
- * jerarquía en el servicio (`InvitationAdminService.kt:461-463`). Decisión REUTILIZAR TAL CUAL de
+ * jerarquía en el servicio (`InvitationAdminService.kt:479-481`, dentro de `toggleInvitationStatus`,
+ * `:471-487`; la cita anterior a `:461-463` apuntaba a `getInvitationById`, el método vecino — objeción
+ * BAJA-1 de `5-E5-R2`, medida con `curl` en su §4). Decisión REUTILIZAR TAL CUAL de
  * `12-producto-completo.md §A2.5`.
  *
  * ### Autorización

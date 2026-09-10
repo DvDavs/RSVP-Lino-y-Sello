@@ -4,6 +4,7 @@ import mx.evolutiondev.invitaciones.core.error.GeneralExceptionHandler
 import mx.evolutiondev.invitaciones.core.util.formatter.DateFormatterImpl
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -306,6 +307,89 @@ class ProductAdminConsolaControllerTest {
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.errors.error").isNotEmpty)
         }
+    }
+
+    /**
+     * **La prueba que cae si el 500 de ALTA-1 (`5-E5-R2 §6`) vuelve.**
+     *
+     * `pagina` y `tamano` pasaban su rango cada uno por su lado y **su producto no**: en `Int`,
+     * `21474837 * 100` desborda, sale negativo y PostgreSQL responde `OFFSET must not be negative`.
+     * Las tres rutas paginadas devolvían **500 con ~20 KB de traza** que, con
+     * `server.error.include-message: always`, publicaba el `SELECT` entero **incluido el predicado de
+     * alcance por rol** — el oráculo de S-02 servido desde código de esta sesión.
+     *
+     * Por eso esta prueba no se conforma con el 400: comprueba también que el cuerpo **no lleva SQL
+     * ni traza**, y que no se consultó la base. El caso `pagina=21474837&tamano=100` es el umbral
+     * exacto que midió el revisor con `curl`.
+     */
+    @Test
+    fun `un desplazamiento que desborda el entero es 400 con cuerpo, nunca un 500 con el SQL en la traza`() {
+        val casos = listOf(
+            "/product/admin/clientas?pagina=21474837&tamano=100",
+            "/product/admin/clientas?pagina=2147483647&tamano=2",
+            "/product/admin/invitaciones?pagina=2147483647&tamano=2",
+            "/product/admin/pagos?pagina=2147483647&tamano=2",
+        )
+        casos.forEach { ruta ->
+            val cuerpo = mvc.perform(get(ruta).principal(master))
+                .andExpect(status().isBadRequest)
+                .andExpect(jsonPath("$.statusCode").value(400))
+                .andExpect(jsonPath("$.errors.error").isNotEmpty)
+                .andReturn().response.contentAsString
+
+            listOf("SELECT", "select ", "OFFSET", "trace", "Exception", "customer c").forEach { veneno ->
+                assertFalse(
+                    cuerpo.contains(veneno),
+                    "el cuerpo del 400 de $ruta no puede contener '$veneno'; devolvió: $cuerpo",
+                )
+            }
+        }
+
+        // Y ninguna de las cuatro llegó a la base: el 400 se decide antes de consultar.
+        verify(consultas, never()).contarClientas(any(), any())
+        verify(consultas, never()).clientas(any(), any(), any(), any())
+        verify(consultas, never()).contarInvitaciones(any(), any(), any(), any(), any())
+        verify(consultas, never()).invitaciones(any(), any(), any(), any(), any(), any(), any())
+        verify(consultas, never()).contarPagos(any(), any())
+        verify(consultas, never()).pagos(any(), any(), any(), any())
+    }
+
+    /**
+     * El otro lado del arreglo, que importa igual: **el mayor desplazamiento que sí cabe sigue dando
+     * 200**. `21474836 * 100 = 2 147 483 600` es exactamente el último valor válido, y el revisor lo
+     * midió en 200 antes del arreglo. Un rango que se pasara de estricto rompería la paginación buena,
+     * que es peor que el fallo que arregla.
+     */
+    @Test
+    fun `el desplazamiento maximo que cabe sigue siendo 200 y llega entero a la consulta`() {
+        whenever(consultas.contarClientas(any(), any())).thenReturn(2)
+        whenever(consultas.clientas(any(), any(), any(), any())).thenReturn(emptyList())
+
+        mvc.perform(get("/product/admin/clientas?pagina=21474836&tamano=100").principal(master))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.total").value(2))
+            .andExpect(jsonPath("$.elementos", hasSize<Any>(0)))
+
+        verify(consultas).clientas(any(), any(), eq(100), eq(2_147_483_600))
+    }
+
+    /**
+     * BAJA-2: los comodines del texto de búsqueda viajan **escapados**, así que `%` y `_` se buscan
+     * como caracteres y no como comodines. Lo que casa contra la base lo comprueba
+     * `ConsultasDeAdministracionIntegrationTest`; aquí se fija que el patrón que sale del parámetro es
+     * el escapado, que es lo que un refactor puede deshacer sin darse cuenta.
+     */
+    @Test
+    fun `el texto de busqueda viaja con sus comodines escapados`() {
+        whenever(consultas.contarClientas(any(), any())).thenReturn(0)
+        whenever(consultas.clientas(any(), any(), any(), any())).thenReturn(emptyList())
+
+        // Por `param` y no dentro de la URL: `standaloneSetup` no decodifica `%25` en el query string.
+        mvc.perform(get("/product/admin/clientas").param("buscar", "Ana_100%").principal(master))
+            .andExpect(status().isOk)
+
+        verify(consultas).contarClientas(any(), eq("%ana\\_100\\%%"))
+        assertEquals("%%", ParametrosDeAdministracion.patron(null), "sin texto, el patrón casa con todo")
     }
 
     // ------------------------------------------------------------------ la anotación

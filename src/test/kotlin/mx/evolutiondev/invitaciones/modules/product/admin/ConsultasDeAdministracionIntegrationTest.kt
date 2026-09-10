@@ -224,9 +224,10 @@ class ConsultasDeAdministracionIntegrationTest : SpringPersistenceTestSupport() 
      */
     @Test
     fun `deshabilitada gana sobre publicada y la fila sigue siendo visible`() {
+        val publico = token()
         ejecutar(
             "INSERT INTO tpl_document (invitation_id, template_version_id, doc, public_token) VALUES (?, ?, '{}'::jsonb, ?)",
-            invPropia, versionAlta, token(),
+            invPropia, versionAlta, publico,
         )
         ejecutar(
             "INSERT INTO tpl_release (invitation_id, template_version_id, document_revision, composed, report, " +
@@ -241,6 +242,78 @@ class ConsultasDeAdministracionIntegrationTest : SpringPersistenceTestSupport() 
         assertEquals(1, consultas.contarInvitaciones(alcanceDelAdmin, "%%", 3, 0), "filtro estado=deshabilitada")
         assertEquals(0, consultas.contarInvitaciones(alcanceDelAdmin, "%%", 1, 0), "ya no es publicada")
         assertEquals(0, consultas.contarInvitaciones(alcanceDelAdmin, "%%", 2, 0), "tampoco en-edicion")
+
+        // BAJA-4 (`5-E5-R2 §6`): deshabilitada ⇒ **sin enlace público**, aunque el release siga
+        // activo. Con `invitation.is_enabled = false` el render público responde 403
+        // TPL_INVITATION_UNAVAILABLE (`PublicRenderService.kt:74` sobre `disponible`), así que el
+        // enlace que la consola enseñaba era una URL muerta. Invariante:
+        // `enlacePublico != null` implica `estado == "publicada"`.
+        assertNull(fila.enlacePublico, "una invitación deshabilitada no puede enseñar su enlace público")
+
+        // Y rehabilitar lo devuelve **igual**: `toggle-status` no rota el token ni toca el release,
+        // así que ocultarlo no pierde nada.
+        ejecutar("UPDATE invitation SET is_enabled = true WHERE id = ?", invPropia)
+        val rehabilitada = sinFiltro(alcanceDelAdmin).first { it.id == invPropia }
+        assertEquals(ParametrosDeAdministracion.ESTADO_PUBLICADA, rehabilitada.estado)
+        assertEquals(publico, rehabilitada.enlacePublico, "al rehabilitar vuelve el mismo enlace")
+    }
+
+    // ------------------------------------------------------------------ búsqueda
+
+    /**
+     * BAJA-2 (`5-E5-R2 §6`): los comodines del `LIKE` van **escapados**, contra PostgreSQL de verdad.
+     *
+     * Sin escapar, `buscar=%` dejaba de ser una búsqueda y devolvía todo el alcance de quien pregunta,
+     * y `buscar=ana_lopez` casaba también con `anaxlopez`. No era una fuga —el predicado de alcance
+     * sigue en el `AND`, y aquí se comprueba— pero sí un resultado incorrecto. El par que se mide es
+     * [ParametrosDeAdministracion.patron] + `ESCAPE '\'`: por separado ninguno de los dos prueba nada.
+     */
+    @Test
+    fun `los comodines del texto de busqueda se buscan como caracteres, no como comodines`() {
+        ejecutar("UPDATE customer SET name = 'ana_lopez' WHERE id = ?", idPropia)
+        ejecutar("UPDATE customer SET name = 'anaxlopez' WHERE id = ?", idAdmin)
+
+        val exacto = ParametrosDeAdministracion.patron("ana_lopez")
+        assertEquals(
+            listOf(idPropia),
+            consultas.clientas(alcanceDelAdmin, exacto, 100, 0).map { it.id },
+            "el guion bajo tiene que casar como carácter: 'anaxlopez' no es 'ana_lopez'",
+        )
+        assertEquals(1, consultas.contarClientas(alcanceDelAdmin, exacto), "el recuento escapa igual que el listado")
+
+        // Un `%` suelto ya no es «tráemelo todo»: busca un porcentaje literal, que aquí no tiene nadie.
+        // Antes del arreglo esta misma llamada devolvía las 2 filas del alcance.
+        assertEquals(0, consultas.contarClientas(alcanceDelAdmin, ParametrosDeAdministracion.patron("%")))
+        // Y un `_` suelto ya no casa con cualquier letra: casa con la única fila que lleva un guion
+        // bajo de verdad ('ana_lopez'), no con las dos.
+        assertEquals(1, consultas.contarClientas(alcanceDelAdmin, ParametrosDeAdministracion.patron("_")))
+        // Y sin texto se sigue viendo el alcance entero: el arreglo no rompe la búsqueda vacía.
+        assertEquals(2, consultas.contarClientas(alcanceDelAdmin, ParametrosDeAdministracion.patron(null)))
+
+        // La barra invertida tampoco rompe la consulta (era el otro comodín sin escapar).
+        assertEquals(0, consultas.contarClientas(alcanceDelAdmin, ParametrosDeAdministracion.patron("\\")))
+    }
+
+    // ------------------------------------------------------------------ desplazamiento
+
+    /**
+     * ALTA-1 (`5-E5-R2 §6`) **desde el lado de la base**: el mayor desplazamiento que el contrato
+     * admite se ejecuta y devuelve una página vacía, sin `OFFSET` negativo y sin excepción. Si alguien
+     * volviera a calcular `pagina * tamano` en `Int`, aquí llegaría un número negativo y PostgreSQL
+     * respondería `ERROR: OFFSET must not be negative`, que es el 500 con 20 KB de traza y el `SELECT`
+     * entero —predicado de alcance incluido— que esta prueba existe para impedir.
+     */
+    @Test
+    fun `el desplazamiento maximo se ejecuta en la base sin OFFSET negativo`() {
+        val maximo = ParametrosDeAdministracion.desplazamiento(21_474_836, 100)
+        assertEquals(2_147_483_600, maximo, "21474836 * 100, el último que cabe en un Int")
+
+        assertTrue(consultas.clientas(alcanceDelAdmin, "%%", 100, maximo).isEmpty())
+        assertTrue(consultas.invitaciones(alcanceDelAdmin, "%%", 0, 0, 100, maximo).isEmpty())
+        assertTrue(consultas.pagos(alcanceDelAdmin, 0, 100, maximo).isEmpty())
+
+        // Y el recuento no cambia porque la página esté más allá del final: `total` no depende del OFFSET.
+        assertEquals(2, consultas.contarClientas(alcanceDelAdmin, "%%"))
     }
 
     /**

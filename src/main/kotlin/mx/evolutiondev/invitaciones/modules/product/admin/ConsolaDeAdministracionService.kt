@@ -31,12 +31,14 @@ class ConsolaDeAdministracionService(
     fun clientas(alcance: AlcanceDeAdministracion, pagina: Int, tamano: Int, buscar: String?): PaginaDeClientas {
         val p = ParametrosDeAdministracion.pagina(pagina)
         val t = ParametrosDeAdministracion.tamano(tamano)
+        // Antes que ninguna consulta: si el desplazamiento no cabe, esto es un 400 y no se toca la base.
+        val desplazamiento = ParametrosDeAdministracion.desplazamiento(p, t)
         val patron = ParametrosDeAdministracion.patron(buscar)
         return PaginaDeClientas(
             total = consultas.contarClientas(alcance, patron),
             pagina = p,
             tamano = t,
-            elementos = consultas.clientas(alcance, patron, t, p * t),
+            elementos = consultas.clientas(alcance, patron, t, desplazamiento),
         )
     }
 
@@ -52,6 +54,7 @@ class ConsolaDeAdministracionService(
     ): PaginaDeInvitaciones {
         val p = ParametrosDeAdministracion.pagina(pagina)
         val t = ParametrosDeAdministracion.tamano(tamano)
+        val desplazamiento = ParametrosDeAdministracion.desplazamiento(p, t)
         val patron = ParametrosDeAdministracion.patron(buscar)
         val codigoEstado = when (ParametrosDeAdministracion.opcion("estado", estado, ESTADOS_DE_INVITACION)) {
             ParametrosDeAdministracion.ESTADO_PUBLICADA -> 1
@@ -74,7 +77,9 @@ class ConsolaDeAdministracionService(
             total = consultas.contarInvitaciones(alcance, patron, codigoEstado, codigoPago, codigoPlan),
             pagina = p,
             tamano = t,
-            elementos = consultas.invitaciones(alcance, patron, codigoEstado, codigoPago, t, p * t, codigoPlan),
+            elementos = consultas.invitaciones(
+                alcance, patron, codigoEstado, codigoPago, t, desplazamiento, codigoPlan,
+            ),
         )
     }
 

@@ -55,6 +55,42 @@ object ParametrosDeAdministracion {
         return valor
     }
 
+    /**
+     * **El desplazamiento (`OFFSET`) de la página pedida, calculado en un solo sitio y en `Long`.**
+     *
+     * `pagina` y `tamano` pasan cada uno su rango por separado —`pagina >= 0`, `tamano in [1,100]`—
+     * y aun así **su producto no cabía en un `Int`**: `pagina=21474837` con `tamano=100` desborda,
+     * sale negativo y PostgreSQL responde `ERROR: OFFSET must not be negative`. Esa excepción subía
+     * sin traducir y las tres rutas paginadas devolvían **500 con ~20 KB de traza**, traza que con
+     * `server.error.include-message: always` (`application.yml:6`) publica el `SELECT` entero: sus
+     * tablas, sus columnas y **el predicado de alcance por rol** de [AlcanceDeAdministracion.PREDICADO].
+     * Regalar el predicado de autorización a quien sondea es el oráculo del hallazgo S-02, así que el
+     * desbordamiento no es un detalle aritmético: es superficie de información.
+     *
+     * Por eso el producto se calcula aquí y **solo aquí**. Estaba repetido en tres sitios
+     * (`ConsolaDeAdministracionService.clientas`, `.invitaciones` y `PagosDesdeInvitaciones.pagina`)
+     * y un arreglo repetido tres veces se desincroniza a la primera.
+     *
+     * Revalida los dos parámetros aunque quien llame ya lo haya hecho: es idempotente, cuesta dos
+     * comparaciones y hace que la función sea segura por sí sola para cualquier futura implementación
+     * de [FuenteDePagosDeAdministracion] (la de E4, por ejemplo), que recibe `pagina` y `tamano` ya
+     * validados pero no tiene por qué confiar en ello.
+     *
+     * El límite es `Int.MAX_VALUE` porque es lo que cabe en el parámetro `:desplazamiento` de las
+     * consultas; no es un límite de negocio inventado. El mensaje habla solo de los parámetros de
+     * quien llama —nunca de cuántas filas hay— igual que el resto de los 400 de este fichero.
+     */
+    fun desplazamiento(pagina: Int, tamano: Int): Int {
+        val p = pagina(pagina)
+        val t = tamano(tamano)
+        val offset = p.toLong() * t.toLong()
+        require(offset <= Int.MAX_VALUE) {
+            "El parámetro 'pagina' es demasiado grande para 'tamano'=$t: 'pagina' × 'tamano' no puede " +
+                "pasar de ${Int.MAX_VALUE}; se recibió pagina=$p"
+        }
+        return offset.toInt()
+    }
+
     /** Filtro opcional de lista cerrada: `null` o vacío = sin filtro; valor desconocido = 400. */
     fun opcion(nombre: String, valor: String?, permitidos: List<String>): String? {
         if (valor.isNullOrBlank()) return null
@@ -96,6 +132,25 @@ object ParametrosDeAdministracion {
     fun planDesconocido(id: Long): String =
         "El parámetro 'plan' no corresponde a ningún plan del catálogo; se recibió '$id'"
 
-    /** Texto de búsqueda → patrón `LIKE` en minúsculas. Vacío o ausente = `%`, que casa con todo. */
-    fun patron(buscar: String?): String = "%" + (buscar?.trim()?.lowercase() ?: "") + "%"
+    /**
+     * Texto de búsqueda → patrón `LIKE` en minúsculas. Vacío o ausente = `%%`, que casa con todo.
+     *
+     * **Los comodines del texto se escapan.** Sin escapar, `buscar=%` o `buscar=_` dejaban de ser una
+     * búsqueda y pasaban a ser un comodín: `%` casaba con todo el alcance de quien pregunta y `_` con
+     * cualquier letra, así que un correo con guion bajo —`ana_lopez@…`— no se podía buscar literalmente
+     * y quien mirara la consola vería filas que no pidió. **No era una fuga** (el predicado de alcance
+     * sigue en el `AND` y todo viaja vinculado, no interpolado); era un resultado incorrecto.
+     *
+     * El escape es `\`, declarado explícitamente con `ESCAPE '\'` en las cinco cláusulas `LIKE` de
+     * [ConsultasDeAdministracion] —es también el que PostgreSQL usa por defecto, pero escrito no
+     * depende de un ajuste del motor—. La barra se escapa **primero**: hacerlo al final volvería a
+     * escapar las barras que acabamos de introducir.
+     */
+    fun patron(buscar: String?): String {
+        val texto = (buscar?.trim()?.lowercase() ?: "")
+            .replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_")
+        return "%$texto%"
+    }
 }

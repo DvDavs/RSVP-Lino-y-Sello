@@ -20,6 +20,13 @@ interface FuenteDePagosDeAdministracion {
     /** Etiqueta que el cuerpo devuelve en `origen`, para que el frontend sepa qué está mirando. */
     val origen: String
 
+    /**
+     * `pagina` y `tamano` llegan ya validados por [ConsolaDeAdministracionService.pagos], pero el
+     * desplazamiento **no se calcula a mano**: quien implemente esto usa
+     * [ParametrosDeAdministracion.desplazamiento], que lo hace en `Long` y responde 400 cuando el
+     * producto no cabe en un `Int`. Multiplicar aquí `pagina * tamano` es lo que producía un `OFFSET`
+     * negativo y un 500 con el SQL entero en la traza.
+     */
     fun pagina(
         alcance: AlcanceDeAdministracion,
         estado: String?,
@@ -58,6 +65,9 @@ class PagosDesdeInvitaciones(
         pagina: Int,
         tamano: Int,
     ): PaginaDePagos {
+        // Lo primero, antes incluso del atajo de `devuelto`: un desplazamiento que no cabe es 400 en
+        // las tres rutas paginadas por igual, y sin llegar a la base.
+        val desplazamiento = ParametrosDeAdministracion.desplazamiento(pagina, tamano)
         if (estado == ParametrosDeAdministracion.PAGO_ESTADO_DEVUELTO) {
             return PaginaDePagos(total = 0, pagina = pagina, tamano = tamano, origen = origen, elementos = emptyList())
         }
@@ -67,7 +77,7 @@ class PagosDesdeInvitaciones(
             else -> 0
         }
         val total = consultas.contarPagos(alcance, filtro)
-        val elementos = consultas.pagos(alcance, filtro, tamano, pagina * tamano)
+        val elementos = consultas.pagos(alcance, filtro, tamano, desplazamiento)
             .map { consultas.leerPago(it, propiedades.moneda) }
         return PaginaDePagos(total = total, pagina = pagina, tamano = tamano, origen = origen, elementos = elementos)
     }

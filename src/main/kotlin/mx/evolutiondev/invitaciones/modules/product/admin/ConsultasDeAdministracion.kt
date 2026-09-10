@@ -112,8 +112,8 @@ class ConsultasDeAdministracion(
 
     private val filtroDeClienta = """
         $PREDICADO
-        AND (lower(coalesce(c.name, '') || ' ' || coalesce(c.lastname, '')) LIKE :patron
-             OR lower(c.email) LIKE :patron)
+        AND (lower(coalesce(c.name, '') || ' ' || coalesce(c.lastname, '')) LIKE :patron ESCAPE '\'
+             OR lower(c.email) LIKE :patron ESCAPE '\')
     """.trimIndent()
 
     fun contarClientas(alcance: AlcanceDeAdministracion, patron: String): Long =
@@ -219,9 +219,9 @@ class ConsultasDeAdministracion(
              OR (:pago = 1 AND coalesce(i.is_paid, false) = true)
              OR (:pago = 2 AND coalesce(i.is_paid, false) = false))
         AND (:plan = 0 OR p.id = :plan)
-        AND (lower(coalesce(c.name, '') || ' ' || coalesce(c.lastname, '')) LIKE :patron
-             OR lower(c.email) LIKE :patron
-             OR lower(coalesce(et.name, '')) LIKE :patron)
+        AND (lower(coalesce(c.name, '') || ' ' || coalesce(c.lastname, '')) LIKE :patron ESCAPE '\'
+             OR lower(c.email) LIKE :patron ESCAPE '\'
+             OR lower(coalesce(et.name, '')) LIKE :patron ESCAPE '\')
     """.trimIndent()
 
     fun contarInvitaciones(
@@ -264,6 +264,30 @@ class ConsultasDeAdministracion(
      * `NULL` cuando no hay release activo, así que **el `public_token` de una invitación no publicada
      * ni siquiera sale de la base**. No se filtra después en Kotlin, donde un `if` se puede borrar.
      *
+     * ### Por qué el `CASE` exige además `is_enabled` (objeción BAJA-4 de `5-E5-R2`)
+     * Una invitación **deshabilitada pero con release activo** devolvía su enlace, y ese enlace **no
+     * sirve nada**: `templates2/api/PublicRenderService.kt:74` resuelve el token contra
+     * `InvitationAvailabilityReader`, cuyo `disponible` es
+     * `invitationEnabled && customerEnabled && !customerBanned`
+     * (`persistence/Templates2EditorQueryRepositories.kt:134`), y con la invitación deshabilitada
+     * responde `403 TPL_INVITATION_UNAVAILABLE` al invitado. La consola estaba enseñando —y ofreciendo
+     * copiar— una URL muerta.
+     *
+     * `enlacePublico` significa **«la URL que hoy sirve esta invitación»**, no «la URL que tiene
+     * asignada»: eso es lo que ya decía la regla «solo cuando hay release activo», y `is_enabled` es
+     * la otra mitad de la misma condición. Queda un invariante comprobable y fácil de leer en la
+     * pantalla: **`enlacePublico != null` implica `estado == "publicada"`**.
+     *
+     * No se pierde nada al ocultarlo: `toggle-status` (`InvitationAdminService.kt:471-487`) solo
+     * cambia `is_enabled` —no toca el release ni rota el `public_token`—, así que rehabilitar devuelve
+     * **el mismo enlace** y vuelve a salir aquí.
+     *
+     * Es deliberadamente compatible con las dos salidas de la pregunta abierta «¿deshabilitar debe
+     * retirar la publicación?» (`preguntas-abiertas.md`), que **no se cierra aquí**: si el dueño
+     * decide que deshabilitar despublica, el release deja de estar activo y esta condición sobra sin
+     * cambiar nada; si decide que no despublica, la consola sigue sin mentir sobre lo que ve el
+     * invitado. Lo que esta consulta decide es solo qué **enseña la consola**, no qué se sirve.
+     *
      * `"time"` va entre comillas: es palabra reservada de SQL y la columna se llama así
      * (`V1__initial_schema.sql`, `"time" character varying(255)`).
      */
@@ -282,7 +306,8 @@ class ConsultasDeAdministracion(
                    p.name, coalesce(i.is_paid, false), coalesce(i.total_amount, 0),
                    coalesce(i.is_enabled, true),
                    (r.id IS NOT NULL),
-                   CASE WHEN r.id IS NOT NULL THEN d.public_token ELSE NULL END,
+                   CASE WHEN r.id IS NOT NULL AND coalesce(i.is_enabled, true) = true
+                        THEN d.public_token ELSE NULL END,
                    coalesce(i.uses_templates2, false), i.created_at
             $desdeInvitacion
             WHERE $filtroDeInvitacion
