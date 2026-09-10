@@ -39,23 +39,28 @@ Sesión E5 de la fase 5. Rama **`claude/fase-5-admin-vq1fjm`**, nacida del commi
    caducó». Si otra sesión toca esa zona, conservar el `export`.
 2. **`decisiones.md` y `preguntas-abiertas.md`.** E5 solo **añadió al final** con `cat >>`. En un
    conflicto, conservar ambos lados.
-3. **`MasterGiftMessagesService.kt`** — ver §4. Es el único fichero de esta rama fuera del
-   territorio de E5, y está aislado a propósito para que se pueda revertir solo.
+3. **Ninguno más.** E5 no deja ni un fichero fuera de su territorio: el único que llegó a tocarse
+   se revirtió (ver §4).
 
-## 4. Aviso: un fichero fuera del territorio de E5
-`modules/master/giftmessages/service/MasterGiftMessagesService.kt` **no es territorio de E5** (ni de
-ninguna sesión de la fase 5; tampoco está en la lista de prohibidos). Se tocó al amparo de **D-08**
-(endurecer lo heredado con ADR, pruebas y revisor Opus) porque tiene el mismo desbordamiento que la
-objeción ALTA de la revisión de autorización, medido en vivo: `?page=2147483647` respondía **500 con
-13 210 bytes de traza**.
+## 4. Un hallazgo real que E5 decidió NO arreglar en esta rama
+`modules/master/giftmessages/service/MasterGiftMessagesService.kt` tiene el **mismo desbordamiento**
+que la objeción ALTA de la revisión de autorización, medido en vivo: `?page=2147483647` responde
+**500 con 13 210 bytes de traza**.
 
-**E6 puede revertir ese fichero en un solo commit sin tocar nada más de esta rama.** Está deliberadamente
-en su propio commit por eso. Si se conserva, va con su ADR y su prueba.
+Se arregló, se probó… y **se revirtió**. El arreglo **no va en esta rama**. Por qué:
 
-Se encontraron **6 rutas heredadas más** con un 500 del mismo tipo (~17 KB) que **no se tocaron**:
-su fallo viene de la guarda de Spring Data y **no filtra SQL ni el predicado de alcance**, y decidir
-400 contra página vacía para esa clase es un cambio de contrato de ~10 rutas de cuatro módulos, que
-es del dueño. Están en `preguntas-abiertas.md`.
+1. `modules/master/**` **no es territorio de E5** ni de ninguna sesión de la fase 5, y **D-08 no lo
+   cubre**: esa decisión levanta la prohibición sobre `auth`, `guests`, `admin` y pagos, **no sobre
+   `master`**. Sin esa cobertura, es una decisión del dueño.
+2. Hay **6 rutas heredadas más** con el mismo síntoma (~17 KB, aunque esas por la guarda de Spring
+   Data, **sin** filtrar SQL ni el predicado de alcance). Arreglar 1 de 7 deja el sistema
+   incoherente y da por cerrada una clase de fallo que sigue abierta.
+
+**El parche, su medición y su prueba están escritos** en `ADR-5-E5-06` y en `bitacora/5-E5-G.md`:
+aplicarlos cuesta minutos cuando su dueño lo decida. Las 7 rutas y las tres preguntas que hay que
+resolver (400 contra página vacía · quién lo arregla · apagar el síntoma entero con
+`include-message`/`include-stacktrace: never`, que es el hallazgo S-02) están en
+`preguntas-abiertas.md`.
 
 ## 5. Dos cosas que E6 tiene que decidir
 1. **Presupuesto de `/admin`: 273,7 KB gz.** El techo de 150 KB que cita el skill es el de las rutas

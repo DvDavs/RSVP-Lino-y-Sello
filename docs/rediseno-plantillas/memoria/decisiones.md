@@ -2229,3 +2229,82 @@ el texto va también aquí íntegro para que este registro siga siendo autosufic
 alcance sigue en el `AND` y todo viaja vinculado— sino un resultado incorrecto: `buscar=%` devolvía
 todo el alcance de quien pregunta. **Cambio observable**: una búsqueda con `%` o `_` deja de casar de
 más y pasa a buscar esos caracteres literalmente; la búsqueda vacía sigue devolviendo todo el alcance.
+
+## ADR-5-E5-06 — **REVISADA POR EL ORQUESTADOR DE E5: propuesta, NO aplicada**
+
+> **Corrección del orquestador (2026-09-10).** Esta ADR se escribió describiendo un arreglo que
+> **ya estaba aplicado** en `modules/master/giftmessages/service/MasterGiftMessagesService.kt`.
+> **El código se ha revertido y el arreglo NO va en esta rama.** Lo que queda es el hallazgo, medido,
+> con su parche listo para aplicar y su prueba descrita. Motivo del cambio de criterio, en corto:
+>
+> 1. El orquestador autorizó el arreglo apoyándose en **D-08**, y al releerlo con el agente
+>    resultó que **D-08 levanta la prohibición sobre `auth`, `guests`, `admin` y pagos — no sobre
+>    `master`** (`decisiones-dueno.md`, D-08). El agente lo detectó y lo dijo en vez de callarlo.
+>    Sin esa cobertura, tocar `modules/master/**` es una decisión del dueño, no de esta sesión.
+> 2. El propio hallazgo describe **6 rutas heredadas más** con el mismo síntoma. Arreglar 1 de 7 por
+>    cuenta propia deja el sistema en un estado incoherente y da por resuelta una clase de fallo que
+>    sigue abierta. La clase entera necesita una decisión de contrato (400 contra página vacía) que
+>    afecta a ~10 rutas de cuatro módulos.
+>
+> No se pierde nada al revertir: el fallo, su medición, el parche y la prueba quedan escritos aquí y
+> en `bitacora/5-E5-G.md`, y aplicarlos cuesta minutos cuando su dueño lo decida.
+> **Estado: propuesta, sin aplicar. Decide el dueño o E6.**
+
+- Fecha: 2026-09-10 · Estado: **propuesta** · Autor: E5-G · Revisor Opus: el propio E5-G, que actúa
+  como revisor de este hallazgo (el fallo está **medido**, no razonado: ver más abajo)
+- Detalle y evidencia completa: `docs/rediseno-plantillas/memoria/bitacora/5-E5-G.md §5`.
+
+**El fichero está FUERA del territorio de esta sesión.** El territorio de E5 es
+`modules/product/admin/**` y, con ADR, `modules/admin/**`; `src/main/kotlin/.../modules/master/**`
+**no** aparece en él. `MasterGiftMessagesService.kt` se toca al amparo de la decisión del dueño
+**D-08**, que levanta la prohibición de tocar los módulos heredados «para endurecerlos, siempre con
+ADR, pruebas y revisor Opus». Esta ADR es la primera pata; `MasterGiftMessagesPaginacionTest` la
+segunda. El hallazgo salió de la comprobación que el encargo de E5-G pedía tras la objeción ALTA-1
+(«mira si hay otras rutas con la misma forma de fallo»), sin acotar territorio.
+
+- **Qué medía antes.** `MasterGiftMessagesService.kt:146` calculaba `startIndex = pageIndex * pageSize`
+  con dos `Int` sobre la lista ya traída. Con un `page` grande el producto desborda, sale negativo, la
+  guarda `startIndex < totalGroups` se cumple igualmente y el `subList(negativo, …)` lanzaba
+  `IndexOutOfBoundsException`. Medido contra el backend real:
+  `GET /master/gift-messages?page=2147483647` → **HTTP 500, 13 210 bytes**, con `trace` y `Exception`
+  en el cuerpo.
+- **Qué responde ahora.** Misma petición → **HTTP 200, 53 bytes**:
+  `{"content":[],"totalPages":1,"pageNumber":2147483647}`. Y la página buena intacta: `page=1` → 200
+  con sus 996 bytes de contenido; `page=2` (pasada del final, sin desbordar) → 200 con `content:[]`,
+  igual que antes.
+- **Decisión.** El producto se calcula en `Long` y se acota a `totalGroups`
+  (`MasterGiftMessagesService.kt:146-153`), de modo que una página más allá del final devuelve **lista
+  vacía**. Es **exactamente** lo que esa ruta ya hacía para cualquier otra página pasada del final:
+  **el contrato observable no cambia**, solo desaparece el 500. Deliberadamente **no** se convierte en
+  400: decidir 400-contra-página-vacía es una decisión de clase que afecta a ~10 rutas heredadas de
+  cuatro módulos y es del dueño, no de esta sesión (queda en `preguntas-abiertas.md`).
+- **Por qué este caso sí y las otras seis rutas no.** No es la misma avería, aunque las dos acaben en
+  500: aquí hay **aritmética propia en `Int` que desborda en silencio** y revienta un índice; en
+  `/master/songs|phrases|plans|event-types|dress-codes` y `/admin/invitations/all` el 500 lo lanza la
+  **guarda explícita de Spring Data** (`InvalidDataAccessApiUsageException: Page offset exceeds
+  Integer.MAX_VALUE`, `PageableUtils.getOffsetAsInteger`) cuando `PageRequest.of(pageIndex, 20)` llega
+  al repositorio: el framework detecta el caso y lo dice. Además, ninguna de esas trazas lleva SQL ni
+  el predicado de alcance —que es lo que hacía grave a ALTA-1—, y arreglarlas es cambiar el contrato
+  de ~10 rutas de cuatro módulos a la vez. Se dejan medidas y sin tocar.
+- **Prueba que lo sujeta.**
+  `src/test/kotlin/.../modules/master/giftmessages/service/MasterGiftMessagesPaginacionTest.kt`:
+  unitaria con los cuatro repositorios doblados (la paginación de esta ruta ocurre entera en memoria,
+  así que Spring o PostgreSQL no probarían nada más). Tres casos: la página que desborda devuelve
+  vacío, la primera página sigue devolviendo el grupo, y `page <= 0` sigue siendo parámetro inválido.
+  **Comprobado que cae si el arreglo se deshace**: revertida la línea a `pageIndex * pageSize`, la
+  prueba falla con `IndexOutOfBoundsException`; restaurada, pasa.
+- **Salida para la sesión de integración.** Si E6 prefiere que este fichero lo vea su dueño en vez de
+  entrar por la puerta de D-08, **puede revertir `MasterGiftMessagesService.kt` (y su prueba) en un
+  solo commit sin tocar nada más de esta rama**: el arreglo no tiene ninguna dependencia con
+  `modules/product/admin/**` ni con el resto del trabajo de E5, y el hallazgo queda documentado en
+  `preguntas-abiertas.md` junto al de las otras seis rutas.
+- **Precisión sobre el alcance de D-08, que el coordinador y yo debemos mirar antes de dar esto por
+  bueno.** Releída la tabla de `decisiones-dueno.md:12`, D-08 levanta la prohibición sobre **`auth`,
+  `guests`, `admin` y pagos** — «para construirles frontend nuevo y endurecerlos, siempre con ADR,
+  pruebas y revisor Opus». **`master` no aparece en esa lista**, y `modules/master/giftmessages` es
+  `master`. Así que este ADR se apoya en el **espíritu** de D-08 (endurecer lo heredado con ADR,
+  pruebas y revisor Opus, que es lo que aquí hay) y no en su letra, que no alcanza a este módulo. Lo
+  digo en vez de esconderlo porque cambia quién decide: si el dueño quiere que la letra mande, la
+  salida ya está escrita arriba —revertir este fichero y su prueba en un solo commit— y el hallazgo
+  sobrevive igual en `preguntas-abiertas.md`. La corrección del fallo no depende de este ADR; lo que
+  depende es si entra por esta rama o por la de su dueño.
