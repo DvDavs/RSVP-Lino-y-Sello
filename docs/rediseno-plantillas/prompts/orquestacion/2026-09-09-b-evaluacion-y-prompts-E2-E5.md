@@ -66,3 +66,10 @@ prueba, entre ellos una toma de cuenta preexistente vía signup. Deudas para E6:
 `V42`/`V44` chocan con E4 (renumerar a V45/V46); `d138590` arrastró trabajo ajeno (revisar);
 tocó `modules/admin/users/**` (conflicto probable con E5). Volumen: 22 .md nuevos, 5 018 líneas
 (anterior al protocolo ligero). E5 sigue sin rama en el remoto.
+
+## Evaluación E5 — admin (2026-09-10)
+**ACEPTADO.** `origin/claude/fase-5-admin-vq1fjm` = `7c9be0e`, desde `9a4cd56`, cero migraciones,
+cero ficheros fuera de territorio, S-03 (mark-as-paid sin jerarquía) cerrado con ruta × rol medida.
+Deja para el dueño: parche revertido en `modules/master` (D-08 no lo cubre), y 5 preguntas de
+producto. E6 debe añadir `pnpm -r lint` a la suite (E5 no lo exigía y se colaron dos errores).
+Las cuatro sesiones E2–E5 cerradas: E6 se lanza ya con la lista completa de ramas.
