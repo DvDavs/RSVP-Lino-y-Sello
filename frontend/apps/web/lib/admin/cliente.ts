@@ -105,14 +105,29 @@ async function peticionAdmin<T>(method: "GET" | "PUT", path: string, query?: Rec
   }
 
   // 401/403 de la cadena de filtros de Spring Security, o del `ErrorMessage` heredado sin `code`
-  // TPL_* (p. ej. `UnauthorizedAccessException` en `toggleInvitationStatus`): SessionError. Se
-  // marca la sesión como caducada ANTES de lanzar (misma línea que `peticion()` en
-  // `api-client.ts`), para que `haySesionCaducada()` — la única fuente de verdad de P8 — se
-  // encienda y `clearAuthToken()` tire el token muerto; si no se hace esto aquí, `/acceso` cree
-  // que sigue habiendo sesión válida (ADR-5-E5-02).
-  if (respuesta.status === 401 || respuesta.status === 403) {
+  // TPL_* (p. ej. `UnauthorizedAccessException` en `toggleInvitationStatus`): los dos se lanzan como
+  // `SessionError`, pero NO cuentan la misma historia y no se tratan igual (arreglo de seguimiento,
+  // hallazgo MEDIA-1 de la revisión de autorización, `lib/admin/cliente.ts:113-116` de la versión
+  // anterior).
+  //
+  // 401 → la sesión de verdad no vale (sin token, o el backend ya no lo reconoce): se marca caducada
+  // ANTES de lanzar (misma línea que `peticion()` en `api-client.ts`), para que `haySesionCaducada()`
+  // — la única fuente de verdad de P8 — se encienda y `clearAuthToken()` tire el token muerto; si no
+  // se hace esto aquí, `/acceso` cree que sigue habiendo sesión válida (ADR-5-E5-02).
+  //
+  // 403 → la sesión SIGUE SIENDO VÁLIDA; lo que falta es permiso para ESTA operación concreta — un
+  // rol insuficiente para `/product/admin/**` entero, o (`alternarEstadoInvitacion`) un ADMIN que
+  // toca una invitación fuera de su jerarquía (`hierarchyValidationService.validateInvitationAccess`,
+  // `InvitationAdminService.kt:479-481` — no `:461`, cita corregida). Tirar el token aquí expulsaba
+  // a una cuenta con sesión perfectamente buena solo porque una acción puntual le estaba prohibida.
+  // Se lanza el mismo `SessionError` (quien llama ya distingue por `statusCode`), pero SIN marcar la
+  // sesión como caducada ni tocar el token.
+  if (respuesta.status === 401) {
     marcarSesionCaducada();
-    throw new SessionError(respuesta.status, textoCrudo);
+    throw new SessionError(401, textoCrudo);
+  }
+  if (respuesta.status === 403) {
+    throw new SessionError(403, textoCrudo);
   }
 
   throw new UnknownApiError(respuesta.status, textoCrudo);
@@ -137,7 +152,10 @@ export async function listarClientas(query?: ClientasQuery): Promise<PaginaClien
 }
 
 // =============================================================================================
-// 3. GET /product/admin/invitaciones?pagina=&tamano=&buscar=&estado=&pago=
+// 3. GET /product/admin/invitaciones?pagina=&tamano=&buscar=&estado=&pago=&plan=
+//    `plan` es el id del plan (no el nombre), añadido por el backend en el commit `de79915`
+//    mientras se montaba esta pantalla (`bitacora/5-E5-A.md §1.1.bis`) — ver el comentario de
+//    `InvitacionesQuery.plan` en `./tipos.ts`.
 // =============================================================================================
 export async function listarInvitaciones(query?: InvitacionesQuery): Promise<PaginaInvitaciones> {
   return peticionAdmin<PaginaInvitaciones>(
@@ -152,9 +170,10 @@ export async function listarInvitaciones(query?: InvitacionesQuery): Promise<Pag
 //    (`InvitationController.kt:127-141`, decisión REUTILIZAR de `12-producto-completo.md §A2.5`).
 //    Verificado leyendo el fuente (sin backend levantado en este entorno para un curl real):
 //    - No pide cuerpo: solo `@PathVariable id` y la `Authentication` del token.
-//    - Comprueba jerarquía SÍ: `InvitationAdminService.kt:461` llama
+//    - Comprueba jerarquía SÍ: `InvitationAdminService.kt:479-481` llama
 //      `hierarchyValidationService.validateInvitationAccess(loggedInUserId, invitationId)` y lanza
 //      `UnauthorizedAccessException` (→ 403) si no pasa. No es un hallazgo: la comprobación existe.
+//      (Cita corregida — la cabecera de esta función decía `:461`, arreglo de seguimiento.)
 //    - Devuelve `InvitationResponse` (`status`, `message`, `invitation`), NO indica en la respuesta
 //      si quedó habilitada o deshabilitada más que en el texto de `message` — ver el comentario de
 //      `InvitacionHeredada` en `./tipos.ts`.

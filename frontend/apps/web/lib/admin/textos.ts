@@ -48,6 +48,9 @@ export const textosAdmin = {
     // Añadido por E5-D: falta un «Cancelar» genérico para el diálogo de confirmación de
     // `AccionDeFila` (deshabilitar/habilitar una invitación) — ningún bloque existente lo traía.
     cancelar: "Cancelar",
+    // Añadido por E5-D (arreglo de seguimiento, hallazgo MEDIA-1): acción de cierre de un aviso que
+    // no se reintenta (un 403 de jerarquía no se arregla reintentando la misma acción).
+    entendido: "Entendido",
     // Añadido por E5-D: título genérico de un estado vacío de tabla. Cada tabla sigue enseñando su
     // propio cuerpo (`<tabla>.vacio.sinFiltro`/`conFiltro`); esto es solo el encabezado corto que
     // pide `EmptyState.titulo` y que ningún bloque definía por separado.
@@ -178,6 +181,14 @@ export const textosAdmin = {
       titulo: "¿Habilitar esta invitación?",
       descripcion: "Vuelve a verse en internet con el enlace que ya tenía.",
       confirmando: "Habilitando…",
+    },
+    // Añadido por E5-D (arreglo de seguimiento, hallazgo MEDIA-1 de la revisión de autorización):
+    // un 403 de `alternarEstadoInvitacion` por jerarquía («esta invitación no es de tu clienta») NO
+    // es un fallo de red ni una sesión caducada — es distinto de `alternarError` a propósito, para
+    // no decirle a quien administra «revisa tu conexión» cuando el problema es de permisos.
+    alternarProhibido: {
+      titulo: "Esta invitación no es tuya",
+      cuerpo: "No puedes deshabilitarla ni habilitarla: pertenece a una clienta fuera de tu jerarquía.",
     },
   },
 

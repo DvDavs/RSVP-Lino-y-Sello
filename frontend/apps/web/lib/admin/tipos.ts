@@ -115,6 +115,16 @@ export interface InvitacionesQuery {
   buscar?: string;
   estado?: EstadoInvitacion;
   pago?: FiltroPagoInvitacion;
+  /**
+   * Editado por E5-D (autorizado por el orquestador, arreglo de seguimiento): el **id** de un plan
+   * del catálogo (`GET /product/admin/planes` → `PlanAdmin.id`), NUNCA su nombre — el nombre lo
+   * puede renombrar un MASTER en caliente (`PUT /master/plans/{id}`) y `invitation_plan.name` no es
+   * `UNIQUE` (`bitacora/5-E5-A.md §1.1.bis`). Un id que no existe en el catálogo, `0`, `-1` o un
+   * valor no numérico responden `400` (`ParametrosDeAdministracion.planDesconocido`); una invitación
+   * sin plan (`plan: null`) no casa con ningún `plan=<id>` y queda fuera del resultado — no hay
+   * centinela de "sin plan" en el contrato.
+   */
+  plan?: number;
 }
 
 // -------------------------------------------------------------------------------------------

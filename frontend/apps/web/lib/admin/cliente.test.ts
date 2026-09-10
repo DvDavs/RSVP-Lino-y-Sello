@@ -226,12 +226,27 @@ describe("clasificación de errores: nunca se devuelve null, siempre se lanza", 
     expect(getAuthToken()).toBeNull();
   });
 
-  it("un 403 (sin jerarquía en la ruta heredada) también marca la sesión como caducada", async () => {
+  // Arreglo de seguimiento (hallazgo MEDIA-1 de la revisión de autorización): un 403 de jerarquía
+  // en la ruta heredada («esta invitación no es tuya») NO es una sesión caducada — la cuenta sigue
+  // teniendo sesión válida, solo le falta permiso para ESA invitación. Antes de este arreglo, la
+  // prueba de abajo comprobaba justo lo contrario (`haySesionCaducada()` en `true` y el token
+  // tirado); quedaba mal: expulsaba a un ADMIN con sesión perfectamente buena.
+  it("un 403 (sin jerarquía en la ruta heredada) NO marca la sesión como caducada ni tira el token", async () => {
     setAuthToken("jwt-sin-jerarquia");
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("Access Denied", { status: 403 })));
-    await alternarEstadoInvitacion(7).catch(() => {});
-    expect(haySesionCaducada()).toBe(true);
-    expect(getAuthToken()).toBeNull();
+    const error = await alternarEstadoInvitacion(7).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(SessionError);
+    expect((error as SessionError).statusCode).toBe(403);
+    expect(haySesionCaducada()).toBe(false);
+    expect(getAuthToken()).toBe("jwt-sin-jerarquia");
+  });
+
+  it("un 403 de una ruta de lectura (rol insuficiente) tampoco marca la sesión como caducada", async () => {
+    setAuthToken("jwt-rol-user");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("Access Denied", { status: 403 })));
+    await listarClientas().catch(() => {});
+    expect(haySesionCaducada()).toBe(false);
+    expect(getAuthToken()).toBe("jwt-rol-user");
   });
 });
 
